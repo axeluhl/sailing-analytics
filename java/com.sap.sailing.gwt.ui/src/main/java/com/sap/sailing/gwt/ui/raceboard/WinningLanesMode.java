@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
@@ -47,7 +46,8 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_TIME_TRAVELED);
-        final SingleRaceLeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
+        final SingleRaceLeaderboardSettings additiveSettings = SingleRaceLeaderboardSettings
+                .createDefaultSettingsWithRaceDetailValues(raceDetailsToShow);
         ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
             @Override
             public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {

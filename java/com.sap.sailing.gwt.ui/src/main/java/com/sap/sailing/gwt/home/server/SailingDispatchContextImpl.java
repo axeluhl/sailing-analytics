@@ -19,7 +19,6 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
-import com.sap.sse.security.UserStore;
 
 @GwtIncompatible
 public class SailingDispatchContextImpl implements SailingDispatchContext {
@@ -30,20 +29,18 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     private String clientLocaleName;
     private final HttpServletRequest request;
     private final SecurityService securityService;
-    private final UserStore userStore;
     private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
     private final WindFinderTrackerFactory windFinderTrackerFactory;
 
     public SailingDispatchContextImpl(Date currentClientTime, RacingEventService racingEventService,
             WindFinderTrackerFactory windFinderTrackerFactory, EventNewsService eventNewsService,
-            SecurityService securityService, UserStore userStore, TrackedRaceStatisticsCache trackedRaceStatisticsCache,
+            SecurityService securityService, TrackedRaceStatisticsCache trackedRaceStatisticsCache,
             String clientLocaleName, HttpServletRequest request) {
         this.currentClientTime = currentClientTime;
         this.racingEventService = racingEventService;
         this.windFinderTrackerFactory = windFinderTrackerFactory;
         this.eventNewsService = eventNewsService;
         this.securityService = securityService;
-        this.userStore = userStore;
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
         this.clientLocaleName = clientLocaleName;
         this.request = request;
@@ -96,7 +93,7 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     public <T> T getPreferenceForCurrentUser(String preferenceKey) {
         User currentUser = securityService.getCurrentUser();
         if (currentUser != null) {
-            return userStore.getPreferenceObject(currentUser.getName(), preferenceKey);
+            return securityService.getPreferenceObject(currentUser.getName(), preferenceKey);
         }
         return null;
     }

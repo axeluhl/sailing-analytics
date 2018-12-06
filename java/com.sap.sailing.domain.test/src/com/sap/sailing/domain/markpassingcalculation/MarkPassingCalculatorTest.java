@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sse.common.TimePoint;
@@ -55,7 +56,7 @@ public class MarkPassingCalculatorTest {
         mpc.suspend();
         mpc.enqueueUpdate(new StorePositionUpdateStrategy() {
             @Override
-            public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes,
+            public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes, Map<Mark, List<GPSFix>> markFixes,
                     List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints, IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings, List<Pair<Competitor, Integer>> suppressedMarkPassings,

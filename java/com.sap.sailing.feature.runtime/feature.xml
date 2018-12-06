@@ -158,6 +158,14 @@
          id="org.mp4parser.isoparser"
          download-size="0"
          install-size="0"
-         version="1.9.31"/>
+         version="1.9.37"/>
+
+   <plugin
+         id="com.sap.sailing.routeconverterjava11extension"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
 
 </feature>

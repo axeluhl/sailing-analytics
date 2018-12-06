@@ -160,7 +160,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
 
     private ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
             String placeToken, Iterable<DetailType> availableDetailTypes) {
-        final MultipleMultiLeaderboardPanelLifecycle lifecycle = new MultipleMultiLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes);
+        final MultipleMultiLeaderboardPanelLifecycle lifecycle = new MultipleMultiLeaderboardPanelLifecycle(StringMessages.INSTANCE, availableDetailTypes);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesRegattaLeaderboards(leaderboardName);
 
         final ComponentContext<MultiRaceLeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(

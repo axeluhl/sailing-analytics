@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,6 +20,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -61,7 +64,7 @@ public class MarkPassingCalculator {
      */
     private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
         @Override
-        public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
+        public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes,
                 Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
                 IntHolder smallestChangedWaypointIndex, List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                 List<Pair<Competitor, Integer>> removedMarkPassings,
@@ -229,7 +232,7 @@ public class MarkPassingCalculator {
             try {
                 logger.fine("MarkPassingCalculator is listening on race "+raceName);
                 boolean finished = false;
-                final Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
+                final Map<Competitor, List<GPSFixMoving>> competitorFixes = new HashMap<>();
                 final Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
                 final List<Waypoint> addedWaypoints = new ArrayList<>();
                 final List<Waypoint> removedWaypoints = new ArrayList<>();
@@ -361,31 +364,31 @@ public class MarkPassingCalculator {
          * {@link CandidateChooser} to calculate any new {@link MarkPassing}s (see {@link ComputeMarkPassings}).
          * 
          */
-        private void computeMarkPasses(Map<Competitor, List<GPSFix>> newCompetitorFixes,
+        private void computeMarkPasses(Map<Competitor, List<GPSFixMoving>> newCompetitorFixes,
                 Map<Mark, List<GPSFix>> newMarkFixes) {
             logger.finer("Calculating markpassings for race "+raceName+" with " + newCompetitorFixes.size() + " new competitor Fixes and "
                     + newMarkFixes.size() + " new mark fixes.");
-            Map<Competitor, Set<GPSFix>> combinedCompetitorFixes = new HashMap<>();
+            Map<Competitor, Collection<GPSFixMoving>> combinedCompetitorFixes = new HashMap<>();
 
-            for (Entry<Competitor, List<GPSFix>> competitorEntry : newCompetitorFixes.entrySet()) {
-                Set<GPSFix> fixesForCompetitor = new HashSet<>();
+            for (Entry<Competitor, List<GPSFixMoving>> competitorEntry : newCompetitorFixes.entrySet()) {
+                Collection<GPSFixMoving> fixesForCompetitor = new LinkedList<>();
                 combinedCompetitorFixes.put(competitorEntry.getKey(), fixesForCompetitor);
                 fixesForCompetitor.addAll(competitorEntry.getValue());
             }
             if (!newMarkFixes.isEmpty()) {
                 // FIXME bug 2745 use new mark fixes to invalidate chooser's mark position and mutual mark/waypoint distance cache
-                for (Entry<Competitor, List<GPSFix>> fixesAffectedByNewMarkFixes : finder
+                for (Entry<Competitor, List<GPSFixMoving>> fixesAffectedByNewMarkFixes : finder
                         .calculateFixesAffectedByNewMarkFixes(newMarkFixes).entrySet()) {
-                    Set<GPSFix> fixes = combinedCompetitorFixes.get(fixesAffectedByNewMarkFixes.getKey());
+                    Collection<GPSFixMoving> fixes = combinedCompetitorFixes.get(fixesAffectedByNewMarkFixes.getKey());
                     if (fixes == null) {
-                        fixes = new HashSet<>();
+                        fixes = new LinkedList<>();
                         combinedCompetitorFixes.put(fixesAffectedByNewMarkFixes.getKey(), fixes);
                     }
                     fixes.addAll(fixesAffectedByNewMarkFixes.getValue());
                 }
             }
             List<Callable<Void>> tasks = new ArrayList<>();
-            for (final Entry<Competitor, Set<GPSFix>> c : combinedCompetitorFixes.entrySet()) {
+            for (final Entry<Competitor, Collection<GPSFixMoving>> c : combinedCompetitorFixes.entrySet()) {
                 final Runnable runnable = new ComputeMarkPassings(c.getKey(), c.getValue());
                 tasks.add(new Callable<Void>() {
                     @Override
@@ -412,9 +415,9 @@ public class MarkPassingCalculator {
 
         private class ComputeMarkPassings implements Runnable {
             final Competitor c;
-            final Iterable<GPSFix> fixes;
+            final Iterable<GPSFixMoving> fixes;
 
-            public ComputeMarkPassings(Competitor c, Iterable<GPSFix> fixes) {
+            public ComputeMarkPassings(Competitor c, Iterable<GPSFixMoving> fixes) {
                 this.c = c;
                 this.fixes = fixes;
             }
@@ -462,7 +465,7 @@ public class MarkPassingCalculator {
             suspended = false;
             enqueueUpdate(new StorePositionUpdateStrategy() {
                 @Override
-                public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
+                public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes,
                         Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
                         IntHolder smallestChangedWaypointIndex,
                         List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,

@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
@@ -41,17 +41,17 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
             this.setupProgress(container);
             this.setupLiveRaces(container);
         }
+        this.setupMiniLeaderboard(container);
+        this.initRacesNavigation(container);
         if (!isMultiRegattaEvent()) {
             this.setupOverviewStage(container);
             this.setupEventDescription(container);
         }
-        this.setupMiniLeaderboard(container);
-        initRacesNavigation(container);
         if (!isMultiRegattaEvent()) {
             this.setupUpdateBox(container);
             this.setupImpressions(container);
         }
-        this.setupStatisticsBox(container, !presenter.isSingleRegattaEvent());
+        this.setupStatisticsBox(container, true);
         setViewContent(container);
     }
     
@@ -64,7 +64,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupLiveRaces(Panel container) {
-        liveRacesUi = new RegattaLiveRaces();
+        liveRacesUi = new RegattaLiveRaces(currentPresenter);
         refreshManager.add(liveRacesUi, new GetLiveRacesForRegattaAction(getEventId(), getRegattaId()));
         container.add(liveRacesUi);
     }
@@ -87,7 +87,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     @Override
-    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceWithStateDTO> eventsOfSeries) {
+    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
         QuickfinderPresenter.getForSeriesEventOverview(quickfinder, seriesName, currentPresenter, eventsOfSeries);
     }
 

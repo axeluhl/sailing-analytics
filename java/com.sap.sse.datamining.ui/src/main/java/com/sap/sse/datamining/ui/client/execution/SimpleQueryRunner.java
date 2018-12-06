@@ -1,22 +1,25 @@
 package com.sap.sse.datamining.ui.client.execution;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
+import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.ManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.QueryRunner;
-import com.sap.sse.datamining.ui.client.ResultsPresenter;
 import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettings;
 import com.sap.sse.datamining.ui.client.settings.QueryRunnerSettingsDialogComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -48,67 +51,64 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
     private final Timer queryReleaseTimer;
     private QueryRunnerSettings settings;
     private final QueryDefinitionProvider<?> queryDefinitionProvider;
-    private final ResultsPresenter<?> resultsPresenter;
+    private final CompositeResultsPresenter<?> resultsPresenter;
     private final Button runButton;
 
     public SimpleQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
-           DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            QueryDefinitionProvider<?> queryDefinitionProvider, ResultsPresenter<?> resultsPresenter) {
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            QueryDefinitionProvider<?> queryDefinitionProvider, CompositeResultsPresenter<?> resultsPresenter) {
         super(parent, context);
         this.session = session;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         counter = new SimpleManagedDataMiningQueriesCounter();
+        queryDefinitionProvider.addQueryDefinitionChangedListener(this);
 
         this.settings = new QueryRunnerSettings();
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.resultsPresenter = resultsPresenter;
 
-        runButton = new Button(getDataMiningStringMessages().runAsSubstantive());
+        runButton = new Button(getDataMiningStringMessages().run());
         runButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                runQuery();
+                run(queryDefinitionProvider.getQueryDefinition());
             }
         });
 
         queryReleaseTimer = new Timer() {
             @Override
             public void run() {
-                runQuery();
+                SimpleQueryRunner.this.run(queryDefinitionProvider.getQueryDefinition());
             }
         };
-        if (this.settings.isRunAutomatically()) {
-            queryDefinitionProvider.addQueryDefinitionChangedListener(this);
-        }
-    }
-
-    @Override
-    public void runQuery() {
-        run(queryDefinitionProvider.getQueryDefinition());
+        
+        queryDefinitionChanged(queryDefinitionProvider.getQueryDefinition());
     }
 
     @Override
     public void run(StatisticQueryDefinitionDTO queryDefinition) {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
+        String presenterId = resultsPresenter.getCurrentPresenterId();
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
-            resultsPresenter.showBusyIndicator();
-            dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Serializable>(counter) {
+            resultsPresenter.showBusyIndicator(presenterId);
+            dataMiningService.runQuery(session, (ModifiableStatisticQueryDefinitionDTO) queryDefinition,
+                    new ManagedDataMiningQueryCallback<Serializable>(counter) {
+                        @Override
+                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
+                            resultsPresenter.showResult(presenterId, queryDefinition, result);
+                            queryDefinitionProvider.queryDefinitionChangesHaveBeenStored();
+                        }
                         @Override
                         protected void handleFailure(Throwable caught) {
                             errorReporter.reportError("Error running the query: " + caught.getMessage());
-                            resultsPresenter
-                                    .showError(getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
-                        }
-
-                        @Override
-                        protected void handleSuccess(QueryResultDTO<Serializable> result) {
-                            resultsPresenter.showResult(result);
+                            resultsPresenter.showError(presenterId,
+                                    getDataMiningStringMessages().errorRunningDataMiningQuery() + ".");
                         }
                     });
         } else {
-            resultsPresenter.showError(getDataMiningStringMessages().queryNotValidBecause(), errorMessages);
+            resultsPresenter.showError(presenterId, getDataMiningStringMessages().queryNotValidBecause(), errorMessages);
         }
     }
 
@@ -116,18 +116,25 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
     public void updateSettings(QueryRunnerSettings newSettings) {
         if (settings.isRunAutomatically() != newSettings.isRunAutomatically()) {
             settings = newSettings;
-            if (settings.isRunAutomatically()) {
-                queryDefinitionProvider.addQueryDefinitionChangedListener(this);
-            } else {
-                queryDefinitionProvider.removeQueryDefinitionChangedListener(this);
-            }
         }
     }
 
     @Override
     public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
-        // See javadoc of queryReleaseTimer
-        queryReleaseTimer.schedule(queryBufferTimeInMillis);
+        Iterable<String> errors = queryDefinitionProvider.validateQueryDefinition(newQueryDefinition);
+        boolean isValid = Util.isEmpty(errors);
+        runButton.setEnabled(isValid);
+        if (isValid) {
+            runButton.setTitle(null);
+            if (settings.isRunAutomatically()) {
+                queryReleaseTimer.schedule(queryBufferTimeInMillis);
+            }
+        } else {
+            Iterator<String> errorsIterator = errors.iterator();
+            StringBuilder tooltipBuilder = new StringBuilder(errorsIterator.next());
+            errorsIterator.forEachRemaining(e -> tooltipBuilder.append("\n").append(e));
+            runButton.setTitle(tooltipBuilder.toString());
+        }
     }
 
     @Override

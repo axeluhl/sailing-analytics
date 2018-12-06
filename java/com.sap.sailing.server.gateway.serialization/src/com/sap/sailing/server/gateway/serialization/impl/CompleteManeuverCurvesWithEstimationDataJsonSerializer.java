@@ -72,5 +72,4 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer implements C
                 .getCompleteManeuverCurvesWithEstimationData(maneuverCurves);
         return maneuversWithEstimationData;
     }
-
 }

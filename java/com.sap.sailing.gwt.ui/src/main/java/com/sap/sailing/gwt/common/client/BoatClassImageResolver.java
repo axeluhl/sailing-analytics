@@ -60,6 +60,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.FINN.getDisplayName(), imageResources.FinnIcon());
         boatClassIconsMap.put(BoatClassMasterdata.FLYING_DUTCHMAN.getDisplayName(), imageResources.FlyingDutchmanIcon());
         boatClassIconsMap.put(BoatClassMasterdata.FLYING_JUNIOR.getDisplayName(), imageResources.FlyingJuniorIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.FLYING_PHANTOM.getDisplayName(), imageResources.FlyingPhantomIcon());
         boatClassIconsMap.put(BoatClassMasterdata.FOLKBOAT.getDisplayName(), imageResources.FolkBoatIcon());
         boatClassIconsMap.put(BoatClassMasterdata.FUN.getDisplayName(), imageResources.FUNIcon());
         boatClassIconsMap.put(BoatClassMasterdata.GC_32.getDisplayName(), imageResources.GC32Icon());

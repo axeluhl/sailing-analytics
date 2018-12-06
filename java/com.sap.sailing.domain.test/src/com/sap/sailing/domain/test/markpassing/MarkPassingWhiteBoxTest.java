@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NavigableSet;
 
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
@@ -17,7 +17,6 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
@@ -53,7 +52,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         race.recordFix(ron, fix2);
         CandidateFinder finder = new CandidateFinderImpl(race);
         CandidateChooser chooser = new CandidateChooserImpl(race);
-        List<GPSFix> fixes = new ArrayList<GPSFix>();
+        List<GPSFixMoving> fixes = new ArrayList<>();
         fixes.add(fix1);
         fixes.add(fix2);
         Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(ron, fixes);
@@ -95,7 +94,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
 
         race.recordFix(tom, fix1);
         race.recordFix(tom, fix3);
-        List<GPSFix> fixes = new ArrayList<>();
+        List<GPSFixMoving> fixes = new ArrayList<>();
         fixes.add(fix1);
         fixes.add(fix3);
         Util.Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(tom, fixes);
@@ -126,7 +125,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         CandidateFinderImpl finder = new CandidateFinderImpl(race);
         race.recordFix(tom, fix1);
         race.recordFix(tom, fix2);
-        List<GPSFix> fixes = new ArrayList<>();
+        List<GPSFixMoving> fixes = new ArrayList<>();
         fixes.addAll(Arrays.asList(fix1, fix2));
         Util.Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(tom, fixes);
         Double inFront = cans.getA().iterator().next().getProbability();
@@ -194,7 +193,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         race.recordFix(ben, fix1);
         race.recordFix(ben, fix2);
         race.recordFix(ben, fix3);
-        List<GPSFix> fixes = new ArrayList<>();
+        List<GPSFixMoving> fixes = new ArrayList<>();
         fixes.addAll(Arrays.asList(fix1, fix2, fix3));
         Util.Pair<Iterable<Candidate>, Iterable<Candidate>> cans = finder.getCandidateDeltas(ben, fixes);
         Candidate inFront = Util.get(cans.getA(), 0);

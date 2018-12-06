@@ -1,5 +1,6 @@
 #!/bin/bash
 set -o functrace
+source ./configuration/correctFilePathInRelationToCurrentOs.sh
 
 # This indicates the type of the project
 # and is used to correctly resolve bundle names
@@ -23,7 +24,7 @@ find_project_home ()
         return 0
     fi
 
-    echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
+    echo $(correct_file_path  "$1")
 }
 
 # this holds for default installation
@@ -40,8 +41,9 @@ if [[ "$PROJECT_HOME" == "" ]]; then
     exit 1
 fi
 
+#reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
 if [ "$SERVERS_HOME" = "" ]; then
-  SERVERS_HOME=`echo "$USER_HOME/servers" | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'`
+	SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
 fi
 
 # x86 or x86_64 should work for most cases
@@ -587,6 +589,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    #build local p2 repo
 	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
 	    echo "Maven version used: `mvn --version`"
+            echo "JAVA_HOME used: $JAVA_HOME"
 	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
@@ -666,6 +669,15 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         ANDROID_ABI=armeabi-v7a
         AVD_NAME="androidTest-${NOW}"
         echo "Updating Android SDK..." | tee -a $START_DIR/build.log
+	OLD_JAVA_HOME=$JAVA_HOME
+	if [ -z "$JAVA8_HOME" ]; then
+	  if [ -d /opt/sapjvm_8 ]; then
+	    JAVA8_HOME=/opt/sapjvm_8
+	  else
+	    JAVA8_HOME=$JAVA_HOME
+	  fi
+	fi
+	export JAVA_HOME=$JAVA8_HOME
         "$SDK_MANAGER" --update $ANDROID_OPTIONS
         echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..." | tee -a $START_DIR/build.log
         "$SDK_MANAGER" $ANDROID_OPTIONS "build-tools;${BUILD_TOOLS}"
@@ -675,6 +687,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         "$SDK_MANAGER" $ANDROID_OPTIONS "extras;android;m2repository"
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         "$SDK_MANAGER" $ANDROID_OPTIONS "extras;google;m2repository"
+	export JAVA_HOME=$OLD_JAVA_HOME
 
         echo "Using following command for apps build: mvn $mobile_extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
@@ -730,6 +743,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
+        echo "JAVA_HOME used: $JAVA_HOME"
         mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         # now get the exit status from mvn, and not that of tee which is what $? contains now
         MVN_EXIT_CODE=${PIPESTATUS[0]}
@@ -816,6 +830,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
