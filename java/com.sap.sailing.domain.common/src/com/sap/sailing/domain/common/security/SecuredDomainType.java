@@ -70,9 +70,9 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE", IdentifierStrategy.TO_SPECIFY);
     
     public static enum CompetitorAndBoatActions implements Action {
-        READ_PUBLIC, READ_PRIVATE, LIST;
+        READ_PUBLIC;
         
-        private static final Action[] ALL_ACTIONS = new Action[] { READ_PUBLIC, READ_PRIVATE, LIST,
+        private static final Action[] ALL_ACTIONS = new Action[] { READ_PUBLIC, DefaultActions.READ,
                 DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,
                 DefaultActions.CHANGE_ACL };
     };
