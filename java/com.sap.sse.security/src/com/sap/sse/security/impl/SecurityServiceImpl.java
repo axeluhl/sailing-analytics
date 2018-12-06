@@ -1529,14 +1529,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
     }
 
-    public <T> T setOwnershipCheckCreatePermissionAndRevertOnError(String tenantOwnerName,
-            HasPermissions type, String typeRelativeObjectIdentifier, String securityDisplayName,
-            ActionWithResult<T> createActionReturningCreatedObject) {
-        final UserGroup tenantOwner = getUserGroupByName(tenantOwnerName);
-        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeRelativeObjectIdentifier,
-                securityDisplayName, createActionReturningCreatedObject, false);
-    }
-    
     /**
      * Special case for user creation, as no currentUser might exist when registering anonymous, and since a user always
      * should own itself as userOwner

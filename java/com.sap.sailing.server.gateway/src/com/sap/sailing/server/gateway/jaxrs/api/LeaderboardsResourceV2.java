@@ -119,11 +119,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             Map<String, Map<CompetitorDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
             List<CompetitorDTO> filteredCompetitorsFromBestToWorst = new ArrayList<>();
             getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
-                    SecuredDomainType.CompetitorAndBoatActions.LIST, competitorsFromBestToWorst,
+                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorsFromBestToWorst,
                     competitor -> competitor.getIdAsString(), filteredCompetitorsFromBestToWorst::add);
             for (CompetitorDTO competitor: filteredCompetitorsFromBestToWorst) {
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
-                LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);                
+                LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);
                 FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
                     Map<CompetitorDTO, Integer> competitorsOfFleet = competitorsOrderedByFleets.get(fleetOfCompetitor.getName());
@@ -143,7 +143,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         // Remark: leaderboardDTO.competitors are ordered by total rank
         List<CompetitorDTO> filteredCompetitors = new ArrayList<>();
         getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
-                SecuredDomainType.CompetitorAndBoatActions.LIST, leaderboardDTO.competitors,
+                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, leaderboardDTO.competitors,
                 competitor -> competitor.getIdAsString(), filteredCompetitors::add);
         for (CompetitorDTO competitor : filteredCompetitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);

@@ -333,7 +333,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 new DefaultRefreshableAdminConsolePanel<UserManagementPanel<AdminConsoleTableResources>>(userManagementPanel) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        userManagementPanel.updateUsersAndACLs();
+                        userManagementPanel.updateUsers();
                     }
                 }, getStringMessages().userManagement(), SecuredSecurityTypes.USER.getPermission(DefaultActions.MUTATION_ACTIONS));
 
