@@ -13,14 +13,23 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.util.ThreadLocalTransporter;
 
+/**
+ * {@link RaceTrackingHandler} that handles permission checks and ownership creation. Due to the fact that the creation
+ * of {@link TrackedRace TrackedRaces} is potentially done asynchronously, the current authentication is recognized when
+ * calling the constructor. On {@link TrackedRace} creation this authentication is restored temporarily to allow proper
+ * creation of {@link Ownership} and permission checks. If the user is not permitted, the {@link TrackedRace} creation
+ * will fail.
+ */
 public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandler {
 
     private final Subject subject;
