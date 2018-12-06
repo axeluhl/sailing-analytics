@@ -1548,15 +1548,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             ActionWithResult<User> createActionReturningCreatedObject) {
         QualifiedObjectIdentifier identifier = SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username);
         User result = null;
-        boolean didSetOwnerShip = false;
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
             result = createActionReturningCreatedObject.run();
             setOwnership(identifier, result, getDefaultTenantForCurrentUser());
         } catch (AuthorizationException e) {
-            if (didSetOwnerShip) {
-                deleteOwnership(identifier);
-            }
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
