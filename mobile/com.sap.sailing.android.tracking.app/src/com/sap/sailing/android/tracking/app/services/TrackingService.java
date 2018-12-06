@@ -1,7 +1,6 @@
 package com.sap.sailing.android.tracking.app.services;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-import static com.sap.sailing.android.shared.services.sending.MessageSendingService.CHANNEL_ID;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -345,8 +344,16 @@ public class TrackingService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         stopTracking();
-        stopForeground(false);
+        stopForeground(true);
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        stopTracking();
+        stopForeground(true);
+        ExLog.i(this, TAG, "Tracking Service is being removed.");
     }
 
     /**
@@ -391,13 +398,13 @@ public class TrackingService extends Service implements LocationListener {
     private void showNotification() {
         // Starting in Android 8.0 (API level 26), all notifications must be assigned to a channel
         CharSequence name = getText(R.string.service_info);
-        NotificationHelper.createNotificationChannel(this, CHANNEL_ID, name);
+        NotificationHelper.createNotificationChannel(this, NotificationHelper.getNotificationChannelId(), name);
 
         Intent intent = new Intent(this, TrackingActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        Notification notification = NotificationHelper.getNotification(this, CHANNEL_ID, getText(R.string.app_name),
+        Notification notification = NotificationHelper.getNotification(this, NotificationHelper.getNotificationChannelId(), getText(R.string.app_name),
                 getString(R.string.tracking_notification_text, event.name), pendingIntent);
         startForeground(NotificationHelper.getNotificationId(), notification);
     }

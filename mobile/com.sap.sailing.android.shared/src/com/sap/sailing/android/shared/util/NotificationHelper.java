@@ -13,6 +13,8 @@ import android.support.v4.os.BuildCompat;
 public class NotificationHelper {
 
     private static final int NOTIFICATION_ID = 13062018;
+    private final static String CHANNEL_ID = "default";
+
     private static Bitmap largeIcon;
     private static CharSequence title;
     private static int smallIcon;
@@ -48,6 +50,10 @@ public class NotificationHelper {
         }
 
         return builder.build();
+    }
+
+    public static String getNotificationChannelId() {
+        return CHANNEL_ID;
     }
 
     public static int getNotificationId() {

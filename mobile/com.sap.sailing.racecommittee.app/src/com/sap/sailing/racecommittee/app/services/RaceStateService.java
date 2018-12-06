@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.services;
 
-import static com.sap.sailing.android.shared.services.sending.MessageSendingService.CHANNEL_ID;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,7 +91,7 @@ public class RaceStateService extends Service {
     private Notification setupNotification(String customContent) {
         // Starting in Android 8.0 (API level 26), all notifications must be assigned to a channel
         CharSequence name = getText(R.string.service_info);
-        NotificationHelper.createNotificationChannel(this, CHANNEL_ID, name);
+        NotificationHelper.createNotificationChannel(this, NotificationHelper.getNotificationChannelId(), name);
 
         Intent launcherIntent = new Intent(this, LoginActivity.class);
         launcherIntent.setAction(Intent.ACTION_MAIN);
@@ -102,7 +100,7 @@ public class RaceStateService extends Service {
         CharSequence title = getText(R.string.service_info);
         String content = customContent != null ? customContent : getString(R.string.service_text_no_races);
         int color = getResources().getColor(R.color.constant_sap_blue_1);
-        return NotificationHelper.getNotification(this, CHANNEL_ID, title, content, contentIntent, color);
+        return NotificationHelper.getNotification(this, NotificationHelper.getNotificationChannelId(), title, content, contentIntent, color);
     }
 
     @Override
@@ -126,8 +124,17 @@ public class RaceStateService extends Service {
     @Override
     public void onDestroy() {
         unregisterAllRaces();
-        stopForeground(false);
+        stopForeground(true);
         super.onDestroy();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        unregisterAllRaces();
+        stopForeground(true);
+        stopSelf();
+        ExLog.i(this, TAG, "Race State Service is being removed.");
     }
 
     private void unregisterAllRaces() {

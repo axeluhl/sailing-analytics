@@ -97,7 +97,8 @@ public class RaceLogPollingService extends Service
     @Override
     public void onDestroy() {
         ExLog.i(this, TAG, "onDestroy");
-
+        stopForeground(true);
+        stopSelf();
         mRaces.clear();
         if (mAppPreferences != null) {
             mAppPreferences.unregisterPollingActiveChangedListener(this);
@@ -105,6 +106,15 @@ public class RaceLogPollingService extends Service
         if (mAlarm != null && mPendingIntent != null) {
             mAlarm.cancel(mPendingIntent);
         }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        stopForeground(true);
+        stopSelf();
+        ExLog.i(this, TAG, "Race State Service is being removed.");
     }
 
     @Override
