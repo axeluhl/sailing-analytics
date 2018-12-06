@@ -61,6 +61,6 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
      * represents the logical server which may consist of a master and multiple replicas and has a unique server name;
      * type-relative identifier is the server name
      */
-    public static final HasPermissions SERVER = new SecuredSecurityTypes("SERVER", IdentifierStrategy.SERVER, ServerActions.values());
+    public static final HasPermissions SERVER = new SecuredSecurityTypes("SERVER", IdentifierStrategy.STRING, ServerActions.values());
 
 }

@@ -69,8 +69,14 @@ public interface HasPermissions {
     /**
      * Same as {@link #getStringPermissionForObjects(Action, String...)}, only that the result is a
      * {@link WildcardPermission} instead of a {@link String}
+     * @deprecated  better option is to use the variant {@link #getPermissionForObject(Action action, Object object)} instead.
+     * {@link #getPermissionForObject(Action action, Object object)} uses this implementation in a private manner but is
+     * creating the permission id by using the corresponding {{@link #identifierStrategy()}.
+     * If no concrete object (e.g. unit test) is available, this method can still be used.
      */
+    @Deprecated
     WildcardPermission getPermissionForObjects(Action action, String... objectIdentifiers);
+    WildcardPermission getPermissionForObject(Action action, Object object);
 
     /**
      * Same as {@link #getPermissionForObjects(Action, String...)}, only that this method gets the

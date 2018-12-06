@@ -139,4 +139,10 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
         return new WildcardPermission(getStringPermissionForObjects(action, objectIdentifiers));
     }
 
+    @Override
+    public WildcardPermission getPermissionForObject(final Action action, final Object object) {
+        assert supports(action);
+        return new WildcardPermission(getStringPermissionForObjects(action, identiferStrategy.getIdentifierAsString(object)));
+    }
+
 }

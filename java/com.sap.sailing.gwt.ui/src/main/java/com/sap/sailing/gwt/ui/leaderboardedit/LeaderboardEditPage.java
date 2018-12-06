@@ -52,6 +52,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint implements Pr
                             logger.log(Level.SEVERE, "Could not load detailtypes", caught);
                         }
 
+                        @SuppressWarnings("deprecation")
                         @Override
                         public void onSuccess(Iterable<DetailType> result) {
                             SAPHeaderWithAuthentication header = initHeader();

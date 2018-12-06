@@ -4839,7 +4839,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final User allUser = getSecurityService().getAllUser();
             if (allUser != null) {
                 final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
-                        .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName());
+                        .getPermissionForObject(ServerActions.CREATE_OBJECT, ServerInfo.getName());
                 if (serverConfiguration.isSelfService() != null) {
                     if (serverConfiguration.isSelfService()) {
                         getSecurityService().addPermissionForUser(allUser.getName(),
@@ -8704,7 +8704,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final User allUser = getSecurityService().getAllUser();
         if (allUser != null) {
             result = Util.contains(allUser.getPermissions(), SecuredSecurityTypes.SERVER
-                    .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
+                    .getPermissionForObject(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
         } else {
             result = null;
         }

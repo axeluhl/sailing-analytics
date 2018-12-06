@@ -626,6 +626,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      * @return <code>true</code> if user has {@link Mode#UPDATE update permissions} on {@link #leaderboardName current
      *         leaderboard}, otherwise <code>false</code>
      */
+    @SuppressWarnings("deprecation")
     protected boolean hasPermissionToModifyPublicTags() {
         boolean hasPermission = false;
         if (leaderboardName != null && userService.hasPermission(

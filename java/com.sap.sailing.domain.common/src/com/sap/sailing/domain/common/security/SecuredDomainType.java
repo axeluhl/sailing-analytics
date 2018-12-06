@@ -90,7 +90,7 @@ public class SecuredDomainType extends HasPermissionsImpl {
     /**
      * type-relative identifier is the media track's "DB ID"
      */
-    public static final HasPermissions MEDIA_TRACK = new SecuredDomainType("MEDIA_TRACK", IdentifierStrategy.TO_SPECIFY);
+    public static final HasPermissions MEDIA_TRACK = new SecuredDomainType("MEDIA_TRACK", DomainIdentifierStrategy.MEDIA_TRACK);
     
     /**
      * the import URLs can be protected such that they take effect only for those users who can read them; type-relative
@@ -130,9 +130,9 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions REPLICATOR = new SecuredDomainType("REPLICATOR", IdentifierStrategy.TO_SPECIFY, ReplicatorActions.values());
     
     /**
-     * type-relative identifier is the server name
+     * Permission is checked against servername.
      */
-    public static final HasPermissions DATA_MINING = new SecuredDomainType("DATA_MINING", IdentifierStrategy.TO_SPECIFY);
+    public static final HasPermissions DATA_MINING = new SecuredDomainType("DATA_MINING", IdentifierStrategy.STRING /* identifer is servername. */);
 
     /**
      * type-relative identifier is the device configuration name

@@ -144,7 +144,7 @@ public class SailorProfileStatisticTable extends Composite {
             @Override
             public void onSuccess(ServerInfoDTO serverInfo) {
                 if (!userService.hasPermission(
-                        SecuredDomainType.DATA_MINING.getPermissionForObjects(DefaultActions.READ,
+                        SecuredDomainType.DATA_MINING.getPermissionForObject(DefaultActions.READ,
                                 serverInfo.getServerName()))) {
                     anchor.setVisible(false);
                 }

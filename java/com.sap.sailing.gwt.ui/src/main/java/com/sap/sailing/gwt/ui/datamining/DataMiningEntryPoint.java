@@ -77,7 +77,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                 genericSailingAuthentication);
         authorizedContentDecorator.setPermissionToCheck(
-                SecuredDomainType.DATA_MINING.getPermissionForObjects(DefaultActions.READ, serverInfo.getServerName()));
+                SecuredDomainType.DATA_MINING.getPermissionForObject(DefaultActions.READ, serverInfo.getServerName()));
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
 
             private QueryDefinitionProviderWithControls queryDefinitionProvider;

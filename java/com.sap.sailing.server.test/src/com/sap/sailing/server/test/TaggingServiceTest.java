@@ -66,6 +66,7 @@ public class TaggingServiceTest {
     private final static String leaderboardName = "Leaderboard";
     private final static String raceColumnName = "RaceColumn";
     private final static String fleetName = "Default";
+    @SuppressWarnings("deprecation")
     private final static WildcardPermission editLeaderboardPermission = SecuredDomainType.LEADERBOARD
             .getPermissionForObjects(DefaultActions.UPDATE, leaderboardName);
 

@@ -28,7 +28,7 @@ public interface IdentifierStrategy {
 
     };
 
-    static IdentifierStrategy SERVER = new IdentifierStrategy() {
+    static IdentifierStrategy STRING = new IdentifierStrategy() {
 
         @Override
         public <T> String getIdentifierAsString(T object) {

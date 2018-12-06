@@ -1581,7 +1581,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }
             if (checkCreateObjectOnServer) {
                 SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER
-                        .getStringPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
+                        .getStringPermissionForObject(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
             }
             SecurityUtils.getSubject()
                     .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
