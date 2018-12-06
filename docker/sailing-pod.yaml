@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: sailing
-    image: donaldduck70/sapsailing:docker-201812050126
+    image: donaldduck70/sapsailing:docker-201812052304
     imagePullPolicy: Always
     ports:
     - containerPort: 8888
