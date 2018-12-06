@@ -4,6 +4,7 @@ import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
@@ -102,7 +103,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
         private final UserManagementServiceAsync userManagementService;
         private final Consumer<T> updateCallback;
         private final Function<T, QualifiedObjectIdentifier> identifierFactory;
-        private final Function<T, Action[]> availableActionsFactory;
+        private final Supplier<Action[]> availableActionsFactory;
         private final StringMessages stringMessages;
 
         private DialogConfig(final UserManagementServiceAsync userManagementService, final HasPermissions type,
@@ -110,7 +111,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
                 final StringMessages stringMessages) {
             this.userManagementService = userManagementService;
             this.identifierFactory = idFactory.andThen(type::getQualifiedObjectIdentifier);
-            this.availableActionsFactory = idFactory.andThen(t -> type.getAvailableActions());
+            this.availableActionsFactory = type::getAvailableActions;
             this.updateCallback = updateCallback;
             this.stringMessages = stringMessages;
         }
@@ -123,8 +124,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
          */
         public void openDialog(final T securedObject) {
             new EditACLDialog(userManagementService, identifierFactory.apply(securedObject),
-                    availableActionsFactory.apply(securedObject), StringMessages.INSTANCE,
-                    new EditAclDialogCallback(securedObject)).show();
+                    availableActionsFactory.get(), stringMessages, new EditAclDialogCallback(securedObject)).show();
         }
 
         private class EditAclDialogCallback implements DialogCallback<AclDialogResult> {
