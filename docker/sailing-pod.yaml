@@ -5,15 +5,23 @@ metadata:
 spec:
   containers:
   - name: sailing
-    image: donaldduck70/sapsailing:docker-201811291913
+    image: donaldduck70/sapsailing:docker-201812052304
+    imagePullPolicy: Always
     ports:
     - containerPort: 8888
       name: http-port
     - containerPort: 14888
       name: telnet-port
+    resources:
+      requests:
+        memory: "3Gi"
+        cpu: "250m"
+      limits:
+        memory: "8Gi"
+        cpu: "500m"
     env:
-    - name: MONGODB_HOST
-      value: mongo-0.mongo
+    - name: MONGODB_URI
+      value: mongodb://mongodb-mongodb-replicaset-0.mongodb-mongodb-replicaset,mongodb-mongodb-replicaset-1.mongodb-mongodb-replicaset,mongodb-mongodb-replicaset-2.mongodb-mongodb-replicaset/docker
     livenessProbe:
       httpGet:
         path: /

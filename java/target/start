@@ -69,10 +69,15 @@ sed $SED_ARGS "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./
 
 # Inject information for system
 HEAD_DATE=$(date "+%Y%m%d%H%M")
-sed $SED_ARGS "s/System:.*$/ System: $MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+sed $SED_ARGS "s/System:.*$/ System: $MONGO_URI:$MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
 
 # Apply app parameters from env.sh
-APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dmongo.dbName=$MONGODB_NAME -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangePort=$REPLICATION_PORT -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+if [ "$MONGODB_URI" = "" ]; then
+  APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dmongo.dbName=$MONGODB_NAME"
+else
+  APP_PARAMETERS="-Dmongo.uri=$MONGODB_URI"
+fi
+APP_PARAMETERS="$APP_PARAMETERS -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangePort=$REPLICATION_PORT -Dreplication.exchangeName=$REPLICATION_CHANNEL"
 
 # Append mail-related environment variables to configuration/mail.properties to override defaults
 if [ -n "$MAIL_FROM" ]; then
@@ -105,6 +110,7 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     echo "SERVER_PORT: $SERVER_PORT"
     echo "MEMORY: $MEMORY"
     echo "TELNET_PORT: $TELNET_PORT"
+    echo "MONGODB_URI: $MONGODB_URI"
     echo "MONGODB_HOST: $MONGODB_HOST"
     echo "MONGODB_PORT: $MONGODB_PORT"
     echo "MONGODB_NAME: $MONGODB_NAME"
