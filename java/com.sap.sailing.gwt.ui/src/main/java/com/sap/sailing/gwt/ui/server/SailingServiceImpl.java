@@ -5575,8 +5575,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Iterable<CompetitorDTO> result;
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
         final HasPermissions.Action[] requiredActionsForRead = new HasPermissions.Action[] {
-                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
-                SecuredDomainType.CompetitorAndBoatActions.LIST };
+                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC };
         if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
             @SuppressWarnings("unchecked")
             Iterable<Competitor> competitors = (Iterable<Competitor>) competitorStore.getAllCompetitors();
@@ -5738,8 +5737,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Iterable<BoatDTO> getAllBoats() {
         final HasPermissions.Action[] requiredActionsForRead = new HasPermissions.Action[] {
-                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
-                SecuredDomainType.CompetitorAndBoatActions.LIST };
+                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC };
         Iterable<BoatDTO> result = getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(
                 SecuredDomainType.BOAT, requiredActionsForRead,
                 getService().getBaseDomainFactory().getCompetitorAndBoatStore().getBoats(),
