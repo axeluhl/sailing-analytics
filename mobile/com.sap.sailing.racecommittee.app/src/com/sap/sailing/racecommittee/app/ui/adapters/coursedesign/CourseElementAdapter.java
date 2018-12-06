@@ -115,8 +115,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
             itemHolder.rightImage.setImageDrawable(mImageHelper.resolveMarkImage(mContext, element.getRightMark()));
             itemHolder.rightImage.setVisibility(View.VISIBLE);
         } else if (element.getPassingInstructions() != null
-                && PassingInstruction.Gate.equals(element.getPassingInstructions())
-                || PassingInstruction.Line.equals(element.getPassingInstructions())) {
+                && (PassingInstruction.Gate.equals(element.getPassingInstructions())
+                || PassingInstruction.Line.equals(element.getPassingInstructions()))) {
             itemHolder.addItem.setVisibility(View.VISIBLE);
         }
     }
@@ -126,8 +126,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         if (mEditable) {
             if (mItems != null && mItems.size() != 0) {
                 CourseListDataElementWithIdImpl element = mItems.get(mItems.size() - 1);
-                if (element.getRightMark() == null && PassingInstruction.Gate.equals(element.getPassingInstructions())
-                        || PassingInstruction.Line.equals(element.getPassingInstructions())) {
+                if (element.getRightMark() == null && (PassingInstruction.Gate.equals(element.getPassingInstructions())
+                        || PassingInstruction.Line.equals(element.getPassingInstructions()))) {
                     return mItems.size();
                 }
                 return mItems.size() + 1;
