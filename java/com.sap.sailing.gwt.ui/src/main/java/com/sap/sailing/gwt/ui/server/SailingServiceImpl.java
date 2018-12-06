@@ -5458,8 +5458,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword) {
         // FIXME should the targetserver also check this?
-        SecurityUtils.getSubject().isPermitted(SecuredDomainType.CAN_IMPORT_MASTERDATA
-                .getStringPermissionForObjects(DefaultActions.CREATE, ServerInfo.getName()));
+        SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.SERVER
+                .getStringPermissionForObjects(ServerActions.CAN_IMPORT_MASTERDATA, ServerInfo.getName()));
 
         String token = getTokenForServer(urlAsString, targetServerUsername, targetServerPassword);
 

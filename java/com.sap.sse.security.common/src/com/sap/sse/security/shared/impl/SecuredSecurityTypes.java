@@ -54,7 +54,8 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         CONFIGURE_LOCAL_SERVER,
         CONFIGURE_REMOTE_INSTANCES,
         IMPORT_MASTER_DATA,
-        CREATE_OBJECT
+        CREATE_OBJECT,
+        CAN_IMPORT_MASTERDATA
     }
 
     /**
