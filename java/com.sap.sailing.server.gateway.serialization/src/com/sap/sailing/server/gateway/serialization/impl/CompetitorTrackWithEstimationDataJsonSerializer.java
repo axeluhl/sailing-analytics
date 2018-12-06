@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
@@ -36,6 +37,7 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
     public static final String FIXES_COUNT_FOR_POLARS = "fixesCountForPolars";
     public static final String MARK_PASSINGS_COUNT = "markPassingsCount";
     public static final String WAYPOINTS_COUNT = "waypointsCount";
+    public static final String HIGH_QUALITY_WIND_DATA = "goodWindQuality";
 
     private final BoatClassJsonSerializer boatClassJsonSerializer;
     private final CompetitorTrackElementsJsonSerializer elementsJsonSerializer;
@@ -63,6 +65,10 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
     public JSONObject serialize(TrackedRace trackedRace) {
         final JSONObject result = new JSONObject();
         JSONArray byCompetitorJson = new JSONArray();
+        boolean highQualityWindData = trackedRace.getWindSources().stream()
+                .anyMatch(windSource -> windSource.getType() == WindSourceType.EXPEDITION
+                        || windSource.getType() == WindSourceType.RACECOMMITTEE);
+        result.put(HIGH_QUALITY_WIND_DATA, highQualityWindData);
         result.put(BYCOMPETITOR, byCompetitorJson);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
