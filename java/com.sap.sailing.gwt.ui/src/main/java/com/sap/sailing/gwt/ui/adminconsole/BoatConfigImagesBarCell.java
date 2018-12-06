@@ -34,9 +34,9 @@ public class BoatConfigImagesBarCell extends ImagesBarCell {
                 new ImageSpec(ACTION_UPDATE, stringMessages.actionEdit(),
                         makeImagePrototype(IconResources.INSTANCE.editIcon())),
                 new ImageSpec(ACTION_REFRESH, stringMessages.reload(), makeImagePrototype(resources.reloadIcon())),
-                new ImageSpec(ACTION_CHANGE_ACL, stringMessages.actionChangeACL(),
-                        IconResources.INSTANCE.changeACLIcon()),
                 new ImageSpec(ACTION_CHANGE_OWNERSHIP, stringMessages.actionChangeOwnership(),
-                        IconResources.INSTANCE.changeOwnershipIcon()));
+                        IconResources.INSTANCE.changeOwnershipIcon()),
+                new ImageSpec(ACTION_CHANGE_ACL, stringMessages.actionChangeACL(),
+                        IconResources.INSTANCE.changeACLIcon()));
     }
 }
