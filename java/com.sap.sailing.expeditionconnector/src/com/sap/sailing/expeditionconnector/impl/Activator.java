@@ -102,7 +102,8 @@ public class Activator implements BundleActivator {
                                         deviceConfiguration.getName()));
                         securityService.migrateOwnership(identifier, identifier.getTypeRelativeObjectIdentifier());
                     }
-                    securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_ACCOUNT.getName());
+                    securityService
+                            .assumeOwnershipMigrated(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getName());
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Exception trying to migrate IgtimiAccounts implementation", e);
                 }
