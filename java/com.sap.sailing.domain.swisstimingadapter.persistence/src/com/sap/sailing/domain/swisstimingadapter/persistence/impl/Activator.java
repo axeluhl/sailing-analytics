@@ -56,19 +56,17 @@ public class Activator implements BundleActivator {
 
                 for (SwissTimingArchiveConfiguration swissTimingArchive : SwissTimingAdapterPersistence.INSTANCE
                         .getSwissTimingArchiveConfigurations()) {
-                    securityService.migrateOwnership(swissTimingArchive, SecuredDomainType.getAllInstances());
+                    securityService.migrateOwnership(swissTimingArchive);
                 }
 
                 for (SwissTimingConfiguration swissTiming : SwissTimingAdapterPersistence.INSTANCE
                         .getSwissTimingConfigurations()) {
-                    securityService.migrateOwnership(swissTiming, SecuredDomainType.getAllInstances());
+                    securityService.migrateOwnership(swissTiming);
                 }
 
                 // we do not necessarily have swisstiming configs, so ensure that migration is marked as done
-                securityService.assumeOwnershipMigrated(SecuredDomainType.SWISS_TIMING_ACCOUNT.getName(),
-                        SecuredDomainType.getAllInstances());
-                securityService.assumeOwnershipMigrated(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getName(),
-                        SecuredDomainType.getAllInstances());
+                securityService.assumeOwnershipMigrated(SecuredDomainType.SWISS_TIMING_ACCOUNT.getName());
+                securityService.assumeOwnershipMigrated(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getName());
 
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception trying to register SwissTiming RaceTrackingConnectivityParametersHandler implementation", e);

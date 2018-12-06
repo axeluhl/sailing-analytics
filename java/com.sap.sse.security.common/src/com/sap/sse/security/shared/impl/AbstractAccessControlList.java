@@ -53,7 +53,7 @@ public abstract class AbstractAccessControlList<G extends SecurityUserGroup, U e
      */
     private Map<G, Set<WildcardPermission>> deniedActionsByUserGroup;
 
-    public AbstractAccessControlList(Map<G, Set<String>> permissionMap) {
+    protected AbstractAccessControlList(Map<G, Set<String>> permissionMap) {
         this.allowedActionsByUserGroup = new HashMap<>();
         this.deniedActionsByUserGroup = new HashMap<>();
         for (final Entry<G, Set<String>> permissionMapEntry : permissionMap.entrySet()) {

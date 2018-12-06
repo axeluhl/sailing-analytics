@@ -106,10 +106,9 @@ public class Activator implements BundleActivator {
                 final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
                 IgtimiConnectionFactoryImpl igtimiConnectionFactory = connectionFactory.get();
                 for (Account account : igtimiConnectionFactory.getAllAccounts()) {
-                    securityService.migrateOwnership(account, SecuredDomainType.getAllInstances());
+                    securityService.migrateOwnership(account);
                 }
-                securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_ACCOUNT.getName(),
-                        SecuredDomainType.getAllInstances());
+                securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_ACCOUNT.getName());
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception trying to migrate IgtimiAccounts implementation", e);
             }

@@ -48,6 +48,7 @@ import com.sap.sse.common.media.MimeType;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
@@ -192,7 +193,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
             ClassNotFoundException {
 
         UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
-        User currentUser = Mockito.mock(User.class);
+        User currentUser = new UserImpl("test", "email@test", Collections.emptyMap(), null);
 
         SecurityService securityService = Mockito.mock(SecurityService.class);
         Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();
@@ -272,7 +273,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
             fmaster.addMasterDataClassLoader(this.getClass().getClassLoader());
             ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
             MasterDataImporter importer = new MasterDataImporter(domainFactory, fmaster,
-                    null, null);
+                    currentUser, null);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();

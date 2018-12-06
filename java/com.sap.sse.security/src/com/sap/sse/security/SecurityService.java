@@ -381,10 +381,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Since there are some HasPermission objects, that have no Ownership, this method is used to explicitly mention
      * that they are to be assumed as migrated.
      */
-    void assumeOwnershipMigrated(String typeName, Iterable<HasPermissions> permissions);
-    void migrateOwnership(WithQualifiedObjectIdentifier object, Iterable<HasPermissions> permissions);
+    void assumeOwnershipMigrated(String typeName);
 
-    void migrateOwnership(QualifiedObjectIdentifier object, String displayName, Iterable<HasPermissions> permissions);
+    void migrateOwnership(WithQualifiedObjectIdentifier object);
+
+    void migrateOwnership(QualifiedObjectIdentifier object, String displayName);
 
     void checkMigration(Iterable<HasPermissions> allInstances);
 

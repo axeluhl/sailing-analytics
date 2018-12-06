@@ -10,17 +10,12 @@ import java.util.Set;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -28,25 +23,18 @@ import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.component.AccessControlListListDataProvider;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.CreateUserDialog;
-import com.sap.sse.security.ui.client.component.EditAccessControlListDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class UserManagementPanel<TR extends CellTableWithCheckboxResources> extends DockPanel {
     
     private final List<UserCreatedEventHandler> userCreatedHandlers = new ArrayList<>();
-    
     private final List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
-    
-    private final SingleSelectionModel<AccessControlListAnnotationDTO> aclSingleSelectionModel;
-    private final AccessControlListListDataProvider aclListDataProvider;
     
     private final UserTableWrapper<RefreshableMultiSelectionModel<UserDTO>, TR> userList;
     private final RefreshableMultiSelectionModel<UserDTO> userSelectionModel;
@@ -62,21 +50,11 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         final VerticalPanel west = new VerticalPanel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER);
         west.add(buttonPanel);
-        buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateUsersAndACLs);
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateUsers);
         buttonPanel.addCreateAction(stringMessages.createUser(),
                 () -> new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService)
                         .show());
 
-        aclListDataProvider = new AccessControlListListDataProvider(userManagementService);
-        aclSingleSelectionModel = new SingleSelectionModel<>();
-        // TODO: find the right place for the acl controls
-        final Button editACLButton = buttonPanel.addUnsecuredAction(stringMessages.editACL(),
-                () -> new EditAccessControlListDialog(stringMessages, userManagementService, aclListDataProvider,
-                        aclSingleSelectionModel.getSelectedObject()).show());
-        editACLButton.setEnabled(false);
-        aclSingleSelectionModel.addSelectionChangeHandler(
-                event -> editACLButton.setEnabled(aclSingleSelectionModel.getSelectedObject() != null));
-        
         userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
                 /* multiSelection */ true, /* enablePager */ true, tableResources);
         userSelectionModel = userList.getSelectionModel();
@@ -118,30 +96,6 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
             deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
         });
 
-        final CellTable<AccessControlListAnnotationDTO> aclTable = new CellTable<>();
-        TextColumn<AccessControlListAnnotationDTO> idColumn = new TextColumn<AccessControlListAnnotationDTO>() {
-            @Override
-            public String getValue(AccessControlListAnnotationDTO acl) {
-                return acl.getIdOfAnnotatedObject().toString();
-            }
-        };
-        TextColumn<AccessControlListAnnotationDTO> displayNameColumn = new TextColumn<AccessControlListAnnotationDTO>() {
-            @Override
-            public String getValue(AccessControlListAnnotationDTO acl) {
-                return acl.getDisplayNameOfAnnotatedObject()==null?"":acl.getDisplayNameOfAnnotatedObject();
-            }
-        };
-        aclTable.addColumn(idColumn, stringMessages.id());
-        aclTable.addColumn(displayNameColumn, stringMessages.displayName());
-        aclTable.setSelectionModel(aclSingleSelectionModel);
-        aclTable.setPageSize(20);
-        aclListDataProvider.addDataDisplay(aclTable);
-        SimplePager aclPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
-        aclPager.setDisplay(aclTable);
-        ScrollPanel aclPanel = new ScrollPanel(aclTable);
-        west.add(aclPager);
-        west.add(aclPanel);
-        
         ScrollPanel scrollPanel = new ScrollPanel(userList.asWidget());
         LabeledAbstractFilterablePanel<UserDTO> filterBox = userList.getFilterField();
         filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
@@ -164,12 +118,11 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 userList.getFilterField().remove(user);
             }
         });
-        updateUsersAndACLs();
+        updateUsers();
     }
     
-    public void updateUsersAndACLs() {
+    public void updateUsers() {
         userList.refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null);
-        aclListDataProvider.updateDisplays();
     }
 
     public void addUserCreatedEventHandler(UserCreatedEventHandler handler){

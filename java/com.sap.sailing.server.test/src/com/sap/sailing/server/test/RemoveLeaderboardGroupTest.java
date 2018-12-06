@@ -103,12 +103,17 @@ public class RemoveLeaderboardGroupTest {
         assertNull(pfingstbusch.getLeaderboardGroups().iterator().next().getOverallLeaderboard());
     }
 
+    /**
+     * Unlike earlier versions, the RemoveLeaderboardGroup no longer removes the OverallLeaderboard, because it cannot
+     * ensure proper Ownership handling. This is no handled in the SailingServiceImpl
+     */
     @Test
-    public void testRemovingLeaderboardGroupRemovesOverallLeaderboardAndUnlinksItFromEvent() {
+    public void testRemovingLeaderboardGroupDoesNotRemoveOverallLeaderboard() {
         assertEquals(1, Util.size(pfingstbusch.getLeaderboardGroups()));
         server.apply(new RemoveLeaderboardGroup("Pfingstbusch"));
-        final Leaderboard overallLeaderboard = server.getLeaderboardByName("Pfingstbusch "+LeaderboardNameConstants.OVERALL);
-        assertNull(overallLeaderboard);
+        final Leaderboard overallLeaderboard = server
+                .getLeaderboardByName("Pfingstbusch " + LeaderboardNameConstants.OVERALL);
+        assertNotNull(overallLeaderboard);
         assertFalse(pfingstbusch.getLeaderboardGroups().iterator().hasNext());
     }
 }
