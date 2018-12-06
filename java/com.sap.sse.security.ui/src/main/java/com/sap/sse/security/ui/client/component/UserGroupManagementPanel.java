@@ -1,26 +1,23 @@
 package com.sap.sse.security.ui.client.component;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.USER_GROUP;
+
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -31,7 +28,6 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 public class UserGroupManagementPanel extends DockPanel {
     private final UserGroupListDataProvider userGroupListDataProvider;
     private UserGroupDetailPanel userGroupDetailPanel;
-    private Button editACLForNullUsergroup = null;
 
     private final UserGroupTableWrapper userGroupTableWrapper;
 
@@ -42,8 +38,7 @@ public class UserGroupManagementPanel extends DockPanel {
         final VerticalPanel west = new VerticalPanel();
 
         // create button bar
-        final HorizontalPanel buttonPanel = createButtonPanel(userService, stringMessages, userManagementService);
-        west.add(buttonPanel);
+        west.add(createButtonPanel(userService, stringMessages, userManagementService));
 
         // create UserGroup Table
         userGroupListDataProvider = new UserGroupListDataProvider(userManagementService, new TextBox());
@@ -66,69 +61,32 @@ public class UserGroupManagementPanel extends DockPanel {
     }
 
     /** Creates the button bar with add/remove/refresh buttons. */
-    private HorizontalPanel createButtonPanel(final UserService userService, final StringMessages stringMessages,
+    private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages,
             final UserManagementServiceAsync userManagementService) {
-        final HorizontalPanel buttonPanel = new HorizontalPanel();
-
-        buttonPanel.add(new Button(stringMessages.refresh(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateUserGroups();
-            }
-        }));
-        buttonPanel.add(new Button(stringMessages.createUserGroup(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                new CreateUserGroupDialog(stringMessages, userService, userManagementService, userGroupListDataProvider)
-                        .show();
-            }
-        }));
-        editACLForNullUsergroup = new Button("Edit ACL for Null Usergroup", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                userManagementService.getAccessControlList(null, new AsyncCallback<AccessControlListAnnotationDTO>() {
-
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> updateUserGroups());
+        buttonPanel.addCreateAction(stringMessages.createUserGroup(), () -> new CreateUserGroupDialog(stringMessages,
+                userService, userManagementService, userGroupListDataProvider).show());
+        buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), () -> {
+            UserGroupDTO userGroup = userGroupTableWrapper.getSelectionModel().getSelectedObject();
+            if (userGroup == null) {
+                Window.alert(stringMessages.youHaveToSelectAUserGroup());
+            } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroup.getName()))) {
+                userManagementService.deleteUserGroup(userGroup.getId().toString(), new AsyncCallback<SuccessInfo>() {
                     @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-
+                    public void onSuccess(SuccessInfo result) {
+                        userGroupListDataProvider.updateDisplays();
+                        Window.alert(result.getMessage());
+                        updateUserGroups();
                     }
 
                     @Override
-                    public void onSuccess(AccessControlListAnnotationDTO result) {
-                        final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
-                                userService.getUserManagementService(), SecuredSecurityTypes.USER_GROUP, null,
-                                user -> result.getAnnotation(), stringMessages);
-                        configACL.openDialog(null);
+                    public void onFailure(Throwable caught) {
+                        Window.alert(stringMessages.couldNotDeleteUserGroup());
                     }
                 });
             }
         });
-        buttonPanel.add(editACLForNullUsergroup);
-        buttonPanel.add(new Button(stringMessages.removeUserGroup(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                UserGroupDTO userGroup = userGroupTableWrapper.getSelectionModel().getSelectedObject();
-                if (userGroup == null) {
-                    Window.alert(stringMessages.youHaveToSelectAUserGroup());
-                } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroup.getName()))) {
-                    userManagementService.deleteUserGroup(userGroup.getId().toString(),
-                            new AsyncCallback<SuccessInfo>() {
-                                @Override
-                                public void onSuccess(SuccessInfo result) {
-                                    userGroupListDataProvider.updateDisplays();
-                                    Window.alert(result.getMessage());
-                                    updateUserGroups();
-                                }
-
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    Window.alert(stringMessages.couldNotDeleteUserGroup());
-                                }
-                            });
-                }
-            }
-        }));
         return buttonPanel;
     }
 
