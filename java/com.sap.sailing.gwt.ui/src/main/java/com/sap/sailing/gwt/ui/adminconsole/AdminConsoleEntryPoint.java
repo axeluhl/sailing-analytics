@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.HeaderPanel;
@@ -28,6 +29,7 @@ import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
+import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -41,6 +43,7 @@ import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
@@ -77,6 +80,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             @Override
             public Widget get() {
+                checkPublicServerNonPublicUserWarning();
                 return createAdminConsolePanel(serverInfo);
             }
         });
@@ -86,6 +90,25 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         rootPanel.add(headerPanel);
     }
     
+    protected void checkPublicServerNonPublicUserWarning() {
+        getSailingService().getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(ServerConfigurationDTO result) {
+                if (Boolean.TRUE.equals(result.isPublic())) {
+                    StrippedUserGroupDTO currentTenant = getUserService().getCurrentTenant();
+                    StrippedUserGroupDTO serverTenant = result.getServerDefaultTenant();
+                    if (!serverTenant.equals(currentTenant)) {
+                        Window.alert(getStringMessages().serverIsPublicButTenantIsNot());
+                    }
+                }
+            }
+        });
+    }
+
     private Widget createAdminConsolePanel(ServerInfoDTO serverInfo) {
         AdminConsolePanel panel = new AdminConsolePanel(getUserService(), 
                 serverInfo, getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this,

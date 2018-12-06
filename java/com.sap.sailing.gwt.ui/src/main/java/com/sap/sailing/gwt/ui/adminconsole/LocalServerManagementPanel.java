@@ -118,7 +118,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         Boolean selfServiceServer = isSelfServiceServerCheckbox.isEnabled() ? isSelfServiceServerCheckbox.getValue()
                 : null;
         ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
-                publicServer, selfServiceServer);
+                publicServer, selfServiceServer, null);
 
         sailingService.updateServerConfiguration(serverConfig, new AsyncCallback<Void>() {
             @Override
