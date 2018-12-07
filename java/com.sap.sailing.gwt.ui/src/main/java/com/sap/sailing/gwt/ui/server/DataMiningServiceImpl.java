@@ -90,13 +90,13 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     @Override
     public Date getComponentsChangedTimepoint() {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermission(DefaultActions.READ));
         return getDataMiningServer().getComponentsChangedTimepoint();
     }
     
     @Override
     public FunctionDTO getIdentityFunction(String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermission(DefaultActions.READ));
         DataMiningServer server = getDataMiningServer();
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         return dtoFactory.createFunctionDTO(server.getIdentityFunction(), server.getStringMessages(), locale);
@@ -104,7 +104,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     @Override
     public HashSet<FunctionDTO> getAllStatistics(String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermission(DefaultActions.READ));
         Iterable<Function<?>> statistics = getDataMiningServer().getAllStatistics();
         return functionsAsDTOs(statistics, localeInfoName);
     }
@@ -113,7 +113,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition,
             String localeInfoName) {
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ, retrieverChainDefinition.getName()));
+                SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.READ, retrieverChainDefinition.getName()));
         Class<?> retrievedDataType = getDataMiningServer()
                 .getDataRetrieverChainDefinitionForDTO(retrieverChainDefinition).getRetrievedDataType();
         Iterable<Function<?>> statistics = getDataMiningServer().getStatisticsFor(retrievedDataType);
@@ -122,7 +122,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     @Override
     public HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitions(String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermission(DefaultActions.READ));
         Iterable<AggregationProcessorDefinition<?, ?>> definitions = getDataMiningServer()
                 .getAllAggregationProcessorDefinitions();
         return aggregatorDefinitionsAsDTOs(definitions, localeInfoName);
@@ -132,7 +132,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction,
             String localeInfoName) {
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ, extractionFunction.getFunctionName()));
+                SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.READ, extractionFunction.getFunctionName()));
         Class<?> returnType = getReturnType(extractionFunction);
         @SuppressWarnings("unchecked")
         Iterable<AggregationProcessorDefinition<?, ?>> definitions = (Iterable<AggregationProcessorDefinition<?, ?>>) (Iterable<?>) getDataMiningServer()
@@ -159,7 +159,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public HashSet<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
             String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ,
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.READ,
                 dataRetrieverChainDefinitionDTO.getName()));
         Class<?> retrievedType = getDataMiningServer()
                 .getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO).getRetrievedDataType();
@@ -170,7 +170,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public ReducedDimensionsDTO getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ,
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.READ,
                 dataRetrieverChainDefinitionDTO.getName()));
         DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer()
                 .getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO);
@@ -211,7 +211,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     @Override
     public ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermission(DefaultActions.READ));
         Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = getDataMiningServer()
                 .getDataRetrieverChainDefinitions();
         return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
@@ -220,7 +220,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(
             FunctionDTO statisticToCalculate, String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ,
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.READ,
                 statisticToCalculate.getFunctionName()));
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
         @SuppressWarnings("unchecked")
@@ -254,7 +254,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
             HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsDTO,
             HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO,
             String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ,
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.READ,
                 dataRetrieverChainDefinitionDTO.getName()));
         DataMiningServer dataMiningServer = getDataMiningServer();
         DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = dataMiningServer
@@ -354,7 +354,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public <ResultType extends Serializable> QueryResultDTO<ResultType> runQuery(DataMiningSession session,
             ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ,
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.READ,
                 queryDefinitionDTO.getDataRetrieverChainDefinition().getName()));
         DataMiningServer dataMiningServer = getDataMiningServer();
         StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer
@@ -366,7 +366,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     @Override
     public HashSet<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers() {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermission(DefaultActions.READ));
         HashSet<PredefinedQueryIdentifier> predefinedQueryNames = new HashSet<PredefinedQueryIdentifier>();
         for (PredefinedQueryIdentifier predefinedQueryName : getDataMiningServer().getPredefinedQueryIdentifiers()) {
             predefinedQueryNames.add(predefinedQueryName);
@@ -378,7 +378,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier,
             String localeInfoName) {
          SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ, identifier.getIdentifier()));
+                SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.READ, identifier.getIdentifier()));
         return (ModifiableStatisticQueryDefinitionDTO) localize(
                 getDataMiningServer().getPredefinedQueryDefinitionDTO(identifier), localeInfoName);
     }
@@ -387,7 +387,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public <ResultType extends Serializable> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session,
             PredefinedQueryIdentifier identifier, String localeInfoName) {
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ, identifier.getIdentifier()));
+                SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.READ, identifier.getIdentifier()));
         DataMiningServer dataMiningServer = getDataMiningServer();
         ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = dataMiningServer
                 .getPredefinedQueryDefinitionDTO(identifier);
@@ -401,7 +401,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public ModifiableStatisticQueryDefinitionDTO localize(ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO,
             String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ,
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.READ,
                 queryDefinitionDTO.getDataRetrieverChainDefinition().getName()));
         DataMiningServer dataMiningServer = getDataMiningServer();
         StatisticQueryDefinition<?, ?, ?, ?> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
@@ -418,23 +418,23 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public ArrayList<StoredDataMiningQueryDTOImpl> retrieveStoredQueries() {
         SecurityUtils.getSubject()
-                .checkPermission(SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.READ));
+                .checkPermission(SecuredDomainType.DATA_MINING.getStringPermission(DefaultActions.READ));
         return storedDataMiningQueryPersistor.retrieveStoredQueries();
     }
 
     @Override
     public StoredDataMiningQueryDTOImpl updateOrCreateStoredQuery(StoredDataMiningQueryDTOImpl query) {
 	SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.UPDATE, query.getName()));
+                SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.UPDATE, query.getName()));
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.CREATE, query.getName()));
+                SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.CREATE, query.getName()));
         return (StoredDataMiningQueryDTOImpl) storedDataMiningQueryPersistor.updateOrCreateStoredQuery(query);
     }
 
     @Override
     public StoredDataMiningQueryDTOImpl removeStoredQuery(StoredDataMiningQueryDTOImpl query) {
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.DELETE, query.getName()));
+                SecuredDomainType.DATA_MINING.getStringPermissionForObject(DefaultActions.DELETE, query.getName()));
         return (StoredDataMiningQueryDTOImpl) storedDataMiningQueryPersistor.removeStoredQuery(query);
     }
 

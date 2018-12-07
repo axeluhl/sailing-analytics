@@ -94,7 +94,7 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     }
 
     @Override
-    public String getStringPermissionForObjects(final Action action, final String... typeRelativeObjectIdentifiers) {
+    public String getStringPermissionForTypeRelativeIdentifiers(final Action action, final String... typeRelativeObjectIdentifiers) {
         assert supports(action);
         final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(action));
@@ -112,10 +112,17 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
         }
         return result.toString();
     }
+    
+    /*@Override
+    public String getStringPermission(final Action action) {
+        assert supports(action);
+        final StringBuilder result = new StringBuilder(getStringPermission(action));
+        return result.toString();
+    }*/
 
     @Override
     public String getStringPermissionForObject(final Action action, final Object object) {
-        return getStringPermissionForObjects(action, identifierStrategy().getIdentifierAsString(object));
+        return getStringPermissionForTypeRelativeIdentifiers(action, identifierStrategy().getIdentifierAsString(object));
     }
 
     @Override
@@ -141,13 +148,13 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     @Override
     public WildcardPermission getPermissionForObjects(final Action action, final String... objectIdentifiers) {
         assert supports(action);
-        return new WildcardPermission(getStringPermissionForObjects(action, objectIdentifiers));
+        return new WildcardPermission(getStringPermissionForTypeRelativeIdentifiers(action, objectIdentifiers));
     }
 
     @Override
     public WildcardPermission getPermissionForObject(final Action action, final Object object) {
         assert supports(action);
-        return new WildcardPermission(getStringPermissionForObjects(action, identiferStrategy.getIdentifierAsString(object)));
+        return new WildcardPermission(getStringPermissionForTypeRelativeIdentifiers(action, identiferStrategy.getIdentifierAsString(object)));
     }
 
 }

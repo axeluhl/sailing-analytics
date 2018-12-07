@@ -1619,7 +1619,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
             if (SecurityUtils.getSubject().isPermitted(
-                    permittedObject.getStringPermissionForObjects(action, permittedObject.identifierStrategy().getIdentifierAsString(objectToCheck)))) {
+                    permittedObject.getStringPermissionForObject(action, objectToCheck))) {
                 filteredObjectsConsumer.accept(objectToCheck);
             }
         });
@@ -1630,11 +1630,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
-            String typeRelativeObjectIdentifier = permittedObject.identifierStrategy().getIdentifierAsString(objectToCheck);
             boolean isPermitted = actions.length > 0;
             for (int i = 0; i < actions.length; i++) {
                 isPermitted &= SecurityUtils.getSubject().isPermitted(
-                        permittedObject.getStringPermissionForObjects(actions[i], typeRelativeObjectIdentifier));
+                        permittedObject.getStringPermissionForObject(actions[i], objectToCheck));
             }
             if (isPermitted) {
                 filteredObjectsConsumer.accept(objectToCheck);
@@ -1841,8 +1840,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (object == null) {
             return false;
         }
-        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
-                DefaultActions.READ, object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(
+                DefaultActions.READ, object));
     }
 
     @Override
@@ -1850,8 +1849,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (object == null) {
             return false;
         }
-        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
-                DefaultActions.UPDATE, object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(
+                DefaultActions.UPDATE, object));
     }
 
     public boolean hasCurrentUserExplictPermissions(WithQualifiedObjectIdentifier object,
@@ -1861,8 +1860,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         boolean isPermitted = true;
         for (int i = 0; i < actions.length; i++) {
-            isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
-                    actions[i], object.getIdentifier().getTypeRelativeObjectIdentifier()));
+            isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(
+                    actions[i], object));
         }
         return isPermitted;
     }
@@ -1872,8 +1871,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (object == null) {
             throw new AuthorizationException();
         }
-        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.READ,
-                object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
     }
 
     @Override
@@ -1881,8 +1879,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (object == null) {
             throw new AuthorizationException();
         }
-        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.UPDATE,
-                object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
     }
 
     @Override
@@ -1890,8 +1887,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (object == null) {
             throw new AuthorizationException();
         }
-        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.DELETE,
-                object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
     }
 
     @Override
@@ -1900,8 +1896,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new AuthorizationException();
         }
         for (int i = 0; i < actions.length; i++) {
-            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(actions[i],
-                    object.getIdentifier().getTypeRelativeObjectIdentifier()));
+            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(actions[i], object));
         }
     }
 

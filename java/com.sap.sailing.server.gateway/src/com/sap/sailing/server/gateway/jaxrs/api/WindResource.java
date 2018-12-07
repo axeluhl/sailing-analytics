@@ -26,7 +26,6 @@ import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeseriali
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 @Path("/v1/wind")
 public class WindResource extends AbstractSailingServerResource {
@@ -47,10 +46,9 @@ public class WindResource extends AbstractSailingServerResource {
             final JSONObject regattaNameAndRaceNameObject = Helpers.toJSONObjectSafe(regattaNameAndRaceName);
             String regattaName = (String) regattaNameAndRaceNameObject.get("regattaName");
             String raceName = (String) regattaNameAndRaceNameObject.get("raceName");
+            RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, raceName);
             // add wind only to those races the subject is permitted to update
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.TRACKED_RACE.getStringPermissionForObjects(DefaultActions.UPDATE,
-                            WildcardPermissionEncoder.encode(regattaName, raceName)))) {
-                RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, raceName);
+            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.TRACKED_RACE.getStringPermissionForObject(DefaultActions.UPDATE, identifier))) {
                 JSONObject answerForRace = new JSONObject();
                 answerForRace.put("regattaNameAndRaceName", regattaNameAndRaceName);
                 if (windSourceType == WindSourceType.EXPEDITION || windSourceType == WindSourceType.WEB) {

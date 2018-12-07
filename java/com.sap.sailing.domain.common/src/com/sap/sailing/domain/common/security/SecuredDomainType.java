@@ -110,10 +110,12 @@ public class SecuredDomainType extends HasPermissionsImpl {
             ReplicatorActions.values());
 
     /**
-     * Permission is checked against servername.
+     * This permission is used to check READ-permission on different things. For that the object type to determine the
+     * permission strings is String (e.g. servername, DataRetrieverChainDefinitionDTO.name, RetrieverChainDefinition.
+     * name, QueryIdentifier, ...)
      */
     public static final HasPermissions DATA_MINING = new SecuredDomainType("DATA_MINING",
-            IdentifierStrategy.SERVERNAME);
+            IdentifierStrategy.STRING);
 
     /**
      * type-relative identifier is the device configuration name

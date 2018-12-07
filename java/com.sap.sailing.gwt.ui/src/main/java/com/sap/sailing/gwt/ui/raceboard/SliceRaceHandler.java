@@ -123,8 +123,8 @@ public class SliceRaceHandler {
     }
     
     private boolean allowsEditing() {
-        return userService.hasPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, selectedRaceIdentifier.getRegattaName()))
-                && userService.hasPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        return userService.hasPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, selectedRaceIdentifier.getRegattaName()))
+                && userService.hasPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, leaderboardName));
     }
 
     private void doSlice() {

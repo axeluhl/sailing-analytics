@@ -267,7 +267,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public UserGroupDTO getUserGroupByName(String userGroupName) throws UnauthorizedException {
         final UserGroup userGroup = getSecurityService().getUserGroupByName(userGroupName);
-        if (userGroup == null || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.READ, userGroup.getId().toString()))) {
+        if (userGroup == null || SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.READ, userGroup))) {
             Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
             Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
             return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser,
@@ -281,7 +282,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public StrippedUserGroupDTO getStrippedUserGroupByName(String userGroupName) throws UnauthorizedException {
         final UserGroup userGroup = getSecurityService().getUserGroupByName(userGroupName);
         if (userGroup == null || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP
-                .getStringPermissionForObjects(DefaultActions.READ, userGroup.getId().toString()))) {
+                .getStringPermissionForObject(DefaultActions.READ, userGroup))) {
             Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
             return securityDTOFactory.createStrippedUserGroupDTOFromUserGroup(userGroup,
                     fromOriginalToStrippedDownUserGroup);
@@ -293,7 +294,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public UserDTO getUserByName(String username) throws UnauthorizedException {
         final User user = getSecurityService().getUserByName(username);
-        if (user == null || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObjects(DefaultActions.READ, user.getName()))) {
+        if (user == null || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObject(DefaultActions.READ, user))) {
             return user==null?null:securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
         } else {
             throw new UnauthorizedException("Not permitted to read user "+username);
@@ -345,8 +346,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void addUserToUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.UPDATE, userGroupIdAsString))) {
-            final UserGroup tenant = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
+        final UserGroup tenant = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
+        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.UPDATE, tenant))) {
             getSecurityService().addUserToUserGroup(tenant, getSecurityService().getUserByName(username));
         } else {
             throw new UnauthorizedException("Not permitted to add user to group");
@@ -355,8 +356,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void removeUserFromUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.DELETE, userGroupIdAsString))) {
-            final UserGroup userGroup = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
+        final UserGroup userGroup = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
+        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.DELETE, userGroup))) {
             getSecurityService().removeUserFromUserGroup(userGroup, getSecurityService().getUserByName(username));
         } else {
             throw new UnauthorizedException("Not permitted to remove user from group");
@@ -367,7 +368,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public Collection<UserDTO> getUserList() throws UnauthorizedException {
         List<UserDTO> users = new ArrayList<>();
         for (User u : getSecurityService().getUserList()) {
-            if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObjects(DefaultActions.READ, u.getName()))) {
+            if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObject(DefaultActions.READ, u))) {
                 UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
                 users.add(userDTO);
             }
@@ -501,14 +502,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo setRolesForUser(String username,
             Iterable<Triple<UUID, String, String>> roleDefinitionIdAndTenantQualifierNameAndUsernames)
             throws UnauthorizedException {
-        final boolean isUserPermittedToGrantPermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(
-                SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username));
-        final boolean isUserPermittedToRevokePermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(
-                SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username));
         User u = getSecurityService().getUserByName(username);
         if (u == null) {
             return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
         }
+        final boolean isUserPermittedToGrantPermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER.getStringPermissionForObject(UserActions.GRANT_PERMISSION, u));
+        final boolean isUserPermittedToRevokePermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER.getStringPermissionForObject(UserActions.REVOKE_PERMISSION, u));
         Set<Role> rolesToSet = new HashSet<>();
         for (final Triple<UUID, String, String> roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet : roleDefinitionIdAndTenantQualifierNameAndUsernames) {
             final UserGroup tenant;
@@ -586,19 +587,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<WildcardPermission> permissions) throws UnauthorizedException {
+        User u = getSecurityService().getUserByName(username);
+        if (u == null) {
+            return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
+        }
         final boolean isUserPermittedToGrantPermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(
-                SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username));
+                SecuredSecurityTypes.USER.getStringPermissionForObject(UserActions.GRANT_PERMISSION, u));
         final boolean isUserPermittedToRevokePermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
-                .getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username));
+                .getStringPermissionForObject(UserActions.REVOKE_PERMISSION, u));
         if (!isUserPermittedToGrantPermissionsForOtherUser
                 && !isUserPermittedToRevokePermissionsForOtherUser) {
             return new SuccessInfo(false, "Not permitted to grant or revoke permissions for user " + username,
                     /* redirectURL */null, null);
         } else {
-            User u = getSecurityService().getUserByName(username);
-            if (u == null) {
-                return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
-            }
             Set<WildcardPermission> permissionsToRemove = new HashSet<>();
             Util.addAll(u.getPermissions(), permissionsToRemove);
             Util.removeAll(permissions, permissionsToRemove);

@@ -24,6 +24,10 @@ public interface HasPermissions {
      */
     Action[] getAvailableActions();
     
+    /**
+     * Defines the strategy, for determining the type relative identifier.
+     * @return the identifier strategy for the permission type.
+     */
     IdentifierStrategy identifierStrategy();
 
     /**
@@ -55,7 +59,9 @@ public interface HasPermissions {
      *            can be any string; this method will take care of encoding the identifiers such that they are legal in
      *            the context of a permission part; see also {@link PermissionStringEncoder}
      */
-    String getStringPermissionForObjects(Action action, String... typeRelativeObjectIdentifier);
+    /*String getStringPermission(Action action);*/
+    @Deprecated
+    String getStringPermissionForTypeRelativeIdentifiers(Action action, String... typeRelativeObjectIdentifier);
     String getStringPermissionForObject(Action action, Object object);
 
     /**
@@ -69,7 +75,7 @@ public interface HasPermissions {
     <T> QualifiedObjectIdentifier getQualifiedObjectIdentifier(T object);
 
     /**
-     * Same as {@link #getStringPermissionForObjects(Action, String...)}, only that the result is a
+     * Same as {@link #getStringPermissionForTypeRelativeIdentifiers(Action, String...)}, only that the result is a
      * {@link WildcardPermission} instead of a {@link String}
      * @deprecated  better option is to use the variant {@link #getPermissionForObject(Action action, Object object)} instead.
      * {@link #getPermissionForObject(Action action, Object object)} uses this implementation in a private manner but is
