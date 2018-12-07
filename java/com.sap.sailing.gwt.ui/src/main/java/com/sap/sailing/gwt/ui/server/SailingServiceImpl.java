@@ -384,6 +384,7 @@ import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
+import com.sap.sailing.expeditionconnector.security.ExpeditionSecuredDomainTypes;
 import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
@@ -7786,7 +7787,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Subject subject = SecurityUtils.getSubject();
         if (expeditionConnector != null) {
             for (final ExpeditionDeviceConfiguration config : expeditionConnector.getDeviceConfigurations()) {
-                if (subject.isPermitted(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(DefaultActions.READ,
+                if (subject.isPermitted(ExpeditionSecuredDomainTypes.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(DefaultActions.READ,
                         WildcardPermissionEncoder.encode(getServerInfo().getServerName(), config.getName())))) {
                     result.add(config);
                 }
@@ -7799,7 +7800,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         final Subject subject = SecurityUtils.getSubject();
         subject.checkPermission(
-                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(DefaultActions.CREATE,
+                ExpeditionSecuredDomainTypes.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(DefaultActions.CREATE,
                         WildcardPermissionEncoder.encode(getServerInfo().getServerName(),
                                 deviceConfiguration.getName())));
 
@@ -7812,7 +7813,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        QualifiedObjectIdentifier identifier = SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION
+        QualifiedObjectIdentifier identifier = ExpeditionSecuredDomainTypes.EXPEDITION_DEVICE_CONFIGURATION
                 .getQualifiedObjectIdentifier(
                         WildcardPermissionEncoder.encode(ServerInfo.getName(), deviceConfiguration.getName()));
         getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier,

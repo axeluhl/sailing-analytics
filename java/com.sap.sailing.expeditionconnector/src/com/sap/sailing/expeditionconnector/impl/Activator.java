@@ -14,7 +14,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
@@ -25,6 +24,7 @@ import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdenti
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifierJsonHandler;
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
+import com.sap.sailing.expeditionconnector.security.ExpeditionSecuredDomainTypes;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -97,13 +97,13 @@ public class Activator implements BundleActivator {
                     final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
                     for (ExpeditionDeviceConfiguration deviceConfiguration : expeditionTrackerFactory
                             .getDeviceConfigurations()) {
-                        QualifiedObjectIdentifier identifier = SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION
+                        QualifiedObjectIdentifier identifier = ExpeditionSecuredDomainTypes.EXPEDITION_DEVICE_CONFIGURATION
                                 .getQualifiedObjectIdentifier(WildcardPermissionEncoder.encode(ServerInfo.getName(),
                                         deviceConfiguration.getName()));
                         securityService.migrateOwnership(identifier, identifier.getTypeRelativeObjectIdentifier());
                     }
                     securityService
-                            .assumeOwnershipMigrated(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getName());
+                            .assumeOwnershipMigrated(ExpeditionSecuredDomainTypes.EXPEDITION_DEVICE_CONFIGURATION.getName());
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Exception trying to migrate IgtimiAccounts implementation", e);
                 }

@@ -6,7 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sailing.expeditionconnector,
- com.sap.sailing.expeditionconnector.impl;x-friends:="com.sap.sailing.server.test,com.sap.sailing.expeditionconnector.persistence"
+ com.sap.sailing.expeditionconnector.impl;x-friends:="com.sap.sailing.server.test,com.sap.sailing.expeditionconnector.persistence",
+ com.sap.sailing.expeditionconnector.security
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.declination,
  com.sap.sailing.udpconnector,

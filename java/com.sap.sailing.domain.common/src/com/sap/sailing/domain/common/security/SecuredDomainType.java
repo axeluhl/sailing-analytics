@@ -99,12 +99,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
      */
     public static final HasPermissions RESULT_IMPORT_URL = new SecuredDomainType("RESULT_IMPORT_URL", IdentifierStrategy.TO_SPECIFY);
 
-    /**
-     * Describes access permissions to {@code ExpeditionDeviceConfiguration} objects. Type-relative object identifier is
-     * the WildcardPermissionEncoder.encode(getServerInfo().getServerName(), deviceConfiguration.getName());
-     */
-    public static final HasPermissions EXPEDITION_DEVICE_CONFIGURATION = new SecuredDomainType("EXPEDITION_DEVICE_CONFIGURATION", IdentifierStrategy.TO_SPECIFY);
-
     public static enum ReplicatorActions implements Action {
         START, STOP, DROP_CONNECTION
     };
