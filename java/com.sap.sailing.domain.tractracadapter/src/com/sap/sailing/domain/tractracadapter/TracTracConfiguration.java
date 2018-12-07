@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.tractracadapter;
 
-import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.tractracadapter.security.TracTracSecuredDomainType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
@@ -45,6 +45,6 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
 
     @Override
     default HasPermissions getType() {
-        return SecuredDomainType.TRACTRAC_ACCOUNT;
+        return TracTracSecuredDomainType.TRACTRAC_ACCOUNT;
     }
 }

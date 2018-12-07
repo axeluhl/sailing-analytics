@@ -110,12 +110,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
      * object identifier is the e-mail address string representing the account.
      */
     public static final HasPermissions IGTIMI_ACCOUNT = new SecuredDomainType("IGTIMI_ACCOUNT", IdentifierStrategy.TO_SPECIFY);
-    
-    /**
-     * type-relative identifier is the jsonurl of the configuration: TracTracConfiguration::getJsonUrl
-     */
-    //TODO: TracTracConfiguration::getJSONURL
-    public static final HasPermissions TRACTRAC_ACCOUNT = new SecuredDomainType("TRACTRAC_ACCOUNT", IdentifierStrategy.TO_SPECIFY);
 
     public static enum ReplicatorActions implements Action {
         START, STOP, DROP_CONNECTION

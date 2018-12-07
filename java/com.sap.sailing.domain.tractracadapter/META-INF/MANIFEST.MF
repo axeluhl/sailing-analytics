@@ -22,7 +22,8 @@ Export-Package: com.sap.sailing.domain.tractracadapter,
    com.sap.sailing.server.test,
    com.sap.sailing.mongodb.test,
    com.sap.sailing.domain.tractracadapter.persistence,
-   com.sap.sailing.server.replication.test"
+   com.sap.sailing.server.replication.test",
+ com.sap.sailing.domain.tractracadapter.security
 Bundle-ActivationPolicy: lazy
 Import-Package: org.apache.http,
  org.apache.http.client;version="[4.2.5,4.3.0)",

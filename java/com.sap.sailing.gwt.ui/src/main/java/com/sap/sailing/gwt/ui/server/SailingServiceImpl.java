@@ -377,6 +377,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.domain.tractracadapter.security.TracTracSecuredDomainType;
 import com.sap.sailing.domain.windfinder.Spot;
 import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
@@ -1393,7 +1394,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception {
         final Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(TracTracSecuredDomainType.TRACTRAC_ACCOUNT,
                 configs,
                 ttConfig -> new TracTracConfigurationDTO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
                         ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(),
@@ -1406,7 +1407,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
 
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.TRACTRAC_ACCOUNT, jsonURL, name,
+                TracTracSecuredDomainType.TRACTRAC_ACCOUNT, jsonURL, name,
                 () -> tractracMongoObjectFactory.storeTracTracConfiguration(
                         getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI,
                                 courseDesignUpdateURI, tracTracUsername, tracTracPassword)));
