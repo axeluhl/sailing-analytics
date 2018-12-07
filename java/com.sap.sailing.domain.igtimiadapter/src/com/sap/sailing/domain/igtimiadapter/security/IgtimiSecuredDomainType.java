@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.IdentifierStrategy;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 public class IgtimiSecuredDomainType extends SecuredDomainType {
 
@@ -31,7 +32,7 @@ public class IgtimiSecuredDomainType extends SecuredDomainType {
             @Override
             public <T> String getIdentifierAsString(T object) {
                 Account account = (Account) object;
-                return account.getUser().getEmail();
+                return WildcardPermissionEncoder.encode(account.getUser().getEmail());
             }
 
         };

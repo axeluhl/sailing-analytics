@@ -6,6 +6,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.IdentifierStrategy;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 public class SwissTimingSecuredDomainTypes extends SecuredDomainType {
 
@@ -36,7 +37,7 @@ public class SwissTimingSecuredDomainTypes extends SecuredDomainType {
             @Override
             public String getIdentifierAsString(Object object) {
                 HasJsonUrl hasJsonUrl = (HasJsonUrl) object;
-                return hasJsonUrl.getJsonURL();
+                return WildcardPermissionEncoder.encode(hasJsonUrl.getJsonURL());
             }
 
         };

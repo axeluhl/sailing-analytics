@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.IdentifierStrategy;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 public class TracTracSecuredDomainType extends SecuredDomainType {
 
@@ -26,7 +27,7 @@ public class TracTracSecuredDomainType extends SecuredDomainType {
             @Override
             public String getIdentifierAsString(Object object) {
                 TracTracConfiguration tracTracConfiguration = (TracTracConfiguration) object;
-                return tracTracConfiguration.getJSONURL();
+                return WildcardPermissionEncoder.encode(tracTracConfiguration.getJSONURL());
             }
 
         };
