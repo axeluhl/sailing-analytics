@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter;
 
-import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.igtimiadapter.security.IgtimiSecuredDomainType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
@@ -13,7 +13,7 @@ public interface Account extends WithQualifiedObjectIdentifier {
 
     @Override
     default HasPermissions getType() {
-        return SecuredDomainType.IGTIMI_ACCOUNT;
+        return IgtimiSecuredDomainType.IGTIMI_ACCOUNT;
     }
 
     @Override

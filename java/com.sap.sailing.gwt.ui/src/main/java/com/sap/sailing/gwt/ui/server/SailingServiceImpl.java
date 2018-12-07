@@ -308,6 +308,7 @@ import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.security.IgtimiSecuredDomainType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -6149,7 +6150,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<String> result = new ArrayList<String>();
         for (Account account : getIgtimiConnectionFactory().getAllAccounts()) {
             final String email = account.getUser().getEmail();
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObjects(DefaultActions.READ, email))) {
+            if (SecurityUtils.getSubject().isPermitted(IgtimiSecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObject(DefaultActions.READ, account))) {
                 result.add(email);
             }
         }
@@ -6179,7 +6180,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Account account;
         if (existingAccount == null) {
             account = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.IGTIMI_ACCOUNT, eMailAddress,
+                    IgtimiSecuredDomainType.IGTIMI_ACCOUNT, eMailAddress,
                     eMailAddress,
                     () -> getIgtimiConnectionFactory()
                             .createAccountToAccessUserData(eMailAddress, password));
@@ -6192,9 +6193,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeIgtimiAccount(String eMailOfAccountToRemove) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObjects(
-                DefaultActions.DELETE, eMailOfAccountToRemove));
-        getIgtimiConnectionFactory().removeAccount(eMailOfAccountToRemove);
+        final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailOfAccountToRemove);
+        SecurityUtils.getSubject().checkPermission(IgtimiSecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObject(
+                DefaultActions.DELETE, existingAccount));
+        getIgtimiConnectionFactory().removeAccount(existingAccount);
     }
 
     @Override
@@ -6215,7 +6217,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Map<RegattaAndRaceIdentifier, Integer> numberOfWindFixesImportedPerRace = new HashMap<RegattaAndRaceIdentifier, Integer>();
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
             // filter account based on used permissions to read account:
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObjects(
+            if (SecurityUtils.getSubject().isPermitted(IgtimiSecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObjects(
                     DefaultActions.READ, account.getUser().getEmail()))) {
                 IgtimiConnection conn = igtimiConnectionFactory.connect(account);
                 Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces, correctByDeclination);

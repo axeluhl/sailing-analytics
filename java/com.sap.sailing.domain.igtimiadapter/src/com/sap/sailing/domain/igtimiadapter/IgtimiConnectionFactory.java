@@ -28,7 +28,7 @@ public interface IgtimiConnectionFactory {
      * Removes the account and the credentials associated with it permanently. The account is identified by the e-mail
      * address of the owner of the data to which the account granted access. See also {@link #getExistingAccountByEmail(String)}.
      */
-    void removeAccount(String eMail);
+    void removeAccount(Account account);
     
     /**
      * Obtains a URL that a user agent (e.g., a web browser) can be sent to in order to allow that user to authenticate

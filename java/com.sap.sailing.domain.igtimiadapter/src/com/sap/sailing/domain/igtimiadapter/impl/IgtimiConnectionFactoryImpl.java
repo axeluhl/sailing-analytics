@@ -522,11 +522,10 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
-    public void removeAccount(String eMail) {
-        Account account = getExistingAccountByEmail(eMail);
+    public void removeAccount(Account account) {
         if (account != null) {
             String accessToken = accessTokensByAccount.remove(account);
-            accountsByEmail.remove(eMail);
+            accountsByEmail.remove(account.getUser().getEmail());
             mongoObjectFactory.removeAccessToken(accessToken);
         }
     }

@@ -104,12 +104,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
      * the WildcardPermissionEncoder.encode(getServerInfo().getServerName(), deviceConfiguration.getName());
      */
     public static final HasPermissions EXPEDITION_DEVICE_CONFIGURATION = new SecuredDomainType("EXPEDITION_DEVICE_CONFIGURATION", IdentifierStrategy.TO_SPECIFY);
-    
-    /**
-     * Describes access permissions to Igtimi account objects. Type-relative
-     * object identifier is the e-mail address string representing the account.
-     */
-    public static final HasPermissions IGTIMI_ACCOUNT = new SecuredDomainType("IGTIMI_ACCOUNT", IdentifierStrategy.TO_SPECIFY);
 
     public static enum ReplicatorActions implements Action {
         START, STOP, DROP_CONNECTION
