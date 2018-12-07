@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -40,9 +41,6 @@ class RaceLogTrackingInvitationMailBuilder {
      */
     private static final String TEXT_LINE_BREAK = "\r\n";
     
-    private static final String SAIL_INSIGHT_BRANCH_DEEPLINK = "https://sailinsight-app.sapsailing.com/invite";
-    private static final String BUOY_PINGER_BRANCH_DEEPLINK = "https://buoypinger-app.sapsailing.com/invite";
-
     private final Locale locale;
     private final Map<String,byte[]> pngAttachAndInline = new HashMap<>();
     private final StringBuilder html = new StringBuilder();
@@ -100,13 +98,13 @@ class RaceLogTrackingInvitationMailBuilder {
     }
     
     RaceLogTrackingInvitationMailBuilder addSailInsightDeeplink(final String checkinUrl) {
-    	String deeplink = String.format("%s?%s=%s", SAIL_INSIGHT_BRANCH_DEEPLINK, DeviceMappingConstants.URL_CHECKIN_URL, NonGwtUrlHelper.INSTANCE.encodeQueryString(checkinUrl));
+    	String deeplink = String.format("%s?%s=%s", BranchIOConstants.SAILINSIGHT_APP_BRANCHIO, DeviceMappingConstants.URL_CHECKIN_URL, NonGwtUrlHelper.INSTANCE.encodeQueryString(checkinUrl));
     	this.addDeeplink(deeplink, RaceLogTrackingI18n::register);
     	return this;
     }
     
     RaceLogTrackingInvitationMailBuilder addBuoyPingerDeeplink(final String checkinUrl) {
-    	String deeplink = String.format("%s?%s=%s", BUOY_PINGER_BRANCH_DEEPLINK, DeviceMappingConstants.URL_CHECKIN_URL, NonGwtUrlHelper.INSTANCE.encodeQueryString(checkinUrl));
+    	String deeplink = String.format("%s?%s=%s", BranchIOConstants.BUOYPINGER_APP_BRANCHIO, DeviceMappingConstants.URL_CHECKIN_URL, NonGwtUrlHelper.INSTANCE.encodeQueryString(checkinUrl));
     	this.addDeeplink(deeplink, RaceLogTrackingI18n::register);
     	return this;
     }
