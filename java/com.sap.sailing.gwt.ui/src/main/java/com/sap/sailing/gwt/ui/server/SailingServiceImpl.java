@@ -4637,6 +4637,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(regatta, new Action() {
                 @Override
                 public void run() throws Exception {
+                    // if there were any tracked races, free all ownerships
+                    for (RaceDefinition race : regatta.getAllRaces()) {
+                        String typeRelativeObjectIdentifier = WildcardPermissionEncoder.encode(regatta.getName(),
+                                race.getName());
+                        QualifiedObjectIdentifier identifier = SecuredDomainType.TRACKED_RACE
+                                .getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
+                        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier,
+                                new ActionWithResult<Void>() {
+                                    @Override
+                                    public Void run() throws Exception {
+                                        RegattaNameAndRaceName raceIdentifier = new RegattaNameAndRaceName(
+                                                regatta.getName(), race.getName());
+                                        ArrayList<RegattaAndRaceIdentifier> trackedRace = new ArrayList<>();
+                                        trackedRace.add(raceIdentifier);
+                                        removeAndUntrackRaces(trackedRace);
+                                        return null;
+                                    }
+                                });
+                    }
                     getService().apply(new RemoveRegatta(regattaIdentifier));
                 }
             });
