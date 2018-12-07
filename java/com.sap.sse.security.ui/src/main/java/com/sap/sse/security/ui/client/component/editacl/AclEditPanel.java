@@ -1,17 +1,25 @@
 package com.sap.sse.security.ui.client.component.editacl;
 
+import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
+import static com.sap.sse.gwt.client.Notification.NotificationType.SUCCESS;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -30,9 +38,11 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.common.Named;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
@@ -61,72 +71,60 @@ public class AclEditPanel extends Composite {
 
     private final StringMessages stringMessages;
 
-    private final StringListEditorComposite allowedActionsEditor;
-    private final StringListEditorComposite deniedActionsEditor;
+    private final StringListEditorComposite allowedActionsEditor, deniedActionsEditor;
+    private final CaptionPanel allowedActionsContainer, deniedActionsContainer;
 
-    private final SingleSelectionModel<StrippedUserGroupDTO> userGroupSingleSelectionModel = new SingleSelectionModel<>();
-    private CellList<StrippedUserGroupDTO> userGroupList;
+    private final SingleSelectionModel<StrippedUserGroupDTO> userGroupSelectionModel = new SingleSelectionModel<>();
+    private final ListDataProvider<StrippedUserGroupDTO> userGroupDataProvider = new ListDataProvider<>();
 
     // denied actions start with '!'
-    private Map<StrippedUserGroupDTO, Set<String>> userGroupsWithAllowedActions = new HashMap<>();
-    private Map<StrippedUserGroupDTO, Set<String>> userGroupsWithDeniedActions = new HashMap<>();
-    private UserManagementServiceAsync userManagementService;
+    private final Map<StrippedUserGroupDTO, Set<String>> userGroupsWithAllowedActions = new HashMap<>();
+    private final Map<StrippedUserGroupDTO, Set<String>> userGroupsWithDeniedActions = new HashMap<>();
+    private final UserManagementServiceAsync userManagementService;
 
-    public AclEditPanel(UserManagementServiceAsync userManagementService, Action[] availableActions,
-            StringMessages stringMessages) {
+    public AclEditPanel(final UserManagementServiceAsync userManagementService, final Action[] availableActions,
+            final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
         AclDialogResources.INSTANCE.css().ensureInjected();
 
         suggestUserGroupUi = createUserGroupSuggest(userManagementService);
-        addUserGroupButtonUi = new Button(stringMessages.add());
-        removeUserGroupButtonUi = new Button(stringMessages.remove());
-        addUserGroupButtonUi.addClickHandler(e -> onUserGroupAdd(e));
-        removeUserGroupButtonUi.addClickHandler(e -> onUserGroupRemove(e));
+        addUserGroupButtonUi = new Button(stringMessages.add(), (ClickHandler) event -> onUserGroupAdd());
+        removeUserGroupButtonUi = new Button(stringMessages.remove(), (ClickHandler) event -> onUserGroupRemove());
+        removeUserGroupButtonUi.setEnabled(false);
 
         initWidget(uiBinder.createAndBindUi(this));
-        userGroupList = createUserGroupCellList();
+        final CellList<StrippedUserGroupDTO> userGroupList = createUserGroupCellList();
+        userGroupDataProvider.addDataDisplay(userGroupList);
         userGroupCellListPanelUi.add(wrapIntoCaptionPanel(userGroupList, stringMessages.userGroups(),
                 suggestUserGroupUi, addUserGroupButtonUi, removeUserGroupButtonUi));
 
-        userGroupSingleSelectionModel.addSelectionChangeHandler(h -> {
-            onUserGroupsChange();
-        });
-
         // retrieve set of available action names
-        final Collection<String> actionNames = new ArrayList<>();
-        for (Action a : availableActions) {
-            actionNames.add(a.name());
-        }
+        final List<String> actionNames = Stream.of(availableActions).map(Action::name).collect(Collectors.toList());
 
         // create action editor for allowed actions
         allowedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
-                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames,
-                stringMessages.allowedActionName());
-        allowedActionsEditor.addValueChangeHandler(e -> userGroupsWithAllowedActions
-                .put(userGroupSingleSelectionModel.getSelectedObject(), toSet(e.getValue())));
-
-        CaptionPanel allowedActionsPanel = new CaptionPanel(stringMessages.allowedActions());
-        allowedActionsPanel.add(allowedActionsEditor);
-        allowedActionsPanel.addStyleName(AclDialogResources.INSTANCE.css().allowedActionsTable());
-        permissionsCellListPanelUi.add(allowedActionsPanel);
+                IconResources.INSTANCE.removeIcon(), actionNames, stringMessages.allowedActionName());
+        allowedActionsEditor.addValueChangeHandler(event -> userGroupsWithAllowedActions
+                .put(userGroupSelectionModel.getSelectedObject(), toSet(event.getValue())));
+        permissionsCellListPanelUi.add(allowedActionsContainer = createActionsContainer(stringMessages.allowedActions(),
+                allowedActionsEditor, AclDialogResources.INSTANCE.css().allowedActionsTable()));
 
         // create action editor for denied actions
         deniedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
-                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames,
-                stringMessages.deniedActionName());
+                IconResources.INSTANCE.removeIcon(), actionNames, stringMessages.deniedActionName());
         deniedActionsEditor.addValueChangeHandler(e -> userGroupsWithDeniedActions
-                .put(userGroupSingleSelectionModel.getSelectedObject(), toDeniedActionSet(e.getValue())));
-
-        CaptionPanel deniedActionsPanel = new CaptionPanel(stringMessages.deniedActions());
-        deniedActionsPanel.add(deniedActionsEditor);
-        deniedActionsPanel.addStyleName(AclDialogResources.INSTANCE.css().deniedActionsTable());
-        permissionsCellListPanelUi.add(deniedActionsPanel);
+                .put(userGroupSelectionModel.getSelectedObject(), toDeniedActionSet(e.getValue())));
+        permissionsCellListPanelUi.add(deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
+                deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable()));
     }
 
-    /** Called when the selected {@link UserGroupImpl} changes. */
-    private void onUserGroupsChange() {
-        removeUserGroupButtonUi.setEnabled(userGroupSingleSelectionModel.getSelectedObject() != null);
+    private CaptionPanel createActionsContainer(final SafeHtml caption, final Widget content, final String styleName) {
+        final CaptionPanel container = new CaptionPanel(caption);
+        container.add(content);
+        container.addStyleName(styleName);
+        container.setVisible(false);
+        return container;
     }
 
     /** @return UI element for selection of {@link UserGroupImpl} elements. */
@@ -147,10 +145,8 @@ public class AclEditPanel extends Composite {
                 userGroupOracle.setDefaultSuggestionsFromText(suggestionList);
             }
         });
-        TextBox textBox = new TextBox();
-        textBox.getElement().setPropertyString("placeholder", stringMessages.enterUserGroupName());
-
-        SuggestBox suggestBox = new SuggestBox(userGroupOracle, textBox);
+        SuggestBox suggestBox = new SuggestBox(userGroupOracle, new TextBox());
+        suggestBox.getElement().setPropertyString("placeholder", stringMessages.enterUserGroupName());
         suggestBox.addStyleName(AclDialogResources.INSTANCE.css().userGroupTextBox());
         return suggestBox;
     }
@@ -166,9 +162,9 @@ public class AclEditPanel extends Composite {
             }
         });
 
-        userGroupCellList.setSelectionModel(userGroupSingleSelectionModel);
-        userGroupSingleSelectionModel
-                .addSelectionChangeHandler(e -> updateActionEditors(userGroupSingleSelectionModel.getSelectedObject()));
+        userGroupCellList.setSelectionModel(userGroupSelectionModel);
+        userGroupSelectionModel
+                .addSelectionChangeHandler(event -> updateActionEditors(userGroupSelectionModel.getSelectedObject()));
         return userGroupCellList;
     }
 
@@ -176,11 +172,15 @@ public class AclEditPanel extends Composite {
      * Updates the {@link #allowedActionsEditor} and {@link #deniedActionsEditor} when the selected UserGroup changed.
      */
     private void updateActionEditors(StrippedUserGroupDTO selectedUserGroup) {
-        onUserGroupsChange();
-        allowedActionsEditor.setValue(userGroupsWithAllowedActions.get(selectedUserGroup), false);
-        deniedActionsEditor
-                .setValue(removeExclamationMarkFromStrings(userGroupsWithDeniedActions.get(selectedUserGroup)), false);
-
+        final boolean userGroupSelected = selectedUserGroup != null;
+        removeUserGroupButtonUi.setEnabled(userGroupSelected);
+        allowedActionsContainer.setVisible(userGroupSelected);
+        deniedActionsContainer.setVisible(userGroupSelected);
+        if (userGroupSelected) {
+            allowedActionsEditor.setValue(userGroupsWithAllowedActions.get(selectedUserGroup), false);
+            deniedActionsEditor.setValue(
+                    removeExclamationMarkFromStrings(userGroupsWithDeniedActions.get(selectedUserGroup)), false);
+        }
     }
 
     /**
@@ -189,11 +189,11 @@ public class AclEditPanel extends Composite {
      */
     private CaptionPanel wrapIntoCaptionPanel(CellList<?> cellList, String title, Widget... additionalWidgets) {
         cellList.setPageSize(10);
-        final SimplePager tenantPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50,
-                true);
-        tenantPager.setDisplay(cellList);
+        final SimplePager pager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
+        pager.setDisplay(cellList);
         final ScrollPanel tenantPanel = new ScrollPanel(cellList);
         final VerticalPanel tenantListWrapper = new VerticalPanel();
+        tenantListWrapper.getElement().getStyle().setWidth(100, Unit.PCT);
 
         // add additional widgets
         final FlowPanel additionalWidgetsPanel = new FlowPanel();
@@ -203,7 +203,7 @@ public class AclEditPanel extends Composite {
         }
         tenantListWrapper.add(additionalWidgetsPanel);
         tenantListWrapper.add(tenantPanel);
-        tenantListWrapper.add(tenantPager);
+        tenantListWrapper.add(pager);
 
         final CaptionPanel tenantListCaption = new CaptionPanel(title);
         tenantListCaption.add(tenantListWrapper);
@@ -242,56 +242,55 @@ public class AclEditPanel extends Composite {
      * {@link #allowedActionsEditor} and {@link #deniedActionsEditor}.
      */
     private void refreshUi() {
+        this.userGroupDataProvider.getList().clear();
         final Set<StrippedUserGroupDTO> combinedKeySet = new HashSet<>();
         combinedKeySet.addAll(userGroupsWithAllowedActions.keySet());
         combinedKeySet.addAll(userGroupsWithDeniedActions.keySet());
-        userGroupList.setRowCount(combinedKeySet.size(), true);
-        userGroupList.setRowData(0, new ArrayList<>(combinedKeySet));
+        userGroupDataProvider.getList().addAll(combinedKeySet);
+        Collections.sort(userGroupDataProvider.getList(), Comparator.comparing(Named::getName));
 
         // select an element
-        if (combinedKeySet.size() > 0) {
-            userGroupSingleSelectionModel.setSelected(combinedKeySet.iterator().next(), true);
+        if (userGroupDataProvider.getList().isEmpty()) {
+            userGroupSelectionModel.clear();
+        } else {
+            userGroupSelectionModel.setSelected(userGroupDataProvider.getList().iterator().next(), true);
         }
     }
 
     /** Called when the user clicks on the 'Add' button */
-    private void onUserGroupAdd(ClickEvent e) {
+    private void onUserGroupAdd() {
         final String userGroupName = suggestUserGroupUi.getValue();
 
         // get UserGroup object corresponding to user group name
         userManagementService.getStrippedUserGroupByName(userGroupName, new AsyncCallback<StrippedUserGroupDTO>() {
             @Override
             public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.errorMessageUserGroupNameNotFound(userGroupName),
-                        NotificationType.ERROR);
+                Notification.notify(stringMessages.errorMessageUserGroupNameNotFound(userGroupName), ERROR);
             }
 
             @Override
             public void onSuccess(StrippedUserGroupDTO result) {
                 if (result == null) {
-                    Notification.notify(stringMessages.errorMessageUserGroupNameNotFound(userGroupName),
-                            NotificationType.ERROR);
+                    Notification.notify(stringMessages.errorMessageUserGroupNameNotFound(userGroupName), ERROR);
                 } else {
-                    Notification.notify(stringMessages.successMessageAddedUserGroup(userGroupName),
-                            NotificationType.SUCCESS);
+                    Notification.notify(stringMessages.successMessageAddedUserGroup(userGroupName), SUCCESS);
                     userGroupsWithAllowedActions.put(result, new HashSet<>());
                     userGroupsWithDeniedActions.put(result, new HashSet<>());
                     refreshUi();
                     suggestUserGroupUi.setText("");
-                    userGroupSingleSelectionModel.setSelected(result, true);
+                    userGroupSelectionModel.setSelected(result, true);
                 }
             }
         });
     }
 
     /** Called when the user clicks on the 'Remove' button */
-    private void onUserGroupRemove(ClickEvent e) {
-        StrippedUserGroupDTO selectedObject = userGroupSingleSelectionModel.getSelectedObject();
+    private void onUserGroupRemove() {
+        StrippedUserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
         if (selectedObject != null) {
             userGroupsWithAllowedActions.remove(selectedObject);
             userGroupsWithDeniedActions.remove(selectedObject);
-            Notification.notify(stringMessages.successMessageRemovedUserGroup(selectedObject.getName()),
-                    NotificationType.SUCCESS);
+            Notification.notify(stringMessages.successMessageRemovedUserGroup(selectedObject.getName()), SUCCESS);
             refreshUi();
         }
     }
