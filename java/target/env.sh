@@ -123,7 +123,7 @@ else
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_8_ARGS
 fi
 echo JAVA_VERSION_SPECIFIC_ARGS are: $JAVA_VERSION_SPECIFIC_ARGS
-ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -XX:MaxGCPauseMillis=500"
+ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -XX:MaxGCPauseMillis=500"
 # options for use with SAP JVM only:
 if "$JAVA_BINARY" -version 2>&1 | grep -q "SAP Java"; then
   echo SAP JVM detected
