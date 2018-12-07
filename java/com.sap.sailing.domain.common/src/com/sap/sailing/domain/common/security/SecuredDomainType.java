@@ -67,7 +67,7 @@ public class SecuredDomainType extends HasPermissionsImpl {
      * {@link WildcardPermissionEncoder#encodeStringList(String...)} method
      */
     //TODO: RaceDTO.getTypeRelativeIdentifierAsString
-    public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE", IdentifierStrategy.TO_SPECIFY);
+    public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE", DomainIdentifierStrategy.TRACKED_RACE);
     
     public static enum CompetitorAndBoatActions implements Action {
         READ_PUBLIC;
