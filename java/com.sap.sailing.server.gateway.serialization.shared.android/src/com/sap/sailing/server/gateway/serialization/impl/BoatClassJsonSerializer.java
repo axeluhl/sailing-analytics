@@ -23,14 +23,20 @@ public class BoatClassJsonSerializer implements JsonSerializer<BoatClass> {
         JSONObject result = new JSONObject();
         result.put(FIELD_NAME, boatClass.getName());
         result.put(FIELD_TYPICALLY_STARTS_UPWIND, boatClass.typicallyStartsUpwind());
-        result.put(FIELD_HULL_LENGTH_IN_METERS, boatClass.getHullLength().getMeters());
-        result.put(FIELD_HULL_BEAM_IN_METERS, boatClass.getHullBeam().getMeters());
-        result.put(FIELD_DISPLAY_NAME, boatClass.getDisplayName());
-        final BoatClassMasterdata masterData = BoatClassMasterdata.resolveBoatClass(boatClass.getDisplayName());
+        if (boatClass.getHullLength() != null) {
+            result.put(FIELD_HULL_LENGTH_IN_METERS, boatClass.getHullLength().getMeters());
+        }
+        if (boatClass.getHullBeam() != null) {
+            result.put(FIELD_HULL_BEAM_IN_METERS, boatClass.getHullBeam().getMeters());
+        }
         final JSONArray aliasNames = new JSONArray();
-        if (masterData != null) {
-            result.put(FIELD_ICON_URL, "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/"+masterData.name().replaceAll("^_", "")+".png");
-            aliasNames.addAll(Arrays.asList(masterData.getAlternativeNames()));
+        if (boatClass.getDisplayName() != null) {
+            result.put(FIELD_DISPLAY_NAME, boatClass.getDisplayName());
+            final BoatClassMasterdata masterData = BoatClassMasterdata.resolveBoatClass(boatClass.getDisplayName());
+            if (masterData != null) {
+                result.put(FIELD_ICON_URL, "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/"+masterData.name().replaceAll("^_", "")+".png");
+                aliasNames.addAll(Arrays.asList(masterData.getAlternativeNames()));
+            }
         }
         result.put(FIELD_ALIAS_NAMES, aliasNames);
         return result;
