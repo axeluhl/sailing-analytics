@@ -40,7 +40,7 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getJSONURL());
+        return getType().getQualifiedObjectIdentifier(this);
     }
 
     @Override

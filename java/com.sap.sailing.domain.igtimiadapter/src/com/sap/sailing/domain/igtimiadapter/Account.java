@@ -23,6 +23,6 @@ public interface Account extends WithQualifiedObjectIdentifier {
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getUser().getEmail());
+        return getType().getQualifiedObjectIdentifier(this);
     }
 }

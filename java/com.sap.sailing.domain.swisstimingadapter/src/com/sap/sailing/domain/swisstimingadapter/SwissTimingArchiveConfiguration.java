@@ -17,7 +17,7 @@ public interface SwissTimingArchiveConfiguration extends WithQualifiedObjectIden
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getJsonURL());
+        return getType().getQualifiedObjectIdentifier(this);
     }
 
     @Override

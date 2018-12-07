@@ -243,7 +243,7 @@ public interface Regatta
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getType().identifierStrategy().getIdentifierAsString(this));
+        return getType().getQualifiedObjectIdentifier(this);
     }
 
     @Override

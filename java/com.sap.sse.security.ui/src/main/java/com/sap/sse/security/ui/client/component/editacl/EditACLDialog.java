@@ -110,8 +110,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
                 final Consumer<T> updateCallback,
                 final StringMessages stringMessages) {
             this.userManagementService = userManagementService;
-            final Function<T, String> idFactory = o -> type.identifierStrategy().getIdentifierAsString(o);
-            this.identifierFactory = idFactory.andThen(type::getQualifiedObjectIdentifier);
+            this.identifierFactory = type::getQualifiedObjectIdentifier;
             this.availableActionsFactory = type::getAvailableActions;
             this.updateCallback = updateCallback;
             this.stringMessages = stringMessages;

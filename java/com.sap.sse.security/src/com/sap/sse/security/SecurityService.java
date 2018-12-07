@@ -389,7 +389,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void checkMigration(Iterable<HasPermissions> allInstances);
 
-    boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, String typeRelativeObjectIdentifier,
+    <T> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
             RoleDefinition roleToCheck);
 
     boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);

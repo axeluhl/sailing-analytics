@@ -318,7 +318,7 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup> 
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getName());
+        return getType().getQualifiedObjectIdentifier(this); 
     }
 
     @Override

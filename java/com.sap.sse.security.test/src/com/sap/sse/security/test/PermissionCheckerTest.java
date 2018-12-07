@@ -117,28 +117,27 @@ public class PermissionCheckerTest {
      * sets up users and roles with qualifications and then validates that the correct permissions emerge based
      * on a successful ownership lookup with the object ID provided by the permission.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testPermissionsImpliedByOwnershipConstrainedRole() throws UserManagementException {
         final String leaderboardName = "My:Leaderboard, the only one ";
         final String regattaName = " My:Regatta, the only one ";
-        @SuppressWarnings("deprecation")
         WildcardPermission leaderboardPermission = SecuredDomainType.LEADERBOARD.getPermissionForObjects(DefaultActions.READ, leaderboardName);
-        @SuppressWarnings("deprecation")
         WildcardPermission regattaPermission = SecuredDomainType.REGATTA.getPermissionForObjects(DefaultActions.READ, regattaName);
         assertFalse(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         // let leaderboard be owned by user
-        accessControlStore.setOwnership(SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(leaderboardName), user,
+        accessControlStore.setOwnership(SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifierByString(leaderboardName), user,
                 /* tenantOwner */ null, leaderboardName);
         // let regatta be owned by admin
-        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaName), adminUser,
+        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifierByString(regattaName), adminUser,
                 /* tenantOwner */ null, regattaName);
         // grant user the admin role, but only for objects owned by the user (leaderboard, but not regatta)
         userStore.addRoleForUser(user.getName(),
                 new Role(AdminRole.getInstance(), /* qualifiedForTenant */ null, /* qualifiedForUser */ user));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
-        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaName), /* userOwner */ null,
+        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifierByString(regattaName), /* userOwner */ null,
                 /* groupOwner */ userTenant, leaderboardName);
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         // only adding the group owner doesn't grant permission yet:

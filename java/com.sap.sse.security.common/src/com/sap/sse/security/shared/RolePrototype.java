@@ -93,6 +93,6 @@ public abstract class RolePrototype implements RoleDefinition {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getId().toString());
+        return getType().getQualifiedObjectIdentifier(this);
     }
 }

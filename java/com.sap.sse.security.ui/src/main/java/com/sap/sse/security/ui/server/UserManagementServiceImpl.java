@@ -311,8 +311,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     } catch (UserGroupManagementException e) {
                         throw new UserGroupManagementException(e.getMessage());
                     }
-                    getSecurityService().setOwnership(
-                            SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(newTenantId.toString()),
+                    getSecurityService().setOwnership(userGroup.getIdentifier(),
                             getSecurityService().getCurrentUser(),
                             getSecurityService().getDefaultTenantForCurrentUser(), name);
                     return userGroup;
@@ -640,7 +639,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (user != null) {
             // In addition to checking the default delete permission we currently explicitly require admin role for the
             // owning user/group
-            if (!getSecurityService().hasCurrentUserRoleForOwnedObject(SecuredSecurityTypes.USER, username,
+            if (!getSecurityService().hasCurrentUserRoleForOwnedObject(SecuredSecurityTypes.USER, user,
                     AdminRole.getInstance())) {
                 return new SuccessInfo(false, "You are not permitted to delete user " + username,
                         /* redirectURL */ null, null);

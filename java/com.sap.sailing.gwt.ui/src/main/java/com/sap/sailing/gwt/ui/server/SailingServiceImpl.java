@@ -7814,8 +7814,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         QualifiedObjectIdentifier identifier = ExpeditionSecuredDomainTypes.EXPEDITION_DEVICE_CONFIGURATION
-                .getQualifiedObjectIdentifier(
-                        WildcardPermissionEncoder.encode(ServerInfo.getName(), deviceConfiguration.getName()));
+                .getQualifiedObjectIdentifier(deviceConfiguration);
         getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier,
                 new ActionWithResult<Void>() {
                     @Override

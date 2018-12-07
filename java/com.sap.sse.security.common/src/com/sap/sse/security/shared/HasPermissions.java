@@ -64,7 +64,9 @@ public interface HasPermissions {
      * type, and the {@code objectIdentifier} is {@code "abc"} then the resulting qualified identifier will be
      * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
      */
-    QualifiedObjectIdentifier getQualifiedObjectIdentifier(String typeRelativeObjectIdentifier);
+    @Deprecated
+    QualifiedObjectIdentifier getQualifiedObjectIdentifierByString(String typeRelativeObjectIdentifier);
+    <T> QualifiedObjectIdentifier getQualifiedObjectIdentifier(T object);
 
     /**
      * Same as {@link #getStringPermissionForObjects(Action, String...)}, only that the result is a

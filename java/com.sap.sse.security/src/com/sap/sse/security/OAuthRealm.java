@@ -185,7 +185,7 @@ public class OAuthRealm extends AbstractCompositeAuthorizingRealm {
         if (user == null) {
             try {
                 UserGroup tenant = getUserStore().createUserGroup(UUID.randomUUID(), socialname + "-tenant");
-                getAccessControlStore().setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), user, tenant, tenant.getName());
+                getAccessControlStore().setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant), user, tenant, tenant.getName());
                 user = getUserStore().createUser(socialname, socialUser.getProperty(Social.EMAIL.name()), tenant, socialUser);
                 tenant.add(user);
                 getUserStore().updateUserGroup(tenant);

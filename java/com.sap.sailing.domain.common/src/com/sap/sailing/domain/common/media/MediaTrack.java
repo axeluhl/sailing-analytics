@@ -170,7 +170,7 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(dbId);
+        return getType().getQualifiedObjectIdentifier(this);
     }
 
     @Override

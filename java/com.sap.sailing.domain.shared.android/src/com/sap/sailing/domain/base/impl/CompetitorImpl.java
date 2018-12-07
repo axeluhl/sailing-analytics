@@ -248,7 +248,7 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getType().identifierStrategy().getIdentifierAsString(this));
+        return getType().getQualifiedObjectIdentifier(this);
     }
 
     @Override

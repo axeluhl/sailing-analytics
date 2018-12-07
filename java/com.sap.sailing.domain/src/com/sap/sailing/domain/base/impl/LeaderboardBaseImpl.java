@@ -36,7 +36,7 @@ public class LeaderboardBaseImpl implements LeaderboardBase {
     }
 
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getType().identifierStrategy().getIdentifierAsString(this));
+        return getType().getQualifiedObjectIdentifier(this);
     }
 
     @Override

@@ -29,7 +29,7 @@ public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier,
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getJsonURL());
+        return getType().getQualifiedObjectIdentifier(this);
     }
 
     @Override

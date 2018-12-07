@@ -46,7 +46,7 @@ public abstract class SecurityUserGroupImpl implements NamedWithID, WithQualifie
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(id.toString());
+        return getType().getQualifiedObjectIdentifier(this);
     }
 
     @Override

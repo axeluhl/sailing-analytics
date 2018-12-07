@@ -119,8 +119,13 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     }
 
     @Override
-    public QualifiedObjectIdentifier getQualifiedObjectIdentifier(final String typeRelativeObjectIdentifier) {
+    public QualifiedObjectIdentifier getQualifiedObjectIdentifierByString(final String typeRelativeObjectIdentifier) {
         return new QualifiedObjectIdentifierImpl(getName(), typeRelativeObjectIdentifier);
+    }
+    
+    @Override
+    public <T> QualifiedObjectIdentifier getQualifiedObjectIdentifier(T object) {
+        return new QualifiedObjectIdentifierImpl(getName(), identifierStrategy().getIdentifierAsString(object));
     }
 
     @Override

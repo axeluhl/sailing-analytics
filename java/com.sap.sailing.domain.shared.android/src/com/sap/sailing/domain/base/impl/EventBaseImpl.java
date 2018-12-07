@@ -374,7 +374,7 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getType().identifierStrategy().getIdentifierAsString(this));
+        return getType().getQualifiedObjectIdentifier(this);
     }
 
     @Override
