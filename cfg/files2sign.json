@@ -3,19 +3,19 @@
         {
             "version": "1.4.55",
             "groupid": "com.sap.sailing.android",
-            "file": "src/java/com.sap.sailing.www/apps/com.sap.sailing.racecommittee.app-unsigned.apk",
+            "file": "${gendir}/src/java/com.sap.sailing.www/apps/com.sap.sailing.racecommittee.app-unsigned.apk",
             "artifactid": "racecommitteeapp"
         },
         {
             "version": "1.4.55",
             "groupid": "com.sap.sailing.android",
-            "file": "src/java/com.sap.sailing.www/apps/com.sap.sailing.tracking.app-unsigned.apk",
+            "file": "${gendir}/src/java/com.sap.sailing.www/apps/com.sap.sailing.tracking.app-unsigned.apk",
             "artifactid": "trackingapp"
         },
         {
             "version": "1.4.55",
             "groupid": "com.sap.sailing.android",
-            "file": "src/java/com.sap.sailing.www/apps/com.sap.sailing.buoy.positioning.app-unsigned.apk",
+            "file": "${gendir}/src/java/com.sap.sailing.www/apps/com.sap.sailing.buoy.positioning.app-unsigned.apk",
             "artifactid": "buoypositioningapp"
         }
     ]
