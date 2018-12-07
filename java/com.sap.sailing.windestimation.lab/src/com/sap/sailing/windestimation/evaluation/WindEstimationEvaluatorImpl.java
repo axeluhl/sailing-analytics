@@ -65,8 +65,8 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
                     racesToEvaluate.add(race);
                 } else {
                     for (CompetitorTrackWithEstimationData<T> competitorTrack : race.getCompetitorTracks()) {
-                        RaceWithEstimationData<T> raceWithSingleCompetitorTrack = new RaceWithEstimationData<>(
-                                race.getRegattaName(), race.getRaceName(), Collections.singletonList(competitorTrack));
+                        RaceWithEstimationData<T> raceWithSingleCompetitorTrack = race
+                                .constructWithElements(Collections.singletonList(competitorTrack));
                         racesToEvaluate.add(raceWithSingleCompetitorTrack);
                     }
                 }

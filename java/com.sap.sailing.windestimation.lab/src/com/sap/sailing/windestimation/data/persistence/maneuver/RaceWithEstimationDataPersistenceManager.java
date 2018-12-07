@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.RegattaWithEstimationData;
+import com.sap.sailing.windestimation.data.WindQuality;
 
 /**
  * 
@@ -19,7 +20,8 @@ public interface RaceWithEstimationDataPersistenceManager<T> extends Persistence
 
     void dropDb();
 
-    void addRace(String regattaName, String trackedRaceName, List<JSONObject> competitorTracks);
+    void addRace(String regattaName, String trackedRaceName, WindQuality windQuality,
+            List<JSONObject> competitorTracks);
 
     Iterator<CompetitorTrackWithEstimationData<T>> getCompetitorTrackIterator(String query);
 

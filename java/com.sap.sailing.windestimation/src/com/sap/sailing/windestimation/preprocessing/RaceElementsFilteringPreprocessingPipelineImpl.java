@@ -22,8 +22,7 @@ public class RaceElementsFilteringPreprocessingPipelineImpl
                 .map(competitorTrack -> competitorTrack.constructWithElements(transformer.apply(competitorTrack)
                         .getElements().stream().filter(maneuverFiltering).collect(Collectors.toList())))
                 .collect(Collectors.toList());
-        RaceWithEstimationData<ManeuverForEstimation> newRace = new RaceWithEstimationData<>(race.getRegattaName(),
-                race.getRaceName(), competitorTracks);
+        RaceWithEstimationData<ManeuverForEstimation> newRace = race.constructWithElements(competitorTracks);
         return newRace;
     }
 

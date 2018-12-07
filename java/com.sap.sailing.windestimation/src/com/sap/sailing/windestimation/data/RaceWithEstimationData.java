@@ -12,11 +12,13 @@ public class RaceWithEstimationData<T> {
     private final String regattaName;
     private final String raceName;
     private final List<CompetitorTrackWithEstimationData<T>> competitorTracks;
+    private final WindQuality windQuality;
 
-    public RaceWithEstimationData(String regattaName, String raceName,
+    public RaceWithEstimationData(String regattaName, String raceName, WindQuality windQuality,
             List<CompetitorTrackWithEstimationData<T>> competitorTracks) {
         this.regattaName = regattaName;
         this.raceName = raceName;
+        this.windQuality = windQuality;
         this.competitorTracks = competitorTracks;
     }
 
@@ -33,8 +35,13 @@ public class RaceWithEstimationData<T> {
     }
 
     public <S> RaceWithEstimationData<S> constructWithElements(List<CompetitorTrackWithEstimationData<S>> elements) {
-        RaceWithEstimationData<S> newRace = new RaceWithEstimationData<>(getRegattaName(), getRaceName(), elements);
+        RaceWithEstimationData<S> newRace = new RaceWithEstimationData<>(getRegattaName(), getRaceName(),
+                getWindQuality(), elements);
         return newRace;
+    }
+
+    public WindQuality getWindQuality() {
+        return windQuality;
     }
 
 }

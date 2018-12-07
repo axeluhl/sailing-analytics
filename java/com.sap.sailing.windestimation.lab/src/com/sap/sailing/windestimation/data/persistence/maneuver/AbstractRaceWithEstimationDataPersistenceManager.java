@@ -16,6 +16,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.RegattaWithEstimationData;
+import com.sap.sailing.windestimation.data.WindQuality;
 import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstimationDataJsonDeserializer;
 import com.sap.sailing.windestimation.data.deserializer.RaceWithEstimationDataDeserializer;
 
@@ -42,7 +43,9 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
         return new RaceWithEstimationDataDeserializer<>(getNewCompetitorTrackWithEstimationDataJsonDeserializer());
     }
 
-    public void addRace(String regattaName, String trackedRaceName, List<JSONObject> competitorTracks) {
+    @Override
+    public void addRace(String regattaName, String trackedRaceName, WindQuality windQuality,
+            List<JSONObject> competitorTracks) {
         BasicDBList dbCompetitorTracks = new BasicDBList();
         for (JSONObject competitorTrack : competitorTracks) {
             DBObject entry = (DBObject) JSON.parse(competitorTrack.toString());
@@ -51,6 +54,7 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
         BasicDBObject dbObject = new BasicDBObject();
         dbObject.put(RaceWithEstimationDataDeserializer.REGATTA_NAME, regattaName);
         dbObject.put(RaceWithEstimationDataDeserializer.TRACKED_RACE_NAME, trackedRaceName);
+        dbObject.put(RaceWithEstimationDataDeserializer.WIND_QUALITY, windQuality);
         dbObject.put(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS, dbCompetitorTracks);
         DBCollection races = getDb().getCollection(getCollectionName());
         races.insert(dbObject);

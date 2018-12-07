@@ -28,15 +28,18 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
+import com.sap.sailing.windestimation.data.WindQuality;
 import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstimationDataJsonDeserializer;
 import com.sap.sailing.windestimation.data.deserializer.ManeuverForDataAnalysisJsonSerializer;
 import com.sap.sailing.windestimation.data.deserializer.ManeuverForEstimationJsonSerializer;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuverForDataAnalysisPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuverForEstimationPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.wind.RaceWithWindSourcesPersistenceManager;
 import com.sap.sailing.windestimation.data.transformer.AbstractCompleteManeuverCurveWithEstimationDataTransformer;
 import com.sap.sailing.windestimation.data.transformer.ManeuverForDataAnalysisTransformer;
 import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
@@ -53,9 +56,11 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
     public static final String REST_API_REGATTAS_PATH = "/regattas";
     public static final String REST_API_RACES_PATH = "/races";
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
+    public static final String REST_API_WIND_DATA_PATH = "/highQualityWind";
     private final RaceWithCompleteManeuverCurvePersistenceManager completeManeuverCurvePersistanceManager;
     private final RaceWithManeuverForDataAnalysisPersistenceManager maneuverForDataAnalysisPersistenceManager;
     private final RaceWithManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager;
+    private final RaceWithWindSourcesPersistenceManager raceWithWindSourcesPersistenceManager;
     private final ManeuverForDataAnalysisTransformer maneuverForDataAnalysisTransformer;
     private final ManeuverForEstimationTransformer maneuverForEstimationTransformer;
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
@@ -68,6 +73,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
         this.completeManeuverCurvePersistanceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
         this.maneuverForDataAnalysisPersistenceManager = new RaceWithManeuverForDataAnalysisPersistenceManager();
         this.maneuverForEstimationPersistenceManager = new RaceWithManeuverForEstimationPersistenceManager();
+        this.raceWithWindSourcesPersistenceManager = new RaceWithWindSourcesPersistenceManager();
         this.maneuverForDataAnalysisTransformer = new ManeuverForDataAnalysisTransformer();
         this.maneuverForEstimationTransformer = new ManeuverForEstimationTransformer();
         this.maneuverForDataAnalysisJsonSerializer = new ManeuverForDataAnalysisJsonSerializer();
@@ -119,6 +125,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
                 + importStatistics.racesCount + " races\n\t" + importStatistics.competitorTracksCount
                 + " competitor tracks\n\t" + importStatistics.maneuversCount
                 + " complete maneuver curves with estimation data\n\t" + importStatistics.errors
+                + " races with high quality wind data\n\t" + importStatistics.racesWithHighQualityWindData
                 + " ingored races due to error\n--------------------------------------------\nTime passed: "
                 + duration.toHours() + "h " + (duration.toMinutes() - duration.toHours() * 60) + "m "
                 + (duration.get(ChronoUnit.SECONDS) % 60) + "s");
@@ -176,8 +183,79 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
         }
         String encodedRegattaName = encodeUrlPathPart(regattaName);
         String encodedRaceName = encodeUrlPathPart(trackedRaceName);
-        HttpGet getEstimationData = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName
-                + REST_API_RACES_PATH + "/" + encodedRaceName + REST_API_ESTIMATION_DATA_PATH);
+        String urlPath = REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName + REST_API_RACES_PATH
+                + "/" + encodedRaceName;
+        HttpGet getEstimationData = new HttpGet(urlPath + REST_API_ESTIMATION_DATA_PATH);
+        HttpGet getWindData = new HttpGet(urlPath + REST_API_WIND_DATA_PATH);
+        JSONObject resultJson = getHttpResponseAsJson(trackedRaceName, getEstimationData);
+        parseManeuverData(regattaName, trackedRaceName, importStatistics, resultJson);
+        resultJson = getHttpResponseAsJson(trackedRaceName, getWindData);
+        parseWindData(regattaName, trackedRaceName, importStatistics, resultJson);
+    }
+
+    private void parseWindData(String regattaName, String trackedRaceName, ImportStatistics importStatistics,
+            JSONObject resultJson) {
+        raceWithWindSourcesPersistenceManager.add(resultJson);
+        importStatistics.racesWithHighQualityWindData++;
+    }
+
+    private void parseManeuverData(String regattaName, String trackedRaceName, ImportStatistics importStatistics,
+            JSONObject resultJson) throws JsonDeserializationException {
+        List<JSONObject> competitorTracks = new ArrayList<>();
+        int maneuversCount = 0;
+        CompetitorTrackWithEstimationDataJsonDeserializer<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationDataJsonDeserializer = completeManeuverCurvePersistanceManager
+                .getNewCompetitorTrackWithEstimationDataJsonDeserializer();
+        List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracksWithEstimationData = new ArrayList<>();
+        WindQuality windQuality = WindQuality
+                .values()[(int) resultJson.get(CompetitorTrackWithEstimationDataJsonSerializer.WIND_QUALITY)];
+        for (Object competitorTrackJson : (JSONArray) resultJson
+                .get(CompetitorTrackWithEstimationDataJsonSerializer.BYCOMPETITOR)) {
+            JSONObject competitorTrack = (JSONObject) competitorTrackJson;
+            JSONArray maneuverCurves = (JSONArray) competitorTrack
+                    .get(CompetitorTrackWithEstimationDataJsonSerializer.ELEMENTS);
+            if (!maneuverCurves.isEmpty()) {
+                competitorTracks.add(competitorTrack);
+                CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData = competitorTrackWithEstimationDataJsonDeserializer
+                        .deserialize(competitorTrack);
+                competitorTrack.put("clean",
+                        competitorTrackWithEstimationData.isClean()
+                                && competitorTrackWithEstimationData
+                                        .getWaypointsCount() == competitorTrackWithEstimationData.getMarkPassingsCount()
+                                && competitorTrackWithEstimationData.getMarkPassingsCount() > 1);
+                competitorTracksWithEstimationData.add(competitorTrackWithEstimationData);
+                maneuversCount += maneuverCurves.size();
+            }
+        }
+        try {
+            completeManeuverCurvePersistanceManager.addRace(regattaName, trackedRaceName, windQuality,
+                    competitorTracks);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        addTransformedElementsToCompetitorTrackJson(competitorTracks, competitorTracksWithEstimationData,
+                maneuverForDataAnalysisTransformer, maneuverForDataAnalysisJsonSerializer);
+        try {
+            maneuverForDataAnalysisPersistenceManager.addRace(regattaName, trackedRaceName, windQuality,
+                    competitorTracks);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        addTransformedElementsToCompetitorTrackJson(competitorTracks, competitorTracksWithEstimationData,
+                maneuverForEstimationTransformer, maneuverForEstimationJsonSerializer);
+        try {
+            maneuverForEstimationPersistenceManager.addRace(regattaName, trackedRaceName, windQuality,
+                    competitorTracks);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        LoggingUtil.logInfo(
+                "Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount + " maneuvers");
+        importStatistics.competitorTracksCount += competitorTracks.size();
+        importStatistics.maneuversCount += maneuversCount;
+    }
+
+    private JSONObject getHttpResponseAsJson(String trackedRaceName, HttpGet getEstimationData)
+            throws InterruptedException, Exception {
         HttpResponse httpResponse = null;
         Exception lastException = null;
         for (int i = 1; i <= 10; i++) {
@@ -201,44 +279,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
             System.out.println(getEstimationData);
             throw e;
         }
-        List<JSONObject> competitorTracks = new ArrayList<>();
-        int maneuversCount = 0;
-        CompetitorTrackWithEstimationDataJsonDeserializer<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationDataJsonDeserializer = completeManeuverCurvePersistanceManager
-                .getNewCompetitorTrackWithEstimationDataJsonDeserializer();
-        List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracksWithEstimationData = new ArrayList<>();
-        for (Object competitorTrackJson : (JSONArray) resultJson
-                .get(CompetitorTrackWithEstimationDataJsonSerializer.BYCOMPETITOR)) {
-            JSONObject competitorTrack = (JSONObject) competitorTrackJson;
-            JSONArray maneuverCurves = (JSONArray) competitorTrack
-                    .get(CompetitorTrackWithEstimationDataJsonSerializer.ELEMENTS);
-            if (!maneuverCurves.isEmpty()) {
-                competitorTracks.add(competitorTrack);
-                CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData = competitorTrackWithEstimationDataJsonDeserializer
-                        .deserialize(competitorTrack);
-                competitorTrack.put("clean",
-                        competitorTrackWithEstimationData.isClean()
-                                && competitorTrackWithEstimationData
-                                        .getWaypointsCount() == competitorTrackWithEstimationData.getMarkPassingsCount()
-                                && competitorTrackWithEstimationData.getMarkPassingsCount() > 1);
-                competitorTracksWithEstimationData.add(competitorTrackWithEstimationData);
-                maneuversCount += maneuverCurves.size();
-            }
-        }
-        try {
-            completeManeuverCurvePersistanceManager.addRace(regattaName, trackedRaceName, competitorTracks);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        addTransformedElementsToCompetitorTrackJson(competitorTracks, competitorTracksWithEstimationData,
-                maneuverForDataAnalysisTransformer, maneuverForDataAnalysisJsonSerializer);
-        maneuverForDataAnalysisPersistenceManager.addRace(regattaName, trackedRaceName, competitorTracks);
-        addTransformedElementsToCompetitorTrackJson(competitorTracks, competitorTracksWithEstimationData,
-                maneuverForEstimationTransformer, maneuverForEstimationJsonSerializer);
-        maneuverForEstimationPersistenceManager.addRace(regattaName, trackedRaceName, competitorTracks);
-        LoggingUtil.logInfo(
-                "Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount + " maneuvers");
-        importStatistics.competitorTracksCount += competitorTracks.size();
-        importStatistics.maneuversCount += maneuversCount;
+        return resultJson;
     }
 
     private <ToType> void addTransformedElementsToCompetitorTrackJson(List<JSONObject> competitorTracks,
@@ -284,6 +325,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
         private int competitorTracksCount = 0;
         private int maneuversCount = 0;
         private int errors = 0;
+        private int racesWithHighQualityWindData = 0;
     }
 
 }
