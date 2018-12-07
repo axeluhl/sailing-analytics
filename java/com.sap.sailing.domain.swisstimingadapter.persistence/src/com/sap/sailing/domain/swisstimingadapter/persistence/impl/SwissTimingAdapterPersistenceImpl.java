@@ -118,7 +118,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 true);
         
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonUrl());
+        result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonURL());
         
         stArchiveConfigCollection.update(result, result, true, false);
     }

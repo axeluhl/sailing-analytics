@@ -17,7 +17,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.shared.android,
  com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0"
 Export-Package: com.sap.sailing.domain.swisstimingadapter,
- com.sap.sailing.domain.swisstimingadapter.impl;x-friends:="com.sap.sailing.server.test,com.sap.sailing.mongodb.test,com.sap.sailing.domain.swisstimingadapter.persistence"
+ com.sap.sailing.domain.swisstimingadapter.impl;x-friends:="com.sap.sailing.server.test,com.sap.sailing.mongodb.test,com.sap.sailing.domain.swisstimingadapter.persistence",
+ com.sap.sailing.domain.swisstimingadapter.security
 Import-Package: com.sap.sailing.xrr.schema,
  com.sap.sse.security.shared,
  javax.xml.bind,

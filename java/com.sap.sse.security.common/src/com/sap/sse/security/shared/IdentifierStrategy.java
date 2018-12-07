@@ -37,6 +37,8 @@ public interface IdentifierStrategy {
 
     };
 
+    static IdentifierStrategy SERVERNAME = STRING;
+
     static IdentifierStrategy TO_SPECIFY = new IdentifierStrategy() {
 
         @Override

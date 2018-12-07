@@ -346,6 +346,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
+import com.sap.sailing.domain.swisstimingadapter.security.SwissTimingSecuredDomainTypes;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
@@ -3032,7 +3033,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations() {
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, configs,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SwissTimingSecuredDomainTypes.SWISS_TIMING_ACCOUNT, configs,
                 stConfig -> new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(),
                         stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(),
                         stConfig.getUpdateUsername(), stConfig.getUpdatePassword()));
@@ -3075,7 +3076,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String updateURL, String updateUsername, String updatePassword) throws Exception {
         if (!jsonURL.equalsIgnoreCase("test")) {
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.SWISS_TIMING_ACCOUNT, configName,
+                    SwissTimingSecuredDomainTypes.SWISS_TIMING_ACCOUNT, configName,
                     configName,
                     () -> swissTimingAdapterPersistence
                             .storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName,
@@ -4972,14 +4973,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence
                 .getSwissTimingArchiveConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, configs,
-                stArchiveConfig -> new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonUrl()));
+                SwissTimingSecuredDomainTypes.SWISS_TIMING_ARCHIVE_ACCOUNT, configs,
+                stArchiveConfig -> new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonURL()));
     }
 
     @Override
     public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) throws Exception {
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.SWISS_TIMING_ACCOUNT, swissTimingJsonUrl,
+                SwissTimingSecuredDomainTypes.SWISS_TIMING_ACCOUNT, swissTimingJsonUrl,
                 swissTimingJsonUrl, () -> swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(
                         swissTimingFactory.createSwissTimingArchiveConfiguration(swissTimingJsonUrl)));
     }

@@ -116,27 +116,27 @@ public class SecuredDomainType extends HasPermissionsImpl {
      */
     //TODO: TracTracConfiguration::getJSONURL
     public static final HasPermissions TRACTRAC_ACCOUNT = new SecuredDomainType("TRACTRAC_ACCOUNT", IdentifierStrategy.TO_SPECIFY);
-    
-    //TODO: SwissTimingConfiguration::getName
-    public static final HasPermissions SWISS_TIMING_ACCOUNT = new SecuredDomainType("SWISS_TIMING_ACCOUNT", IdentifierStrategy.TO_SPECIFY);
-    
-    //TODO: SwissTimingArchiveConfiguration::getJsonUrl
-    public static final HasPermissions SWISS_TIMING_ARCHIVE_ACCOUNT = new SecuredDomainType("SWISS_TIMING_ARCHIVE_ACCOUNT", IdentifierStrategy.TO_SPECIFY);
-    
-    public static enum ReplicatorActions implements Action { START, STOP, DROP_CONNECTION };
+
+    public static enum ReplicatorActions implements Action {
+        START, STOP, DROP_CONNECTION
+    };
+
     /**
      * type-relative identifier is the server name
      */
-    public static final HasPermissions REPLICATOR = new SecuredDomainType("REPLICATOR", IdentifierStrategy.TO_SPECIFY, ReplicatorActions.values());
-    
+    public static final HasPermissions REPLICATOR = new SecuredDomainType("REPLICATOR", IdentifierStrategy.SERVERNAME,
+            ReplicatorActions.values());
+
     /**
      * Permission is checked against servername.
      */
-    public static final HasPermissions DATA_MINING = new SecuredDomainType("DATA_MINING", IdentifierStrategy.STRING /* identifer is servername. */);
+    public static final HasPermissions DATA_MINING = new SecuredDomainType("DATA_MINING",
+            IdentifierStrategy.SERVERNAME);
 
     /**
      * type-relative identifier is the device configuration name
      */
-    public static final HasPermissions RACE_MANAGER_APP_DEVICE_CONFIGURATION = new SecuredDomainType("RACE_MANAGER_APP_DEVICE_CONFIGURATION", IdentifierStrategy.NAMED);
+    public static final HasPermissions RACE_MANAGER_APP_DEVICE_CONFIGURATION = new SecuredDomainType(
+            "RACE_MANAGER_APP_DEVICE_CONFIGURATION", IdentifierStrategy.NAMED);
 
 }

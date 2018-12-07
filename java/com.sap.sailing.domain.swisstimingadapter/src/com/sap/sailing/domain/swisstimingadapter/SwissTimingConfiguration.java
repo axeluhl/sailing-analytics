@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
-import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.swisstimingadapter.security.SwissTimingSecuredDomainTypes;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
@@ -11,9 +11,10 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  * @author Axel Uhl (D043530)
  *
  */
-public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier {
+public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier, HasJsonUrl {
     String getName();
     
+    @Override
     String getJsonURL();
     
     String getHostname();
@@ -33,6 +34,6 @@ public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier 
 
     @Override
     default HasPermissions getType() {
-        return SecuredDomainType.SWISS_TIMING_ACCOUNT;
+        return SwissTimingSecuredDomainTypes.SWISS_TIMING_ACCOUNT;
     }
 }
