@@ -131,6 +131,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(role, new Action() {
                 @Override
                 public void run() throws Exception {
+                    for (User user : getSecurityService().getUserList()) {
+                        HashSet<Role> nonConcurrentModificationCopy = new HashSet<>();
+                        Util.addAll(user.getRoles(), nonConcurrentModificationCopy);
+                        for (Role roleInstance : nonConcurrentModificationCopy) {
+                            if (roleInstance.getRoleDefinition().equals(role)) {
+                                getSecurityService().removeRoleFromUser(user, roleInstance);
+                            }
+                        }
+                    }
                     getSecurityService().deleteRoleDefinition(role);
                 }
             });
@@ -331,7 +340,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (userGroup != null) {
             return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(userGroup, () -> {
                 try {
-
                     getSecurityService().deleteUserGroup(userGroup);
                     return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".",
                             /* redirectURL */ null, null);
