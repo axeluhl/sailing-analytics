@@ -13,6 +13,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
+import com.sap.sailing.windestimation.classifier.store.ContextType;
 import com.sap.sailing.windestimation.classifier.store.MongoDbClassifierModelStore;
 import com.sap.sailing.windestimation.data.LabelledTwdTransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
@@ -105,6 +106,7 @@ public class TwdTransitionClassifierTrainer {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         TwdTransitionPersistenceManager persistenceManager = new TwdTransitionPersistenceManager();
         ClassifierModelStore classifierModelStore = new MongoDbClassifierModelStore(persistenceManager.getDb());
+        classifierModelStore.deleteAll(ContextType.TWD_TRANSITION);
         TwdTransitionClassifierTrainer classifierTrainer = new TwdTransitionClassifierTrainer(persistenceManager,
                 classifierModelStore);
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();

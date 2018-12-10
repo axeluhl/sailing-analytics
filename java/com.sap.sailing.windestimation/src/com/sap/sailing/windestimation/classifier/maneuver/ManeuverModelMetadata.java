@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.classifier.store.ContextType;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
@@ -17,6 +18,7 @@ public class ManeuverModelMetadata extends ContextSpecificModelMetadata<Maneuver
 
     public ManeuverModelMetadata(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
             ManeuverTypeForInternalClassification... orderedSupportedTargetValues) {
+        super(ContextType.MANEUVER);
         this.maneuverFeatures = maneuverFeatures;
         this.boatClass = boatClass;
         this.indexToManeuverTypeOrdinalMapping = new int[ManeuverTypeForInternalClassification.values().length];

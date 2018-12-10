@@ -12,17 +12,19 @@ import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 
 public class FileSystemClassifierModelStore implements ClassifierModelStore {
 
+    private static final String CONTEXT_NAME_PREFIX = "classifiersFor";
     private final String destinationFolder;
     private static final String FILE_EXT = ".clf";
 
-    public FileSystemClassifierModelStore(String destinationFolder) {
+    public FileSystemClassifierModelStore(String destinationFolder, ContextType contextType) {
         this.destinationFolder = destinationFolder;
     }
 
-    private File getFileForClassifier(PersistenceSupport<?> trainedModel) {
+    private File getFileForClassifier(PersistenceSupport<?> trainedModel, ContextType contextType) {
         StringBuilder filePath = new StringBuilder();
         filePath.append(destinationFolder);
         filePath.append(File.separator);
+        filePath.append(getContextPrefix(contextType));
         filePath.append(trainedModel.getPersistenceKey());
         filePath.append(FILE_EXT);
         String finalFilePath = replaceSystemChars(filePath.toString());
@@ -31,14 +33,14 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
 
     private String replaceSystemChars(String str) {
         return str.replaceAll("[\\\\\\/\\\"\\:\\|\\<\\>\\*\\?]", "__");
-
     }
 
     @Override
     public <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableClassificationModel<InstanceType, T>> ModelType loadPersistedState(
             ModelType newModel) throws ClassifierPersistenceException {
         PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        File classifierFile = getFileForClassifier(persistenceSupport);
+        File classifierFile = getFileForClassifier(persistenceSupport,
+                newModel.getModelMetadata().getContextSpecificModelMetadata().getContextType());
         if (classifierFile.exists()) {
             try (FileInputStream input = new FileInputStream(classifierFile)) {
                 @SuppressWarnings("unchecked")
@@ -58,7 +60,8 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
     @Override
     public void persistState(TrainableClassificationModel<?, ?> trainedModel) throws ClassifierPersistenceException {
         PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
-        try (FileOutputStream output = new FileOutputStream(getFileForClassifier(persistenceSupport))) {
+        try (FileOutputStream output = new FileOutputStream(getFileForClassifier(persistenceSupport,
+                trainedModel.getModelMetadata().getContextSpecificModelMetadata().getContextType()))) {
             persistenceSupport.saveToStream(output);
         } catch (IOException e) {
             throw new ClassifierPersistenceException(e);
@@ -68,7 +71,8 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
     @Override
     public void delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
         PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        File classifierFile = getFileForClassifier(persistenceSupport);
+        File classifierFile = getFileForClassifier(persistenceSupport,
+                newModel.getModelMetadata().getContextSpecificModelMetadata().getContextType());
         try {
             Files.deleteIfExists(classifierFile.toPath());
         } catch (IOException e) {
@@ -77,10 +81,11 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public void deleteAll() throws ClassifierPersistenceException {
+    public void deleteAll(ContextType contextType) throws ClassifierPersistenceException {
         File folder = new File(destinationFolder);
         for (File file : folder.listFiles()) {
-            if (file.isFile() && file.getName().endsWith(FILE_EXT)) {
+            if (file.isFile() && file.getName().endsWith(FILE_EXT)
+                    && file.getName().startsWith(getContextPrefix(contextType))) {
                 try {
                     Files.deleteIfExists(file.toPath());
                 } catch (IOException e) {
@@ -88,6 +93,10 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
                 }
             }
         }
+    }
+
+    private String getContextPrefix(ContextType contextType) {
+        return CONTEXT_NAME_PREFIX + contextType.getContextName() + ".";
     }
 
 }

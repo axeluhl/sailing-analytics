@@ -12,7 +12,7 @@ public interface ClassifierModelStore {
 
     void delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException;
 
-    void deleteAll() throws ClassifierPersistenceException;
+    void deleteAll(ContextType contextType) throws ClassifierPersistenceException;
 
     default <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>> PersistenceSupport<TrainableClassificationModel<InstanceType, T>> checkAndGetPersistenceSupport(
             TrainableClassificationModel<InstanceType, T> trainedModel) throws ClassifierPersistenceException {

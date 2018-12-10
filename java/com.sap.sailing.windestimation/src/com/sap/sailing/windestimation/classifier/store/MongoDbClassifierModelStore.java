@@ -5,13 +5,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
-import com.mongodb.util.JSON;
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.ModelMetadata;
@@ -19,9 +19,7 @@ import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 
 public class MongoDbClassifierModelStore implements ClassifierModelStore {
 
-    private static final String COLLECTION_NAME = "maneuverClassifierModels";
-    private static final String FILE_EXT = ".clf";
-    private static final String FIELD_FILENAME = "filename";
+    private static final String CONTEXT_NAME_PREFIX = "classifiersFor";
     private final DB db;
 
     public MongoDbClassifierModelStore(DB db) {
@@ -29,7 +27,7 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
     }
 
     private String getFileName(PersistenceSupport<?> persistenceSupport) {
-        return persistenceSupport.getPersistenceKey() + FILE_EXT;
+        return persistenceSupport.getPersistenceKey();
     }
 
     @Override
@@ -39,7 +37,8 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
         String fileName = getFileName(persistenceSupport);
         GridFS gridFs = null;
         try {
-            gridFs = new GridFS(db, COLLECTION_NAME);
+            gridFs = new GridFS(db,
+                    getCollectionName(newModel.getModelMetadata().getContextSpecificModelMetadata().getContextType()));
             List<GridFSDBFile> mongoFiles = gridFs.find(fileName);
             if (!mongoFiles.isEmpty()) {
                 GridFSDBFile mongoFile = mongoFiles.get(0);
@@ -68,7 +67,8 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
         GridFS gridFs = null;
         GridFSInputFile mongoFile = null;
         try {
-            gridFs = new GridFS(db, COLLECTION_NAME);
+            gridFs = new GridFS(db, getCollectionName(
+                    trainedModel.getModelMetadata().getContextSpecificModelMetadata().getContextType()));
             mongoFile = gridFs.createFile();
             mongoFile.setFilename(newFileName);
             try (OutputStream outputStream = mongoFile.getOutputStream()) {
@@ -90,7 +90,8 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
         PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getFileName(persistenceSupport);
         try {
-            GridFS gridFs = new GridFS(db, COLLECTION_NAME);
+            GridFS gridFs = new GridFS(db,
+                    getCollectionName(newModel.getModelMetadata().getContextSpecificModelMetadata().getContextType()));
             gridFs.remove(fileName);
         } catch (Exception e) {
             throw new ClassifierPersistenceException(e);
@@ -98,15 +99,18 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public void deleteAll() throws ClassifierPersistenceException {
+    public void deleteAll(ContextType contextType) throws ClassifierPersistenceException {
         try {
-            GridFS gridFs = new GridFS(db, COLLECTION_NAME);
-            String query = "{'" + FIELD_FILENAME + "': {$regex: '^.*\\" + FILE_EXT + "$'}}";
-            DBObject dbQuery = (DBObject) JSON.parse(query.toString());
+            GridFS gridFs = new GridFS(db, getCollectionName(contextType));
+            DBObject dbQuery = new BasicDBObject();
             gridFs.remove(dbQuery);
         } catch (Exception e) {
             throw new ClassifierPersistenceException(e);
         }
+    }
+
+    private String getCollectionName(ContextType contextType) {
+        return CONTEXT_NAME_PREFIX + contextType.getContextName();
     }
 
 }
