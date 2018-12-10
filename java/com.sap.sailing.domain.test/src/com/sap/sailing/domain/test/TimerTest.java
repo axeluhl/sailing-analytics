@@ -17,7 +17,7 @@ import org.junit.rules.Timeout;
  */
 public class TimerTest {
     @Rule
-    public Timeout AbstractTracTracLiveTestTimeout = new Timeout(10 * 1000);
+    public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(10 * 1000);
 
     @Test
     public void exceptionInTask() throws InterruptedException {
