@@ -15,9 +15,9 @@ import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.rules.TestWatchman;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.FrameworkMethod;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
@@ -175,35 +175,18 @@ public abstract class AbstractSeleniumTest {
         }
     }
     
-    // TODO: Change to TestWatcher if we support a higher version (4.11) of JUnit.
-    //private class ScreenShotRule extends TestWatcher {
-    //    ScreenShotFilenameGenerator generator;
-    //    
-    //    public ScreenShotRule(ScreenShotFilenameGenerator generator) {
-    //        this.generator = generator;
-    //    }
-    //    
-    //    protected void failed(Throwable error, Description description) {
-    //        captureScreenshot(this.generator.getFilePath(description));
-    //    }
-    //}
-    
-    private class ScreenShotAndCloseWindowRule extends TestWatchman {
+    private class ScreenShotRule extends TestWatcher {
         @Override
-        public void failed(Throwable cause, FrameworkMethod method) {
-            try {
-                captureScreenshots();
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
+        protected void failed(Throwable error, Description description) {
+            captureScreenshots();
         }
-        
+
         @Override
-        public void finished(FrameworkMethod method) {
+        protected void finished(Description description) {
             try {
                 environment.getWindowManager().closeAllWindows();
             } finally {
-                super.finished(method);
+                super.finished(description);
             }
         }
     }
@@ -212,7 +195,7 @@ public abstract class AbstractSeleniumTest {
      * <p>Rule for capturing of a screenshot if a test fails.</p>
      */
     @Rule
-    public final ScreenShotAndCloseWindowRule takeScreenshotAndCloseWindows = new ScreenShotAndCloseWindowRule(/*generator*/);
+    public final ScreenShotRule takeScreenshotAndCloseWindows = new ScreenShotRule();
 
     /**
      * <p>The test environment used for the execution of the the tests.</p>
