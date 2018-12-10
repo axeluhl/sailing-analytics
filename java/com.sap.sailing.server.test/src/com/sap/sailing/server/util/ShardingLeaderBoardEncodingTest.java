@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.sharding.ShardingType;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class ShardingLeaderBoardEncodingTest {
     @Test

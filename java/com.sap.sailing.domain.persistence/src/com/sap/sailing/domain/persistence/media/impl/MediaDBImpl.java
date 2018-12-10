@@ -104,7 +104,7 @@ public class MediaDBImpl implements MediaDB {
     private DBCollection getVideoCollection() {
         try {
             DBCollection dbVideos = database.getCollection(DbNames.Collections.VIDEOS.name());
-            dbVideos.setWriteConcern(WriteConcern.FSYNC_SAFE);
+            dbVideos.setWriteConcern(WriteConcern.JOURNALED);
             dbVideos.createIndex(new BasicDBObject(DbNames.Collections.VIDEOS.name(), 1));
             return dbVideos;
         } catch (NullPointerException e) {

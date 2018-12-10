@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator.AnniversaryChecker;
 import com.sap.sailing.server.anniversary.checker.QuarterChecker;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class AnniversaryQuarterCheckerTest {
 

@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelogtracking.test;
 
 import static com.sap.sse.common.Util.size;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.Collections;

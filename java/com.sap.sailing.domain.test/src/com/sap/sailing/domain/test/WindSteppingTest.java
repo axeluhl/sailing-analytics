@@ -32,8 +32,8 @@ public class WindSteppingTest {
         Assert.assertEquals(-1, stepping.getLevelIndexForValue(8));
         Assert.assertEquals(2.0, stepping.getSteppedValueForValue(1.064), 0.005);
         Assert.assertEquals(-1.0, stepping.getSteppedValueForValue(7.8365), 0.005);
-        Assert.assertEquals(1.55, stepping.getHistogramXValue(20, 1.5));
-        Assert.assertEquals(2.55, stepping.getHistogramXValue(20, 2.5));
+        Assert.assertEquals(1.55, stepping.getHistogramXValue(20, 1.5), 0.0000001);
+        Assert.assertEquals(2.55, stepping.getHistogramXValue(20, 2.5), 0.0000001);
     }
 
 }

@@ -48,7 +48,7 @@ import com.sap.sse.common.media.MimeType;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
       
@@ -283,7 +283,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
 
     private void deleteAllDataFromDatabase() {
         MongoDBService service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
-        service.getDB().getWriteConcern().fsync();
+        service.getDB().getWriteConcern().getJournal();
         service.getDB().dropDatabase();
     }
 

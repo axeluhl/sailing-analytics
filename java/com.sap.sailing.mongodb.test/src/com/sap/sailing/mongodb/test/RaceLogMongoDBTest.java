@@ -41,7 +41,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
 

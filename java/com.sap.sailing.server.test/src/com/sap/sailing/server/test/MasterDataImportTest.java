@@ -146,7 +146,7 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class MasterDataImportTest {
 
@@ -189,7 +189,7 @@ public class MasterDataImportTest {
 
     private void deleteAllDataFromDatabase() {
         MongoDBService service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
-        service.getDB().getWriteConcern().fsync();
+        service.getDB().getWriteConcern().getJournal();
         service.getDB().dropDatabase();
     }
 
@@ -366,7 +366,7 @@ public class MasterDataImportTest {
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID), serviceFinderFactory){};
             domainFactory = destService.getBaseDomainFactory();
             DB db = destService.getMongoObjectFactory().getDatabase();
-            db.setWriteConcern(WriteConcern.SAFE);
+            db.setWriteConcern(WriteConcern.ACKNOWLEDGED);
             inputStream = new ByteArrayInputStream(os.toByteArray());
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
             importer.importFromStream(inputStream, randomUUID, false);
@@ -411,7 +411,7 @@ public class MasterDataImportTest {
 
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
 
-        Assert.assertEquals(factor, leaderboard.getScoringScheme().getScoreFactor(raceColumnOnTarget));
+        Assert.assertEquals(factor, leaderboard.getScoringScheme().getScoreFactor(raceColumnOnTarget), 0.000001);
 
         Iterable<Competitor> competitorsOnTarget = leaderboardOnTarget.getAllCompetitors();
         Iterator<Competitor> competitorIterator = competitorsOnTarget.iterator();
@@ -422,12 +422,12 @@ public class MasterDataImportTest {
         Assert.assertEquals(
                 scoreCorrection,
                 leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
-                        raceColumnOnTarget));
+                        raceColumnOnTarget), 0.0000001);
         Assert.assertEquals(maxPointsReason, leaderboardOnTarget.getScoreCorrection()
                 .getMaxPointsReason(competitorOnTarget, raceColumnOnTarget, MillisecondsTimePoint.now()));
 
         // Check for carried points
-        Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget));
+        Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget), 0.0000001);
 
         // Check for suppressed competitor
         Assert.assertTrue(leaderboardOnTarget.getSuppressedCompetitors().iterator().hasNext());
@@ -676,7 +676,7 @@ public class MasterDataImportTest {
         Assert.assertEquals(
                 scoreCorrection,
                 leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
-                        raceColumnOnTarget));
+                        raceColumnOnTarget), 0.0000001);
         Assert.assertEquals(
                 maxPointsReason,
                 leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget,
@@ -2091,7 +2091,7 @@ public class MasterDataImportTest {
 
         RaceColumn metaColumn = metaColumns.iterator().next();
         Assert.assertNotNull(metaColumn);
-        Assert.assertEquals(factor, overallLeaderboard.getScoringScheme().getScoreFactor(metaColumn));
+        Assert.assertEquals(factor, overallLeaderboard.getScoringScheme().getScoreFactor(metaColumn), 0.0000001);
 
         // Verify that overall leaderboard data has been persisted
         RacingEventService persistenceVerifier = new RacingEventServiceImplMock(){};
@@ -2113,7 +2113,7 @@ public class MasterDataImportTest {
 
         metaColumn = metaColumns.iterator().next();
         Assert.assertNotNull(metaColumn);
-        Assert.assertEquals(factor, overallLeaderboard.getScoringScheme().getScoreFactor(metaColumn));
+        Assert.assertEquals(factor, overallLeaderboard.getScoringScheme().getScoreFactor(metaColumn), 0.0000001);
 
     }
 
@@ -2287,18 +2287,18 @@ public class MasterDataImportTest {
 
         raceColumnOnTarget.setTrackedRace(defaultFleetOnTarget, trackedRaceForTarget);
 
-        Assert.assertEquals(factor, leaderboardOnTarget.getScoringScheme().getScoreFactor(raceColumnOnTarget));
+        Assert.assertEquals(factor, leaderboardOnTarget.getScoringScheme().getScoreFactor(raceColumnOnTarget), 0.0000001);
 
         // Check for score corrections
         Assert.assertEquals(
                 scoreCorrection,
                 leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
-                        raceColumnOnTarget));
+                        raceColumnOnTarget), 0.0000001);
         Assert.assertEquals(maxPointsReason, leaderboardOnTarget.getScoreCorrection()
                 .getMaxPointsReason(competitorOnTarget, raceColumnOnTarget, MillisecondsTimePoint.now()));
 
         // Check for carried points
-        Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget));
+        Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget), 0.0000001);
 
         // Check for suppressed competitor
         Assert.assertTrue(leaderboardOnTarget.getSuppressedCompetitors().iterator().hasNext());

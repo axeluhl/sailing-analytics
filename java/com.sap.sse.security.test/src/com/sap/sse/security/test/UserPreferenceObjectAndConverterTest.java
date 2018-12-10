@@ -14,7 +14,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class UserPreferenceObjectAndConverterTest {
     

@@ -67,7 +67,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBService;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class RaceColumnReloadTest {
 

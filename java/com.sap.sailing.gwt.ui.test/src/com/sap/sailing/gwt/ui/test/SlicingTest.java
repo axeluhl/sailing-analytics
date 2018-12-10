@@ -42,7 +42,7 @@ import com.sap.sse.common.impl.CountryCodeFactoryImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ClearStateTestSupport;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class SlicingTest {
     private final String regattaName = "test";

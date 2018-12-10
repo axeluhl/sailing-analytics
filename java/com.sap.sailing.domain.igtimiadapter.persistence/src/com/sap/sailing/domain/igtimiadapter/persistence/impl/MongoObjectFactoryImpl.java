@@ -15,7 +15,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeAccessToken(String accessToken) {
         final BasicDBObject basicDBObject = getAccessTokenDBQuery(accessToken);
-        db.getCollection(CollectionNames.IGTIMI_ACCESS_TOKENS.name()).update(basicDBObject, basicDBObject, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
+        db.getCollection(CollectionNames.IGTIMI_ACCESS_TOKENS.name()).update(basicDBObject, basicDBObject, /* upsert */ true, /* multi */ false, WriteConcern.ACKNOWLEDGED);
     }
 
     private BasicDBObject getAccessTokenDBQuery(String accessToken) {
@@ -26,6 +26,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void removeAccessToken(String accessToken) {
         final BasicDBObject basicDBObject = getAccessTokenDBQuery(accessToken);
-        db.getCollection(CollectionNames.IGTIMI_ACCESS_TOKENS.name()).remove(basicDBObject, WriteConcern.SAFE);
+        db.getCollection(CollectionNames.IGTIMI_ACCESS_TOKENS.name()).remove(basicDBObject, WriteConcern.ACKNOWLEDGED);
     }
 }

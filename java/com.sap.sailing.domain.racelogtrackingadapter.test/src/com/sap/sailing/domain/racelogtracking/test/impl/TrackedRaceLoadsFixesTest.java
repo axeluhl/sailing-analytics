@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;

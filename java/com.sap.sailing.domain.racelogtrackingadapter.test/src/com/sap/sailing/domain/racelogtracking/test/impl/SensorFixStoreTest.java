@@ -36,7 +36,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class SensorFixStoreTest {
     private static final long FIX_TIMESTAMP = 110;

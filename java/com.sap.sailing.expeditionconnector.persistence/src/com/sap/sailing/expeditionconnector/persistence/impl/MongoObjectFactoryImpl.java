@@ -39,7 +39,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Exception lastException = null;
         while (attempt < 5 && !success) {
             try {
-                expeditionDeviceConfigurationsCollection.update(key, expeditionDeviceConfigurationDBObject, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
+                expeditionDeviceConfigurationsCollection.update(key, expeditionDeviceConfigurationDBObject, /* upsert */ true, /* multi */ false, WriteConcern.ACKNOWLEDGED);
                 success = true;
                 attempt++;
             } catch (Exception e) {
@@ -54,6 +54,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {
-        expeditionDeviceConfigurationsCollection.remove(getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfiguration), WriteConcern.SAFE);
+        expeditionDeviceConfigurationsCollection.remove(getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfiguration), WriteConcern.ACKNOWLEDGED);
     }
 }
