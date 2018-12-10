@@ -6,7 +6,6 @@ import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.SecurityInformationDTO;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
  * Master data about a single race that is to be transferred to the client.<p>
