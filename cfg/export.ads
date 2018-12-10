@@ -40,6 +40,7 @@ def zipalign = setup_android_tool("zipalign")
 def apksigner = setup_android_tool("apksigner")
 
 def repodir = new File(gendir, "src/java/com.sap.sailing.www/apps")
+def apkExtension = /\.apk$/
 
 if (new File(SIGN_DOCKER_FILE_PY).exists()){
   // central signing available only during release builds
@@ -60,7 +61,6 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
   }
 } else {
   // snapshot and milestone builds are not eligible for central signing
-  apkExtension = /\.apk$/
   repodir.traverse(type : FILES, nameFilter: ~/.*unsigned*.*${apkExtension}/) { apkFile ->
     def apkToDeploy = "$gendir/${apkFile.getName()}"
     def apkToSign = apkFile.getAbsolutePath()
@@ -75,7 +75,6 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
 artifacts builderVersion: "1.1", {
   def groupId = "com.sap.sailing.android"
 
-  def apkExtension = /\.apk$/
   repodir.traverse(type : FILES, nameFilter: ~/.*unsigned*.*${apkExtension}/) { apkFile ->
     def apkToDeploy = "$gendir/${apkFile.getName()}"
     def artifactId = apkFile.getName().replace("com.sap.sailing.", "")
