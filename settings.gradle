@@ -20,5 +20,5 @@ project(':org.json.simple').projectDir = new File('./java/org.json.simple')
 // android projects
 include(':mobile:com.sap.sailing.android.shared')
 include(':mobile:com.sap.sailing.android.tracking.app')
+include(':mobile:com.sap.sailing.android.buoy.positioning.app')
 include(':mobile:com.sap.sailing.racecommittee.app')
-include(':mobile:com.sap.sailing.buoy.positioning')
