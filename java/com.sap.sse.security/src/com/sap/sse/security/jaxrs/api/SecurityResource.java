@@ -22,11 +22,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.AdminRole;
-import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
@@ -112,22 +111,27 @@ public class SecurityResource extends AbstractSecurityResource {
     @POST
     @Path("/create_user")
     @Produces("text/plain;charset=UTF-8")
-    public Response createUser(@Context UriInfo uriInfo, @QueryParam("username") String username, @QueryParam("email") String email,
-            @QueryParam("password") String password, @QueryParam("fullName") String fullName,
-            @QueryParam("company") String company) {
-        return getService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredSecurityTypes.USER,
-                username,
-                username, () -> {
-                    try {
-                        final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
-                        getService().createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
-                                validationBaseURL);
-                        SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
-                        return respondWithAccessTokenForUser(username);
-                    } catch (UserManagementException | MailException | UserGroupManagementException e) {
-                        return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
-                    }
-                });
+    public Response createUser(@Context UriInfo uriInfo, @QueryParam("username") String username,
+            @QueryParam("email") String email, @QueryParam("password") String password,
+            @QueryParam("fullName") String fullName, @QueryParam("company") String company) {
+
+        try {
+            User user = getService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(username,
+                    new ActionWithResult<User>() {
+
+                        @Override
+                        public User run() throws Exception {
+                            final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
+                            User newUser = getService().createSimpleUser(username, email, password, fullName, company,
+                                    Locale.ENGLISH, validationBaseURL);
+                            SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
+                            return newUser;
+                        }
+                    });
+            return respondWithAccessTokenForUser(user.getName());
+        } catch (Exception e) {
+            return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
+        }
     }
 
     private String getEmailValidationBaseURL(UriInfo uriInfo) {

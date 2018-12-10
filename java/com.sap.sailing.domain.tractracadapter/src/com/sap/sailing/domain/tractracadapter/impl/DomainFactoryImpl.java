@@ -47,7 +47,6 @@ import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
-import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SidelineImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -598,44 +597,58 @@ public class DomainFactoryImpl implements DomainFactory {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
                 logger.info("Creating RaceDefinitionImpl for race "+raceName);
-                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats, raceId);
+                try {
+                    raceDefinition = raceTrackingHandler.createRaceDefinition(trackedRegatta.getRegatta(), raceName, course, boatClass, competitorsAndBoats, raceId);
+                } catch (RuntimeException exception) {
+                    final String reasonForNotAddingRaceToRegatta = "Error while creating race " + raceDefinition + " for regatta " + trackedRegatta.getRegatta();
+                    errorWhileTryingToTrackRace(trackedRegatta, raceDefinitionSetToUpdate, raceDefinition, reasonForNotAddingRaceToRegatta);
+                }
             } else {
                 logger.info("Already found RaceDefinitionImpl for race "+raceName);
             }
-            DynamicTrackedRace trackedRace = trackedRegatta.getExistingTrackedRace(raceDefinition);
-            if (trackedRace == null) {
-                // add to existing regatta only if boat class matches
-                if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
-                    trackedRegatta.getRegatta().addRace(raceDefinition);
-                    trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
-                            delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
-                            raceLogResolver, raceTrackingHandler);
-                    logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
-                    if (runBeforeExposingRace != null) {
-                    	logger.fine("Running callback for tracked race creation for "+trackedRace.getRace());
-                    	runBeforeExposingRace.accept(trackedRace);
+            DynamicTrackedRace trackedRace = null;
+            if (raceDefinition != null) {
+                trackedRace = trackedRegatta.getExistingTrackedRace(raceDefinition);
+                if (trackedRace == null) {
+                    // add to existing regatta only if boat class matches
+                    if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
+                        trackedRegatta.getRegatta().addRace(raceDefinition);
+                        trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
+                                delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
+                                raceLogResolver, raceTrackingHandler);
+                        logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
+                        if (runBeforeExposingRace != null) {
+                            logger.fine("Running callback for tracked race creation for "+trackedRace.getRace());
+                            runBeforeExposingRace.accept(trackedRace);
+                        }
+                        addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
+                                raceDefinition, trackedRace, tractracRace);
+                        raceCache.put(raceId, raceDefinition);
+                        // the following unblocks waiters in DomainFactory.getAndWaitForRaceDefinition(...)
+                        raceCache.notifyAll();
+                    } else {
+                        final String reasonForNotAddingRaceToRegatta = "Not adding race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta()
+                        + " because boat class " + raceDefinition.getBoatClass()
+                        + " doesn't match regatta's boat class " + trackedRegatta.getRegatta().getBoatClass();
+                        errorWhileTryingToTrackRace(trackedRegatta, raceDefinitionSetToUpdate, raceDefinition,
+                                reasonForNotAddingRaceToRegatta);
                     }
-                    addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
-                            raceDefinition, trackedRace, tractracRace);
-                    raceCache.put(raceId, raceDefinition);
-                    // the following unblocks waiters in DomainFactory.getAndWaitForRaceDefinition(...)
-                    raceCache.notifyAll();
                 } else {
-                    final String reasonForNotAddingRaceToRegatta = "Not adding race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta()
-                            + " because boat class " + raceDefinition.getBoatClass()
-                            + " doesn't match regatta's boat class " + trackedRegatta.getRegatta().getBoatClass();
-                    logger.warning(reasonForNotAddingRaceToRegatta);
-                    try {
-                        raceDefinitionSetToUpdate.raceNotLoaded(reasonForNotAddingRaceToRegatta);
-                    } catch (Exception e) {
-                        logger.log(Level.INFO, "Something else went wrong while trying to notify the RaceDefinition set that the race "+
-                                raceDefinition+" could not be added to the the regatta "+trackedRegatta.getRegatta(), e);
-                    }
+                    logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
                 }
-            } else {
-                logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
             }
             return trackedRace;
+        }
+    }
+
+    private void errorWhileTryingToTrackRace(DynamicTrackedRegatta trackedRegatta, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+            RaceDefinition raceDefinition, final String reasonForNotAddingRaceToRegatta) {
+        logger.warning(reasonForNotAddingRaceToRegatta);
+        try {
+            raceDefinitionSetToUpdate.raceNotLoaded(reasonForNotAddingRaceToRegatta);
+        } catch (Exception e) {
+            logger.log(Level.INFO, "Something else went wrong while trying to notify the RaceDefinition set that the race "+
+                    raceDefinition+" could not be added to the the regatta "+trackedRegatta.getRegatta(), e);
         }
     }
 

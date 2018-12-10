@@ -1,10 +1,18 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
+import java.util.Map;
 import java.util.Optional;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sse.util.ThreadLocalTransporter;
 
 /**
@@ -20,6 +28,9 @@ public interface RaceTrackingHandler {
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
             RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter);
+    
+    RaceDefinition createRaceDefinition(Regatta regatta, String name, Course course, BoatClass boatClass,
+            Map<Competitor, Boat> competitorsAndTheirBoats, Serializable id);
 
     public class DefaultRaceTrackingHandler implements RaceTrackingHandler {
         @Override
@@ -31,6 +42,12 @@ public interface RaceTrackingHandler {
             return trackedRegatta.createTrackedRace(raceDefinition, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
                     useMarkPassingCalculator, raceLogResolver, threadLocalTransporter);
+        }
+
+        @Override
+        public RaceDefinition createRaceDefinition(Regatta regatta, String name, Course course,
+                BoatClass boatClass, Map<Competitor, Boat> competitorsAndTheirBoats, Serializable id) {
+            return new RaceDefinitionImpl(name, course, boatClass, competitorsAndTheirBoats, id);
         }
     }
 }

@@ -4661,6 +4661,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                         return null;
                                     }
                                 });
+
+                        // remove all leaderboards using the proper call that will clean and remove the owner as well
+                        Set<RegattaLeaderboard> leaderboardsToRemove = new HashSet<>();
+                        for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+                            if (leaderboard instanceof RegattaLeaderboard) {
+                                RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                                if (regattaLeaderboard.getRegatta() == regatta) {
+                                    leaderboardsToRemove.add(regattaLeaderboard);
+                                }
+                            }
+                        }
+                        for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
+                            removeLeaderboard(regattaLeaderboardToRemove.getName());
+                        }
                     }
                     getService().apply(new RemoveRegatta(regattaIdentifier));
                 }

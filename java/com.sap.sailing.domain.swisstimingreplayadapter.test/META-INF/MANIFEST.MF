@@ -7,8 +7,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.domain.swisstimingreplayadapter
-Import-Package: com.sap.sailing.domain.tracking,
- org.json.simple,
+Import-Package: org.json.simple,
  org.json.simple.parser
 Require-Bundle: com.sap.sailing.domain.test,
  org.junit;bundle-version="4.8.2",

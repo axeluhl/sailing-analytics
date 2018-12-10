@@ -131,6 +131,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(role, new Action() {
                 @Override
                 public void run() throws Exception {
+                    for (User user : getSecurityService().getUserList()) {
+                        HashSet<Role> nonConcurrentModificationCopy = new HashSet<>();
+                        Util.addAll(user.getRoles(), nonConcurrentModificationCopy);
+                        for (Role roleInstance : nonConcurrentModificationCopy) {
+                            if (roleInstance.getRoleDefinition().equals(role)) {
+                                getSecurityService().removeRoleFromUser(user, roleInstance);
+                            }
+                        }
+                    }
                     getSecurityService().deleteRoleDefinition(role);
                 }
             });
@@ -331,7 +340,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (userGroup != null) {
             return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(userGroup, () -> {
                 try {
-
                     getSecurityService().deleteUserGroup(userGroup);
                     return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".",
                             /* redirectURL */ null, null);
@@ -417,19 +425,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company,
             String localeName, String validationBaseURL)
             throws UserManagementException, MailException, UnauthorizedException {
-        
+
         User user = getSecurityService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(username,
                 new ActionWithResult<User>() {
-            @Override
-            public User run() throws Exception {
-                try {
-                    return getSecurityService().createSimpleUser(username, email, password, fullName, company,
-                            getLocaleFromLocaleName(localeName), validationBaseURL);
-                } catch (UserManagementException | UserGroupManagementException e) {
-                    logger.log(Level.SEVERE, "Error creating user " + username, e);
-                    throw new UserManagementException(e.getMessage());
-                }
-            }
+                    @Override
+                    public User run() throws Exception {
+                        try {
+                            return getSecurityService().createSimpleUser(username, email, password, fullName, company,
+                                    getLocaleFromLocaleName(localeName), validationBaseURL);
+                        } catch (UserManagementException | UserGroupManagementException e) {
+                            logger.log(Level.SEVERE, "Error creating user " + username, e);
+                            throw new UserManagementException(e.getMessage());
+                        }
+                    }
                 });
         return securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
     }
