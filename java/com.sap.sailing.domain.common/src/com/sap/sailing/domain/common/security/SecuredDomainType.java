@@ -42,31 +42,14 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions CAN_REPLAY_DURING_LIVE_RACES = new SecuredDomainType("CAN_REPLAY_DURING_LIVE_RACES", IdentifierStrategy.NO_OP);
     public static final HasPermissions DETAIL_TIMER = new SecuredDomainType("DETAIL_TIMER", IdentifierStrategy.NO_OP); // TODO this is not a valid "HasPermission" instance; it's more an operation the user may be granted on objects of the TimePanel type
     
-    /**
-     * type-relative identifier is the event ID's string representation}
-     */
     public static final HasPermissions EVENT = new SecuredDomainType("EVENT", IdentifierStrategy.ID);
 
-    /**
-     * type-relative identifier is the regatta name
-     */
     public static final HasPermissions REGATTA = new SecuredDomainType("REGATTA", IdentifierStrategy.NAMED);
 
-    /**
-     * type-relative identifier is the leaderboard name
-     */
     public static final HasPermissions LEADERBOARD = new SecuredDomainType("LEADERBOARD", IdentifierStrategy.NAMED);
 
-    /**
-     * type-relative identifier is the leaderboard group ID's string representation
-     */
     public static final HasPermissions LEADERBOARD_GROUP = new SecuredDomainType("LEADERBOARD_GROUP", IdentifierStrategy.ID);
 
-    /**
-     * type-relative identifier is the regatta name and the race definition name, encoded using the
-     * {@link WildcardPermissionEncoder#encodeStringList(String...)} method
-     */
-    //TODO: RaceDTO.getTypeRelativeIdentifierAsString
     public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE", DomainIdentifierStrategy.TRACKED_RACE);
     
     public static enum CompetitorAndBoatActions implements Action {
@@ -76,20 +59,11 @@ public class SecuredDomainType extends HasPermissionsImpl {
                 DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,
                 DefaultActions.CHANGE_ACL };
     };
-    
-    /**
-     * type relative identifier is the competitor ID's string representation
-     */
+
     public static final HasPermissions COMPETITOR = new SecuredDomainType("COMPETITOR", IdentifierStrategy.ID, CompetitorAndBoatActions.ALL_ACTIONS);
-    
-    /**
-     * type relative identifier is the boat ID's string representation
-     */
+
     public static final HasPermissions BOAT = new SecuredDomainType("BOAT", IdentifierStrategy.ID, CompetitorAndBoatActions.ALL_ACTIONS);
-    
-    /**
-     * type-relative identifier is the media track's "DB ID"
-     */
+
     public static final HasPermissions MEDIA_TRACK = new SecuredDomainType("MEDIA_TRACK", DomainIdentifierStrategy.MEDIA_TRACK);
     
     /**
@@ -103,9 +77,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
         START, STOP, DROP_CONNECTION
     };
 
-    /**
-     * type-relative identifier is the server name
-     */
     public static final HasPermissions REPLICATOR = new SecuredDomainType("REPLICATOR", IdentifierStrategy.SERVERNAME,
             ReplicatorActions.values());
 
@@ -117,9 +88,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions DATA_MINING = new SecuredDomainType("DATA_MINING",
             IdentifierStrategy.STRING);
 
-    /**
-     * type-relative identifier is the device configuration name
-     */
     public static final HasPermissions RACE_MANAGER_APP_DEVICE_CONFIGURATION = new SecuredDomainType(
             "RACE_MANAGER_APP_DEVICE_CONFIGURATION", IdentifierStrategy.NAMED);
 
