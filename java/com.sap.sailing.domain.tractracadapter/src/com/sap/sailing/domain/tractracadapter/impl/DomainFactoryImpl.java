@@ -47,7 +47,6 @@ import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
-import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SidelineImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -598,7 +597,7 @@ public class DomainFactoryImpl implements DomainFactory {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
                 logger.info("Creating RaceDefinitionImpl for race "+raceName);
-                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats, raceId);
+                raceDefinition = raceTrackingHandler.createRaceDefinition(trackedRegatta.getRegatta(), raceName, course, boatClass, competitorsAndBoats, raceId);
             } else {
                 logger.info("Already found RaceDefinitionImpl for race "+raceName);
             }

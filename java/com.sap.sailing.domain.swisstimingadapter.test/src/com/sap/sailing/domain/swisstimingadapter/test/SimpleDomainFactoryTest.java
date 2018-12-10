@@ -30,6 +30,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.CourseImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.Util;
 
@@ -101,7 +102,7 @@ public class SimpleDomainFactoryTest {
             public Iterable<Mark> getMarks() {
                 return Collections.emptyList();
             }
-        });
+        }, new DefaultRaceTrackingHandler());
         assertNotNull(raceDefinition.getBoatClass());
         assertEquals("UNKNOWN", raceDefinition.getBoatClass().getName());
     }
@@ -120,7 +121,8 @@ public class SimpleDomainFactoryTest {
         Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"), /* markType */ null);
         List<Mark> marks = Arrays.asList(mark1, mark2);
         Course course = new CourseImpl("1234", marks);
-        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course);
+        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course,
+                new DefaultRaceTrackingHandler());
         ArrayList<Waypoint> waypoints1 = new ArrayList<Waypoint>();
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
             waypoints1.add(waypoint);
@@ -147,7 +149,8 @@ public class SimpleDomainFactoryTest {
         Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"), /* markType */ null);
         List<Mark> marks = Arrays.asList(mark1, mark2);
         Course course = new CourseImpl("1234", marks);
-        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course);
+        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course,
+                new DefaultRaceTrackingHandler());
         assertEquals(2, Util.size(raceDefinition.getCourse().getWaypoints()));
         ArrayList<Waypoint> waypoints1 = new ArrayList<Waypoint>();
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
