@@ -672,7 +672,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     public void raceNotLoaded(String reason) throws MalformedURLException, IOException, InterruptedException {
         logger.severe("Race for tracker "+this+" with ID "+getID()+" did not load: "+reason+". Stopping tracker.");
         if (race != null) {
-            trackedRegattaRegistry.stopTracking(regatta, race);
+            if (race == null) {
+                trackedRegattaRegistry.stopTracker(regatta, this);
+            } else {
+                trackedRegattaRegistry.stopTracking(regatta, race);
+            }
         }
     }
 

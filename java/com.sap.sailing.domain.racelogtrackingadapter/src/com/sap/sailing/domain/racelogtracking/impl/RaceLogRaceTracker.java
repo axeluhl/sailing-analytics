@@ -302,19 +302,32 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         }
         Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getAllCompetitorsAndTheirBoats(params.getFleet());
         Serializable raceId = denoteEvent.getRaceId();
-        final RaceDefinition raceDef = raceTrackingHandler.createRaceDefinition(trackedRegatta.getRegatta(), raceName, course,
-                boatClass, competitorsAndTheirBoats, raceId);
-        Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
-        // set race definition, so race is linked to leaderboard automatically
-        trackedRegatta.getRegatta().addRace(raceDef);
-        raceColumn.setRaceIdentifier(fleet, trackedRegatta.getRegatta().getRaceIdentifier(raceDef));
-        trackedRace = raceTrackingHandler.createTrackedRace(trackedRegatta, raceDef, sidelines, windStore,
-                params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
-                boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver,
-                /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
-        notifyRaceCreationListeners();
-        logger.info(String.format("Started tracking race-log race (%s)", raceLog));
-        // this wakes up all waiting race handles
+        try {
+            final RaceDefinition raceDef = raceTrackingHandler.createRaceDefinition(trackedRegatta.getRegatta(), raceName, course,
+                    boatClass, competitorsAndTheirBoats, raceId);
+            Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
+            // set race definition, so race is linked to leaderboard automatically
+            trackedRegatta.getRegatta().addRace(raceDef);
+            raceColumn.setRaceIdentifier(fleet, trackedRegatta.getRegatta().getRaceIdentifier(raceDef));
+            trackedRace = raceTrackingHandler.createTrackedRace(trackedRegatta, raceDef, sidelines, windStore,
+                    params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
+                    boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver,
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+            notifyRaceCreationListeners();
+            logger.info(String.format("Started tracking race-log race (%s)", raceLog));
+            // this wakes up all waiting race handles
+        } catch (Exception exception) {
+            logger.log(Level.WARNING,
+                    "Error while creating race " + raceName + " for retatta " + trackedRegatta.getRegatta(), exception);
+            try {
+                trackedRegattaRegistry.stopTracker(trackedRegatta.getRegatta(), this);
+            } catch (Exception e) {
+                logger.log(Level.INFO,
+                        "Something else went wrong while trying to notify the TrackedRegattaRegistry that the race "
+                                + " could not be added to the the regatta " + trackedRegatta.getRegatta(),
+                                e);
+            }
+        }
         synchronized (this) {
             this.notifyAll();
         }

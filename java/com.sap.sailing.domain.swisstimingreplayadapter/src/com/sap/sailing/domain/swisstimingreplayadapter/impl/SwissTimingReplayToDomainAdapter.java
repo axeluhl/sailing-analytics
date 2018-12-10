@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -395,30 +396,45 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     }
 
     private void createRace() {
-        RaceDefinition race = domainFactory.createRaceDefinition(regatta,
-                currentRaceID, competitorsAndBoatsPerRaceID.get(currentRaceID), currentCourseDefinition, raceName, raceIdForRaceDefinition);
-        synchronized (racePerRaceIdForRaceDefinition) {
-            racePerRaceIdForRaceDefinition.put(raceIdForRaceDefinition, race);
-            racePerRaceIdForRaceDefinition.notifyAll();
-        }
-        DynamicTrackedRace trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(),
-                race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
-                        TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
-                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
-                        /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                        /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver,
-                        /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
-        trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
-        TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
-        if (bestStartTimeKnownSoFar != null) {
-            trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);
-        }
-        trackedRacePerRaceID.put(currentRaceID, trackedRace);
-        if (dynamicRaceDefinitionSet != null) {
-            dynamicRaceDefinitionSet.addRaceDefinition(race, trackedRace);
+        try {
+            RaceDefinition race = domainFactory.createRaceDefinition(regatta,
+                    currentRaceID, competitorsAndBoatsPerRaceID.get(currentRaceID), currentCourseDefinition, raceName, raceIdForRaceDefinition,
+                    raceTrackingHandler);
+            synchronized (racePerRaceIdForRaceDefinition) {
+                racePerRaceIdForRaceDefinition.put(raceIdForRaceDefinition, race);
+                racePerRaceIdForRaceDefinition.notifyAll();
+            }
+            DynamicTrackedRace trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(),
+                    race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
+                    TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
+                    WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
+                    /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
+                    /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver,
+                    /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+            trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
+            TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
+            if (bestStartTimeKnownSoFar != null) {
+                trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);
+            }
+            trackedRacePerRaceID.put(currentRaceID, trackedRace);
+            if (dynamicRaceDefinitionSet != null) {
+                dynamicRaceDefinitionSet.addRaceDefinition(race, trackedRace);
+            }
+        } catch (Exception exception) {
+            logger.log(Level.WARNING, "Error while creating race " + raceName + " for retatta " + regatta, exception);
+            try {
+                if (tracker != null) {
+                    trackedRegattaRegistry.stopTracker(regatta, getTracker());
+                }
+            } catch (Exception e) {
+                logger.log(Level.INFO,
+                        "Something else went wrong while trying to notify the TrackedRegattaRegistry that the race "
+                                + " could not be added to the the regatta " + regatta,
+                                e);
+            }
         }
     }
-
+    
     public DynamicTrackedRegatta getTrackedRegatta() {
         return trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
     }

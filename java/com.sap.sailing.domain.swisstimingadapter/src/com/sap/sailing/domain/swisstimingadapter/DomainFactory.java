@@ -79,7 +79,8 @@ public interface DomainFactory {
     ControlPoint getOrCreateControlPoint(String description, Iterable<Serializable> deviceIds, MarkType markType);
 
     RaceDefinition createRaceDefinition(Regatta regatta, String swissTimingRaceID, Map<Competitor, Boat> competitorsAndBoats,
-            List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition);
+            List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition,
+            RaceTrackingHandler raceTrackingHandler);
 
     /**
      * Adds update handlers that forward events about a race, such as start time changes, course changes
