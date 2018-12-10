@@ -2469,18 +2469,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
-        Set<RegattaLeaderboard> leaderboardsToRemove = new HashSet<>();
-        for (Leaderboard leaderboard : getLeaderboards().values()) {
-            if (leaderboard instanceof RegattaLeaderboard) {
-                RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-                if (regattaLeaderboard.getRegatta() == regatta) {
-                    leaderboardsToRemove.add(regattaLeaderboard);
-                }
-            }
-        }
-        for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
-            removeLeaderboard(regattaLeaderboardToRemove.getName());
-        }
         // avoid ConcurrentModificationException by copying the races to remove:
         Set<RaceDefinition> racesToRemove = new HashSet<>();
         Util.addAll(regatta.getAllRaces(), racesToRemove);
