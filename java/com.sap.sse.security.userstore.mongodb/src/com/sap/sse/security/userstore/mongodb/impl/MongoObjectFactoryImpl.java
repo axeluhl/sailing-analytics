@@ -47,7 +47,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUser.put(FieldNames.User.ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
         dbUser.put(FieldNames.User.ROLES.name(), user.getRoles());
         dbUser.put(FieldNames.User.PERMISSIONS.name(), user.getPermissions());
-        usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+        usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.ACKNOWLEDGED);
     }
     
     @Override
@@ -92,7 +92,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbSettings.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
         dbSettings.put(FieldNames.Settings.MAP.name(), createSettingsMapObject(settings));
 
-        settingCollection.update(query, dbSettings, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+        settingCollection.update(query, dbSettings, /* upsrt */true, /* multi */false, WriteConcern.ACKNOWLEDGED);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.Preferences.USERNAME.name(), username);
         DBObject update = new BasicDBObject(FieldNames.Preferences.KEYS_AND_VALUES.name(), dbSettings);
         update.put(FieldNames.Preferences.USERNAME.name(), username);
-        settingCollection.update(query, update, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+        settingCollection.update(query, update, /* upsrt */true, /* multi */false, WriteConcern.ACKNOWLEDGED);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbSettingTypes.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
         dbSettingTypes.put(FieldNames.Settings.MAP.name(), createSettingTypesMapObject(settingTypes));
 
-        settingCollection.update(query, dbSettingTypes, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+        settingCollection.update(query, dbSettingTypes, /* upsrt */true, /* multi */false, WriteConcern.ACKNOWLEDGED);
     }
 
     private DBObject createSettingsMapObject(Map<String, Object> settings) {

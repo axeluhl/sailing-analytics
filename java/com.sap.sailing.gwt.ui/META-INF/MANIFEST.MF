@@ -10,7 +10,6 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sse.mongodb,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence,
@@ -58,7 +57,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.expeditionconnector.common,
  org.mp4parser.isoparser;bundle-version="1.9.37",
- com.sap.sse.datamining.ui
+ com.sap.sse.datamining.ui,
+ org.eclipse.orbit.mongodb;bundle-version="3.2.2"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",

@@ -20,7 +20,6 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.declination,
  com.sap.sse.mongodb,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.common,
  com.sap.sailing.udpconnector,
@@ -39,7 +38,8 @@ Require-Bundle: com.sap.sailing.domain,
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.core;bundle-version="1.2.2",
  javax.servlet;bundle-version="3.1.0",
- com.sap.sse.mail
+ com.sap.sse.mail,
+ org.eclipse.orbit.mongodb;bundle-version="3.2.2"
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;

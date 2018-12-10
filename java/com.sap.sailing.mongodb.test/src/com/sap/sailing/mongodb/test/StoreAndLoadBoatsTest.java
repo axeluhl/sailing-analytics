@@ -43,7 +43,7 @@ public class StoreAndLoadBoatsTest extends AbstractMongoDBTest {
     private void dropBoatCollection() {
         DB db = getMongoService().getDB();
         DBCollection boatCollection = db.getCollection(CollectionNames.BOATS.name());
-        boatCollection.setWriteConcern(WriteConcern.SAFE); // ensure that the drop() has happened
+        boatCollection.setWriteConcern(WriteConcern.ACKNOWLEDGED); // ensure that the drop() has happened
         boatCollection.drop();
     }
     
