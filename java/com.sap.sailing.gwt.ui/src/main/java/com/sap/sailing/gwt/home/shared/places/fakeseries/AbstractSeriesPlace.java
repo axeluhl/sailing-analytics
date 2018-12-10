@@ -2,11 +2,13 @@ package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.common.client.AbstractMapTokenizer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 
 public abstract class AbstractSeriesPlace extends Place {
     private final SeriesContext ctx;
@@ -19,34 +21,44 @@ public abstract class AbstractSeriesPlace extends Place {
         return ctx;
     }
 
+    public AbstractSeriesPlace(String eventUuidAsString) {
+        UUID asUUID = UUID.fromString(eventUuidAsString);
+        this.ctx = SeriesContext.createWithSeriesId(asUUID);
+    }
+
     public String getTitle(String eventName) {
         return StringMessages.INSTANCE.sapSailing() + " - " + eventName;
     }
 
+    public String getSeriesUuidAsString() {
+        return ctx.getSeriesId().toString();
+    }
+    
     public static abstract class Tokenizer<PLACE extends AbstractSeriesPlace> extends AbstractMapTokenizer<PLACE> {
         private final static String PARAM_EVENTID = "seriesId";
-        private final static String PARAM_LEADERBOARD_GROUP_UUID = "leaderboardGroupId";
-        protected PLACE getPlaceFromParameters(Map<String, String> parameters) {
-            String leaderboardGroupIdRaw = parameters.get(PARAM_LEADERBOARD_GROUP_UUID);
+	private final static String PARAM_LEADERBOARD_GROUP_UUID = "leaderboardGroupId";
+       
+        protected PLACE getPlaceFromParameters(Map<String, Set<String>> parameters) {
+            String leaderboardGroupIdRaw = parameters.get(PARAM_LEADERBOARD_GROUP_UUID).stream().findFirst().orElse("");
             SeriesContext ctx;
             if (leaderboardGroupIdRaw != null) {
                 ctx = SeriesContext.createWithLeaderboardGroupId(UUID.fromString(leaderboardGroupIdRaw));
             } else {
-                String eventIdRaw = parameters.get(PARAM_EVENTID);
+                String eventIdRaw = parameters.get(PARAM_EVENTID).stream().findFirst().orElse("");
                 ctx = SeriesContext.createWithSeriesId(UUID.fromString(eventIdRaw));
             }
             return getRealPlace(ctx);
         }
         
-        protected Map<String, String> getParameters(PLACE place) {
-            Map<String, String> parameters = new HashMap<>();
+        protected Map<String, Set<String>> getParameters(PLACE place) {
+            Map<String, Set<String>> parameters = new HashMap<>();
             SeriesContext context = place.getCtx();
             if(context.getLeaderboardGroupId() != null) {
-                parameters.put(PARAM_LEADERBOARD_GROUP_UUID, context.getLeaderboardGroupId().toString());
+               Util.addToValueSet(parameters, PARAM_LEADERBOARD_GROUP_UUID, context.getLeaderboardGroupId().toString());
             }
             //fallback only generate old urls if not possible otherwise!
             if(context.getLeaderboardGroupId() == null && context.getSeriesId() != null) {
-                parameters.put(PARAM_EVENTID, context.getSeriesId().toString());
+                Util.addToValueSet(parameters, PARAM_EVENTID, context.getSeriesId().toString());
             }
             return parameters;
         }

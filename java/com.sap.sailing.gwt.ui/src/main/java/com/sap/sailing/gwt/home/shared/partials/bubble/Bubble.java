@@ -54,15 +54,13 @@ public class Bubble extends PopupPanel {
         }
 
         /**
-         * Registers the given {@link Element} as {@link PopupPanel#addAutoHidePartner(Element) auto-hide partner} as
-         * well as {@link DOM#sinkEvents(Element, int) event sink} for click, mouse-over and mouse-out events to trigger
-         * show or hide of the managed {@link Bubble} instance.
+         * Registers the given {@link Element} as {@link DOM#sinkEvents(Element, int) event sink} for click, mouse-over
+         * and mouse-out events to trigger show or hide of the managed {@link Bubble} instance.
          * 
          * @param target
          *            the {@link Element} to register
          */
         public void registerTarget(Element target) {
-            popup.addAutoHidePartner(target);
             DOM.sinkEvents(target, Event.ONCLICK | Event.ONMOUSEOVER | Event.ONMOUSEOUT);
             Event.setEventListener(target, this);
         }

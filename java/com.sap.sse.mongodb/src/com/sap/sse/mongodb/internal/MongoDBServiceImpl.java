@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.sap.sse.mongodb.AlreadyRegisteredException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
@@ -19,9 +20,9 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     private MongoDBConfiguration configuration;
 
-    private final Map<com.sap.sse.common.Util.Pair<String, Integer>, Mongo> mongos;
+    private final Map<MongoClientURI, Mongo> mongos;
     
-    private final Map<com.sap.sse.common.Util.Pair<String, Integer>, DB> dbs;
+    private final Map<MongoClientURI, DB> dbs;
 
     /**
      * collection name -> fully qualified class name
@@ -29,8 +30,8 @@ public class MongoDBServiceImpl implements MongoDBService {
     private final Map<String, String> registered;
 
     public MongoDBServiceImpl() {
-        mongos = new HashMap<com.sap.sse.common.Util.Pair<String, Integer>, Mongo>();
-        dbs = new HashMap<com.sap.sse.common.Util.Pair<String,Integer>, DB>();
+        mongos = new HashMap<>();
+        dbs = new HashMap<>();
         registered = new HashMap<String, String>();
     }
 
@@ -45,13 +46,13 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     public void setConfiguration(MongoDBConfiguration configuration) {
         this.configuration = configuration;
-        logger.info("Used Mongo configuration: host:port/DBName: "+configuration.getHostName()+":"+configuration.getPort()+"/"+configuration.getDatabaseName());
+        logger.info("Used Mongo configuration: "+configuration.getMongoClientURI());
     }
 
     public DB getDB() {
         if (configuration == null) {
             configuration = MongoDBConfiguration.getDefaultTestConfiguration();
-            logger.info("Used default Mongo configuration: host:port/DBName: "+configuration.getHostName()+":"+configuration.getPort()+"/"+configuration.getDatabaseName());
+            logger.info("Used default Mongo configuration: "+configuration.getMongoClientURI());
         }
         try {
             return getDB(configuration);
@@ -61,15 +62,15 @@ public class MongoDBServiceImpl implements MongoDBService {
     }
     
     private synchronized DB getDB(MongoDBConfiguration mongoDBConfiguration) throws UnknownHostException {
-        com.sap.sse.common.Util.Pair<String, Integer> key = new com.sap.sse.common.Util.Pair<String, Integer>(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
+        final MongoClientURI key = mongoDBConfiguration.getMongoClientURI();
         DB db = dbs.get(key);
         if (db == null) {
             Mongo mongo = mongos.get(key);
             if (mongo == null) {
-                mongo = new MongoClient(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
+                mongo = new MongoClient(mongoDBConfiguration.getMongoClientURI());
                 mongos.put(key, mongo);
             }
-            db = mongo.getDB(mongoDBConfiguration.getDatabaseName());
+            db = mongo.getDB(mongoDBConfiguration.getMongoClientURI().getDatabase());
             dbs.put(key, db);
         }
         return db;

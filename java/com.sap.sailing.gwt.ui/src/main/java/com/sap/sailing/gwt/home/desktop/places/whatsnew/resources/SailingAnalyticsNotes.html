@@ -4,24 +4,64 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">November 2018</h5>
+         <ul class="bulletList">
+            <li>The number on top of the series progress bar is now labeled to explain what it means.</li>
+            <li>The series name on top of the progress bar will be omitted, if there the "Default" series only</li>
+            <li>Improvements to mobile event overview page:
+               <ul class="bulletList">
+                  <li>To make it easier to find regattas with tracked races, the data indicators known from the desktop
+                      version are now be used in the overview page of multi-regatta events on mobile, too.</li>
+                  <li>In addition, live races shown in event's the overview pages can now be used to navigate to the
+                      RaceBoard.html without further detours.</li>
+                  <li>The series progress bars on a event's/regatta's overview page can now be used to easily navigate
+                      to the respective series within the races page.</li>
+                  <li>In order to show the interesting information first, the order of contents on the mobile regatta
+                      overview page has been adjusted.</li>
+                  <li>Also, the series progress bars are now collapsable in order to same space if there are not
+                      urgently needed, where they are shown by default if the regatta is live or in progress and will
+                      stay collapsed by default if the event is over or the regatta is complete.</li>
+               </ul>
+            </li>  
+         </ul>
+      
          <h5 class="articleSubheadline">October 2018</h5>
          <ul class="bulletList">
+            <li>Introduction of the Sailor Profiles</li>
+                <ul class="bulletList">
+                    <li>Authenticated users can now create sailor profiles in their profile view.</li>
+                    <li>Sailor Profiles show information about the selected competitors and help to compare their strengths and weaknesses, like:</li>
+                    <ul class="bulletList">
+                        <li>The events the sailor has participated in with the rank and points of the sailor.</li>
+                        <li>Several statistics for each competitor:
+                            <ul class="bulletList">
+                            <li>the maximum speed</li>
+                            <li>the minimum distance to the start line at race start</li>
+                            <li>the average distance to the start line at race start</li>
+                            <li>the maximum speed while crossing the start line</li>
+                         </ul>
+                        <li>It is possible to go from the sailor profile directly to the dynamic place of interest. For example, after clicking on the maximum speed statistic value, the race board will open and the exact point in time where the maximum speed was reached is displayed.</li>
+                    </ul>
+                </ul>
             <li>Searching for phrases containing whitespace characters with double quotes such as "Tobias Schadewaldt" will now work
                 across a distributed server and event landscape.</li>  
+            <li>A column showing the used boat can now be shown for each extended race column in leaderboards with multiple races.
+                This new column is activated per default, if the boats change between races. </li>
+            <li>It is now possible to store and load queries in <tt>DataMining.html</tt>. Such queries are saved per user.</li>
          </ul>
-
+         
          <h5 class="articleSubheadline">September 2018</h5>
          <ul class="bulletList">
             <li>In <tt>RaceBoard.html</tt> is a new feature available which allows users to create tags consisting of a title
-            and optional comment and/or image per race. These tags can be saved visible only for the creating user or for everbody 
-            (requiring special permissions) and can be used to mark interesting situations during a race. Tag buttons allow users to 
-            save frequently used tags as a preset which can be used quckily and do not require repeating input of the same tag.
+            and optional comment and/or image per race. These tags can be saved visible only for the creating user or for everybody
+            (requiring special permissions) and can be used to mark interesting situations during a race. Tag buttons allow users to
+            save frequently used tags as a preset which can be used quickly and do not require repeating input of the same tag.
             Those tags and their comments are also used in order to find the containing leaderboard via the global search.</li>
          </ul>
 
          <h5 class="articleSubheadline">August 2018</h5>
          <ul class="bulletList">
-            <li>The windstreamlets are now colored dynamically according to the wind fields maximum and minimum wind speed.</li>  
+            <li>The windstreamlets are now colored dynamically according to the wind fields maximum and minimum wind speed.</li>
             <li>Changes of <tt>DataMining.html</tt>
                <ul class="bulletList">
                   <li>The currently selected result tab will be remembered when a query is run. It is now possible
