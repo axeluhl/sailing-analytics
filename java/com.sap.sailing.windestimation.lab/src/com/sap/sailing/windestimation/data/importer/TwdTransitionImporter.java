@@ -11,7 +11,6 @@ import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifier;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
@@ -22,7 +21,7 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
-import com.sap.sailing.windestimation.data.persistence.maneuver.TwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.wind.TwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.Distance;
@@ -36,7 +35,7 @@ public class TwdTransitionImporter {
         RaceWithCompleteManeuverCurvePersistenceManager racesPersistenceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
         TwdTransitionPersistenceManager twdTransitionPersistenceManager = new TwdTransitionPersistenceManager();
         twdTransitionPersistenceManager.dropCollection();
-        ManeuverClassifier maneuverClassifier = new DummyManeuverClassifier();
+        DummyManeuverClassifier maneuverClassifier = new DummyManeuverClassifier();
         RaceElementsFilteringPreprocessingPipelineImpl preprocessingPipeline = new RaceElementsFilteringPreprocessingPipelineImpl();
         long twdTransitionsCount = 0;
         for (PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> iterator = racesPersistenceManager
@@ -60,13 +59,14 @@ public class TwdTransitionImporter {
     }
 
     private static List<ManeuverWithProbabilisticTypeClassification> getPreprocessedSortedManeuvers(
-            ManeuverClassifier maneuverClassifier, RaceElementsFilteringPreprocessingPipelineImpl preprocessingPipeline,
+            DummyManeuverClassifier maneuverClassifier,
+            RaceElementsFilteringPreprocessingPipelineImpl preprocessingPipeline,
             RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> race) {
         RaceWithEstimationData<ManeuverForEstimation> preprocessedRace = preprocessingPipeline.preprocessRace(race);
         List<CompetitorTrackWithEstimationData<ManeuverWithProbabilisticTypeClassification>> competitorTracks = preprocessedRace
                 .getCompetitorTracks().stream().map(competitorTrack -> {
                     List<ManeuverWithProbabilisticTypeClassification> maneuverClassifications = competitorTrack
-                            .getElements().stream().map(maneuver -> maneuverClassifier.classifyManeuver(maneuver))
+                            .getElements().stream().map(maneuver -> maneuverClassifier.classifyInstance(maneuver))
                             .collect(Collectors.toList());
                     return competitorTrack.constructWithElements(maneuverClassifications);
                 }).collect(Collectors.toList());
@@ -132,23 +132,12 @@ public class TwdTransitionImporter {
         return result;
     }
 
-    private static class DummyManeuverClassifier implements ManeuverClassifier {
+    private static class DummyManeuverClassifier {
 
-        @Override
-        public ManeuverWithProbabilisticTypeClassification classifyManeuver(ManeuverForEstimation maneuver) {
+        public ManeuverWithProbabilisticTypeClassification classifyInstance(ManeuverForEstimation maneuver) {
             ManeuverWithProbabilisticTypeClassification maneuverWithProbabilisticTypeClassification = new ManeuverWithProbabilisticTypeClassification(
                     maneuver, new double[ManeuverTypeForClassification.values().length]);
             return maneuverWithProbabilisticTypeClassification;
-        }
-
-        @Override
-        public double getTestScore() {
-            return 0;
-        }
-
-        @Override
-        public boolean hasSupportForProvidedFeatures() {
-            return true;
         }
 
     }

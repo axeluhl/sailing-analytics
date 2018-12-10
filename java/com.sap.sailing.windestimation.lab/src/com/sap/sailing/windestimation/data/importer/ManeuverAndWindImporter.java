@@ -31,6 +31,7 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
 import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstimationDataJsonDeserializer;
@@ -50,7 +51,7 @@ import com.sap.sailing.windestimation.util.LoggingUtil;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class CompleteManeuverCurveWithEstimationDataImporter {
+public class ManeuverAndWindImporter {
 
     public static final String REST_API_BASE_URL = "https://www.sapsailing.com/sailingserver/api/v1";
     public static final String REST_API_REGATTAS_PATH = "/regattas";
@@ -69,7 +70,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
     private final String startFromRegattaName = "KW 2016 International - 29er";
     private final String startFromRegattaRace = "F4 Silver (29er)";
 
-    public CompleteManeuverCurveWithEstimationDataImporter() throws UnknownHostException {
+    public ManeuverAndWindImporter() throws UnknownHostException {
         this.completeManeuverCurvePersistanceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
         this.maneuverForDataAnalysisPersistenceManager = new RaceWithManeuverForDataAnalysisPersistenceManager();
         this.maneuverForEstimationPersistenceManager = new RaceWithManeuverForEstimationPersistenceManager();
@@ -88,7 +89,7 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
     }
 
     public static void main(String[] args) throws Exception {
-        CompleteManeuverCurveWithEstimationDataImporter importer = new CompleteManeuverCurveWithEstimationDataImporter();
+        ManeuverAndWindImporter importer = new ManeuverAndWindImporter();
         importer.importAllRegattas();
     }
 
@@ -195,8 +196,10 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
 
     private void parseWindData(String regattaName, String trackedRaceName, ImportStatistics importStatistics,
             JSONObject resultJson) {
-        raceWithWindSourcesPersistenceManager.add(resultJson);
-        importStatistics.racesWithHighQualityWindData++;
+        if (resultJson.containsKey(RaceWindJsonSerializer.WIND_SOURCES)) {
+            raceWithWindSourcesPersistenceManager.add(resultJson);
+            importStatistics.racesWithHighQualityWindData++;
+        }
     }
 
     private void parseManeuverData(String regattaName, String trackedRaceName, ImportStatistics importStatistics,

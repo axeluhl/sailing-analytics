@@ -5,11 +5,10 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.PolarsFittingBasedWindEstimationComponentImpl;
 import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl;
 import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl.ManeuverClassificationsAggregatorImplementation;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifierLoader;
+import com.sap.sailing.windestimation.WindEstimationComponent;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
-import com.sap.sailing.windestimation.WindEstimationComponent;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 
@@ -28,8 +27,7 @@ public class WindEstimatorFactories {
             ClassifierModelStore classifierModelStore) {
         this.polarService = polarService;
         this.maneuverFeatures = maneuverFeatures;
-        this.maneuverClassifiersCache = new ManeuverClassifiersCache(new ManeuverClassifierLoader(classifierModelStore),
-                3600000, maneuverFeatures);
+        this.maneuverClassifiersCache = new ManeuverClassifiersCache(classifierModelStore, 3600000, maneuverFeatures);
     }
 
     public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> get(

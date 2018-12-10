@@ -177,7 +177,7 @@ public class ManeuverModelMetadata extends ContextSpecificModelMetadata<Maneuver
 
     @Override
     public String getId() {
-        StringBuilder id = new StringBuilder();
+        StringBuilder id = new StringBuilder("Maneuver-");
         id.append(getManeuverFeatures().toString());
         id.append("-");
         if (getBoatClass() == null) {

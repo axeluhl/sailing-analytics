@@ -19,7 +19,7 @@ public interface FeatureExtraction<InstanceType> {
 
     int getNumberOfInputFeatures();
 
-    int getY(InstanceType maneuver);
+    int getY(InstanceType instance);
 
     default int[] getYVector(List<InstanceType> instances) {
         int[] output = new int[instances.size()];

@@ -1,10 +1,7 @@
-package com.sap.sailing.windestimation.classifier.maneuver;
+package com.sap.sailing.windestimation.classifier;
 
 import java.util.List;
-
-import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverModelMetadata;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import java.util.function.Function;
 
 import smile.validation.ConfusionMatrix;
 
@@ -13,38 +10,40 @@ import smile.validation.ConfusionMatrix;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ClassifierScoring {
+public class ClassifierScoring<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>> {
 
-    private TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> trainedClassifier;
+    private TrainableClassificationModel<InstanceType, T> trainedClassifier;
     private double lastAvgF1Score = 0;
     private double lastAvgPrecision = 0;
     private double lastAvgRecall = 0;
+    private final Function<Integer, String> indexOfTargetValueToLabelMapper;
 
-    public ClassifierScoring(
-            TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> trainedClassifierModel) {
+    public ClassifierScoring(TrainableClassificationModel<InstanceType, T> trainedClassifierModel,
+            Function<Integer, String> indexOfTargetValueToLabelMapper) {
         this.trainedClassifier = trainedClassifierModel;
+        this.indexOfTargetValueToLabelMapper = indexOfTargetValueToLabelMapper;
     }
 
-    public String printScoring(List<ManeuverForEstimation> maneuvers) {
-        ManeuverModelMetadata modelMetadata = trainedClassifier.getModelMetadata().getContextSpecificModelMetadata();
-        int[] target = modelMetadata.getYVector(maneuvers);
-        int[] predicted = new int[maneuvers.size()];
+    public String printScoring(List<InstanceType> instances) {
+        T modelMetadata = trainedClassifier.getModelMetadata().getContextSpecificModelMetadata();
+        int[] target = modelMetadata.getYVector(instances);
+        int[] predicted = new int[instances.size()];
         int i = 0;
-        for (ManeuverForEstimation maneuver : maneuvers) {
-            double[] x = modelMetadata.getX(maneuver);
+        for (InstanceType instance : instances) {
+            double[] x = modelMetadata.getX(instance);
             double[] classificationResult = trainedClassifier.classifyWithProbabilities(x);
             predicted[i++] = argmax(classificationResult);
         }
         int[][] confusionMatrix = new ConfusionMatrix(target, predicted).getMatrix();
-        int supportedManeuverTypesCount = modelMetadata.getNumberOfPossibleTargetValues();
-        double[] precisionPerClass = new double[supportedManeuverTypesCount];
-        double[] recallPerClass = new double[supportedManeuverTypesCount];
-        double[] f1ScorePerClass = new double[supportedManeuverTypesCount];
-        for (i = 0; i < supportedManeuverTypesCount; i++) {
+        int supportedTargetValuesCount = modelMetadata.getNumberOfPossibleTargetValues();
+        double[] precisionPerClass = new double[supportedTargetValuesCount];
+        double[] recallPerClass = new double[supportedTargetValuesCount];
+        double[] f1ScorePerClass = new double[supportedTargetValuesCount];
+        for (i = 0; i < supportedTargetValuesCount; i++) {
             int tp = confusionMatrix[i][i];
             int fp = 0;
             int fn = 0;
-            for (int j = 0; j < supportedManeuverTypesCount; j++) {
+            for (int j = 0; j < supportedTargetValuesCount; j++) {
                 if (i != j) {
                     fp += confusionMatrix[i][j];
                     fn += confusionMatrix[j][i];
@@ -67,8 +66,7 @@ public class ClassifierScoring {
         str.append("\n   | ");
         double statisticValueSum = 0;
         for (int i = 0; i < statisticPerClass.length; i++) {
-            str.append(trainedClassifier.getModelMetadata().getContextSpecificModelMetadata()
-                    .getManeuverTypeByMappingIndex(i).toString());
+            str.append(indexOfTargetValueToLabelMapper.apply(i));
             double statisticValue = statisticPerClass[i];
             statisticValueSum += statisticValue;
             str.append(String.format(" %.03f | ", statisticValue));

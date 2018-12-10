@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.data.persistence.maneuver;
+package com.sap.sailing.windestimation.data.persistence.wind;
 
 import java.net.UnknownHostException;
 import java.util.List;
@@ -13,6 +13,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.deserializer.TwdTransitionJsonDeserializer;
 import com.sap.sailing.windestimation.data.deserializer.TwdTransitionJsonSerializer;
+import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
 
 public class TwdTransitionPersistenceManager extends AbstractPersistenceManager<TwdTransition> {
 

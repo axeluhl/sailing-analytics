@@ -43,8 +43,7 @@ public class ManeuverBasedWindEstimationComponentImpl<InputType>
         List<CompetitorTrackWithEstimationData<ManeuverWithProbabilisticTypeClassification>> competitorTracks = race
                 .getCompetitorTracks().stream().map(competitorTrack -> {
                     List<ManeuverWithProbabilisticTypeClassification> maneuverClassifications = competitorTrack
-                            .getElements().stream().map(maneuver -> maneuverClassifiersCache.getBestClassifier(maneuver)
-                                    .classifyManeuver(maneuver))
+                            .getElements().stream().map(maneuver -> maneuverClassifiersCache.classifyInstance(maneuver))
                             .collect(Collectors.toList());
                     return competitorTrack.constructWithElements(maneuverClassifications);
                 }).collect(Collectors.toList());
