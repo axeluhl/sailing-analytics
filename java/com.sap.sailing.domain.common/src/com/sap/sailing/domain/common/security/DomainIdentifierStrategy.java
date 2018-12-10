@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.security;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sse.security.shared.IdentifierStrategy;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 public interface DomainIdentifierStrategy extends IdentifierStrategy {
@@ -16,11 +17,15 @@ public interface DomainIdentifierStrategy extends IdentifierStrategy {
 
         @Override
         public <T> String getIdentifierAsString(T object) {
-            RegattaAndRaceIdentifier regattaAndRaceIdentifer = (RegattaAndRaceIdentifier) object;
-            return WildcardPermissionEncoder.encode(regattaAndRaceIdentifer.getRegattaName(),
-                    regattaAndRaceIdentifer.getRaceName());
+            if (object instanceof WithQualifiedObjectIdentifier) {
+                WithQualifiedObjectIdentifier withQualifiedObjectIdentifier = ((WithQualifiedObjectIdentifier) object);
+                return withQualifiedObjectIdentifier.getIdentifier().getTypeRelativeObjectIdentifier();
+            } else {
+                RegattaAndRaceIdentifier regattaAndRaceIdentifer = (RegattaAndRaceIdentifier) object;
+                return WildcardPermissionEncoder.encode(regattaAndRaceIdentifer.getRegattaName(),
+                        regattaAndRaceIdentifer.getRaceName());
+            }
         }
-
     };
 
     /**
