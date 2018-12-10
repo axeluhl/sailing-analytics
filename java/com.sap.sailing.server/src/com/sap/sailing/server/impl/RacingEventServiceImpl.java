@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -2429,12 +2430,39 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,
             InterruptedException {
         logger.info("Stopping tracking for " + race + "...");
+        stopTracking(regatta, raceTracker -> raceTracker.getRace() == race, () -> {
+            try {
+                stopTrackingWind(regatta, race);
+                final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
+                // update the "restore" handle for race in DB such that when restoring, no wind tracker will be requested for race
+                if (connectivityParams != null) {
+                    if (connectivityParams.isTrackWind()) {
+                        connectivityParams.setTrackWind(false);
+                        getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
+                    }
+                } else {
+                    logger.warning("Would have expected to find connectivity params for race "+race+" but didn't");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+    
+    @Override
+    public void stopTracker(Regatta regatta, RaceTracker tracker)
+            throws MalformedURLException, IOException, InterruptedException {
+        stopTracking(regatta, raceTracker -> raceTracker == tracker, () -> {});
+    }
+    
+    private void stopTracking(Regatta regatta, Predicate<RaceTracker> matcher, Runnable actionBeforePotentiallyRemovingTrackedRegatta) throws MalformedURLException, IOException,
+    InterruptedException {
         final Set<RaceTracker> trackerSet = raceTrackersByRegatta.get(regatta);
         if (trackerSet != null) {
             Iterator<RaceTracker> trackerIter = trackerSet.iterator();
             while (trackerIter.hasNext()) {
                 RaceTracker raceTracker = trackerIter.next();
-                if (raceTracker.getRace() == race) {
+                if (matcher.test(raceTracker)) {
                     logger.info("Found tracker to stop for races " + raceTracker.getRace());
                     raceTracker.stop(/* preemptive */false);
                     trackerIter.remove();
@@ -2450,17 +2478,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         } else {
             logger.warning("Didn't find any trackers for regatta " + regatta);
         }
-        stopTrackingWind(regatta, race);
-        final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
-        // update the "restore" handle for race in DB such that when restoring, no wind tracker will be requested for race
-        if (connectivityParams != null) {
-            if (connectivityParams.isTrackWind()) {
-                connectivityParams.setTrackWind(false);
-                getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
-            }
-        } else {
-            logger.warning("Would have expected to find connectivity params for race "+race+" but didn't");
-        }
+        actionBeforePotentiallyRemovingTrackedRegatta.run();
         // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
         if (trackerSet == null || trackerSet.isEmpty()) {
             stopTracking(regatta, /* willBeRemoved */ false);
