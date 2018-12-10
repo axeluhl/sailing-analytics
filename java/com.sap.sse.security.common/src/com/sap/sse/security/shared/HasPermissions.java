@@ -59,31 +59,64 @@ public interface HasPermissions {
      *            can be any string; this method will take care of encoding the identifiers such that they are legal in
      *            the context of a permission part; see also {@link PermissionStringEncoder}
      */
-    /*String getStringPermission(Action action);*/
     @Deprecated
     String getStringPermissionForTypeRelativeIdentifiers(Action action, String... typeRelativeObjectIdentifier);
+    
+    /**
+     * Produces a string permission for this permission, the <code>mode</code> specified as the second wildcard
+     * permission segment, and the <code>objectIdentifier</code> as the third wildcard permission segment. The object
+     * identifiers must be unique within the scope defined by this {@link HasPermissions} which represents an object
+     * category or type, such as, e.g., "LEADERBOARD."
+     * 
+     * @param object
+     *            can be any object that can be passed to the identifer strategy to determine the type relative
+     *            identifier for this object. What type of object can be passed is defined by the identifer strategy
+     */
     String getStringPermissionForObject(Action action, Object object);
 
     /**
-     * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified
-     * by this permission with this permission's type name. For example, if this permission is for the "LEADERBOARD"
-     * type, and the {@code objectIdentifier} is {@code "abc"} then the resulting qualified identifier will be
+     * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified by
+     * this permission with this permission's type name. For example, if this permission is for the "LEADERBOARD" type,
+     * and the {@code objectIdentifier} is {@code "abc"} then the resulting qualified identifier will be
      * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
      */
     @Deprecated
     QualifiedObjectIdentifier getQualifiedObjectIdentifierByString(String typeRelativeObjectIdentifier);
+    
+    /**
+     * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified by
+     * this permission with this permission's type name. For example, if this permission is for the "LEADERBOARD" type,
+     * and the {@code objectIdentifier} is {@code "abc"} then the resulting qualified identifier will be
+     * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
+     * 
+     * @param object
+     *            can be any object that can be passed to the identifer strategy to determine the type relative
+     *            identifier for this object. What type of object can be passed is defined by the identifer strategy
+     */
     <T> QualifiedObjectIdentifier getQualifiedObjectIdentifier(T object);
 
     /**
      * Same as {@link #getStringPermissionForTypeRelativeIdentifiers(Action, String...)}, only that the result is a
      * {@link WildcardPermission} instead of a {@link String}
-     * @deprecated  better option is to use the variant {@link #getPermissionForObject(Action action, Object object)} instead.
-     * {@link #getPermissionForObject(Action action, Object object)} uses this implementation in a private manner but is
-     * creating the permission id by using the corresponding {{@link #identifierStrategy()}.
-     * If no concrete object (e.g. unit test) is available, this method can still be used.
+     * 
+     * @deprecated better option is to use the variant {@link #getPermissionForObject(Action action, Object object)}
+     *             instead. {@link #getPermissionForObject(Action action, Object object)} uses this implementation in a
+     *             private manner but is creating the permission id by using the corresponding
+     *             {{@link #identifierStrategy()}. If no concrete object (e.g. unit test) is available, this method can
+     *             still be used.
      */
     @Deprecated
     WildcardPermission getPermissionForObjects(Action action, String... objectIdentifiers);
+
+    /**
+     * Same as {@link #getStringPermissionForTypeRelativeIdentifiers(Action, String...)}, only that the result is a
+     * {@link WildcardPermission} instead of a {@link String}
+     * 
+     * @param object
+     *            can be any object that can be passed to the identifer strategy to determine the type relative
+     *            identifier for this object. What type of object can be passed is defined by the identifer strategy
+     * 
+     */
     WildcardPermission getPermissionForObject(Action action, Object object);
 
     /**
