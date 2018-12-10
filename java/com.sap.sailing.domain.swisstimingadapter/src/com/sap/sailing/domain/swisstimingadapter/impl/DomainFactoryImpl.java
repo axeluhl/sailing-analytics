@@ -56,6 +56,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.CourseDesignUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
@@ -226,12 +227,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, Course course) {
+    public RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, Course course,
+            RaceTrackingHandler raceTrackingHandler) {
         com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
         Map<Competitor, Boat> competitorsAndBoats = createCompetitorsAndBoats(startList, race.getRaceID(), race.getBoatClass());
         logger.info("Creating RaceDefinitionImpl for race "+race.getRaceID());
         BoatClass boatClass = race.getBoatClass() != null ? race.getBoatClass() : getRaceTypeFromRaceID(race.getRaceID()).getBoatClass();
-        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitorsAndBoats, race.getRaceID());
+        RaceDefinition result = raceTrackingHandler.createRaceDefinition(regatta, race.getRaceName(), domainCourse, boatClass, competitorsAndBoats, race.getRaceID());
         regatta.addRace(result);
         return result;
     }

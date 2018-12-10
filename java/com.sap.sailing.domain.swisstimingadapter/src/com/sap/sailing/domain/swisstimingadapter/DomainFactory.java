@@ -22,6 +22,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -55,7 +56,8 @@ public interface DomainFactory {
 
     String getCompetitorID(String boatID, BoatClass boatClass);
 
-    RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
+    RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course,
+            RaceTrackingHandler raceTrackingHandler);
 
     com.sap.sailing.domain.base.Mark getOrCreateMark(Serializable trackerID, String description);
     

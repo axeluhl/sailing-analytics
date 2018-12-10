@@ -466,7 +466,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         // now we can create the RaceDefinition and most other things
         Race swissTimingRace = new RaceImpl(raceID, raceName, raceDescription, boatClass);
         synchronized (this) {
-            race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
+            race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course,
+                    raceTrackingHandler);
             this.notifyAll();
         }
         // temp

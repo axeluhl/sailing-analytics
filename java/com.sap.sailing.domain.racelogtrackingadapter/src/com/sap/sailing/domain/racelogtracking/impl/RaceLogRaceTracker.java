@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,7 +51,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
-import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
@@ -303,7 +302,8 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         }
         Map<Competitor, Boat> competitorsAndTheirBoats = raceColumn.getAllCompetitorsAndTheirBoats(params.getFleet());
         Serializable raceId = denoteEvent.getRaceId();
-        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndTheirBoats, raceId);
+        final RaceDefinition raceDef = raceTrackingHandler.createRaceDefinition(trackedRegatta.getRegatta(), raceName, course,
+                boatClass, competitorsAndTheirBoats, raceId);
         Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
         // set race definition, so race is linked to leaderboard automatically
         trackedRegatta.getRegatta().addRace(raceDef);
