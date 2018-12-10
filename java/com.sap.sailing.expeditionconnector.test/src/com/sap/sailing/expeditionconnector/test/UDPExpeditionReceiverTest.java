@@ -71,7 +71,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class UDPExpeditionReceiverTest {
-    @Rule public Timeout TestTimeout = new Timeout(60 * 1000);
+    @Rule public Timeout TestTimeout = Timeout.millis(60 * 1000);
     
     private String[] validLines;
     private String[] someValidWithFourInvalidLines;

@@ -86,7 +86,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     private long time = 0;
 
     @Rule
-    public Timeout CreateAndTrackWithRaceLogTestTimeout = new Timeout(3 * 60 * 1000);
+    public Timeout CreateAndTrackWithRaceLogTestTimeout = Timeout.millis(3 * 60 * 1000);
 
     @Before
     public void setup() {

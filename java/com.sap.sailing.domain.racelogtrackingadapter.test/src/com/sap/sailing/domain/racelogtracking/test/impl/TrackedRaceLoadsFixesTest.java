@@ -66,7 +66,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     }
     
     @Rule
-    public Timeout TrackedRaceLoadsFixesTestTimeout = new Timeout(3 * 60 * 1000);
+    public Timeout TrackedRaceLoadsFixesTestTimeout = Timeout.millis(3 * 60 * 1000);
 
     @Test
     public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,

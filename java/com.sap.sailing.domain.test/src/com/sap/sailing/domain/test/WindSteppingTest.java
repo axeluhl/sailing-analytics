@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.test;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 
