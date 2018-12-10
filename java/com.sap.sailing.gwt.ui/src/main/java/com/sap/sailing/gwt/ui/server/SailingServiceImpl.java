@@ -4289,17 +4289,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public EventDTO getEventById(UUID id, boolean withStatisticalData) throws MalformedURLException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.READ, id.toString()))) {
-            EventDTO result = null;
-            Event event = getService().getEvent(id);
-            if (event != null) {
+        EventDTO result = null;
+        Event event = getService().getEvent(id);
+        if (event != null) {
+            if (SecurityUtils.getSubject()
+                    .isPermitted(SecuredDomainType.EVENT.getStringPermissionForObject(DefaultActions.READ, event))) {
                 result = convertToEventDTO(event, withStatisticalData);
                 result.setBaseURL(getEventBaseURLFromEventOrRequest(event));
                 result.setIsOnRemoteServer(false);
+            } else {
+                throw new UnauthorizedException("You are not permitted to view event " + id);
             }
-            return result;
         }
-        throw new UnauthorizedException("You are not permitted to view event " + id);
+        return result;
+
     }
 
     private String getEventBaseURLFromEventOrRequest(Event event) throws MalformedURLException {
@@ -4651,7 +4654,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Regatta regatta = getService().getRegatta(identifier);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(
-                    SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, regatta.getName()));
+                    SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         getService().apply(new RemoveSeries(identifier, seriesName));
     }
@@ -4669,7 +4672,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String registrationLinkSecret) {
         Regatta regatta = getService().getRegatta(regattaName);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
@@ -4683,7 +4686,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             List<Pair<String, Integer>> columnNamesWithInsertIndex) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         List<RaceColumnInSeriesDTO> result = new ArrayList<RaceColumnInSeriesDTO>();
         for (Pair<String, Integer> columnNameAndInsertIndex : columnNamesWithInsertIndex) {
@@ -4703,7 +4706,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Integer maximumNumberOfDiscards, List<FleetDTO> fleets) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         getService().apply(
                 new UpdateSeries(regattaIdentifier, seriesName, newSeriesName, isMedal, isFleetsCanRunInParallel, resultDiscardingThresholds,
@@ -4715,7 +4718,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         for(String columnName: columnNames) {
             getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
@@ -4726,7 +4729,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         getService().apply(new MoveColumnInSeriesUp(regattaIdentifier, seriesName, columnName));
     }
@@ -4735,7 +4738,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         getService().apply(new MoveColumnInSeriesDown(regattaIdentifier, seriesName, columnName));
     }
@@ -5103,7 +5106,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * when this method is called.
      */
     private void addRaceColumnsToRegattaSeries(RegattaDTO regatta) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, regatta.getName()));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         for (SeriesDTO series : regatta.series) {
             List<Pair<String, Integer>> raceNamesAndInsertIndex = new ArrayList<>();
             int insertIndex = 0;
@@ -5468,7 +5471,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String targetServerUsername, String targetServerPassword) {
         // FIXME should the targetserver also check this?
         SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.SERVER
-                .getStringPermissionForTypeRelativeIdentifiers(ServerActions.CAN_IMPORT_MASTERDATA, ServerInfo.getName()));
+                .getStringPermissionForObject(ServerActions.CAN_IMPORT_MASTERDATA, ServerInfo.getName()));
 
         String token = getTokenForServer(urlAsString, targetServerUsername, targetServerPassword);
 
@@ -5657,7 +5660,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         }
                     });
         } else {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, competitor.getIdAsString()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR.getStringPermissionForObject(DefaultActions.UPDATE, competitor));
             Competitor updatedCompetitor  = getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor.getShortName(),
                                     competitor.getColor(), competitor.getEmail(), nationality,
@@ -5700,7 +5703,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     });
         } else {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR
-                    .getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, competitor.getIdAsString()));
+                    .getStringPermissionForObject(DefaultActions.UPDATE, competitor));
             result = getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
                     competitor.getShortName(), competitor.getColor(), competitor.getEmail(), nationality,
                     competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
