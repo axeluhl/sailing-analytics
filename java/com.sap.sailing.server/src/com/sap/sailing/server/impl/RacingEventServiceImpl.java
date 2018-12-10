@@ -2473,7 +2473,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Set<RaceDefinition> racesToRemove = new HashSet<>();
         Util.addAll(regatta.getAllRaces(), racesToRemove);
         for (RaceDefinition race : racesToRemove) {
-            removeRace(regatta, race);
+            // FIXME can this be removed//moved to the removeRace part?
             mongoObjectFactory.removeRegattaForRaceID(race.getName(), regatta);
             persistentRegattasForRaceIDs.remove(race.getId().toString());
         }
