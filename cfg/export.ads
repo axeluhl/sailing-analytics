@@ -53,11 +53,14 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
     def apkUnsigned = apkFile.getAbsolutePath()
     def name = apkFile.getName()
     def index = name.indexOf("-")
-    def apkToDeploy = "$gendir/${name.substring(0 , index)}-release-centralsigned.apk"
+    def apkToDeploy = "$repodir/${name.substring(0 , index)}-release-centralsigned.apk"
 
     //align the already signed apks
     assert execute(zipalign.absolutePath, "-v", "4", apkUnsigned, apkToDeploy) == 0
     assert execute(apksigner.absolutePath, "verify", "--print-certs", apkToDeploy) == 0
+
+    def deployable = new File(apkToDeploy)
+    deployable.renameTo(apkFile)
   }
 } else {
   // snapshot and milestone builds are not eligible for central signing
