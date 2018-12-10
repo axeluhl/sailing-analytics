@@ -6,16 +6,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -37,13 +36,13 @@ public class MediaDBImpl implements MediaDB {
     private static final int SORT_ASCENDING = 1;
     private static final int SORT_DESSCENDING = -1;
     // private static Logger logger = Logger.getLogger(MediaDBImpl.class.getName());
-    private final DB database;
-    private final BasicDBObject sortByStartTimeAndTitle;
+    private final MongoDatabase database;
+    private final Document sortByStartTimeAndTitle;
 
-    public MediaDBImpl(DB database) {
+    public MediaDBImpl(MongoDatabase database) {
         super();
         this.database = database;
-        sortByStartTimeAndTitle = new BasicDBObject();
+        sortByStartTimeAndTitle = new Document();
         sortByStartTimeAndTitle.put(DbNames.Fields.STARTTIME.name(), SORT_DESSCENDING);
         sortByStartTimeAndTitle.put(DbNames.Fields.MEDIA_TITLE.name(), SORT_ASCENDING);
     }
@@ -51,7 +50,7 @@ public class MediaDBImpl implements MediaDB {
     @Override
     public String insertMediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType,
             Set<RegattaAndRaceIdentifier> assignedRaces) {
-        BasicDBObject dbMediaTrack = new BasicDBObject();
+        Document dbMediaTrack = new Document();
         dbMediaTrack.put(DbNames.Fields.MEDIA_TITLE.name(), title);
         dbMediaTrack.put(DbNames.Fields.MEDIA_URL.name(), url);
         dbMediaTrack.put(DbNames.Fields.STARTTIME.name(), startTime == null ? null : startTime.asDate());
@@ -60,22 +59,22 @@ public class MediaDBImpl implements MediaDB {
         BasicDBList assignedRacesDb = new BasicDBList();
         if (assignedRaces != null) { //safety check to support deserialized instances imported from legacy servers  
             for (RegattaAndRaceIdentifier assignedRace : assignedRaces) {
-                BasicDBObject object = new BasicDBObject();
+                Document object = new Document();
                 object.put(DbNames.Fields.REGATTA_NAME.name(), assignedRace.getRegattaName());
                 object.put(DbNames.Fields.RACE_NAME.name(), assignedRace.getRaceName());
                 assignedRacesDb.add(object);
             }
         }
         dbMediaTrack.put(DbNames.Fields.ASSIGNED_RACES.name(), assignedRacesDb);
-        DBCollection dbVideos = getVideoCollection();
-        dbVideos.insert(dbMediaTrack);
+        MongoCollection<org.bson.Document> dbVideos = getVideoCollection();
+        dbVideos.insertOne(dbMediaTrack);
         return ((ObjectId) dbMediaTrack.get(DbNames.Fields._id.name())).toHexString();
     }
 
     @Override
     public void insertMediaTrackWithId(String dbId, String title, String url, TimePoint startTime, Duration duration,
             MimeType mimeType, Set<RegattaAndRaceIdentifier> assignedRaces) {
-        BasicDBObject dbMediaTrack = new BasicDBObject();
+        Document dbMediaTrack = new Document();
         dbMediaTrack.put(DbNames.Fields._id.name(), new ObjectId(dbId));
         dbMediaTrack.put(DbNames.Fields.MEDIA_TITLE.name(), title);
         dbMediaTrack.put(DbNames.Fields.MEDIA_URL.name(), url);
@@ -85,27 +84,26 @@ public class MediaDBImpl implements MediaDB {
         BasicDBList assignedRacesDb = new BasicDBList();
         if (assignedRaces != null) { //safety check to support deserialized instances imported from legacy servers
             for (RegattaAndRaceIdentifier assignedRace : assignedRaces) {
-                BasicDBObject object = new BasicDBObject();
+                Document object = new Document();
                 object.put(DbNames.Fields.REGATTA_NAME.name(), assignedRace.getRegattaName());
                 object.put(DbNames.Fields.RACE_NAME.name(), assignedRace.getRaceName());
                 assignedRacesDb.add(object);
             }
         }
         dbMediaTrack.put(DbNames.Fields.ASSIGNED_RACES.name(), assignedRacesDb);
-        DBCollection dbVideos = getVideoCollection();
+        MongoCollection<org.bson.Document> dbVideos = getVideoCollection();
         try {
-            dbVideos.insert(dbMediaTrack);
+            dbVideos.insertOne(dbMediaTrack);
         } catch (DuplicateKeyException e) {
             throw new IllegalArgumentException("Duplicate key '" + dbId
                     + "' caused an error when importing media (title: '" + title + "')", e);
         }
     }
 
-    private DBCollection getVideoCollection() {
+    private MongoCollection<org.bson.Document> getVideoCollection() {
         try {
-            DBCollection dbVideos = database.getCollection(DbNames.Collections.VIDEOS.name());
-            dbVideos.setWriteConcern(WriteConcern.JOURNALED);
-            dbVideos.createIndex(new BasicDBObject(DbNames.Collections.VIDEOS.name(), 1));
+            MongoCollection<org.bson.Document> dbVideos = database.getCollection(DbNames.Collections.VIDEOS.name());
+            dbVideos.withWriteConcern(WriteConcern.JOURNALED).createIndex(new Document(DbNames.Collections.VIDEOS.name(), 1));
             return dbVideos;
         } catch (NullPointerException e) {
             // sometimes, for reasons yet to be clarified, ensuring an index on the name field causes an NPE
@@ -113,7 +111,7 @@ public class MediaDBImpl implements MediaDB {
         }
     }
 
-    private MediaTrack createMediaTrackFromDb(DBObject dbObject) {
+    private MediaTrack createMediaTrackFromDb(Document dbObject) {
         String dbId = ((ObjectId) dbObject.get(DbNames.Fields._id.name())).toHexString();
         String title = (String) dbObject.get(DbNames.Fields.MEDIA_TITLE.name());
         String url = (String) dbObject.get(DbNames.Fields.MEDIA_URL.name());
@@ -125,7 +123,7 @@ public class MediaDBImpl implements MediaDB {
         BasicDBList assignedRacesDb = (BasicDBList) dbObject.get(DbNames.Fields.ASSIGNED_RACES.name());
         if (assignedRacesDb != null) { //safety check to support legacy instances
             for (Object assignedRace : assignedRacesDb) {
-                BasicDBObject object = (BasicDBObject) assignedRace;
+                Document object = (Document) assignedRace;
                 String regattaName = (String) object.get(DbNames.Fields.REGATTA_NAME.name());
                 String raceName = (String) object.get(DbNames.Fields.RACE_NAME.name());
                 if (regattaName != null && raceName != null) {
@@ -141,85 +139,75 @@ public class MediaDBImpl implements MediaDB {
 
     @Override
     public List<MediaTrack> loadAllMediaTracks() {
-        DBCursor cursor = getVideoCollection().find().sort(sortByStartTimeAndTitle);
-        List<MediaTrack> result = new ArrayList<>(cursor.count());
-        while (cursor.hasNext()) {
-            result.add(createMediaTrackFromDb(cursor.next()));
+        FindIterable<Document> cursor = getVideoCollection().find().sort(sortByStartTimeAndTitle);
+        List<MediaTrack> result = new ArrayList<>((int) getVideoCollection().count());
+        while (cursor.iterator().hasNext()) {
+            result.add(createMediaTrackFromDb(cursor.iterator().next()));
         }
         return result;
     }
 
     @Override
     public void deleteMediaTrack(String dbId) {
-        BasicDBObject dbObject = new BasicDBObject();
+        Document dbObject = new Document();
         dbObject.put(DbNames.Fields._id.name(), new ObjectId(dbId));
-        getVideoCollection().remove(dbObject);
+        getVideoCollection().deleteOne(dbObject);
     }
 
     @Override
     public void updateTitle(String dbId, String title) {
-        BasicDBObject updateQuery = new BasicDBObject();
+        Document updateQuery = new Document();
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
-
-        BasicDBObject updateCommand = new BasicDBObject();
-        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.MEDIA_TITLE.name(), title));
-
-        getVideoCollection().update(updateQuery, updateCommand);
+        Document updateCommand = new Document();
+        updateCommand.append("$set", new Document(DbNames.Fields.MEDIA_TITLE.name(), title));
+        getVideoCollection().updateOne(updateQuery, updateCommand);
     }
 
     @Override
     public void updateUrl(String dbId, String url) {
-        BasicDBObject updateQuery = new BasicDBObject();
+        Document updateQuery = new Document();
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
-
-        BasicDBObject updateCommand = new BasicDBObject();
-        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.MEDIA_URL.name(), url));
-
-        getVideoCollection().update(updateQuery, updateCommand);
+        Document updateCommand = new Document();
+        updateCommand.append("$set", new Document(DbNames.Fields.MEDIA_URL.name(), url));
+        getVideoCollection().updateOne(updateQuery, updateCommand);
     }
 
     @Override
     public void updateStartTime(String dbId, TimePoint startTime) {
-        BasicDBObject updateQuery = new BasicDBObject();
+        Document updateQuery = new Document();
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
-
-        BasicDBObject updateCommand = new BasicDBObject();
-        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.STARTTIME.name(), startTime == null ? null
+        Document updateCommand = new Document();
+        updateCommand.append("$set", new Document(DbNames.Fields.STARTTIME.name(), startTime == null ? null
                 : startTime.asDate()));
-
-        getVideoCollection().update(updateQuery, updateCommand);
+        getVideoCollection().updateOne(updateQuery, updateCommand);
     }
 
     @Override
     public void updateDuration(String dbId, Duration duration) {
-        BasicDBObject updateQuery = new BasicDBObject();
+        Document updateQuery = new Document();
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
-
-        BasicDBObject updateCommand = new BasicDBObject();
-        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.DURATION_IN_MILLIS.name(),
+        Document updateCommand = new Document();
+        updateCommand.append("$set", new Document(DbNames.Fields.DURATION_IN_MILLIS.name(),
                 duration == null ? null : duration.asMillis()));
-
-        getVideoCollection().update(updateQuery, updateCommand);
+        getVideoCollection().updateOne(updateQuery, updateCommand);
     }
 
     @Override
     public void updateRace(String dbId, Set<RegattaAndRaceIdentifier> assignedRaces) {
-        BasicDBObject updateQuery = new BasicDBObject();
+        Document updateQuery = new Document();
         updateQuery.append(DbNames.Fields._id.name(), new ObjectId(dbId));
-
         BasicDBList assignedRacesDb = new BasicDBList();
         if (assignedRaces != null) { //safety check to support deserialized instances imported from legacy servers
             for (RegattaAndRaceIdentifier assignedRace : assignedRaces) {
-                BasicDBObject object = new BasicDBObject();
+                Document object = new Document();
                 object.put(DbNames.Fields.REGATTA_NAME.name(), assignedRace.getRegattaName());
                 object.put(DbNames.Fields.RACE_NAME.name(), assignedRace.getRaceName());
                 assignedRacesDb.add(object);
             }
         }
-        BasicDBObject updateCommand = new BasicDBObject();
-        updateCommand.append("$set", new BasicDBObject(DbNames.Fields.ASSIGNED_RACES.name(), assignedRacesDb));
-
-        getVideoCollection().update(updateQuery, updateCommand);
+        Document updateCommand = new Document();
+        updateCommand.append("$set", new Document(DbNames.Fields.ASSIGNED_RACES.name(), assignedRacesDb));
+        getVideoCollection().updateOne(updateQuery, updateCommand);
     }
 
 }

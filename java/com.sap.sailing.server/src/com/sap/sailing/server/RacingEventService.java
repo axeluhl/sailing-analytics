@@ -716,7 +716,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @see #getNumberOfTrackedRacesRestored()
      */
-    int getNumberOfTrackedRacesToRestore();
+    long getNumberOfTrackedRacesToRestore();
 
     /**
      * When restoring tracked races was requested upon creation of this service, this method tells the number of races

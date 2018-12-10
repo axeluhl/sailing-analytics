@@ -23,8 +23,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -174,7 +174,7 @@ public class SensorFixStoreAndLoadTest {
     }
 
     private void dropPersistedData() {
-        DB db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
+        MongoDatabase db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
         db.getCollection(CollectionNames.GPS_FIXES.name()).drop();
         db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).drop();
         db.getCollection(CollectionNames.REGATTA_LOGS.name()).drop();

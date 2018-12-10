@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.mongodb.AlreadyRegisteredException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
@@ -21,7 +21,7 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     private final Map<MongoClientURI, MongoClient> mongos;
     
-    private final Map<MongoClientURI, DB> dbs;
+    private final Map<MongoClientURI, MongoDatabase> dbs;
 
     /**
      * collection name -> fully qualified class name
@@ -48,7 +48,7 @@ public class MongoDBServiceImpl implements MongoDBService {
         logger.info("Used Mongo configuration: "+configuration.getMongoClientURI());
     }
 
-    public DB getDB() {
+    public MongoDatabase getDB() {
         if (configuration == null) {
             configuration = MongoDBConfiguration.getDefaultTestConfiguration();
             logger.info("Used default Mongo configuration: "+configuration.getMongoClientURI());
@@ -60,16 +60,16 @@ public class MongoDBServiceImpl implements MongoDBService {
         }
     }
     
-    private synchronized DB getDB(MongoDBConfiguration mongoDBConfiguration) throws UnknownHostException {
+    private synchronized MongoDatabase getDB(MongoDBConfiguration mongoDBConfiguration) throws UnknownHostException {
         final MongoClientURI key = mongoDBConfiguration.getMongoClientURI();
-        DB db = dbs.get(key);
+        MongoDatabase db = dbs.get(key);
         if (db == null) {
             MongoClient mongo = mongos.get(key);
             if (mongo == null) {
                 mongo = new MongoClient(mongoDBConfiguration.getMongoClientURI());
                 mongos.put(key, mongo);
             }
-            db = mongo.getDB(mongoDBConfiguration.getMongoClientURI().getDatabase());
+            db = mongo.getDatabase(mongoDBConfiguration.getMongoClientURI().getDatabase());
             dbs.put(key, db);
         }
         return db;

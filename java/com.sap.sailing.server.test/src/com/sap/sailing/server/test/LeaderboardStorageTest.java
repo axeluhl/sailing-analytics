@@ -4,13 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
 import org.junit.Test;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -65,11 +66,11 @@ public class LeaderboardStorageTest extends TestCase {
         service.getMongoObjectFactory().storeLeaderboard(leaderboard);
 
         // Test in db
-        DBCollection leaderboardCollection = MongoDBService.INSTANCE.getDB().getCollection("LEADERBOARDS");
+        MongoCollection<org.bson.Document> leaderboardCollection = MongoDBService.INSTANCE.getDB().getCollection("LEADERBOARDS");
         BasicDBObject query = new BasicDBObject();
         query.put("LEADERBOARD_NAME", LEADERBOARD_NAME);
-        DBCursor leaderboardObjectCursor = leaderboardCollection.find();
-        DBObject dbLeaderboard = leaderboardObjectCursor.next();
+        FindIterable<Document> leaderboardObjectCursor = leaderboardCollection.find();
+        Document dbLeaderboard = leaderboardObjectCursor.iterator().next();
         BasicDBList carriedPointsById = (BasicDBList) dbLeaderboard.get("LEADERBOARD_CARRIED_POINTS_BY_ID");
         if (carriedPointsById != null) {
             for (Object o : carriedPointsById) {

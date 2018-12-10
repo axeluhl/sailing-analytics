@@ -58,7 +58,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
     @Before
     public void setUp() throws FileNotFoundException, UnknownHostException {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
-        mongoDBService.getDB().dropDatabase();
+        mongoDBService.getDB().drop();
     }
     
     /**

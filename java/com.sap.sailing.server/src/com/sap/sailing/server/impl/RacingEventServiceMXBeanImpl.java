@@ -21,7 +21,7 @@ public class RacingEventServiceMXBeanImpl implements RacingEventServiceMXBean {
     }
 
     @Override
-    public int getNumberOfTrackedRacesToRestore() {
+    public long getNumberOfTrackedRacesToRestore() {
         return getRacingEventService().getNumberOfTrackedRacesToRestore();
     }
 

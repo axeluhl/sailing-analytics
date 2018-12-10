@@ -37,7 +37,7 @@ public class OperationalTransformationTest {
     @Before
     public void setUp() {
         // ensure that leaderboards will be loaded from and stored to the test database which is 
-        MongoDBService.INSTANCE.getDB().dropDatabase();
+        MongoDBService.INSTANCE.getDB().drop();
         racingEventServiceServer = new RacingEventServiceImpl();
         racingEventServiceReplica = new RacingEventServiceImpl();
         OperationalTransformer<RacingEventService, RacingEventServiceOperation<?>> transformer = new OperationalTransformer<>();

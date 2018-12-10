@@ -487,7 +487,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final TrackedRegattaListenerManager trackedRegattaListener;
     
-    private int numberOfTrackedRacesToRestore;
+    private long numberOfTrackedRacesToRestore;
     
     private final AtomicInteger numberOfTrackedRacesRestored;
     
@@ -4047,7 +4047,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public int getNumberOfTrackedRacesToRestore() {
+    public long getNumberOfTrackedRacesToRestore() {
         return numberOfTrackedRacesToRestore;
     }
 

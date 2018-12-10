@@ -41,7 +41,7 @@ public abstract class AbstractJsonExportTest {
 
     public void setUp() {
         service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
-        service.getDB().dropDatabase();
+        service.getDB().drop();
 
         racingEventService = new RacingEventServiceImpl();
     }

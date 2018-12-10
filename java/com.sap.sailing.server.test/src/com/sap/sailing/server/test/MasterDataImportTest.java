@@ -31,11 +31,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
-import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -146,8 +145,6 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
-import org.junit.Assert;
-
 public class MasterDataImportTest {
 
     private static final String TEST_GROUP_NAME = "testGroup";
@@ -190,7 +187,7 @@ public class MasterDataImportTest {
     private void deleteAllDataFromDatabase() {
         MongoDBService service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().getWriteConcern().getJournal();
-        service.getDB().dropDatabase();
+        service.getDB().drop();
     }
 
     private Map<Competitor, Boat> createCompetitorsAndBoatsMap(BoatClass boatClass, Iterable<Competitor> competitors) {
@@ -365,8 +362,6 @@ public class MasterDataImportTest {
             // Import in new service
             destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID), serviceFinderFactory){};
             domainFactory = destService.getBaseDomainFactory();
-            DB db = destService.getMongoObjectFactory().getDatabase();
-            db.setWriteConcern(WriteConcern.ACKNOWLEDGED);
             inputStream = new ByteArrayInputStream(os.toByteArray());
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
             importer.importFromStream(inputStream, randomUUID, false);

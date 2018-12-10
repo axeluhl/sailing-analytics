@@ -92,7 +92,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     public void setup() {
         service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
         sensorFixStore = service.getSensorFixStore();
-        service.getMongoObjectFactory().getDatabase().dropDatabase();
+        service.getMongoObjectFactory().getDatabase().drop();
         author = service.getServerAuthor();
         Series series = new SeriesImpl("series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet), Collections.emptySet(),
                 service);

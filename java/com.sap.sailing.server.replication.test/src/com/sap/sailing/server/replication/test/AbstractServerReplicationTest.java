@@ -39,7 +39,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
         protected void persistenceSetUp(boolean dropDB) {
             mongoDBService = MongoDBService.INSTANCE;
             if (dropDB) {
-                mongoDBService.getDB().dropDatabase();
+                mongoDBService.getDB().drop();
             }
             mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
         }

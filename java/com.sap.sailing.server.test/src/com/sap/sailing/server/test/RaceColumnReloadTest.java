@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -67,8 +68,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBService;
 
-import org.junit.Assert;
-
 public class RaceColumnReloadTest {
 
     private MongoRaceLogStoreVisitor mongoStoreVisitor;
@@ -80,7 +79,7 @@ public class RaceColumnReloadTest {
 
     @Before
     public void setUp() {
-        MongoDBService.INSTANCE.getDB().dropDatabase();
+        MongoDBService.INSTANCE.getDB().drop();
         final RacingEventServiceImpl service = new RacingEventServiceImpl();
         // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = service.getBaseDomainFactory();

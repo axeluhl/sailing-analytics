@@ -36,7 +36,7 @@ public abstract class AbstractJaxRsApiTest {
 
     public void setUp() throws Exception {
         service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
-        service.getDB().dropDatabase();
+        service.getDB().drop();
         racingEventService = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
                 new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false);
     }

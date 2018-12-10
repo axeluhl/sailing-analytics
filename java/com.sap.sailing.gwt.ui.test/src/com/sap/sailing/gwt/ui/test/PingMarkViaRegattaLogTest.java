@@ -36,7 +36,7 @@ public class PingMarkViaRegattaLogTest {
     
     @Test
     public void testPinging() throws DoesNotHaveRegattaLogException {
-        service.getMongoObjectFactory().getDatabase().dropDatabase();
+        service.getMongoObjectFactory().getDatabase().drop();
         Series series = new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet),
                 Collections.singletonList(columnName), service);
         Regatta regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", 

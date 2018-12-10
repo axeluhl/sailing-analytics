@@ -284,7 +284,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     private void deleteAllDataFromDatabase() {
         MongoDBService service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().getWriteConcern().getJournal();
-        service.getDB().dropDatabase();
+        service.getDB().drop();
     }
 
 }

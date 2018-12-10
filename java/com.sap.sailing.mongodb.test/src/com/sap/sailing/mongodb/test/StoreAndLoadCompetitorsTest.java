@@ -13,10 +13,10 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -73,13 +73,11 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     }
     
     private void dropCompetitorAndBoatsCollection() {
-        DB db = getMongoService().getDB();
-        DBCollection competitorCollection = db.getCollection(CollectionNames.COMPETITORS.name());
-        competitorCollection.setWriteConcern(WriteConcern.ACKNOWLEDGED); // ensure that the drop() has happened
-        competitorCollection.drop();
-        DBCollection boatsCollection = db.getCollection(CollectionNames.BOATS.name());
-        boatsCollection.setWriteConcern(WriteConcern.ACKNOWLEDGED); // ensure that the drop() has happened
-        boatsCollection.drop();
+        MongoDatabase db = getMongoService().getDB();
+        MongoCollection<org.bson.Document> competitorCollection = db.getCollection(CollectionNames.COMPETITORS.name());
+        competitorCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).drop();
+        MongoCollection<org.bson.Document> boatsCollection = db.getCollection(CollectionNames.BOATS.name());
+        boatsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).drop(); // ensure that the drop() has happened
     }
     
     @Test

@@ -12,8 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -71,7 +71,7 @@ public class SensorFixStoreTest {
     }
 
     private void dropPersistedData() {
-        DB db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
+        MongoDatabase db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
         db.getCollection(CollectionNames.GPS_FIXES.name()).drop();
         db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).drop();
     }

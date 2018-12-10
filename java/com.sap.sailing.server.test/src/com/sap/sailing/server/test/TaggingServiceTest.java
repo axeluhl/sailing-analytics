@@ -78,7 +78,7 @@ public class TaggingServiceTest {
     @BeforeClass
     public static void setUpClass()
             throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException {
-        MongoDBService.INSTANCE.getDB().dropDatabase();
+        MongoDBService.INSTANCE.getDB().drop();
         // setup racing service and racelog
         racingService = new RacingEventServiceImpl();
         RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(
@@ -119,7 +119,7 @@ public class TaggingServiceTest {
         } catch (UserManagementException e) {
             logger.severe("Could not teardown TaggingServiceTest!");
         }
-        MongoDBService.INSTANCE.getDB().dropDatabase();
+        MongoDBService.INSTANCE.getDB().drop();
     }
 
     @Before

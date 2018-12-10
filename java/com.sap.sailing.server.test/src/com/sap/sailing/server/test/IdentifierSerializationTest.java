@@ -7,7 +7,6 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import org.junit.Assert;
-
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
