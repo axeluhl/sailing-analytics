@@ -189,13 +189,6 @@ public interface TaggingService {
             boolean returnRevokedTags) throws RaceLogNotFoundException;
     
     /**
-     * Same as {@link #getPublicTags(String, String, String, TimePoint, boolean)}, only that the search for a {@link RaceLog}
-     * by leaderboard/race column/fleet name is eliminated by passing the {@link RaceLog} directly.
-     */
-    List<TagDTO> getPublicTags(RaceLog raceLog, TimePoint searchSince, boolean returnRevokedTags)
-            throws RaceLogNotFoundException;
-
-    /**
      * Returns all public tags since the given <code>searchSince</code> for the specified race.
      * 
      * @param raceIdentifier
@@ -204,6 +197,7 @@ public interface TaggingService {
      *            tags will only be returned if they got created after this time point
      * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
      *         <b>never null</b>!
+     * @throws RaceLogNotFoundException
      */
     List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince);
 

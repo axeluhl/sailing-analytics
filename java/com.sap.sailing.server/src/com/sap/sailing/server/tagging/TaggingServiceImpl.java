@@ -64,7 +64,6 @@ public class TaggingServiceImpl implements TaggingService {
             String comment, String imageURL, String resizedImageURL, TimePoint raceTimepoint)
             throws RaceLogNotFoundException, TagAlreadyExistsException {
         getSecurityService().checkCurrentUserUpdatePermission(racingService.getLeaderboardByName(leaderboardName));
-
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog == null) {
             throw new RaceLogNotFoundException();
@@ -101,6 +100,7 @@ public class TaggingServiceImpl implements TaggingService {
 
     private void removePublicTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag)
             throws AuthorizationException, NotRevokableException, RaceLogNotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(racingService.getLeaderboardByName(leaderboardName));
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog == null) {
             throw new RaceLogNotFoundException();
@@ -114,9 +114,6 @@ public class TaggingServiceImpl implements TaggingService {
                     && tagEvent.getImageURL().equals(tag.getImageURL())
                     && tagEvent.getUsername().equals(tag.getUsername())
                     && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint())) {
-
-                getSecurityService()
-                        .checkCurrentUserUpdatePermission(racingService.getLeaderboardByName(leaderboardName));
                 raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
                 break;
             }
@@ -205,26 +202,24 @@ public class TaggingServiceImpl implements TaggingService {
     public List<TagDTO> getTags(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, TimePoint searchSince,
             boolean returnRevokedTags) throws RaceLogNotFoundException, ServiceNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
-        Util.addAll(getPublicTags(raceColumn.getRaceLog(fleet), searchSince, returnRevokedTags), result);
-        try {
-            Util.addAll(getPrivateTags(leaderboard.getName(), raceColumn.getName(), fleet.getName()), result);
-        } catch (AuthorizationException e) {
-            // user is not logged in, may fail while unit testing because no user is logged in
-        }
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        extractPublicTagsFromLogInternal(raceColumn.getRaceLog(fleet), searchSince, returnRevokedTags, result);
+        Util.addAll(getPrivateTags(leaderboard.getName(), raceColumn.getName(), fleet.getName()), result);
         return result;
     }
 
     @Override
     public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName,
             TimePoint searchSince, boolean returnRevokedTags) throws RaceLogNotFoundException {
+        getSecurityService().checkCurrentUserReadPermission(racingService.getLeaderboardByName(leaderboardName));
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
-        return getPublicTags(raceLog, searchSince, returnRevokedTags);
+        final List<TagDTO> result = new ArrayList<TagDTO>();
+        extractPublicTagsFromLogInternal(raceLog, searchSince, returnRevokedTags, result);
+        return result;
     }
 
-    @Override
-    public List<TagDTO> getPublicTags(RaceLog raceLog, TimePoint searchSince, boolean returnRevokedTags)
-            throws RaceLogNotFoundException {
-        final List<TagDTO> result = new ArrayList<TagDTO>();
+    private void extractPublicTagsFromLogInternal(RaceLog raceLog, TimePoint searchSince, boolean returnRevokedTags,
+            final List<TagDTO> result) {
         if (raceLog == null) {
             throw new RaceLogNotFoundException();
         }
@@ -243,28 +238,18 @@ public class TaggingServiceImpl implements TaggingService {
                 }
             }
         }
-        return result;
     }
 
     @Override
     public List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince) {
+        Leaderboard leaderBoard = racingService.getLeaderboardByName(raceIdentifier.getRegattaName());
+        getSecurityService().checkCurrentUserReadPermission(leaderBoard);
+
         final List<TagDTO> result = new ArrayList<TagDTO>();
         TrackedRace trackedRace = racingService.getExistingTrackedRace(raceIdentifier);
         Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
         for (RaceLog raceLog : raceLogs) {
-            ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(racingService, raceLog);
-            Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
-            for (RaceLogTagEvent tagEvent : foundTagEvents) {
-                if ((searchSince == null && tagEvent.getRevokedAt() == null)
-                        || (searchSince != null && tagEvent.getRevokedAt() == null
-                                && tagEvent.getCreatedAt().after(searchSince))
-                        || (searchSince != null && tagEvent.getRevokedAt() != null
-                                && tagEvent.getRevokedAt().after(searchSince))) {
-                    result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                            tagEvent.getResizedImageURL(), true, tagEvent.getUsername(), tagEvent.getLogicalTimePoint(),
-                            tagEvent.getCreatedAt(), tagEvent.getRevokedAt()));
-                }
-            }
+            extractPublicTagsFromLogInternal(raceLog, searchSince, false, result);
         }
         return result;
     }
