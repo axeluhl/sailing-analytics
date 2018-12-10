@@ -116,11 +116,5 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
     public final void setOwnership(final OwnershipDTO ownership) {
         this.securityInformation.setOwnership(ownership);
     }
-    
-    public String getTypeRelativeIdentifierAsString() {
-        RegattaAndRaceIdentifier regattaAndRaceId = getRaceIdentifier();
-        WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
-        return wildcardPermissionEncoder.encodeStringList(regattaAndRaceId.getRegattaName(),
-                regattaAndRaceId.getRaceName());
-    }
+
 }
