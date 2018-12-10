@@ -1,5 +1,7 @@
 package com.sap.sailing.server.security;
 
+import java.io.Serializable;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.shiro.SecurityUtils;
@@ -7,7 +9,12 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.SubjectThreadState;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -66,4 +73,22 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         }
     }
 
+    @Override
+    public RaceDefinition createRaceDefinition(Regatta regatta, String name, Course course, BoatClass boatClass,
+            Map<Competitor, Boat> competitorsAndTheirBoats, Serializable id) {
+        SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
+        subjectThreadState.bind();
+        try {
+            RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(regatta.getName(), name);
+            QualifiedObjectIdentifier qualifiedObjectIdentifier = TrackedRace.getIdentifier(regattaAndRaceIdentifier);
+            return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.TRACKED_RACE, qualifiedObjectIdentifier.getTypeRelativeObjectIdentifier(),
+                    regattaAndRaceIdentifier.toString(), () -> {
+                        return super.createRaceDefinition(regatta, name, course, boatClass, competitorsAndTheirBoats,
+                                id);
+                    });
+        } finally {
+            subjectThreadState.clear();
+        }
+    }
 }
