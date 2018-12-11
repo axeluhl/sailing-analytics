@@ -72,6 +72,9 @@ public class SecuredDomainType extends HasPermissionsImpl {
         private static final Action[] ALL_ACTIONS = new Action[] { READ_PUBLIC, DefaultActions.READ,
                 DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,
                 DefaultActions.CHANGE_ACL };
+
+        public static final Action[] MUTATION_ACTIONS = new Action[] { DefaultActions.CREATE, DefaultActions.UPDATE,
+                DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL };
     };
     
     /**
