@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 
@@ -45,5 +46,13 @@ public class MigrateGroupOwnerForHierarchyDTO implements Serializable {
 
     public boolean isUpdateBoats() {
         return updateBoats;
+    }
+
+    public UUID getExistingUserGroupIdOrNull() {
+        UUID id = null;
+        if (existingUserGroup != null) {
+            id = existingUserGroup.getId();
+        }
+        return id;
     }
 }

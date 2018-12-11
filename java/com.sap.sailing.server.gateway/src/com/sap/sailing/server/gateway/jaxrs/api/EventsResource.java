@@ -65,6 +65,7 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.geocoding.ReverseGeocoder;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.exceptions.ExceptionManager;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -73,6 +74,7 @@ import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.EventRaceStatesSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
+import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
@@ -102,6 +104,19 @@ public class EventsResource extends AbstractSailingServerResource {
     public EventsResource() {
     }
     
+    @POST
+    public Response migrateOwnershipForEvent(@QueryParam("eventId") UUID eventId,
+            @QueryParam("createNewGroup") Boolean createNewGroup,
+            @QueryParam("existingGroupId") UUID existingGroupIdOrNull, @QueryParam("newGroupName") String newGroupName,
+            @QueryParam("migrateCompetitors") Boolean migrateCompetitors,
+            @QueryParam("migrateBoats") Boolean migrateBoats) throws ParseException, JsonDeserializationException {
+        Event event = getService().getEvent(eventId);
+        SailingHierarchyOwnershipUpdater updater = SailingHierarchyOwnershipUpdater.createOwnershipUpdater(
+                createNewGroup, existingGroupIdOrNull, newGroupName, migrateCompetitors, migrateBoats, getService());
+        updater.updateGroupOwnershipForEventHierarchy(event);
+        return Response.ok().build();
+    }
+
     @POST
     @Path("/createEvent")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
