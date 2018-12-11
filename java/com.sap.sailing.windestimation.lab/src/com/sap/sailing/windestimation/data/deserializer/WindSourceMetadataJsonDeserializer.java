@@ -5,7 +5,6 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
 import com.sap.sailing.windestimation.data.WindSourceMetadata;
 import com.sap.sse.common.TimePoint;
@@ -13,9 +12,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindSourceMetadataJsonDeserializer implements JsonDeserializer<WindSourceMetadata> {
 
-    private final PositionJsonDeserializer positionDeserializer;
+    private final JsonDeserializer<Position> positionDeserializer;
 
-    public WindSourceMetadataJsonDeserializer(PositionJsonDeserializer positionDeserializer) {
+    public WindSourceMetadataJsonDeserializer(JsonDeserializer<Position> positionDeserializer) {
         this.positionDeserializer = positionDeserializer;
     }
 

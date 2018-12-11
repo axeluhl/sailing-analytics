@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.MongoDbFriendlyPositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
 import com.sap.sailing.windestimation.data.RaceWithWindSources;
@@ -24,7 +24,7 @@ public class RaceWithWindSourcesDeserializer implements JsonDeserializer<RaceWit
     public static final String REGATTA_NAME = "regattaName";
     public static final String WIND_QUALITY = "windQuality";
 
-    private final PositionJsonDeserializer positionDeserializer = new PositionJsonDeserializer();
+    private final MongoDbFriendlyPositionJsonDeserializer positionDeserializer = new MongoDbFriendlyPositionJsonDeserializer();
     private final WindJsonDeserializer windDeserializer = new WindJsonDeserializer(positionDeserializer);
     private final WindSourceMetadataJsonDeserializer windSourceMetadataDeserializer = new WindSourceMetadataJsonDeserializer(
             positionDeserializer);
