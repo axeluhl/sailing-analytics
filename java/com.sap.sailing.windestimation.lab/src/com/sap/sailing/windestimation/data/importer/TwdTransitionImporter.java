@@ -114,7 +114,9 @@ public class TwdTransitionImporter {
                                     .getWindCourseRangeForManeuverType(newManeuverNodesLevel.getManeuver(),
                                             currentNode.getManeuverType());
                             Bearing bearingToPreviousManeuverMinusTwd = bearingToPreviusManeuver
-                                    .add(new DegreeBearingImpl(-currentWindCourseRange.getAvgWindCourse()));
+                                    .getDifferenceTo(
+                                            new DegreeBearingImpl(currentWindCourseRange.getAvgWindCourse()).reverse())
+                                    .abs();
                             double twdChangeDegrees = previousWindCourseRange.intersect(currentWindCourseRange)
                                     .getViolationRange();
                             double intersectedTwdChangeDegrees = intersectedWindRangeBasedTransitionProbabilitiesCalculator
