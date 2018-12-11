@@ -25,8 +25,12 @@ public class Activator implements BundleActivator {
             try {
                 // TODO figure out if we're in the middle of a graceful shutdown already and then skip this...
                 final Bundle systemBundle = context.getBundle(0);
-                logger.info("Found system bundle "+systemBundle.getSymbolicName());
-                systemBundle.stop();
+                if (systemBundle == null) {
+                    logger.warning("Couldn't find system bundle (anymore?). Perhaps already shut down.");
+                } else {
+                    logger.info("Found system bundle "+systemBundle.getSymbolicName());
+                    systemBundle.stop();
+                }
             } catch (BundleException e) {
                 logger.log(Level.WARNING, "Exception while trying to gracefully stop the OSGi framework", e);
             }
