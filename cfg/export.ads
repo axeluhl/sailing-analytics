@@ -60,7 +60,8 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
     assert execute(apksigner.absolutePath, "verify", "--print-certs", apkToDeploy) == 0
 
     def deployable = new File(apkToDeploy)
-    deployable.renameTo(apkFile)
+    def expectedLocation = new File("$gendir/$name")
+    deployable.renameTo(expectedLocation)
   }
 } else {
   // snapshot and milestone builds are not eligible for central signing
