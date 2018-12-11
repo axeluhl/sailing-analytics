@@ -7,9 +7,7 @@ import java.util.List;
 import org.bson.Document;
 import org.junit.Test;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.sap.sailing.domain.base.Competitor;
@@ -66,15 +64,15 @@ public class LeaderboardStorageTest extends TestCase {
         service.getMongoObjectFactory().storeLeaderboard(leaderboard);
 
         // Test in db
-        MongoCollection<org.bson.Document> leaderboardCollection = MongoDBService.INSTANCE.getDB().getCollection("LEADERBOARDS");
+        MongoCollection<Document> leaderboardCollection = MongoDBService.INSTANCE.getDB().getCollection("LEADERBOARDS");
         BasicDBObject query = new BasicDBObject();
         query.put("LEADERBOARD_NAME", LEADERBOARD_NAME);
         FindIterable<Document> leaderboardObjectCursor = leaderboardCollection.find();
         Document dbLeaderboard = leaderboardObjectCursor.iterator().next();
-        BasicDBList carriedPointsById = (BasicDBList) dbLeaderboard.get("LEADERBOARD_CARRIED_POINTS_BY_ID");
+        Iterable<?> carriedPointsById = (Iterable<?>) dbLeaderboard.get("LEADERBOARD_CARRIED_POINTS_BY_ID");
         if (carriedPointsById != null) {
             for (Object o : carriedPointsById) {
-                DBObject competitorIdAndCarriedPoints = (DBObject) o;
+                Document competitorIdAndCarriedPoints = (Document) o;
                 Serializable competitorIdFromDB = (Serializable) competitorIdAndCarriedPoints.get("COMPETITOR_ID");
                 Double carriedPointsForCompetitor = ((Number) competitorIdAndCarriedPoints
                         .get("LEADERBOARD_CARRIED_POINTS")).doubleValue();
