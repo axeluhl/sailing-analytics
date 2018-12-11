@@ -65,13 +65,8 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions BOAT = new SecuredDomainType("BOAT", IdentifierStrategy.ID, CompetitorAndBoatActions.ALL_ACTIONS);
 
     public static final HasPermissions MEDIA_TRACK = new SecuredDomainType("MEDIA_TRACK", DomainIdentifierStrategy.MEDIA_TRACK);
-    
-    /**
-     * the import URLs can be protected such that they take effect only for those users who can read them; type-relative
-     * identifier is the {@link ScoreCorrectionProvider#getName() name of the score correction provider} and the URL,
-     * encoded using the {@link WildcardPermissionEncoder#encodeStringList(String...)} method
-     */
-    public static final HasPermissions RESULT_IMPORT_URL = new SecuredDomainType("RESULT_IMPORT_URL", IdentifierStrategy.TO_SPECIFY);
+
+    public static final HasPermissions RESULT_IMPORT_URL = new SecuredDomainType("RESULT_IMPORT_URL", DomainIdentifierStrategy.RESULT_IMPORT_URL);
 
     public static enum ReplicatorActions implements Action {
         START, STOP, DROP_CONNECTION

@@ -121,7 +121,7 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     }*/
 
     @Override
-    public String getStringPermissionForObject(final Action action, final Object object) {
+    public String getStringPermissionForObject(final Action action, final Object... object) {
         return getStringPermissionForTypeRelativeIdentifiers(action, identifierStrategy().getIdentifierAsString(object));
     }
 

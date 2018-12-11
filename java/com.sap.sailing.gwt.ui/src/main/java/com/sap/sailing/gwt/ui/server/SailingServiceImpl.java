@@ -4959,10 +4959,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (urlBasedScoreCorrectionProvider != null) {
             Iterable<URL> allUrls = resultUrlRegistry.getResultUrls(resultProviderName);
             final Subject subject = SecurityUtils.getSubject();
-            final WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
             for (URL url : allUrls) {
-                if (subject.isPermitted(SecuredDomainType.RESULT_IMPORT_URL.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.READ,
-                        wildcardPermissionEncoder.encodeStringList(resultProviderName, url.toString())))) {
+                if (subject.isPermitted(SecuredDomainType.RESULT_IMPORT_URL
+                        .getStringPermissionForObject(DefaultActions.READ, urlBasedScoreCorrectionProvider, url))) {
                     result.add(url.toString());
                 }
             }

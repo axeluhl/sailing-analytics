@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.common.security;
 
+import java.net.URL;
+
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sse.security.shared.IdentifierStrategy;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
@@ -16,12 +19,13 @@ public interface DomainIdentifierStrategy extends IdentifierStrategy {
     static IdentifierStrategy TRACKED_RACE = new IdentifierStrategy() {
 
         @Override
-        public <T> String getIdentifierAsString(T object) {
-            if (object instanceof WithQualifiedObjectIdentifier) {
-                WithQualifiedObjectIdentifier withQualifiedObjectIdentifier = ((WithQualifiedObjectIdentifier) object);
+        public String getIdentifierAsString(Object... object) {
+            assert object.length == 1;
+            if (object[0] instanceof WithQualifiedObjectIdentifier) {
+                WithQualifiedObjectIdentifier withQualifiedObjectIdentifier = ((WithQualifiedObjectIdentifier) object[0]);
                 return withQualifiedObjectIdentifier.getIdentifier().getTypeRelativeObjectIdentifier();
             } else {
-                RegattaAndRaceIdentifier regattaAndRaceIdentifer = (RegattaAndRaceIdentifier) object;
+                RegattaAndRaceIdentifier regattaAndRaceIdentifer = (RegattaAndRaceIdentifier) object[0];
                 return WildcardPermissionEncoder.encode(regattaAndRaceIdentifer.getRegattaName(),
                         regattaAndRaceIdentifer.getRaceName());
             }
@@ -34,9 +38,26 @@ public interface DomainIdentifierStrategy extends IdentifierStrategy {
     static IdentifierStrategy MEDIA_TRACK = new IdentifierStrategy() {
 
         @Override
-        public <T> String getIdentifierAsString(T object) {
-            MediaTrack mediaTrack = (MediaTrack) object;
+        public String getIdentifierAsString(Object... object) {
+            assert object.length == 1;
+            MediaTrack mediaTrack = (MediaTrack) object[0];
             return mediaTrack.dbId;
+        }
+
+    };
+
+    /**
+     * type-relative identifier is the {@link ScoreCorrectionProvider#getName() name of the score correction provider}
+     * and the URL, encoded using the {@link WildcardPermissionEncoder#encodeStringList(String...)} method
+     */
+    static IdentifierStrategy RESULT_IMPORT_URL = new IdentifierStrategy() {
+
+        @Override
+        public String getIdentifierAsString(Object... object) {
+            assert object.length == 2;
+            ScoreCorrectionProvider scoreCorrectionProvider = (ScoreCorrectionProvider) object[0];
+            URL url = (URL) object[1];
+            return WildcardPermissionEncoder.encode(scoreCorrectionProvider.getName(), url.toString());
         }
 
     };

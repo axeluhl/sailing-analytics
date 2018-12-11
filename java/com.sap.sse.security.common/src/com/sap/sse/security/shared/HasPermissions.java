@@ -72,7 +72,7 @@ public interface HasPermissions {
      *            can be any object that can be passed to the identifer strategy to determine the type relative
      *            identifier for this object. What type of object can be passed is defined by the identifer strategy
      */
-    String getStringPermissionForObject(Action action, Object object);
+    String getStringPermissionForObject(Action action, Object... object);
 
     /**
      * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified by
