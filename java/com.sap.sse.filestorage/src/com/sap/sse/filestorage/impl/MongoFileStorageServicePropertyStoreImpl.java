@@ -59,7 +59,7 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
                 .append(FieldNames.PROPERTY_VALUE.name(), propertyValue);
         Document query = new Document().append(FieldNames.SERVICE_NAME.name(), serviceName)
                 .append(FieldNames.PROPERTY_NAME.name(), propertyName);
-        propertiesCollection.updateOne(query, obj, new UpdateOptions().upsert(true));
+        propertiesCollection.replaceOne(query, obj, new UpdateOptions().upsert(true));
     }
 
     @Override
@@ -75,6 +75,6 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
     public void writeActiveService(String serviceName) {
         Document obj = new Document(FieldNames.SERVICE_NAME.name(), serviceName);
         Document query = new Document();
-        activeServiceCollection.updateOne(query, obj, new UpdateOptions().upsert(true));
+        activeServiceCollection.replaceOne(query, obj, new UpdateOptions().upsert(true));
     }
 }

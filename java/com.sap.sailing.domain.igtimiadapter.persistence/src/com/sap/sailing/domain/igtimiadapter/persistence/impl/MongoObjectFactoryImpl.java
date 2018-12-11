@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.persistence.impl;
 
-import com.mongodb.BasicDBObject;
+import org.bson.Document;
+
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
@@ -15,18 +16,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeAccessToken(String accessToken) {
-        final BasicDBObject basicDBObject = getAccessTokenDBQuery(accessToken);
-        db.getCollection(CollectionNames.IGTIMI_ACCESS_TOKENS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(basicDBObject, basicDBObject, new UpdateOptions().upsert(true));
+        final Document basicDBObject = getAccessTokenDBQuery(accessToken);
+        db.getCollection(CollectionNames.IGTIMI_ACCESS_TOKENS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(basicDBObject, basicDBObject, new UpdateOptions().upsert(true));
     }
 
-    private BasicDBObject getAccessTokenDBQuery(String accessToken) {
-        final BasicDBObject basicDBObject = new BasicDBObject(FieldNames.IGTIMI_ACCESS_TOKENS_ACCESS_TOKEN.name(), accessToken);
+    private Document getAccessTokenDBQuery(String accessToken) {
+        final Document basicDBObject = new Document(FieldNames.IGTIMI_ACCESS_TOKENS_ACCESS_TOKEN.name(), accessToken);
         return basicDBObject;
     }
     
     @Override
     public void removeAccessToken(String accessToken) {
-        final BasicDBObject basicDBObject = getAccessTokenDBQuery(accessToken);
+        final Document basicDBObject = getAccessTokenDBQuery(accessToken);
         db.getCollection(CollectionNames.IGTIMI_ACCESS_TOKENS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(basicDBObject);
     }
 }

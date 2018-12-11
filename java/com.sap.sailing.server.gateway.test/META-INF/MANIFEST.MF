@@ -17,5 +17,6 @@ Require-Bundle: org.mockito.mockito-core;bundle-version="1.9.5",
  org.apache.commons.io;bundle-version="2.2.0"
 Import-Package: com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.persistence.impl,
- com.sap.sailing.server.impl
+ com.sap.sailing.server.impl,
+ com.sun.istack;version="3.0.7"
 Automatic-Module-Name: com.sap.sailing.server.gateway.test

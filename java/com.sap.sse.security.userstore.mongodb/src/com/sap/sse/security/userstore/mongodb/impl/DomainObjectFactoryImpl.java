@@ -10,12 +10,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bson.BsonDocument;
 import org.bson.Document;
+import org.bson.types.Binary;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.security.Social;
@@ -53,7 +50,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public User loadUser(String name) {
         User result;
-        BasicDBObject query = new BasicDBObject();
+        Document query = new Document();
         query.put(FieldNames.User.NAME.name(), name);
         MongoCollection<org.bson.Document> userCollection = db.getCollection(CollectionNames.USERS.name());
         Document userDBObject = userCollection.find(query).first();
@@ -77,19 +74,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
         Set<String> roles = new HashSet<String>();
         Set<String> permissions = new HashSet<String>();
-        BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLES.name());
+        Iterable<?> rolesO = (Iterable<?>) userDBObject.get(FieldNames.User.ROLES.name());
         if (rolesO != null) {
             for (Object o : rolesO) {
                 roles.add((String) o);
             }
         }
-        BasicDBList permissionsO = (BasicDBList) userDBObject.get(FieldNames.User.PERMISSIONS.name());
+        Iterable<?> permissionsO = (Iterable<?>) userDBObject.get(FieldNames.User.PERMISSIONS.name());
         if (permissionsO != null) {
             for (Object o : permissionsO) {
                 permissions.add((String) o);
             }
         }
-        DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
+        Document accountsMap = (Document) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
         User result = new User(name, email, fullName, company, locale, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, accounts.values());
         for (String role : roles) {
@@ -101,24 +98,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Map<AccountType, Account> createAccountMapFromdDBObject(DBObject accountsMap) {
+    private Map<AccountType, Account> createAccountMapFromdDBObject(Document accountsMap) {
         Map<AccountType, Account> accounts = new HashMap<>();
-        Map<?, ?> accountsM = (Map<?, ?>) accountsMap.toMap();
-        for (Entry<?, ?> e : accountsM.entrySet()){
+        for (Entry<?, ?> e : accountsMap.entrySet()){
             AccountType type = AccountType.valueOf((String) e.getKey());
-            Account account = createAccountFromDBObject((DBObject) e.getValue(), type);
+            Account account = createAccountFromDBObject((Document) e.getValue(), type);
             accounts.put(type, account);
         }
         return accounts;
     }
 
-    private Account createAccountFromDBObject(DBObject dbAccount, final AccountType type) {
+    private Account createAccountFromDBObject(Document dbAccount, final AccountType type) {
         switch (type) {
         case USERNAME_PASSWORD:
             String name = (String) dbAccount.get(FieldNames.UsernamePassword.NAME.name());
             String saltedPassword = (String) dbAccount.get(FieldNames.UsernamePassword.SALTED_PW.name());
-            byte[] salt = (byte[]) dbAccount.get(FieldNames.UsernamePassword.SALT.name());
-            return new UsernamePasswordAccount(name, saltedPassword, salt);
+            Binary salt = (Binary) dbAccount.get(FieldNames.UsernamePassword.SALT.name());
+            return new UsernamePasswordAccount(name, saltedPassword, salt.getData());
             //TODO [D056866] add other Account-types
         case SOCIAL_USER:
             SocialUserAccount socialUserAccount = new SocialUserAccount();
@@ -137,7 +133,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         MongoCollection<org.bson.Document> settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
 
         try {
-            BasicDBObject query = new BasicDBObject();
+            Document query = new Document();
             query.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
             Document settingDBObject = settingsCollection.find(query).first();
             if (settingDBObject != null) {
@@ -160,8 +156,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         MongoCollection<org.bson.Document> settingsCollection = db.getCollection(CollectionNames.PREFERENCES.name());
         try {
             for (Object o : settingsCollection.find()) {
-                DBObject usernameAndPreferencesMap = (DBObject) o;
-                Map<String, String> userMap = loadPreferencesMap((BasicDBList) usernameAndPreferencesMap.get(FieldNames.Preferences.KEYS_AND_VALUES.name()));
+                Document usernameAndPreferencesMap = (Document) o;
+                Map<String, String> userMap = loadPreferencesMap((Iterable<?>) usernameAndPreferencesMap.get(FieldNames.Preferences.KEYS_AND_VALUES.name()));
                 String username = (String) usernameAndPreferencesMap.get(FieldNames.Preferences.USERNAME.name());
                 result.put(username, userMap);
             }
@@ -172,10 +168,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Map<String, String> loadPreferencesMap(BasicDBList preferencesDBObject) {
+    private Map<String, String> loadPreferencesMap(Iterable<?> preferencesDBObject) {
         Map<String, String> result = new HashMap<>();
         for (Object o : preferencesDBObject) {
-            DBObject keyValue = (DBObject) o;
+            Document keyValue = (Document) o;
             String key = (String) keyValue.get(FieldNames.Preferences.KEY.name());
             String value = (String) keyValue.get(FieldNames.Preferences.VALUE.name());
             result.put(key, value);
@@ -185,7 +181,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Map<String, Object> loadSettingMap(Document settingDBObject) {
         Map<String, Object> result = new HashMap<>();
-        Map<?, ?> map = ((DBObject) settingDBObject.get(FieldNames.Settings.MAP.name())).toMap();
+        Map<?, ?> map = ((Document) settingDBObject.get(FieldNames.Settings.MAP.name()));
         for (Entry<?, ?> e : map.entrySet()){
             String key = (String) e.getKey();
             Object value = e.getValue();
@@ -197,10 +193,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Map<String, Class<?>> loadSettingTypes() {
         Map<String, Class<?>> result = new HashMap<String, Class<?>>();
-        MongoCollection<org.bson.Document> settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
+        MongoCollection<Document> settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
 
         try {
-            BasicDBObject query = new BasicDBObject();
+            Document query = new Document();
             query.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
             Document settingTypesDBObject = settingsCollection.find(query).first();
             if (settingTypesDBObject != null) {
@@ -219,15 +215,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Map<String, Class<?>> loadSettingTypesMap(Document settingTypesDBObject) {
         Map<String, Class<?>> result = new HashMap<>();
-        Map<?, ?> map = (BsonDocument) settingTypesDBObject.get(FieldNames.Settings.MAP.name());
+        Map<?, ?> map = (Document) settingTypesDBObject.get(FieldNames.Settings.MAP.name());
         for (Entry<?, ?> e : map.entrySet()){
             String key = (String) e.getKey();
             Class<?> value = null;
             try {
                 value = Class.forName((String) e.getValue());
             } catch (ClassNotFoundException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                logger.log(Level.WARNING, "Exception trying to load settings types map", e);
             }
             result.put(key, value);
         }

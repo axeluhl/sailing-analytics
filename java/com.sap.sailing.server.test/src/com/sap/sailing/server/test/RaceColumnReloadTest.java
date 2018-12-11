@@ -220,7 +220,6 @@ public class RaceColumnReloadTest {
     }
 
     private class WindFixLoggingRaceLogVisitor extends BaseRaceLogEventVisitor {
-
         private final Set<Wind> loggedWindFixes = ConcurrentHashMap.newKeySet();
 
         private WindFixLoggingRaceLogVisitor(RaceLog raceLog) {

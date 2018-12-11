@@ -27,16 +27,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bson.BsonArray;
-import org.bson.BsonDocument;
-import org.bson.BsonValue;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.MongoException;
 import com.mongodb.MongoNamespace;
 import com.mongodb.client.FindIterable;
@@ -436,7 +432,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public RegattaLeaderboardWithEliminations loadRegattaLeaderboardWithEliminations(Document dbLeaderboard,
             String leaderboardName, String wrappedRegattaLeaderboardName, LeaderboardRegistry leaderboardRegistry) {
         final RegattaLeaderboardWithEliminations result;
-        BasicDBList eliminatedCompetitorIds = (BasicDBList) dbLeaderboard.get(FieldNames.ELMINATED_COMPETITORS.name());
+        BsonArray eliminatedCompetitorIds = (BsonArray) dbLeaderboard.get(FieldNames.ELMINATED_COMPETITORS.name());
         result = new DelegatingRegattaLeaderboardWithCompetitorElimination(
                 () -> (RegattaLeaderboard) leaderboardRegistry.getLeaderboardByName(wrappedRegattaLeaderboardName),
                 leaderboardName);
@@ -544,7 +540,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private void loadSuppressedCompetitors(Document dbLeaderboard,
             DelayedLeaderboardCorrections loadedLeaderboardCorrections) {
-        BasicDBList dbSuppressedCompetitorIDs = (BasicDBList) dbLeaderboard
+        Iterable<?> dbSuppressedCompetitorIDs = (Iterable<?>) dbLeaderboard
                 .get(FieldNames.LEADERBOARD_SUPPRESSED_COMPETITOR_IDS.name());
         if (dbSuppressedCompetitorIDs != null) {
             for (Object competitorId : dbSuppressedCompetitorIDs) {
@@ -555,15 +551,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     /**
      * @param dbObject
-     *            expects to find a field identified by <code>field</code> which holds a {@link BasicDBList}
+     *            expects to find a field identified by <code>field</code> which holds a {@link BsonArray}
      */
     private ThresholdBasedResultDiscardingRule loadResultDiscardingRule(Document dbObject, FieldNames field) {
-        BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) dbObject.get(field.name());
+        @SuppressWarnings("unchecked")
+        Iterable<Document> dbDiscardIndexResultsStartingWithHowManyRaces = (Iterable<Document>) dbObject.get(field.name());
         final ThresholdBasedResultDiscardingRule result;
         if (dbDiscardIndexResultsStartingWithHowManyRaces == null) {
             result = null;
         } else {
-            int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
+            int[] discardIndexResultsStartingWithHowManyRaces = new int[Util.size(dbDiscardIndexResultsStartingWithHowManyRaces)];
             int i = 0;
             for (Object discardingThresholdAsObject : dbDiscardIndexResultsStartingWithHowManyRaces) {
                 discardIndexResultsStartingWithHowManyRaces[i++] = ((Number) discardingThresholdAsObject).intValue();
@@ -605,7 +602,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private FlexibleLeaderboard loadFlexibleLeaderboard(Document dbLeaderboard,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         final FlexibleLeaderboardImpl result;
-        BasicDBList dbRaceColumns = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMNS.name());
+        @SuppressWarnings("unchecked")
+        Iterable<Document> dbRaceColumns = (Iterable<Document>) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMNS.name());
         if (dbRaceColumns == null) {
             // this was probably an orphaned overall leaderboard
             logger.warning("Probably found orphan overall leaderboard named "
@@ -664,7 +662,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private void loadLeaderboardCorrections(Document dbLeaderboard, DelayedLeaderboardCorrections correctionsToUpdate,
             SettableScoreCorrection scoreCorrectionToUpdate) {
-        BasicDBList carriedPointsById = (BasicDBList) dbLeaderboard
+        @SuppressWarnings("unchecked")
+        Iterable<Document> carriedPointsById = (Iterable<Document>) dbLeaderboard
                 .get(FieldNames.LEADERBOARD_CARRIED_POINTS_BY_ID.name());
         if (carriedPointsById != null) {
             for (Object o : carriedPointsById) {
@@ -691,26 +690,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         for (String escapedRaceColumnName : dbScoreCorrection.keySet()) {
             // deprecated style: a DBObject per race where the keys are the escaped competitor names
-            // new style: a BasicDBList per race where each entry is a DBObject with COMPETITOR_ID and
+            // new style: a BsonArray per race where each entry is a DBObject with COMPETITOR_ID and
             // LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON and LEADERBOARD_CORRECTED_SCORE fields each
-            BsonArray dbScoreCorrectionForRace = (BsonArray) dbScoreCorrection.get(escapedRaceColumnName);
+            @SuppressWarnings("unchecked")
+            Iterable<Document> dbScoreCorrectionForRace = (Iterable<Document>) dbScoreCorrection.get(escapedRaceColumnName);
             final RaceColumn raceColumn = correctionsToUpdate.getLeaderboard()
                     .getRaceColumnByName(MongoUtils.unescapeDollarAndDot(escapedRaceColumnName));
             if (raceColumn != null) {
-                for (BsonValue o : dbScoreCorrectionForRace) {
-                    BsonDocument dbScoreCorrectionForCompetitorInRace = o.asDocument();
+                for (Document dbScoreCorrectionForCompetitorInRace : dbScoreCorrectionForRace) {
                     Serializable competitorId = (Serializable) dbScoreCorrectionForCompetitorInRace
                             .get(FieldNames.COMPETITOR_ID.name());
                     if (dbScoreCorrectionForCompetitorInRace
                             .containsKey(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
                         correctionsToUpdate.setMaxPointsReasonByID(competitorId, raceColumn,
-                                MaxPointsReason.valueOf(dbScoreCorrectionForCompetitorInRace
-                                        .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()).asString().getValue()));
+                                MaxPointsReason.valueOf((String) dbScoreCorrectionForCompetitorInRace
+                                        .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
                     }
                     if (dbScoreCorrectionForCompetitorInRace
                             .containsKey(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
                         final Double leaderboardCorrectedScore = dbScoreCorrectionForCompetitorInRace
-                                .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name()).asNumber().doubleValue();
+                                .getDouble(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
                         correctionsToUpdate.correctScoreByID(competitorId, raceColumn, leaderboardCorrectedScore);
                     }
                 }
@@ -719,13 +718,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         + " in leaderboard " + correctionsToUpdate.getLeaderboard().getName());
             }
         }
-        Bson competitorDisplayNames = (Bson) dbLeaderboard
+        Iterable<?> competitorDisplayNames = (Iterable<?>) dbLeaderboard
                 .get(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name());
         // deprecated style: a Document whose keys are the escaped competitor names
-        // new style: a BasicDBList whose entries are Documents with COMPETITOR_ID and COMPETITOR_DISPLAY_NAME fields
+        // new style: a BsonArray whose entries are Documents with COMPETITOR_ID and COMPETITOR_DISPLAY_NAME fields
         if (competitorDisplayNames != null) {
-            if (competitorDisplayNames instanceof BsonArray) {
-                for (Object o : (BasicDBList) competitorDisplayNames) {
+            if (competitorDisplayNames instanceof Iterable<?>) {
+                for (Object o : (Iterable<?>) competitorDisplayNames) {
                     Document competitorDisplayName = (Document) o;
                     final Serializable competitorId = (Serializable) competitorDisplayName
                             .get(FieldNames.COMPETITOR_ID.name());
@@ -834,7 +833,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             displayGroupsInReverseOrder = (Boolean) displayGroupsInReverseOrderObj;
         }
         ArrayList<Leaderboard> leaderboards = new ArrayList<Leaderboard>();
-        BasicDBList dbLeaderboardIds = (BasicDBList) o.get(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name());
+        @SuppressWarnings("unchecked")
+        Iterable<Document> dbLeaderboardIds = (Iterable<Document>) o.get(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name());
         for (Object object : dbLeaderboardIds) {
             ObjectId dbLeaderboardId = (ObjectId) object;
             Document dbLeaderboard = leaderboardCollection.find(eq("_id", dbLeaderboardId)).first();
@@ -1168,7 +1168,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         "Error parsing base URL " + baseURLAsString + " for event " + name + ". Ignoring this URL.");
             }
         }
-        BasicDBList images = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGES.name());
+        Iterable<?> images = (Iterable<?>) eventDBObject.get(FieldNames.EVENT_IMAGES.name());
         if (images != null) {
             for (Object imageObject : images) {
                 ImageDescriptor image = loadImage((Document) imageObject);
@@ -1177,7 +1177,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
-        BasicDBList videos = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEOS.name());
+        Iterable<?> videos = (Iterable<?>) eventDBObject.get(FieldNames.EVENT_VIDEOS.name());
         if (videos != null) {
             for (Object videoObject : videos) {
                 VideoDescriptor video = loadVideo((Document) videoObject);
@@ -1186,7 +1186,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
-        BasicDBList sailorsInfoWebsiteURLs = (BasicDBList) eventDBObject
+        Iterable<?> sailorsInfoWebsiteURLs = (Iterable<?>) eventDBObject
                 .get(FieldNames.EVENT_SAILORS_INFO_WEBSITES.name());
         if (sailorsInfoWebsiteURLs != null) {
             for (Object sailorsInfoWebsiteObject : sailorsInfoWebsiteURLs) {
@@ -1204,7 +1204,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Venue loadVenue(Document dbObject) {
         String name = (String) dbObject.get(FieldNames.VENUE_NAME.name());
-        BasicDBList dbCourseAreas = (BasicDBList) dbObject.get(FieldNames.COURSE_AREAS.name());
+        Iterable<?> dbCourseAreas = (Iterable<?>) dbObject.get(FieldNames.COURSE_AREAS.name());
         Venue result = new VenueImpl(name);
         for (Object courseAreaDBObject : dbCourseAreas) {
             CourseArea courseArea = loadCourseArea((Document) courseAreaDBObject);
@@ -1256,7 +1256,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         .get(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name());
                 boatClass = baseDomainFactory.getOrCreateBoatClass(boatClassName, typicallyStartsUpwind);
             }
-            BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
+            @SuppressWarnings("unchecked")
+            Iterable<Document> dbSeries = (Iterable<Document>) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
             Serializable courseAreaId = (Serializable) dbRegatta.get(FieldNames.COURSE_AREA_ID.name());
             CourseArea courseArea = null;
@@ -1347,10 +1348,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return scoringSchemeType;
     }
 
-    private Iterable<Series> loadSeries(BasicDBList dbSeries, TrackedRegattaRegistry trackedRegattaRegistry) {
+    private Iterable<Series> loadSeries(Iterable<Document> dbSeries, TrackedRegattaRegistry trackedRegattaRegistry) {
         List<Series> result = new ArrayList<Series>();
-        for (Object o : dbSeries) {
-            Document oneDBSeries = (Document) o;
+        for (Document oneDBSeries : dbSeries) {
             Series series = loadSeries(oneDBSeries, trackedRegattaRegistry);
             result.add(series);
         }
@@ -1374,9 +1374,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 .get(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name());
         Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries
                 .get(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name());
-        final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
+        @SuppressWarnings("unchecked")
+        final Iterable<Document> dbFleets = (Iterable<Document>) dbSeries.get(FieldNames.SERIES_FLEETS.name());
         List<Fleet> fleets = loadFleets(dbFleets);
-        BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
+        @SuppressWarnings("unchecked")
+        Iterable<Document> dbRaceColumns = (Iterable<Document>) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
         Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns);
         Series series = new SeriesImpl(name, isMedal, isFleetsCanRunInParallel, fleets, raceColumnNames,
                 trackedRegattaRegistry);
@@ -1399,7 +1401,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return series;
     }
 
-    private Iterable<String> loadRaceColumnNames(BasicDBList dbRaceColumns) {
+    private Iterable<String> loadRaceColumnNames(Iterable<Document> dbRaceColumns) {
         List<String> result = new ArrayList<String>();
         for (Object o : dbRaceColumns) {
             Document dbRaceColumn = (Document) o;
@@ -1408,7 +1410,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private void loadRaceColumnRaceLinks(BasicDBList dbRaceColumns, Series series) {
+    private void loadRaceColumnRaceLinks(Iterable<Document> dbRaceColumns, Series series) {
         for (Object o : dbRaceColumns) {
             Document dbRaceColumn = (Document) o;
             String name = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
@@ -1424,10 +1426,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    private List<Fleet> loadFleets(BasicDBList dbFleets) {
+    private List<Fleet> loadFleets(Iterable<Document> dbFleets) {
         List<Fleet> result = new ArrayList<Fleet>();
-        for (Object o : dbFleets) {
-            Document dbFleet = (Document) o;
+        for (Document dbFleet : dbFleets) {
             Fleet fleet = loadFleet(dbFleet);
             result.add(fleet);
         }
@@ -1521,7 +1522,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_CREATED_AT);
         Serializable id = (Serializable) dbObject.get(FieldNames.RACE_LOG_EVENT_ID.name());
         Integer passId = (Integer) dbObject.get(FieldNames.RACE_LOG_EVENT_PASS_ID.name());
-        BasicDBList dbCompetitors = (BasicDBList) dbObject.get(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name());
+        @SuppressWarnings("unchecked")
+        Iterable<Document> dbCompetitors = (Iterable<Document>) dbObject.get(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name());
         List<Competitor> competitors = loadCompetitorsForRaceLogEvent(dbCompetitors);
         final AbstractLogEventAuthor author;
         String authorName = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_AUTHOR_NAME.name());
@@ -1810,7 +1812,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogFinishPositioningConfirmedEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
             Document dbObject) {
-        BasicDBList dbPositionedCompetitorList = (BasicDBList) dbObject
+        BsonArray dbPositionedCompetitorList = (BsonArray) dbObject
                 .get(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name());
         CompetitorResults positionedCompetitors = null;
         // When a confirmation event is loaded that does not contain the positioned competitors (this is the case for
@@ -1827,7 +1829,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogFinishPositioningListChangedEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
             List<Competitor> competitors, Document dbObject) {
-        BasicDBList dbPositionedCompetitorList = (BasicDBList) dbObject
+        BsonArray dbPositionedCompetitorList = (BsonArray) dbObject
                 .get(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name());
         CompetitorResults positionedCompetitors = loadPositionedCompetitors(dbPositionedCompetitorList);
 
@@ -1848,7 +1850,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
             List<Competitor> competitors, Document dbObject) {
         String courseName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name());
-        Pair<CourseBase, Boolean> courseData = loadCourseData((BasicDBList) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()),
+        Pair<CourseBase, Boolean> courseData = loadCourseData((BsonArray) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()),
                 courseName);
         final String courseDesignerModeName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGNER_MODE.name());
         final CourseDesignerMode courseDesignerMode = courseDesignerModeName == null ? null
@@ -1874,7 +1876,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 zeroBasedIndexOfFirstSuppressedWaypoint);
     }
 
-    private CompetitorResults loadPositionedCompetitors(BasicDBList dbPositionedCompetitorList) {
+    private CompetitorResults loadPositionedCompetitors(BsonArray dbPositionedCompetitorList) {
         CompetitorResultsImpl positionedCompetitors = new CompetitorResultsImpl();
         int rankCounter = 1;
         for (Object object : dbPositionedCompetitorList) {
@@ -1919,7 +1921,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return positionedCompetitors;
     }
 
-    private List<Competitor> loadCompetitorsForRaceLogEvent(BasicDBList dbCompetitorList) {
+    private List<Competitor> loadCompetitorsForRaceLogEvent(Iterable<Document> dbCompetitorList) {
         List<Competitor> competitors = new ArrayList<Competitor>();
         for (Object object : dbCompetitorList) {
             Serializable competitorId = (Serializable) object;
@@ -2351,7 +2353,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         been edited "in place" to describe the migration that has happened
      */
     @SuppressWarnings("deprecation") // Used to migrate from PASSINGSIDE to the new PASSINGINSTRUCTIONS
-    private Pair<CourseBase, Boolean> loadCourseData(BasicDBList dbCourseList, String courseName) {
+    private Pair<CourseBase, Boolean> loadCourseData(BsonArray dbCourseList, String courseName) {
         boolean migrated = false;
         if (courseName == null) {
             courseName = "Course";
@@ -2591,7 +2593,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private DeviceConfigurationMatcher loadConfigurationMatcher(Document matcherObject) {
         List<String> clientIdentifiers = new ArrayList<String>();
-        BasicDBList clientIdentifiersObject = (BasicDBList) matcherObject
+        BsonArray clientIdentifiersObject = (BsonArray) matcherObject
                 .get(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name());
         if (clientIdentifiersObject != null) {
             for (Object clientIdentifier : clientIdentifiersObject) {
@@ -2667,7 +2669,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Number imageWidth = (Number) dbObject.get(FieldNames.IMAGE_WIDTH_IN_PX.name());
             Number imageHeight = (Number) dbObject.get(FieldNames.IMAGE_HEIGHT_IN_PX.name());
             TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.IMAGE_CREATEDATDATE);
-            BasicDBList tags = (BasicDBList) dbObject.get(FieldNames.IMAGE_TAGS.name());
+            BsonArray tags = (BsonArray) dbObject.get(FieldNames.IMAGE_TAGS.name());
             List<String> imageTags = new ArrayList<String>();
             if (tags != null) {
                 for (Object tagObject : tags) {
@@ -2699,7 +2701,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             String localeRaw = (String) dbObject.get(FieldNames.VIDEO_LOCALE.name());
             Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null;
             TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.VIDEO_CREATEDATDATE);
-            BasicDBList tags = (BasicDBList) dbObject.get(FieldNames.VIDEO_TAGS.name());
+            BsonArray tags = (BsonArray) dbObject.get(FieldNames.VIDEO_TAGS.name());
             Number lengthInSeconds = (Number) dbObject.get(FieldNames.VIDEO_LENGTH_IN_SECONDS.name());
             URL thumbnailURL = loadURL(dbObject, FieldNames.VIDEO_THUMBNAIL_URL);
             List<String> videoTags = new ArrayList<String>();
@@ -2754,7 +2756,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         + ". Ignoring this URL.");
             }
         }
-        BasicDBList imageURLsJson = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
+        BsonArray imageURLsJson = (BsonArray) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
         if (imageURLsJson != null) {
             for (Object imageURL : imageURLsJson) {
                 try {
@@ -2765,7 +2767,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
-        BasicDBList videoURLsJson = (BasicDBList) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
+        BsonArray videoURLsJson = (BsonArray) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
         if (videoURLsJson != null) {
             for (Object videoURL : videoURLsJson) {
                 try {
@@ -2776,7 +2778,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
-        BasicDBList sponsorImageURLsJson = (BasicDBList) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
+        BsonArray sponsorImageURLsJson = (BsonArray) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
         if (sponsorImageURLsJson != null) {
             for (Object sponsorImageURL : sponsorImageURLsJson) {
                 try {

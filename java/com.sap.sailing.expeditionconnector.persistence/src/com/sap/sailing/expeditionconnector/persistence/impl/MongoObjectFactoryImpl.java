@@ -3,6 +3,8 @@ package com.sap.sailing.expeditionconnector.persistence.impl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bson.Document;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
@@ -23,15 +25,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         expeditionDeviceConfigurationsCollection.createIndex(index, new IndexOptions().unique(true));
     }
 
-    private BasicDBObject getExpeditionDeviceConfigurationDBKey(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {
-        final BasicDBObject basicDBObject = new BasicDBObject(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_UUID.name(), expeditionDeviceConfiguration.getDeviceUuid());
+    private Document getExpeditionDeviceConfigurationDBKey(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {
+        final Document basicDBObject = new Document(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_UUID.name(), expeditionDeviceConfiguration.getDeviceUuid());
         return basicDBObject;
     }
     
     @Override
     public void storeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {
-        final BasicDBObject key = getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfiguration);
-        final BasicDBObject expeditionDeviceConfigurationDBObject = new BasicDBObject();
+        final Document key = getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfiguration);
+        final Document expeditionDeviceConfigurationDBObject = new Document();
         expeditionDeviceConfigurationDBObject.put(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_UUID.name(), expeditionDeviceConfiguration.getDeviceUuid());
         expeditionDeviceConfigurationDBObject.put(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_NAME.name(), expeditionDeviceConfiguration.getName());
         expeditionDeviceConfigurationDBObject.put(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_BOAT_ID.name(), expeditionDeviceConfiguration.getExpeditionBoatId());
@@ -40,7 +42,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Exception lastException = null;
         while (attempt < 5 && !success) {
             try {
-                expeditionDeviceConfigurationsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(key, expeditionDeviceConfigurationDBObject, new UpdateOptions().upsert(true));
+                expeditionDeviceConfigurationsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(key, expeditionDeviceConfigurationDBObject, new UpdateOptions().upsert(true));
                 success = true;
                 attempt++;
             } catch (Exception e) {

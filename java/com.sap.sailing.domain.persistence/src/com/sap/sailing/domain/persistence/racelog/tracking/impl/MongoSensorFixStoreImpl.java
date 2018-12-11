@@ -176,8 +176,8 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                         "Unexpected fix type (" + type + ") encountered when trying to load track for " + device);
             }
         }
-
         progressConsumer.accept(1d);
+        
         return fixLoaded;
     }
 
@@ -269,7 +269,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     private Bson getDeviceQuery(DeviceIdentifier device)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
+        Document dbDeviceId = storeDeviceId(deviceServiceFinder, device);
         Bson query = Filters.eq(FieldNames.DEVICE_ID.name(), dbDeviceId);
         return query;
     }

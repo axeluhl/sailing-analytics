@@ -48,7 +48,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUser.put(FieldNames.User.ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
         dbUser.put(FieldNames.User.ROLES.name(), user.getRoles());
         dbUser.put(FieldNames.User.PERMISSIONS.name(), user.getPermissions());
-        usersCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, dbUser, new UpdateOptions().upsert(true));
+        usersCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUser, new UpdateOptions().upsert(true));
     }
     
     @Override
@@ -92,7 +92,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
         dbSettings.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
         dbSettings.put(FieldNames.Settings.MAP.name(), createSettingsMapObject(settings));
-        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, dbSettings, new UpdateOptions().upsert(true));
+        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbSettings, new UpdateOptions().upsert(true));
     }
 
     @Override
@@ -109,7 +109,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.Preferences.USERNAME.name(), username);
         Document update = new Document(FieldNames.Preferences.KEYS_AND_VALUES.name(), dbSettings);
         update.put(FieldNames.Preferences.USERNAME.name(), username);
-        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, update, new UpdateOptions().upsert(true));
+        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, update, new UpdateOptions().upsert(true));
     }
 
     @Override
@@ -120,7 +120,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
         dbSettingTypes.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
         dbSettingTypes.put(FieldNames.Settings.MAP.name(), createSettingTypesMapObject(settingTypes));
-        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, dbSettingTypes, new UpdateOptions().upsert(true));
+        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbSettingTypes, new UpdateOptions().upsert(true));
     }
 
     private Document createSettingsMapObject(Map<String, Object> settings) {

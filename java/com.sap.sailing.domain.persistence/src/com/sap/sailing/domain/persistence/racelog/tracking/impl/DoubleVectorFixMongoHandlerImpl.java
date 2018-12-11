@@ -36,7 +36,7 @@ public class DoubleVectorFixMongoHandlerImpl implements FixMongoHandler<DoubleVe
     @Override
     public DoubleVectorFix transformBack(Document dbObject) {
         TimePoint timePoint = dof.loadTimePoint(dbObject);
-        return new DoubleVectorFixImpl(timePoint, fromDBObject((Document) dbObject.get(FieldNames.FIX.name())));
+        return new DoubleVectorFixImpl(timePoint, fromDBObject(dbObject.get(FieldNames.FIX.name())));
     }
     
     private BsonArray toDBObject(Double[] data) {
@@ -47,7 +47,7 @@ public class DoubleVectorFixMongoHandlerImpl implements FixMongoHandler<DoubleVe
         return result;
     }
     
-    private Double[] fromDBObject(Document dbObject) {
+    private Double[] fromDBObject(Object dbObject) {
         @SuppressWarnings("unchecked")
         List<Number> dbValues = (List<Number>) dbObject;
         Double[] result = new Double[dbValues.size()];

@@ -11,9 +11,10 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoWriteException;
 import com.mongodb.WriteConcern;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -94,7 +95,7 @@ public class MediaDBImpl implements MediaDB {
         MongoCollection<org.bson.Document> dbVideos = getVideoCollection();
         try {
             dbVideos.insertOne(dbMediaTrack);
-        } catch (DuplicateKeyException e) {
+        } catch (DuplicateKeyException | MongoWriteException e) {
             throw new IllegalArgumentException("Duplicate key '" + dbId
                     + "' caused an error when importing media (title: '" + title + "')", e);
         }
@@ -120,7 +121,7 @@ public class MediaDBImpl implements MediaDB {
         String mimeTypeText = (String) dbObject.get(DbNames.Fields.MIME_TYPE.name());
         MimeType mimeType = MimeType.byName(mimeTypeText);
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
-        BasicDBList assignedRacesDb = (BasicDBList) dbObject.get(DbNames.Fields.ASSIGNED_RACES.name());
+        Iterable<?> assignedRacesDb = (Iterable<?>) dbObject.get(DbNames.Fields.ASSIGNED_RACES.name());
         if (assignedRacesDb != null) { //safety check to support legacy instances
             for (Object assignedRace : assignedRacesDb) {
                 Document object = (Document) assignedRace;
@@ -139,10 +140,10 @@ public class MediaDBImpl implements MediaDB {
 
     @Override
     public List<MediaTrack> loadAllMediaTracks() {
-        FindIterable<Document> cursor = getVideoCollection().find().sort(sortByStartTimeAndTitle);
+        MongoCursor<Document> cursor = getVideoCollection().find().sort(sortByStartTimeAndTitle).iterator();
         List<MediaTrack> result = new ArrayList<>((int) getVideoCollection().count());
-        while (cursor.iterator().hasNext()) {
-            result.add(createMediaTrackFromDb(cursor.iterator().next()));
+        while (cursor.hasNext()) {
+            result.add(createMediaTrackFromDb(cursor.next()));
         }
         return result;
     }

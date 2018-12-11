@@ -35,6 +35,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -186,8 +187,7 @@ public class MasterDataImportTest {
 
     private void deleteAllDataFromDatabase() {
         MongoDBService service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
-        service.getDB().getWriteConcern().getJournal();
-        service.getDB().drop();
+        service.getDB().withWriteConcern(WriteConcern.JOURNALED).drop();
     }
 
     private Map<Competitor, Boat> createCompetitorsAndBoatsMap(BoatClass boatClass, Iterable<Competitor> competitors) {
