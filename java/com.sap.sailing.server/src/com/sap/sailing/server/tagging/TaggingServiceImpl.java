@@ -110,14 +110,17 @@ public class TaggingServiceImpl implements TaggingService {
         for (RaceLogTagEvent tagEvent : foundTagEvents) {
             if (tagEvent.getRevokedAt() != null) {
                 continue;
-            } else if (tagEvent.getTag().equals(tag.getTag()) && tagEvent.getComment().equals(tag.getComment())
-                    && tagEvent.getImageURL().equals(tag.getImageURL())
-                    && tagEvent.getUsername().equals(tag.getUsername())
-                    && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint())) {
+            } else if (tagEventEqualsTagDTO(tagEvent, tag)) {
                 raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
                 break;
             }
         }
+    }
+
+    private boolean tagEventEqualsTagDTO(RaceLogTagEvent tagEvent, TagDTO tag) {
+        return tagEvent.getTag().equals(tag.getTag()) && tagEvent.getComment().equals(tag.getComment())
+                && tagEvent.getImageURL().equals(tag.getImageURL()) && tagEvent.getUsername().equals(tag.getUsername())
+                && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint());
     }
 
     private void removePrivateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag)
