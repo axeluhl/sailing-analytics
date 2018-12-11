@@ -25,8 +25,9 @@ public class TracTracSecuredDomainType extends SecuredDomainType {
         static IdentifierStrategy TRACTRAC_ACCOUNT = new IdentifierStrategy() {
 
             @Override
-            public String getIdentifierAsString(Object object) {
-                TracTracConfiguration tracTracConfiguration = (TracTracConfiguration) object;
+            public String getIdentifierAsString(Object... object) {
+                assert object.length == 1;
+                TracTracConfiguration tracTracConfiguration = (TracTracConfiguration) object[0];
                 return WildcardPermissionEncoder.encode(tracTracConfiguration.getJSONURL());
             }
 

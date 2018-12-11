@@ -30,8 +30,9 @@ public class IgtimiSecuredDomainType extends SecuredDomainType {
         static IdentifierStrategy IGITIMI_ACCOUNT = new IdentifierStrategy() {
 
             @Override
-            public <T> String getIdentifierAsString(T object) {
-                Account account = (Account) object;
+            public String getIdentifierAsString(Object... object) {
+                assert object.length == 1;
+                Account account = (Account) object[0];
                 return WildcardPermissionEncoder.encode(account.getUser().getEmail());
             }
 

@@ -68,17 +68,6 @@ public interface IdentifierStrategy {
      */
     static IdentifierStrategy SERVERNAME = STRING;
 
-    @Deprecated
-    static IdentifierStrategy TO_SPECIFY = new IdentifierStrategy() {
-
-        @Override
-        public String getIdentifierAsString(Object... object) {
-            assert object.length == 1;
-            return object.toString();
-        }
-
-    };
-
     /**
      * Used to mark a permission that does not require a conceret object
      * permission. If used to build a permission, it will throw a

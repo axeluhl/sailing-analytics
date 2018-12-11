@@ -31,8 +31,9 @@ public class ExpeditionSecuredDomainTypes extends SecuredDomainType {
         static IdentifierStrategy EXPEDITION_DEVICE_CONFIGURATION = new IdentifierStrategy() {
 
             @Override
-            public String getIdentifierAsString(Object object) {
-                ExpeditionDeviceConfiguration expeditionDeviceConfiguration = (ExpeditionDeviceConfiguration) object;
+            public String getIdentifierAsString(Object... object) {
+                assert object.length == 1;
+                ExpeditionDeviceConfiguration expeditionDeviceConfiguration = (ExpeditionDeviceConfiguration) object[0];
                 return WildcardPermissionEncoder.encode(ServerInfo.getName(), expeditionDeviceConfiguration.getName());
             }
 

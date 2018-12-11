@@ -35,8 +35,8 @@ public class SwissTimingSecuredDomainTypes extends SecuredDomainType {
         static IdentifierStrategy JSON_URL = new IdentifierStrategy() {
 
             @Override
-            public String getIdentifierAsString(Object object) {
-                HasJsonUrl hasJsonUrl = (HasJsonUrl) object;
+            public String getIdentifierAsString(Object... object) {
+                HasJsonUrl hasJsonUrl = (HasJsonUrl) object[0];
                 return WildcardPermissionEncoder.encode(hasJsonUrl.getJsonURL());
             }
 
