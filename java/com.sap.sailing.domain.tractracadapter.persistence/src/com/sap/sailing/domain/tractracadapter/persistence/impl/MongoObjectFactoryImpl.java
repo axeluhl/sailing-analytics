@@ -2,7 +2,6 @@ package com.sap.sailing.domain.tractracadapter.persistence.impl;
 
 import org.bson.Document;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
@@ -18,8 +17,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {
-        MongoCollection<org.bson.Document> ttConfigCollection = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
-        ttConfigCollection.createIndex(new BasicDBObject(CollectionNames.TRACTRAC_CONFIGURATIONS.name(), 1));
+        MongoCollection<Document> ttConfigCollection = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
+        ttConfigCollection.createIndex(new Document(CollectionNames.TRACTRAC_CONFIGURATIONS.name(), 1));
         Document result = new Document();
         result.put(FieldNames.TT_CONFIG_NAME.name(), tracTracConfiguration.getName());
         for (Document equallyNamedConfig : ttConfigCollection.find(result)) {

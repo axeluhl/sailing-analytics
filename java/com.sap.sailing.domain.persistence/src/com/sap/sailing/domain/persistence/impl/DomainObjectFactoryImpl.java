@@ -432,7 +432,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public RegattaLeaderboardWithEliminations loadRegattaLeaderboardWithEliminations(Document dbLeaderboard,
             String leaderboardName, String wrappedRegattaLeaderboardName, LeaderboardRegistry leaderboardRegistry) {
         final RegattaLeaderboardWithEliminations result;
-        BsonArray eliminatedCompetitorIds = (BsonArray) dbLeaderboard.get(FieldNames.ELMINATED_COMPETITORS.name());
+        Iterable<?> eliminatedCompetitorIds = (Iterable<?>) dbLeaderboard.get(FieldNames.ELMINATED_COMPETITORS.name());
         result = new DelegatingRegattaLeaderboardWithCompetitorElimination(
                 () -> (RegattaLeaderboard) leaderboardRegistry.getLeaderboardByName(wrappedRegattaLeaderboardName),
                 leaderboardName);
@@ -551,7 +551,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     /**
      * @param dbObject
-     *            expects to find a field identified by <code>field</code> which holds a {@link BsonArray}
+     *            expects to find a field identified by <code>field</code> which holds a {@link Iterable<?>}
      */
     private ThresholdBasedResultDiscardingRule loadResultDiscardingRule(Document dbObject, FieldNames field) {
         @SuppressWarnings("unchecked")
@@ -1812,7 +1812,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogFinishPositioningConfirmedEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
             Document dbObject) {
-        BsonArray dbPositionedCompetitorList = (BsonArray) dbObject
+        Iterable<?> dbPositionedCompetitorList = (Iterable<?>) dbObject
                 .get(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name());
         CompetitorResults positionedCompetitors = null;
         // When a confirmation event is loaded that does not contain the positioned competitors (this is the case for
@@ -1829,7 +1829,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogFinishPositioningListChangedEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
             List<Competitor> competitors, Document dbObject) {
-        BsonArray dbPositionedCompetitorList = (BsonArray) dbObject
+        Iterable<?> dbPositionedCompetitorList = (Iterable<?>) dbObject
                 .get(FieldNames.RACE_LOG_POSITIONED_COMPETITORS.name());
         CompetitorResults positionedCompetitors = loadPositionedCompetitors(dbPositionedCompetitorList);
 
@@ -1850,7 +1850,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
             List<Competitor> competitors, Document dbObject) {
         String courseName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN_NAME.name());
-        Pair<CourseBase, Boolean> courseData = loadCourseData((BsonArray) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()),
+        Pair<CourseBase, Boolean> courseData = loadCourseData((Iterable<?>) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGN.name()),
                 courseName);
         final String courseDesignerModeName = (String) dbObject.get(FieldNames.RACE_LOG_COURSE_DESIGNER_MODE.name());
         final CourseDesignerMode courseDesignerMode = courseDesignerModeName == null ? null
@@ -1876,7 +1876,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 zeroBasedIndexOfFirstSuppressedWaypoint);
     }
 
-    private CompetitorResults loadPositionedCompetitors(BsonArray dbPositionedCompetitorList) {
+    private CompetitorResults loadPositionedCompetitors(Iterable<?> dbPositionedCompetitorList) {
         CompetitorResultsImpl positionedCompetitors = new CompetitorResultsImpl();
         int rankCounter = 1;
         for (Object object : dbPositionedCompetitorList) {
@@ -2353,7 +2353,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         been edited "in place" to describe the migration that has happened
      */
     @SuppressWarnings("deprecation") // Used to migrate from PASSINGSIDE to the new PASSINGINSTRUCTIONS
-    private Pair<CourseBase, Boolean> loadCourseData(BsonArray dbCourseList, String courseName) {
+    private Pair<CourseBase, Boolean> loadCourseData(Iterable<?> dbCourseList, String courseName) {
         boolean migrated = false;
         if (courseName == null) {
             courseName = "Course";
@@ -2370,7 +2370,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 if (waypointPassingInstruction != null) {
                     logger.info("Migrating PassingInstruction " + waypointPassingInstruction
                             + " to field name WAYPOINT_PASSINGINSTRUCTIONS");
-                    if ((i == 0 || i == dbCourseList.size() - 1)
+                    if ((i == 0 || i == Util.size(dbCourseList) - 1)
                             && waypointPassingInstruction.toLowerCase().equals("gate")) {
                         logger.warning("Changing PassingInstructions of first or last Waypoint from Gate to Line.");
                         waypointPassingInstruction = "Line";
@@ -2593,7 +2593,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private DeviceConfigurationMatcher loadConfigurationMatcher(Document matcherObject) {
         List<String> clientIdentifiers = new ArrayList<String>();
-        BsonArray clientIdentifiersObject = (BsonArray) matcherObject
+        Iterable<?> clientIdentifiersObject = (Iterable<?>) matcherObject
                 .get(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name());
         if (clientIdentifiersObject != null) {
             for (Object clientIdentifier : clientIdentifiersObject) {
@@ -2669,7 +2669,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Number imageWidth = (Number) dbObject.get(FieldNames.IMAGE_WIDTH_IN_PX.name());
             Number imageHeight = (Number) dbObject.get(FieldNames.IMAGE_HEIGHT_IN_PX.name());
             TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.IMAGE_CREATEDATDATE);
-            BsonArray tags = (BsonArray) dbObject.get(FieldNames.IMAGE_TAGS.name());
+            Iterable<?> tags = (Iterable<?>) dbObject.get(FieldNames.IMAGE_TAGS.name());
             List<String> imageTags = new ArrayList<String>();
             if (tags != null) {
                 for (Object tagObject : tags) {
@@ -2701,7 +2701,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             String localeRaw = (String) dbObject.get(FieldNames.VIDEO_LOCALE.name());
             Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null;
             TimePoint createdAtDate = loadTimePoint(dbObject, FieldNames.VIDEO_CREATEDATDATE);
-            BsonArray tags = (BsonArray) dbObject.get(FieldNames.VIDEO_TAGS.name());
+            Iterable<?> tags = (Iterable<?>) dbObject.get(FieldNames.VIDEO_TAGS.name());
             Number lengthInSeconds = (Number) dbObject.get(FieldNames.VIDEO_LENGTH_IN_SECONDS.name());
             URL thumbnailURL = loadURL(dbObject, FieldNames.VIDEO_THUMBNAIL_URL);
             List<String> videoTags = new ArrayList<String>();
@@ -2756,7 +2756,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         + ". Ignoring this URL.");
             }
         }
-        BsonArray imageURLsJson = (BsonArray) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
+        Iterable<?> imageURLsJson = (Iterable<?>) eventDBObject.get(FieldNames.EVENT_IMAGE_URLS.name());
         if (imageURLsJson != null) {
             for (Object imageURL : imageURLsJson) {
                 try {

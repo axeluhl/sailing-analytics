@@ -490,7 +490,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Document query = new Document(FieldNames.LEADERBOARD_NAME.name(), oldName);
         Document renameUpdate = new Document("$set", new Document(FieldNames.LEADERBOARD_NAME.name(), newName));
-        leaderboardCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, renameUpdate, new UpdateOptions().upsert(true));
+        leaderboardCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, renameUpdate);
     }
 
     @Override
