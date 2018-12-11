@@ -96,6 +96,11 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     @Override
     public String getStringPermissionForTypeRelativeIdentifiers(final Action action, final String... typeRelativeObjectIdentifiers) {
         assert supports(action);
+        return getStringPermissionForTypeRelativeIdentifiers(action, true, typeRelativeObjectIdentifiers);
+    }
+    
+    private String getStringPermissionForTypeRelativeIdentifiers(final Action action, boolean encode, final String... typeRelativeObjectIdentifiers) {
+        assert supports(action);
         final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(action));
         if (typeRelativeObjectIdentifiers != null && typeRelativeObjectIdentifiers.length > 0) {
@@ -107,7 +112,11 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
                 } else {
                     result.append(WildcardPermission.SUBPART_DIVIDER_TOKEN);
                 }
-                result.append(permissionEncoder.encodeAsPermissionPart(typeRelativeObjectIdentifier));
+                if (encode) {
+                    result.append(permissionEncoder.encodeAsPermissionPart(typeRelativeObjectIdentifier));
+                } else {
+                    result.append(typeRelativeObjectIdentifier);
+                }
             }
         }
         return result.toString();
@@ -122,7 +131,7 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
 
     @Override
     public String getStringPermissionForObject(final Action action, final Object... object) {
-        return getStringPermissionForTypeRelativeIdentifiers(action, identifierStrategy().getIdentifierAsString(object));
+        return getStringPermissionForTypeRelativeIdentifiers(action, false, identifierStrategy().getIdentifierAsString(object));
     }
 
     @Override
@@ -154,7 +163,7 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     @Override
     public WildcardPermission getPermissionForObject(final Action action, final Object object) {
         assert supports(action);
-        return new WildcardPermission(getStringPermissionForTypeRelativeIdentifiers(action, identiferStrategy.getIdentifierAsString(object)));
+        return new WildcardPermission(getStringPermissionForTypeRelativeIdentifiers(action, false, identiferStrategy.getIdentifierAsString(object)));
     }
 
 }
