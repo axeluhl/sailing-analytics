@@ -36,7 +36,7 @@ public class PersistedTwdTransitionClassifiersScorePrinter {
         List<TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata>> allClassifierModels = new ArrayList<>();
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();
         LoggingUtil.logInfo("### Loading all boat class classifiers:");
-        TwdTransitionModelMetadata maneuverModelMetadata = new TwdTransitionModelMetadata(null);
+        LabelledTwdTransitionModelMetadata maneuverModelMetadata = new LabelledTwdTransitionModelMetadata(null);
         List<TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata>> classifierModels = classifierModelFactory
                 .getAllTrainableClassifierModels(maneuverModelMetadata);
         for (TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata> classifierModel : classifierModels) {
@@ -49,7 +49,7 @@ public class PersistedTwdTransitionClassifiersScorePrinter {
             }
         }
         for (BoatClass boatClass : allBoatClasses) {
-            maneuverModelMetadata = new TwdTransitionModelMetadata(boatClass);
+            maneuverModelMetadata = new LabelledTwdTransitionModelMetadata(boatClass);
             classifierModels = classifierModelFactory.getAllTrainableClassifierModels(maneuverModelMetadata);
             for (TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata> classifierModel : classifierModels) {
                 try {

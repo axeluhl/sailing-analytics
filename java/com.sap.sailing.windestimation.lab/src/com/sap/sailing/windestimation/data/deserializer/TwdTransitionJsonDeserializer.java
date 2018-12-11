@@ -27,9 +27,11 @@ public class TwdTransitionJsonDeserializer implements JsonDeserializer<TwdTransi
         String boatClassName = (String) object.get(TwdTransitionJsonSerializer.BOAT_CLASS);
         double twdChangeDegrees = (double) object.get(TwdTransitionJsonSerializer.TWD_CHANGE);
         double intersectedTwdChangeDegrees = (double) object.get(TwdTransitionJsonSerializer.INTERSECTED_TWD_CHANGE);
+        double bearingMinusTwdInDegrees = (double) object.get(TwdTransitionJsonSerializer.BEARING_MINUS_TWD);
         TwdTransition twdTransition = new TwdTransition(new MeterDistance(distanceMeters),
                 new MillisecondsDurationImpl(durationMillis), domainFactory.getOrCreateBoatClass(boatClassName),
-                new DegreeBearingImpl(twdChangeDegrees), new DegreeBearingImpl(intersectedTwdChangeDegrees));
+                new DegreeBearingImpl(twdChangeDegrees), new DegreeBearingImpl(intersectedTwdChangeDegrees),
+                new DegreeBearingImpl(bearingMinusTwdInDegrees));
         if (object.containsKey(TwdTransitionJsonSerializer.CORRECT)) {
             boolean correct = (boolean) object.get(TwdTransitionJsonSerializer.CORRECT);
             ManeuverTypeForClassification fromManeuverType = ManeuverTypeForClassification
@@ -39,7 +41,8 @@ public class TwdTransitionJsonDeserializer implements JsonDeserializer<TwdTransi
             String regattaName = (String) object.get(TwdTransitionJsonSerializer.REGATTA_NAME);
             twdTransition = new LabelledTwdTransition(twdTransition.getDistance(), twdTransition.getDuration(),
                     twdTransition.getBoatClass(), twdTransition.getTwdChange(), twdTransition.getIntersectedTwdChange(),
-                    correct, fromManeuverType, toManeuverType, regattaName);
+                    twdTransition.getBearingToPreviousManeuverMinusTwd(), correct, fromManeuverType, toManeuverType,
+                    regattaName);
         }
         return twdTransition;
     }

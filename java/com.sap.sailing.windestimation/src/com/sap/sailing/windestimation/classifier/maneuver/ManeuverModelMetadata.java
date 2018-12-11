@@ -5,7 +5,6 @@ import java.util.Arrays;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.store.ContextType;
-import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
 public class ManeuverModelMetadata extends ContextSpecificModelMetadata<ManeuverForEstimation> {
@@ -13,7 +12,7 @@ public class ManeuverModelMetadata extends ContextSpecificModelMetadata<Maneuver
     private static final long serialVersionUID = -7074647974723150672L;
     private final ManeuverFeatures maneuverFeatures;
     private final BoatClass boatClass;
-    private final int[] indexToManeuverTypeOrdinalMapping;
+    protected final int[] indexToManeuverTypeOrdinalMapping;
     private final int numberOfSupportedManeuverTypes;
 
     public ManeuverModelMetadata(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
@@ -168,13 +167,6 @@ public class ManeuverModelMetadata extends ContextSpecificModelMetadata<Maneuver
             return false;
         }
         return true;
-    }
-
-    @Override
-    public int getY(ManeuverForEstimation maneuver) {
-        int y = indexToManeuverTypeOrdinalMapping[((LabelledManeuverForEstimation) maneuver).getManeuverType()
-                .ordinal()];
-        return y;
     }
 
     @Override

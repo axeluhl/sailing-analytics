@@ -6,6 +6,7 @@ import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifiersCac
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
+import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.preprocessing.RacePreprocessingPipeline;
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
@@ -30,13 +31,13 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
             ManeuverClassifiersCache maneuverClassifiersCache, PolarDataService polarService,
             ManeuverClassificationsAggregatorImplementation aggregatorImplementation) {
         this(maneuverFeatures, maneuverClassifiersCache, polarService,
-                new RaceElementsFilteringPreprocessingPipelineImpl(), aggregatorImplementation);
+                new RaceElementsFilteringPreprocessingPipelineImpl(new ManeuverForEstimationTransformer()),
+                aggregatorImplementation);
     }
 
     public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
             ManeuverClassifiersCache maneuverClassifiersCache, PolarDataService polarService) {
         this(maneuverFeatures, maneuverClassifiersCache, polarService,
-                new RaceElementsFilteringPreprocessingPipelineImpl(),
                 ManeuverClassificationsAggregatorImplementation.HMM);
     }
 

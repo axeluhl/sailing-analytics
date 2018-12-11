@@ -3,12 +3,11 @@ package com.sap.sailing.windestimation.classifier.twdtransition;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.store.ContextType;
-import com.sap.sailing.windestimation.data.LabelledTwdTransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 
 public class TwdTransitionModelMetadata extends ContextSpecificModelMetadata<TwdTransition> {
 
-    private static final long serialVersionUID = 8195288288811779220L;
+    private static final long serialVersionUID = 819528288811779220L;
 
     private final BoatClass boatClass;
 
@@ -32,12 +31,6 @@ public class TwdTransitionModelMetadata extends ContextSpecificModelMetadata<Twd
     @Override
     public int getNumberOfInputFeatures() {
         return 3;
-    }
-
-    @Override
-    public int getY(TwdTransition instance) {
-        int label = ((LabelledTwdTransition) instance).isCorrect() ? 1 : 0;
-        return label;
     }
 
     @Override

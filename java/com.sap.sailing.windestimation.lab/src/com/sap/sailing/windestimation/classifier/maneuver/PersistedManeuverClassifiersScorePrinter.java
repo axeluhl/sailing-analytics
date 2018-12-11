@@ -37,8 +37,8 @@ public class PersistedManeuverClassifiersScorePrinter {
         ManeuverClassifierModelFactory classifierModelFactory = new ManeuverClassifierModelFactory();
         LoggingUtil.logInfo("### Loading all boat class classifiers:");
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
-            ManeuverModelMetadata maneuverModelMetadata = new ManeuverModelMetadata(maneuverFeatures, null,
-                    ManeuverClassifierModelFactory.orderedSupportedTargetValues);
+            LabelledManeuverModelMetadata maneuverModelMetadata = new LabelledManeuverModelMetadata(maneuverFeatures,
+                    null, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
             List<TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> classifierModels = classifierModelFactory
                     .getAllTrainableClassifierModels(maneuverModelMetadata);
             for (TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : classifierModels) {
@@ -51,7 +51,7 @@ public class PersistedManeuverClassifiersScorePrinter {
                 }
             }
             for (BoatClass boatClass : allBoatClasses) {
-                maneuverModelMetadata = new ManeuverModelMetadata(maneuverFeatures, boatClass,
+                maneuverModelMetadata = new LabelledManeuverModelMetadata(maneuverFeatures, boatClass,
                         ManeuverClassifierModelFactory.orderedSupportedTargetValues);
                 classifierModels = classifierModelFactory.getAllTrainableClassifierModels(maneuverModelMetadata);
                 for (TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : classifierModels) {

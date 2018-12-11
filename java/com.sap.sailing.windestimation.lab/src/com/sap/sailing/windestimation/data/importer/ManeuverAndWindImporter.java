@@ -43,7 +43,7 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuver
 import com.sap.sailing.windestimation.data.persistence.wind.RaceWithWindSourcesPersistenceManager;
 import com.sap.sailing.windestimation.data.transformer.AbstractCompleteManeuverCurveWithEstimationDataTransformer;
 import com.sap.sailing.windestimation.data.transformer.ManeuverForDataAnalysisTransformer;
-import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
+import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 /**
@@ -63,7 +63,7 @@ public class ManeuverAndWindImporter {
     private final RaceWithManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager;
     private final RaceWithWindSourcesPersistenceManager raceWithWindSourcesPersistenceManager;
     private final ManeuverForDataAnalysisTransformer maneuverForDataAnalysisTransformer;
-    private final ManeuverForEstimationTransformer maneuverForEstimationTransformer;
+    private final LabelledManeuverForEstimationTransformer maneuverForEstimationTransformer;
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
     private final ManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
     private boolean skipRace = true;
@@ -76,7 +76,7 @@ public class ManeuverAndWindImporter {
         this.maneuverForEstimationPersistenceManager = new RaceWithManeuverForEstimationPersistenceManager();
         this.raceWithWindSourcesPersistenceManager = new RaceWithWindSourcesPersistenceManager();
         this.maneuverForDataAnalysisTransformer = new ManeuverForDataAnalysisTransformer();
-        this.maneuverForEstimationTransformer = new ManeuverForEstimationTransformer();
+        this.maneuverForEstimationTransformer = new LabelledManeuverForEstimationTransformer();
         this.maneuverForDataAnalysisJsonSerializer = new ManeuverForDataAnalysisJsonSerializer();
         this.maneuverForEstimationJsonSerializer = new ManeuverForEstimationJsonSerializer();
     }

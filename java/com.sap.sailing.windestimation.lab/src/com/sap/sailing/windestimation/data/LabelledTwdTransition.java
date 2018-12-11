@@ -13,9 +13,10 @@ public class LabelledTwdTransition extends TwdTransition {
     private final String regattaName;
 
     public LabelledTwdTransition(Distance distance, Duration duration, BoatClass boatClass, Bearing twdChange,
-            Bearing intersectedTwdChange, boolean correct, ManeuverTypeForClassification fromManeuverType,
-            ManeuverTypeForClassification toManeuverType, String regattaName) {
-        super(distance, duration, boatClass, twdChange, intersectedTwdChange);
+            Bearing intersectedTwdChange, Bearing bearingToPreviousManeuverMinusTwd, boolean correct,
+            ManeuverTypeForClassification fromManeuverType, ManeuverTypeForClassification toManeuverType,
+            String regattaName) {
+        super(distance, duration, boatClass, twdChange, intersectedTwdChange, bearingToPreviousManeuverMinusTwd);
         this.correct = correct;
         this.fromManeuverType = fromManeuverType;
         this.toManeuverType = toManeuverType;

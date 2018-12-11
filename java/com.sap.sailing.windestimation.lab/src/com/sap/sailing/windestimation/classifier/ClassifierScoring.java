@@ -24,9 +24,9 @@ public class ClassifierScoring<InstanceType, T extends ContextSpecificModelMetad
         this.indexOfTargetValueToLabelMapper = indexOfTargetValueToLabelMapper;
     }
 
-    public String printScoring(List<InstanceType> instances) {
+    public String printScoring(List<InstanceType> instances, LabelExtraction<InstanceType> labelExtraction) {
         T modelMetadata = trainedClassifier.getModelMetadata().getContextSpecificModelMetadata();
-        int[] target = modelMetadata.getYVector(instances);
+        int[] target = labelExtraction.getYVector(instances);
         int[] predicted = new int[instances.size()];
         int i = 0;
         for (InstanceType instance : instances) {

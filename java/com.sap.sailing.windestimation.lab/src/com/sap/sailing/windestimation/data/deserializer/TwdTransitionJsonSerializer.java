@@ -17,6 +17,7 @@ public class TwdTransitionJsonSerializer implements JsonSerializer<TwdTransition
     public static final String FROM_MANEUVER_TYPE = "fromManeuverType";
     public static final String TO_MANEUVER_TYPE = "toManeuverType";
     public static final String REGATTA_NAME = "regattaName";
+    public static final String BEARING_MINUS_TWD = "bearingMinusTwd";
 
     @Override
     public JSONObject serialize(TwdTransition transition) {
@@ -31,6 +32,7 @@ public class TwdTransitionJsonSerializer implements JsonSerializer<TwdTransition
             json.put(CORRECT, labelledTransition.isCorrect());
             json.put(FROM_MANEUVER_TYPE, labelledTransition.getFromManeuverType().name());
             json.put(TO_MANEUVER_TYPE, labelledTransition.getToManeuverType().name());
+            json.put(BEARING_MINUS_TWD, labelledTransition.getBearingToPreviousManeuverMinusTwd().getDegrees());
             json.put(REGATTA_NAME, labelledTransition.getRegattaName());
         }
         return json;

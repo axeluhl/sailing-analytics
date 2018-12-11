@@ -22,8 +22,10 @@ import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.wind.TwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -36,7 +38,8 @@ public class TwdTransitionImporter {
         TwdTransitionPersistenceManager twdTransitionPersistenceManager = new TwdTransitionPersistenceManager();
         twdTransitionPersistenceManager.dropCollection();
         DummyManeuverClassifier maneuverClassifier = new DummyManeuverClassifier();
-        RaceElementsFilteringPreprocessingPipelineImpl preprocessingPipeline = new RaceElementsFilteringPreprocessingPipelineImpl();
+        RaceElementsFilteringPreprocessingPipelineImpl preprocessingPipeline = new RaceElementsFilteringPreprocessingPipelineImpl(
+                new LabelledManeuverForEstimationTransformer());
         long twdTransitionsCount = 0;
         for (PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> iterator = racesPersistenceManager
                 .getIterator(null); iterator.hasNext();) {
@@ -104,10 +107,14 @@ public class TwdTransitionImporter {
                         WindCourseRange previousWindCourseRange = simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
                                 .getWindCourseRangeForManeuverType(lastGraphLevel.getManeuver(),
                                         previousNode.getManeuverType());
+                        Bearing bearingToPreviusManeuver = newManeuverNodesLevel.getManeuver().getManeuverPosition()
+                                .getBearingGreatCircle(lastGraphLevel.getManeuver().getManeuverPosition());
                         for (GraphNode currentNode : newManeuverNodesLevel.getLevelNodes()) {
                             WindCourseRange currentWindCourseRange = simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
                                     .getWindCourseRangeForManeuverType(newManeuverNodesLevel.getManeuver(),
                                             currentNode.getManeuverType());
+                            Bearing bearingToPreviousManeuverMinusTwd = bearingToPreviusManeuver
+                                    .add(new DegreeBearingImpl(-currentWindCourseRange.getAvgWindCourse()));
                             double twdChangeDegrees = previousWindCourseRange.intersect(currentWindCourseRange)
                                     .getViolationRange();
                             double intersectedTwdChangeDegrees = intersectedWindRangeBasedTransitionProbabilitiesCalculator
@@ -120,8 +127,9 @@ public class TwdTransitionImporter {
                             LabelledTwdTransition labelledTwdTransition = new LabelledTwdTransition(distance, duration,
                                     newManeuverNodesLevel.getManeuver().getBoatClass(),
                                     new DegreeBearingImpl(twdChangeDegrees),
-                                    new DegreeBearingImpl(intersectedTwdChangeDegrees), correct,
-                                    previousNode.getManeuverType(), currentNode.getManeuverType(), regattaName);
+                                    new DegreeBearingImpl(intersectedTwdChangeDegrees),
+                                    bearingToPreviousManeuverMinusTwd, correct, previousNode.getManeuverType(),
+                                    currentNode.getManeuverType(), regattaName);
                             result.add(labelledTwdTransition);
                         }
                     }

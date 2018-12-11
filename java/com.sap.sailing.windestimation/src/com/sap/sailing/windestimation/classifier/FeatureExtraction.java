@@ -19,15 +19,4 @@ public interface FeatureExtraction<InstanceType> {
 
     int getNumberOfInputFeatures();
 
-    int getY(InstanceType instance);
-
-    default int[] getYVector(List<InstanceType> instances) {
-        int[] output = new int[instances.size()];
-        int i = 0;
-        for (InstanceType instance : instances) {
-            output[i++] = getY(instance);
-        }
-        return output;
-    }
-
 }

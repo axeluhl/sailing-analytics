@@ -9,12 +9,14 @@ public class TwdTransition extends ManeuverTransition {
 
     private final Bearing twdChange;
     private final Bearing intersectedTwdChange;
+    private final Bearing bearingToPreviousManeuverMinusTwd;
 
     public TwdTransition(Distance distance, Duration duration, BoatClass boatClass, Bearing twdChange,
-            Bearing intersectedTwdChange) {
+            Bearing intersectedTwdChange, Bearing bearingToPreviousManeuverMinusTwd) {
         super(distance, duration, boatClass);
         this.twdChange = twdChange;
         this.intersectedTwdChange = intersectedTwdChange;
+        this.bearingToPreviousManeuverMinusTwd = bearingToPreviousManeuverMinusTwd;
     }
 
     public Bearing getTwdChange() {
@@ -23,6 +25,10 @@ public class TwdTransition extends ManeuverTransition {
 
     public Bearing getIntersectedTwdChange() {
         return intersectedTwdChange;
+    }
+    
+    public Bearing getBearingToPreviousManeuverMinusTwd() {
+        return bearingToPreviousManeuverMinusTwd;
     }
 
 }
