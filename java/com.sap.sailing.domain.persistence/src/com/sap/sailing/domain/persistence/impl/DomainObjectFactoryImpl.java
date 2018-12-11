@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bson.BsonArray;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
@@ -2767,7 +2766,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
-        BsonArray videoURLsJson = (BsonArray) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
+        Iterable<?> videoURLsJson = (Iterable<?>) eventDBObject.get(FieldNames.EVENT_VIDEO_URLS.name());
         if (videoURLsJson != null) {
             for (Object videoURL : videoURLsJson) {
                 try {
@@ -2778,7 +2777,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
-        BsonArray sponsorImageURLsJson = (BsonArray) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
+        Iterable<?> sponsorImageURLsJson = (Iterable<?>) eventDBObject.get(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name());
         if (sponsorImageURLsJson != null) {
             for (Object sponsorImageURL : sponsorImageURLsJson) {
                 try {

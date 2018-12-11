@@ -42,7 +42,7 @@ public class DoubleVectorFixMongoHandlerImpl implements FixMongoHandler<DoubleVe
     private BsonArray toDBObject(Double[] data) {
         BsonArray result = new BsonArray();
         for (Double value : data) {
-            result.add(new BsonDouble(value));
+            result.add(value==null?null:new BsonDouble(value));
         }
         return result;
     }
