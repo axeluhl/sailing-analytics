@@ -56,7 +56,8 @@ import com.sap.sse.common.Util.Pair;
 @Path("/v2/leaderboards")
 public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
     @POST
-    public Response migrateOwnershipForLeaderboard(@QueryParam("leaderboardName") String leaderboardName,
+    @Path("/{name}/migrate")
+    public Response migrateOwnershipForLeaderboard(@PathParam("name") String leaderboardName,
             @QueryParam("createNewGroup") Boolean createNewGroup,
             @QueryParam("existingGroupId") UUID existingGroupIdOrNull, @QueryParam("newGroupName") String newGroupName,
             @QueryParam("migrateCompetitors") Boolean migrateCompetitors,

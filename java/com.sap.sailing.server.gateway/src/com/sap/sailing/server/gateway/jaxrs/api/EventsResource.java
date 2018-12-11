@@ -105,7 +105,8 @@ public class EventsResource extends AbstractSailingServerResource {
     }
     
     @POST
-    public Response migrateOwnershipForEvent(@QueryParam("eventId") UUID eventId,
+    @Path("/{eventId}/migrate")
+    public Response migrateOwnershipForEvent(@PathParam("eventId") UUID eventId,
             @QueryParam("createNewGroup") Boolean createNewGroup,
             @QueryParam("existingGroupId") UUID existingGroupIdOrNull, @QueryParam("newGroupName") String newGroupName,
             @QueryParam("migrateCompetitors") Boolean migrateCompetitors,
