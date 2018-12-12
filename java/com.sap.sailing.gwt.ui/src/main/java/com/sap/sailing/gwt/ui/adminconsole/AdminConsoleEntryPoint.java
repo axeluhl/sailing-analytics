@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.CompetitorAndBoatActions;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -119,7 +120,9 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
         
-        final EventManagementPanel eventManagementPanel = new EventManagementPanel(getSailingService(), getUserService(), this, this, getStringMessages(), panel);
+        /* EVENTS */
+        final EventManagementPanel eventManagementPanel = new EventManagementPanel(getSailingService(),
+                getUserService(), this, this, getStringMessages(), panel);
         eventManagementPanel.ensureDebugId("EventManagement");
         panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanel) {
             @Override
@@ -127,11 +130,10 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 getWidget().fillEvents();
                 fillLeaderboardGroups();
             }
-        }, getStringMessages().events()); // no permissions required; we show those events the user may read
+        }, getStringMessages().events(), SecuredDomainType.EVENT.getPermission(DefaultActions.MUTATION_ACTIONS));
         leaderboardGroupsDisplayers.add(eventManagementPanel);
         
         /* REGATTAS */
-
         RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(
                 getSailingService(), getUserService(), this, getStringMessages(), this, eventManagementPanel);
         regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
@@ -140,11 +142,10 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             public void refreshAfterBecomingVisible() {
                 fillRegattas();
             }
-        }, getStringMessages().regattas(), SecuredDomainType.EVENT.getPermission(DefaultActions.MUTATION_ACTIONS));
+        }, getStringMessages().regattas(), SecuredDomainType.REGATTA.getPermission(DefaultActions.MUTATION_ACTIONS));
         regattasDisplayers.add(regattaManagementPanel);
         
         /* LEADERBOARDS */
-        
         final HorizontalTabLayoutPanel leaderboardTabPanel = panel.addVerticalTab(getStringMessages().leaderboards(), "LeaderboardPanel");
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(getSailingService(), getUserService(), this, this,
                 getStringMessages(), /* showRaceDetails */true, this);
@@ -179,9 +180,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
         
         /* RACES */
-        
         final HorizontalTabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().trackedRaces(), "RacesPanel");
-        racesTabPanel.ensureDebugId("RacesPanel");
 
         final TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(
                 getSailingService(), getUserService(), this, this, getStringMessages());
@@ -201,7 +200,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             public void refreshAfterBecomingVisible() {
                 getWidget().refreshCompetitorList();
             }
-        }, getStringMessages().competitors()); // no permissions required; we show those competitors the user may read
+        }, getStringMessages().competitors(), SecuredDomainType.COMPETITOR.getPermission(CompetitorAndBoatActions.MUTATION_ACTIONS));
 
         final BoatPanel boatPanel = new BoatPanel(getSailingService(), getUserService(), getStringMessages(), this);
         boatPanel.ensureDebugId("BoatPanel");
@@ -210,7 +209,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             public void refreshAfterBecomingVisible() {
                 getWidget().refreshBoatList();
             }
-        }, getStringMessages().boats()); // no permissions required; we show those boats the user may read
+        }, getStringMessages().boats(), SecuredDomainType.BOAT.getPermission(CompetitorAndBoatActions.MUTATION_ACTIONS));
 
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(getSailingService(), this, this, getStringMessages());
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanel), getStringMessages().courseLayout());
@@ -231,7 +230,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         }, getStringMessages().mediaPanel()); // no permissions required; we show those media the user may read
 
         /* RACE COMMITTEE APP */
-
         final HorizontalTabLayoutPanel raceCommitteeTabPanel = panel.addVerticalTab(getStringMessages().raceCommitteeApp(), "RaceCommiteeAppPanel");
         final DeviceConfigurationUserPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(getSailingService(),
                 getUserService(), getStringMessages(), this);
@@ -239,7 +237,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 getStringMessages().deviceConfiguration()); // no permissions required; we show those device configurations the user may read
         
         /* CONNECTORS */
-        
         final HorizontalTabLayoutPanel connectorsTabPanel = panel.addVerticalTab(getStringMessages().connectors(), "TrackingProviderPanel");
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(getSailingService(),
                 this, this, getStringMessages());
@@ -297,9 +294,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE)); // TODO bug4763 provide the default CREATE ownership for REGATTA / EVENT
 
         /* ADVANCED */
-        
-        final HorizontalTabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(), "AdvancedPanel");
-        advancedTabPanel.ensureDebugId("AdvancedTab");
+        final HorizontalTabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(),
+                "AdvancedTab");
         final ReplicationPanel replicationPanel = new ReplicationPanel(getSailingService(), this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanel) {
             @Override

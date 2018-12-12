@@ -98,7 +98,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
 
     /**
      * If {@code null}, any permission will be accepted by
-     * {@link #remeberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel, Widget, String, HasPermissions...)}
+     * {@link #rememberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel, Widget, String, HasPermissions...)}
      * which is used by all methods that add a panel and optionally specify permissions required to see that panel.
      * If this field holds a valid permission collection, only permissions from this collection will be accepted.
      * This can be used to keep a central repository of all such permissions which in turn may be used to
@@ -278,7 +278,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
         newTabPanel.ensureDebugId(tabDebugId);
-        remeberWidgetLocationAndPermissions(topLevelTabPanelWrapper, newTabPanel, tabTitle, requiresAnyOfThesePermissions);
+        rememberWidgetLocationAndPermissions(topLevelTabPanelWrapper, newTabPanel, tabTitle, requiresAnyOfThesePermissions);
         return newTabPanel;
     }
 
@@ -341,7 +341,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * method can be called.
      */
     private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, WildcardPermission... requiresAnyOfThesePermissions) {
-        remeberWidgetLocationAndPermissions(tabPanel, wrapInScrollPanel(panelToAdd.getWidget()), tabTitle, requiresAnyOfThesePermissions);
+        rememberWidgetLocationAndPermissions(tabPanel, wrapInScrollPanel(panelToAdd.getWidget()), tabTitle, requiresAnyOfThesePermissions);
         panelsByWidget.put(panelToAdd.getWidget(), panelToAdd);
     }
 
@@ -356,7 +356,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      *            widget. Otherwise, if any of these permissions implies any of the permissions the user has, the user
      *            will be shown the widget.
      */
-    private void remeberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
+    private void rememberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
             String tabTitle, WildcardPermission... requiresAnyOfThesePermissions) {
         if (acceptablePermissionsRequiredToSeeWidgets != null) {
             for (final WildcardPermission requiredPermission : requiresAnyOfThesePermissions) {
