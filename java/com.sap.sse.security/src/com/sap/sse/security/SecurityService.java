@@ -375,6 +375,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
 
+    void checkCurrentUserDeletePermission(QualifiedObjectIdentifier object);
+
     void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
 
     /**
@@ -421,4 +423,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
             ActionWithResult<T> actionToDeleteObject);
+    
+    <T> T doWithTemporaryDefaultTenant(UserGroup tenant, ActionWithResult<T> action);
 }

@@ -93,6 +93,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -417,27 +418,7 @@ public class EventsResource extends AbstractSailingServerResource {
         Map<Locale, URL> sailorsInfoWebsiteURLs = new HashMap<Locale,URL>();
         Iterable<ImageDescriptor> images = Collections.<ImageDescriptor> emptyList();
         Iterable<VideoDescriptor> videos = Collections.<VideoDescriptor> emptyList();
-        Event event = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.EVENT, eventId,
-                eventName, new ActionWithResult<Event>() {
 
-                    @Override
-                    public Event run() throws Exception {
-                        return getService()
-                        .apply(new CreateEvent(eventName, eventDescription, startDate, endDate, venueName, isPublic, eventId,
-                                officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos, leaderboardGroupIds));
-                    }
-                });
-
-        CourseArea courseArea = addCourseArea(event, "Default");
-        final LeaderboardGroup leaderboardGroup;
-        if (createLeaderboardGroup) {
-            leaderboardGroup = validateAndAddLeaderboardGroup(event.getId(), event.getName(), event.getDescription(), /* leaderboardGroupDisplayNameParam */ null,
-                    /* displayGroupsInReverseOrderParam */ false, /* leaderboardNamesParam */ null,
-                    /* overallLeaderboardDiscardThresholdsParam */ null, /* overallLeaderboardScoringSchemeTypeParam */ null);
-        } else {
-            leaderboardGroup = null;
-        }
         final CompetitorRegistrationType competitorRegistrationType;
         try {
             competitorRegistrationType = CompetitorRegistrationType.valueOfOrDefault(competitorRegistrationTypeString, /* failForUnknown */ true);
@@ -445,27 +426,68 @@ public class EventsResource extends AbstractSailingServerResource {
             throw new IllegalArgumentException(ExceptionManager.incorrectParameterValue(competitorRegistrationTypeString,
                     StringUtils.join(CompetitorRegistrationType.values(), ", ")));
         }
-        final RegattaLeaderboard leaderboard;
-        if (createRegatta) {
-            leaderboard = validateAndCreateRegatta(event.getName(), boatClassName,
-                    /* scoringSchemeParam */ null, courseArea.getId(), /* buoyZoneRadiusInHullLengthsParam */ null,
-                    /* useStartTimeInterferenceParam */ null, /* controlTrackingFromStartAndFinishTimesParam */ null,
-                    /* rankingMetricParam */ null, /* leaderboardDiscardThresholdsParam */ null,
-                    numberOfRacesParam, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, competitorRegistrationSecret);
-            if (leaderboardGroup != null) {
-                getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(),
-                        leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
-                        Collections.singletonList(leaderboard.getName()),
-                        leaderboardGroup.getOverallLeaderboard() == null ? null
-                                : ((ThresholdBasedResultDiscardingRule) leaderboardGroup.getOverallLeaderboard()
-                                        .getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
-                        leaderboardGroup.getOverallLeaderboard() == null ? null
-                                : leaderboardGroup.getOverallLeaderboard().getScoringScheme().getType()));
+        
+        ActionWithResult<Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard>> doCreationAction = new ActionWithResult<Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard>>() {
+            @Override
+            public Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard> run() throws Exception {
+                Event event = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                        SecuredDomainType.EVENT, eventId,
+                        eventName, new ActionWithResult<Event>() {
+
+                            @Override
+                            public Event run() throws Exception {
+                                return getService()
+                                .apply(new CreateEvent(eventName, eventDescription, startDate, endDate, venueName, isPublic, eventId,
+                                        officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos, leaderboardGroupIds));
+                            }
+                        });
+
+                CourseArea courseArea = addCourseArea(event.getId(), "Default");
+                final LeaderboardGroup leaderboardGroup;
+                if (createLeaderboardGroup) {
+                    leaderboardGroup = validateAndAddLeaderboardGroup(event.getId(), event.getName(), event.getDescription(), /* leaderboardGroupDisplayNameParam */ null,
+                            /* displayGroupsInReverseOrderParam */ false, /* leaderboardNamesParam */ null,
+                            /* overallLeaderboardDiscardThresholdsParam */ null, /* overallLeaderboardScoringSchemeTypeParam */ null);
+                } else {
+                    leaderboardGroup = null;
+                }
+                final RegattaLeaderboard leaderboard;
+                if (createRegatta) {
+                    leaderboard = validateAndCreateRegatta(event.getName(), boatClassName,
+                            /* scoringSchemeParam */ null, courseArea.getId(), /* buoyZoneRadiusInHullLengthsParam */ null,
+                            /* useStartTimeInterferenceParam */ null, /* controlTrackingFromStartAndFinishTimesParam */ null,
+                            /* rankingMetricParam */ null, /* leaderboardDiscardThresholdsParam */ null,
+                            numberOfRacesParam, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, competitorRegistrationSecret);
+                    if (leaderboardGroup != null) {
+                        getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(),
+                                leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
+                                Collections.singletonList(leaderboard.getName()),
+                                leaderboardGroup.getOverallLeaderboard() == null ? null
+                                        : ((ThresholdBasedResultDiscardingRule) leaderboardGroup.getOverallLeaderboard()
+                                                .getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces(),
+                                leaderboardGroup.getOverallLeaderboard() == null ? null
+                                        : leaderboardGroup.getOverallLeaderboard().getScoringScheme().getType()));
+                    }
+                } else {
+                    leaderboard = null;
+                }
+                return new Util.Triple<>(event, leaderboardGroup, leaderboard);
             }
-        } else {
-            leaderboard = null;
+        };
+        
+        
+        try {
+            if (competitorRegistrationType == CompetitorRegistrationType.OPEN_UNMODERATED) {
+                UUID newTenantId = UUID.randomUUID();
+                UserGroup ownerGroup = getSecurityService().createUserGroup(newTenantId, eventName + "-owner");
+                getSecurityService().addUserToUserGroup(ownerGroup, getCurrentUser());
+                return getSecurityService().doWithTemporaryDefaultTenant(ownerGroup, doCreationAction);
+            } else {
+                return doCreationAction.run();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return new Util.Triple<>(event, leaderboardGroup, leaderboard);
     }
 
     private LeaderboardGroup validateAndAddLeaderboardGroup(UUID eventId, String leaderboardGroupName,

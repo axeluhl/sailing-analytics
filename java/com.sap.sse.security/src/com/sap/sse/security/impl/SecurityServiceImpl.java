@@ -165,6 +165,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
+    private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
+    
     // private TimerTask migrationCompleteCheckTask;
 
     private static Ini shiroConfiguration;
@@ -359,10 +361,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     public UserGroup getDefaultTenantForUser(User user) {
-        UserGroup specificTenant = user.getDefaultTenant(ServerInfo.getName());
+        UserGroup specificTenant = temporaryDefaultTenant.get();
         if (specificTenant == null) {
-            String defaultTenantName = getDefaultTenantNameForUsername(user.getName());
-            specificTenant = getUserGroupByName(defaultTenantName);
+            specificTenant = user.getDefaultTenant(ServerInfo.getName());
+            if (specificTenant == null) {
+                String defaultTenantName = getDefaultTenantNameForUsername(user.getName());
+                specificTenant = getUserGroupByName(defaultTenantName);
+            }
         }
         return specificTenant;
     }
@@ -1891,6 +1896,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public void checkCurrentUserDeletePermission(QualifiedObjectIdentifier identifier) {
+        SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
+    }
+
+    @Override
     public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
         if (object == null || actions.length == 0) {
             throw new AuthorizationException();
@@ -1945,6 +1955,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final Role existingRole = userAndRole.getB();
             addRoleForUser(userAndRole.getA(),
                     new Role(existingRole.getRoleDefinition(), destination, existingRole.getQualifiedForUser()));
+        }
+    }
+    
+    @Override
+    public <T> T doWithTemporaryDefaultTenant(UserGroup tenant, ActionWithResult<T> action) {
+        final UserGroup previousValue = temporaryDefaultTenant.get();
+        temporaryDefaultTenant.set(tenant);
+        try {
+            return action.run();
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            temporaryDefaultTenant.set(previousValue);
         }
     }
 }
