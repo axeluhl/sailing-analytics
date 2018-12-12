@@ -16,7 +16,12 @@ public class BearerTokenOrBasicOrFormOrAnonymousAuthenticationFilterSAPSailing
     @Override
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
         super.onAccessDenied(request, response);
-        return true;
+        return true; // The request should always be processed, in case of doubt anonymously.
+    }
+    
+    @Override
+    protected boolean sendChallenge(ServletRequest request, ServletResponse response) {
+        return false; // Do not build a challenge for authorization in case of an anonymous user.
     }
 
 }
