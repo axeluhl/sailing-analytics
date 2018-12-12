@@ -30,6 +30,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.ThreadLocalTransporter;
 
 /**
@@ -42,23 +43,28 @@ import com.sap.sse.util.ThreadLocalTransporter;
 public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandler {
 
     private final Subject subject;
+    private final UserGroup defaultTenant;
     private final SecurityService securityService;
 
     public PermissionAwareRaceTrackingHandler(SecurityService securityService) {
         this.securityService = securityService;
         subject = SecurityUtils.getSubject();
+        defaultTenant = securityService.getDefaultTenantForCurrentUser();
     }
     
     private <T> T decorate(RegattaAndRaceIdentifier regattaAndRaceIdentifier, Supplier<T> innerAction) {
         SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
         subjectThreadState.bind();
         try {
-            QualifiedObjectIdentifier qualifiedObjectIdentifier = TrackedRace.getIdentifier(regattaAndRaceIdentifier);
-            return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.TRACKED_RACE, qualifiedObjectIdentifier.getTypeRelativeObjectIdentifier(),
-                    regattaAndRaceIdentifier.toString(), () -> {
-                        return innerAction.get();
-                    });
+            return securityService.doWithTemporaryDefaultTenant(defaultTenant, () -> {
+                QualifiedObjectIdentifier qualifiedObjectIdentifier = TrackedRace
+                        .getIdentifier(regattaAndRaceIdentifier);
+                return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                        SecuredDomainType.TRACKED_RACE, qualifiedObjectIdentifier.getTypeRelativeObjectIdentifier(),
+                        regattaAndRaceIdentifier.toString(), () -> {
+                            return innerAction.get();
+                        });
+            });
         } finally {
             subjectThreadState.clear();
         }
