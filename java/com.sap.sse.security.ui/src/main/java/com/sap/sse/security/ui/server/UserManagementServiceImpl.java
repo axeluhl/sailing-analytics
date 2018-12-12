@@ -312,18 +312,16 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public UserGroupDTO createUserGroup(String name) throws UnauthorizedException, UserGroupManagementException {
+        UUID newTenantId = UUID.randomUUID();
         UserGroup group = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredSecurityTypes.USER_GROUP, name, name, () -> {
-                    UUID newTenantId = UUID.randomUUID();
+                SecuredSecurityTypes.USER_GROUP, newTenantId, name, () -> {
+                    
                     UserGroup userGroup;
                     try {
                         userGroup = getSecurityService().createUserGroup(newTenantId, name);
                     } catch (UserGroupManagementException e) {
                         throw new UserGroupManagementException(e.getMessage());
                     }
-                    getSecurityService().setOwnership(userGroup.getIdentifier(),
-                            getSecurityService().getCurrentUser(),
-                            getSecurityService().getDefaultTenantForCurrentUser(), name);
                     return userGroup;
                 });
 
