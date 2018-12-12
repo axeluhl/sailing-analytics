@@ -23,8 +23,13 @@ public class BranchIO {
         if (parameters != null && parameters.size() > 0) {
             deepLinkUrl.append("?");
         }
+        boolean first = true;
         for (Entry<String, String> param : parameters.entrySet()) {
+            if (!first) {
+                deepLinkUrl.append("&");
+            }
             deepLinkUrl.append(param.getKey()).append(("=")).append(urlEncoder.attributeEncode(param.getValue()));
+            first = false;
         }
         return deepLinkUrl.toString();
     }

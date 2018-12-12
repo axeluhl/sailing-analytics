@@ -45,7 +45,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 @Path("/v1/leaderboardgroups")
 public class LeaderboardGroupsResource extends AbstractSailingServerResource {
     @POST
-    public Response migrateOwnershipForLeaderboardGroup(@QueryParam("leaderboardGroupName") String leaderboardGroupName,
+    @Path("/{name}/migrate")
+    public Response migrateOwnershipForLeaderboardGroup(@PathParam("name") String leaderboardGroupName,
             @QueryParam("createNewGroup") Boolean createNewGroup,
             @QueryParam("existingGroupId") UUID existingGroupIdOrNull, @QueryParam("newGroupName") String newGroupName,
             @QueryParam("migrateCompetitors") Boolean migrateCompetitors,

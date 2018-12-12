@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.security.SecurityService;
@@ -113,6 +114,10 @@ public class SailingHierarchyOwnershipUpdater {
 
     public void updateGroupOwnershipForLeaderboardHierarchy(Leaderboard leaderboard) {
         updateGroupOwner(leaderboard.getIdentifier());
+        if (leaderboard instanceof RegattaLeaderboard) {
+            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            updateGroupOwner(regattaLeaderboard.getRegatta().getIdentifier());
+        }
         SailingHierarchyWalker.walkFromLeaderboard(leaderboard, new LeaderboardHierarchyVisitor() {
             @Override
             public void visit(TrackedRace race) {

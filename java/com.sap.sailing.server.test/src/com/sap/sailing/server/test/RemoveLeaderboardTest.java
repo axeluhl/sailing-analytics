@@ -46,6 +46,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
+import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
@@ -119,6 +120,8 @@ public class RemoveLeaderboardTest {
     public void testRaceLogOfRaceColumnInSeriesDetachedWhenRegattaIsRemoved() {
         regatta.getRaceColumnByName(R1).setTrackedRace(defaultFleet, trackedRace);
         assertEquals(1, Util.size(trackedRace.getAttachedRaceLogs()));
+        // removal of races is no longer done automatically, due to restrictions based on permission-vertical
+        server.apply(new RemoveAndUntrackRace(trackedRace.getRaceIdentifier()));
         server.apply(new RemoveRegatta(new RegattaName(regatta.getName())));
         assertTrue(Util.isEmpty(trackedRace.getAttachedRaceLogs()));
     }
