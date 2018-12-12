@@ -1899,6 +1899,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public void checkCurrentUserDeletePermission(QualifiedObjectIdentifier identifier) {
+        SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
+    }
+
+    @Override
     public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
         if (object == null || actions.length == 0) {
             throw new AuthorizationException();

@@ -4630,45 +4630,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeRegatta(RegattaIdentifier regattaIdentifier) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(regatta, new Action() {
-                @Override
-                public void run() throws Exception {
-                    // if there were any tracked races, free all ownerships
-                    for (RaceDefinition race : regatta.getAllRaces()) {
-                        String typeRelativeObjectIdentifier = WildcardPermissionEncoder.encode(regatta.getName(),
-                                race.getName());
-                        QualifiedObjectIdentifier identifier = SecuredDomainType.TRACKED_RACE
-                                .getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
-                        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier,
-                                new ActionWithResult<Void>() {
-                                    @Override
-                                    public Void run() throws Exception {
-                                        RegattaNameAndRaceName raceIdentifier = new RegattaNameAndRaceName(
-                                                regatta.getName(), race.getName());
-                                        ArrayList<RegattaAndRaceIdentifier> trackedRace = new ArrayList<>();
-                                        trackedRace.add(raceIdentifier);
-                                        removeAndUntrackRaces(trackedRace);
-                                        return null;
-                                    }
-                                });
-
-                        // remove all leaderboards using the proper call that will clean and remove the owner as well
-                        Set<RegattaLeaderboard> leaderboardsToRemove = new HashSet<>();
-                        for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-                            if (leaderboard instanceof RegattaLeaderboard) {
-                                RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-                                if (regattaLeaderboard.getRegatta() == regatta) {
-                                    leaderboardsToRemove.add(regattaLeaderboard);
-                                }
-                            }
-                        }
-                        for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
-                            removeLeaderboard(regattaLeaderboardToRemove.getName());
-                        }
+            Set<QualifiedObjectIdentifier> objectsThatWillBeImplicitlyCleanedByRemoveRegatta = new HashSet<>();
+            objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(regatta.getIdentifier());
+            for (RaceDefinition race : regatta.getAllRaces()) {
+                String typeRelativeObjectIdentifier = WildcardPermissionEncoder.encode(regatta.getName(),
+                        race.getName());
+                QualifiedObjectIdentifier identifier = SecuredDomainType.TRACKED_RACE
+                        .getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
+                objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(identifier);
+            }
+            for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+                if (leaderboard instanceof RegattaLeaderboard) {
+                    RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                    if (regattaLeaderboard.getRegatta() == regatta) {
+                        objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(regattaLeaderboard.getIdentifier());
                     }
-                    getService().apply(new RemoveRegatta(regattaIdentifier));
                 }
-            });
+            }
+            // check if we can delete everything RemoveRegatta will remove
+            for (QualifiedObjectIdentifier toRemovePermissionObjects : objectsThatWillBeImplicitlyCleanedByRemoveRegatta) {
+                getSecurityService().checkCurrentUserDeletePermission(toRemovePermissionObjects);
+            }
+            // we have all permissions, execute
+            getService().apply(new RemoveRegatta(regattaIdentifier));
+            // cleanup the Ownership and ACLs
+            for (QualifiedObjectIdentifier toRemovePermissionObjects : objectsThatWillBeImplicitlyCleanedByRemoveRegatta) {
+                getSecurityService().deleteOwnership(toRemovePermissionObjects);
+            }
+
         }
     }
     

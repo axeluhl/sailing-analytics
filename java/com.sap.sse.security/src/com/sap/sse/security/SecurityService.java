@@ -375,6 +375,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
 
+    void checkCurrentUserDeletePermission(QualifiedObjectIdentifier object);
+
     void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
 
     /**
