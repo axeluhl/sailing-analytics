@@ -40,6 +40,14 @@ public class SwissTimingSecuredDomainTypes extends SecuredDomainType {
                 return WildcardPermissionEncoder.encode(hasJsonUrl.getJsonURL());
             }
 
+            @Override
+            public String convertNewIdentifer(Object... object) {
+                // TODO: check again, what type can be used, for now assuming String for the hasJsonUrl.getJsonURL()
+                assert object.length == 1;
+                String identifier = (String) object[0];
+                return WildcardPermissionEncoder.encode(identifier);
+            }
+
         };
     }
 

@@ -227,7 +227,7 @@ public class SailingHierarchyOwnershipUpdater {
         // and is possible out of date.
         final UUID newGroupId = UUID.randomUUID();
         return securitySerice.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredSecurityTypes.USER_GROUP, newGroupId.toString(), name, () -> {
+                SecuredSecurityTypes.USER_GROUP, newGroupId, name, () -> {
                     final UserGroup createdUserGroup = securitySerice.createUserGroup(newGroupId, name);
                     securitySerice.copyUsersAndRoleAssociations(userGroupToCopy, createdUserGroup);
                     return createdUserGroup;

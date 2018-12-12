@@ -487,7 +487,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             final CompetitorWithBoat competitor;
             if (subject.isAuthenticated()) {
                 competitor = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                        SecuredDomainType.COMPETITOR, competitorUuid.toString(), name,
+                        SecuredDomainType.COMPETITOR, competitorUuid, name,
                         new ActionWithResult<CompetitorWithBoat>() {
                                 @Override
                                 public CompetitorWithBoat run() throws Exception {
@@ -564,7 +564,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         final DynamicBoat boat;
         if (SecurityUtils.getSubject().isAuthenticated()) {
             boat = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.BOAT, boatUUID.toString(), name, new ActionWithResult<DynamicBoat>() {
+                SecuredDomainType.BOAT, boatUUID, name, new ActionWithResult<DynamicBoat>() {
 
                     @Override
                     public DynamicBoat run() throws Exception {

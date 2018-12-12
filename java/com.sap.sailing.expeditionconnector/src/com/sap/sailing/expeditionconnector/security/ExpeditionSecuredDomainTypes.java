@@ -37,6 +37,15 @@ public class ExpeditionSecuredDomainTypes extends SecuredDomainType {
                 return WildcardPermissionEncoder.encode(ServerInfo.getName(), expeditionDeviceConfiguration.getName());
             }
 
+            @Override
+            public String convertNewIdentifer(Object... object) {
+                // TODO: check again, what type can be used, for now assuming String for the
+                // expeditionDeviceConfiguration.getName()
+                assert object.length == 1;
+                String identifier = (String) object[0];
+                return WildcardPermissionEncoder.encode(ServerInfo.getName(), identifier);
+            }
+
         };
     }
 }

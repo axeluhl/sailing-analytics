@@ -418,7 +418,7 @@ public class EventsResource extends AbstractSailingServerResource {
         Iterable<ImageDescriptor> images = Collections.<ImageDescriptor> emptyList();
         Iterable<VideoDescriptor> videos = Collections.<VideoDescriptor> emptyList();
         Event event = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.EVENT, eventId.toString(),
+                SecuredDomainType.EVENT, eventId,
                 eventName, new ActionWithResult<Event>() {
 
                     @Override
@@ -476,7 +476,7 @@ public class EventsResource extends AbstractSailingServerResource {
         UUID leaderboardGroupId = UUID.randomUUID();
         LeaderboardGroup leaderboardGroup = getSecurityService()
                 .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                        SecuredDomainType.LEADERBOARD_GROUP, leaderboardGroupName,
+                        SecuredDomainType.LEADERBOARD_GROUP, leaderboardGroupId,
                 leaderboardGroupName, new ActionWithResult<LeaderboardGroup>() {
 
             @Override

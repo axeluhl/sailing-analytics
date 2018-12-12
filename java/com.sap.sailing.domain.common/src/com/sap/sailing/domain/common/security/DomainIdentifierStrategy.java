@@ -28,6 +28,13 @@ public interface DomainIdentifierStrategy extends IdentifierStrategy {
                         regattaAndRaceIdentifer.getRaceName());
             }
         }
+
+        @Override
+        public String convertNewIdentifer(Object... object) {
+            assert object.length == 1;
+            RegattaAndRaceIdentifier identifer = (RegattaAndRaceIdentifier) object[0];
+            return WildcardPermissionEncoder.encode(identifer.getRegattaName(), identifer.getRaceName());
+        }
     };
 
     /**
@@ -42,6 +49,13 @@ public interface DomainIdentifierStrategy extends IdentifierStrategy {
             return mediaTrack.dbId;
         }
 
+        @Override
+        public String convertNewIdentifer(Object... object) {
+            assert object.length == 1;
+            String identifer = (String) object[0];
+            return identifer;
+        }
+
     };
 
     /**
@@ -52,6 +66,13 @@ public interface DomainIdentifierStrategy extends IdentifierStrategy {
 
         @Override
         public String getIdentifierAsString(Object... object) {
+            assert object.length == 2;
+            ScoreCorrectionProvider scoreCorrectionProvider = (ScoreCorrectionProvider) object[0];
+            return WildcardPermissionEncoder.encode(scoreCorrectionProvider.getName(), object[1].toString());
+        }
+
+        @Override
+        public String convertNewIdentifer(Object... object) {
             assert object.length == 2;
             ScoreCorrectionProvider scoreCorrectionProvider = (ScoreCorrectionProvider) object[0];
             return WildcardPermissionEncoder.encode(scoreCorrectionProvider.getName(), object[1].toString());

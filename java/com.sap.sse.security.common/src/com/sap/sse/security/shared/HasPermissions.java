@@ -80,7 +80,7 @@ public interface HasPermissions {
      * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
      */
     QualifiedObjectIdentifier getQualifiedObjectIdentifierByString(String typeRelativeObjectIdentifier);
-    
+
     /**
      * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified by
      * this permission with this permission's type name. For example, if this permission is for the "LEADERBOARD" type,

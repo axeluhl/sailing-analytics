@@ -1500,7 +1500,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-            HasPermissions type, String typeIdentifier, String securityDisplayName,
+            HasPermissions type, Object typeIdentifier, String securityDisplayName,
             ActionWithResult<T> actionWithResult) {
         return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(getDefaultTenantForCurrentUser(), type,
                 typeIdentifier, securityDisplayName, actionWithResult, false);
@@ -1508,7 +1508,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
-            String typeRelativeObjectIdentifier, String securityDisplayName,
+            Object typeRelativeObjectIdentifier, String securityDisplayName,
             Action actionToCreateObject) {
         setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeRelativeObjectIdentifier,
                 securityDisplayName, () -> {
@@ -1549,9 +1549,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     private <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
-            HasPermissions type, String typeRelativeObjectIdentifier, String securityDisplayName,
+            HasPermissions type, Object typeRelativeObjectIdentifier, String securityDisplayName,
             ActionWithResult<T> createActionReturningCreatedObject, boolean checkCreateObjectOnServer) {
-        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifierByString(typeRelativeObjectIdentifier);
+        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifierByString(type.identifierStrategy().convertNewIdentifer(typeRelativeObjectIdentifier));
         T result = null;
         boolean didSetOwnerShip = false;
         try {

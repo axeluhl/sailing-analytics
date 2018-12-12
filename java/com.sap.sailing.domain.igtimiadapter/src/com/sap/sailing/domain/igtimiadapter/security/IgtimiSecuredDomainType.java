@@ -36,6 +36,15 @@ public class IgtimiSecuredDomainType extends SecuredDomainType {
                 return WildcardPermissionEncoder.encode(account.getUser().getEmail());
             }
 
+            @Override
+            public String convertNewIdentifer(Object... object) {
+                // TODO: check again, what type can be used, for now assuming String for the
+                // account.getUser().getEmail()
+                assert object.length == 1;
+                String identifier = (String) object[0];
+                return WildcardPermissionEncoder.encode(identifier);
+            }
+
         };
     }
 }

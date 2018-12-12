@@ -334,11 +334,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     UserGroup getDefaultTenant();
 
     <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
-            String typeRelativeObjectIdentifier,
+            Object typeRelativeObjectIdentifier,
             String securityDisplayName, ActionWithResult<T> createActionReturningCreatedObject);
 
     void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
-            String typeRelativeObjectIdentifier, String securityDisplayName, Action actionToCreateObject);
+            Object typeRelativeObjectIdentifier, String securityDisplayName, Action actionToCreateObject);
 
     User getAllUser();
 

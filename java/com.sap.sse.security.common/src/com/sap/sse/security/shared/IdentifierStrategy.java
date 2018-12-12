@@ -1,5 +1,7 @@
 package com.sap.sse.security.shared;
 
+import java.io.Serializable;
+
 import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
@@ -7,6 +9,7 @@ import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 public interface IdentifierStrategy {
 
     String getIdentifierAsString(Object... object);
+    String convertNewIdentifer(Object... object);
 
     /**
      * Identifier strategy that is used for object types that implement the
@@ -21,14 +24,12 @@ public interface IdentifierStrategy {
             return WildcardPermissionEncoder.encode(namedObject.getName());
         }
 
-//        @Override
-//        public <T> String buildNewIdentifier(T... params) {
-//            if (params.length != 1) {
-//                throw new IllegalArgumentException("IdentifierStrategy NAMED can only have one parameter for the name.");
-//            } else {
-//                return WildcardPermissionEncoder.encode((String) params[0]);
-//            }
-//        }
+        @Override
+        public String convertNewIdentifer(Object... object) {
+            assert object.length == 1;
+            String identifer = (String) object[0];
+            return WildcardPermissionEncoder.encode(identifer);
+        }
 
     };
 
@@ -45,6 +46,13 @@ public interface IdentifierStrategy {
             return objectWithId.getId().toString();
         }
 
+        @Override
+        public String convertNewIdentifer(Object... object) {
+            assert object.length == 1;
+            Serializable identifier = (Serializable) object[0];
+            return identifier.toString();
+        }
+
     };
 
     /**
@@ -57,6 +65,13 @@ public interface IdentifierStrategy {
         public String getIdentifierAsString(Object... object) {
             assert object.length == 1;
             return WildcardPermissionEncoder.encode((String) object[0]);
+        }
+
+        @Override
+        public String convertNewIdentifer(Object... object) {
+            assert object.length == 1;
+            String identifier = (String) object[0];
+            return WildcardPermissionEncoder.encode(identifier);
         }
 
     };
@@ -77,6 +92,11 @@ public interface IdentifierStrategy {
 
         @Override
         public String getIdentifierAsString(Object... object) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String convertNewIdentifer(Object... object) {
             throw new UnsupportedOperationException();
         }
 

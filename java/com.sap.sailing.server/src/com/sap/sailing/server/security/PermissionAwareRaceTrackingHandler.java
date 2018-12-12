@@ -26,7 +26,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.util.ThreadLocalTransporter;
 
@@ -59,9 +58,8 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         try {
             RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(
                     trackedRegatta.getRegatta().getName(), raceDefinition.getName());
-            QualifiedObjectIdentifier qualifiedObjectIdentifier = TrackedRace.getIdentifier(regattaAndRaceIdentifier);
             return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.TRACKED_RACE, qualifiedObjectIdentifier.getTypeRelativeObjectIdentifier(),
+                    SecuredDomainType.TRACKED_RACE, regattaAndRaceIdentifier,
                     regattaAndRaceIdentifier.toString(), () -> {
                         return super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                                 delayToLiveInMillis, millisecondsOverWhichToAverageWind,
@@ -80,9 +78,8 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         subjectThreadState.bind();
         try {
             RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(regatta.getName(), name);
-            QualifiedObjectIdentifier qualifiedObjectIdentifier = TrackedRace.getIdentifier(regattaAndRaceIdentifier);
             return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.TRACKED_RACE, qualifiedObjectIdentifier.getTypeRelativeObjectIdentifier(),
+                    SecuredDomainType.TRACKED_RACE, regattaAndRaceIdentifier,
                     regattaAndRaceIdentifier.toString(), () -> {
                         return super.createRaceDefinition(regatta, name, course, boatClass, competitorsAndTheirBoats,
                                 id);
