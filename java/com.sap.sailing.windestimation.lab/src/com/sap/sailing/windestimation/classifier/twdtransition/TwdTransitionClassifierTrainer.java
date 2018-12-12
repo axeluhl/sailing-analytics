@@ -20,7 +20,7 @@ import com.sap.sailing.windestimation.data.LabelledTwdTransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.importer.TwdTransitionImporter;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
-import com.sap.sailing.windestimation.data.persistence.wind.TwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class TwdTransitionClassifierTrainer {

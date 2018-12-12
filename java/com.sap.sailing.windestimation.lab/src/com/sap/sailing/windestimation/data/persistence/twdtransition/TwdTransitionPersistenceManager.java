@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.data.persistence.wind;
+package com.sap.sailing.windestimation.data.persistence.twdtransition;
 
 import java.net.UnknownHostException;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.data.persistence.wind;
+package com.sap.sailing.windestimation.data.persistence.twdtransition;
 
 import java.net.UnknownHostException;
 
@@ -29,8 +29,10 @@ public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceMa
         return new RaceWithWindSourcesDeserializer();
     }
 
-    public void add(JSONObject raceWithWindSourcesJson) {
+    public void add(String regattaName, String raceName, JSONObject raceWithWindSourcesJson) {
         DBObject dbObject = (DBObject) JSON.parse(raceWithWindSourcesJson.toString());
+        dbObject.put(RaceWithWindSourcesDeserializer.REGATTA_NAME, regattaName);
+        dbObject.put(RaceWithWindSourcesDeserializer.RACE_NAME, raceName);
         getDb().getCollection(getCollectionName()).insert(dbObject);
     }
 

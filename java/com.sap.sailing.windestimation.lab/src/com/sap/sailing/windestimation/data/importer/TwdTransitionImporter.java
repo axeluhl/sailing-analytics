@@ -21,7 +21,7 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
-import com.sap.sailing.windestimation.data.persistence.wind.TwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;

@@ -18,7 +18,7 @@ import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
 import com.sap.sailing.windestimation.classifier.store.MongoDbClassifierModelStore;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
-import com.sap.sailing.windestimation.data.persistence.wind.TwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class PersistedTwdTransitionClassifiersScorePrinter {

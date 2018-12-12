@@ -40,10 +40,10 @@ import com.sap.sailing.windestimation.data.deserializer.ManeuverForEstimationJso
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuverForDataAnalysisPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuverForEstimationPersistenceManager;
-import com.sap.sailing.windestimation.data.persistence.wind.RaceWithWindSourcesPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.RaceWithWindSourcesPersistenceManager;
 import com.sap.sailing.windestimation.data.transformer.AbstractCompleteManeuverCurveWithEstimationDataTransformer;
-import com.sap.sailing.windestimation.data.transformer.ManeuverForDataAnalysisTransformer;
 import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstimationTransformer;
+import com.sap.sailing.windestimation.data.transformer.ManeuverForDataAnalysisTransformer;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 /**
@@ -197,7 +197,7 @@ public class ManeuverAndWindImporter {
     private void parseWindData(String regattaName, String trackedRaceName, ImportStatistics importStatistics,
             JSONObject resultJson) {
         if (resultJson.containsKey(RaceWindJsonSerializer.WIND_SOURCES)) {
-            raceWithWindSourcesPersistenceManager.add(resultJson);
+            raceWithWindSourcesPersistenceManager.add(regattaName, trackedRaceName, resultJson);
             importStatistics.racesWithHighQualityWindData++;
         }
     }

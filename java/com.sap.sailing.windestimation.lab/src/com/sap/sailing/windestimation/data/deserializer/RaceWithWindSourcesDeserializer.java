@@ -19,10 +19,8 @@ import com.sap.sailing.windestimation.data.WindSourceWithFixes;
 
 public class RaceWithWindSourcesDeserializer implements JsonDeserializer<RaceWithWindSources> {
 
-    public static final String COMPETITOR_TRACKS = "competitorTracks";
     public static final String RACE_NAME = "raceName";
     public static final String REGATTA_NAME = "regattaName";
-    public static final String WIND_QUALITY = "windQuality";
 
     private final MongoDbFriendlyPositionJsonDeserializer positionDeserializer = new MongoDbFriendlyPositionJsonDeserializer();
     private final WindJsonDeserializer windDeserializer = new WindJsonDeserializer(positionDeserializer);
@@ -33,6 +31,8 @@ public class RaceWithWindSourcesDeserializer implements JsonDeserializer<RaceWit
     public RaceWithWindSources deserialize(JSONObject object) throws JsonDeserializationException {
         WindSourceMetadata raceMetadata = windSourceMetadataDeserializer.deserialize(object);
         JSONArray windSourcesJson = (JSONArray) object.get(RaceWindJsonSerializer.WIND_SOURCES);
+        String regattaName = (String) object.get(REGATTA_NAME);
+        String raceName = (String) object.get(RACE_NAME);
         List<WindSourceWithFixes> windSources = new ArrayList<>(windSourcesJson.size());
         for (Object windSourceObj : windSourcesJson) {
             JSONObject windSourceJson = (JSONObject) windSourceObj;
@@ -49,7 +49,7 @@ public class RaceWithWindSourcesDeserializer implements JsonDeserializer<RaceWit
             WindSourceWithFixes windSource = new WindSourceWithFixes(windSourceMetadata, windSourceType, windFixes);
             windSources.add(windSource);
         }
-        RaceWithWindSources raceWithWindSources = new RaceWithWindSources(raceMetadata, windSources);
+        RaceWithWindSources raceWithWindSources = new RaceWithWindSources(regattaName, raceName, raceMetadata, windSources);
         return raceWithWindSources;
     }
 
