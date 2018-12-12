@@ -630,7 +630,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     protected boolean hasPermissionToModifyPublicTags() {
         boolean hasPermission = false;
         if (leaderboardName != null && userService.hasPermission(
-                SecuredDomainType.LEADERBOARD.getPermissionForObjects(DefaultActions.UPDATE, leaderboardName))) {
+                SecuredDomainType.LEADERBOARD.getPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, leaderboardName))) {
             hasPermission = true;
         }
         return hasPermission;

@@ -109,7 +109,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                         queryDefinitionProvider, resultsPresenter);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
                 if (getUserService().hasAllPermissions(SecuredDomainType.DATA_MINING
-                        .getPermissionsForObjects(DefaultActions.READ_AND_WRITE_ACTIONS, serverInfo.getServerName()))) {
+                        .getPermissionsForTypeRelativeIdentifiers(DefaultActions.READ_AND_WRITE_ACTIONS, serverInfo.getServerName()))) {
                     StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
                             queryDefinitionProvider, dataMiningService, queryRunner);
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));

@@ -59,7 +59,6 @@ public interface HasPermissions {
      *            can be any string; this method will take care of encoding the identifiers such that they are legal in
      *            the context of a permission part; see also {@link PermissionStringEncoder}
      */
-    @Deprecated
     String getStringPermissionForTypeRelativeIdentifiers(Action action, String... typeRelativeObjectIdentifier);
     
     /**
@@ -80,7 +79,6 @@ public interface HasPermissions {
      * and the {@code objectIdentifier} is {@code "abc"} then the resulting qualified identifier will be
      * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
      */
-    @Deprecated
     QualifiedObjectIdentifier getQualifiedObjectIdentifierByString(String typeRelativeObjectIdentifier);
     
     /**
@@ -106,7 +104,7 @@ public interface HasPermissions {
      *             still be used.
      */
     @Deprecated
-    WildcardPermission getPermissionForObjects(Action action, String... objectIdentifiers);
+    WildcardPermission getPermissionForTypeRelativeIdentifiers(Action action, String... objectIdentifiers);
 
     /**
      * Same as {@link #getStringPermissionForTypeRelativeIdentifiers(Action, String...)}, only that the result is a
@@ -120,10 +118,10 @@ public interface HasPermissions {
     WildcardPermission getPermissionForObject(Action action, Object object);
 
     /**
-     * Same as {@link #getPermissionForObjects(Action, String...)}, only that this method gets the
+     * Same as {@link #getPermissionForTypeRelativeIdentifiers(Action, String...)}, only that this method gets the
      * {@link WildcardPermission}s for all given actions
      */
-    WildcardPermission[] getPermissionsForObjects(final Action[] actions, final String... objectIdentifiers);
+    WildcardPermission[] getPermissionsForTypeRelativeIdentifiers(final Action[] actions, final String... objectIdentifiers);
 
     public static interface Action {
         /**

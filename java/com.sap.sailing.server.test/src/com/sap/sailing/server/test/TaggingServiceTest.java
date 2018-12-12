@@ -68,7 +68,7 @@ public class TaggingServiceTest {
     private final static String fleetName = "Default";
     @SuppressWarnings("deprecation")
     private final static WildcardPermission editLeaderboardPermission = SecuredDomainType.LEADERBOARD
-            .getPermissionForObjects(DefaultActions.UPDATE, leaderboardName);
+            .getPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, leaderboardName);
 
     // tagging & utilities
     private final static Logger logger = Logger.getLogger(TaggingServiceTest.class.getName());

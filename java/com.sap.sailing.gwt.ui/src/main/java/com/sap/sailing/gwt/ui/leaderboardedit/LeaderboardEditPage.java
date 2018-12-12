@@ -58,7 +58,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint implements Pr
                             SAPHeaderWithAuthentication header = initHeader();
                             GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
                             AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-                    authorizedContentDecorator.setPermissionToCheck(SecuredDomainType.LEADERBOARD.getPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+                    authorizedContentDecorator.setPermissionToCheck(SecuredDomainType.LEADERBOARD.getPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, leaderboardName));
                             authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
                                 @Override
                                 public Widget get() {

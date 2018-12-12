@@ -4,11 +4,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.IdentifierStrategy;
 import com.sap.sse.security.shared.impl.HasPermissionsImpl;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
  * Logical domain types in the "sailing" domain that require the user to have certain permissions

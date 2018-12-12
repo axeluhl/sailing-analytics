@@ -145,17 +145,17 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     }
 
     @Override
-    public WildcardPermission[] getPermissionsForObjects(Action[] actions,
+    public WildcardPermission[] getPermissionsForTypeRelativeIdentifiers(Action[] actions,
             final String... objectIdentifiers) {
         Collection<WildcardPermission> result = new ArrayList<>();
         for(Action action : actions) {
-            result.add(getPermissionForObjects(action, objectIdentifiers));
+            result.add(getPermissionForTypeRelativeIdentifiers(action, objectIdentifiers));
         }
         return result.toArray(new WildcardPermission[result.size()]);
     }
 
     @Override
-    public WildcardPermission getPermissionForObjects(final Action action, final String... objectIdentifiers) {
+    public WildcardPermission getPermissionForTypeRelativeIdentifiers(final Action action, final String... objectIdentifiers) {
         assert supports(action);
         return new WildcardPermission(getStringPermissionForTypeRelativeIdentifiers(action, objectIdentifiers));
     }

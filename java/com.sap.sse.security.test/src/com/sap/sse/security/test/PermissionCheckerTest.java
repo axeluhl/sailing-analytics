@@ -42,7 +42,7 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 public class PermissionCheckerTest {
     private final UUID eventId = UUID.randomUUID();
     @SuppressWarnings("deprecation")
-    private final WildcardPermission eventReadPermission = SecuredDomainType.EVENT.getPermissionForObjects(DefaultActions.READ, eventId.toString());
+    private final WildcardPermission eventReadPermission = SecuredDomainType.EVENT.getPermissionForTypeRelativeIdentifiers(DefaultActions.READ, eventId.toString());
     private final UUID userTenantId = UUID.randomUUID();
     private UserGroup adminTenant;
     private User adminUser;
@@ -122,8 +122,8 @@ public class PermissionCheckerTest {
     public void testPermissionsImpliedByOwnershipConstrainedRole() throws UserManagementException {
         final String leaderboardName = "My:Leaderboard, the only one ";
         final String regattaName = " My:Regatta, the only one ";
-        WildcardPermission leaderboardPermission = SecuredDomainType.LEADERBOARD.getPermissionForObjects(DefaultActions.READ, leaderboardName);
-        WildcardPermission regattaPermission = SecuredDomainType.REGATTA.getPermissionForObjects(DefaultActions.READ, regattaName);
+        WildcardPermission leaderboardPermission = SecuredDomainType.LEADERBOARD.getPermissionForTypeRelativeIdentifiers(DefaultActions.READ, leaderboardName);
+        WildcardPermission regattaPermission = SecuredDomainType.REGATTA.getPermissionForTypeRelativeIdentifiers(DefaultActions.READ, regattaName);
         assertFalse(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         // let leaderboard be owned by user
