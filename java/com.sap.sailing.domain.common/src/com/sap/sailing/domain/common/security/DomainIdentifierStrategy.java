@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.common.security;
 
-import java.net.URL;
-
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -56,8 +54,7 @@ public interface DomainIdentifierStrategy extends IdentifierStrategy {
         public String getIdentifierAsString(Object... object) {
             assert object.length == 2;
             ScoreCorrectionProvider scoreCorrectionProvider = (ScoreCorrectionProvider) object[0];
-            URL url = (URL) object[1];
-            return WildcardPermissionEncoder.encode(scoreCorrectionProvider.getName(), url.toString());
+            return WildcardPermissionEncoder.encode(scoreCorrectionProvider.getName(), object[1].toString());
         }
 
     };
