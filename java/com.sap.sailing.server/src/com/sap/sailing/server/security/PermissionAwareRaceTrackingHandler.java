@@ -3,6 +3,7 @@ package com.sap.sailing.server.security;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -46,27 +48,16 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         this.securityService = securityService;
         subject = SecurityUtils.getSubject();
     }
-
-    @Override
-    public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition raceDefinition,
-            Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
-            RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
-
+    
+    private <T> T decorate(RegattaAndRaceIdentifier regattaAndRaceIdentifier, Supplier<T> innerAction) {
         SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
         subjectThreadState.bind();
         try {
-            RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(
-                    trackedRegatta.getRegatta().getName(), raceDefinition.getName());
             QualifiedObjectIdentifier qualifiedObjectIdentifier = TrackedRace.getIdentifier(regattaAndRaceIdentifier);
             return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.TRACKED_RACE, qualifiedObjectIdentifier.getTypeRelativeObjectIdentifier(),
                     regattaAndRaceIdentifier.toString(), () -> {
-                        return super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
-                                delayToLiveInMillis, millisecondsOverWhichToAverageWind,
-                                millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate,
-                                useMarkPassingCalculator, raceLogResolver, threadLocalTransporter);
+                        return innerAction.get();
                     });
         } finally {
             subjectThreadState.clear();
@@ -74,21 +65,21 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
     }
 
     @Override
+    public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition raceDefinition,
+            Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
+            RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
+        return decorate(new RegattaNameAndRaceName(trackedRegatta.getRegatta().getName(), raceDefinition.getName()),
+                () -> super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, delayToLiveInMillis,
+                        millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                        raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, threadLocalTransporter));
+    }
+
+    @Override
     public RaceDefinition createRaceDefinition(Regatta regatta, String name, Course course, BoatClass boatClass,
             Map<Competitor, Boat> competitorsAndTheirBoats, Serializable id) {
-        SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
-        subjectThreadState.bind();
-        try {
-            RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(regatta.getName(), name);
-            QualifiedObjectIdentifier qualifiedObjectIdentifier = TrackedRace.getIdentifier(regattaAndRaceIdentifier);
-            return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.TRACKED_RACE, qualifiedObjectIdentifier.getTypeRelativeObjectIdentifier(),
-                    regattaAndRaceIdentifier.toString(), () -> {
-                        return super.createRaceDefinition(regatta, name, course, boatClass, competitorsAndTheirBoats,
-                                id);
-                    });
-        } finally {
-            subjectThreadState.clear();
-        }
+        return decorate(new RegattaNameAndRaceName(regatta.getName(), name),
+                () -> super.createRaceDefinition(regatta, name, course, boatClass, competitorsAndTheirBoats, id));
     }
 }
