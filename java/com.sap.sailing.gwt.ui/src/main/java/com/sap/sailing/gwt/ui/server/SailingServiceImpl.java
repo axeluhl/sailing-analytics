@@ -4018,7 +4018,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             ScoringSchemeType overallLeaderboardScoringSchemeType, List<String> leaderBoards) {
         UUID newLeaderboardGroupId = UUID.randomUUID();
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD_GROUP, newLeaderboardGroupId.toString(), displayName,
+                SecuredDomainType.LEADERBOARD_GROUP, newLeaderboardGroupId, displayName,
                 new ActionWithResult<LeaderboardGroupDTO>() {
                     @Override
                     public LeaderboardGroupDTO run() throws Exception {
@@ -4204,7 +4204,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.EVENT,
-                eventUuid.toString(), eventName, new ActionWithResult<EventDTO>() {
+                eventUuid, eventName, new ActionWithResult<EventDTO>() {
                     @Override
                     public EventDTO run() throws Exception {
                         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
@@ -5674,7 +5674,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
             final UUID competitorUuid = UUID.randomUUID();
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.COMPETITOR, competitorUuid.toString(), competitor.getName(),
+                    SecuredDomainType.COMPETITOR, competitorUuid, competitor.getName(),
                     new ActionWithResult<CompetitorWithBoat>() {
                         @Override
                         public CompetitorWithBoat run() throws Exception {
@@ -5717,7 +5717,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
             DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.COMPETITOR, competitorUUID.toString(), competitor.getName(),
+                    SecuredDomainType.COMPETITOR, competitorUUID, competitor.getName(),
                     new ActionWithResult<Competitor>() {
 
                         @Override
@@ -5807,7 +5807,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             UUID boatUUID = UUID.randomUUID();
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(boat.getBoatClass().getName());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.BOAT, boatUUID.toString(), boat.getName(), new ActionWithResult<Boat>() {
+                    SecuredDomainType.BOAT, boatUUID, boat.getName(), new ActionWithResult<Boat>() {
 
                         @Override
                         public Boat run() throws Exception {
