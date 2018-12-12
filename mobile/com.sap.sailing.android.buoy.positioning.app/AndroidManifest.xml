@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.sap.sailing.android.buoy.positioning.app"
-          android:versionCode="13"
-          android:versionName="1.11">
+          android:versionCode="58"
+          android:versionName="1.4.58">
 
     <uses-sdk />
 
