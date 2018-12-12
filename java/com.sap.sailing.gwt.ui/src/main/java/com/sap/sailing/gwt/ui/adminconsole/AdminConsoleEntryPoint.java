@@ -14,6 +14,10 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.security.SecuredDomainType.CompetitorAndBoatActions;
+import com.sap.sailing.domain.igtimiadapter.security.IgtimiSecuredDomainType;
+import com.sap.sailing.domain.swisstimingadapter.security.SwissTimingSecuredDomainTypes;
+import com.sap.sailing.domain.tractracadapter.security.TracTracSecuredDomainType;
+import com.sap.sailing.expeditionconnector.security.ExpeditionSecuredDomainTypes;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -243,21 +247,21 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tractracEventManagementPanel),
                 getStringMessages().tracTracEvents(),
-                SecuredDomainType.TRACTRAC_ACCOUNT.getPermission(DefaultActions.values()));
+                TracTracSecuredDomainType.TRACTRAC_ACCOUNT.getPermission(DefaultActions.values()));
         regattasDisplayers.add(tractracEventManagementPanel);
         
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(
                 getSailingService(), this, this, getStringMessages());
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingReplayConnectorPanel>(swissTimingReplayConnectorPanel),
                 getStringMessages().swissTimingArchiveConnector(),
-                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getPermission(DefaultActions.values()));
+                SwissTimingSecuredDomainTypes.SWISS_TIMING_ARCHIVE_ACCOUNT.getPermission(DefaultActions.values()));
         regattasDisplayers.add(swissTimingReplayConnectorPanel);
 
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(
                 getSailingService(), this, this, getStringMessages());
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingEventManagementPanel>(swisstimingEventManagementPanel),
                 getStringMessages().swissTimingEvents(),
-                SecuredDomainType.SWISS_TIMING_ACCOUNT.getPermission(DefaultActions.values()));
+                SwissTimingSecuredDomainTypes.SWISS_TIMING_ACCOUNT.getPermission(DefaultActions.values()));
         regattasDisplayers.add(swisstimingEventManagementPanel);
 
         final SmartphoneTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new SmartphoneTrackingEventManagementPanel(
@@ -276,7 +280,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<IgtimiAccountsPanel>(igtimiAccountsPanel),
                 getStringMessages().igtimiAccounts(),
-                SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
+                IgtimiSecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
         ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages());
         expeditionDeviceConfigurationsPanel.ensureDebugId("ExpeditionDeviceConfigurations");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ExpeditionDeviceConfigurationsPanel>(expeditionDeviceConfigurationsPanel) {
@@ -285,7 +289,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 expeditionDeviceConfigurationsPanel.refresh();
             }
         }, getStringMessages().expeditionDeviceConfigurations(),
-                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getPermission(DefaultActions.values()));
+                ExpeditionSecuredDomainTypes.EXPEDITION_DEVICE_CONFIGURATION.getPermission(DefaultActions.values()));
 
         ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(getSailingService(), this, getStringMessages());
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ResultImportUrlsManagementPanel>(resultImportUrlsManagementPanel),

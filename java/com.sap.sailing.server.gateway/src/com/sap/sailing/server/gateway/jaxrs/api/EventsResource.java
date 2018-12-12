@@ -442,7 +442,7 @@ public class EventsResource extends AbstractSailingServerResource {
                             }
                         });
 
-                CourseArea courseArea = addCourseArea(event.getId(), "Default");
+                CourseArea courseArea = addCourseArea(event, "Default");
                 final LeaderboardGroup leaderboardGroup;
                 if (createLeaderboardGroup) {
                     leaderboardGroup = validateAndAddLeaderboardGroup(event.getId(), event.getName(), event.getDescription(), /* leaderboardGroupDisplayNameParam */ null,
