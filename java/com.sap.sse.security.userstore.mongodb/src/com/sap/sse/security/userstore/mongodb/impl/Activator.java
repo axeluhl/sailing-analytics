@@ -14,7 +14,10 @@ import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.PreferenceConverterRegistrationManager;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -70,6 +73,15 @@ public class Activator implements BundleActivator {
                     for (RoleDefinition role : userStore.getRoleDefinitions()) {
                         securityService.migrateOwnership(role);
                     }
+                    for (User user : securityService.getUserList()) {
+                        for (Role role : user.getRoles()) {
+                            String associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+                            QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                            securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier);
+                        }
+                    }
+
                     securityService.assumeOwnershipMigrated(SecuredSecurityTypes.SERVER.getName());
                     securityService.checkMigration(SecuredSecurityTypes.getAllInstances());
                 } catch (InterruptedException e) {
