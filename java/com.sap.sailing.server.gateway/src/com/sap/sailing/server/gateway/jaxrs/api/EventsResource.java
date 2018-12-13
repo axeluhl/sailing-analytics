@@ -97,6 +97,7 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -482,11 +483,14 @@ public class EventsResource extends AbstractSailingServerResource {
         try {
             if (competitorRegistrationType == CompetitorRegistrationType.OPEN_UNMODERATED) {
                 UUID newTenantId = UUID.randomUUID();
-                UserGroup ownerGroup = getSecurityService().createUserGroup(newTenantId, eventName + "-owner");
+                String escapedName = WildcardPermissionEncoder.encode(eventName) + "-owner";
+                UserGroup ownerGroup = getSecurityService().createUserGroup(newTenantId, escapedName);
+                getSecurityService().setOwnershipIfNotSet(ownerGroup.getIdentifier(), getCurrentUser(),
+                        getSecurityService().getDefaultTenantForCurrentUser());
                 RoleDefinition roleDef = getSecurityService()
                         .getRoleDefinition(SailingViewerRole.getInstance().getId());
                 Role groupViewer = new Role(roleDef, ownerGroup, null);
-                getSecurityService().addRoleForUser(getCurrentUser(), groupViewer);
+                getSecurityService().addRoleForUser(getSecurityService().getAllUser(), groupViewer);
                 getSecurityService().addUserToUserGroup(ownerGroup, getCurrentUser());
                 return getSecurityService().doWithTemporaryDefaultTenant(ownerGroup, doCreationAction);
             } else {
