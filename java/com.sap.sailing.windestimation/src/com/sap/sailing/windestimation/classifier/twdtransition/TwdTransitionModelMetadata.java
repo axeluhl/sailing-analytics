@@ -2,8 +2,8 @@ package com.sap.sailing.windestimation.classifier.twdtransition;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.classifier.store.ContextType;
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.model.store.ContextType;
 
 public class TwdTransitionModelMetadata extends ContextSpecificModelMetadata<TwdTransition> {
 

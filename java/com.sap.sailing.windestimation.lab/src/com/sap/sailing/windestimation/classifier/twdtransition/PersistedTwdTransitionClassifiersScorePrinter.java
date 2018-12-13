@@ -14,11 +14,11 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
-import com.sap.sailing.windestimation.classifier.store.MongoDbClassifierModelStore;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class PersistedTwdTransitionClassifiersScorePrinter {
@@ -31,7 +31,7 @@ public class PersistedTwdTransitionClassifiersScorePrinter {
             throws MalformedURLException, ClassNotFoundException, IOException, InterruptedException {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
-        ClassifierModelStore classifierModelStore = new MongoDbClassifierModelStore(
+        ModelStore classifierModelStore = new MongoDbModelStore(
                 new TwdTransitionPersistenceManager().getDb());
         List<TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata>> allClassifierModels = new ArrayList<>();
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();

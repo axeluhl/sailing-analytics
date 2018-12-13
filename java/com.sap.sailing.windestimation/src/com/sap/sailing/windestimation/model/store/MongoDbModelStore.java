@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.classifier.store;
+package com.sap.sailing.windestimation.model.store;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,23 +17,23 @@ import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.ModelMetadata;
 import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 
-public class MongoDbClassifierModelStore implements ClassifierModelStore {
+public class MongoDbModelStore implements ModelStore {
 
     private static final String CONTEXT_NAME_PREFIX = "classifiersFor";
     private final DB db;
 
-    public MongoDbClassifierModelStore(DB db) {
+    public MongoDbModelStore(DB db) {
         this.db = db;
     }
 
-    private String getFileName(PersistenceSupport<?> persistenceSupport) {
+    private String getFileName(PersistenceSupport persistenceSupport) {
         return persistenceSupport.getPersistenceKey();
     }
 
     @Override
     public <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableClassificationModel<InstanceType, T>> ModelType loadPersistedState(
             ModelType newModel) throws ClassifierPersistenceException {
-        PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(newModel);
+        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getFileName(persistenceSupport);
         GridFS gridFs = null;
         try {
@@ -61,14 +61,13 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public void persistState(TrainableClassificationModel<?, ?> trainedModel) throws ClassifierPersistenceException {
-        PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
+    public <T extends PersistableModel> void persistState(T trainedModel) throws ClassifierPersistenceException {
+        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         String newFileName = getFileName(persistenceSupport);
         GridFS gridFs = null;
         GridFSInputFile mongoFile = null;
         try {
-            gridFs = new GridFS(db, getCollectionName(
-                    trainedModel.getModelMetadata().getContextSpecificModelMetadata().getContextType()));
+            gridFs = new GridFS(db, getCollectionName(trainedModel.getContextType()));
             mongoFile = gridFs.createFile();
             mongoFile.setFilename(newFileName);
             try (OutputStream outputStream = mongoFile.getOutputStream()) {
@@ -86,12 +85,11 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public void delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
-        PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(newModel);
+    public <T extends PersistableModel> void delete(T newModel) throws ClassifierPersistenceException {
+        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getFileName(persistenceSupport);
         try {
-            GridFS gridFs = new GridFS(db,
-                    getCollectionName(newModel.getModelMetadata().getContextSpecificModelMetadata().getContextType()));
+            GridFS gridFs = new GridFS(db, getCollectionName(newModel.getContextType()));
             gridFs.remove(fileName);
         } catch (Exception e) {
             throw new ClassifierPersistenceException(e);

@@ -2,15 +2,15 @@ package com.sap.sailing.windestimation.classifier.twdtransition;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.classifier.AbstractClassifiersCache;
-import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.model.store.ModelStore;
 
 public class TwdTransitionClassifiersCache
         extends AbstractClassifiersCache<TwdTransition, TwdTransitionModelMetadata, TwdTransitionClassificationResult> {
 
     private final boolean enableBoatClassInfo;
 
-    public TwdTransitionClassifiersCache(ClassifierModelStore classifierModelStore,
+    public TwdTransitionClassifiersCache(ModelStore classifierModelStore,
             long preserveLoadedClassifiersMillis, boolean enableBoatClassInfo) {
         super(classifierModelStore, preserveLoadedClassifiersMillis, new TwdTransitionClassifierModelFactory(),
                 new TwdTransitionClassificationResultMapper());

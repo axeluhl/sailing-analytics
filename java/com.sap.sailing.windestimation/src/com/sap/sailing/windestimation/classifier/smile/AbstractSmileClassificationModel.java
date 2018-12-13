@@ -12,8 +12,7 @@ import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.ModelMetadata;
 import com.sap.sailing.windestimation.classifier.PreprocessingConfig;
-import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.classifier.store.PersistenceSupport;
+import com.sap.sailing.windestimation.model.store.PersistenceSupport;
 
 import smile.classification.SoftClassifier;
 import smile.feature.Standardizer;
@@ -82,7 +81,7 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends C
         return new SmilePersistenceSupport();
     }
 
-    private class SmilePersistenceSupport implements PersistenceSupport<TrainableClassificationModel<InstanceType, T>> {
+    private class SmilePersistenceSupport implements PersistenceSupport {
         @Override
         public String getPersistenceKey() {
             StringBuilder key = new StringBuilder();

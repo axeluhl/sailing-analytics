@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.classifier;
 
 import java.io.Serializable;
 
-import com.sap.sailing.windestimation.classifier.store.ContextType;
+import com.sap.sailing.windestimation.model.store.ContextType;
 
 public abstract class ContextSpecificModelMetadata<InstanceType>
         implements Serializable, FeatureExtraction<InstanceType> {

@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
+import com.sap.sailing.windestimation.model.store.ModelStore;
 
 public class ClassifierLoader<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>> {
 
-    private final ClassifierModelStore classifierModelStore;
+    private final ModelStore classifierModelStore;
     private final ClassifierModelFactory<InstanceType, T> classifierModelFactory;
 
-    public ClassifierLoader(ClassifierModelStore classifierModelStore,
+    public ClassifierLoader(ModelStore classifierModelStore,
             ClassifierModelFactory<InstanceType, T> classifierModelFactory) {
         this.classifierModelStore = classifierModelStore;
         this.classifierModelFactory = classifierModelFactory;

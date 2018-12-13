@@ -14,11 +14,11 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
-import com.sap.sailing.windestimation.classifier.store.MongoDbClassifierModelStore;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
+import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class PersistedManeuverClassifiersScorePrinter {
@@ -31,7 +31,7 @@ public class PersistedManeuverClassifiersScorePrinter {
             throws MalformedURLException, ClassNotFoundException, IOException, InterruptedException {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
-        ClassifierModelStore classifierModelStore = new MongoDbClassifierModelStore(
+        ModelStore classifierModelStore = new MongoDbModelStore(
                 new RegularManeuversForEstimationPersistenceManager().getDb());
         List<TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> allClassifierModels = new ArrayList<>();
         ManeuverClassifierModelFactory classifierModelFactory = new ManeuverClassifierModelFactory();

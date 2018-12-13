@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.classifier.store.ContextType;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.model.store.ContextType;
 
 public class ManeuverModelMetadata extends ContextSpecificModelMetadata<ManeuverForEstimation> {
 

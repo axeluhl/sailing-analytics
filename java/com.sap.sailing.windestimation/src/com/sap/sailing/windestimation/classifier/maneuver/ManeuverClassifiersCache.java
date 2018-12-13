@@ -2,15 +2,15 @@ package com.sap.sailing.windestimation.classifier.maneuver;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.classifier.AbstractClassifiersCache;
-import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.model.store.ModelStore;
 
 public class ManeuverClassifiersCache extends
         AbstractClassifiersCache<ManeuverForEstimation, ManeuverModelMetadata, ManeuverWithProbabilisticTypeClassification> {
 
     private final ManeuverFeatures maneuverFeatures;
 
-    public ManeuverClassifiersCache(ClassifierModelStore classifierModelStore, long preserveLoadedClassifiersMillis,
+    public ManeuverClassifiersCache(ModelStore classifierModelStore, long preserveLoadedClassifiersMillis,
             ManeuverFeatures maxManeuverFeatures) {
         super(classifierModelStore, preserveLoadedClassifiersMillis, new ManeuverClassifierModelFactory(),
                 new ManeuverClassificationResultMapper());

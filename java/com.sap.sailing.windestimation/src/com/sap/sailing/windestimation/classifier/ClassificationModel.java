@@ -4,16 +4,11 @@ public interface ClassificationModel<InstanceType, T extends ContextSpecificMode
 
     double[] classifyWithProbabilities(double[] x);
 
+    default double[] classifyWithProbabilities(InstanceType instance) {
+        double[] x = getModelMetadata().getContextSpecificModelMetadata().getX(instance);
+        return classifyWithProbabilities(x);
+    }
+
     ModelMetadata<InstanceType, T> getModelMetadata();
-
-    double getTestScore();
-
-    double getTrainScore();
-
-    boolean hasSupportForProvidedFeatures();
-
-    boolean isModelReady();
-
-    int getNumberOfTrainingInstances();
 
 }

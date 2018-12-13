@@ -1,7 +1,7 @@
 package com.sap.sailing.windestimation.classifier;
 
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
-import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
+import com.sap.sailing.windestimation.model.store.ModelStore;
 
 public abstract class AbstractClassifiersCache<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ClassificationResultType> {
 
@@ -9,7 +9,7 @@ public abstract class AbstractClassifiersCache<InstanceType, T extends ContextSp
     private final ClassifierLoader<InstanceType, T> classifierLoader;
     private final ClassificationResultMapper<InstanceType, T, ClassificationResultType> classificationResultMapper;
 
-    public AbstractClassifiersCache(ClassifierModelStore classifierModelStore, long preserveLoadedClassifiersMillis,
+    public AbstractClassifiersCache(ModelStore classifierModelStore, long preserveLoadedClassifiersMillis,
             ClassifierModelFactory<InstanceType, T> classifierModelFactory,
             ClassificationResultMapper<InstanceType, T, ClassificationResultType> classificationResultMapper) {
         this.classifierLoader = new ClassifierLoader<>(classifierModelStore, classifierModelFactory);
@@ -39,8 +39,7 @@ public abstract class AbstractClassifiersCache<InstanceType, T extends ContextSp
     public ClassificationResultType classifyInstance(InstanceType instance) {
         T modelMetadata = getContextSpecificModelMetadata(instance);
         TrainableClassificationModel<InstanceType, T> bestClassifierModel = getBestClassifier(modelMetadata);
-        double[] x = modelMetadata.getX(instance);
-        double[] likelihoods = bestClassifierModel.classifyWithProbabilities(x);
+        double[] likelihoods = bestClassifierModel.classifyWithProbabilities(instance);
         ClassificationResultType result = classificationResultMapper.mapToClassificationResult(likelihoods, instance,
                 modelMetadata);
         return result;

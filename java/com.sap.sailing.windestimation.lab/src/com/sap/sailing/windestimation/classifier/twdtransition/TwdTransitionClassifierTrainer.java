@@ -13,14 +13,14 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.windestimation.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
-import com.sap.sailing.windestimation.classifier.store.ContextType;
-import com.sap.sailing.windestimation.classifier.store.MongoDbClassifierModelStore;
 import com.sap.sailing.windestimation.data.LabelledTwdTransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.importer.TwdTransitionImporter;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.model.store.ContextType;
+import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class TwdTransitionClassifierTrainer {
@@ -30,10 +30,10 @@ public class TwdTransitionClassifierTrainer {
     private final TwdTransitionPersistenceManager persistenceManager;
     private List<TwdTransition> allTwdTransitions;
 
-    private final ClassifierModelStore classifierModelStore;
+    private final ModelStore classifierModelStore;
 
     public TwdTransitionClassifierTrainer(TwdTransitionPersistenceManager persistenceManager,
-            ClassifierModelStore classifierModelStore) {
+            ModelStore classifierModelStore) {
         this.persistenceManager = persistenceManager;
         this.classifierModelStore = classifierModelStore;
     }
@@ -106,7 +106,7 @@ public class TwdTransitionClassifierTrainer {
     public static void main(String[] args) throws Exception {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         TwdTransitionPersistenceManager persistenceManager = new TwdTransitionPersistenceManager();
-        ClassifierModelStore classifierModelStore = new MongoDbClassifierModelStore(persistenceManager.getDb());
+        ModelStore classifierModelStore = new MongoDbModelStore(persistenceManager.getDb());
         classifierModelStore.deleteAll(ContextType.TWD_TRANSITION);
         TwdTransitionClassifierTrainer classifierTrainer = new TwdTransitionClassifierTrainer(persistenceManager,
                 classifierModelStore);

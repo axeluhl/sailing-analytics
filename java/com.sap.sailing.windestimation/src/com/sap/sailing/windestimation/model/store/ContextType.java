@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.classifier.store;
+package com.sap.sailing.windestimation.model.store;
 
 public enum ContextType {
     MANEUVER("maneuver"), TWD_TRANSITION("twdTransition");
