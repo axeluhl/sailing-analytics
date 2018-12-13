@@ -42,6 +42,7 @@ public class InheritableThreadLocalAndThreadPoolTest {
 
     @Test
     public void testMissingInitialization() throws InterruptedException, ExecutionException {
+        threadLocalWithChildValueInit.set(123);
         final Callable<Integer> reader1 = ()->threadLocalWithChildValueInit.get();
         final Future<Integer> future1 = executor.submit(reader1);
         final Runnable setter = ()->threadLocalWithChildValueInit.set(43);
