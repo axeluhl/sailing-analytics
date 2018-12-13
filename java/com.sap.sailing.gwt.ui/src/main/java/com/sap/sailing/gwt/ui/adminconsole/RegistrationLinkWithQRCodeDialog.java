@@ -153,7 +153,7 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         String baseUrl = GWT.getHostPageBaseURL();
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/"));
-            baseUrl = baseUrl.substring(1, baseUrl.indexOf("/gwt"));
+            baseUrl = baseUrl.substring(0, baseUrl.indexOf("/gwt"));
         }
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("regatta_name", regattaName);
