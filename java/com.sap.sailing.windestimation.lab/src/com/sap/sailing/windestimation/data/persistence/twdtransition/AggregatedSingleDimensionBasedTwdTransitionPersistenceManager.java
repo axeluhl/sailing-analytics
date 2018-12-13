@@ -50,8 +50,7 @@ public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
     }
 
     public enum AggregatedSingleDimensionType {
-        DISTANCE("distanceTwdTransition"), AGGREGATED_DISTANCE("aggregatedDistanceTwdTransition"), DURATION(
-                "durationTwdTransition"), AGGREGATED_DURATION("aggregatedDurationTwdTransition");
+        DISTANCE("aggregatedDistanceTwdTransition"), DURATION("aggregatedDurationTwdTransition");
 
         private final String collectioName;
 

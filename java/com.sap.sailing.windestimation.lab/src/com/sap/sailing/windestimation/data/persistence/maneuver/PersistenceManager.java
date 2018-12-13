@@ -5,6 +5,7 @@ import java.util.List;
 import org.json.simple.parser.ParseException;
 
 import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.Util.Pair;
 
@@ -33,5 +34,9 @@ public interface PersistenceManager<T> {
     String getFilterQueryForYear(int year, boolean exclude);
     
     DB getDb();
+
+    DBCollection getCollection();
+
+    PersistedElementsIterator<T> getIterator(String query, String sort);
 
 }

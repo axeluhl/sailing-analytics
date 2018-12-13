@@ -14,6 +14,7 @@ import com.sap.sailing.windestimation.data.SingleDimensionBasedTwdTransition;
 import com.sap.sailing.windestimation.data.deserializer.SingleDimensionBasedTwdTransitionJsonDeserializer;
 import com.sap.sailing.windestimation.data.deserializer.SingleDimensionBasedTwdTransitionJsonSerializer;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 
 public class SingleDimensionBasedTwdTransitionPersistenceManager
         extends AbstractPersistenceManager<SingleDimensionBasedTwdTransition> {
@@ -47,6 +48,11 @@ public class SingleDimensionBasedTwdTransitionPersistenceManager
                 .map(twdTransition -> (DBObject) JSON.parse(serializer.serialize(twdTransition).toString()))
                 .collect(Collectors.toList());
         getDb().getCollection(getCollectionName()).insert(dbObjects);
+    }
+
+    public PersistedElementsIterator<SingleDimensionBasedTwdTransition> getIteratorSorted() {
+        return super.getIterator(null,
+                "{'" + SingleDimensionBasedTwdTransitionJsonSerializer.DIMENSION_VALUE + "': 1}");
     }
 
     public enum SingleDimensionType {

@@ -11,6 +11,7 @@ import org.json.simple.parser.ParseException;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
@@ -40,10 +41,14 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         deserializer = getNewJsonDeserializer();
     }
 
+    public DBCollection getCollection() {
+        return db.getCollection(getCollectionName());
+    }
+
     protected abstract JsonDeserializer<T> getNewJsonDeserializer();
 
     public void dropCollection() {
-        db.getCollection(getCollectionName()).drop();
+        getCollection().drop();
     }
 
     public boolean collectionExists() {
@@ -52,7 +57,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
 
     public long countElements(String query) {
         DBObject dbQuery = query == null ? null : (DBObject) JSON.parse(query);
-        return db.getCollection(getCollectionName()).count(dbQuery);
+        return getCollection().count(dbQuery);
     }
 
     @Override
@@ -73,7 +78,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
             finalQuery = query;
         }
         DBObject dbQuery = finalQuery == null ? null : (DBObject) JSON.parse(finalQuery);
-        DBObject dbObject = db.getCollection(getCollectionName()).findOne(dbQuery);
+        DBObject dbObject = getCollection().findOne(dbQuery);
         if (dbObject != null) {
             ObjectId dbId = (ObjectId) dbObject.get(FIELD_DB_ID);
             T element = deserializer.deserialize(getJSONObject(dbObject.toString()));
@@ -104,7 +109,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         if (query != null) {
             dbQuery = (DBObject) JSON.parse(query.toString());
         }
-        DBCursor dbCursor = db.getCollection(getCollectionName()).find(dbQuery);
+        DBCursor dbCursor = getCollection().find(dbQuery);
         List<T> result = new ArrayList<>(dbCursor.count());
         while (dbCursor.hasNext()) {
             DBObject dbObject = dbCursor.next();
@@ -119,6 +124,11 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         return new PersistedElementsIteratorImpl(query);
     }
 
+    @Override
+    public PersistedElementsIterator<T> getIterator(String query, String sort) {
+        return new PersistedElementsIteratorImpl(query, sort);
+    }
+
     protected JSONObject getJSONObject(String json) throws ParseException {
         return (JSONObject) jsonParser.parse(json);
     }
@@ -130,17 +140,23 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
 
     protected class PersistedElementsIteratorImpl implements PersistedElementsIterator<T> {
 
-        private String lastDbId = null;
+        private DBCursor dbCursor;
         private T nextElement = null;
         private long numberOfElements;
         private long currentElementNumber = 0;
         private int numberOfCharsDuringLastStatusLog = 0;
         private long limit = Long.MAX_VALUE;
-        private String query;
 
         public PersistedElementsIteratorImpl(String query) {
-            this.query = query;
+            this(query, null);
+        }
+
+        public PersistedElementsIteratorImpl(String query, String sort) {
             numberOfElements = countElements(query);
+            this.dbCursor = query == null ? getCollection().find() : getCollection().find((DBObject) JSON.parse(query));
+            if (sort != null) {
+                this.dbCursor = this.dbCursor.sort((DBObject) JSON.parse(query));
+            }
             LoggingUtil.logInfo(numberOfElements + " elements found in " + getCollectionName());
             prepareNext();
         }
@@ -167,10 +183,9 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
                                     + (nextElementNumber * 100 / numberOfElements) + " %) from " + getCollectionName());
                 }
                 try {
-                    Pair<String, T> nextElementWithDbId = getNextElement(lastDbId, query);
-                    if (nextElementWithDbId != null) {
-                        this.lastDbId = nextElementWithDbId.getA();
-                        this.nextElement = nextElementWithDbId.getB();
+                    if (dbCursor.hasNext()) {
+                        DBObject nextDbObject = dbCursor.next();
+                        this.nextElement = deserializer.deserialize(getJSONObject(nextDbObject.toString()));
                         this.currentElementNumber = nextElementNumber;
                     } else {
                         this.nextElement = null;

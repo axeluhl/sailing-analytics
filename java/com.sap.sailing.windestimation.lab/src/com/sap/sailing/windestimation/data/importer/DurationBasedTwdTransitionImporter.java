@@ -2,7 +2,6 @@ package com.sap.sailing.windestimation.data.importer;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -26,102 +25,74 @@ public class DurationBasedTwdTransitionImporter {
     public static void main(String[] args) throws UnknownHostException {
         LoggingUtil.logInfo("###################\r\nDuration based TWD transitions Import started");
         RaceWithWindSourcesPersistenceManager racesPersistenceManager = new RaceWithWindSourcesPersistenceManager();
-        long aggregatesCount = 0;
-        List<AggregatedSingleDimensionBasedTwdTransition> aggregates = new ArrayList<>();
-        SingleDimensionBasedTwdTransitionPersistenceManager entriesPersistenceManager = new SingleDimensionBasedTwdTransitionPersistenceManager(
+        SingleDimensionBasedTwdTransitionPersistenceManager durationBasedTwdTransitionPersistenceManager = new SingleDimensionBasedTwdTransitionPersistenceManager(
                 SingleDimensionType.DURATION);
+        durationBasedTwdTransitionPersistenceManager.dropCollection();
         for (PersistedElementsIterator<RaceWithWindSources> iterator = racesPersistenceManager
                 .getIterator(null); iterator.hasNext();) {
             RaceWithWindSources race = iterator.next();
             LoggingUtil.logInfo("Processing race " + race.getRaceName() + " of regatta " + race.getRegattaName());
             List<SingleDimensionBasedTwdTransition> entries = new ArrayList<>();
             for (WindSourceWithFixes windSource : race.getWindSources()) {
-                double recordingSeconds = windSource.getWindSourceMetadata().getStartTime()
-                        .until(windSource.getWindSourceMetadata().getEndTime()).asSeconds();
-                int numberOfAggregates = (int) Math.ceil(recordingSeconds / 10);
-                if (numberOfAggregates > 0) {
+                if (windSource.getWindFixes().size() > 1) {
                     Iterator<Wind> windIterator = windSource.getWindFixes().iterator();
-                    double valuesCount = 0;
-                    double twdSum = 0.0;
-                    double squareTwdSum = 0.0;
                     Wind previousWind = windIterator.next();
-                    double secondsPassed = 0;
-                    double secondsPassedAtLastAggregation = 0;
                     for (Wind currentWind = windIterator.next(); windIterator.hasNext();) {
                         double secondsPassedToPrevious = previousWind.getTimePoint().until(currentWind.getTimePoint())
                                 .asSeconds();
-                        double newSecondsPassed = secondsPassed + secondsPassedToPrevious;
-                        if (newSecondsPassed - secondsPassedAtLastAggregation >= SECONDS_TO_AGGREGATE
-                                && newSecondsPassed > 0) {
-                            AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount,
-                                    twdSum, squareTwdSum, secondsPassed);
-                            aggregates.add(aggregate);
-                            secondsPassedAtLastAggregation = secondsPassed;
-                        }
-                        secondsPassed = newSecondsPassed;
-                        valuesCount++;
                         double absTwdChange = previousWind.getBearing().getDifferenceTo(currentWind.getBearing()).abs()
                                 .getDegrees();
                         SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
                                 secondsPassedToPrevious, absTwdChange);
                         entries.add(entry);
-                        twdSum += absTwdChange;
-                        squareTwdSum += absTwdChange * absTwdChange;
                         previousWind = currentWind;
                     }
-                    if (secondsPassedAtLastAggregation < secondsPassed) {
-                        AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount, twdSum,
-                                squareTwdSum, secondsPassed);
-                        aggregates.add(aggregate);
-                    }
-                    LoggingUtil.logInfo(numberOfAggregates + " TWD transition aggregates imported in-memory");
-                    LoggingUtil.logInfo(numberOfAggregates + " TWD transition entries persisted");
-                    entriesPersistenceManager.add(entries);
+                    durationBasedTwdTransitionPersistenceManager.add(entries);
+                    LoggingUtil.logInfo(entries.size() + " TWD transition entries imported");
                 } else {
-                    LoggingUtil.logInfo("No TWD transition aggregates to import");
+                    LoggingUtil.logInfo("No TWD transitions to import");
                 }
             }
         }
-        LoggingUtil.logInfo("Sorting aggregates in-memory");
-        Collections.sort(aggregates, (one, two) -> Double.compare(one.getDimensionValue(), two.getDimensionValue()));
-        LoggingUtil.logInfo("Persisting sorted aggregates");
-        AggregatedSingleDimensionBasedTwdTransitionPersistenceManager durationBasedTwdTransitionPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
-                AggregatedSingleDimensionType.DURATION);
-        durationBasedTwdTransitionPersistenceManager.dropCollection();
-        durationBasedTwdTransitionPersistenceManager.add(aggregates);
-        LoggingUtil.logInfo("Aggregating sorted aggregates");
-        double valuesCount = 0;
-        double meanSum = 0.0;
-        double stdSum = 0.0;
+        long valuesCount = 0;
+        double twdSum = 0.0;
+        double squareTwdSum = 0.0;
         double secondsPassed = 0;
         double secondsPassedAtLastAggregation = 0;
-        List<AggregatedSingleDimensionBasedTwdTransition> aggregatedAggregates = new ArrayList<>();
-        for (AggregatedSingleDimensionBasedTwdTransition aggregate : aggregates) {
-            double newSecondsPassed = aggregate.getDimensionValue();
+        List<AggregatedSingleDimensionBasedTwdTransition> aggregates = new ArrayList<>();
+        LoggingUtil.logInfo("Aggregating persisted entries");
+        for (PersistedElementsIterator<SingleDimensionBasedTwdTransition> iterator = durationBasedTwdTransitionPersistenceManager
+                .getIteratorSorted(); iterator.hasNext();) {
+            SingleDimensionBasedTwdTransition entry = iterator.next();
+            double newSecondsPassed = entry.getDimensionValue();
             if (newSecondsPassed - secondsPassedAtLastAggregation >= SECONDS_TO_AGGREGATE) {
-                AggregatedSingleDimensionBasedTwdTransition aggregatedAggregate = new AggregatedSingleDimensionBasedTwdTransition(
-                        secondsPassed, meanSum / valuesCount, stdSum / valuesCount);
-                aggregatedAggregates.add(aggregatedAggregate);
+                AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount, twdSum,
+                        squareTwdSum, secondsPassed);
+                aggregates.add(aggregate);
                 secondsPassedAtLastAggregation = secondsPassed;
             }
             secondsPassed = newSecondsPassed;
-            meanSum += aggregate.getMean();
-            stdSum += aggregate.getStd();
+            double twdChange = entry.getAbsTwdChangeInDegrees();
+            twdSum += twdChange;
+            squareTwdSum += twdChange * twdChange;
             valuesCount++;
+            if (valuesCount % 10000 == 0) {
+                LoggingUtil.logInfo(valuesCount + " Entries aggregated");
+            }
         }
         if (secondsPassedAtLastAggregation < secondsPassed) {
-            AggregatedSingleDimensionBasedTwdTransition aggregatedAggregate = new AggregatedSingleDimensionBasedTwdTransition(
-                    secondsPassed, meanSum / valuesCount, stdSum / valuesCount);
-            aggregatedAggregates.add(aggregatedAggregate);
+            AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount, twdSum, squareTwdSum,
+                    secondsPassed);
+            aggregates.add(aggregate);
         }
-        LoggingUtil.logInfo("Persisting aggregated aggregates");
-        durationBasedTwdTransitionPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
-                AggregatedSingleDimensionType.AGGREGATED_DURATION);
-        durationBasedTwdTransitionPersistenceManager.dropCollection();
-        durationBasedTwdTransitionPersistenceManager.add(aggregatedAggregates);
+        LoggingUtil.logInfo("Persisting " + aggregates.size() + " aggregates");
+        AggregatedSingleDimensionBasedTwdTransitionPersistenceManager aggregatedDurationBasedTwdTransitionPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
+                AggregatedSingleDimensionType.DURATION);
+        aggregatedDurationBasedTwdTransitionPersistenceManager.dropCollection();
+        aggregatedDurationBasedTwdTransitionPersistenceManager.add(aggregates);
         LoggingUtil.logInfo("###################\r\nDuration based TWD transitions Import finished");
-        LoggingUtil.logInfo("Totally " + aggregatesCount + " TWD transition aggregates imported");
-        LoggingUtil.logInfo("Totally " + valuesCount + " TWD transition aggregated aggregates imported");
+        LoggingUtil.logInfo("Totally " + valuesCount + " TWD transitions imported");
+        LoggingUtil.logInfo("Totally " + aggregates.size() + " TWD transition aggregates imported");
     }
 
     private static AggregatedSingleDimensionBasedTwdTransition computeAggregate(double valuesCount, double twdSum,
