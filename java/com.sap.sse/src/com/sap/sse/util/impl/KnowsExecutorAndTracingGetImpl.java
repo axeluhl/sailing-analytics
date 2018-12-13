@@ -27,6 +27,7 @@ import com.sap.sse.util.ThreadPoolUtil;
 public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> implements KnowsExecutorAndTracingGet<V> {
     private static final Logger logger = Logger.getLogger(KnowsExecutorAndTracingGetImpl.class.getName());
     private static Field inheritableThreadLocalsField;
+    private static Method childValueMethod;
     private ThreadPoolExecutor executorThisTaskIsScheduledFor;
     private final WeakHashMap<InheritableThreadLocal<Object>, Object> threadLocalValuesToInherit;
     
@@ -34,7 +35,9 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
         try {
             inheritableThreadLocalsField = Thread.class.getDeclaredField("inheritableThreadLocals");
             inheritableThreadLocalsField.setAccessible(true);
-        } catch (NoSuchFieldException | SecurityException e) {
+            childValueMethod = InheritableThreadLocal.class.getDeclaredMethod("childValue", Object.class);
+            childValueMethod.setAccessible(true);
+        } catch (NoSuchFieldException | SecurityException | NoSuchMethodException e) {
             logger.log(Level.SEVERE, "Problem finding field inheritableThreadLocals; will be unable to forward InheritableThreadLocal values to thread pool threads", e);
         }
     }
@@ -64,8 +67,6 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
                         if (key != null) {
                             final Field valueField = entry.getClass().getDeclaredField("value");
                             valueField.setAccessible(true);
-                            final Method childValueMethod = InheritableThreadLocal.class.getDeclaredMethod("childValue", Object.class);
-                            childValueMethod.setAccessible(true);
                             final Object value = childValueMethod.invoke(key, valueField.get(entry));
                             threadLocalValuesToInheritValue.put(key, value);
                         }
