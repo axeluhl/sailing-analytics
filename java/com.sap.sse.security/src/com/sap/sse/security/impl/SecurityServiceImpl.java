@@ -1511,8 +1511,32 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
             HasPermissions type, String typeIdentifier, String securityDisplayName,
             ActionWithResult<T> actionWithResult) {
-        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(getDefaultTenantForCurrentUser(), type,
-                typeIdentifier, securityDisplayName, actionWithResult, false);
+        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
+        T result = null;
+        boolean didSetOwnerShip = false;
+        try {
+            final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
+            if (preexistingOwnership == null) {
+                didSetOwnerShip = true;
+                final User user = getCurrentUser();
+                setOwnership(identifier, user, getDefaultTenantForCurrentUser(), securityDisplayName);
+            } else {
+                logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
+            }
+            SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER
+                    .getStringPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
+            SecurityUtils.getSubject()
+                    .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
+            result = actionWithResult.run();
+        } catch (AuthorizationException e) {
+            if (didSetOwnerShip) {
+                deleteOwnership(identifier);
+            }
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 
     @Override
@@ -1557,39 +1581,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return result;
     }
 
-    private <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
-            HasPermissions type, String typeRelativeObjectIdentifier, String securityDisplayName,
-            ActionWithResult<T> createActionReturningCreatedObject, boolean checkCreateObjectOnServer) {
-        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
-        T result = null;
-        boolean didSetOwnerShip = false;
-        try {
-            final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
-            if (preexistingOwnership == null) {
-                didSetOwnerShip = true;
-                final User user = getCurrentUser();
-                setOwnership(identifier, user, tenantOwner, securityDisplayName);
-            } else {
-                logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
-            }
-            if (checkCreateObjectOnServer) {
-                SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER
-                        .getStringPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
-            }
-            SecurityUtils.getSubject()
-                    .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
-            result = createActionReturningCreatedObject.run();
-        } catch (AuthorizationException e) {
-            if (didSetOwnerShip) {
-                deleteOwnership(identifier);
-            }
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return result;
-    }
-    
     @Override
     public void checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             Action actionToDeleteObject) {
