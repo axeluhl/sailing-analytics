@@ -9,11 +9,14 @@ import java.util.List;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.windestimation.data.AggregatedSingleDimensionBasedTwdTransition;
 import com.sap.sailing.windestimation.data.RaceWithWindSources;
+import com.sap.sailing.windestimation.data.SingleDimensionBasedTwdTransition;
 import com.sap.sailing.windestimation.data.WindSourceWithFixes;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager.AggregatedSingleDimensionType;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.RaceWithWindSourcesPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.SingleDimensionBasedTwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.SingleDimensionBasedTwdTransitionPersistenceManager.SingleDimensionType;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class DurationBasedTwdTransitionImporter {
@@ -25,10 +28,13 @@ public class DurationBasedTwdTransitionImporter {
         RaceWithWindSourcesPersistenceManager racesPersistenceManager = new RaceWithWindSourcesPersistenceManager();
         long aggregatesCount = 0;
         List<AggregatedSingleDimensionBasedTwdTransition> aggregates = new ArrayList<>();
+        SingleDimensionBasedTwdTransitionPersistenceManager entriesPersistenceManager = new SingleDimensionBasedTwdTransitionPersistenceManager(
+                SingleDimensionType.DURATION);
         for (PersistedElementsIterator<RaceWithWindSources> iterator = racesPersistenceManager
                 .getIterator(null); iterator.hasNext();) {
             RaceWithWindSources race = iterator.next();
             LoggingUtil.logInfo("Processing race " + race.getRaceName() + " of regatta " + race.getRegattaName());
+            List<SingleDimensionBasedTwdTransition> entries = new ArrayList<>();
             for (WindSourceWithFixes windSource : race.getWindSources()) {
                 double recordingSeconds = windSource.getWindSourceMetadata().getStartTime()
                         .until(windSource.getWindSourceMetadata().getEndTime()).asSeconds();
@@ -42,8 +48,9 @@ public class DurationBasedTwdTransitionImporter {
                     double secondsPassed = 0;
                     double secondsPassedAtLastAggregation = 0;
                     for (Wind currentWind = windIterator.next(); windIterator.hasNext();) {
-                        double newSecondsPassed = secondsPassed
-                                + previousWind.getTimePoint().until(currentWind.getTimePoint()).asSeconds();
+                        double secondsPassedToPrevious = previousWind.getTimePoint().until(currentWind.getTimePoint())
+                                .asSeconds();
+                        double newSecondsPassed = secondsPassed + secondsPassedToPrevious;
                         if (newSecondsPassed - secondsPassedAtLastAggregation >= SECONDS_TO_AGGREGATE
                                 && newSecondsPassed > 0) {
                             AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount,
@@ -55,6 +62,9 @@ public class DurationBasedTwdTransitionImporter {
                         valuesCount++;
                         double absTwdChange = previousWind.getBearing().getDifferenceTo(currentWind.getBearing()).abs()
                                 .getDegrees();
+                        SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
+                                secondsPassedToPrevious, absTwdChange);
+                        entries.add(entry);
                         twdSum += absTwdChange;
                         squareTwdSum += absTwdChange * absTwdChange;
                         previousWind = currentWind;
@@ -65,6 +75,8 @@ public class DurationBasedTwdTransitionImporter {
                         aggregates.add(aggregate);
                     }
                     LoggingUtil.logInfo(numberOfAggregates + " TWD transition aggregates imported in-memory");
+                    LoggingUtil.logInfo(numberOfAggregates + " TWD transition entries persisted");
+                    entriesPersistenceManager.add(entries);
                 } else {
                     LoggingUtil.logInfo("No TWD transition aggregates to import");
                 }
