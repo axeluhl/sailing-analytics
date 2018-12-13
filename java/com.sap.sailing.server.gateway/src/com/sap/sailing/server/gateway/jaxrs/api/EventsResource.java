@@ -82,6 +82,7 @@ import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
+import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -92,8 +93,11 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -479,7 +483,14 @@ public class EventsResource extends AbstractSailingServerResource {
         try {
             if (competitorRegistrationType == CompetitorRegistrationType.OPEN_UNMODERATED) {
                 UUID newTenantId = UUID.randomUUID();
-                UserGroup ownerGroup = getSecurityService().createUserGroup(newTenantId, eventName + "-owner");
+                String escapedName = WildcardPermissionEncoder.encode(eventName) + "-owner";
+                UserGroup ownerGroup = getSecurityService().createUserGroup(newTenantId, escapedName);
+                getSecurityService().setOwnershipIfNotSet(ownerGroup.getIdentifier(), getCurrentUser(),
+                        getSecurityService().getDefaultTenantForCurrentUser());
+                RoleDefinition roleDef = getSecurityService()
+                        .getRoleDefinition(SailingViewerRole.getInstance().getId());
+                Role groupViewer = new Role(roleDef, ownerGroup, null);
+                getSecurityService().addRoleForUser(getSecurityService().getAllUser(), groupViewer);
                 getSecurityService().addUserToUserGroup(ownerGroup, getCurrentUser());
                 return getSecurityService().doWithTemporaryDefaultTenant(ownerGroup, doCreationAction);
             } else {

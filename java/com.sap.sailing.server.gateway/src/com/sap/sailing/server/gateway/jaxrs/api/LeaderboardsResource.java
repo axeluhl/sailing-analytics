@@ -95,6 +95,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
@@ -133,7 +134,11 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.impl.UUIDHelper;
 
 @Path("/v1/leaderboards")
@@ -609,24 +614,44 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         // FIXME check for consistency with SailingServiceImpl
         SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
                 DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
-        final Response result;
-        if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
-            JSONObject jsonResult = new JSONObject();
-            final RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
-            jsonResult.put("addeddenotation", adapter.denoteRaceForRaceLogTracking(getService(),
-                    leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard(),
-                    leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn(),
-                    leaderboardAndRaceColumnAndFleetAndResponse.getFleet(), /* use default race name */ null));
-            final RaceHandle raceHandle = adapter.startTracking(getService(), leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard(),
-                    leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn(),
-                    leaderboardAndRaceColumnAndFleetAndResponse.getFleet(),
-                    trackWind == null ? true : trackWind,
-                    correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination,
-                    new PermissionAwareRaceTrackingHandler(getSecurityService()));
-            jsonResult.put("regatta", raceHandle.getRegatta().getName());
-            result = Response.ok(jsonResult.toJSONString()).build();
+        final ActionWithResult<Response> innerAction = () -> {
+            final Response result;
+            if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
+                JSONObject jsonResult = new JSONObject();
+                final RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
+                jsonResult.put("addeddenotation", adapter.denoteRaceForRaceLogTracking(getService(),
+                        leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard(),
+                        leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn(),
+                        leaderboardAndRaceColumnAndFleetAndResponse.getFleet(), /* use default race name */ null));
+                final RaceHandle raceHandle = adapter.startTracking(getService(), leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard(),
+                        leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn(),
+                        leaderboardAndRaceColumnAndFleetAndResponse.getFleet(),
+                        trackWind == null ? true : trackWind,
+                                correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination,
+                                        new PermissionAwareRaceTrackingHandler(getSecurityService()));
+                jsonResult.put("regatta", raceHandle.getRegatta().getName());
+                result = Response.ok(jsonResult.toJSONString()).build();
+            } else {
+                result = leaderboardAndRaceColumnAndFleetAndResponse.getResponse();
+            }
+            return result;
+        };
+
+        final Leaderboard leaderboard = leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard();
+        final WithQualifiedObjectIdentifier leaderboardOrRegatta;
+        if (leaderboard instanceof RegattaLeaderboard) {
+            leaderboardOrRegatta = ((RegattaLeaderboard) leaderboard).getRegatta();
         } else {
-            result = leaderboardAndRaceColumnAndFleetAndResponse.getResponse();
+            leaderboardOrRegatta = leaderboard;
+        }
+        final OwnershipAnnotation ownership = getSecurityService().getOwnership(leaderboardOrRegatta.getIdentifier());
+        final UserGroup groupOwner = ownership == null ? null : ownership.getAnnotation().getTenantOwner();
+
+        final Response result;
+        if (groupOwner == null) {
+            result = innerAction.run();
+        } else {
+            result = getSecurityService().doWithTemporaryDefaultTenant(groupOwner, innerAction);
         }
         return result;
     }

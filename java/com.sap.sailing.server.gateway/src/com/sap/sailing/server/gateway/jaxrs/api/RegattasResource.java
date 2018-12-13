@@ -375,8 +375,11 @@ public class RegattasResource extends AbstractSailingServerResource {
         final User user = getSecurityService().getCurrentUser();
         Response response;
         final Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            return getBadRegattaErrorResponse(regattaName);
+        }
         OwnershipAnnotation regattaOwnerShipAnnotation = getSecurityService().getOwnership(regatta.getIdentifier());
-        if (regatta == null || regattaOwnerShipAnnotation == null) {
+        if (regattaOwnerShipAnnotation == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
         boolean registerCompetitor = false;
@@ -2069,7 +2072,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @POST
     @Path("{regattaname}/removeracecolumn")
-    public Response addRaceColumns(@PathParam("regattaname") String regattaName,
+    public Response removeRaceColumns(@PathParam("regattaname") String regattaName,
             @QueryParam("racecolumn") String raceColumnName) {
         final Response response;
         Regatta regatta = findRegattaByName(regattaName);
