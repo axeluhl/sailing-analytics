@@ -1,11 +1,11 @@
 package com.sap.sse.replication.impl;
 
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.UUID;
 
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 
 /**
@@ -15,7 +15,7 @@ import com.sap.sse.replication.Replicable;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicaDescriptor implements Serializable {
+public class ReplicaDescriptorImpl implements ReplicaDescriptor {
     private static final long serialVersionUID = -5451556877949921454L;
 
     private final UUID uuid;
@@ -27,7 +27,7 @@ public class ReplicaDescriptor implements Serializable {
     /**
      * Sets the registration time to now.
      */
-    public ReplicaDescriptor(InetAddress ipAddress, UUID serverUuid, String additionalInformation, String[] replicableIdsAsStrings) {
+    public ReplicaDescriptorImpl(InetAddress ipAddress, UUID serverUuid, String additionalInformation, String[] replicableIdsAsStrings) {
         assert replicableIdsAsStrings != null && replicableIdsAsStrings.length > 0;
         this.uuid = serverUuid;
         this.registrationTime = MillisecondsTimePoint.now();
@@ -79,7 +79,7 @@ public class ReplicaDescriptor implements Serializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        ReplicaDescriptor other = (ReplicaDescriptor) obj;
+        ReplicaDescriptorImpl other = (ReplicaDescriptorImpl) obj;
         if (uuid == null) {
             if (other.uuid != null)
                 return false;

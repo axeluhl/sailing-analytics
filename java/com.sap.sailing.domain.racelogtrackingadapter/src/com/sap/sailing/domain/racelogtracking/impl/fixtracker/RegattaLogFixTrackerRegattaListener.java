@@ -26,9 +26,9 @@ import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
 /**
  * This is the main entry point of the {@link SensorFixStore} based fix tracking.

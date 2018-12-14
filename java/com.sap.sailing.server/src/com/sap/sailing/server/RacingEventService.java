@@ -105,7 +105,7 @@ import com.sap.sse.common.search.Searchable;
 import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 

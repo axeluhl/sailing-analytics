@@ -95,6 +95,7 @@
         <module>com.sap.sse.security.userstore.mongodb</module>
         <module>com.sap.sse.operationaltransformation</module>
         <module>com.sap.sse.replication</module>
+        <module>com.sap.sse.replication.interfaces</module>
         <module>com.sap.sse.threadmanager</module>
         <module>com.sap.sse.filestorage</module>
         <module>com.sap.sse.feature</module>

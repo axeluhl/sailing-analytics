@@ -18,7 +18,7 @@ Require-Bundle: org.apache.servicemix.bundles.aws-java-sdk;bundle-version="1.9.8
  com.fasterxml.jackson.core.jackson-annotations,
  com.sap.sse.common,
  com.sap.sse.mongodb,
- com.sap.sse.replication,
+ com.sap.sse.replication.interfaces,
  com.sap.sse.operationaltransformation,
  com.sap.sse,
  org.apache.commons.io,

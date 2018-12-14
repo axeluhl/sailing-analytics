@@ -1,10 +1,9 @@
-package com.sap.sse.replication.impl;
+package com.sap.sse.replication;
 
 import java.io.Serializable;
 import java.util.UUID;
 
 import com.sap.sse.common.WithID;
-import com.sap.sse.replication.OperationWithResult;
 
 /**
  * Wraps an operation and delegates all methods to it. In addition, provides an {@link #id ID} which is used

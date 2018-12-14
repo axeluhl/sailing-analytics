@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.rabbitmq.client.Channel;
-import com.sap.sse.replication.impl.ReplicaDescriptor;
-import com.sap.sse.replication.impl.ReplicationServlet;
 
 /**
  * A service that organizes a master server and its replicas.
@@ -31,7 +29,7 @@ public interface ReplicationService {
     ReplicationMasterDescriptor getReplicatingFromMaster();
     
     /**
-     * Starts to replicate the {@link Replicables} that the {@code master} descriptor
+     * Starts to replicate the {@link Replicable}s that the {@code master} descriptor
      * {@link ReplicationMasterDescriptor#getReplicables() specifies}. Performs a servlet request to the remote master
      * server's {@link ReplicationServlet}, first registering this replica, ensuring the message queue for replicating
      * operations is created, then subscribing to the master's replication message queue and asking the servlet for the
@@ -99,4 +97,6 @@ public interface ReplicationService {
     double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica);
 
     Iterable<Replicable<?, ?>> getAllReplicables();
+
+    ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname, String exchangeName, int servletPort, int jmsPort, String jmsQueueName, Iterable<Replicable<?, ?>> replicables);
 }

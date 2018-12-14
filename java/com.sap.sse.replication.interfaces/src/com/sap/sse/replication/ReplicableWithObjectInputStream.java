@@ -1,4 +1,4 @@
-package com.sap.sse.replication.impl;
+package com.sap.sse.replication;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -17,10 +17,6 @@ import java.util.logging.Logger;
 
 import com.sap.sse.common.WithID;
 import com.sap.sse.operationaltransformation.Operation;
-import com.sap.sse.replication.OperationExecutionListener;
-import com.sap.sse.replication.OperationWithResult;
-import com.sap.sse.replication.Replicable;
-import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 public interface ReplicableWithObjectInputStream<S, O extends OperationWithResult<S, ?>> extends Replicable<S, O> {
     static final Logger logger = Logger.getLogger(ReplicableWithObjectInputStream.class.getName());

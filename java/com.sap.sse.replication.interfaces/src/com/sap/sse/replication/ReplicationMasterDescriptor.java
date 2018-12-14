@@ -8,8 +8,6 @@ import java.util.UUID;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
-import com.sap.sse.replication.impl.RabbitInputStreamProvider;
-import com.sap.sse.replication.impl.ReplicationServlet;
 
 /**
  * Identifies a master server instance from which a replica can obtain an initial load and continuous updates.

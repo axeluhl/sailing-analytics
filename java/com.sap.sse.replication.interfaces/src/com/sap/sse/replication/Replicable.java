@@ -8,12 +8,10 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.logging.Logger;
 
-import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.WithID;
 import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
-import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 import com.sap.sse.util.ThreadLocalTransporter;
 
