@@ -164,4 +164,60 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="com.sap.sse.jersey.jaxbdependencyfragment"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.moxieapps.gwt.highcharts"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.gwt.servlet"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.googlecode.mgwt"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.googlecode.java-diff-utils"
+         download-size="0"
+         install-size="0"
+         version="1.3.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.branflake2267.gwt-maps-api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.gwt.ajaxloader"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.mp4parser.isoparser"
+         download-size="0"
+         install-size="0"
+         version="1.9.37"/>
+
 </feature>
