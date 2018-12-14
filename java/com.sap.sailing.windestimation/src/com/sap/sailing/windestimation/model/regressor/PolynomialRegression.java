@@ -48,4 +48,19 @@ public class PolynomialRegression<InstanceType, T extends ContextSpecificModelMe
         return valueSum;
     }
 
+    @Override
+    public boolean isModelReady() {
+        if (super.isModelReady()) {
+            for (int i = 0; i < regressions.length; i++) {
+                try {
+                    regressions[i].getOrCreatePolynomialFunction();
+                } catch (NotEnoughDataHasBeenAddedException e) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
 }
