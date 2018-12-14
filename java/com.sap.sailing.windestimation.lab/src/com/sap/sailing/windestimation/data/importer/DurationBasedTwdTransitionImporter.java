@@ -2,8 +2,8 @@ package com.sap.sailing.windestimation.data.importer;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.windestimation.data.AggregatedSingleDimensionBasedTwdTransition;
@@ -17,6 +17,7 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.RaceWithWin
 import com.sap.sailing.windestimation.data.persistence.twdtransition.SingleDimensionBasedTwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.SingleDimensionBasedTwdTransitionPersistenceManager.SingleDimensionType;
 import com.sap.sailing.windestimation.util.LoggingUtil;
+import com.sap.sse.common.TimePoint;
 
 public class DurationBasedTwdTransitionImporter {
 
@@ -34,23 +35,29 @@ public class DurationBasedTwdTransitionImporter {
             LoggingUtil.logInfo("Processing race " + race.getRaceName() + " of regatta " + race.getRegattaName());
             List<SingleDimensionBasedTwdTransition> entries = new ArrayList<>();
             for (WindSourceWithFixes windSource : race.getWindSources()) {
-                if (windSource.getWindFixes().size() > 1) {
-                    Iterator<Wind> windIterator = windSource.getWindFixes().iterator();
-                    Wind previousWind = windIterator.next();
-                    for (Wind currentWind = windIterator.next(); windIterator.hasNext();) {
-                        double secondsPassedToPrevious = previousWind.getTimePoint().until(currentWind.getTimePoint())
+                int windFixIndex = 0;
+                for (Wind windFix : windSource.getWindFixes()) {
+                    TimePoint timePointOfLastConsideredWindFix = windFix.getTimePoint();
+                    for (ListIterator<Wind> otherWindFixesIterator = windSource.getWindFixes()
+                            .listIterator(++windFixIndex); otherWindFixesIterator.hasNext();) {
+                        Wind otherWindFix = otherWindFixesIterator.next();
+                        double secondsPassed = timePointOfLastConsideredWindFix.until(otherWindFix.getTimePoint())
                                 .asSeconds();
-                        double absTwdChange = previousWind.getBearing().getDifferenceTo(currentWind.getBearing()).abs()
-                                .getDegrees();
-                        SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
-                                secondsPassedToPrevious, absTwdChange);
-                        entries.add(entry);
-                        previousWind = currentWind;
+                        if (secondsPassed >= SECONDS_TO_AGGREGATE) {
+                            double absTwdChange = windFix.getBearing().getDifferenceTo(otherWindFix.getBearing()).abs()
+                                    .getDegrees();
+                            SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
+                                    secondsPassed, absTwdChange);
+                            entries.add(entry);
+                            timePointOfLastConsideredWindFix = otherWindFix.getTimePoint();
+                        }
                     }
+                }
+                if (entries.isEmpty()) {
+                    LoggingUtil.logInfo("No TWD transitions to import");
+                } else {
                     durationBasedTwdTransitionPersistenceManager.add(entries);
                     LoggingUtil.logInfo(entries.size() + " TWD transition entries imported");
-                } else {
-                    LoggingUtil.logInfo("No TWD transitions to import");
                 }
             }
         }
