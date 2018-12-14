@@ -66,6 +66,6 @@ echo "<stringAttribute key=\"workspace_bundles\" value=\"${workspace_bundles:1}\
 # Now patch the .launch file if provided
 if [ $# -ge 2 ]; then
     echo "Patching $2 ..."
-    sed -i 's/<stringAttribute key="target_bundles" value="[^>]*">/<stringAttribute key="target_bundles" value="'${target_bundles}'"/' "$2"
-    sed -i 's/<stringAttribute key="workspace_bundles" value="[^>]*">/<stringAttribute key="workspace_bundles" value="'${target_bundles}'"/' "$2"
+    sed -i 's/<stringAttribute key="target_bundles" value="[^"]*"/<stringAttribute key="target_bundles" value="'${target_bundles}'"/' "$2"
+    sed -i 's/<stringAttribute key="workspace_bundles" value="[^"]*">/<stringAttribute key="workspace_bundles" value="'${target_bundles}'"/' "$2"
 fi
