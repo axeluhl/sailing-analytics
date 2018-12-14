@@ -67,5 +67,5 @@ echo "<stringAttribute key=\"workspace_bundles\" value=\"${workspace_bundles:1}\
 if [ $# -ge 2 ]; then
     echo "Patching $2 ..."
     sed -i 's/<stringAttribute key="target_bundles" value="[^"]*"/<stringAttribute key="target_bundles" value="'${target_bundles:1}'"/' "$2"
-    sed -i 's/<stringAttribute key="workspace_bundles" value="[^"]*">/<stringAttribute key="workspace_bundles" value="'${workspace_bundles:1}'"/' "$2"
+    sed -i 's/<stringAttribute key="workspace_bundles" value="[^"]*"/<stringAttribute key="workspace_bundles" value="'${workspace_bundles:1}'"/' "$2"
 fi
