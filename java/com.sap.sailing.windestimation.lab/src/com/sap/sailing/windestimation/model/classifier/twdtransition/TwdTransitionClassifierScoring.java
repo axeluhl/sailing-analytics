@@ -1,7 +1,7 @@
-package com.sap.sailing.windestimation.classifier.twdtransition;
+package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
-import com.sap.sailing.windestimation.classifier.ClassifierScoring;
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.model.classifier.ClassifierScoring;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassifierModelMetadata;
 

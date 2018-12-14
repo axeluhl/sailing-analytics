@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.classifier.twdtransition;
+package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

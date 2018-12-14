@@ -5,8 +5,8 @@ import java.net.UnknownHostException;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.windestimation.data.ManeuverForDataAnalysis;
-import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstimationDataJsonDeserializer;
-import com.sap.sailing.windestimation.data.deserializer.ManeuverForDataAnalysisJsonDeserializer;
+import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
+import com.sap.sailing.windestimation.data.serialization.ManeuverForDataAnalysisJsonDeserializer;
 
 /**
  * 

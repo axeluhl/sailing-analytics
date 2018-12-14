@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.classifier.maneuver;
+package com.sap.sailing.windestimation.model.classifier.maneuver;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

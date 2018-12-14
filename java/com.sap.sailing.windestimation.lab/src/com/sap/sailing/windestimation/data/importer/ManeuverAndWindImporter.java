@@ -34,13 +34,13 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEsti
 import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
-import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstimationDataJsonDeserializer;
-import com.sap.sailing.windestimation.data.deserializer.ManeuverForDataAnalysisJsonSerializer;
-import com.sap.sailing.windestimation.data.deserializer.ManeuverForEstimationJsonSerializer;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuverForDataAnalysisPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuverForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.RaceWithWindSourcesPersistenceManager;
+import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
+import com.sap.sailing.windestimation.data.serialization.ManeuverForDataAnalysisJsonSerializer;
+import com.sap.sailing.windestimation.data.serialization.ManeuverForEstimationJsonSerializer;
 import com.sap.sailing.windestimation.data.transformer.AbstractCompleteManeuverCurveWithEstimationDataTransformer;
 import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.data.transformer.ManeuverForDataAnalysisTransformer;

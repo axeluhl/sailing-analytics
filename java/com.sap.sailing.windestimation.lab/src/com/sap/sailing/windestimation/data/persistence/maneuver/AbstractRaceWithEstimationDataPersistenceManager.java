@@ -17,8 +17,8 @@ import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.RegattaWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
-import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstimationDataJsonDeserializer;
-import com.sap.sailing.windestimation.data.deserializer.RaceWithEstimationDataDeserializer;
+import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
+import com.sap.sailing.windestimation.data.serialization.RaceWithEstimationDataDeserializer;
 
 /**
  * 

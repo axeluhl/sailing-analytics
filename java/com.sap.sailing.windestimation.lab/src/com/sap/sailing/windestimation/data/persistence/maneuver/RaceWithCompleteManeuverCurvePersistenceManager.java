@@ -10,7 +10,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.ManeuverCurveWithUnst
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverMainCurveWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverWindJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
-import com.sap.sailing.windestimation.data.deserializer.CompetitorTrackWithEstimationDataJsonDeserializer;
+import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
 
 /**
  * 

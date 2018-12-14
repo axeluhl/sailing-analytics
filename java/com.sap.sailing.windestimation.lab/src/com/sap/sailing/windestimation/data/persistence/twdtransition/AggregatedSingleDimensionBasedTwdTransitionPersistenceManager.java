@@ -11,9 +11,9 @@ import com.mongodb.util.JSON;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.windestimation.data.AggregatedSingleDimensionBasedTwdTransition;
-import com.sap.sailing.windestimation.data.deserializer.AggregatedSingleDimensionBasedTwdTransitionJsonDeserializer;
-import com.sap.sailing.windestimation.data.deserializer.AggregatedSingleDimensionBasedTwdTransitionJsonSerializer;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
+import com.sap.sailing.windestimation.data.serialization.AggregatedSingleDimensionBasedTwdTransitionJsonDeserializer;
+import com.sap.sailing.windestimation.data.serialization.AggregatedSingleDimensionBasedTwdTransitionJsonSerializer;
 
 public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
         extends AbstractPersistenceManager<AggregatedSingleDimensionBasedTwdTransition> {

@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.classifier.twdtransition;
+package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -11,12 +11,12 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.windestimation.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.data.LabelledTwdTransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.importer.TwdTransitionImporter;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassifierModelFactory;
 import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassifierModelMetadata;

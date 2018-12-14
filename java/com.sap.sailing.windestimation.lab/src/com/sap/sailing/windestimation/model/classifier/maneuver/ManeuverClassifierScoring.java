@@ -1,7 +1,7 @@
-package com.sap.sailing.windestimation.classifier.maneuver;
+package com.sap.sailing.windestimation.model.classifier.maneuver;
 
-import com.sap.sailing.windestimation.classifier.ClassifierScoring;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.model.classifier.ClassifierScoring;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelMetadata;
 

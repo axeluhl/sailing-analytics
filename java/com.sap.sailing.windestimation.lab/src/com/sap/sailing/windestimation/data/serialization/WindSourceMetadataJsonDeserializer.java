@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.data.deserializer;
+package com.sap.sailing.windestimation.data.serialization;
 
 import org.json.simple.JSONObject;
 

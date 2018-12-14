@@ -10,9 +10,9 @@ import com.mongodb.util.JSON;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
 import com.sap.sailing.windestimation.data.RaceWithWindSources;
-import com.sap.sailing.windestimation.data.deserializer.RaceWithWindSourcesDeserializer;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
+import com.sap.sailing.windestimation.data.serialization.RaceWithWindSourcesDeserializer;
 import com.sap.sse.common.TimePoint;
 
 public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceManager<RaceWithWindSources> {

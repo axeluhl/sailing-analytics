@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.data.deserializer;
+package com.sap.sailing.windestimation.data.serialization;
 
 import java.util.ArrayList;
 import java.util.List;

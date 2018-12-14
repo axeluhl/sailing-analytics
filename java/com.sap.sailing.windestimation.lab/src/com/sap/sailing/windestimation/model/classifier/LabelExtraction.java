@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.classifier;
+package com.sap.sailing.windestimation.model.classifier;
 
 import java.util.List;
 

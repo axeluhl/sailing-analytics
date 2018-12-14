@@ -1,9 +1,9 @@
-package com.sap.sailing.windestimation.classifier.twdtransition;
+package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.windestimation.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.data.LabelledTwdTransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassifierModelMetadata;
 
 public class LabelledTwdTransitionModelMetadata extends TwdTransitionClassifierModelMetadata

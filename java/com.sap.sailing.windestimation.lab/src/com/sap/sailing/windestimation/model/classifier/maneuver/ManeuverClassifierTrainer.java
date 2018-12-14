@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.classifier.maneuver;
+package com.sap.sailing.windestimation.model.classifier.maneuver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,11 +12,11 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.windestimation.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.TransformedManeuversPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
+import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelFactory;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelMetadata;
