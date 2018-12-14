@@ -7,13 +7,13 @@ import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 
-public class PolynomialRegression<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>> extends
-        AbstractRegressionModel<InstanceType, T> implements IncrementallyTrainableRegressorModel<InstanceType, T> {
+public class PolynomialRegressor<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>> extends
+        AbstractRegressorModel<InstanceType, T> implements IncrementallyTrainableRegressorModel<InstanceType, T> {
 
     private static final long serialVersionUID = 2275631213670766824L;
     private final IncrementalLeastSquares[] regressions;
 
-    public PolynomialRegression(T contextSpecificModelMetadata, int[] polynomialOrder, boolean[] withBias) {
+    public PolynomialRegressor(T contextSpecificModelMetadata, int[] polynomialOrder, boolean[] withBias) {
         super(contextSpecificModelMetadata);
         int numberOfInputFeatures = getContextSpecificModelMetadata().getNumberOfInputFeatures();
         this.regressions = new IncrementalAnyOrderLeastSquaresImpl[numberOfInputFeatures];

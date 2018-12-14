@@ -60,7 +60,7 @@ public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMe
 
     @Override
     public String toString() {
-        return "TwdTransitionModelMetadata [boatClass=" + boatClass + "]";
+        return "TwdTransitionClassifierModelMetadata [boatClass=" + boatClass + "]";
     }
 
     @Override
@@ -70,7 +70,7 @@ public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMe
 
     @Override
     public String getId() {
-        StringBuilder id = new StringBuilder("TwdTransition-");
+        StringBuilder id = new StringBuilder("TwdTransitionClassification-");
         if (getBoatClass() == null) {
             id.append("All");
         } else {

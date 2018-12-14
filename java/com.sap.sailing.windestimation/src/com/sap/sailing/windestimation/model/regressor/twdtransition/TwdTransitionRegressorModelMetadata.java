@@ -4,11 +4,11 @@ import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.model.store.ContextType;
 
-public class TwdTransitionRegressionModelMetadata extends ContextSpecificModelMetadata<TwdTransition> {
+public class TwdTransitionRegressorModelMetadata extends ContextSpecificModelMetadata<TwdTransition> {
 
     private static final long serialVersionUID = 1120422671027132155L;
 
-    public TwdTransitionRegressionModelMetadata() {
+    public TwdTransitionRegressorModelMetadata() {
         super(ContextType.TWD_TRANSITION);
     }
 
@@ -34,7 +34,7 @@ public class TwdTransitionRegressionModelMetadata extends ContextSpecificModelMe
 
     @Override
     public String getId() {
-        return "twdTransitionRegression";
+        return "TwdTransitionRegression";
     }
 
     @Override
@@ -44,15 +44,15 @@ public class TwdTransitionRegressionModelMetadata extends ContextSpecificModelMe
 
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof TwdTransitionRegressionModelMetadata) {
-            return getContextType().equals(((TwdTransitionRegressionModelMetadata) obj).getContextType());
+        if (obj != null && obj instanceof TwdTransitionRegressorModelMetadata) {
+            return getContextType().equals(((TwdTransitionRegressorModelMetadata) obj).getContextType());
         }
         return false;
     }
 
     @Override
     public String toString() {
-        return "TwdTransitionRegressionModelMetadata [getContextType()=" + getContextType() + "]";
+        return "TwdTransitionRegressorModelMetadata [getContextType()=" + getContextType() + "]";
     }
 
 }

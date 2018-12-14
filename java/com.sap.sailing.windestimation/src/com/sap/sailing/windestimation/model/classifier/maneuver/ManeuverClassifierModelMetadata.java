@@ -95,7 +95,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
 
     @Override
     public String toString() {
-        return "ManeuverModelMetadata [maneuverFeatures=" + maneuverFeatures + ", boatClass=" + boatClass
+        return "ManeuverClassifierModelMetadata [maneuverFeatures=" + maneuverFeatures + ", boatClass=" + boatClass
                 + ", indexToManeuverTypeOrdinalMapping=" + Arrays.toString(indexToManeuverTypeOrdinalMapping)
                 + ", numberOfSupportedManeuverTypes=" + numberOfSupportedManeuverTypes + "]";
     }
@@ -171,7 +171,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
 
     @Override
     public String getId() {
-        StringBuilder id = new StringBuilder("Maneuver-");
+        StringBuilder id = new StringBuilder("ManeuverClassification-");
         id.append(getManeuverFeatures().toString());
         id.append("-");
         if (getBoatClass() == null) {

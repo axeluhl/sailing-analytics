@@ -8,7 +8,7 @@ public abstract class AbstractRegressorCache<InstanceType, T extends ContextSpec
         extends AbstractModelCache<InstanceType, T, TrainableRegressorModel<InstanceType, T>> {
 
     public AbstractRegressorCache(ModelStore modelStore, long preserveLoadedModelsMillis,
-            RegressionModelFactory<InstanceType, T> modelFactory) {
+            RegressorModelFactory<InstanceType, T> modelFactory) {
         super(modelStore, preserveLoadedModelsMillis, modelFactory);
     }
 
