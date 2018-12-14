@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
+import com.sap.sailing.windestimation.classifier.ModelPersistenceException;
 import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
@@ -31,41 +31,39 @@ public class PersistedTwdTransitionClassifiersScorePrinter {
             throws MalformedURLException, ClassNotFoundException, IOException, InterruptedException {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
-        ModelStore classifierModelStore = new MongoDbModelStore(
-                new TwdTransitionPersistenceManager().getDb());
-        List<TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata>> allClassifierModels = new ArrayList<>();
+        ModelStore classifierModelStore = new MongoDbModelStore(new TwdTransitionPersistenceManager().getDb());
+        List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> allClassifierModels = new ArrayList<>();
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();
         LoggingUtil.logInfo("### Loading all boat class classifiers:");
         LabelledTwdTransitionModelMetadata maneuverModelMetadata = new LabelledTwdTransitionModelMetadata(null);
-        List<TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata>> classifierModels = classifierModelFactory
+        List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> classifierModels = classifierModelFactory
                 .getAllTrainableClassifierModels(maneuverModelMetadata);
-        for (TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata> classifierModel : classifierModels) {
+        for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel : classifierModels) {
             try {
                 classifierModel = classifierModelStore.loadPersistedState(classifierModel);
                 if (classifierModel != null) {
                     allClassifierModels.add(classifierModel);
                 }
-            } catch (ClassifierPersistenceException e) {
+            } catch (ModelPersistenceException e) {
             }
         }
         for (BoatClass boatClass : allBoatClasses) {
             maneuverModelMetadata = new LabelledTwdTransitionModelMetadata(boatClass);
             classifierModels = classifierModelFactory.getAllTrainableClassifierModels(maneuverModelMetadata);
-            for (TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata> classifierModel : classifierModels) {
+            for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel : classifierModels) {
                 try {
                     classifierModel = classifierModelStore.loadPersistedState(classifierModel);
                     if (classifierModel != null) {
                         allClassifierModels.add(classifierModel);
                     }
-                } catch (ClassifierPersistenceException e) {
+                } catch (ModelPersistenceException e) {
                 }
             }
         }
         StringBuilder str = new StringBuilder("Classifier name \t| Boat class \t| Test score");
         Collections.sort(allClassifierModels, (a, b) -> Double.compare(a.getTestScore(), b.getTestScore()));
-        for (TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata> classifierModel : allClassifierModels) {
-            TwdTransitionModelMetadata modelMetadata = classifierModel.getModelMetadata()
-                    .getContextSpecificModelMetadata();
+        for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel : allClassifierModels) {
+            TwdTransitionClassifierModelMetadata modelMetadata = classifierModel.getContextSpecificModelMetadata();
             str.append("\r\n" + classifierModel.getClass().getSimpleName() + ": \t| " + modelMetadata.getBoatClass()
                     + " \t| " + String.format(" %.03f", classifierModel.getTestScore()));
         }

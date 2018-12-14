@@ -1,17 +1,17 @@
 package com.sap.sailing.windestimation.classifier.twdtransition;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.model.store.ContextType;
 
-public class TwdTransitionModelMetadata extends ContextSpecificModelMetadata<TwdTransition> {
+public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMetadata<TwdTransition> {
 
     private static final long serialVersionUID = 819528288811779220L;
 
     private final BoatClass boatClass;
 
-    public TwdTransitionModelMetadata(BoatClass boatClass) {
+    public TwdTransitionClassifierModelMetadata(BoatClass boatClass) {
         super(ContextType.TWD_TRANSITION);
         this.boatClass = boatClass;
     }
@@ -49,7 +49,7 @@ public class TwdTransitionModelMetadata extends ContextSpecificModelMetadata<Twd
             return false;
         if (getClass() != obj.getClass())
             return false;
-        TwdTransitionModelMetadata other = (TwdTransitionModelMetadata) obj;
+        TwdTransitionClassifierModelMetadata other = (TwdTransitionClassifierModelMetadata) obj;
         if (boatClass == null) {
             if (other.boatClass != null)
                 return false;

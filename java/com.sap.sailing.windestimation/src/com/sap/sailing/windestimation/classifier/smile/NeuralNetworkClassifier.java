@@ -1,8 +1,7 @@
 package com.sap.sailing.windestimation.classifier.smile;
 
-import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.classifier.ModelMetadata;
 import com.sap.sailing.windestimation.classifier.PreprocessingConfig.PreprocessingConfigBuilder;
+import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 
 import smile.classification.NeuralNetwork;
 
@@ -17,8 +16,7 @@ public class NeuralNetworkClassifier<InstanceType, T extends ContextSpecificMode
 
     @Override
     protected NeuralNetwork trainInternalModel(double[][] x, int[] y) {
-        ModelMetadata<InstanceType, T> modelMetadata = getModelMetadata();
-        int k = modelMetadata.getContextSpecificModelMetadata().getNumberOfPossibleTargetValues();
+        int k = getContextSpecificModelMetadata().getNumberOfPossibleTargetValues();
         int numberOfInputFeatures = x[0].length;
         NeuralNetwork net;
         int outputUnits = k == 2 ? 1 : k;

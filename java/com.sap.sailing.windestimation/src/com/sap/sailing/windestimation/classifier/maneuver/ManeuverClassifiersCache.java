@@ -6,7 +6,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 
 public class ManeuverClassifiersCache extends
-        AbstractClassifiersCache<ManeuverForEstimation, ManeuverModelMetadata, ManeuverWithProbabilisticTypeClassification> {
+        AbstractClassifiersCache<ManeuverForEstimation, ManeuverClassifierModelMetadata, ManeuverWithProbabilisticTypeClassification> {
 
     private final ManeuverFeatures maneuverFeatures;
 
@@ -18,10 +18,10 @@ public class ManeuverClassifiersCache extends
     }
 
     @Override
-    public ManeuverModelMetadata getContextSpecificModelMetadata(ManeuverForEstimation maneuver) {
+    public ManeuverClassifierModelMetadata getContextSpecificModelMetadata(ManeuverForEstimation maneuver) {
         ManeuverFeatures maneuverFeatures = determineFinalManeuverFeatures(maneuver);
         BoatClass boatClass = maneuverFeatures.isPolarsInformation() ? maneuver.getBoatClass() : null;
-        ManeuverModelMetadata maneuverModelMetadata = new ManeuverModelMetadata(maneuverFeatures, boatClass,
+        ManeuverClassifierModelMetadata maneuverModelMetadata = new ManeuverClassifierModelMetadata(maneuverFeatures, boatClass,
                 ManeuverClassifierModelFactory.orderedSupportedTargetValues);
         return maneuverModelMetadata;
     }

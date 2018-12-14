@@ -1,7 +1,8 @@
-package com.sap.sailing.windestimation.classifier;
+package com.sap.sailing.windestimation.model;
 
 import java.io.Serializable;
 
+import com.sap.sailing.windestimation.classifier.FeatureExtraction;
 import com.sap.sailing.windestimation.model.store.ContextType;
 
 public abstract class ContextSpecificModelMetadata<InstanceType>

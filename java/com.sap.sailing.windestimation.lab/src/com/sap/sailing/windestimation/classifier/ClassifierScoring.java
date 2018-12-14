@@ -3,6 +3,8 @@ package com.sap.sailing.windestimation.classifier;
 import java.util.List;
 import java.util.function.Function;
 
+import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+
 import smile.validation.ConfusionMatrix;
 
 /**
@@ -25,7 +27,7 @@ public class ClassifierScoring<InstanceType, T extends ContextSpecificModelMetad
     }
 
     public String printScoring(List<InstanceType> instances, LabelExtraction<InstanceType> labelExtraction) {
-        T modelMetadata = trainedClassifier.getModelMetadata().getContextSpecificModelMetadata();
+        T modelMetadata = trainedClassifier.getContextSpecificModelMetadata();
         int[] target = labelExtraction.getYVector(instances);
         int[] predicted = new int[instances.size()];
         int i = 0;

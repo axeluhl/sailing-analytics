@@ -5,7 +5,7 @@ import com.sap.sailing.windestimation.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
-public class LabelledManeuverModelMetadata extends ManeuverModelMetadata
+public class LabelledManeuverModelMetadata extends ManeuverClassifierModelMetadata
         implements LabelExtraction<ManeuverForEstimation> {
 
     private static final long serialVersionUID = -7074647974723150632L;

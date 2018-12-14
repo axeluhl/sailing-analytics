@@ -1,21 +1,22 @@
 package com.sap.sailing.windestimation.regression;
 
 import com.sap.sailing.windestimation.model.AbstractTrainableModel;
-import com.sap.sailing.windestimation.model.store.ContextType;
+import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.store.PersistenceSupport;
+import com.sap.sailing.windestimation.model.store.SerializationBasedPersistenceSupport;
 
-public abstract class AbstractRegressionModel<InstanceType> extends AbstractTrainableModel
-        implements TrainableRegressionModel<InstanceType> {
+public abstract class AbstractRegressionModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+        extends AbstractTrainableModel<InstanceType, T> implements TrainableRegressionModel<InstanceType, T> {
 
     private static final long serialVersionUID = -3283338628316L;
-    private final ContextType contextType;
 
-    public AbstractRegressionModel(ContextType contextType) {
-        this.contextType = contextType;
+    public AbstractRegressionModel(T contextSpecificModelMetadata) {
+        super(contextSpecificModelMetadata);
     }
 
     @Override
-    public ContextType getContextType() {
-        return contextType;
+    public PersistenceSupport getPersistenceSupport() {
+        return new SerializationBasedPersistenceSupport(this);
     }
 
 }

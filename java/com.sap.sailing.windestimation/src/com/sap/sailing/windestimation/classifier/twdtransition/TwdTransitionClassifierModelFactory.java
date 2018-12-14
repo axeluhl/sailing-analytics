@@ -10,27 +10,27 @@ import com.sap.sailing.windestimation.classifier.smile.NeuralNetworkClassifier;
 import com.sap.sailing.windestimation.data.TwdTransition;
 
 public class TwdTransitionClassifierModelFactory
-        implements ClassifierModelFactory<TwdTransition, TwdTransitionModelMetadata> {
+        implements ClassifierModelFactory<TwdTransition, TwdTransitionClassifierModelMetadata> {
 
-    private static TwdTransitionModelMetadata createModelMetadata(BoatClass boatClass) {
-        TwdTransitionModelMetadata modelMetadata = new TwdTransitionModelMetadata(boatClass);
+    private static TwdTransitionClassifierModelMetadata createModelMetadata(BoatClass boatClass) {
+        TwdTransitionClassifierModelMetadata modelMetadata = new TwdTransitionClassifierModelMetadata(boatClass);
         return modelMetadata;
     }
 
     @Override
-    public TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata> getNewClassifierModel(
-            TwdTransitionModelMetadata contextSpecificModelMetadata) {
+    public TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> getNewClassifierModel(
+            TwdTransitionClassifierModelMetadata contextSpecificModelMetadata) {
         BoatClass boatClass = contextSpecificModelMetadata.getBoatClass();
-        TwdTransitionModelMetadata modelMetadata = createModelMetadata(boatClass);
-        TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata> classificationModel = new NeuralNetworkClassifier<>(
+        TwdTransitionClassifierModelMetadata modelMetadata = createModelMetadata(boatClass);
+        TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classificationModel = new NeuralNetworkClassifier<>(
                 modelMetadata);
         return classificationModel;
     }
 
     @Override
-    public List<TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata>> getAllTrainableClassifierModels(
-            TwdTransitionModelMetadata contextSpecificModelMetadata) {
-        List<TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata>> classifiers = new ArrayList<>();
+    public List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> getAllTrainableClassifierModels(
+            TwdTransitionClassifierModelMetadata contextSpecificModelMetadata) {
+        List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> classifiers = new ArrayList<>();
         // classifiers.add(new GradientBoostingManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
         // classifiers.add(new LDAManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
         // classifiers.add(new LogisticRegressionManeuverClassifier(maneuverFeatures, boatClass,
@@ -44,10 +44,10 @@ public class TwdTransitionClassifierModelFactory
     }
 
     @Override
-    public List<TwdTransitionModelMetadata> getAllValidContextSpecificModelMetadataCandidates(
-            TwdTransitionModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
+    public List<TwdTransitionClassifierModelMetadata> getAllValidContextSpecificModelMetadataCandidates(
+            TwdTransitionClassifierModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
         BoatClass boatClass = contextSpecificModelMetadataWithMaxFeatures.getBoatClass();
-        List<TwdTransitionModelMetadata> modelMetadataCandidates = new ArrayList<>();
+        List<TwdTransitionClassifierModelMetadata> modelMetadataCandidates = new ArrayList<>();
         modelMetadataCandidates.add(createModelMetadata(null));
         if (boatClass != null) {
             modelMetadataCandidates.add(createModelMetadata(boatClass));

@@ -2,6 +2,8 @@ package com.sap.sailing.windestimation.classifier;
 
 import java.io.Serializable;
 
+import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+
 public class ModelMetadata<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>> implements Serializable {
 
     private static final long serialVersionUID = 6920073254335476342L;

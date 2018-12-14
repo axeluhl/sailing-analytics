@@ -3,11 +3,11 @@ package com.sap.sailing.windestimation.classifier.maneuver;
 import java.util.Arrays;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.model.store.ContextType;
 
-public class ManeuverModelMetadata extends ContextSpecificModelMetadata<ManeuverForEstimation> {
+public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadata<ManeuverForEstimation> {
 
     private static final long serialVersionUID = -7074647974723150672L;
     private final ManeuverFeatures maneuverFeatures;
@@ -15,7 +15,7 @@ public class ManeuverModelMetadata extends ContextSpecificModelMetadata<Maneuver
     protected final int[] indexToManeuverTypeOrdinalMapping;
     private final int numberOfSupportedManeuverTypes;
 
-    public ManeuverModelMetadata(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
+    public ManeuverClassifierModelMetadata(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
             ManeuverTypeForInternalClassification... orderedSupportedTargetValues) {
         super(ContextType.MANEUVER);
         this.maneuverFeatures = maneuverFeatures;
@@ -75,7 +75,7 @@ public class ManeuverModelMetadata extends ContextSpecificModelMetadata<Maneuver
             return false;
         if (getClass() != obj.getClass())
             return false;
-        ManeuverModelMetadata other = (ManeuverModelMetadata) obj;
+        ManeuverClassifierModelMetadata other = (ManeuverClassifierModelMetadata) obj;
         if (boatClass == null) {
             if (other.boatClass != null)
                 return false;

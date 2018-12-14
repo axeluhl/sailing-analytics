@@ -1,7 +1,7 @@
 package com.sap.sailing.windestimation.classifier.smile;
 
-import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.PreprocessingConfig.PreprocessingConfigBuilder;
+import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 
 import smile.classification.RandomForest;
 
@@ -16,8 +16,7 @@ public class RandomForestClassifier<InstanceType, T extends ContextSpecificModel
 
     @Override
     protected RandomForest trainInternalModel(double[][] x, int[] y) {
-        return new RandomForest(x, y, 50,
-                getModelMetadata().getContextSpecificModelMetadata().getNumberOfInputFeatures());
+        return new RandomForest(x, y, 50, getContextSpecificModelMetadata().getNumberOfInputFeatures());
     }
 
 }

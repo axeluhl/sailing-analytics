@@ -1,7 +1,7 @@
 package com.sap.sailing.windestimation.classifier.smile;
 
-import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.PreprocessingConfig.PreprocessingConfigBuilder;
+import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 
 import smile.classification.NaiveBayes;
 
@@ -16,8 +16,8 @@ public class NaiveBayesClassifier<InstanceType, T extends ContextSpecificModelMe
 
     @Override
     protected NaiveBayes trainInternalModel(double[][] x, int[] y) {
-        int numberOfInputFeatures = getModelMetadata().getContextSpecificModelMetadata().getNumberOfInputFeatures();
-        int numberOfClasses = getModelMetadata().getContextSpecificModelMetadata().getNumberOfPossibleTargetValues();
+        int numberOfInputFeatures = getContextSpecificModelMetadata().getNumberOfInputFeatures();
+        int numberOfClasses = getContextSpecificModelMetadata().getNumberOfPossibleTargetValues();
         NaiveBayes nbc = new NaiveBayes(NaiveBayes.Model.MULTINOMIAL, numberOfClasses, numberOfInputFeatures);
         nbc.learn(x, y);
         return nbc;

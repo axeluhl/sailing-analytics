@@ -1,13 +1,9 @@
 package com.sap.sailing.windestimation.classifier;
 
-import java.util.List;
+import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelFactory;
 
-public interface ClassifierModelFactory<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>> {
-
-    TrainableClassificationModel<InstanceType, T> getNewClassifierModel(T contextSpecificModelMetadata);
-
-    List<TrainableClassificationModel<InstanceType, T>> getAllTrainableClassifierModels(T contextSpecificModelMetadata);
-
-    List<T> getAllValidContextSpecificModelMetadataCandidates(T contextSpecificModelMetadataWithMaxFeatures);
+public interface ClassifierModelFactory<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+        extends ModelFactory<InstanceType, T, TrainableClassificationModel<InstanceType, T>> {
 
 }

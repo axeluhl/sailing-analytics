@@ -38,9 +38,9 @@ public class TwdTransitionClassifierTrainer {
         this.classifierModelStore = classifierModelStore;
     }
 
-    public void trainClassifier(TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata> classifierModel,
+    public void trainClassifier(TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel,
             LabelExtraction<TwdTransition> labelExtraction) throws Exception {
-        TwdTransitionModelMetadata modelMetadata = classifierModel.getModelMetadata().getContextSpecificModelMetadata();
+        TwdTransitionClassifierModelMetadata modelMetadata = classifierModel.getContextSpecificModelMetadata();
         List<TwdTransition> twdTransitions = getSuitableManeuvers(modelMetadata);
         LoggingUtil.logInfo("Using " + twdTransitions.size() + " twd transitions instances");
         if (twdTransitions.size() < MIN_TWD_TRANSITIONS_COUNT) {
@@ -83,7 +83,7 @@ public class TwdTransitionClassifierTrainer {
         }
     }
 
-    private List<TwdTransition> getSuitableManeuvers(TwdTransitionModelMetadata modelMetadata)
+    private List<TwdTransition> getSuitableManeuvers(TwdTransitionClassifierModelMetadata modelMetadata)
             throws JsonDeserializationException, ParseException, UnknownHostException {
         BoatClass boatClass = modelMetadata.getBoatClass();
         if (allTwdTransitions == null) {
@@ -113,9 +113,9 @@ public class TwdTransitionClassifierTrainer {
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();
         LoggingUtil.logInfo("### Training classifier for all boat classes");
         LabelledTwdTransitionModelMetadata modelMetadata = new LabelledTwdTransitionModelMetadata(null);
-        List<TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata>> allTrainableModels = classifierModelFactory
+        List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> allTrainableModels = classifierModelFactory
                 .getAllTrainableClassifierModels(modelMetadata);
-        for (TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata> classifierModel : allTrainableModels) {
+        for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel : allTrainableModels) {
             LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
             classifierTrainer.trainClassifier(classifierModel, modelMetadata);
         }
@@ -124,9 +124,9 @@ public class TwdTransitionClassifierTrainer {
             LoggingUtil.logInfo("### Training classifier for boat class " + boatClass);
             LabelledTwdTransitionModelMetadata twdTransitionModelMetadata = new LabelledTwdTransitionModelMetadata(
                     boatClass);
-            List<TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata>> allTrainableClassifierModels = classifierModelFactory
+            List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> allTrainableClassifierModels = classifierModelFactory
                     .getAllTrainableClassifierModels(twdTransitionModelMetadata);
-            for (TrainableClassificationModel<TwdTransition, TwdTransitionModelMetadata> classifierModel : allTrainableClassifierModels) {
+            for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel : allTrainableClassifierModels) {
                 LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
                 classifierTrainer.trainClassifier(classifierModel, twdTransitionModelMetadata);
             }

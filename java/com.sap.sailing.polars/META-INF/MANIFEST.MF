@@ -10,6 +10,7 @@ Export-Package:
  com.sap.sailing.polars.impl,
  com.sap.sailing.polars.mining,
  com.sap.sailing.polars.regression,
+ com.sap.sailing.polars.regression.impl,
  com.sap.sailing.polars.windestimation
 Require-Bundle: 
  com.sap.sailing.domain.common,

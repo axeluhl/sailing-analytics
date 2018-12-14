@@ -6,7 +6,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 
 public class ManeuverClassificationResultMapper implements
-        ClassificationResultMapper<ManeuverForEstimation, ManeuverModelMetadata, ManeuverWithProbabilisticTypeClassification> {
+        ClassificationResultMapper<ManeuverForEstimation, ManeuverClassifierModelMetadata, ManeuverWithProbabilisticTypeClassification> {
 
     private double[] mapManeuverTypesForInternalClassificationToManeuverTypesForClassification(
             double[] likelihoodPerManeuverType, ManeuverCategory maneuverCategory) {
@@ -31,7 +31,7 @@ public class ManeuverClassificationResultMapper implements
 
     @Override
     public ManeuverWithProbabilisticTypeClassification mapToClassificationResult(double[] likelihoods,
-            ManeuverForEstimation maneuver, ManeuverModelMetadata modelMetadata) {
+            ManeuverForEstimation maneuver, ManeuverClassifierModelMetadata modelMetadata) {
         likelihoods = modelMetadata.getLikelihoodsPerManeuverTypeOrdinal(likelihoods);
         likelihoods = mapManeuverTypesForInternalClassificationToManeuverTypesForClassification(likelihoods,
                 maneuver.getManeuverCategory());

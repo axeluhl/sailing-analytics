@@ -5,7 +5,7 @@ import com.sap.sailing.windestimation.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.data.LabelledTwdTransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 
-public class LabelledTwdTransitionModelMetadata extends TwdTransitionModelMetadata
+public class LabelledTwdTransitionModelMetadata extends TwdTransitionClassifierModelMetadata
         implements LabelExtraction<TwdTransition> {
 
     private static final long serialVersionUID = 8198288811779220L;

@@ -2,9 +2,12 @@ package com.sap.sailing.windestimation.model.store;
 
 import java.io.Serializable;
 
-public interface PersistableModel extends Serializable {
+import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+
+public interface PersistableModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+        extends Serializable {
 
     PersistenceSupport getPersistenceSupport();
 
-    ContextType getContextType();
+    T getContextSpecificModelMetadata();
 }

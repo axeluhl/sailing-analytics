@@ -20,7 +20,8 @@ Require-Bundle: org.eclipse.osgi;bundle-version="3.10.1",
  com.sap.sailing.polars,
  org.apache.commons.io,
  com.sap.sse.replication,
- slf4j.api
+ slf4j.api,
+ org.apache.commons.math
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.windestimation

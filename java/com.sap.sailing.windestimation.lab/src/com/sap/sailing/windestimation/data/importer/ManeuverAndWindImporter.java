@@ -196,9 +196,19 @@ public class ManeuverAndWindImporter {
 
     private void parseWindData(String regattaName, String trackedRaceName, ImportStatistics importStatistics,
             JSONObject resultJson) {
-        if (resultJson.containsKey(RaceWindJsonSerializer.WIND_SOURCES)) {
+        JSONArray windSourcesJson = (JSONArray) resultJson.get(RaceWindJsonSerializer.WIND_SOURCES);
+        if (windSourcesJson != null) {
             raceWithWindSourcesPersistenceManager.add(regattaName, trackedRaceName, resultJson);
+            long windFixesCount = 0;
+            for (Object windSourceObj : windSourcesJson) {
+                JSONArray windFixesJson = (JSONArray) ((JSONObject) windSourceObj).get(RaceWindJsonSerializer.FIXES);
+                windFixesCount += windFixesJson.size();
+            }
+            LoggingUtil.logInfo(
+                    "Imported " + windFixesCount + " wind fixes from " + windSourcesJson.size() + " wind sources");
             importStatistics.racesWithHighQualityWindData++;
+        } else {
+            LoggingUtil.logInfo("No high quality wind fixes contained");
         }
     }
 
@@ -210,7 +220,7 @@ public class ManeuverAndWindImporter {
                 .getNewCompetitorTrackWithEstimationDataJsonDeserializer();
         List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracksWithEstimationData = new ArrayList<>();
         WindQuality windQuality = WindQuality
-                .values()[(int)((long) resultJson.get(CompetitorTrackWithEstimationDataJsonSerializer.WIND_QUALITY))];
+                .values()[(int) ((long) resultJson.get(CompetitorTrackWithEstimationDataJsonSerializer.WIND_QUALITY))];
         for (Object competitorTrackJson : (JSONArray) resultJson
                 .get(CompetitorTrackWithEstimationDataJsonSerializer.BYCOMPETITOR)) {
             JSONObject competitorTrack = (JSONObject) competitorTrackJson;
