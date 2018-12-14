@@ -88,7 +88,8 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
         json.put(MARK_PASSING, maneuver.isMarkPassing());
         if (maneuver instanceof LabelledManeuverForEstimation) {
             LabelledManeuverForEstimation labelledManeuver = (LabelledManeuverForEstimation) maneuver;
-            json.put(MANEUVER_TYPE, labelledManeuver.getManeuverType().name());
+            json.put(MANEUVER_TYPE,
+                    labelledManeuver.getManeuverType() == null ? null : labelledManeuver.getManeuverType().name());
             json.put(WIND_SPEED, labelledManeuver.getWind().getKnots());
             json.put(WIND_COURSE, labelledManeuver.getWind().getBearing().getDegrees());
         }

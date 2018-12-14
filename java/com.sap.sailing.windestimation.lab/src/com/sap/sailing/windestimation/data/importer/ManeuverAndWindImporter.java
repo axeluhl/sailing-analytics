@@ -57,7 +57,9 @@ public class ManeuverAndWindImporter {
     public static final String REST_API_REGATTAS_PATH = "/regattas";
     public static final String REST_API_RACES_PATH = "/races";
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
-    public static final String REST_API_WIND_DATA_PATH = "/highQualityWind";
+    public static final String REST_API_WIND_DATA_PATH = "/highQualityWindFixes";
+    private final String startFromRegattaName = null;
+    private final String startFromRegattaRace = null;
     private final RaceWithCompleteManeuverCurvePersistenceManager completeManeuverCurvePersistanceManager;
     private final RaceWithManeuverForDataAnalysisPersistenceManager maneuverForDataAnalysisPersistenceManager;
     private final RaceWithManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager;
@@ -66,9 +68,7 @@ public class ManeuverAndWindImporter {
     private final LabelledManeuverForEstimationTransformer maneuverForEstimationTransformer;
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
     private final ManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
-    private boolean skipRace = true;
-    private final String startFromRegattaName = "KW 2016 International - 29er";
-    private final String startFromRegattaRace = "F4 Silver (29er)";
+    private boolean skipRace;
 
     public ManeuverAndWindImporter() throws UnknownHostException {
         this.completeManeuverCurvePersistanceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
@@ -210,7 +210,7 @@ public class ManeuverAndWindImporter {
                 .getNewCompetitorTrackWithEstimationDataJsonDeserializer();
         List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracksWithEstimationData = new ArrayList<>();
         WindQuality windQuality = WindQuality
-                .values()[(int) resultJson.get(CompetitorTrackWithEstimationDataJsonSerializer.WIND_QUALITY)];
+                .values()[(int)((long) resultJson.get(CompetitorTrackWithEstimationDataJsonSerializer.WIND_QUALITY))];
         for (Object competitorTrackJson : (JSONArray) resultJson
                 .get(CompetitorTrackWithEstimationDataJsonSerializer.BYCOMPETITOR)) {
             JSONObject competitorTrack = (JSONObject) competitorTrackJson;

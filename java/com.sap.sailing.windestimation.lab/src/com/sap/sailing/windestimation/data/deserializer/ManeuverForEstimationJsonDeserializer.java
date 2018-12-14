@@ -80,8 +80,9 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
                 scaledSpeedBefore, scaledSpeedAfter, boatClass, markPassing, relativeBearingToNextMarkBeforeInDegrees,
                 relativeBearingToNextMarkAfterInDegrees, regattaName);
         if (object.containsKey(ManeuverForEstimationJsonSerializer.WIND_SPEED)) {
-            ManeuverTypeForClassification maneuverType = ManeuverTypeForClassification
-                    .valueOf((String) object.get(ManeuverForEstimationJsonSerializer.MANEUVER_TYPE));
+            String maneuverTypeStr = (String) object.get(ManeuverForEstimationJsonSerializer.MANEUVER_TYPE);
+            ManeuverTypeForClassification maneuverType = maneuverTypeStr == null ? null
+                    : ManeuverTypeForClassification.valueOf(maneuverTypeStr);
             Double windSpeedInKnots = (Double) object.get(ManeuverForEstimationJsonSerializer.WIND_SPEED);
             Double windCourse = (Double) object.get(ManeuverForEstimationJsonSerializer.WIND_COURSE);
             maneuver = new LabelledManeuverForEstimation(maneuver.getManeuverTimePoint(),

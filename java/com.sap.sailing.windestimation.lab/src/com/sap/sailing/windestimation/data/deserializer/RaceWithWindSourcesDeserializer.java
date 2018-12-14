@@ -38,7 +38,7 @@ public class RaceWithWindSourcesDeserializer implements JsonDeserializer<RaceWit
             JSONObject windSourceJson = (JSONObject) windSourceObj;
             WindSourceMetadata windSourceMetadata = windSourceMetadataDeserializer.deserialize(windSourceJson);
             WindSourceType windSourceType = WindSourceType
-                    .values()[(int) windSourceJson.get(RaceWindJsonSerializer.TYPE)];
+                    .valueOf((String) windSourceJson.get(RaceWindJsonSerializer.TYPE));
             JSONArray windFixesJson = (JSONArray) object.get(RaceWindJsonSerializer.FIXES);
             List<Wind> windFixes = new ArrayList<>(windFixesJson.size());
             for (Object windObj : windFixesJson) {
@@ -49,7 +49,8 @@ public class RaceWithWindSourcesDeserializer implements JsonDeserializer<RaceWit
             WindSourceWithFixes windSource = new WindSourceWithFixes(windSourceMetadata, windSourceType, windFixes);
             windSources.add(windSource);
         }
-        RaceWithWindSources raceWithWindSources = new RaceWithWindSources(regattaName, raceName, raceMetadata, windSources);
+        RaceWithWindSources raceWithWindSources = new RaceWithWindSources(regattaName, raceName, raceMetadata,
+                windSources);
         return raceWithWindSources;
     }
 

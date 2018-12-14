@@ -54,7 +54,7 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
         BasicDBObject dbObject = new BasicDBObject();
         dbObject.put(RaceWithEstimationDataDeserializer.REGATTA_NAME, regattaName);
         dbObject.put(RaceWithEstimationDataDeserializer.TRACKED_RACE_NAME, trackedRaceName);
-        dbObject.put(RaceWithEstimationDataDeserializer.WIND_QUALITY, windQuality);
+        dbObject.put(RaceWithEstimationDataDeserializer.WIND_QUALITY, windQuality.name());
         dbObject.put(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS, dbCompetitorTracks);
         DBCollection races = getDb().getCollection(getCollectionName());
         races.insert(dbObject);

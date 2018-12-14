@@ -29,7 +29,7 @@ public class RaceWithEstimationDataDeserializer<T> implements JsonDeserializer<R
     public RaceWithEstimationData<T> deserialize(JSONObject object) throws JsonDeserializationException {
         String regattaName = (String) object.get(REGATTA_NAME);
         String raceName = (String) object.get(TRACKED_RACE_NAME);
-        WindQuality windQuality = WindQuality.values()[(int) object.get(WIND_QUALITY)];
+        WindQuality windQuality = WindQuality.valueOf((String) object.get(WIND_QUALITY));
         JSONArray competitorTracks = (JSONArray) object.get(COMPETITOR_TRACKS);
         List<CompetitorTrackWithEstimationData<T>> competitorTracksWithEstimationData = new ArrayList<>(
                 competitorTracks.size());
