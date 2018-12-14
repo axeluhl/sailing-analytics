@@ -23,6 +23,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.shared.android,
  com.sap.sailing.domain.racelogtrackingadapter,
  com.sap.sailing.server,
+ com.sap.sailing.server.interface,
  com.sap.sailing.server.testsupport,
  com.sap.sailing.domain.persistence,
  com.sap.sse.filestorage

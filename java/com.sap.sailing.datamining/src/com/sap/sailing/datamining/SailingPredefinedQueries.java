@@ -19,7 +19,7 @@ import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrieva
 import com.sap.sailing.datamining.impl.components.TrackedLegRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Distance;
 import com.sap.sse.datamining.shared.data.AverageWithStats;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;

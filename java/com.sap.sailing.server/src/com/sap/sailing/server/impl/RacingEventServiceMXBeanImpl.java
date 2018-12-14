@@ -1,7 +1,7 @@
 package com.sap.sailing.server.impl;
 
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class RacingEventServiceMXBeanImpl implements RacingEventServiceMXBean {
     private final RacingEventService racingEventService;

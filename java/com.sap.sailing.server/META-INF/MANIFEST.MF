@@ -39,9 +39,11 @@ Require-Bundle: com.sap.sailing.domain,
  org.apache.shiro.core;bundle-version="1.2.2",
  javax.servlet;bundle-version="3.1.0",
  com.sap.sse.mail,
- org.eclipse.orbit.mongodb;bundle-version="3.2.2"
+ org.eclipse.orbit.mongodb;bundle-version="3.2.2",
+ com.sap.sailing.server.interface;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
+ com.sap.sailing.server.anniversary,
  com.sap.sailing.server.impl;
   x-friends:="com.sap.sailing.mongodb.test,
    com.sap.sailing.server.test,
@@ -54,7 +56,6 @@ Export-Package: com.sap.sailing.server,
    com.sap.sailing.domain.test",
  com.sap.sailing.server.impl.preferences.model,
  com.sap.sailing.server.masterdata,
- com.sap.sailing.server.operationaltransformation,
  com.sap.sailing.server.operationaltransformation.racelog,
  com.sap.sailing.server.security,
  com.sap.sailing.server.simulation,

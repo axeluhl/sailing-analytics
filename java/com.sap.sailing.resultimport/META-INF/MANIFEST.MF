@@ -13,7 +13,7 @@ Export-Package: com.sap.sailing.resultimport,
 Import-Package: com.sap.sailing.competitorimport,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain.persistence,
- com.sap.sailing.server,
+ com.sap.sailing.server.interfaces,
  org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker;version="1.5.1"
 Require-Bundle: com.sap.sse.common

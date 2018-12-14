@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.server,
+ com.sap.sailing.server.interface,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sse.mongodb,
  com.sap.sailing.domain.swisstimingadapter,

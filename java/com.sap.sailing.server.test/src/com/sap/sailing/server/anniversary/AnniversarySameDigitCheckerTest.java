@@ -6,8 +6,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator.AnniversaryChecker;
 import com.sap.sailing.server.anniversary.checker.SameDigitChecker;
+import com.sap.sailing.server.interfaces.AnniversaryRaceDeterminator.AnniversaryChecker;
 
 public class AnniversarySameDigitCheckerTest {
 

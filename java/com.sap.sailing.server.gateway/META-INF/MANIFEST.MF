@@ -61,7 +61,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.geocoding,
  com.googlecode.java-diff-utils,
  com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0",
- org.eclipse.orbit.mongodb;bundle-version="3.2.2"
+ org.eclipse.orbit.mongodb;bundle-version="3.2.2",
+ com.sap.sailing.server.interface;bundle-version="1.0.0"
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,

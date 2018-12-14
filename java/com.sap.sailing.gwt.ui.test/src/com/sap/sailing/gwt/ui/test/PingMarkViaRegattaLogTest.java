@@ -20,7 +20,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class PingMarkViaRegattaLogTest {
     private SailingServiceImplMock sailingService;
