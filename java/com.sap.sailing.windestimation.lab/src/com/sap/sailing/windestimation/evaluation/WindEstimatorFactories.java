@@ -6,10 +6,10 @@ import com.sap.sailing.windestimation.PolarsFittingBasedWindEstimationComponentI
 import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl;
 import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl.ManeuverClassificationsAggregatorImplementation;
 import com.sap.sailing.windestimation.WindEstimationComponent;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifiersCache;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstimationTransformer;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 

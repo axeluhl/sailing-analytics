@@ -4,28 +4,26 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.sap.sailing.windestimation.classifier.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 
 public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
 
-    private final ModelStore classifierModelStore;
-    private final ModelFactory<InstanceType, T, ModelType> classifierModelFactory;
+    private final ModelStore modelStore;
+    private final ModelFactory<InstanceType, T, ModelType> modelFactory;
 
-    public ModelLoader(ModelStore classifierModelStore,
-            ModelFactory<InstanceType, T, ModelType> classifierModelFactory) {
-        this.classifierModelStore = classifierModelStore;
-        this.classifierModelFactory = classifierModelFactory;
+    public ModelLoader(ModelStore modelStore, ModelFactory<InstanceType, T, ModelType> modelFactory) {
+        this.modelStore = modelStore;
+        this.modelFactory = modelFactory;
     }
 
-    public ModelType loadBestClassifierModel(T contextSpecificModelMetadataWithMaxFeatures) {
-        List<T> modelMetadataCandidates = classifierModelFactory
+    public ModelType loadBestModel(T contextSpecificModelMetadataWithMaxFeatures) {
+        List<T> modelMetadataCandidates = modelFactory
                 .getAllValidContextSpecificModelMetadataCandidates(contextSpecificModelMetadataWithMaxFeatures);
         List<ModelType> loadedModels = new ArrayList<>();
         for (T modelMetadata : modelMetadataCandidates) {
-            ModelType model = classifierModelFactory.getNewClassifierModel(modelMetadata);
+            ModelType model = modelFactory.getNewModel(modelMetadata);
             try {
-                model = classifierModelStore.loadPersistedState(model);
+                model = modelStore.loadPersistedState(model);
                 if (model != null && model.hasSupportForProvidedFeatures()) {
                     loadedModels.add(model);
                 }
@@ -37,10 +35,10 @@ public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<In
             return null;
         }
 
-        Iterator<ModelType> loadedClassifiersIterator = loadedModels.iterator();
-        ModelType bestModel = loadedClassifiersIterator.next();
-        while (loadedClassifiersIterator.hasNext()) {
-            ModelType otherModel = loadedClassifiersIterator.next();
+        Iterator<ModelType> loadedModelsIterator = loadedModels.iterator();
+        ModelType bestModel = loadedModelsIterator.next();
+        while (loadedModelsIterator.hasNext()) {
+            ModelType otherModel = loadedModelsIterator.next();
             if (bestModel.getTestScore() < otherModel.getTestScore()) {
                 bestModel = otherModel;
             }

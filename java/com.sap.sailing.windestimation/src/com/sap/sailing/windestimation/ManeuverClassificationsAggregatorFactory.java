@@ -16,10 +16,10 @@ import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRangeBasedTr
 import com.sap.sailing.windestimation.aggregator.hmm.ManeuverSequenceGraph;
 import com.sap.sailing.windestimation.aggregator.outlierremoval.MeanBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.aggregator.outlierremoval.NeighborBasedOutlierRemovalWindEstimator;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithEstimatedType;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculatorImpl;
 
 public class ManeuverClassificationsAggregatorFactory {

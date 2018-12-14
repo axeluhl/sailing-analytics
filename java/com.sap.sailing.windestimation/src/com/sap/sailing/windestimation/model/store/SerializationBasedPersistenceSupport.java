@@ -7,7 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.windestimation.classifier.ModelPersistenceException;
+import com.sap.sailing.windestimation.model.ModelPersistenceException;
 
 public class SerializationBasedPersistenceSupport implements PersistenceSupport {
 

@@ -4,9 +4,9 @@ import java.util.List;
 
 public interface ModelFactory<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
 
-    ModelType getNewClassifierModel(T contextSpecificModelMetadata);
+    ModelType getNewModel(T contextSpecificModelMetadata);
 
-    List<ModelType> getAllTrainableClassifierModels(T contextSpecificModelMetadata);
+    List<ModelType> getAllTrainableModels(T contextSpecificModelMetadata);
 
     List<T> getAllValidContextSpecificModelMetadataCandidates(T contextSpecificModelMetadataWithMaxFeatures);
 

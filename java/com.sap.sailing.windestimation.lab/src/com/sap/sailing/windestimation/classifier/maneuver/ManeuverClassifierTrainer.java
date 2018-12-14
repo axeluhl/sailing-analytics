@@ -13,11 +13,14 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.windestimation.classifier.LabelExtraction;
-import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.TransformedManeuversPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
+import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelFactory;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelMetadata;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.store.ContextType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
@@ -121,7 +124,7 @@ public class ManeuverClassifierTrainer {
             LabelledManeuverModelMetadata maneuverModelMetadata = new LabelledManeuverModelMetadata(maneuverFeatures,
                     null, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
             List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> allTrainableModels = classifierModelFactory
-                    .getAllTrainableClassifierModels(maneuverModelMetadata);
+                    .getAllTrainableModels(maneuverModelMetadata);
             for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classifierModel : allTrainableModels) {
                 LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
                 classifierTrainer.trainClassifier(classifierModel, maneuverModelMetadata);
@@ -136,7 +139,7 @@ public class ManeuverClassifierTrainer {
                 LabelledManeuverModelMetadata maneuverModelMetadata = new LabelledManeuverModelMetadata(
                         maneuverFeatures, boatClass, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
                 List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> allTrainableClassifierModels = classifierModelFactory
-                        .getAllTrainableClassifierModels(maneuverModelMetadata);
+                        .getAllTrainableModels(maneuverModelMetadata);
                 for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classifierModel : allTrainableClassifierModels) {
                     LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
                     classifierTrainer.trainClassifier(classifierModel, maneuverModelMetadata);

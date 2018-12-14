@@ -3,9 +3,9 @@ package com.sap.sailing.windestimation.aggregator.clustering;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.windestimation.ManeuverClassificationImpl;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 public class ManeuverClassificationForClusteringImpl extends ManeuverClassificationImpl {
 

@@ -6,8 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import com.sap.sailing.windestimation.classifier.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.TrainableModel;
 
 public class FileSystemModelStore implements ModelStore {
@@ -20,7 +20,7 @@ public class FileSystemModelStore implements ModelStore {
         this.destinationFolder = destinationFolder;
     }
 
-    private File getFileForClassifier(PersistenceSupport trainedModel, ContextType contextType) {
+    private File getFileForModel(PersistenceSupport trainedModel, ContextType contextType) {
         StringBuilder filePath = new StringBuilder();
         filePath.append(destinationFolder);
         filePath.append(File.separator);
@@ -39,14 +39,14 @@ public class FileSystemModelStore implements ModelStore {
     public <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
             ModelType newModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        File classifierFile = getFileForClassifier(persistenceSupport,
+        File modelFile = getFileForModel(persistenceSupport,
                 newModel.getContextSpecificModelMetadata().getContextType());
-        if (classifierFile.exists()) {
-            try (FileInputStream input = new FileInputStream(classifierFile)) {
+        if (modelFile.exists()) {
+            try (FileInputStream input = new FileInputStream(modelFile)) {
                 @SuppressWarnings("unchecked")
                 ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(input);
                 if (!newModel.getContextSpecificModelMetadata().equals(loadedModel.getContextSpecificModelMetadata())) {
-                    throw new ModelPersistenceException("The configuration of the loaded classifier is: "
+                    throw new ModelPersistenceException("The configuration of the loaded model is: "
                             + loadedModel.getContextSpecificModelMetadata() + ". \nExpected: "
                             + newModel.getContextSpecificModelMetadata());
                 }
@@ -61,7 +61,7 @@ public class FileSystemModelStore implements ModelStore {
     @Override
     public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
-        try (FileOutputStream output = new FileOutputStream(getFileForClassifier(persistenceSupport,
+        try (FileOutputStream output = new FileOutputStream(getFileForModel(persistenceSupport,
                 trainedModel.getContextSpecificModelMetadata().getContextType()))) {
             persistenceSupport.saveToStream(output);
         } catch (IOException e) {
@@ -72,10 +72,10 @@ public class FileSystemModelStore implements ModelStore {
     @Override
     public <T extends PersistableModel<?, ?>> void delete(T newModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        File classifierFile = getFileForClassifier(persistenceSupport,
+        File modelFile = getFileForModel(persistenceSupport,
                 newModel.getContextSpecificModelMetadata().getContextType());
         try {
-            Files.deleteIfExists(classifierFile.toPath());
+            Files.deleteIfExists(modelFile.toPath());
         } catch (IOException e) {
             throw new ModelPersistenceException(e);
         }

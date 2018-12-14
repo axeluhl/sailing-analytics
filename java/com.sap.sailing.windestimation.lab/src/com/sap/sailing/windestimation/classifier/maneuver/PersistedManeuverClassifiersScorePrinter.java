@@ -12,11 +12,14 @@ import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.classifier.ModelPersistenceException;
-import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
+import com.sap.sailing.windestimation.model.ModelPersistenceException;
+import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelFactory;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelMetadata;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
 import com.sap.sailing.windestimation.util.LoggingUtil;
@@ -40,7 +43,7 @@ public class PersistedManeuverClassifiersScorePrinter {
             LabelledManeuverModelMetadata maneuverModelMetadata = new LabelledManeuverModelMetadata(maneuverFeatures,
                     null, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
             List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> classifierModels = classifierModelFactory
-                    .getAllTrainableClassifierModels(maneuverModelMetadata);
+                    .getAllTrainableModels(maneuverModelMetadata);
             for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classifierModel : classifierModels) {
                 try {
                     classifierModel = classifierModelStore.loadPersistedState(classifierModel);
@@ -53,7 +56,7 @@ public class PersistedManeuverClassifiersScorePrinter {
             for (BoatClass boatClass : allBoatClasses) {
                 maneuverModelMetadata = new LabelledManeuverModelMetadata(maneuverFeatures, boatClass,
                         ManeuverClassifierModelFactory.orderedSupportedTargetValues);
-                classifierModels = classifierModelFactory.getAllTrainableClassifierModels(maneuverModelMetadata);
+                classifierModels = classifierModelFactory.getAllTrainableModels(maneuverModelMetadata);
                 for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classifierModel : classifierModels) {
                     try {
                         classifierModel = classifierModelStore.loadPersistedState(classifierModel);

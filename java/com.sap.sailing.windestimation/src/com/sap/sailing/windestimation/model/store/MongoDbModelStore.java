@@ -12,8 +12,8 @@ import com.mongodb.MongoException;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
-import com.sap.sailing.windestimation.classifier.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.TrainableModel;
 
 public class MongoDbModelStore implements ModelStore {
@@ -47,7 +47,7 @@ public class MongoDbModelStore implements ModelStore {
                     ContextSpecificModelMetadata<InstanceType> loadedModelMetadata = loadedModel
                             .getContextSpecificModelMetadata();
                     if (!requestedModelMetadata.equals(loadedModelMetadata)) {
-                        throw new ModelPersistenceException("The configuration of the loaded classifier is: "
+                        throw new ModelPersistenceException("The configuration of the loaded model is: "
                                 + loadedModelMetadata + ". \nExpected: " + requestedModelMetadata);
                     }
                     return loadedModel;

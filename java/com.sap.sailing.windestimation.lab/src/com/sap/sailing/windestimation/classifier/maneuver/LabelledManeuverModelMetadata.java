@@ -4,6 +4,9 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelMetadata;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverTypeForInternalClassification;
 
 public class LabelledManeuverModelMetadata extends ManeuverClassifierModelMetadata
         implements LabelExtraction<ManeuverForEstimation> {

@@ -5,29 +5,29 @@ import com.sap.sailing.windestimation.model.store.ModelStore;
 
 public abstract class AbstractModelCache<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
 
-    private final ShortTimeAfterLastHitCache<T, ModelType> classifierCache;
-    private final ModelLoader<InstanceType, T, ModelType> classifierLoader;
+    private final ShortTimeAfterLastHitCache<T, ModelType> modelCache;
+    private final ModelLoader<InstanceType, T, ModelType> modelLoader;
 
-    public AbstractModelCache(ModelStore classifierModelStore, long preserveLoadedClassifiersMillis,
-            ModelFactory<InstanceType, T, ModelType> classifierModelFactory) {
-        this.classifierLoader = new ModelLoader<>(classifierModelStore, classifierModelFactory);
-        this.classifierCache = new ShortTimeAfterLastHitCache<>(preserveLoadedClassifiersMillis,
-                contextSpecificModelMetadata -> loadClassifierModel(contextSpecificModelMetadata));
+    public AbstractModelCache(ModelStore modelStore, long preserveLoadedModelsMillis,
+            ModelFactory<InstanceType, T, ModelType> modelFactory) {
+        this.modelLoader = new ModelLoader<>(modelStore, modelFactory);
+        this.modelCache = new ShortTimeAfterLastHitCache<>(preserveLoadedModelsMillis,
+                contextSpecificModelMetadata -> loadModel(contextSpecificModelMetadata));
     }
 
-    private ModelType loadClassifierModel(T contextSpecificModelMetadata) {
-        ModelType bestClassifierModel = classifierLoader.loadBestClassifierModel(contextSpecificModelMetadata);
-        return bestClassifierModel;
+    private ModelType loadModel(T contextSpecificModelMetadata) {
+        ModelType bestModel = modelLoader.loadBestModel(contextSpecificModelMetadata);
+        return bestModel;
     }
 
-    public ModelType getBestClassifier(T contextSpecificModelMetadata) {
-        return classifierCache.getValue(contextSpecificModelMetadata);
+    public ModelType getBestModel(T contextSpecificModelMetadata) {
+        return modelCache.getValue(contextSpecificModelMetadata);
     }
 
-    public ModelType getBestClassifier(InstanceType instance) {
+    public ModelType getBestModel(InstanceType instance) {
         T modelMetadata = getContextSpecificModelMetadata(instance);
-        ModelType bestClassifierModel = getBestClassifier(modelMetadata);
-        return bestClassifierModel;
+        ModelType bestModel = getBestModel(modelMetadata);
+        return bestModel;
     }
 
     public abstract T getContextSpecificModelMetadata(InstanceType instance);

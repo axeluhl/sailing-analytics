@@ -12,12 +12,14 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.windestimation.classifier.LabelExtraction;
-import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.data.LabelledTwdTransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.importer.TwdTransitionImporter;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
+import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassifierModelFactory;
+import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassifierModelMetadata;
 import com.sap.sailing.windestimation.model.store.ContextType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
@@ -114,7 +116,7 @@ public class TwdTransitionClassifierTrainer {
         LoggingUtil.logInfo("### Training classifier for all boat classes");
         LabelledTwdTransitionModelMetadata modelMetadata = new LabelledTwdTransitionModelMetadata(null);
         List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> allTrainableModels = classifierModelFactory
-                .getAllTrainableClassifierModels(modelMetadata);
+                .getAllTrainableModels(modelMetadata);
         for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel : allTrainableModels) {
             LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
             classifierTrainer.trainClassifier(classifierModel, modelMetadata);
@@ -125,7 +127,7 @@ public class TwdTransitionClassifierTrainer {
             LabelledTwdTransitionModelMetadata twdTransitionModelMetadata = new LabelledTwdTransitionModelMetadata(
                     boatClass);
             List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> allTrainableClassifierModels = classifierModelFactory
-                    .getAllTrainableClassifierModels(twdTransitionModelMetadata);
+                    .getAllTrainableModels(twdTransitionModelMetadata);
             for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel : allTrainableClassifierModels) {
                 LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
                 classifierTrainer.trainClassifier(classifierModel, twdTransitionModelMetadata);

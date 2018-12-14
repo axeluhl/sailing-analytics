@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
 import com.sap.sailing.windestimation.aggregator.advancedhmm.AdvancedManeuverGraphGenerator.AdvancedManeuverGraphComponents;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithEstimatedType;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 /**
  * 

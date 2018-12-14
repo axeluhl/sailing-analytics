@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelBase;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNodeTransitionProbabilitiesCalculator;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 public class AdvancedGraphLevel extends GraphLevelBase {
 

@@ -1,7 +1,7 @@
 package com.sap.sailing.windestimation.model.store;
 
-import com.sap.sailing.windestimation.classifier.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.TrainableModel;
 
 public interface ModelStore {

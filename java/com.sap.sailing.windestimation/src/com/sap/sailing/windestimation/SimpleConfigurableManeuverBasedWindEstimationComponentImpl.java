@@ -2,11 +2,11 @@ package com.sap.sailing.windestimation;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifiersCache;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.preprocessing.RacePreprocessingPipeline;
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;

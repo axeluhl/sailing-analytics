@@ -3,7 +3,7 @@ package com.sap.sailing.windestimation.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
 
 public class ManeuverUtil {
 

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 
 import smile.validation.ConfusionMatrix;
 

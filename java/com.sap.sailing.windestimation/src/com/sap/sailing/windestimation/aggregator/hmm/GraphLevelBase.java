@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverTypeForInternalClassification;
-import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverTypeForInternalClassification;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 /**
  * 
