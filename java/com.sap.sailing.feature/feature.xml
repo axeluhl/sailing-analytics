@@ -389,13 +389,6 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
-         id="com.sap.sailing.datamining.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="com.sap.sailing.grib"
          download-size="0"
          install-size="0"
@@ -454,6 +447,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.server.interface"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.datamining.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
