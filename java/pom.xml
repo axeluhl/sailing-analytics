@@ -78,6 +78,7 @@
       </activation>
       <modules>
         <module>com.sap.sse</module>
+        <module>com.sap.sse.apacheservicemixfragment</module>
         <module>com.sap.sse.test</module>
         <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
         <module>com.sap.sailing.routeconverterjava11extension</module>

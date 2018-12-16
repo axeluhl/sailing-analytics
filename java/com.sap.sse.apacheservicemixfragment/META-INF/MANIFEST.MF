@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Jaxbdependencyfragment
-Bundle-SymbolicName: com.sap.sse.jersey.jaxbdependencyfragment
+Bundle-Name: Apacheservicemixfragment
+Bundle-SymbolicName: com.sap.sse.apacheservicemixfragment
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Fragment-Host: com.sun.jersey
-Automatic-Module-Name: com.sap.sse.jersey.jaxbdependencyfragment
+Fragment-Host: org.apache.servicemix.bundles.zxing;bundle-version="3.1.0"
+Automatic-Module-Name: com.sap.sse.apacheservicemixfragment
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sun.xml.bind.jaxb-impl;bundle-version="2.3.1",
  jaxb-api;bundle-version="2.3.1"
