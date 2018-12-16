@@ -42,7 +42,7 @@
     Can we move the system property -Dmongo.dbName to "parameters.mongodb"? If so the IP of the host would be the same for all
     profiles. -->
     <parameters.common>
-      -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
+      -Dosgi.java.profile=file://${project.basedir}/java/target/configuration/JavaSE-11.profile -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
     </parameters.common>
     <parameters.vm-settings>
       -ea -Xmx1024m -XX:+UseG1GC
