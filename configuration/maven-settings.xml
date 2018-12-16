@@ -29,7 +29,7 @@
         </parameters.proxy>
         <!-- Change the configuration file to the one you like to use for the tests. -->
         <parameters.integration-tests>
-          -Dselenium.test.environment.configuration=ci-test-environment.xml -Dmongo.dbName=winddbTest -DspatialWind=true
+          -Dosgi.java.profile=file://${session.executionRootDirectory}/java/target/configuration/JavaSE-11.profile -Dselenium.test.environment.configuration=ci-test-environment.xml -Dmongo.dbName=winddbTest -DspatialWind=true
         </parameters.integration-tests>
       </properties>
     </profile>
