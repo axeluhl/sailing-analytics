@@ -76,6 +76,9 @@
           <name>!ldi.releaseBuild</name>
         </property>
       </activation>
+      <properties>
+        <with.not.android.relevant>true</with.not.android.relevant>
+      </properties>
       <modules>
         <module>com.sap.sse</module>
         <module>com.sap.sse.apacheservicemixfragment</module>
@@ -246,14 +249,26 @@
     </build>
   </profile>
   <profile>
+      <id>no-more-javaee-in-jdk</id>
+      <activation>
+        <jdk>[11.0,14.0)</jdk>
+      </activation>
+      <properties>
+        <no.more.javaee.in.jdk>true</no.more.javaee.in.jdk>
+      </properties>
+  </profile>
+  <profile>
       <!-- This profile activates the addition of those JavaEE bundles to the target platform
            for Tycho that have been removed from JavaSE-11 if not building for Android -->
       <id>with-java11-non-android-relevant</id>
       <activation>
-        <jdk>[11.0,14.0)</jdk>
         <property>
-          <name>!ldi.releaseBuild</name>
+          <name>no.more.javaee.in.jdk</name>
+	  <value>true</value>
         </property>
+	<property>
+	  <name>with.not.android.relevant</name>
+	  <value>true</value>
       </activation>
     <build>
       <plugins>
