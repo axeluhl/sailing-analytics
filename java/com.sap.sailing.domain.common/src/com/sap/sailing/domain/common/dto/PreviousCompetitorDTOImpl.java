@@ -2,10 +2,8 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 
@@ -171,8 +169,4 @@ public class PreviousCompetitorDTOImpl extends NamedSecuredObjectDTO implements 
         return new TypeRelativeObjectIdentifier(getId().toString());
     }
 
-    @Override
-    public HasPermissions getType() {
-        return SecuredDomainType.COMPETITOR;
-    }
 }

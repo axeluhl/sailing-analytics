@@ -2,7 +2,6 @@ package com.sap.sse.security.shared.dto;
 
 import java.io.Serializable;
 
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
@@ -17,7 +16,6 @@ public class SecurityInformationDTO implements SecuredDTO, Serializable {
 
     private AccessControlListDTO accessControlList;
     private OwnershipDTO ownership;
-    private HasPermissions permissionType;
     private TypeRelativeObjectIdentifier typeRelativeObjectIdentifier;
 
     @Override
@@ -49,12 +47,4 @@ public class SecurityInformationDTO implements SecuredDTO, Serializable {
         this.typeRelativeObjectIdentifier = typeRelativeObjectIdentifier;
    }
 
-    @Override
-    public HasPermissions getType() {
-        return permissionType;
-    }
-
-    public void setType(final HasPermissions permissionType) {
-         this.permissionType = permissionType;
-    }
 }

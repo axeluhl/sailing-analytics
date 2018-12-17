@@ -9,10 +9,8 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
@@ -174,11 +172,6 @@ public class EventDTO extends EventBaseDTO implements SecuredDTO {
     @Override
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return new TypeRelativeObjectIdentifier(getId().toString());
-    }
-
-    @Override
-    public HasPermissions getType() {
-        return SecuredDomainType.EVENT;
     }
 
 }

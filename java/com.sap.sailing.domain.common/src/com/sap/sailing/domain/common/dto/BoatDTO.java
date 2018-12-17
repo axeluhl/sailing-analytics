@@ -3,10 +3,8 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.WithID;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
@@ -123,11 +121,6 @@ public class BoatDTO extends NamedSecuredObjectDTO implements WithID, Serializab
     @Override
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return new TypeRelativeObjectIdentifier(idAsString);
-    }
-
-    @Override
-    public HasPermissions getType() {
-        return SecuredDomainType.BOAT;
     }
 
 }

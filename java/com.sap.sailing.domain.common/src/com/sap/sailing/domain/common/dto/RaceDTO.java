@@ -2,8 +2,6 @@ package com.sap.sailing.domain.common.dto;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
@@ -122,11 +120,6 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
     @Override
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return this.securityInformation.getTypeRelativeObjectIdentifier();
-    }
-
-    @Override
-    public HasPermissions getType() {
-        return SecuredDomainType.TRACKED_RACE;
     }
 
 }
