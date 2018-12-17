@@ -98,7 +98,7 @@ public class WildcardPermissionEncoder implements PermissionStringEncoder<Wildca
             firstPassResult[i] = encodeAsPermissionPart(strings[i]);
         }
         final String concatenatedFirstPassResult = Util.join(WildcardPermission.PART_DIVIDER_TOKEN, firstPassResult);
-        return encodeAsPermissionPart(concatenatedFirstPassResult);
+        return concatenatedFirstPassResult;
     }
 
     @Override
