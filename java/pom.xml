@@ -253,9 +253,9 @@
       <activation>
         <jdk>[11.0,14.0)</jdk>
       </activation>
-      <properties>
+      <property>
         <no.more.javaee.in.jdk>true</no.more.javaee.in.jdk>
-      </properties>
+      </property>
   </profile>
   <profile>
       <!-- This profile activates the addition of those JavaEE bundles to the target platform
