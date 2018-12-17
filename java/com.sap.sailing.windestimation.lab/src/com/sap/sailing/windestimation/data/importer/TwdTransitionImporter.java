@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.data.importer;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
@@ -86,32 +87,33 @@ public class TwdTransitionImporter {
             List<ManeuverWithProbabilisticTypeClassification> sortedManeuvers, String regattaName) {
         IntersectedWindRangeBasedTransitionProbabilitiesCalculator intersectedWindRangeBasedTransitionProbabilitiesCalculator = new IntersectedWindRangeBasedTransitionProbabilitiesCalculator();
         SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator = new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator();
-        GraphLevel firstGraphLevel = null, lastGraphLevel = null;
         List<TwdTransition> result = new ArrayList<>(sortedManeuvers.size()
                 * ManeuverTypeForClassification.values().length * ManeuverTypeForClassification.values().length);
-        for (ManeuverWithProbabilisticTypeClassification maneuver : sortedManeuvers) {
-            GraphLevel newManeuverNodesLevel = new GraphLevel(maneuver,
-                    intersectedWindRangeBasedTransitionProbabilitiesCalculator);
-            if (firstGraphLevel == null) {
-                firstGraphLevel = newManeuverNodesLevel;
-                lastGraphLevel = newManeuverNodesLevel;
-            } else {
-                lastGraphLevel.appendNextManeuverNodesLevel(newManeuverNodesLevel);
-                Duration duration = lastGraphLevel.getManeuver().getManeuverTimePoint()
-                        .until(newManeuverNodesLevel.getManeuver().getManeuverTimePoint());
-                Distance distance = lastGraphLevel.getManeuver().getManeuverPosition()
-                        .getDistance(newManeuverNodesLevel.getManeuver().getManeuverPosition());
-                for (GraphNode previousNode : lastGraphLevel.getLevelNodes()) {
-                    if (previousNode.getManeuverType() == ((LabelledManeuverForEstimation) lastGraphLevel.getManeuver())
+        int maneuverIndex = 0;
+        for (ManeuverWithProbabilisticTypeClassification previousManeuver : sortedManeuvers) {
+            for (ListIterator<ManeuverWithProbabilisticTypeClassification> iterator = sortedManeuvers
+                    .listIterator(++maneuverIndex); iterator.hasNext();) {
+                ManeuverWithProbabilisticTypeClassification currentManeuver = iterator.next();
+                GraphLevel previousLevel = new GraphLevel(previousManeuver,
+                        intersectedWindRangeBasedTransitionProbabilitiesCalculator);
+                GraphLevel currentLevel = new GraphLevel(currentManeuver,
+                        intersectedWindRangeBasedTransitionProbabilitiesCalculator);
+                previousLevel.appendNextManeuverNodesLevel(currentLevel);
+                Duration duration = previousManeuver.getManeuver().getManeuverTimePoint()
+                        .until(currentManeuver.getManeuver().getManeuverTimePoint());
+                Distance distance = previousManeuver.getManeuver().getManeuverPosition()
+                        .getDistance(currentManeuver.getManeuver().getManeuverPosition());
+                for (GraphNode previousNode : previousLevel.getLevelNodes()) {
+                    if (previousNode.getManeuverType() == ((LabelledManeuverForEstimation) previousLevel.getManeuver())
                             .getManeuverType()) {
                         WindCourseRange previousWindCourseRange = simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
-                                .getWindCourseRangeForManeuverType(lastGraphLevel.getManeuver(),
+                                .getWindCourseRangeForManeuverType(previousManeuver.getManeuver(),
                                         previousNode.getManeuverType());
-                        Bearing bearingToPreviusManeuver = newManeuverNodesLevel.getManeuver().getManeuverPosition()
-                                .getBearingGreatCircle(lastGraphLevel.getManeuver().getManeuverPosition());
-                        for (GraphNode currentNode : newManeuverNodesLevel.getLevelNodes()) {
+                        Bearing bearingToPreviusManeuver = currentManeuver.getManeuver().getManeuverPosition()
+                                .getBearingGreatCircle(previousManeuver.getManeuver().getManeuverPosition());
+                        for (GraphNode currentNode : currentLevel.getLevelNodes()) {
                             WindCourseRange currentWindCourseRange = simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
-                                    .getWindCourseRangeForManeuverType(newManeuverNodesLevel.getManeuver(),
+                                    .getWindCourseRangeForManeuverType(currentManeuver.getManeuver(),
                                             currentNode.getManeuverType());
                             Bearing bearingToPreviousManeuverMinusTwd = bearingToPreviusManeuver
                                     .getDifferenceTo(
@@ -120,23 +122,22 @@ public class TwdTransitionImporter {
                             double twdChangeDegrees = previousWindCourseRange.intersect(currentWindCourseRange)
                                     .getViolationRange();
                             double intersectedTwdChangeDegrees = intersectedWindRangeBasedTransitionProbabilitiesCalculator
-                                    .mergeWindRangeAndGetTransitionProbability(previousNode, lastGraphLevel,
-                                            currentNode, newManeuverNodesLevel)
+                                    .mergeWindRangeAndGetTransitionProbability(previousNode, previousLevel, currentNode,
+                                            currentLevel)
                                     .getA().getViolationRange();
                             boolean correct = currentNode
-                                    .getManeuverType() == ((LabelledManeuverForEstimation) newManeuverNodesLevel
-                                            .getManeuver()).getManeuverType();
+                                    .getManeuverType() == ((LabelledManeuverForEstimation) currentLevel.getManeuver())
+                                            .getManeuverType();
+                            boolean testDataset = regattaName.contains("2018");
                             LabelledTwdTransition labelledTwdTransition = new LabelledTwdTransition(distance, duration,
-                                    newManeuverNodesLevel.getManeuver().getBoatClass(),
                                     new DegreeBearingImpl(twdChangeDegrees),
                                     new DegreeBearingImpl(intersectedTwdChangeDegrees),
                                     bearingToPreviousManeuverMinusTwd, correct, previousNode.getManeuverType(),
-                                    currentNode.getManeuverType(), regattaName);
+                                    currentNode.getManeuverType(), testDataset);
                             result.add(labelledTwdTransition);
                         }
                     }
                 }
-                lastGraphLevel = newManeuverNodesLevel;
             }
         }
         return result;

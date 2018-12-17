@@ -125,8 +125,8 @@ public class ManeuverAndWindImporter {
         LoggingUtil.logInfo("Import statistics: \n\t" + importStatistics.regattasCount + " regattas\n\t"
                 + importStatistics.racesCount + " races\n\t" + importStatistics.competitorTracksCount
                 + " competitor tracks\n\t" + importStatistics.maneuversCount
-                + " complete maneuver curves with estimation data\n\t" + importStatistics.errors
-                + " races with high quality wind data\n\t" + importStatistics.racesWithHighQualityWindData
+                + " complete maneuver curves with estimation data\n\t" + importStatistics.racesWithHighQualityWindData
+                + " races with high quality wind data\n\t" + importStatistics.errors
                 + " ingored races due to error\n--------------------------------------------\nTime passed: "
                 + duration.toHours() + "h " + (duration.toMinutes() - duration.toHours() * 60) + "m "
                 + (duration.get(ChronoUnit.SECONDS) % 60) + "s");

@@ -21,7 +21,8 @@ import com.sap.sse.common.TimePoint;
 
 public class DurationBasedTwdTransitionImporter {
 
-    public static final int SECONDS_TO_AGGREGATE = 10;
+    private static final double SECONDS_TO_AGGREGATE = 10;
+    private static final double SECONDS_PASSED_FACTOR_FOR_AGGREGATION = 0.1;
 
     public static void main(String[] args) throws UnknownHostException {
         LoggingUtil.logInfo("###################\r\nDuration based TWD transitions Import started");
@@ -34,22 +35,30 @@ public class DurationBasedTwdTransitionImporter {
             RaceWithWindSources race = iterator.next();
             LoggingUtil.logInfo("Processing race " + race.getRaceName() + " of regatta " + race.getRegattaName());
             List<SingleDimensionBasedTwdTransition> entries = new ArrayList<>();
+            TimePoint timePointOfLastConsideredWindFix = null;
             for (WindSourceWithFixes windSource : race.getWindSources()) {
                 int windFixIndex = 0;
                 for (Wind windFix : windSource.getWindFixes()) {
-                    TimePoint timePointOfLastConsideredWindFix = windFix.getTimePoint();
-                    for (ListIterator<Wind> otherWindFixesIterator = windSource.getWindFixes()
-                            .listIterator(++windFixIndex); otherWindFixesIterator.hasNext();) {
-                        Wind otherWindFix = otherWindFixesIterator.next();
-                        double secondsPassed = timePointOfLastConsideredWindFix.until(otherWindFix.getTimePoint())
-                                .asSeconds();
-                        if (secondsPassed >= SECONDS_TO_AGGREGATE) {
-                            double absTwdChange = windFix.getBearing().getDifferenceTo(otherWindFix.getBearing()).abs()
-                                    .getDegrees();
-                            SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
-                                    secondsPassed, absTwdChange);
-                            entries.add(entry);
-                            timePointOfLastConsideredWindFix = otherWindFix.getTimePoint();
+                    if (timePointOfLastConsideredWindFix == null || timePointOfLastConsideredWindFix
+                            .until(windFix.getTimePoint()).asSeconds() >= SECONDS_TO_AGGREGATE) {
+                        timePointOfLastConsideredWindFix = windFix.getTimePoint();
+                        TimePoint timePointOfLastConsideredOtherWindFix = timePointOfLastConsideredWindFix;
+                        for (ListIterator<Wind> otherWindFixesIterator = windSource.getWindFixes()
+                                .listIterator(++windFixIndex); otherWindFixesIterator.hasNext();) {
+                            Wind otherWindFix = otherWindFixesIterator.next();
+                            double secondsPassedSinceLastConsideredWindFix = timePointOfLastConsideredOtherWindFix
+                                    .until(otherWindFix.getTimePoint()).asSeconds();
+                            double secondsPassed = windFix.getTimePoint().until(otherWindFix.getTimePoint())
+                                    .asSeconds();
+                            if (secondsPassedSinceLastConsideredWindFix >= SECONDS_TO_AGGREGATE
+                                    + secondsPassed * SECONDS_PASSED_FACTOR_FOR_AGGREGATION) {
+                                double absTwdChange = windFix.getBearing().getDifferenceTo(otherWindFix.getBearing())
+                                        .abs().getDegrees();
+                                SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
+                                        secondsPassed, absTwdChange);
+                                entries.add(entry);
+                                timePointOfLastConsideredOtherWindFix = otherWindFix.getTimePoint();
+                            }
                         }
                     }
                 }

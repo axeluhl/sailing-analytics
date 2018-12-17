@@ -46,7 +46,7 @@ public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceMa
             TimePoint startTimePoint, TimePoint endTimePoint, double toleranceInSeconds) {
         double maxStartTime = endTimePoint.asMillis() + toleranceInSeconds * 1000;
         double maxEndTime = startTimePoint.asMillis() - toleranceInSeconds * 1000;
-        String query = "{$and [{'" + RaceWindJsonSerializer.START_TIME_POINT + "': {$lte: " + maxStartTime + "}}, {'"
+        String query = "{$and: [{'" + RaceWindJsonSerializer.START_TIME_POINT + "': {$lte: " + maxStartTime + "}}, {'"
                 + RaceWindJsonSerializer.END_TIME_POINT + "': {$gte: " + maxEndTime + "}}]}";
         return getIterator(query);
     }

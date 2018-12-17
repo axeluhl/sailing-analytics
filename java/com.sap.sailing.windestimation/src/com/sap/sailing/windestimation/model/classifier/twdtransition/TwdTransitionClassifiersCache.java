@@ -1,6 +1,5 @@
 package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.classifier.AbstractClassifiersCache;
 import com.sap.sailing.windestimation.model.store.ModelStore;
@@ -19,9 +18,7 @@ public class TwdTransitionClassifiersCache extends
 
     @Override
     public TwdTransitionClassifierModelMetadata getContextSpecificModelMetadata(TwdTransition twdTransition) {
-        BoatClass boatClass = enableBoatClassInfo ? twdTransition.getBoatClass() : null;
-        TwdTransitionClassifierModelMetadata twdTrasitionModelMetadata = new TwdTransitionClassifierModelMetadata(
-                boatClass);
+        TwdTransitionClassifierModelMetadata twdTrasitionModelMetadata = new TwdTransitionClassifierModelMetadata(null);
         return twdTrasitionModelMetadata;
     }
 

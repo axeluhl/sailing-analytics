@@ -24,6 +24,9 @@ public class DistanceBasedTwdTransitionImporter {
 
     public static final int METERS_TO_AGGREGATE = 100;
     public static final int TOLERANCE_SECONDS = 5;
+    public static final int SAMPLING_SECONDS = 60;
+    public static final int MAX_DISTANCE_METERS = 1000000;
+    public static final int MIN_DISTANCE_METERS = 10;
 
     public static void main(String[] args) throws UnknownHostException {
         LoggingUtil.logInfo("###################\r\nDistance based TWD transitions Import started");
@@ -49,63 +52,72 @@ public class DistanceBasedTwdTransitionImporter {
                 for (ListIterator<WindSourceWithFixes> otherWindSources = windSources
                         .listIterator(++windSourceIndex); otherWindSources.hasNext();) {
                     WindSourceWithFixes otherWindSource = otherWindSources.next();
-                    Iterator<Wind> fixesIterator = windSource.getWindFixes().iterator();
-                    Iterator<Wind> otherFixesIterator = otherWindSource.getWindFixes().iterator();
-                    Wind previousOtherFix = otherFixesIterator.next();
-                    Wind previousFix = fixesIterator.next();
-                    Wind currentFix = null;
-                    Wind currentOtherFix = null;
-                    TimePoint timePointOfLastTransition = null;
-                    double bestDuration = previousFix.getTimePoint().until(previousOtherFix.getTimePoint()).abs()
-                            .asSeconds();
-                    do {
-                        while (fixesIterator.hasNext()) {
-                            currentFix = fixesIterator.next();
-                            double duration = previousOtherFix.getTimePoint().until(currentFix.getTimePoint()).abs()
-                                    .asSeconds();
-                            if (bestDuration > duration) {
-                                bestDuration = duration;
-                                previousFix = currentFix;
-                            } else {
-                                break;
+                    double distanceBetweenWindSourcesInMeters = windSource.getWindSourceMetadata().getFirstPosition()
+                            .getDistance(otherWindSource.getWindSourceMetadata().getFirstPosition()).getMeters();
+                    if (distanceBetweenWindSourcesInMeters <= MAX_DISTANCE_METERS
+                            && distanceBetweenWindSourcesInMeters >= MIN_DISTANCE_METERS) {
+                        Iterator<Wind> fixesIterator = windSource.getWindFixes().iterator();
+                        Iterator<Wind> otherFixesIterator = otherWindSource.getWindFixes().iterator();
+                        Wind previousOtherFix = otherFixesIterator.next();
+                        Wind previousFix = fixesIterator.next();
+                        Wind currentFix = null;
+                        Wind currentOtherFix = null;
+                        TimePoint timePointOfLastTransition = null;
+                        double bestDuration = previousFix.getTimePoint().until(previousOtherFix.getTimePoint()).abs()
+                                .asSeconds();
+                        do {
+                            while (fixesIterator.hasNext()) {
+                                currentFix = fixesIterator.next();
+                                double duration = previousOtherFix.getTimePoint().until(currentFix.getTimePoint()).abs()
+                                        .asSeconds();
+                                if (bestDuration > duration) {
+                                    bestDuration = duration;
+                                    previousFix = currentFix;
+                                } else {
+                                    break;
+                                }
                             }
-                        }
-                        while (otherFixesIterator.hasNext()) {
-                            currentOtherFix = otherFixesIterator.next();
-                            double duration = previousFix.getTimePoint().until(currentOtherFix.getTimePoint()).abs()
-                                    .asSeconds();
-                            if (bestDuration > duration) {
-                                bestDuration = duration;
-                                previousOtherFix = currentOtherFix;
-                            } else {
-                                break;
+                            while (otherFixesIterator.hasNext()) {
+                                currentOtherFix = otherFixesIterator.next();
+                                double duration = previousFix.getTimePoint().until(currentOtherFix.getTimePoint()).abs()
+                                        .asSeconds();
+                                if (bestDuration > duration) {
+                                    bestDuration = duration;
+                                    previousOtherFix = currentOtherFix;
+                                } else {
+                                    break;
+                                }
                             }
-                        }
-                        if (bestDuration <= TOLERANCE_SECONDS) {
-                            TimePoint timePointOfNewTransition = previousFix.getTimePoint()
-                                    .before(previousOtherFix.getTimePoint()) ? previousFix.getTimePoint()
-                                            : previousOtherFix.getTimePoint();
-                            if (timePointOfLastTransition == null || timePointOfLastTransition
-                                    .until(timePointOfNewTransition).asSeconds() > TOLERANCE_SECONDS) {
-                                timePointOfLastTransition = previousFix.getTimePoint()
-                                        .before(previousOtherFix.getTimePoint()) ? previousOtherFix.getTimePoint()
-                                                : previousFix.getTimePoint();
-                                double meters = previousFix.getPosition().getDistance(previousOtherFix.getPosition())
-                                        .getMeters();
-                                double twdChange = previousFix.getBearing()
-                                        .getDifferenceTo(previousOtherFix.getBearing()).abs().getDegrees();
-                                SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(meters,
-                                        twdChange);
-                                entries.add(entry);
+                            if (bestDuration <= TOLERANCE_SECONDS) {
+                                TimePoint timePointOfNewTransition = previousFix.getTimePoint()
+                                        .before(previousOtherFix.getTimePoint()) ? previousFix.getTimePoint()
+                                                : previousOtherFix.getTimePoint();
+                                if (timePointOfLastTransition == null || timePointOfLastTransition
+                                        .until(timePointOfNewTransition).asSeconds() >= SAMPLING_SECONDS) {
+                                    timePointOfLastTransition = previousFix.getTimePoint()
+                                            .before(previousOtherFix.getTimePoint()) ? previousOtherFix.getTimePoint()
+                                                    : previousFix.getTimePoint();
+                                    double meters = previousFix.getPosition()
+                                            .getDistance(previousOtherFix.getPosition()).getMeters();
+                                    double twdChange = previousFix.getBearing()
+                                            .getDifferenceTo(previousOtherFix.getBearing()).abs().getDegrees();
+                                    SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
+                                            meters, twdChange);
+                                    entries.add(entry);
+                                }
                             }
-                        }
-                        previousFix = currentFix;
-                        previousOtherFix = currentOtherFix;
-                    } while (previousFix != null && previousOtherFix != null);
+                            previousFix = fixesIterator.hasNext() ? currentFix : null;
+                            previousOtherFix = otherFixesIterator.hasNext() ? currentOtherFix : null;
+                        } while (previousFix != null && previousOtherFix != null);
+                    }
                 }
             }
-            distanceBasedTwdTransitionPersistenceManager.add(entries);
-            LoggingUtil.logInfo(entries.size() + " TWD transitions imported");
+            if (entries.isEmpty()) {
+                LoggingUtil.logInfo("No TWD transitions to import");
+            } else {
+                distanceBasedTwdTransitionPersistenceManager.add(entries);
+                LoggingUtil.logInfo(entries.size() + " TWD transitions imported");
+            }
         }
         long valuesCount = 0;
         double twdSum = 0.0;

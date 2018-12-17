@@ -176,7 +176,9 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         private void prepareNext() {
             long nextElementNumber = currentElementNumber + 1;
             if (nextElementNumber <= limit) {
-                if (nextElementNumber % (numberOfElements / 100) == 0) {
+                if (numberOfElements >= 100 &&
+                        nextElementNumber %
+                        (numberOfElements / 100) == 0) {
                     LoggingUtil.delete(numberOfCharsDuringLastStatusLog);
                     numberOfCharsDuringLastStatusLog = LoggingUtil
                             .logInfo("Loading element " + nextElementNumber + "/" + numberOfElements + " ("

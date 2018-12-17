@@ -14,7 +14,23 @@ public class TwdTransitionRegressorModelMetadata extends ContextSpecificModelMet
 
     @Override
     public double[] getX(TwdTransition instance) {
-        return new double[] { instance.getDistance().getMeters(), instance.getDuration().asSeconds() };
+        return new double[] { getDistanceValue(instance), getDurationValue(instance) };
+    }
+
+    public double getDurationValue(double[] x) {
+        return x[1];
+    }
+
+    public double getDistanceValue(double[] x) {
+        return x[0];
+    }
+
+    public double getDurationValue(TwdTransition instance) {
+        return instance.getDuration().asSeconds();
+    }
+
+    public double getDistanceValue(TwdTransition instance) {
+        return instance.getDistance().getMeters();
     }
 
     @Override

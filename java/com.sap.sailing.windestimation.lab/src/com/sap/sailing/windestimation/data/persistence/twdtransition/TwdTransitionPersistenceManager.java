@@ -8,7 +8,6 @@ import org.json.simple.JSONObject;
 
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
-import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
@@ -31,7 +30,7 @@ public class TwdTransitionPersistenceManager extends AbstractPersistenceManager<
 
     @Override
     protected JsonDeserializer<TwdTransition> getNewJsonDeserializer() {
-        return new TwdTransitionJsonDeserializer(DomainFactory.INSTANCE);
+        return new TwdTransitionJsonDeserializer();
     }
 
     public void add(TwdTransition twdTransition) {

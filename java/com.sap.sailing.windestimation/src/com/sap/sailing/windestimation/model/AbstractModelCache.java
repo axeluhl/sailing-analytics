@@ -3,7 +3,8 @@ package com.sap.sailing.windestimation.model;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 
-public abstract class AbstractModelCache<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
+public abstract class AbstractModelCache<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>>
+        implements ModelCache<InstanceType, ModelType> {
 
     private final ShortTimeAfterLastHitCache<T, ModelType> modelCache;
     private final ModelLoader<InstanceType, T, ModelType> modelLoader;
@@ -15,7 +16,7 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
                 contextSpecificModelMetadata -> loadModel(contextSpecificModelMetadata));
     }
 
-    private ModelType loadModel(T contextSpecificModelMetadata) {
+    protected ModelType loadModel(T contextSpecificModelMetadata) {
         ModelType bestModel = modelLoader.loadBestModel(contextSpecificModelMetadata);
         return bestModel;
     }

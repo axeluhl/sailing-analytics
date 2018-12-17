@@ -18,8 +18,6 @@ import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAc
 import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassifierModelFactory;
-import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassifierModelMetadata;
 import com.sap.sailing.windestimation.model.store.ContextType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
@@ -40,7 +38,8 @@ public class TwdTransitionClassifierTrainer {
         this.classifierModelStore = classifierModelStore;
     }
 
-    public void trainClassifier(TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel,
+    public void trainClassifier(
+            TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel,
             LabelExtraction<TwdTransition> labelExtraction) throws Exception {
         TwdTransitionClassifierModelMetadata modelMetadata = classifierModel.getContextSpecificModelMetadata();
         List<TwdTransition> twdTransitions = getSuitableManeuvers(modelMetadata);
@@ -52,7 +51,7 @@ public class TwdTransitionClassifierTrainer {
             List<TwdTransition> trainInstances = new ArrayList<>();
             List<TwdTransition> testInstances = new ArrayList<>();
             for (TwdTransition twdTransition : twdTransitions) {
-                if (((LabelledTwdTransition) twdTransition).getRegattaName().contains("2018")) {
+                if (((LabelledTwdTransition) twdTransition).isTestDataset()) {
                     testInstances.add(twdTransition);
                 } else {
                     trainInstances.add(twdTransition);
