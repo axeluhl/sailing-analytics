@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static com.sap.sse.common.Util.size;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -67,8 +67,8 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -88,13 +88,13 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     private long time = 0;
 
     @Rule
-    public Timeout CreateAndTrackWithRaceLogTestTimeout = new Timeout(3 * 60 * 1000);
+    public Timeout CreateAndTrackWithRaceLogTestTimeout = Timeout.millis(3 * 60 * 1000);
 
     @Before
     public void setup() {
         service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
         sensorFixStore = service.getSensorFixStore();
-        service.getMongoObjectFactory().getDatabase().dropDatabase();
+        service.getMongoObjectFactory().getDatabase().drop();
         author = service.getServerAuthor();
         Series series = new SeriesImpl("series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet), Collections.emptySet(),
                 service);

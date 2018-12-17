@@ -10,7 +10,7 @@ import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.impl.DashboardDispatchContextImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.gwt.ui.server.Activator;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.RequestWrapper;
 import com.sap.sse.gwt.dispatch.servlets.AbstractDispatchServlet;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;

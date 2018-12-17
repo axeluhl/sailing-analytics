@@ -150,6 +150,11 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.server.interface</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.server</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
@@ -160,7 +165,22 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sailing.server.replication</id>
+                  <id>com.sap.sailing.routeconverterjava11extension</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sse.jersey.jaxdependencyfragment</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sse.replication.interfaces</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sse.replication</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>

@@ -18,7 +18,7 @@ import org.junit.rules.Timeout;
 import com.sap.sailing.expeditionconnector.UDPMirror;
 
 public class UDPMirrorTest {
-    @Rule public Timeout TestTimeout = new Timeout(60 * 1000);
+    @Rule public Timeout TestTimeout = Timeout.millis(60 * 1000);
     
     private static final int MIRROR_PORT = 33795;
     private static final int RECEIVING_PORT = 33796;

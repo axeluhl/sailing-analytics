@@ -35,9 +35,9 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.test.TrackBasedTest;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -53,7 +53,7 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
       
@@ -303,8 +303,8 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
 
     private void deleteAllDataFromDatabase() {
         MongoDBService service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
-        service.getDB().getWriteConcern().fsync();
-        service.getDB().dropDatabase();
+        service.getDB().getWriteConcern().getJournal();
+        service.getDB().drop();
     }
 
 }

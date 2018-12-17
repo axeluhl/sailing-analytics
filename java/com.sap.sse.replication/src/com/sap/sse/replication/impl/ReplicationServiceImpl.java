@@ -34,6 +34,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
@@ -796,4 +797,10 @@ public class ReplicationServiceImpl implements ReplicationService {
         return serverUUID;
     }
 
+    @Override
+    public ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname,
+            String exchangeName, int servletPort, int messagingPort, String queueName,
+            Iterable<Replicable<?, ?>> replicables) {
+        return new ReplicationMasterDescriptorImpl(messagingHostname, exchangeName, messagingPort, queueName, hostname, servletPort, replicables);
+    }
 }

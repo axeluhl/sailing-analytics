@@ -27,7 +27,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixStoreTest {
     @Rule
-    public Timeout GPSFixStoreListenerTestTimeout = new Timeout(3 * 1000);
+    public Timeout GPSFixStoreListenerTestTimeout = Timeout.millis(3 * 1000);
     
     @Test
     public void deviceMappingsAndSensorFixStoreShouldNotCauseADeadlock() {

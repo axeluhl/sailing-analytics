@@ -21,7 +21,7 @@ import com.sap.sailing.datamining.test.util.NullProcessor;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.datamining.components.Processor;
 
 public class TestLeaderboardGroupRetrievalProcessor {

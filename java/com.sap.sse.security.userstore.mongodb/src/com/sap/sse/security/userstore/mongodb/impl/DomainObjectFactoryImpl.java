@@ -12,11 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bson.Document;
+import org.bson.types.Binary;
+
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.UserGroupProvider;
@@ -46,18 +47,18 @@ import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
 
-    private final DB db;
+    private final MongoDatabase db;
 
-    public DomainObjectFactoryImpl(DB db) {
+    public DomainObjectFactoryImpl(MongoDatabase db) {
         this.db = db;
     }
     
     @Override
     public Iterable<AccessControlListAnnotation> loadAllAccessControlLists(UserStore userStore) {
         ArrayList<AccessControlListAnnotation> result = new ArrayList<>();
-        DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
+        MongoCollection<org.bson.Document> aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         try {
-            for (DBObject o : aclCollection.find()) {
+            for (Document o : aclCollection.find()) {
                 result.add(loadAccessControlList(o, userStore));
             }
         } catch (Exception e) {
@@ -67,13 +68,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    private AccessControlListAnnotation loadAccessControlList(DBObject aclDBObject, UserStore userStore) {
+    private AccessControlListAnnotation loadAccessControlList(Document aclDBObject, UserStore userStore) {
         final QualifiedObjectIdentifier id = new QualifiedObjectIdentifierImpl((String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name()));
         final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name());
         Iterable<?> dbPermissionMap = ((BasicDBList) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         for (Object dbPermissionMapEntryO : dbPermissionMap) {
-            DBObject dbPermissionMapEntry = (DBObject) dbPermissionMapEntryO;
+            Document dbPermissionMapEntry = (Document) dbPermissionMapEntryO;
             final UUID userGroupKey = (UUID) dbPermissionMapEntry.get(FieldNames.AccessControlList.PERMISSION_MAP_USER_GROUP_ID.name());
             final UserGroup userGroup = userStore.getUserGroup(userGroupKey);
             Set<String> actions = new HashSet<>();
@@ -90,9 +91,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<OwnershipAnnotation> loadAllOwnerships(UserStore userStore) {
         ArrayList<OwnershipAnnotation> result = new ArrayList<>();
-        DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
+        MongoCollection<org.bson.Document> ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
         try {
-            for (DBObject o : ownershipCollection.find()) {
+            for (Document o : ownershipCollection.find()) {
                 result.add(loadOwnership(o, userStore));
             }
         } catch (Exception e) {
@@ -102,7 +103,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    private OwnershipAnnotation loadOwnership(DBObject ownershipDBObject, UserStore userStore) {
+    private OwnershipAnnotation loadOwnership(Document ownershipDBObject, UserStore userStore) {
         final QualifiedObjectIdentifier idOfOwnedObject = new QualifiedObjectIdentifierImpl((String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name()));
         final String displayNameOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
         final String userOwnerName = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
@@ -115,9 +116,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<RoleDefinition> loadAllRoleDefinitions() {
         ArrayList<RoleDefinition> result = new ArrayList<>();
-        DBCollection roleCollection = db.getCollection(CollectionNames.ROLES.name());
+        MongoCollection<org.bson.Document> roleCollection = db.getCollection(CollectionNames.ROLES.name());
         try {
-            for (DBObject o : roleCollection.find()) {
+            for (Document o : roleCollection.find()) {
                 result.add(loadRoleDefinition(o));
             }
         } catch (Exception e) {
@@ -127,7 +128,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    private RoleDefinition loadRoleDefinition(DBObject roleDefinitionDBObject) {
+    private RoleDefinition loadRoleDefinition(Document roleDefinitionDBObject) {
         final String id = (String) roleDefinitionDBObject.get(FieldNames.Role.ID.name());
         final String displayName = (String) roleDefinitionDBObject.get(FieldNames.Role.NAME.name());
         final Set<WildcardPermission> permissions = new HashSet<>();
@@ -140,9 +141,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers() {
         Set<UserGroup> userGroups = new HashSet<>();
-        DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
+        MongoCollection<org.bson.Document> userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
         try {
-            for (DBObject o : userGroupCollection.find()) {
+            for (Document o : userGroupCollection.find()) {
                 final UserGroup userGroup = loadUserGroupWithProxyUsers(o);
                 userGroups.add(userGroup);
             }
@@ -153,7 +154,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return userGroups;
     }
     
-    private UserGroup loadUserGroupWithProxyUsers(DBObject groupDBObject) {
+    private UserGroup loadUserGroupWithProxyUsers(Document groupDBObject) {
         final UUID id = (UUID) groupDBObject.get(FieldNames.UserGroup.ID.name());
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
         Set<User> users = new HashSet<>();
@@ -183,9 +184,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration,
             Map<UUID, UserGroup> userGroups, UserGroupProvider userGroupProvider) throws UserManagementException {
         Map<String, User> result = new HashMap<>();
-        DBCollection userCollection = db.getCollection(CollectionNames.USERS.name());
+        MongoCollection<org.bson.Document> userCollection = db.getCollection(CollectionNames.USERS.name());
         try {
-            for (DBObject o : userCollection.find()) {
+            for (Document o : userCollection.find()) {
                 User userWithProxyRoleUserQualifier = loadUserWithProxyRoleUserQualifiers(o, roleDefinitionsById,
                         defaultTenantForRoleMigration, userGroups, userGroupProvider);
                 result.put(userWithProxyRoleUserQualifier.getName(), userWithProxyRoleUserQualifier);
@@ -231,7 +232,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         {@link Role#getQualifiedForUser() user qualifier} where only the username is set properly to identify the
      *         user in the calling method where ultimately all users will be known.
      */
-    private User loadUserWithProxyRoleUserQualifiers(DBObject userDBObject,
+    private User loadUserWithProxyRoleUserQualifiers(Document userDBObject,
             Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration,
             Map<UUID, UserGroup> tenants, UserGroupProvider userGroupProvider) {
         final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
@@ -249,7 +250,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         boolean rolesMigrated = false; // if a role needs migration, user needs an update in the DB
         if (rolesO != null) {
             for (Object o : rolesO) {
-                final Role role = loadRoleWithProxyUserQualifier((DBObject) o, roleDefinitionsById, tenants);
+                final Role role = loadRoleWithProxyUserQualifier((Document) o, roleDefinitionsById, tenants);
                 if (role != null) {
                     roles.add(role);
                 } else {
@@ -287,7 +288,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
-        BasicDBList permissionsO = (BasicDBList) userDBObject.get(FieldNames.User.PERMISSIONS.name());
+        Iterable<?> permissionsO = (Iterable<?>) userDBObject.get(FieldNames.User.PERMISSIONS.name());
         if (permissionsO != null) {
             for (Object o : permissionsO) {
                 permissions.add((String) o);
@@ -298,7 +299,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final BasicDBList defaultTenantIds = (BasicDBList) userDBObject.get(FieldNames.User.DEFAULT_TENANT_IDS.name());
         if (defaultTenantIds != null) {
             for (Object singleDefaultTenant : defaultTenantIds) {
-                BasicDBObject singleDefaultTenantObj = (BasicDBObject) singleDefaultTenant;
+                Document singleDefaultTenantObj = (Document) singleDefaultTenant;
                 String serverName = singleDefaultTenantObj.getString(FieldNames.User.DEFAULT_TENANT_SERVER.name());
                 UUID groupId = (UUID) singleDefaultTenantObj.get(FieldNames.User.DEFAULT_TENANT_GROUP.name());
                 UserGroup tenantOfGroup = tenants.get(groupId);
@@ -310,7 +311,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
         }
-        DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
+        Document accountsMap = (Document) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
         User result = new UserImpl(name, email, fullName, company, locale,
                 emailValidated == null ? false : emailValidated, passwordResetSecret, validationSecret, defaultTenant,
@@ -331,7 +332,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Role loadRoleWithProxyUserQualifier(DBObject rolesO, Map<UUID, RoleDefinition> roleDefinitionsById,
+    private Role loadRoleWithProxyUserQualifier(Document rolesO, Map<UUID, RoleDefinition> roleDefinitionsById,
             Map<UUID, UserGroup> userGroups) {
         final RoleDefinition roleDefinition = roleDefinitionsById.get(rolesO.get(FieldNames.Role.ID.name()));
         final UUID qualifyingTenantId = (UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name());
@@ -341,24 +342,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return new Role(roleDefinition, qualifyingTenant, proxyQualifyingUser);
     }
 
-    private Map<AccountType, Account> createAccountMapFromdDBObject(DBObject accountsMap) {
+    private Map<AccountType, Account> createAccountMapFromdDBObject(Document accountsMap) {
         Map<AccountType, Account> accounts = new HashMap<>();
-        Map<?, ?> accountsM = (Map<?, ?>) accountsMap.toMap();
-        for (Entry<?, ?> e : accountsM.entrySet()){
+        for (Entry<?, ?> e : accountsMap.entrySet()){
             AccountType type = AccountType.valueOf((String) e.getKey());
-            Account account = createAccountFromDBObject((DBObject) e.getValue(), type);
+            Account account = createAccountFromDBObject((Document) e.getValue(), type);
             accounts.put(type, account);
         }
         return accounts;
     }
 
-    private Account createAccountFromDBObject(DBObject dbAccount, final AccountType type) {
+    private Account createAccountFromDBObject(Document dbAccount, final AccountType type) {
         switch (type) {
         case USERNAME_PASSWORD:
             String name = (String) dbAccount.get(FieldNames.UsernamePassword.NAME.name());
             String saltedPassword = (String) dbAccount.get(FieldNames.UsernamePassword.SALTED_PW.name());
-            byte[] salt = (byte[]) dbAccount.get(FieldNames.UsernamePassword.SALT.name());
-            return new UsernamePasswordAccount(name, saltedPassword, salt);
+            Binary salt = (Binary) dbAccount.get(FieldNames.UsernamePassword.SALT.name());
+            return new UsernamePasswordAccount(name, saltedPassword, salt.getData());
             //TODO [D056866] add other Account-types
         case SOCIAL_USER:
             SocialUserAccount socialUserAccount = new SocialUserAccount();
@@ -374,12 +374,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Map<String, Object> loadSettings() {
         Map<String, Object> result = new HashMap<>();
-        DBCollection settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
+        MongoCollection<org.bson.Document> settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
 
         try {
-            BasicDBObject query = new BasicDBObject();
+            Document query = new Document();
             query.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
-            DBObject settingDBObject = (DBObject) settingsCollection.findOne(query);
+            Document settingDBObject = settingsCollection.find(query).first();
             if (settingDBObject != null) {
                 result = loadSettingMap(settingDBObject);
             }
@@ -397,11 +397,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Map<String, Map<String, String>> loadPreferences() {
         Map<String, Map<String, String>> result = new HashMap<>();
-        DBCollection settingsCollection = db.getCollection(CollectionNames.PREFERENCES.name());
+        MongoCollection<org.bson.Document> settingsCollection = db.getCollection(CollectionNames.PREFERENCES.name());
         try {
             for (Object o : settingsCollection.find()) {
-                DBObject usernameAndPreferencesMap = (DBObject) o;
-                Map<String, String> userMap = loadPreferencesMap((BasicDBList) usernameAndPreferencesMap.get(FieldNames.Preferences.KEYS_AND_VALUES.name()));
+                Document usernameAndPreferencesMap = (Document) o;
+                Map<String, String> userMap = loadPreferencesMap((Iterable<?>) usernameAndPreferencesMap.get(FieldNames.Preferences.KEYS_AND_VALUES.name()));
                 String username = (String) usernameAndPreferencesMap.get(FieldNames.Preferences.USERNAME.name());
                 result.put(username, userMap);
             }
@@ -412,10 +412,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Map<String, String> loadPreferencesMap(BasicDBList preferencesDBObject) {
+    private Map<String, String> loadPreferencesMap(Iterable<?> preferencesDBObject) {
         Map<String, String> result = new HashMap<>();
         for (Object o : preferencesDBObject) {
-            DBObject keyValue = (DBObject) o;
+            Document keyValue = (Document) o;
             String key = (String) keyValue.get(FieldNames.Preferences.KEY.name());
             String value = (String) keyValue.get(FieldNames.Preferences.VALUE.name());
             result.put(key, value);
@@ -423,9 +423,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Map<String, Object> loadSettingMap(DBObject settingDBObject) {
+    private Map<String, Object> loadSettingMap(Document settingDBObject) {
         Map<String, Object> result = new HashMap<>();
-        Map<?, ?> map = ((DBObject) settingDBObject.get(FieldNames.Settings.MAP.name())).toMap();
+        Map<?, ?> map = ((Document) settingDBObject.get(FieldNames.Settings.MAP.name()));
         for (Entry<?, ?> e : map.entrySet()){
             String key = (String) e.getKey();
             Object value = e.getValue();
@@ -437,12 +437,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Map<String, Class<?>> loadSettingTypes() {
         Map<String, Class<?>> result = new HashMap<String, Class<?>>();
-        DBCollection settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
+        MongoCollection<Document> settingsCollection = db.getCollection(CollectionNames.SETTINGS.name());
 
         try {
-            BasicDBObject query = new BasicDBObject();
+            Document query = new Document();
             query.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
-            DBObject settingTypesDBObject = settingsCollection.findOne(query);
+            Document settingTypesDBObject = settingsCollection.find(query).first();
             if (settingTypesDBObject != null) {
                 result = loadSettingTypesMap(settingTypesDBObject);
             }
@@ -457,17 +457,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Map<String, Class<?>> loadSettingTypesMap(DBObject settingTypesDBObject) {
+    private Map<String, Class<?>> loadSettingTypesMap(Document settingTypesDBObject) {
         Map<String, Class<?>> result = new HashMap<>();
-        Map<?, ?> map = ((DBObject) settingTypesDBObject.get(FieldNames.Settings.MAP.name())).toMap();
+        Map<?, ?> map = (Document) settingTypesDBObject.get(FieldNames.Settings.MAP.name());
         for (Entry<?, ?> e : map.entrySet()){
             String key = (String) e.getKey();
             Class<?> value = null;
             try {
                 value = Class.forName((String) e.getValue());
             } catch (ClassNotFoundException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                logger.log(Level.WARNING, "Exception trying to load settings types map", e);
             }
             result.put(key, value);
         }

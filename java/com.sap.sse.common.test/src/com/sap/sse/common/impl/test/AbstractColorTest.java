@@ -11,7 +11,7 @@ import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Triple;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class AbstractColorTest {
 

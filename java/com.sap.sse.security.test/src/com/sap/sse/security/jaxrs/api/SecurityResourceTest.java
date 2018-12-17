@@ -46,7 +46,7 @@ public class SecurityResourceTest {
 
     @Before
     public void setUp() throws UserManagementException, MailException, UserGroupManagementException {
-        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase().dropDatabase();
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase().drop();
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {

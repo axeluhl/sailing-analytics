@@ -7,13 +7,13 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sse.mongodb,
  com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sse.common,
  com.sap.sailing.domain.persistence,
  com.sap.sse,
+ org.eclipse.orbit.mongodb;bundle-version="3.2.2",
  com.sap.sse.security.common
 Export-Package: com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence.impl;x-friends:="com.sap.sailing.domain.swisstimingadapter.test,com.sap.sailing.mongodb.test"

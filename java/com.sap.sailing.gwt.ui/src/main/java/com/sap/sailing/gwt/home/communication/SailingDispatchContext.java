@@ -6,7 +6,7 @@ import java.util.Locale;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sailing.news.EventNewsService;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sse.gwt.dispatch.client.system.DispatchContext;
 import com.sap.sse.security.SecurityService;

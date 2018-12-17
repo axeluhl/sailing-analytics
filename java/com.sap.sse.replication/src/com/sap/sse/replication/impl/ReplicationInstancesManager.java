@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 
 /**
