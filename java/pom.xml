@@ -247,10 +247,13 @@
   </profile>
   <profile>
       <!-- This profile activates the addition of those JavaEE bundles to the target platform
-           for Tycho that have been removed from JavaSE-11 -->
-      <id>with-java11</id>
+           for Tycho that have been removed from JavaSE-11 if not building for Android -->
+      <id>with-java11-non-android-relevant</id>
       <activation>
         <jdk>[11.0,14.0)</jdk>
+        <property>
+          <name>!ldi.releaseBuild</name>
+        </property>
       </activation>
     <build>
       <plugins>
