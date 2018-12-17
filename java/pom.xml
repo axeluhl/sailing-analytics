@@ -271,6 +271,53 @@
     </build>
   </profile>
   <profile>
+      <!-- This profile activates the addition of those JavaEE bundles to the target platform
+           for Tycho that have been removed from JavaSE-11 -->
+      <id>with-java11</id>
+      <activation>
+        <jdk>[11.0,14.0)</jdk>
+      </activation>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>target-platform-configuration</artifactId>
+          <configuration>
+            <dependency-resolution>
+              <extraRequirements>
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>jaxb-api</id>
+                  <versionRange>2.3.1</versionRange>
+                </requirement>
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>com.sun.xml.bind.jaxb-impl</id>
+                  <versionRange>2.3.1</versionRange>
+                </requirement>
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>com.sun.istack.commons-runtime</id>
+                  <versionRange>3.0.7</versionRange>
+                </requirement>
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>javax.xml.stream</id>
+                  <versionRange>0.0.0</versionRange>
+                </requirement>
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>javax.xml.ws</id>
+                  <versionRange>0.0.0</versionRange>
+                </requirement>
+              </extraRequirements>
+            </dependency-resolution>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+  <profile>
     <id>no-debug.with-proxy</id>
     <activation>
       <activeByDefault>true</activeByDefault>
