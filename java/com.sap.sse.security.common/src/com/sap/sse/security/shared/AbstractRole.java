@@ -19,12 +19,7 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
     private RD roleDefinition;
     protected G qualifiedForTenant;
     protected U qualifiedForUser;
-    
-    public static Triple<String, String, String> getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(String roleAsString) {
-        final String[] split = roleAsString.split(QUALIFIER_SEPARATOR);
-        return new Triple<>(split[0], split.length<2?null:split[1], split.length<3?null:split[2]);
-    }
-    
+
     @Deprecated
     protected AbstractRole() {
     } // for GWT serialization only
@@ -63,11 +58,19 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
         return qualifiedForUser;
     }
     
+    public Triple<String, String, String> getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName() {
+        final String roleDefinitionName = roleDefinition == null ? null : roleDefinition.getName();
+        final String tenantQualifierName = qualifiedForTenant == null ? null : qualifiedForTenant.getName();
+        final String userQualifierName = qualifiedForUser == null ? null : qualifiedForUser.getName();
+        return new Triple<>(roleDefinitionName, tenantQualifierName, userQualifierName);
+    }
+
     @Override
     public String toString() {
-        return getName()+((getQualifiedForTenant()!=null || getQualifiedForUser()!= null)?QUALIFIER_SEPARATOR:"")+
-                (getQualifiedForTenant()!=null?getQualifiedForTenant().getName():"")+
-                        (getQualifiedForUser()!=null?(QUALIFIER_SEPARATOR+getQualifiedForUser().getName()):"");
+        return getName()
+                + ((getQualifiedForTenant() != null || getQualifiedForUser() != null) ? QUALIFIER_SEPARATOR : "")
+                + (getQualifiedForTenant() != null ? getQualifiedForTenant().getName() : "")
+                + (getQualifiedForUser() != null ? (QUALIFIER_SEPARATOR + getQualifiedForUser().getName()) : "");
     }
 
     /**
