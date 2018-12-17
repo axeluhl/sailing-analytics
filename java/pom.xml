@@ -238,31 +238,6 @@
                   <id>com.google.gwt.dev</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
-                <requirement>
-                  <type>eclipse-plugin</type>
-                  <id>jaxb-api</id>
-                  <versionRange>2.3.1</versionRange>
-                </requirement>
-                <requirement>
-                  <type>eclipse-plugin</type>
-                  <id>com.sun.xml.bind.jaxb-impl</id>
-                  <versionRange>2.3.1</versionRange>
-                </requirement>
-                <requirement>
-                  <type>eclipse-plugin</type>
-                  <id>com.sun.istack.commons-runtime</id>
-                  <versionRange>3.0.7</versionRange>
-                </requirement>
-                <requirement>
-                  <type>eclipse-plugin</type>
-                  <id>javax.xml.stream</id>
-                  <versionRange>0.0.0</versionRange>
-                </requirement>
-                <requirement>
-                  <type>eclipse-plugin</type>
-                  <id>javax.xml.ws</id>
-                  <versionRange>0.0.0</versionRange>
-                </requirement>
               </extraRequirements>
             </dependency-resolution>
           </configuration>
@@ -282,9 +257,11 @@
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>target-platform-configuration</artifactId>
+          <version>${tycho-version}</version>
           <configuration>
             <dependency-resolution>
               <extraRequirements>
+                <!-- First the bundles that provide those package dropped in JavaSE-11 -->
                 <requirement>
                   <type>eclipse-plugin</type>
                   <id>jaxb-api</id>
@@ -314,6 +291,22 @@
                   <type>eclipse-plugin</type>
                   <id>com.sun.activation.javax.activation</id>
                   <versionRange>1.2.0</versionRange>
+                </requirement>
+                <!-- Then the fragments we need to add that  -->
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>com.sap.sailing.routeconverterjava11extension</id>
+                  <versionRange>0.0.0</versionRange>
+                </requirement>
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>com.sap.sse.jersey.jaxbdependencyfragment</id>
+                  <versionRange>0.0.0</versionRange>
+                </requirement>
+                <requirement>
+                  <type>eclipse-plugin</type>
+                  <id>com.sap.sse.apacheservicemixfragment</id>
+                  <versionRange>0.0.0</versionRange>
                 </requirement>
               </extraRequirements>
             </dependency-resolution>
