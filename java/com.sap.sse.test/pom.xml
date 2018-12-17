@@ -15,13 +15,14 @@
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
+                <version>${tycho-version}</version>
                 <configuration>
                     <dependencies>
                         <dependency>
                             <type>eclipse-plugin</type>
                             <groupId>com.sap.sailing</groupId>
                             <artifactId>com.sap.sse.apacheservicemixfragment</artifactId>
-                            <version>1.0.0</version>
+                            <version>0.0.0</version>
                         </dependency>
                     </dependencies>
                 </configuration>
