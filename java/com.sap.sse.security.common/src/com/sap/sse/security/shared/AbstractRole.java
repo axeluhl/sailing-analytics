@@ -82,7 +82,7 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((qualifiedForTenant == null) ? 0 : qualifiedForTenant.hashCode());
+        result = prime * result + ((qualifiedForTenant == null) ? 0 : qualifiedForTenant.getId().hashCode());
         result = prime * result + ((qualifiedForUser == null) ? 0 : qualifiedForUser.getName().hashCode());
         result = prime * result + ((roleDefinition == null) ? 0 : roleDefinition.hashCode());
         return result;
@@ -106,7 +106,7 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
         if (qualifiedForTenant == null) {
             if (other.qualifiedForTenant != null)
                 return false;
-        } else if (!qualifiedForTenant.equals(other.qualifiedForTenant))
+        } else if (!qualifiedForTenant.getId().equals(other.qualifiedForTenant.getId()))
             return false;
         if (qualifiedForUser == null) {
             if (other.qualifiedForUser != null)
