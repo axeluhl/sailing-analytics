@@ -2,10 +2,10 @@ This page is used to think through the features a Waypoint-inferring mechanism n
 
 ### Scenario 1: Starting a race with no information about Marks and Waypoints. 
 
-WaypointInferrer should detect possible Marks, decide for the PassingInstructions and then store the Waypoint persistent in the race
+WaypointInferrer should detect possible Marks, decide for the PassingInstructions and then store the Waypoint persistent in the race:
 
 * If we decide for a Mark position based on a threeshold number of competitors already passed should we take in consideration the upcoming competitors for the final Mark position and if we do so how can we achieve that?
 
 * First approach is to work only with smartphone tracked races. A check box in Smartphone Tracking connector is needed. Also SailInsight2.0 should have an option to use that feature.
 
-* If that checkbox is checked the inferred marks and waypoints should also appear in CourseLayoutEditor.
+* If that checkbox is checked the inferred marks and waypoints should also appear in CourseLayoutEditor. They can then be updated and/or refined. The EditMarkPositions feature on the RaceMap is then also enabled. 
