@@ -8,3 +8,4 @@ WaypointInferrer should detect possible Marks, decide for the PassingInstruction
 
 * First approach is to work only with smartphone tracked races. A check box in Smartphone Tracking connector is needed. Also SailInsight2.0 should have an option to use that feature.
 
+* If that checkbox is checked the inferred marks and waypoints should also appear in CourseLayoutEditor.
