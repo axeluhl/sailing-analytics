@@ -509,7 +509,7 @@ public class EventsResource extends AbstractSailingServerResource {
         UUID leaderboardGroupId = UUID.randomUUID();
         LeaderboardGroup leaderboardGroup = getSecurityService()
                 .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                        SecuredDomainType.LEADERBOARD_GROUP, leaderboardGroupName,
+                        SecuredDomainType.LEADERBOARD_GROUP, leaderboardGroupId.toString(),
                 leaderboardGroupName, new ActionWithResult<LeaderboardGroup>() {
 
             @Override
