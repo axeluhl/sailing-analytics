@@ -241,7 +241,7 @@ public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements Competit
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return new TypeRelativeObjectIdentifier(idAsString);
     }
 

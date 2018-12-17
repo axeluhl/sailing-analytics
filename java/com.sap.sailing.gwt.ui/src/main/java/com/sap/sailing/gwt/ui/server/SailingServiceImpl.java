@@ -7873,7 +7873,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         final Subject subject = SecurityUtils.getSubject();
         subject.checkPermission(
-                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObject(DefaultActions.CREATE, deviceConfiguration));
+                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForTypeRelativeIdentifier(
+                        DefaultActions.CREATE,
+                        new TypeRelativeObjectIdentifier(ServerInfo.getName(), deviceConfiguration.getName())));
 
         // TODO consider replication
         final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
@@ -7884,7 +7886,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(deviceConfiguration.getIdentifier(),
+        QualifiedObjectIdentifier identifier = deviceConfiguration.getType().getQualifiedObjectIdentifier(deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()));
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier,
                 new ActionWithResult<Void>() {
                     @Override
                     public Void run() throws Exception {

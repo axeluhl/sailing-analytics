@@ -1146,7 +1146,7 @@ public interface TrackedRace
     }
 
     @Override
-    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return getTypeRelativeObjectIdentifier(getRaceIdentifier());
     }
 

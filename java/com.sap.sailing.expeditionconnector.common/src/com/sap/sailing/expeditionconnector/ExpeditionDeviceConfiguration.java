@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sse.ServerInfo;
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -80,17 +79,22 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializ
     }
 
     @Override
+    @Deprecated
     public QualifiedObjectIdentifier getIdentifier() {
         return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
+    /**
+     * Get TypeRelativeObjectIdentifer. Needs a parameter for the servername passed as a String parameter.
+     * 
+     */
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(getName());
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+        return getTypeRelativeObjectIdentifier(params[0], getName());
     }
     
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String name) {
-        return new TypeRelativeObjectIdentifier(ServerInfo.getName(), name);
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String serverName, String name) {
+        return new TypeRelativeObjectIdentifier(serverName, name);
     }
 
     @Override

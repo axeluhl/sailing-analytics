@@ -249,7 +249,7 @@ public interface Regatta
     }
 
     @Override
-    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return getTypeRelativeObjectIdentifier(getName());
     }
 

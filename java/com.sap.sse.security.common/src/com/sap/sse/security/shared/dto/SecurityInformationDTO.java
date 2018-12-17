@@ -41,7 +41,7 @@ public class SecurityInformationDTO implements SecuredDTO, Serializable {
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return typeRelativeObjectIdentifier;
     }
 

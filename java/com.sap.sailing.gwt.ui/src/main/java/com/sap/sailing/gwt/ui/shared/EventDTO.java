@@ -172,7 +172,7 @@ public class EventDTO extends EventBaseDTO implements SecuredDTO {
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return new TypeRelativeObjectIdentifier(getId().toString());
     }
 

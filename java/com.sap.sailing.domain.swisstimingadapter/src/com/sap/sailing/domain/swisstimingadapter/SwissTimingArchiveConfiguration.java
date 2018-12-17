@@ -26,7 +26,7 @@ public interface SwissTimingArchiveConfiguration extends WithQualifiedObjectIden
     }
 
     @Override
-    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return getTypeRelativeObjectIdentifier(getJsonURL());
     }
 

@@ -26,7 +26,6 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -47,6 +46,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -631,7 +631,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         boolean hasPermission = false;
         if (leaderboardName != null
                 && userService.hasPermission(SecuredDomainType.LEADERBOARD.getPermissionForTypeRelativeIdentifier(
-                        DefaultActions.UPDATE, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)))) {
+                        DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(leaderboardName)))) {
             hasPermission = true;
         }
         return hasPermission;

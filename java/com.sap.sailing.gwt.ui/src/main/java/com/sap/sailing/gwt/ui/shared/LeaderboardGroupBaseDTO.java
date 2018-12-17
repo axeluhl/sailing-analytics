@@ -52,7 +52,7 @@ public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements Wi
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return new TypeRelativeObjectIdentifier(id.toString());
     }
 

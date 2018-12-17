@@ -28,7 +28,7 @@ public interface Account extends WithQualifiedObjectIdentifier {
     }
 
     @Override
-    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return getTypeRelativeObjectIdentifier(this);
     }
 

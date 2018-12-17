@@ -384,7 +384,7 @@ public abstract class EventBaseImpl implements EventBase {
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return getTypeRelativeObjectIdentifier(this);
     }
 

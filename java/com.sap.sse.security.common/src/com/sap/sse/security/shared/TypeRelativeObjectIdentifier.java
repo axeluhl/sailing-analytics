@@ -1,15 +1,20 @@
 package com.sap.sse.security.shared;
 
+import java.io.Serializable;
+
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
-public class TypeRelativeObjectIdentifier {
+public class TypeRelativeObjectIdentifier implements Serializable {
+    private static final long serialVersionUID = 118021576560675686L;
 
     private String typeRelativeIdentifer;
-    
+
+    public TypeRelativeObjectIdentifier() {}
+
     public TypeRelativeObjectIdentifier(String... identifers) {
         typeRelativeIdentifer = WildcardPermissionEncoder.encode(identifers);
     }
-    
+
     @Override
     public String toString() {
         return typeRelativeIdentifer;

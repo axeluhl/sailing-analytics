@@ -121,7 +121,7 @@ public class BoatDTO extends NamedSecuredObjectDTO implements WithID, Serializab
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return new TypeRelativeObjectIdentifier(idAsString);
     }
 

@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
@@ -25,6 +24,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
@@ -59,7 +59,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint implements Pr
                             GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
                             AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
                             authorizedContentDecorator.setPermissionToCheck(SecuredDomainType.LEADERBOARD.
-                                    getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
+                                    getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(leaderboardName)));
                             authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
                                 @Override
                                 public Widget get() {

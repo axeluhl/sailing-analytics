@@ -9,7 +9,7 @@ public interface SecuredDTO {
 
     OwnershipDTO getOwnership();
 
-    TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier();
+    TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params);
 
     HasPermissions getType();
 

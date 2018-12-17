@@ -138,7 +138,7 @@ public class BoatImpl extends RenamableImpl implements DynamicBoat {
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return getTypeRelativeObjectIdentifier(this);
     }
 

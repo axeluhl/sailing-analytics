@@ -26,6 +26,7 @@ import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdenti
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -97,9 +98,9 @@ public class Activator implements BundleActivator {
                     final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
                     for (ExpeditionDeviceConfiguration deviceConfiguration : expeditionTrackerFactory
                             .getDeviceConfigurations()) {
-                        QualifiedObjectIdentifier identifier = deviceConfiguration.getIdentifier();
+                        QualifiedObjectIdentifier identifier = deviceConfiguration.getType().getQualifiedObjectIdentifier(deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()));
                         securityService.migrateOwnership(identifier, permissionEncoder.decodePermissionPart(
-                                deviceConfiguration.getTypeRelativeObjectIdentifier().toString()));
+                                deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()).toString()));
                     }
                     securityService
                             .assumeOwnershipMigrated(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getName());

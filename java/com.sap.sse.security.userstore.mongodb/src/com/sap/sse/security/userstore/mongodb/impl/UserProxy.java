@@ -194,7 +194,7 @@ public class UserProxy implements User {
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         throw new UnsupportedOperationException();
     }
 }

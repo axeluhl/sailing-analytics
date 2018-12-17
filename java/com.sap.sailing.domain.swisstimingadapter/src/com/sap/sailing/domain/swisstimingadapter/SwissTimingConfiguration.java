@@ -38,7 +38,7 @@ public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier 
     }
 
     @Override
-    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return getTypeRelativeObjectIdentifier(getJsonURL());
     }
 

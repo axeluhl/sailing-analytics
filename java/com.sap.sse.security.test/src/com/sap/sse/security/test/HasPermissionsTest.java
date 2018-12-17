@@ -78,7 +78,7 @@ public class HasPermissionsTest {
             }
 
             @Override
-            public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+            public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
                 return null;
             }
             

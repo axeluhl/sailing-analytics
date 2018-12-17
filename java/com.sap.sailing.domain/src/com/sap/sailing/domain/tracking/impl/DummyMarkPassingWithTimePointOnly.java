@@ -134,7 +134,7 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             }
 
             @Override
-            public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+            public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
                 return null;
             }
         };

@@ -67,7 +67,7 @@ public class RegattaNameAndRaceName extends RegattaName implements RegattaAndRac
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return getTypeRelativeObjectIdentifier(this);
     }
 

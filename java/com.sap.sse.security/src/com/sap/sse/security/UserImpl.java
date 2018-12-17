@@ -323,7 +323,7 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup> 
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
         return getTypeRelativeObjectIdentifier(this);
     }
 
