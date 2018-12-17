@@ -65,6 +65,11 @@
                 <id>com.sap.sse.jersey.jaxbdependencyfragment</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>com.sap.sse.apacheservicemixfragment</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
             </extraRequirements>
           </dependency-resolution>
         </configuration>
