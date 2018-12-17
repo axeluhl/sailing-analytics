@@ -31,13 +31,13 @@ import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
+import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.tagging.TagDTODeSerializer;
-import com.sap.sailing.server.tagging.TaggingService;
 import com.sap.sailing.server.tagging.TaggingServiceImpl;
 import com.sap.sailing.server.testsupport.SecurityBundleTestWrapper;
 import com.sap.sse.common.TimePoint;
@@ -80,7 +80,7 @@ public class TaggingServiceTest {
     @BeforeClass
     public static void setUpClass()
             throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, UserGroupManagementException {
-        MongoDBService.INSTANCE.getDB().dropDatabase();
+        MongoDBService.INSTANCE.getDB().drop();
         // setup racing service and racelog
         racingService = Mockito.spy(new RacingEventServiceImpl());
         RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(
@@ -111,7 +111,7 @@ public class TaggingServiceTest {
         } catch (UserManagementException e) {
             logger.severe("Could not teardown TaggingServiceTest!");
         }
-        MongoDBService.INSTANCE.getDB().dropDatabase();
+        MongoDBService.INSTANCE.getDB().drop();
     }
 
     @Before

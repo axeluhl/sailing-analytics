@@ -1,7 +1,7 @@
 package com.sap.sailing.server.anniversary;
 
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.OperationWithResult;
 

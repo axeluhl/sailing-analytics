@@ -10,10 +10,10 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -41,10 +41,9 @@ public class StoreAndLoadBoatsTest extends AbstractMongoDBTest {
     }
     
     private void dropBoatCollection() {
-        DB db = getMongoService().getDB();
-        DBCollection boatCollection = db.getCollection(CollectionNames.BOATS.name());
-        boatCollection.setWriteConcern(WriteConcern.SAFE); // ensure that the drop() has happened
-        boatCollection.drop();
+        MongoDatabase db = getMongoService().getDB();
+        MongoCollection<org.bson.Document> boatCollection = db.getCollection(CollectionNames.BOATS.name());
+        boatCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).drop();
     }
     
     @Test

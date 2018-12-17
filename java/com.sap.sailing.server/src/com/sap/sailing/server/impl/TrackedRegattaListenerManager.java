@@ -1,7 +1,7 @@
 package com.sap.sailing.server.impl;
 
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 /**
  * Extended version of {@link TrackedRegattaListener} used in the context of {@link RacingEventService}. That

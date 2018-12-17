@@ -15,7 +15,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlListAnnotation;

@@ -21,7 +21,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class PingMarkViaRegattaLogTest {
     private SailingServiceImplMock sailingService;
@@ -37,7 +37,7 @@ public class PingMarkViaRegattaLogTest {
     
     @Test
     public void testPinging() throws DoesNotHaveRegattaLogException {
-        service.getMongoObjectFactory().getDatabase().dropDatabase();
+        service.getMongoObjectFactory().getDatabase().drop();
         Series series = new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet),
                 Collections.singletonList(columnName), service);
         Regatta regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", 

@@ -70,7 +70,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         userToOwnership = new ConcurrentHashMap<>();
         userGroupToOwnership = new ConcurrentHashMap<>();
         userGroupToAccessControlListAnnotation = new ConcurrentHashMap<>();
-        lockForManagementMappings = new NamedReentrantReadWriteLock("owbnerShipLock", true);
+        lockForManagementMappings = new NamedReentrantReadWriteLock("ownershipLock", true);
 
         this.mongoObjectFactory = mongoObjectFactory;
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {

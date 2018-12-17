@@ -6,16 +6,16 @@ import java.net.UnknownHostException;
 
 import org.junit.Before;
 
-import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 
 public abstract class AbstractMongoDBTest {
     protected final Mongo mongo;
-    protected final DB db;
+    protected final MongoDatabase db;
     private final MongoDBConfiguration dbConfiguration;
     private MongoDBService service;
     
@@ -41,8 +41,8 @@ public abstract class AbstractMongoDBTest {
         assertNotNull(db);
     }
 
-    private void dropAllCollections(DB theDB) throws InterruptedException {
-        db.dropDatabase();
+    private void dropAllCollections(MongoDatabase theDB) throws InterruptedException {
+        db.drop();
     }
 
     protected MongoDBService getMongoService() {

@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -66,7 +66,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     }
     
     @Rule
-    public Timeout TrackedRaceLoadsFixesTestTimeout = new Timeout(3 * 60 * 1000);
+    public Timeout TrackedRaceLoadsFixesTestTimeout = Timeout.millis(3 * 60 * 1000);
 
     @Test
     public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,

@@ -1,0 +1,1 @@
+This page is used to think through the features a Waypoint-inferring mechanism needs to have from a end-to-end perspective.
