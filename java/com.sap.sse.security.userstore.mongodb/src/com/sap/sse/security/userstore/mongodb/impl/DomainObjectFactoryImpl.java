@@ -3,6 +3,7 @@ package com.sap.sse.security.userstore.mongodb.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,7 +16,6 @@ import java.util.logging.Logger;
 import org.bson.Document;
 import org.bson.types.Binary;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Util;
@@ -68,17 +68,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
+    @SuppressWarnings("unchecked")
     private AccessControlListAnnotation loadAccessControlList(Document aclDBObject, UserStore userStore) {
         final QualifiedObjectIdentifier id = new QualifiedObjectIdentifierImpl((String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name()));
         final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name());
-        Iterable<?> dbPermissionMap = ((BasicDBList) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
+        List<Object> dbPermissionMap = ((List<Object>) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         for (Object dbPermissionMapEntryO : dbPermissionMap) {
             Document dbPermissionMapEntry = (Document) dbPermissionMapEntryO;
             final UUID userGroupKey = (UUID) dbPermissionMapEntry.get(FieldNames.AccessControlList.PERMISSION_MAP_USER_GROUP_ID.name());
             final UserGroup userGroup = userStore.getUserGroup(userGroupKey);
             Set<String> actions = new HashSet<>();
-            for (Object o : (BasicDBList) dbPermissionMapEntry.get(FieldNames.AccessControlList.PERMISSION_MAP_ACTIONS.name())) {
+            for (Object o : (List<Object>) dbPermissionMapEntry.get(FieldNames.AccessControlList.PERMISSION_MAP_ACTIONS.name())) {
                 actions.add(o.toString());
             }
             permissionMap.put(userGroup, actions);
@@ -128,11 +129,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
+    @SuppressWarnings("unchecked")
     private RoleDefinition loadRoleDefinition(Document roleDefinitionDBObject) {
         final String id = (String) roleDefinitionDBObject.get(FieldNames.Role.ID.name());
         final String displayName = (String) roleDefinitionDBObject.get(FieldNames.Role.NAME.name());
         final Set<WildcardPermission> permissions = new HashSet<>();
-        for (Object o : (BasicDBList) roleDefinitionDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
+        for (Object o : (List<Object>) (roleDefinitionDBObject.get(FieldNames.Role.PERMISSIONS.name()))) {
             permissions.add(new WildcardPermission(o.toString()));
         }
         return new RoleDefinitionImpl(UUID.fromString(id), displayName, permissions);
@@ -158,7 +160,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final UUID id = (UUID) groupDBObject.get(FieldNames.UserGroup.ID.name());
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
         Set<User> users = new HashSet<>();
-        BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERNAMES.name());
+        @SuppressWarnings("unchecked")
+        List<Object> usersO = (List<Object>) groupDBObject.get(FieldNames.UserGroup.USERNAMES.name());
         if (usersO != null) {
             for (Object o : usersO) {
                 users.add(new UserProxy((String) o));
@@ -232,6 +235,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         {@link Role#getQualifiedForUser() user qualifier} where only the username is set properly to identify the
      *         user in the calling method where ultimately all users will be known.
      */
+    @SuppressWarnings("unchecked")
     private User loadUserWithProxyRoleUserQualifiers(Document userDBObject,
             Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration,
             Map<UUID, UserGroup> tenants, UserGroupProvider userGroupProvider) {
@@ -246,7 +250,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
         Set<Role> roles = new HashSet<>();
         Set<String> permissions = new HashSet<>();
-        BasicDBList rolesO = (BasicDBList) userDBObject.get(FieldNames.User.ROLE_IDS.name());
+        List<Object> rolesO = (List<Object>) userDBObject.get(FieldNames.User.ROLE_IDS.name());
         boolean rolesMigrated = false; // if a role needs migration, user needs an update in the DB
         if (rolesO != null) {
             for (Object o : rolesO) {
@@ -263,7 +267,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // that is qualified by the default tenant; for this a default tenant must exist because
             // otherwise a user would obtain global rights by means of migration which must not happen.
             logger.info("Migrating roles of user "+name);
-            BasicDBList roleNames = (BasicDBList) userDBObject.get("ROLES");
+            List<Object> roleNames = (List<Object>) userDBObject.get("ROLES");
             if (roleNames != null) {
                 logger.info("Found old roles "+roleNames+" for user "+name);
                 if (defaultTenantForRoleMigration == null) {
@@ -296,7 +300,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
 
         final Map<String, UserGroup> defaultTenant = new ConcurrentHashMap<>();
-        final BasicDBList defaultTenantIds = (BasicDBList) userDBObject.get(FieldNames.User.DEFAULT_TENANT_IDS.name());
+        final List<Object> defaultTenantIds = (List<Object>) userDBObject.get(FieldNames.User.DEFAULT_TENANT_IDS.name());
         if (defaultTenantIds != null) {
             for (Object singleDefaultTenant : defaultTenantIds) {
                 Document singleDefaultTenantObj = (Document) singleDefaultTenant;
