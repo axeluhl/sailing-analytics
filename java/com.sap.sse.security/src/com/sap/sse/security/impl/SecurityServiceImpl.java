@@ -266,6 +266,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 apply(s -> s.internalSetOwnership(
                         SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), ADMIN_USERNAME, null,
                         ADMIN_USERNAME));
+                // FIXME RoleAssociation
                 addRoleForUser(adminUser, new Role(adminRoleDefinition));
             }
             
@@ -1953,6 +1954,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
         for (Pair<User, Role> userAndRole : userStore.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
+            // FIXME RoleAssociation
             addRoleForUser(userAndRole.getA(),
                     new Role(existingRole.getRoleDefinition(), destination, existingRole.getQualifiedForUser()));
         }

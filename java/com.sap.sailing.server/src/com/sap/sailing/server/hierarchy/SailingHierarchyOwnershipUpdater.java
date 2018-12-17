@@ -229,6 +229,7 @@ public class SailingHierarchyOwnershipUpdater {
         return securitySerice.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER_GROUP, newGroupId.toString(), name, () -> {
                     final UserGroup createdUserGroup = securitySerice.createUserGroup(newGroupId, name);
+                    // FIXME RoleAssociation
                     securitySerice.copyUsersAndRoleAssociations(userGroupToCopy, createdUserGroup);
                     return createdUserGroup;
                 });
