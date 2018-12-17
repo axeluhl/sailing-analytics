@@ -39,12 +39,12 @@ public abstract class AbstractSeriesPlace extends Place {
 	private final static String PARAM_LEADERBOARD_GROUP_UUID = "leaderboardGroupId";
        
         protected PLACE getPlaceFromParameters(Map<String, Set<String>> parameters) {
-            String leaderboardGroupIdRaw = parameters.get(PARAM_LEADERBOARD_GROUP_UUID).stream().findFirst().orElse("");
+            String leaderboardGroupIdRaw = Util.first(parameters.get(PARAM_LEADERBOARD_GROUP_UUID));
             SeriesContext ctx;
             if (leaderboardGroupIdRaw != null) {
                 ctx = SeriesContext.createWithLeaderboardGroupId(UUID.fromString(leaderboardGroupIdRaw));
             } else {
-                String eventIdRaw = parameters.get(PARAM_EVENTID).stream().findFirst().orElse("");
+                String eventIdRaw = Util.first(parameters.get(PARAM_EVENTID));
                 ctx = SeriesContext.createWithSeriesId(UUID.fromString(eventIdRaw));
             }
             return getRealPlace(ctx);
