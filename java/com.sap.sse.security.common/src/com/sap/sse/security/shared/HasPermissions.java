@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared;
 
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
@@ -23,12 +24,6 @@ public interface HasPermissions {
      *         passed that is not contained in the array returned by this method.
      */
     Action[] getAvailableActions();
-    
-    /**
-     * Defines the strategy, for determining the type relative identifier.
-     * @return the identifier strategy for the permission type.
-     */
-    IdentifierStrategy identifierStrategy();
 
     /**
      * @return {@code true} if and only if objects of this logical type support the {@code action} as one of their
@@ -59,8 +54,10 @@ public interface HasPermissions {
      *            can be any string; this method will take care of encoding the identifiers such that they are legal in
      *            the context of a permission part; see also {@link PermissionStringEncoder}
      */
-    String getStringPermissionForTypeRelativeIdentifiers(Action action, String... typeRelativeObjectIdentifier);
-    
+    String getStringPermissionForTypeRelativeIdentifier(Action action, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
+
+    String getStringPermissionForSecuredDTO(Action action, SecuredDTO securedDTO);
+
     /**
      * Produces a string permission for this permission, the <code>mode</code> specified as the second wildcard
      * permission segment, and the <code>objectIdentifier</code> as the third wildcard permission segment. The object
@@ -71,7 +68,7 @@ public interface HasPermissions {
      *            can be any object that can be passed to the identifer strategy to determine the type relative
      *            identifier for this object. What type of object can be passed is defined by the identifer strategy
      */
-    String getStringPermissionForObject(Action action, Object... object);
+    String getStringPermissionForObject(Action action, WithQualifiedObjectIdentifier object);
 
     /**
      * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified by
@@ -79,7 +76,9 @@ public interface HasPermissions {
      * and the {@code objectIdentifier} is {@code "abc"} then the resulting qualified identifier will be
      * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
      */
-    QualifiedObjectIdentifier getQualifiedObjectIdentifierByString(String typeRelativeObjectIdentifier);
+    QualifiedObjectIdentifier getQualifiedObjectIdentifier(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
+
+    QualifiedObjectIdentifier getQualifiedObjectIdentifier(SecuredDTO securedDTO);
 
     /**
      * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified by
@@ -91,20 +90,14 @@ public interface HasPermissions {
      *            can be any object that can be passed to the identifer strategy to determine the type relative
      *            identifier for this object. What type of object can be passed is defined by the identifer strategy
      */
-    <T> QualifiedObjectIdentifier getQualifiedObjectIdentifier(T object);
+    //QualifiedObjectIdentifier getQualifiedObjectIdentifier(WithQualifiedObjectIdentifier object);
 
     /**
      * Same as {@link #getStringPermissionForTypeRelativeIdentifiers(Action, String...)}, only that the result is a
      * {@link WildcardPermission} instead of a {@link String}
      * 
-     * @deprecated better option is to use the variant {@link #getPermissionForObject(Action action, Object object)}
-     *             instead. {@link #getPermissionForObject(Action action, Object object)} uses this implementation in a
-     *             private manner but is creating the permission id by using the corresponding
-     *             {{@link #identifierStrategy()}. If no concrete object (e.g. unit test) is available, this method can
-     *             still be used.
      */
-    @Deprecated
-    WildcardPermission getPermissionForTypeRelativeIdentifiers(Action action, String... objectIdentifiers);
+    WildcardPermission getPermissionForTypeRelativeIdentifier(Action action, TypeRelativeObjectIdentifier objectIdentifiers);
 
     /**
      * Same as {@link #getStringPermissionForTypeRelativeIdentifiers(Action, String...)}, only that the result is a
@@ -115,13 +108,15 @@ public interface HasPermissions {
      *            identifier for this object. What type of object can be passed is defined by the identifer strategy
      * 
      */
-    WildcardPermission getPermissionForObject(Action action, Object object);
+    WildcardPermission getPermissionForObject(Action action, WithQualifiedObjectIdentifier object);
+
+    WildcardPermission getPermissionForSecuredDTO(Action action, SecuredDTO securedDTO);
 
     /**
      * Same as {@link #getPermissionForTypeRelativeIdentifiers(Action, String...)}, only that this method gets the
      * {@link WildcardPermission}s for all given actions
      */
-    WildcardPermission[] getPermissionsForTypeRelativeIdentifiers(final Action[] actions, final String... objectIdentifiers);
+    WildcardPermission[] getPermissionsForTypeRelativeIdentifier(final Action[] actions, final TypeRelativeObjectIdentifier objectIdentifiers);
 
     public static interface Action {
         /**

@@ -23,6 +23,7 @@ import com.sap.sse.common.media.MimeType;
 import com.sap.sse.concurrent.CopyOnWriteHashMap;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
@@ -374,11 +375,24 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(this);
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
     public HasPermissions getType() {
         return SecuredDomainType.EVENT;
+    }
+
+    @Override
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(this);
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(EventBase event) {
+        return new TypeRelativeObjectIdentifier(event.getId().toString());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID id) {
+        return new TypeRelativeObjectIdentifier(id.toString());
     }
 }

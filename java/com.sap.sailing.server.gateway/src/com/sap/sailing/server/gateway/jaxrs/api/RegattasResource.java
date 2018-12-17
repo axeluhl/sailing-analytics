@@ -54,6 +54,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -490,7 +491,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             final CompetitorWithBoat competitor;
             if (subject.isAuthenticated()) {
                 competitor = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                        SecuredDomainType.COMPETITOR, competitorUuid, name,
+                        SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUuid), name,
                         new ActionWithResult<CompetitorWithBoat>() {
                                 @Override
                                 public CompetitorWithBoat run() throws Exception {
@@ -567,7 +568,8 @@ public class RegattasResource extends AbstractSailingServerResource {
         final DynamicBoat boat;
         if (SecurityUtils.getSubject().isAuthenticated()) {
             boat = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.BOAT, boatUUID, name, new ActionWithResult<DynamicBoat>() {
+                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), name,
+                    new ActionWithResult<DynamicBoat>() {
 
                     @Override
                     public DynamicBoat run() throws Exception {

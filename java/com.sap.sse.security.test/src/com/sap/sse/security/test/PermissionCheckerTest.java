@@ -23,10 +23,10 @@ import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.IdentifierStrategy;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -41,8 +41,9 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class PermissionCheckerTest {
     private final UUID eventId = UUID.randomUUID();
-    @SuppressWarnings("deprecation")
-    private final WildcardPermission eventReadPermission = SecuredDomainType.EVENT.getPermissionForTypeRelativeIdentifiers(DefaultActions.READ, eventId.toString());
+    private final WildcardPermission eventReadPermission = SecuredDomainType.EVENT
+            .getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
+                    new TypeRelativeObjectIdentifier(eventId.toString()));
     private final UUID userTenantId = UUID.randomUUID();
     private UserGroup adminTenant;
     private User adminUser;
@@ -58,8 +59,8 @@ public class PermissionCheckerTest {
     private UserStore userStore;
     private AccessControlStore accessControlStore;
     private PrincipalCollection principalCollection;
-    private HasPermissions type1 = new HasPermissionsImpl("DEMO", IdentifierStrategy.NO_OP, DefaultActions.READ, DefaultActions.UPDATE);
-    private HasPermissions type2 = new HasPermissionsImpl("TEST", IdentifierStrategy.NO_OP, DefaultActions.READ, DefaultActions.DELETE);
+    private HasPermissions type1 = new HasPermissionsImpl("DEMO", DefaultActions.READ, DefaultActions.UPDATE);
+    private HasPermissions type2 = new HasPermissionsImpl("TEST", DefaultActions.READ, DefaultActions.DELETE);
     private Iterable<HasPermissions> allHasPermissions = Arrays.asList(type1, type2);
     
     @Before
@@ -117,27 +118,30 @@ public class PermissionCheckerTest {
      * sets up users and roles with qualifications and then validates that the correct permissions emerge based
      * on a successful ownership lookup with the object ID provided by the permission.
      */
-    @SuppressWarnings("deprecation")
     @Test
     public void testPermissionsImpliedByOwnershipConstrainedRole() throws UserManagementException {
         final String leaderboardName = "My:Leaderboard, the only one ";
+        TypeRelativeObjectIdentifier leaderboardIdentifier = new TypeRelativeObjectIdentifier(leaderboardName);
         final String regattaName = " My:Regatta, the only one ";
-        WildcardPermission leaderboardPermission = SecuredDomainType.LEADERBOARD.getPermissionForTypeRelativeIdentifiers(DefaultActions.READ, leaderboardName);
-        WildcardPermission regattaPermission = SecuredDomainType.REGATTA.getPermissionForTypeRelativeIdentifiers(DefaultActions.READ, regattaName);
+        TypeRelativeObjectIdentifier regattaIdentifier = new TypeRelativeObjectIdentifier(regattaName);
+        WildcardPermission leaderboardPermission = SecuredDomainType.LEADERBOARD
+                .getPermissionForTypeRelativeIdentifier(DefaultActions.READ, leaderboardIdentifier);
+        WildcardPermission regattaPermission = SecuredDomainType.REGATTA.getPermissionForTypeRelativeIdentifier(
+                DefaultActions.READ, regattaIdentifier);
         assertFalse(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         // let leaderboard be owned by user
-        accessControlStore.setOwnership(SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifierByString(leaderboardName), user,
+        accessControlStore.setOwnership(SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(leaderboardIdentifier), user,
                 /* tenantOwner */ null, leaderboardName);
         // let regatta be owned by admin
-        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifierByString(regattaName), adminUser,
+        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaIdentifier), adminUser,
                 /* tenantOwner */ null, regattaName);
         // grant user the admin role, but only for objects owned by the user (leaderboard, but not regatta)
         userStore.addRoleForUser(user.getName(),
                 new Role(AdminRole.getInstance(), /* qualifiedForTenant */ null, /* qualifiedForUser */ user));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
-        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifierByString(regattaName), /* userOwner */ null,
+        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaIdentifier), /* userOwner */ null,
                 /* groupOwner */ userTenant, leaderboardName);
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         // only adding the group owner doesn't grant permission yet:

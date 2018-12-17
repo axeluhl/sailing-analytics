@@ -3,9 +3,15 @@ package com.sap.sailing.expeditionconnector;
 import java.io.Serializable;
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializable {
+public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializable, WithQualifiedObjectIdentifier {
     private static final long serialVersionUID = -7819154195403387909L;
 
     private final UUID deviceUuid;
@@ -71,5 +77,24 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializ
     public String toString() {
         return "ExpeditionDeviceConfiguration [deviceUuid=" + deviceUuid + ", expeditionBoatId=" + expeditionBoatId
                 + ", getName()=" + getName() + "]";
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getName());
+    }
+    
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String name) {
+        return new TypeRelativeObjectIdentifier(ServerInfo.getName(), name);
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION;
     }
 }

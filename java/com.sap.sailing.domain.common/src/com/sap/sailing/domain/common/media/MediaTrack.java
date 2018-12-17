@@ -13,6 +13,7 @@ import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
@@ -170,11 +171,24 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(this);
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
     public HasPermissions getType() {
         return SecuredDomainType.MEDIA_TRACK;
+    }
+
+    @Override
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(this);
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(MediaTrack mediaTrack) {
+        return new TypeRelativeObjectIdentifier(mediaTrack.dbId);
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String dbId) {
+        return new TypeRelativeObjectIdentifier(dbId);
     }
 }

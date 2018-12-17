@@ -86,7 +86,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         series.add(testSeries);
         final UUID closedRegattaUuid = UUID.randomUUID();
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.REGATTA,
-                closedRegattaName, closedRegattaName, new ActionWithResult<Regatta>() {
+                Regatta.getTypeRelativeObjectIdentifier(closedRegattaName), closedRegattaName, new ActionWithResult<Regatta>() {
                     @Override
                     public Regatta run() throws Exception {
                         return racingEventService.createRegatta(closedRegattaName, boatClassName,
@@ -99,7 +99,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                     }
                 });
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.REGATTA,
-                openRegattaName, openRegattaName, new ActionWithResult<Regatta>() {
+                Regatta.getTypeRelativeObjectIdentifier(openRegattaName), openRegattaName, new ActionWithResult<Regatta>() {
                     @Override
                     public Regatta run() throws Exception {
                         return racingEventService.createRegatta(openRegattaName, boatClassName,

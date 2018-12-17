@@ -110,6 +110,7 @@ import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserRole;
@@ -1505,7 +1506,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-            HasPermissions type, Object typeIdentifier, String securityDisplayName,
+            HasPermissions type, TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName,
             ActionWithResult<T> actionWithResult) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         T result = null;
@@ -1519,8 +1520,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             } else {
                 logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
             }
-            SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER
-                        .getStringPermissionForObject(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
+            SecurityUtils.getSubject()
+                    .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                            ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
             SecurityUtils.getSubject()
                     .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
             result = actionWithResult.run();
@@ -1537,7 +1539,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
-            Object typeRelativeObjectIdentifier, String securityDisplayName,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
             Action actionToCreateObject) {
         setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeRelativeObjectIdentifier,
                 securityDisplayName, () -> {
@@ -1563,7 +1565,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
             ActionWithResult<User> createActionReturningCreatedObject) {
-        QualifiedObjectIdentifier identifier = SecuredSecurityTypes.USER.getQualifiedObjectIdentifierByString(username);
+        QualifiedObjectIdentifier identifier = SecuredSecurityTypes.USER
+                .getQualifiedObjectIdentifier(UserImpl.getTypeRelativeObjectIdentifier(username));
         User result = null;
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
@@ -1610,7 +1613,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+    public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
             HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
@@ -1622,7 +1625,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+    public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
             HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
@@ -1638,7 +1641,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
+    public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
             Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper) {
         final List<R> result = new ArrayList<>();
         filterObjectsWithPermissionForCurrentUser(permittedObject, DefaultActions.READ, objectsToFilter,
@@ -1647,7 +1650,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public <T, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
+    public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
             HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Function<T, R> filteredObjectsMapper) {
         final List<R> result = new ArrayList<>();
@@ -1662,13 +1665,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public <T> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
+    public <T extends WithQualifiedObjectIdentifier> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
             RoleDefinition roleToCheck) {
         assert type != null;
         assert object != null;
         assert roleToCheck != null;
-        OwnershipAnnotation ownershipToCheck = getOwnership(
-                type.getQualifiedObjectIdentifier(object));
+        OwnershipAnnotation ownershipToCheck = getOwnership(object.getIdentifier());
         return PermissionChecker.ownsUserASpecificRole(getCurrentUser(), getAllUser(),
                 ownershipToCheck == null ? null : ownershipToCheck.getAnnotation(), roleToCheck.getName());
     }

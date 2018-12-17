@@ -24,6 +24,7 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -334,11 +335,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     UserGroup getDefaultTenant();
 
     <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
-            Object typeRelativeObjectIdentifier,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier,
             String securityDisplayName, ActionWithResult<T> createActionReturningCreatedObject);
 
     void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
-            Object typeRelativeObjectIdentifier, String securityDisplayName, Action actionToCreateObject);
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName, Action actionToCreateObject);
 
     User getAllUser();
 
@@ -348,18 +349,18 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             ActionWithResult<T> actionToDeleteObject);
 
-    <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
             com.sap.sse.security.shared.HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer);
 
-    <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
             com.sap.sse.security.shared.HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer);
 
-    <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
+    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
             Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper);
 
-    <T, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
+    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
             HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Function<T, R> filteredObjectsMapper);
 
@@ -391,7 +392,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void checkMigration(Iterable<HasPermissions> allInstances);
 
-    <T> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
+    <T extends WithQualifiedObjectIdentifier> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
             RoleDefinition roleToCheck);
 
     boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);

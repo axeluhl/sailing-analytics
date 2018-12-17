@@ -2,8 +2,11 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 
 /**
@@ -236,4 +239,15 @@ public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements Competit
     public boolean hasBoat() {
         return false;
     }
+
+    @Override
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(idAsString);
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.COMPETITOR;
+    }
+
 }

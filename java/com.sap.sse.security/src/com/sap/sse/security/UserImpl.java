@@ -18,6 +18,7 @@ import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -318,7 +319,20 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup> 
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(this); 
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier()); 
+    }
+
+    @Override
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(this);
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(User user) {
+        return new TypeRelativeObjectIdentifier(user.getName());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String userName) {
+        return new TypeRelativeObjectIdentifier(userName);
     }
 
     @Override

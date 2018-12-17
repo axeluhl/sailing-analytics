@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.IdentifierStrategy;
 import com.sap.sse.security.shared.impl.HasPermissionsImpl;
 
 /**
@@ -20,13 +19,13 @@ public class SecuredDomainType extends HasPermissionsImpl {
     private static final long serialVersionUID = -7072719056136061490L;
     private static final Set<HasPermissions> allInstances = new HashSet<>();
     
-    public SecuredDomainType(String logicalTypeName, IdentifierStrategy identiferStrategy, Action... availableActions) {
-        super(logicalTypeName, identiferStrategy, availableActions);
+    public SecuredDomainType(String logicalTypeName, Action... availableActions) {
+        super(logicalTypeName, availableActions);
         allInstances.add(this);
     }
     
-    public SecuredDomainType(String logicalTypeName, IdentifierStrategy identiferStrategy) {
-        super(logicalTypeName, identiferStrategy);
+    public SecuredDomainType(String logicalTypeName) {
+        super(logicalTypeName);
         allInstances.add(this);
     }
     
@@ -35,20 +34,20 @@ public class SecuredDomainType extends HasPermissionsImpl {
     }
     
     // AdminConsole permissions
-    public static final HasPermissions MANAGE_MARK_PASSINGS = new SecuredDomainType("MANAGE_MARK_PASSINGS", IdentifierStrategy.NO_OP);
-    public static final HasPermissions MANAGE_MARK_POSITIONS = new SecuredDomainType("MANAGE_MARK_POSITIONS", IdentifierStrategy.NO_OP);
-    public static final HasPermissions CAN_REPLAY_DURING_LIVE_RACES = new SecuredDomainType("CAN_REPLAY_DURING_LIVE_RACES", IdentifierStrategy.NO_OP);
-    public static final HasPermissions DETAIL_TIMER = new SecuredDomainType("DETAIL_TIMER", IdentifierStrategy.NO_OP); // TODO this is not a valid "HasPermission" instance; it's more an operation the user may be granted on objects of the TimePanel type
+    public static final HasPermissions MANAGE_MARK_PASSINGS = new SecuredDomainType("MANAGE_MARK_PASSINGS");
+    public static final HasPermissions MANAGE_MARK_POSITIONS = new SecuredDomainType("MANAGE_MARK_POSITIONS");
+    public static final HasPermissions CAN_REPLAY_DURING_LIVE_RACES = new SecuredDomainType("CAN_REPLAY_DURING_LIVE_RACES");
+    public static final HasPermissions DETAIL_TIMER = new SecuredDomainType("DETAIL_TIMER"); // TODO this is not a valid "HasPermission" instance; it's more an operation the user may be granted on objects of the TimePanel type
     
-    public static final HasPermissions EVENT = new SecuredDomainType("EVENT", IdentifierStrategy.ID);
+    public static final HasPermissions EVENT = new SecuredDomainType("EVENT");
 
-    public static final HasPermissions REGATTA = new SecuredDomainType("REGATTA", IdentifierStrategy.NAMED);
+    public static final HasPermissions REGATTA = new SecuredDomainType("REGATTA");
 
-    public static final HasPermissions LEADERBOARD = new SecuredDomainType("LEADERBOARD", IdentifierStrategy.NAMED);
+    public static final HasPermissions LEADERBOARD = new SecuredDomainType("LEADERBOARD");
 
-    public static final HasPermissions LEADERBOARD_GROUP = new SecuredDomainType("LEADERBOARD_GROUP", IdentifierStrategy.ID);
+    public static final HasPermissions LEADERBOARD_GROUP = new SecuredDomainType("LEADERBOARD_GROUP");
 
-    public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE", DomainIdentifierStrategy.TRACKED_RACE);
+    public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE");
     
     public static enum CompetitorAndBoatActions implements Action {
         READ_PUBLIC;
@@ -61,30 +60,35 @@ public class SecuredDomainType extends HasPermissionsImpl {
                 DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL };
     };
 
-    public static final HasPermissions COMPETITOR = new SecuredDomainType("COMPETITOR", IdentifierStrategy.ID, CompetitorAndBoatActions.ALL_ACTIONS);
+    public static final HasPermissions COMPETITOR = new SecuredDomainType("COMPETITOR", CompetitorAndBoatActions.ALL_ACTIONS);
 
-    public static final HasPermissions BOAT = new SecuredDomainType("BOAT", IdentifierStrategy.ID, CompetitorAndBoatActions.ALL_ACTIONS);
+    public static final HasPermissions BOAT = new SecuredDomainType("BOAT", CompetitorAndBoatActions.ALL_ACTIONS);
 
-    public static final HasPermissions MEDIA_TRACK = new SecuredDomainType("MEDIA_TRACK", DomainIdentifierStrategy.MEDIA_TRACK);
+    public static final HasPermissions MEDIA_TRACK = new SecuredDomainType("MEDIA_TRACK");
 
-    public static final HasPermissions RESULT_IMPORT_URL = new SecuredDomainType("RESULT_IMPORT_URL", DomainIdentifierStrategy.RESULT_IMPORT_URL);
+    public static final HasPermissions RESULT_IMPORT_URL = new SecuredDomainType("RESULT_IMPORT_URL");
 
     public static enum ReplicatorActions implements Action {
         START, STOP, DROP_CONNECTION
     };
 
-    public static final HasPermissions REPLICATOR = new SecuredDomainType("REPLICATOR", IdentifierStrategy.SERVERNAME,
-            ReplicatorActions.values());
+    public static final HasPermissions REPLICATOR = new SecuredDomainType("REPLICATOR", ReplicatorActions.values());
 
     /**
      * This permission is used to check READ-permission on different things. For that the object type to determine the
      * permission strings is String (e.g. servername, DataRetrieverChainDefinitionDTO.name, RetrieverChainDefinition.
      * name, QueryIdentifier, ...)
      */
-    public static final HasPermissions DATA_MINING = new SecuredDomainType("DATA_MINING",
-            IdentifierStrategy.STRING);
+    public static final HasPermissions DATA_MINING = new SecuredDomainType("DATA_MINING");
 
     public static final HasPermissions RACE_MANAGER_APP_DEVICE_CONFIGURATION = new SecuredDomainType(
-            "RACE_MANAGER_APP_DEVICE_CONFIGURATION", IdentifierStrategy.NAMED);
+            "RACE_MANAGER_APP_DEVICE_CONFIGURATION");
 
+    public static final HasPermissions EXPEDITION_DEVICE_CONFIGURATION = new SecuredDomainType(
+            "EXPEDITION_DEVICE_CONFIGURATION");
+    public static final HasPermissions IGTIMI_ACCOUNT = new SecuredDomainType("IGTIMI_ACCOUNT");
+    public static final HasPermissions SWISS_TIMING_ACCOUNT = new SecuredDomainType("SWISS_TIMING_ACCOUNT");
+    public static final HasPermissions SWISS_TIMING_ARCHIVE_ACCOUNT = new SecuredDomainType(
+            "SWISS_TIMING_ARCHIVE_ACCOUNT");
+    public static final HasPermissions TRACTRAC_ACCOUNT = new SecuredDomainType("TRACTRAC_ACCOUNT");
 }

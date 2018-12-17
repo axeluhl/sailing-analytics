@@ -77,7 +77,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                 genericSailingAuthentication);
         authorizedContentDecorator.setPermissionToCheck(
-                SecuredDomainType.DATA_MINING.getPermissionForObject(DefaultActions.READ, serverInfo.getServerName()));
+                SecuredDomainType.DATA_MINING.getPermissionForObject(DefaultActions.READ, serverInfo));
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
 
             private QueryDefinitionProviderWithControls queryDefinitionProvider;
@@ -109,7 +109,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                         queryDefinitionProvider, resultsPresenter);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
                 if (getUserService().hasAllPermissions(SecuredDomainType.DATA_MINING
-                        .getPermissionsForTypeRelativeIdentifiers(DefaultActions.READ_AND_WRITE_ACTIONS, serverInfo.getServerName()))) {
+                        .getPermissionsForTypeRelativeIdentifier(DefaultActions.READ_AND_WRITE_ACTIONS, serverInfo.getTypeRelativeObjectIdentifier()))) {
                     StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
                             queryDefinitionProvider, dataMiningService, queryRunner);
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));

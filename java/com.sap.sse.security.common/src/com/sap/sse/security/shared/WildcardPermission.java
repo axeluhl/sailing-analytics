@@ -252,7 +252,8 @@ public class WildcardPermission implements Serializable {
         if (getParts().size() >= 3) {
             for (final String typeName : getParts().get(0)) {
                 for (final String encodedRelativeObjectId : getParts().get(2)) {
-                    result.add(new QualifiedObjectIdentifierImpl(typeName, encoder.decodePermissionPart(encodedRelativeObjectId)));
+                    result.add(new QualifiedObjectIdentifierImpl(typeName,
+                            new TypeRelativeObjectIdentifier(encoder.decodePermissionPart(encodedRelativeObjectId))));
                 }
             }
         }

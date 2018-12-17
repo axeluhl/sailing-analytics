@@ -29,7 +29,7 @@ public class AccessControlledActionsColumn<T extends SecuredDTO, S extends Image
             final HasPermissions type) {
         super(imagesBarCell);
         this.userService = userService;
-        this.permissionFactory = (action, object) -> type.getPermissionForObject(action, object);
+        this.permissionFactory = (action, object) -> type.getPermissionForSecuredDTO(action, object);
         this.setFieldUpdater((index, object, value) -> nameToCallbackMap.get(value).accept(object));
     }
 

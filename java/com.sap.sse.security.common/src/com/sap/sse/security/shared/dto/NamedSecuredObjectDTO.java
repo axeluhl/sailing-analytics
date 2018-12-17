@@ -3,7 +3,7 @@ package com.sap.sse.security.shared.dto;
 /**
  * {@link NamedDTO} extension which also implements {@link SecuredObject} interface.
  */
-public class NamedSecuredObjectDTO extends NamedDTO implements SecuredDTO {
+public abstract class NamedSecuredObjectDTO extends NamedDTO implements SecuredDTO {
 
     private static final long serialVersionUID = 2642220699434177353L;
 
@@ -35,4 +35,5 @@ public class NamedSecuredObjectDTO extends NamedDTO implements SecuredDTO {
     public final void setOwnership(final OwnershipDTO ownership) {
         this.securityInformation.setOwnership(ownership);
     }
+
 }

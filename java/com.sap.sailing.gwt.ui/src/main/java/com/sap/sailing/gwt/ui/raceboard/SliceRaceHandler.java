@@ -12,8 +12,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartZoomChangedEvent;
@@ -121,10 +123,13 @@ public class SliceRaceHandler {
     private void updateVisibility() {
         sliceButtonUi.setVisible(canSlice && visibleRange != null && allowsEditing());
     }
-    
+
     private boolean allowsEditing() {
-        return userService.hasPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, selectedRaceIdentifier.getRegattaName()))
-                && userService.hasPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, leaderboardName));
+        return userService.hasPermission(
+                SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Regatta.getTypeRelativeObjectIdentifier(selectedRaceIdentifier.getRegattaName())))
+                && userService.hasPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(
+                        DefaultActions.UPDATE, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
     }
 
     private void doSlice() {

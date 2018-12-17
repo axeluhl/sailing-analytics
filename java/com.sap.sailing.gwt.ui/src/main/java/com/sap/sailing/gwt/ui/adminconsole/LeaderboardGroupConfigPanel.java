@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.GWT;
@@ -680,6 +681,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     }
 
     private void openEditLeaderboardGroupDialog(final LeaderboardGroupDTO group) {
+        final UUID oldGroupId = group.getId();
         final String oldGroupName = group.getName();
         final ArrayList<LeaderboardGroupDTO> otherExistingGroups = new ArrayList<>(availableLeaderboardGroups);
         otherExistingGroups.remove(group);
@@ -691,7 +693,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
                     @Override
                     public void ok(LeaderboardGroupDescriptor groupDescriptor) {
-                        updateGroup(oldGroupName, group, groupDescriptor);
+                        updateGroup(oldGroupId, oldGroupName, group, groupDescriptor);
                     }
                 });
         dialog.show();
@@ -785,12 +787,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                         }));
     }
 
-    private void updateGroup(final String oldGroupName, final LeaderboardGroupDTO groupToUpdate, final LeaderboardGroupDescriptor updateDescriptor) {
+    private void updateGroup(final UUID oldGroupId, final String oldGroupName, final LeaderboardGroupDTO groupToUpdate, final LeaderboardGroupDescriptor updateDescriptor) {
         List<String> leaderboardNames = new ArrayList<String>();
         for (StrippedLeaderboardDTO leaderboardDTO : groupToUpdate.leaderboards) {
             leaderboardNames.add(leaderboardDTO.getName());
         }
-        sailingService.updateLeaderboardGroup(oldGroupName, updateDescriptor.getName(), updateDescriptor.getDescription(),
+        sailingService.updateLeaderboardGroup(oldGroupId, oldGroupName, updateDescriptor.getName(), updateDescriptor.getDescription(),
                 updateDescriptor.getDisplayName(),
                 leaderboardNames, updateDescriptor.getOverallLeaderboardDiscardThresholds(),
                 updateDescriptor.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(
@@ -842,7 +844,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         for (StrippedLeaderboardDTO leaderboardDTO : group.leaderboards) {
             leaderboardNames.add(leaderboardDTO.getName());
         }
-        sailingService.updateLeaderboardGroup(group.getName(), group.getName(), group.description,
+        sailingService.updateLeaderboardGroup(group.getId(), group.getName(), group.getName(), group.description,
                 group.getDisplayName(),
                 leaderboardNames, group.getOverallLeaderboardDiscardThresholds(),
                 group.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(

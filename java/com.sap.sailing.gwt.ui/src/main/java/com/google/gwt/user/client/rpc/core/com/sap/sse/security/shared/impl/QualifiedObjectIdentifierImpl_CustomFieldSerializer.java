@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 
 public class QualifiedObjectIdentifierImpl_CustomFieldSerializer extends CustomFieldSerializer<QualifiedObjectIdentifierImpl> {
@@ -17,7 +18,7 @@ public class QualifiedObjectIdentifierImpl_CustomFieldSerializer extends CustomF
     public static void serialize(SerializationStreamWriter streamWriter, QualifiedObjectIdentifierImpl instance)
             throws SerializationException {
         streamWriter.writeString(instance.getTypeIdentifier());
-        streamWriter.writeString(instance.getTypeRelativeObjectIdentifier());
+        streamWriter.writeString(instance.getTypeRelativeObjectIdentifier().toString());
     }
 
     @Override
@@ -32,7 +33,7 @@ public class QualifiedObjectIdentifierImpl_CustomFieldSerializer extends CustomF
 
     public static QualifiedObjectIdentifierImpl instantiate(SerializationStreamReader streamReader) throws SerializationException {
         final String typeIdentifier = streamReader.readString();
-        final String typeRelativeObjectIdentifier = streamReader.readString();
+        final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = new TypeRelativeObjectIdentifier(streamReader.readString());
         return new QualifiedObjectIdentifierImpl(typeIdentifier, typeRelativeObjectIdentifier);
     }
 

@@ -6,8 +6,11 @@ import java.util.List;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 public class UserDTO extends StrippedUserDTO
         implements Named, Serializable, SecuredDTO {
@@ -131,4 +134,15 @@ public class UserDTO extends StrippedUserDTO
     public void setDefaultTenantForCurrentServer(StrippedUserGroupDTO defaultTenant) {
         this.defaultTenantForCurrentServer = defaultTenant;
     }
+
+    @Override
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getName());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredSecurityTypes.USER;
+    }
+
 }

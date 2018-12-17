@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
@@ -52,13 +53,13 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint implements Pr
                             logger.log(Level.SEVERE, "Could not load detailtypes", caught);
                         }
 
-                        @SuppressWarnings("deprecation")
                         @Override
                         public void onSuccess(Iterable<DetailType> result) {
                             SAPHeaderWithAuthentication header = initHeader();
                             GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
                             AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-                    authorizedContentDecorator.setPermissionToCheck(SecuredDomainType.LEADERBOARD.getPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, leaderboardName));
+                            authorizedContentDecorator.setPermissionToCheck(SecuredDomainType.LEADERBOARD.
+                                    getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
                             authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
                                 @Override
                                 public Widget get() {

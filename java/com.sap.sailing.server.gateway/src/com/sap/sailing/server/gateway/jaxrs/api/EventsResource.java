@@ -48,6 +48,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.RankingMetrics;
@@ -64,6 +65,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -369,7 +371,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 createDefaultSeriesCreationParameters(regattaName, numberOfRaces));
         UUID regattaId = UUID.randomUUID();
         Regatta regatta = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.REGATTA, regattaName, 
+                SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName), 
                 regattaName, new ActionWithResult<Regatta>() {
 
                     @Override
@@ -435,7 +437,7 @@ public class EventsResource extends AbstractSailingServerResource {
             @Override
             public Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard> run() throws Exception {
                 Event event = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                        SecuredDomainType.EVENT, eventId,
+                        SecuredDomainType.EVENT, EventBaseImpl.getTypeRelativeObjectIdentifier(eventId),
                         eventName, new ActionWithResult<Event>() {
 
                             @Override
@@ -508,9 +510,9 @@ public class EventsResource extends AbstractSailingServerResource {
             throws NotFoundException {
         UUID leaderboardGroupId = UUID.randomUUID();
         LeaderboardGroup leaderboardGroup = getSecurityService()
-                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                        SecuredDomainType.LEADERBOARD_GROUP, leaderboardGroupId,
-                leaderboardGroupName, new ActionWithResult<LeaderboardGroup>() {
+                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD_GROUP,
+                        LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(leaderboardGroupId), leaderboardGroupName,
+                        new ActionWithResult<LeaderboardGroup>() {
 
             @Override
             public LeaderboardGroup run() throws Exception {
@@ -634,7 +636,7 @@ public class EventsResource extends AbstractSailingServerResource {
 
     private RegattaLeaderboard createRegattaLeaderboard(String regattaName, int[] discardThresholds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD, regattaName, regattaName,
+                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaName), regattaName,
                 new ActionWithResult<RegattaLeaderboard>() {
 
                     @Override

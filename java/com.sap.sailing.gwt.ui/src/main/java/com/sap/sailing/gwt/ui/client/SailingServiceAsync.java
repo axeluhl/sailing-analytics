@@ -396,7 +396,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<LeaderboardGroupDTO> callback);
 
-    void updateLeaderboardGroup(String oldName, String newName, String description, String newDisplayName,
+    void updateLeaderboardGroup(UUID leaderboardGroupId, String oldName, String newName, String description, String newDisplayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<Void> callback);
 

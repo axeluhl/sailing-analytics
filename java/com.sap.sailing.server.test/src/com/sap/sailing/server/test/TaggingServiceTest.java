@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -66,9 +67,8 @@ public class TaggingServiceTest {
     private final static String leaderboardName = "Leaderboard";
     private final static String raceColumnName = "RaceColumn";
     private final static String fleetName = "Default";
-    @SuppressWarnings("deprecation")
     private final static WildcardPermission editLeaderboardPermission = SecuredDomainType.LEADERBOARD
-            .getPermissionForTypeRelativeIdentifiers(DefaultActions.UPDATE, leaderboardName);
+            .getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName));
 
     // tagging & utilities
     private final static Logger logger = Logger.getLogger(TaggingServiceTest.class.getName());

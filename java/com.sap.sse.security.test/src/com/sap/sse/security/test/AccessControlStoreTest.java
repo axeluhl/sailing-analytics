@@ -22,6 +22,7 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -38,7 +39,7 @@ import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
  */
 public class AccessControlStoreTest {
     private static final String DEFAULT_TENANT_NAME = "TestDefaultTenant";
-    private final QualifiedObjectIdentifier testId = new QualifiedObjectIdentifierImpl("Test", "test");
+    private final QualifiedObjectIdentifier testId = new QualifiedObjectIdentifierImpl("Test", new TypeRelativeObjectIdentifier("test"));
     private final String testDisplayName = "testDN";
 
     private final UserGroup testTenantOwner = new UserGroupImpl(UUID.randomUUID(), "test-tenant");

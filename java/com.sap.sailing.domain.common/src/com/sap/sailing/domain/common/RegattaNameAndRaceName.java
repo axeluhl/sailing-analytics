@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.common;
 
-
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class RegattaNameAndRaceName extends RegattaName implements RegattaAndRaceIdentifier {
     private static final long serialVersionUID = 3599904513673776450L;
@@ -57,4 +60,33 @@ public class RegattaNameAndRaceName extends RegattaName implements RegattaAndRac
             return false;
         return true;
     }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(this);
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+        return new TypeRelativeObjectIdentifier(regattaAndRaceIdentifier.getRegattaName(), regattaAndRaceIdentifier.getRaceName());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String regattaName, String raceName) {
+        return new TypeRelativeObjectIdentifier(regattaName, raceName);
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.TRACKED_RACE;
+    }
+
+    @Override
+    public String getName() {
+        return toString();
+    }
+
 }

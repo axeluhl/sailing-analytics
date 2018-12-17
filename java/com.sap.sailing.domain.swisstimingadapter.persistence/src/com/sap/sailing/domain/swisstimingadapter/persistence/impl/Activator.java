@@ -9,6 +9,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -18,7 +19,6 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
-import com.sap.sailing.domain.swisstimingadapter.security.SwissTimingSecuredDomainTypes;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.mongodb.MongoDBService;
@@ -65,8 +65,8 @@ public class Activator implements BundleActivator {
                 }
 
                 // we do not necessarily have swisstiming configs, so ensure that migration is marked as done
-                securityService.assumeOwnershipMigrated(SwissTimingSecuredDomainTypes.SWISS_TIMING_ACCOUNT.getName());
-                securityService.assumeOwnershipMigrated(SwissTimingSecuredDomainTypes.SWISS_TIMING_ARCHIVE_ACCOUNT.getName());
+                securityService.assumeOwnershipMigrated(SecuredDomainType.SWISS_TIMING_ACCOUNT.getName());
+                securityService.assumeOwnershipMigrated(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getName());
 
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception trying to register SwissTiming RaceTrackingConnectivityParametersHandler implementation", e);

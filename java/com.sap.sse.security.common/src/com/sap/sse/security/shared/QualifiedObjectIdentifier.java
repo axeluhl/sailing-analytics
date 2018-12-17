@@ -36,7 +36,7 @@ public interface QualifiedObjectIdentifier extends Serializable {
     /**
      * An object identifier that has to be unique only within the scope of the type identified by {@link #getTypeIdentifier()}
      */
-    String getTypeRelativeObjectIdentifier();
+    TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier();
     
     /**
      * Constructs a permission in {@link String} form that can be parsed into a {@link WildcardPermission} and which

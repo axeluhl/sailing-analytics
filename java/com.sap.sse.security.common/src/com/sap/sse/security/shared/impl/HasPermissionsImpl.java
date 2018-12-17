@@ -6,13 +6,14 @@ import java.util.Collection;
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.IdentifierStrategy;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
 public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     private static final long serialVersionUID = -7901836864741040400L;
     private final Action[] availableActions;
-    private final IdentifierStrategy identiferStrategy;
 
     /**
      * By default, all actions as provided by {@link DefaultActions} are supported by logical types with permissions
@@ -22,8 +23,8 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
      *            a type name that can be represented in a {@link WildcardPermission}'s first part without further need
      *            for encoding
      */
-    public <T> HasPermissionsImpl(String logicalTypeName, IdentifierStrategy identiferStrategy) {
-        this(logicalTypeName, identiferStrategy, DefaultActions.values());
+    public <T> HasPermissionsImpl(String logicalTypeName) {
+        this(logicalTypeName, DefaultActions.values());
     }
 
     /**
@@ -35,12 +36,11 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
      *            a type name that can be represented in a {@link WildcardPermission}'s first part without further need
      *            for encoding
      */
-    public <T> HasPermissionsImpl(final String logicalTypeName, IdentifierStrategy identiferStrategy, final Action... availableActions) {
+    public <T> HasPermissionsImpl(final String logicalTypeName, final Action... availableActions) {
         super(logicalTypeName);
         assert logicalTypeName.equals(new WildcardPermissionEncoder().encodeAsPermissionPart(logicalTypeName));
         final int numberOfActionsAvailable = availableActions == null ? 0 : availableActions.length;
         this.availableActions = new Action[numberOfActionsAvailable];
-        this.identiferStrategy = identiferStrategy;
         if (availableActions != null) {
             System.arraycopy(availableActions, 0, this.availableActions, 0, numberOfActionsAvailable);
         }
@@ -59,11 +59,6 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
             }
         }
         return false;
-    }
-
-    @Override
-    public IdentifierStrategy identifierStrategy() {
-        return identiferStrategy;
     }
 
     @Override
@@ -94,14 +89,18 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     }
 
     @Override
-    public String getStringPermissionForTypeRelativeIdentifiers(final Action action, final String... typeRelativeObjectIdentifiers) {
-        assert supports(action);
-        return getStringPermissionForTypeRelativeIdentifiers(action, true, typeRelativeObjectIdentifiers);
+    public String getStringPermissionForTypeRelativeIdentifier(Action action,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier) {
+        return getStringPermissionForTypeRelativeIdentifiers(action, typeRelativeObjectIdentifier.toString());
     }
-    
-    private String getStringPermissionForTypeRelativeIdentifiers(final Action action, boolean encode, final String... typeRelativeObjectIdentifiers) {
+
+    @Override
+    public String getStringPermissionForSecuredDTO(final Action action, final SecuredDTO securedDTO) {
+        return getStringPermissionForTypeRelativeIdentifiers(action, securedDTO.getTypeRelativeObjectIdentifier().toString());
+    }
+
+    private String getStringPermissionForTypeRelativeIdentifiers(final Action action, final String... typeRelativeObjectIdentifiers) {
         assert supports(action);
-        final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(action));
         if (typeRelativeObjectIdentifiers != null && typeRelativeObjectIdentifiers.length > 0) {
             result.append(WildcardPermission.PART_DIVIDER_TOKEN);
@@ -112,58 +111,53 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
                 } else {
                     result.append(WildcardPermission.SUBPART_DIVIDER_TOKEN);
                 }
-                if (encode) {
-                    result.append(permissionEncoder.encodeAsPermissionPart(typeRelativeObjectIdentifier));
-                } else {
-                    result.append(typeRelativeObjectIdentifier);
-                }
+                result.append(typeRelativeObjectIdentifier);
             }
         }
         return result.toString();
     }
-    
-    /*@Override
-    public String getStringPermission(final Action action) {
-        assert supports(action);
-        final StringBuilder result = new StringBuilder(getStringPermission(action));
-        return result.toString();
-    }*/
 
     @Override
-    public String getStringPermissionForObject(final Action action, final Object... object) {
-        return getStringPermissionForTypeRelativeIdentifiers(action, false, identifierStrategy().getIdentifierAsString(object));
+    public String getStringPermissionForObject(final Action action, final WithQualifiedObjectIdentifier domainObject) {
+        return getStringPermissionForTypeRelativeIdentifiers(action, domainObject.getIdentifier().getTypeRelativeObjectIdentifier().toString());
     }
 
-    @Override
-    public QualifiedObjectIdentifier getQualifiedObjectIdentifierByString(final String typeRelativeObjectIdentifier) {
+    @Override 
+    public QualifiedObjectIdentifier getQualifiedObjectIdentifier(final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier) {
         return new QualifiedObjectIdentifierImpl(getName(), typeRelativeObjectIdentifier);
     }
-    
+
     @Override
-    public <T> QualifiedObjectIdentifier getQualifiedObjectIdentifier(T object) {
-        return new QualifiedObjectIdentifierImpl(getName(), identifierStrategy().getIdentifierAsString(object));
+    public QualifiedObjectIdentifier getQualifiedObjectIdentifier(SecuredDTO securedDTO) {
+        return new QualifiedObjectIdentifierImpl(getName(), securedDTO.getTypeRelativeObjectIdentifier());
     }
 
     @Override
-    public WildcardPermission[] getPermissionsForTypeRelativeIdentifiers(Action[] actions,
-            final String... objectIdentifiers) {
+    public WildcardPermission[] getPermissionsForTypeRelativeIdentifier(Action[] actions,
+            final TypeRelativeObjectIdentifier typeRelativeIdentifier) {
         Collection<WildcardPermission> result = new ArrayList<>();
         for(Action action : actions) {
-            result.add(getPermissionForTypeRelativeIdentifiers(action, objectIdentifiers));
+            result.add(getPermissionForTypeRelativeIdentifier(action, typeRelativeIdentifier));
         }
         return result.toArray(new WildcardPermission[result.size()]);
     }
 
     @Override
-    public WildcardPermission getPermissionForTypeRelativeIdentifiers(final Action action, final String... objectIdentifiers) {
+    public WildcardPermission getPermissionForTypeRelativeIdentifier(final Action action, final TypeRelativeObjectIdentifier typeRelativeIdentifier) {
         assert supports(action);
-        return new WildcardPermission(getStringPermissionForTypeRelativeIdentifiers(action, objectIdentifiers));
+        return new WildcardPermission(getStringPermissionForTypeRelativeIdentifier(action, typeRelativeIdentifier));
     }
 
     @Override
-    public WildcardPermission getPermissionForObject(final Action action, final Object object) {
+    public WildcardPermission getPermissionForObject(final Action action, final WithQualifiedObjectIdentifier object) {
         assert supports(action);
-        return new WildcardPermission(getStringPermissionForTypeRelativeIdentifiers(action, false, identiferStrategy.getIdentifierAsString(object)));
+        return new WildcardPermission(getStringPermissionForTypeRelativeIdentifier(action, object.getIdentifier().getTypeRelativeObjectIdentifier()));
+    }
+
+    @Override
+    public WildcardPermission getPermissionForSecuredDTO(Action action, SecuredDTO securedDTO) {
+        assert supports(action);
+        return new WildcardPermission(getStringPermissionForTypeRelativeIdentifier(action, securedDTO.getTypeRelativeObjectIdentifier()));
     }
 
 }

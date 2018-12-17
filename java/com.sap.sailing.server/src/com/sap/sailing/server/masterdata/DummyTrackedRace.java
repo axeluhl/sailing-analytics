@@ -724,4 +724,5 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return null;
     }
+
 }

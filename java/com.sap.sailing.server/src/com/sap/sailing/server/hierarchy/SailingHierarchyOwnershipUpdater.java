@@ -23,6 +23,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 /**
  * Encapsulates the logic to ensure consistency of group owners in the sailing domain object hierarchy.
@@ -227,7 +228,7 @@ public class SailingHierarchyOwnershipUpdater {
         // and is possible out of date.
         final UUID newGroupId = UUID.randomUUID();
         return securitySerice.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredSecurityTypes.USER_GROUP, newGroupId, name, () -> {
+                SecuredSecurityTypes.USER_GROUP, UserGroupImpl.getTypeRelativeObjectIdentifier(newGroupId), name, () -> {
                     final UserGroup createdUserGroup = securitySerice.createUserGroup(newGroupId, name);
                     securitySerice.copyUsersAndRoleAssociations(userGroupToCopy, createdUserGroup);
                     return createdUserGroup;

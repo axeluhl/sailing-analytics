@@ -1,17 +1,15 @@
 package com.sap.sse.security.shared.impl;
 
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.shared.PermissionStringEncoder;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier {
     private static final long serialVersionUID = -1749648443005614962L;
-    private static final PermissionStringEncoder<WildcardPermission> permissionStringEncoder = new WildcardPermissionEncoder();
 
-    
     private final String typeIdentifier;
-    private final String typeRelativeObjectIdentifier;
+    private final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier;
     
     /**
      * Parses the output of {@link QualifiedObjectIdentifier#toString()} into an instance of this class.
@@ -26,10 +24,10 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
             throw new IllegalArgumentException("Qualified object identifier must contain separator character "+QUALIFIER_SEPARATOR);
         }
         typeIdentifier = qualifiedObjectIdentifierAsString.substring(0, indexOfSeparator);
-        typeRelativeObjectIdentifier = qualifiedObjectIdentifierAsString.substring(indexOfSeparator+1);
+        typeRelativeObjectIdentifier = new TypeRelativeObjectIdentifier(qualifiedObjectIdentifierAsString.substring(indexOfSeparator+1));
     }
     
-    public QualifiedObjectIdentifierImpl(String typeIdentifier, String typeRelativeObjectIdentifier) {
+    public QualifiedObjectIdentifierImpl(String typeIdentifier, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier) {
         super();
         this.typeIdentifier = typeIdentifier;
         this.typeRelativeObjectIdentifier = typeRelativeObjectIdentifier;
@@ -41,7 +39,7 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
     }
 
     @Override
-    public String getTypeRelativeObjectIdentifier() {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return typeRelativeObjectIdentifier;
     }
 
@@ -53,7 +51,7 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
     @Override
     public WildcardPermission getPermission(Action action) {
         return new WildcardPermission(getTypeIdentifier()+WildcardPermission.PART_DIVIDER_TOKEN+action.name()+WildcardPermission.PART_DIVIDER_TOKEN+
-                permissionStringEncoder.encodeAsPermissionPart(getTypeRelativeObjectIdentifier()));
+                getTypeRelativeObjectIdentifier());
     }
 
     @Override

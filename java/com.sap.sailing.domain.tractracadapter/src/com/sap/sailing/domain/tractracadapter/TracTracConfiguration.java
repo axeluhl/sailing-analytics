@@ -1,8 +1,9 @@
 package com.sap.sailing.domain.tractracadapter;
 
-import com.sap.sailing.domain.tractracadapter.security.TracTracSecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
@@ -40,11 +41,24 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(this);
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
     default HasPermissions getType() {
-        return TracTracSecuredDomainType.TRACTRAC_ACCOUNT;
+        return SecuredDomainType.TRACTRAC_ACCOUNT;
+    }
+
+    @Override
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getJSONURL());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(TracTracConfiguration config) {
+        return new TypeRelativeObjectIdentifier(config.getJSONURL());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl) {
+        return new TypeRelativeObjectIdentifier(jsonUrl);
     }
 }

@@ -565,8 +565,10 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public boolean allowsEditing(String mediaTrackDbId) {
-        return userService.hasPermission(SecuredDomainType.MEDIA_TRACK.getPermissionForObject(DefaultActions.UPDATE, mediaTrackDbId),
-                        /* TODO media track ownership */ null, /* TODO media track ACL */ null);
+        return userService.hasPermission(
+                SecuredDomainType.MEDIA_TRACK.getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        MediaTrack.getTypeRelativeObjectIdentifier(mediaTrackDbId)),
+                /* TODO media track ownership */ null, /* TODO media track ACL */ null);
     }
 
     @Override

@@ -65,6 +65,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
@@ -1137,7 +1138,16 @@ public interface TrackedRace
     }
     
     public static QualifiedObjectIdentifier getIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
-        return getSecuredDomainType().getQualifiedObjectIdentifier(regattaAndRaceId);
+        return getSecuredDomainType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier(regattaAndRaceId));
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
+        return regattaAndRaceId.getTypeRelativeObjectIdentifier();
+    }
+
+    @Override
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getRaceIdentifier());
     }
 
     @Override

@@ -1,8 +1,9 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
-import com.sap.sailing.domain.swisstimingadapter.security.SwissTimingSecuredDomainTypes;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
@@ -11,10 +12,9 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  * @author Axel Uhl (D043530)
  *
  */
-public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier, HasJsonUrl {
+public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier {
     String getName();
     
-    @Override
     String getJsonURL();
     
     String getHostname();
@@ -29,11 +29,24 @@ public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier,
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(this);
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
     default HasPermissions getType() {
-        return SwissTimingSecuredDomainTypes.SWISS_TIMING_ACCOUNT;
+        return SecuredDomainType.SWISS_TIMING_ACCOUNT;
+    }
+
+    @Override
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getJsonURL());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(SwissTimingConfiguration config) {
+        return new TypeRelativeObjectIdentifier(config.getJsonURL());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl) {
+        return new TypeRelativeObjectIdentifier(jsonUrl);
     }
 }

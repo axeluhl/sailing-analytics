@@ -10,6 +10,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
@@ -20,7 +21,6 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
-import com.sap.sailing.domain.tractracadapter.security.TracTracSecuredDomainType;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
@@ -65,7 +65,7 @@ public class Activator implements BundleActivator {
                     securityService.migrateOwnership(trackTrackConfig);
                 }
                 // we do not necessarily have tractrac configs, so ensure that migration is marked as done
-                securityService.assumeOwnershipMigrated(TracTracSecuredDomainType.TRACTRAC_ACCOUNT.getName());
+                securityService.assumeOwnershipMigrated(SecuredDomainType.TRACTRAC_ACCOUNT.getName());
 
                 properties.put(TypeBasedServiceFinder.TYPE, RaceTrackingConnectivityParametersImpl.TYPE);
                 context.registerService(RaceTrackingConnectivityParametersHandler.class, paramsHandler, properties);
