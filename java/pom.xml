@@ -257,6 +257,7 @@
 	<property>
 	  <name>with.not.android.relevant</name>
 	  <value>true</value>
+        </property>
       </activation>
     <build>
       <plugins>
