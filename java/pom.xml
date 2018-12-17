@@ -238,11 +238,13 @@
                   <id>com.google.gwt.dev</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
+                <!-- TODO is this one responsible for a cyclic dependency in com.sap.sse.common?
                 <requirement>
                   <type>eclipse-feature</type>
                   <id>com.sap.sse.feature</id>
                   <versionRange>0.0.0</versionRange>
                 </requirement>
+                -->
               </extraRequirements>
             </dependency-resolution>
           </configuration>
