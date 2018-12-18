@@ -16,7 +16,7 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
         implements Named {
     private static final String QUALIFIER_SEPARATOR = WildcardPermission.PART_DIVIDER_TOKEN;
     private static final long serialVersionUID = 1243342091492822614L;
-    private RD roleDefinition;
+    protected RD roleDefinition;
     protected G qualifiedForTenant;
     protected U qualifiedForUser;
 
@@ -104,13 +104,19 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
             return false;
         AbstractRole other = (AbstractRole) obj;
         if (qualifiedForTenant == null) {
-            if (other.qualifiedForTenant != null)
+            if (other.qualifiedForTenant != null) {
                 return false;
+            }
+        } else if (other.qualifiedForTenant == null) {
+            return false;
         } else if (!qualifiedForTenant.getId().equals(other.qualifiedForTenant.getId()))
             return false;
         if (qualifiedForUser == null) {
-            if (other.qualifiedForUser != null)
+            if (other.qualifiedForUser != null) {
                 return false;
+            }
+        } else if (other.qualifiedForUser == null) {
+            return false;
         } else if (!qualifiedForUser.getName().equals(other.qualifiedForUser.getName()))
             return false;
         if (roleDefinition == null) {
