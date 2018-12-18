@@ -703,13 +703,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, Locale locale, final String validationBaseURL)
-            throws UserManagementException, MailException, UserGroupManagementException {
-        return createSimpleUser(username, email, password, fullName, company, locale, validationBaseURL,
-                getDefaultTenantForCurrentUser());
-    }
-
-    private User createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL, UserGroup userOwner)
             throws UserManagementException, MailException, UserGroupManagementException {
         logger.info("Creating user "+username);

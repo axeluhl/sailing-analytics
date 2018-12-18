@@ -123,7 +123,7 @@ public class SecurityResource extends AbstractSecurityResource {
                         public User run() throws Exception {
                             final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
                             User newUser = getService().createSimpleUser(username, email, password, fullName, company,
-                                    Locale.ENGLISH, validationBaseURL);
+                                    Locale.ENGLISH, validationBaseURL, getService().getDefaultTenantForCurrentUser());
                             SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
                             return newUser;
                         }

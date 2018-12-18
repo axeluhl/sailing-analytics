@@ -438,7 +438,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                         try {
                             User newUser = getSecurityService().createSimpleUser(username, email, password, fullName,
                                     company,
-                                    getLocaleFromLocaleName(localeName), validationBaseURL);
+                                    getLocaleFromLocaleName(localeName), validationBaseURL,
+                                    getSecurityService().getDefaultTenantForCurrentUser());
                             for (Role role : newUser.getRoles()) {
                                 String associationTypeIdentifier = PermissionAndRoleAssociation.get(role, newUser);
                                 QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION

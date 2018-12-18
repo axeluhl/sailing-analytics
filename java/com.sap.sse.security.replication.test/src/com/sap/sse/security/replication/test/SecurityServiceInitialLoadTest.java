@@ -39,7 +39,7 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
                 final SecurityServiceImpl newMaster = new SecurityServiceImpl(userStore, accessControlStore);
                 newMaster.createSimpleUser(username, email, password, fullName, company,
-                        /* validationBaseURL */ Locale.ENGLISH, null);
+                        /* validationBaseURL */ Locale.ENGLISH, null, null);
                 accessToken = newMaster.createAccessToken(username);
                 return newMaster;
             }

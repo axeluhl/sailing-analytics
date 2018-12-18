@@ -92,7 +92,8 @@ public class TaggingServiceTest {
         // setup security service
         securityService = new SecurityBundleTestWrapper().initializeSecurityServiceForTesting();
         // create & login user
-        securityService.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH, null);
+        securityService.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH, null,
+                securityService.getDefaultTenantForCurrentUser());
 
         subject = SecurityUtils.getSubject();
         subject.login(new UsernamePasswordToken(username, password));
