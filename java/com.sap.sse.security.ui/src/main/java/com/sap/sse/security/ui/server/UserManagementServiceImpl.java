@@ -139,7 +139,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                         Util.addAll(user.getRoles(), nonConcurrentModificationCopy);
                         for (Role roleInstance : nonConcurrentModificationCopy) {
                             if (roleInstance.getRoleDefinition().equals(role)) {
-                                String associationTypeIdentifier = PermissionAndRoleAssociation.get(roleInstance, user);
+                                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(roleInstance, user);
                                 QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
                                 getSecurityService().deleteOwnership(qualifiedTypeIdentifier);
@@ -441,7 +441,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                                     getLocaleFromLocaleName(localeName), validationBaseURL,
                                     getSecurityService().getDefaultTenantForCurrentUser());
                             for (Role role : newUser.getRoles()) {
-                                String associationTypeIdentifier = PermissionAndRoleAssociation.get(role, newUser);
+                                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, newUser);
                                 QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
 
@@ -586,7 +586,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }
         for (Role roleToRemove : roleDefinitionsToRemove) {
-            String associationTypeIdentifier = PermissionAndRoleAssociation.get(roleToRemove, u);
+            TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(roleToRemove, u);
             QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
@@ -600,9 +600,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     });
         }
         for (Role roleToAdd : rolesToAdd) {
-            String associationTypeIdentifier = PermissionAndRoleAssociation.get(roleToAdd, u);
+            TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(roleToAdd, u);
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredSecurityTypes.ROLE_ASSOCIATION,
-                    associationTypeIdentifier, associationTypeIdentifier, new Action() {
+                    associationTypeIdentifier, associationTypeIdentifier.toString(), new Action() {
 
                         @Override
                         public void run() throws Exception {

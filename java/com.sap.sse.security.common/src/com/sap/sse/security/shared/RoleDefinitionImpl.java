@@ -118,10 +118,14 @@ public class RoleDefinitionImpl implements RoleDefinition {
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RoleDefinition roleDefinition) {
-        return new TypeRelativeObjectIdentifier(roleDefinition.getId().toString());
+        return new TypeRelativeObjectIdentifier(getTypeRelativeObjectIdentifierAsString(roleDefinition));
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID uuid) {
         return new TypeRelativeObjectIdentifier(uuid.toString());
+    }
+
+    public static String getTypeRelativeObjectIdentifierAsString(RoleDefinition roleDefinition) {
+        return roleDefinition.getId().toString();
     }
 }

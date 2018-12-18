@@ -1,20 +1,23 @@
 package com.sap.sse.security.shared.impl;
 
+import com.sap.sse.security.shared.RoleDefinitionImpl;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+
 public class PermissionAndRoleAssociation {
-    public static String get(Role role, User userWithRole) {
+    public static TypeRelativeObjectIdentifier get(Role role, User userWithRole) {
         String ownerTenantString = "null";
         UserGroup ownerTenant = role.getQualifiedForTenant();
         if (ownerTenant != null) {
-            ownerTenantString = ownerTenant.getIdentifier().getTypeRelativeObjectIdentifier();
+            ownerTenantString = UserGroupImpl.getTypeRelativeObjectIdentifierAsString(ownerTenant);
         }
         String ownerUserString = "null";
         User ownerUser = role.getQualifiedForUser();
         if (ownerUser != null) {
-            ownerUserString = ownerUser.getIdentifier().getTypeRelativeObjectIdentifier();
+            ownerUserString = SecurityUserImpl.getTypeRelativeObjectIdentifierAsString(ownerUser);
         }
-        String roleDefinitionString = role.getRoleDefinition().getId().toString();
-        String userWithRoleString = userWithRole.getIdentifier().getTypeRelativeObjectIdentifier();
-        String associationTypeRelativeId = WildcardPermissionEncoder.encode(userWithRoleString, roleDefinitionString,
+        String roleDefinitionString = RoleDefinitionImpl.getTypeRelativeObjectIdentifierAsString(role.getRoleDefinition());
+        String userWithRoleString = SecurityUserImpl.getTypeRelativeObjectIdentifierAsString(userWithRole);
+        TypeRelativeObjectIdentifier associationTypeRelativeId = new TypeRelativeObjectIdentifier(userWithRoleString, roleDefinitionString,
                 ownerUserString, ownerTenantString);
         return associationTypeRelativeId;
     }

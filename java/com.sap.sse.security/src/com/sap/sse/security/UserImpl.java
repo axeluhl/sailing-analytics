@@ -371,11 +371,15 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup> 
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(User user) {
-        return new TypeRelativeObjectIdentifier(user.getName());
+        return new TypeRelativeObjectIdentifier(getTypeRelativeObjectIdentifierAsString(user));
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String userName) {
         return new TypeRelativeObjectIdentifier(userName);
+    }
+
+    public static String getTypeRelativeObjectIdentifierAsString(User user) {
+        return user.getName();
     }
 
     @Override

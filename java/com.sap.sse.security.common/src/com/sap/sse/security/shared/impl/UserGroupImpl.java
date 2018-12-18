@@ -19,10 +19,14 @@ public class UserGroupImpl extends AbstractUserGroupImpl<User> implements UserGr
     }
 
     static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UserGroup userGroup) {
-        return new TypeRelativeObjectIdentifier(userGroup.getId().toString());
+        return getTypeRelativeObjectIdentifier(userGroup.getId());
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID uuid) {
         return new TypeRelativeObjectIdentifier(uuid.toString());
+    }
+
+    public static String getTypeRelativeObjectIdentifierAsString(UserGroup userGroup) {
+        return userGroup.getId().toString();
     }
 }
