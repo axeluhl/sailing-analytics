@@ -20,7 +20,7 @@ public class StrippedUserDTO extends SecurityUserImpl<RoleDefinitionDTO, RoleDTO
 
     public StrippedUserDTO(String name, Iterable<RoleDTO> roles, Iterable<WildcardPermission> permissions) {
         super(name, permissions);
-        roles = new HashSet<>();
+        this.roles = new HashSet<>();
         Util.addAll(roles, this.getRolesInternal());
     }
 
