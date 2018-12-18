@@ -155,7 +155,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         userManagementService.getUserByName(usernameBox.getText(), new AsyncCallback<UserDTO>() {
             @Override
             public void onSuccess(UserDTO result) {
-                resolvedUser = result;
+                resolvedUser = result == null ? null : result.asStrippedUser();
                 resolvingUsername = false;
                 validateAndUpdate();
             }

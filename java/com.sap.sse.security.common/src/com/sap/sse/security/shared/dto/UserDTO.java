@@ -2,13 +2,16 @@ package com.sap.sse.security.shared.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
-public class UserDTO extends StrippedUserDTO
+public class UserDTO extends SecurityUserImpl<RoleDefinitionDTO, RoleDTO, StrippedUserGroupDTO>
         implements Serializable, SecuredDTO {
 
     private static final long serialVersionUID = 7556217539893146187L;
@@ -23,6 +26,8 @@ public class UserDTO extends StrippedUserDTO
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
     private StrippedUserGroupDTO defaultTenantForCurrentServer;
 
+    private Set<RoleDTO> roles;
+
     @Deprecated // gwt only
     UserDTO() {
         super(null);
@@ -35,7 +40,7 @@ public class UserDTO extends StrippedUserDTO
             List<AccountDTO> accounts, Iterable<RoleDTO> roles, StrippedUserGroupDTO defaultTenant,
             Iterable<WildcardPermission> permissions,
             Iterable<StrippedUserGroupDTO> groups) {
-        super(name, roles, permissions);
+        super(name, permissions);
         this.defaultTenantForCurrentServer = defaultTenant;
         this.email = email;
         this.fullName = fullName;
@@ -45,6 +50,13 @@ public class UserDTO extends StrippedUserDTO
         this.accounts = accounts;
         this.groups = new ArrayList<>();
         Util.addAll(groups, this.groups);
+        this.roles = new HashSet<>();
+        Util.addAll(roles, this.getRolesInternal());
+    }
+    
+    @Override
+    protected Set<RoleDTO> getRolesInternal() {
+        return roles;
     }
 
     /**
@@ -129,5 +141,9 @@ public class UserDTO extends StrippedUserDTO
     
     public void setDefaultTenantForCurrentServer(StrippedUserGroupDTO defaultTenant) {
         this.defaultTenantForCurrentServer = defaultTenant;
+    }
+    
+    public StrippedUserDTO asStrippedUser() {
+        return new StrippedUserDTO(getName());
     }
 }

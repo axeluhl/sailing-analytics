@@ -1,6 +1,5 @@
 package com.sap.sse.security.shared.impl;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,11 +11,9 @@ import com.sap.sse.security.shared.SecurityUserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup>
-        implements SecurityUser<RD, R, G> {
+        extends AbstractUserReference implements SecurityUser<RD, R, G> {
     private static final long serialVersionUID = -3639860207453072248L;
 
-    private String name;
-    
     private Set<WildcardPermission> permissions;
     
     /**
@@ -27,7 +24,7 @@ public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends Abst
     }
     
     public SecurityUserImpl(String name, Iterable<WildcardPermission> permissions) {
-        this.name = name;
+        super(name);
         this.permissions = new HashSet<>();
         for (WildcardPermission permission : permissions) {
             this.permissions.add(permission);
@@ -35,16 +32,6 @@ public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends Abst
     }
     
     protected abstract Set<R> getRolesInternal();
-    
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Serializable getId() {
-        return getName();
-    }
 
     @Override
     public Iterable<R> getRoles() {
@@ -79,7 +66,7 @@ public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends Abst
 
     @Override
     public String toString() {
-        return name+" (roles: "+getRoles()+")";
+        return getName() + " (roles: " + getRoles() + ")";
     }
 
     /**
