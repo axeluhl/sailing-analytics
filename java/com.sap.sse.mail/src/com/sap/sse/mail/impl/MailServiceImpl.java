@@ -30,8 +30,8 @@ import com.sap.sse.mail.MailServiceResolver;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class MailServiceImpl implements ReplicableMailService {

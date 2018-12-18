@@ -2,7 +2,7 @@ package com.sap.sse.security.userstore.mongodb;
 
 import java.util.Map;
 
-import com.mongodb.DB;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -39,5 +39,5 @@ public interface MongoObjectFactory {
 
     public void storePreferences(String username, Map<String, String> userMap);
 
-    public DB getDatabase();
+    public MongoDatabase getDatabase();
 }

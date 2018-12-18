@@ -56,6 +56,7 @@ import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
@@ -138,6 +139,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                         Util.addAll(user.getRoles(), nonConcurrentModificationCopy);
                         for (Role roleInstance : nonConcurrentModificationCopy) {
                             if (roleInstance.getRoleDefinition().equals(role)) {
+                                String associationTypeIdentifier = PermissionAndRoleAssociation.get(roleInstance, user);
+                                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                                getSecurityService().deleteOwnership(qualifiedTypeIdentifier);
                                 getSecurityService().removeRoleFromUser(user, roleInstance);
                             }
                         }
@@ -431,8 +436,23 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     @Override
                     public User run() throws Exception {
                         try {
-                            return getSecurityService().createSimpleUser(username, email, password, fullName, company,
-                                    getLocaleFromLocaleName(localeName), validationBaseURL);
+                            User newUser = getSecurityService().createSimpleUser(username, email, password, fullName,
+                                    company,
+                                    getLocaleFromLocaleName(localeName), validationBaseURL,
+                                    getSecurityService().getDefaultTenantForCurrentUser());
+                            for (Role role : newUser.getRoles()) {
+                                String associationTypeIdentifier = PermissionAndRoleAssociation.get(role, newUser);
+                                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
+
+                                User currentUser = getSecurityService().getCurrentUser();
+                                if (currentUser == null) {
+                                    currentUser = newUser;
+                                }
+                                UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
+                                getSecurityService().setOwnership(qualifiedTypeIdentifier, currentUser, tenant);
+                            }
+                            return newUser;
                         } catch (UserManagementException | UserGroupManagementException e) {
                             logger.log(Level.SEVERE, "Error creating user " + username, e);
                             throw new UserManagementException(e.getMessage());
@@ -566,10 +586,29 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }
         for (Role roleToRemove : roleDefinitionsToRemove) {
-            getSecurityService().removeRoleFromUser(u, roleToRemove);
+            String associationTypeIdentifier = PermissionAndRoleAssociation.get(roleToRemove, u);
+            QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                    new ActionWithResult<Void>() {
+
+                        @Override
+                        public Void run() throws Exception {
+                            getSecurityService().removeRoleFromUser(u, roleToRemove);
+                            return null;
+                        }
+                    });
         }
         for (Role roleToAdd : rolesToAdd) {
-            getSecurityService().addRoleForUser(u, roleToAdd);
+            String associationTypeIdentifier = PermissionAndRoleAssociation.get(roleToAdd, u);
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredSecurityTypes.ROLE_ASSOCIATION,
+                    associationTypeIdentifier, associationTypeIdentifier, new Action() {
+
+                        @Override
+                        public void run() throws Exception {
+                            getSecurityService().addRoleForUser(u, roleToAdd);
+                        }
+                    });
         }
         final String message = "Set roles " + roleDefinitionIdAndTenantQualifierNameAndUsernames + " for user "
                 + username;

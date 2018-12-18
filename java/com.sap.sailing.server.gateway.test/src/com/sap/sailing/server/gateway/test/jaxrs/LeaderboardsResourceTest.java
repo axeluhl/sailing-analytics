@@ -48,7 +48,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     }
     
     private void dropAndCreateRegatta() {
-        service.getDB().dropDatabase();
+        service.getDB().drop();
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         List<String> raceColumnNames = new ArrayList<String>();

@@ -1,15 +1,21 @@
 package com.sap.sse.security;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
@@ -70,6 +76,19 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup> 
     private final Map<AccountType, Account> accounts;
 
     private transient UserGroupProvider userGroupProvider;
+    
+    /**
+     * Roles can refer back to this user object, e.g., for the user qualification, or during the tenant
+     * qualification if this user belongs to the tenant for which the role is qualified. Therefore, this
+     * set has to be transient, and the {@link #roleListForSerialization} field takes over the serialization
+     * which is resolved by {@link #readResolve}.
+     * 
+     * @see #writeObject
+     * @see #readResolve
+     */
+    private transient Set<Role> roles;
+    
+    private List<Role> roleListForSerialization;
 
     public UserImpl(String name, String email, Map<String, UserGroup> defaultTenantForServer,
             UserGroupProvider userGroupProvider, Account... accounts) {
@@ -100,6 +119,30 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup> 
         for (Account a : accounts) {
             this.accounts.put(a.getAccountType(), a);
         }
+        roles = new HashSet<>();
+    }
+    
+    @Override
+    protected Set<Role> getRolesInternal() {
+        return roles;
+    }
+    
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
+        oos.writeObject(new ArrayList<>(roles));
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void readObject(java.io.ObjectInputStream ois)
+            throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        roleListForSerialization = (List<Role>) ois.readObject();
+    }
+    
+    protected Object readResolve() {
+        roles = new HashSet<>(roleListForSerialization);
+        roleListForSerialization = null;
+        return this;
     }
     
     /**

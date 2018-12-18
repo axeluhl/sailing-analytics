@@ -5,11 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
 
+import org.bson.Document;
 import org.junit.Test;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Mark;
@@ -31,15 +30,15 @@ public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
     public void test() {
         DomainObjectFactoryImpl dof = new DomainObjectFactoryImpl(MongoDBConfiguration.getDefaultTestConfiguration()
                 .getService().getDB(), com.sap.sailing.domain.base.DomainFactory.INSTANCE);
-        DBObject waypoint1 = new BasicDBObject();
+        Document waypoint1 = new Document();
         waypoint1.put(FieldNames.WAYPOINT_PASSINGSIDE.name(), "Gate");
-        DBObject cp = new BasicDBObject();
+        Document cp = new Document();
         cp.put(FieldNames.CONTROLPOINT_CLASS.name(), "Gate");
-        DBObject cpValue = new BasicDBObject();
+        Document cpValue = new Document();
         cpValue.put(FieldNames.GATE_NAME.name(), "Name");
         cpValue.put(FieldNames.GATE_ID.name(), (Serializable) 0);
         Mark mark1 = new MarkImpl(0, "Left", MarkType.BUOY, AbstractColor.getCssColor("blue"), "square", "checkers");
-        DBObject dbMark1 = new BasicDBObject();
+        Document dbMark1 = new Document();
         dbMark1.put(FieldNames.MARK_ID.name(), mark1.getId());
         dbMark1.put(FieldNames.MARK_COLOR.name(), mark1.getColor().getAsHtml());
         dbMark1.put(FieldNames.MARK_NAME.name(), mark1.getName());
@@ -47,7 +46,7 @@ public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
         dbMark1.put(FieldNames.MARK_SHAPE.name(), mark1.getShape());
         dbMark1.put(FieldNames.MARK_TYPE.name(), mark1.getType().name());
         Mark mark2 = new MarkImpl(0, "Right", MarkType.BUOY, AbstractColor.getCssColor("blue"), "square", "checkers");
-        DBObject dbMark2 = new BasicDBObject();
+        Document dbMark2 = new Document();
         dbMark2.put(FieldNames.MARK_ID.name(), mark2.getId());
         dbMark2.put(FieldNames.MARK_COLOR.name(), mark2.getColor().getAsHtml());
         dbMark2.put(FieldNames.MARK_NAME.name(), mark2.getName());
@@ -58,17 +57,17 @@ public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
         cpValue.put(FieldNames.GATE_LEFT.name(), dbMark1);
         cp.put(FieldNames.CONTROLPOINT_VALUE.name(), cpValue);
         waypoint1.put(FieldNames.CONTROLPOINT.name(), cp);
-        DBObject waypoint2 = new BasicDBObject();
+        Document waypoint2 = new Document();
         waypoint2.put(FieldNames.WAYPOINT_PASSINGSIDE.name(), "Gate");
         waypoint2.put(FieldNames.CONTROLPOINT.name(), cp);
-        DBObject waypoint3 = new BasicDBObject();
+        Document waypoint3 = new Document();
         waypoint3.put(FieldNames.WAYPOINT_PASSINGSIDE.name(), "Gate");
         waypoint3.put(FieldNames.CONTROLPOINT.name(), cp);
         BasicDBList list = new BasicDBList();
         list.add(waypoint1);
         list.add(waypoint2);
         list.add(waypoint3);
-        DBObject raceLogEvent = new BasicDBObject();
+        Document raceLogEvent = new Document();
         raceLogEvent.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogCourseDesignChangedEvent.class.getSimpleName());
         raceLogEvent.put(FieldNames.RACE_LOG_COURSE_DESIGN.name(), list);
         raceLogEvent.put(FieldNames.RACE_LOG_EVENT_CREATED_AT.name(), System.currentTimeMillis());
@@ -79,18 +78,18 @@ public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
         raceLogEvent.put(FieldNames.RACE_LOG_EVENT_AUTHOR_PRIORITY.name(), 1);
         RaceLogCourseDesignChangedEvent event = (RaceLogCourseDesignChangedEvent) dof.loadRaceLogEvent(raceLogEvent).getA();
         assertEquals(event.getCourseDesign().getFirstWaypoint().getPassingInstructions(), PassingInstruction.Line);
-        assertTrue(waypoint1.containsField(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name())
-                && !waypoint1.containsField(FieldNames.WAYPOINT_PASSINGSIDE.name()));
+        assertTrue(waypoint1.containsKey(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name())
+                && !waypoint1.containsKey(FieldNames.WAYPOINT_PASSINGSIDE.name()));
         assertTrue(waypoint2.get(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name()).equals("Gate"));
         assertTrue(waypoint3.get(FieldNames.WAYPOINT_PASSINGINSTRUCTIONS.name()).equals("Line"));
         assertTrue(cp.get(FieldNames.CONTROLPOINT_CLASS.name()).equals(ControlPointWithTwoMarks.class.getSimpleName()));
-        assertTrue(cpValue.containsField(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name())
-                && cpValue.containsField(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name())
-                && cpValue.containsField(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name())
-                && cpValue.containsField(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name())
-                && !cpValue.containsField(FieldNames.GATE_NAME.name())
-                && !cpValue.containsField(FieldNames.GATE_ID.name())
-                && !cpValue.containsField(FieldNames.GATE_LEFT.name())
-                && !cpValue.containsField(FieldNames.GATE_RIGHT.name()));
+        assertTrue(cpValue.containsKey(FieldNames.CONTROLPOINTWITHTWOMARKS_ID.name())
+                && cpValue.containsKey(FieldNames.CONTROLPOINTWITHTWOMARKS_NAME.name())
+                && cpValue.containsKey(FieldNames.CONTROLPOINTWITHTWOMARKS_LEFT.name())
+                && cpValue.containsKey(FieldNames.CONTROLPOINTWITHTWOMARKS_RIGHT.name())
+                && !cpValue.containsKey(FieldNames.GATE_NAME.name())
+                && !cpValue.containsKey(FieldNames.GATE_ID.name())
+                && !cpValue.containsKey(FieldNames.GATE_LEFT.name())
+                && !cpValue.containsKey(FieldNames.GATE_RIGHT.name()));
     }
 }

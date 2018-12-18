@@ -27,7 +27,7 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
         protected void persistenceSetUp(boolean dropDB) {
             mongoDBService = MongoDBService.INSTANCE;
             if (dropDB) {
-                mongoDBService.getDB().dropDatabase();
+                mongoDBService.getDB().drop();
             }
         }
 

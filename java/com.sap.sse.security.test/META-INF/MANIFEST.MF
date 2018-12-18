@@ -8,9 +8,10 @@ Fragment-Host: com.sap.sse.security
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sse.security.userstore.mongodb,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sse.mongodb,
  com.sap.sse.mail,
+ org.eclipse.orbit.mongodb;bundle-version="3.2.2",
+ jcl.over.slf4j;bundle-version="1.6.4",
  slf4j.api;bundle-version="1.6.4",
  jcl.over.slf4j;bundle-version="1.6.4",
  org.mockito.mockito-core;bundle-version="1.10.14",

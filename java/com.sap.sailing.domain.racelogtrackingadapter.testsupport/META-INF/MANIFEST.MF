@@ -8,7 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain,
  com.sap.sailing.domain.common,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.racelogtrackingadapter,
  com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0",
@@ -17,6 +16,7 @@ Require-Bundle: com.sap.sailing.domain.shared.android,
  org.hamcrest;bundle-version="1.1.0",
  org.junit;bundle-version="4.8.2",
  com.sap.sse.common,
- com.sap.sailing.server.gateway.serialization.shared.android
+ com.sap.sailing.server.gateway.serialization.shared.android,
+ org.eclipse.orbit.mongodb;bundle-version="3.2.2"
 Export-Package: com.sap.sailing.domain.racelog.tracking.test.mock
 Automatic-Module-Name: com.sap.sailing.domain.racelogtrackingadapter.testsupport

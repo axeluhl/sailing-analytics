@@ -79,8 +79,8 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
@@ -701,13 +701,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, Locale locale, final String validationBaseURL)
-            throws UserManagementException, MailException, UserGroupManagementException {
-        return createSimpleUser(username, email, password, fullName, company, locale, validationBaseURL,
-                getDefaultTenantForCurrentUser());
-    }
-
-    private User createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL, UserGroup userOwner)
             throws UserManagementException, MailException, UserGroupManagementException {
         logger.info("Creating user "+username);

@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -29,18 +30,18 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccountDTO;
 import com.sap.sse.security.shared.dto.RoleDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
-import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
@@ -71,8 +72,8 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
     private final TextBox email;
     private final VerticalPanel accountPanels;
     private final StringListEditorComposite permissionsEditor;
-    private StringListEditorComposite rolesEditor; // set asynchronously after role definitions have been obtained from server
-    private final FlowPanel rolesEditorWrapper;
+    private UserRolesListEditorComposite userRolesEditor; // set asynchronously after role definitions have been obtained from server
+    private final SimplePanel userRolesEditorWrapper;
     private final Map<String, RoleDefinition> serverRoleDefinitionsByName;
 
     private final UserService userService;
@@ -94,12 +95,12 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
         this.userService = userService;
         this.serverRoleDefinitionsByName = new HashMap<>();
         this.userToEdit = userToEdit;
-        this.username = createTextBox(userToEdit.getName());
+        this.username = createTextBox(userToEdit.getName(), 70);
         username.ensureDebugId("UsernameTextBox");
         username.setEnabled(false); // the username is key and cannot be changed
-        this.email = createTextBox(userToEdit.getEmail());
-        this.fullName = createTextBox(userToEdit.getFullName());
-        this.company = createTextBox(userToEdit.getCompany());
+        this.email = createTextBox(userToEdit.getEmail(), 70);
+        this.fullName = createTextBox(userToEdit.getFullName(), 70);
+        this.company = createTextBox(userToEdit.getCompany(), 70);
         List<String> defaultPermissionNames = new ArrayList<>();
         for (final HasPermissions permission : additionalPermissions) {
             for (final Action action : permission.getAvailableActions()) {
@@ -109,7 +110,8 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
         permissionsEditor = new StringListEditorComposite(userToEdit==null?Collections.<String>emptySet():userToEdit.getStringPermissions(), stringMessages,
                 com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultPermissionNames,
                 stringMessages.enterPermissionName());
-        rolesEditorWrapper = new FlowPanel();
+        this.configureFontSize(permissionsEditor);
+        userRolesEditorWrapper = new SimplePanel();
         updateRolesAndInitializeRolesEditor(userToEdit);
         this.accountPanels = new VerticalPanel();
         for (AccountDTO a : userToEdit.getAccounts()) {
@@ -199,14 +201,15 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
      * retrieving a fresh roles copy from the server
      */
     private void setRolesEditor(UserDTO user) {
-        rolesEditor = new StringListEditorComposite(
-                user == null ? Collections.<String> emptySet() : user.getStringRoles(), stringMessages,
-                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), serverRoleDefinitionsByName.keySet(),
-                stringMessages.enterRoleName());
-        while (rolesEditorWrapper.getWidgetCount() > 0) {
-            rolesEditorWrapper.remove(0);
-        }
-        rolesEditorWrapper.add(rolesEditor);
+        this.userRolesEditor = new UserRolesListEditorComposite(user == null ? Collections.emptySet()
+                : Util.map(user.getRoles(), RoleDTO::getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName),
+                stringMessages, serverRoleDefinitionsByName.keySet());
+        this.configureFontSize(userRolesEditor);
+        this.userRolesEditorWrapper.setWidget(userRolesEditor);
+    }
+
+    private <E extends ListEditorComposite<?>> void configureFontSize(final E listEditor) {
+        listEditor.getElement().getStyle().setProperty("fontSize", "small");
     }
 
     @Override
@@ -217,23 +220,19 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
     @Override
     protected Pair<UserDTO, Iterable<Triple<UUID, String, String>>> getResult() {
         final Iterable<Triple<UUID, String, String>> roles;
-        if (rolesEditor != null) {
+        if (userRolesEditor != null) {
             final ArrayList<UUID> newRoleDefinitionIds = new ArrayList<>();
-            for (String roleName : rolesEditor.getValue()) {
-                final Triple<String, String, String> roleDefinitionNameAndTenantQualifierNameAndUserQualifierName = AbstractRole
-                        .getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(roleName);
-                RoleDefinition roleDefinition = serverRoleDefinitionsByName.get(roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getA());
+            for (final Triple<String, String, String> userRoleSpec : userRolesEditor.getValue()) {
+                final RoleDefinition roleDefinition = serverRoleDefinitionsByName.get(userRoleSpec.getA());
                 if (roleDefinition != null) {
                     newRoleDefinitionIds.add(roleDefinition.getId());
-                }    
+                }
             }
-            roles = Util.map(rolesEditor.getValue(), roleName->{
-                final Triple<String, String, String> roleDefinitionNameAndTenantQualifierNameAndUserQualifierName = AbstractRole
-                        .getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(roleName);
-                
-                final String roleNameToAdd = roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getA();
-                final String roleTenantNameToAdd = roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getB();
-                final String roleUsernameToAdd = roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getC();
+
+            roles = Util.map(userRolesEditor.getValue(), userRoleSpec -> {
+                final String roleNameToAdd = userRoleSpec.getA();
+                final String roleTenantNameToAdd = userRoleSpec.getB();
+                final String roleUsernameToAdd = userRoleSpec.getC();
                 
                 RoleDefinition roleDefinition = null;
                 for (RoleDTO role : userToEdit.getRoles()) {
@@ -245,27 +244,30 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
                     if (Util.equalsWithNull(existingRoleName, roleNameToAdd)
                             && Util.equalStringsWithEmptyIsNull(existingTenantName, roleTenantNameToAdd)
                             && Util.equalStringsWithEmptyIsNull(existingUsername, roleUsernameToAdd)) {
-                        roleDefinition =role.getRoleDefinition();
+                        roleDefinition = role.getRoleDefinition();
                         break;
                     }
                 }
                 if (roleDefinition == null) {
-                    roleDefinition = serverRoleDefinitionsByName.get(roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getA());
+                    roleDefinition = serverRoleDefinitionsByName.get(userRoleSpec.getA());
                 }
                 if (roleDefinition == null) {
-                    // FIXME how to handle this case? Use null as role definition ID and validate afterwards
+                    // FIXME how to handle this case? Use null as role definition ID and validate afterwards, or:
+                    // Should a user be able to assign roles if not permitted for the respective role definition?
                     return null;
                 }
-                return new Triple<>(
-                    roleDefinition.getId(), /* qualifying tenant name */ roleTenantNameToAdd,
-                    /* qualifying user name */ roleUsernameToAdd);
+                // Triple containing RoleDefinition id, qualifying tenant name and qualifying user name
+                return new Triple<>(roleDefinition.getId(), roleTenantNameToAdd, roleUsernameToAdd);
             });
         } else {
             roles = Collections.emptyList();
         }
-        final Iterable<WildcardPermission> newPermissionList = Util.map(permissionsEditor.getValue(), p->new WildcardPermission(p));
-        UserDTO user = new UserDTO(userToEdit.getName(), email.getText(), fullName.getText(), company.getText(), userToEdit.getLocale(), userToEdit.isEmailValidated(),
-                userToEdit.getAccounts(), /* roles */ Collections.emptyList(), userToEdit.getDefaultTenant(), newPermissionList, userToEdit.getUserGroups());
+        final Iterable<WildcardPermission> newPermissionList = Util.map(permissionsEditor.getValue(),
+                WildcardPermission::new);
+        final UserDTO user = new UserDTO(userToEdit.getName(), email.getText(), fullName.getText(), company.getText(),
+                userToEdit.getLocale(), userToEdit.isEmailValidated(), userToEdit.getAccounts(),
+                /* roles */ Collections.emptyList(), userToEdit.getDefaultTenant(), newPermissionList,
+                userToEdit.getUserGroups());
         return new Pair<>(user, roles);
     }
 
@@ -283,7 +285,7 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
         result.setWidget(4, 0, new Label(stringMessages.permissions()));
         result.setWidget(4, 1, permissionsEditor);
         result.setWidget(5, 0, new Label(stringMessages.roles()));
-        result.setWidget(5, 1, rolesEditorWrapper);
+        result.setWidget(5, 1, userRolesEditorWrapper);
         result.setWidget(6, 0, accountPanels);
         return result;
     }

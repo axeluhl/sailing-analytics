@@ -15,7 +15,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -154,10 +154,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void logout();
 
     /**
-     * @param validationBaseURL if <code>null</code>, no validation will be attempted
+     * This version should only be used for tests, normally the defaultTenand handling should be used
+     * 
+     * @param validationBaseURL
+     *            if <code>null</code>, no validation will be attempted
      */
     User createSimpleUser(String username, String email, String password, String fullName, String company,
-            Locale locale, String validationBaseURL)
+            Locale locale, String validationBaseURL, UserGroup userOwner)
             throws UserManagementException, MailException, UserGroupManagementException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;

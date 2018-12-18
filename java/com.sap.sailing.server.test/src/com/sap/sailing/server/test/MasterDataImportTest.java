@@ -34,11 +34,11 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.mongodb.DB;
 import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -129,14 +129,14 @@ import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServi
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.TrackBasedTest;
+import com.sap.sailing.domain.tracking.DummyTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.server.masterdata.DummyTrackedRace;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.testsupport.RacingEventServiceImplMock;
 import com.sap.sse.common.Color;
@@ -156,8 +156,6 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
-
-import junit.framework.Assert;
 
 public class MasterDataImportTest {
 
@@ -241,8 +239,7 @@ public class MasterDataImportTest {
 
     private void deleteAllDataFromDatabase() {
         MongoDBService service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
-        service.getDB().getWriteConcern().fsync();
-        service.getDB().dropDatabase();
+        service.getDB().withWriteConcern(WriteConcern.JOURNALED).drop();
     }
 
     private Map<Competitor, Boat> createCompetitorsAndBoatsMap(BoatClass boatClass, Iterable<Competitor> competitors) {
@@ -424,8 +421,6 @@ public class MasterDataImportTest {
             destService = getDestService(randomUUID, serviceFinderFactory);
 
             domainFactory = destService.getBaseDomainFactory();
-            DB db = destService.getMongoObjectFactory().getDatabase();
-            db.setWriteConcern(WriteConcern.SAFE);
             inputStream = new ByteArrayInputStream(os.toByteArray());
             MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
                     securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
@@ -471,7 +466,7 @@ public class MasterDataImportTest {
 
         raceColumnOnTarget.setTrackedRace(fleet1OnTarget, trackedRaceForTarget);
 
-        Assert.assertEquals(factor, leaderboard.getScoringScheme().getScoreFactor(raceColumnOnTarget));
+        Assert.assertEquals(factor, leaderboard.getScoringScheme().getScoreFactor(raceColumnOnTarget), 0.000001);
 
         Iterable<Competitor> competitorsOnTarget = leaderboardOnTarget.getAllCompetitors();
         Iterator<Competitor> competitorIterator = competitorsOnTarget.iterator();
@@ -482,12 +477,12 @@ public class MasterDataImportTest {
         Assert.assertEquals(
                 scoreCorrection,
                 leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
-                        raceColumnOnTarget));
+                        raceColumnOnTarget), 0.0000001);
         Assert.assertEquals(maxPointsReason, leaderboardOnTarget.getScoreCorrection()
                 .getMaxPointsReason(competitorOnTarget, raceColumnOnTarget, MillisecondsTimePoint.now()));
 
         // Check for carried points
-        Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget));
+        Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget), 0.0000001);
 
         // Check for suppressed competitor
         Assert.assertTrue(leaderboardOnTarget.getSuppressedCompetitors().iterator().hasNext());
@@ -736,7 +731,7 @@ public class MasterDataImportTest {
         Assert.assertEquals(
                 scoreCorrection,
                 leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
-                        raceColumnOnTarget));
+                        raceColumnOnTarget), 0.0000001);
         Assert.assertEquals(
                 maxPointsReason,
                 leaderboardOnTarget.getScoreCorrection().getMaxPointsReason(competitorOnTarget, raceColumnOnTarget,
@@ -2159,7 +2154,7 @@ public class MasterDataImportTest {
 
         RaceColumn metaColumn = metaColumns.iterator().next();
         Assert.assertNotNull(metaColumn);
-        Assert.assertEquals(factor, overallLeaderboard.getScoringScheme().getScoreFactor(metaColumn));
+        Assert.assertEquals(factor, overallLeaderboard.getScoringScheme().getScoreFactor(metaColumn), 0.0000001);
 
         // Verify that overall leaderboard data has been persisted
         RacingEventService persistenceVerifier = new RacingEventServiceImplMock(){};
@@ -2181,7 +2176,7 @@ public class MasterDataImportTest {
 
         metaColumn = metaColumns.iterator().next();
         Assert.assertNotNull(metaColumn);
-        Assert.assertEquals(factor, overallLeaderboard.getScoringScheme().getScoreFactor(metaColumn));
+        Assert.assertEquals(factor, overallLeaderboard.getScoringScheme().getScoreFactor(metaColumn), 0.0000001);
 
     }
 
@@ -2356,18 +2351,18 @@ public class MasterDataImportTest {
 
         raceColumnOnTarget.setTrackedRace(defaultFleetOnTarget, trackedRaceForTarget);
 
-        Assert.assertEquals(factor, leaderboardOnTarget.getScoringScheme().getScoreFactor(raceColumnOnTarget));
+        Assert.assertEquals(factor, leaderboardOnTarget.getScoringScheme().getScoreFactor(raceColumnOnTarget), 0.0000001);
 
         // Check for score corrections
         Assert.assertEquals(
                 scoreCorrection,
                 leaderboardOnTarget.getScoreCorrection().getExplicitScoreCorrection(competitorOnTarget,
-                        raceColumnOnTarget));
+                        raceColumnOnTarget), 0.0000001);
         Assert.assertEquals(maxPointsReason, leaderboardOnTarget.getScoreCorrection()
                 .getMaxPointsReason(competitorOnTarget, raceColumnOnTarget, MillisecondsTimePoint.now()));
 
         // Check for carried points
-        Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget));
+        Assert.assertEquals(carriedPoints, leaderboardOnTarget.getCarriedPoints(competitorOnTarget), 0.0000001);
 
         // Check for suppressed competitor
         Assert.assertTrue(leaderboardOnTarget.getSuppressedCompetitors().iterator().hasNext());

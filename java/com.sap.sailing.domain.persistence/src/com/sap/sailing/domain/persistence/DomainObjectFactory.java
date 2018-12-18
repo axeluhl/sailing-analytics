@@ -9,7 +9,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
-import com.mongodb.DBObject;
+import org.bson.Document;
+
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
@@ -61,7 +62,7 @@ public interface DomainObjectFactory {
      */
     Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
 
-    RaceIdentifier loadRaceIdentifier(DBObject dbObject);
+    RaceIdentifier loadRaceIdentifier(Document dbObject);
     
     /**
      * Loads the leaderboard group that has <code>name</code> as its name.
@@ -168,7 +169,7 @@ public interface DomainObjectFactory {
          * @return the number of parameter sets that were loaded from the persistent store; each of these parameter sets
          *         describes for one race how it is to be loaded / tracked.
          */
-        int getNumberOfParametersToLoad();
+        long getNumberOfParametersToLoad();
         
         /**
          * For each set of parameters obtained from the persistent store,
@@ -210,7 +211,7 @@ public interface DomainObjectFactory {
     ConnectivityParametersLoadingResult loadConnectivityParametersForRacesToRestore(
             Consumer<RaceTrackingConnectivityParameters> callback);
 
-    RegattaLeaderboardWithEliminations loadRegattaLeaderboardWithEliminations(DBObject dbLeaderboard,
+    RegattaLeaderboardWithEliminations loadRegattaLeaderboardWithEliminations(Document dbLeaderboard,
             String leaderboardName, String wrappedRegattaLeaderboardName, LeaderboardRegistry leaderboardRegistry);
 
     /**

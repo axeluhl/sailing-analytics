@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.UUID;
 
+import org.junit.Assert;
 import org.junit.Before;
 
 import com.mongodb.MongoException;
@@ -40,8 +41,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.DegreeBearingImpl;
-
-import junit.framework.Assert;
 
 public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
 
