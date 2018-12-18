@@ -91,6 +91,12 @@ apply plugin: "org.ajoberstar.grgit"
 if (project.hasProperty("xmake")) {
     task wrapper(type: Wrapper) {
         distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip"
+        System.setProperty("http.proxyHost", sapProxyHost)
+        System.setProperty("https.proxyHost", sapProxyHost)
+        System.setProperty("http.proxyPort", sapProxyPort)
+        System.setProperty("https.proxyPort", sapProxyPort)
+        System.setProperty("http.nonProxyHosts", sapNonProxyHosts)
+        System.setProperty("https.nonProxyHosts", sapNonProxyHosts)
     }
 }
 
