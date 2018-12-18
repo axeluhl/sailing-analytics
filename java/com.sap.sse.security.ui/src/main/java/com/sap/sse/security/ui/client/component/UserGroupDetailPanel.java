@@ -211,7 +211,7 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
                         }
                         @Override
                         public void onSuccess(Void result) {
-                            tenant.add(user);
+                            tenant.add(user.asStrippedUser());
                             allUsersListDataProvider.updateDisplays();
                                     tenantUsersListDataProvider.updateDisplays();
                         }

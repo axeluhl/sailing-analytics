@@ -9,11 +9,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 import com.sap.sse.security.shared.SecurityAccessControlList;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SecurityUserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public abstract class AbstractAccessControlList<G extends SecurityUserGroup, U extends SecurityUser<?, ?, G>>
+public abstract class AbstractAccessControlList<G extends SecurityUserGroup>
         implements SecurityAccessControlList<G> {
     private static final long serialVersionUID = -8587238587604749862L;
 

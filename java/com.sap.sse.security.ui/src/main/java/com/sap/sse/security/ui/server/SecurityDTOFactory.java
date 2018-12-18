@@ -20,7 +20,6 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
-import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.AccountDTO;
@@ -85,7 +84,6 @@ public class SecurityDTOFactory {
                 user.getPermissions(),
                 createStrippedUserGroupDTOsFromUserGroups(securityService.getUserGroupsOfUser(user),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
-        fromOriginalToStrippedDownUser.put(user, userDTO);
         userDTO.setDefaultTenantForCurrentServer(createStrippedUserGroupDTOFromUserGroup(
                 securityService.getDefaultTenantForCurrentUser(),
                 fromOriginalToStrippedDownUserGroup));
@@ -279,24 +277,21 @@ public class SecurityDTOFactory {
      * @param fromOriginalToStrippedDownUser 
      * @param fromOriginalToStrippedDownUserGroup 
      */
-    public AccessControlListDTO pruneAccessControlListForUser(AccessControlListDTO acl, StrippedUserDTO filterForUser,
+    public AccessControlListDTO pruneAccessControlListForUser(AccessControlListDTO acl, Iterable<StrippedUserGroupDTO> groupsOfUser,
             Iterable<StrippedUserGroupDTO> allUserGroups) {
         final AccessControlListDTO result;
         // add user groups of filterForUser user
-        final Collection<StrippedUserGroupDTO> userGroups = Util.createSet(filterForUser.getUserGroups());
+        final Collection<StrippedUserGroupDTO> userGroups = new HashSet<>();
+        Util.addAll(groupsOfUser, userGroups);
         // add user groups of alluser
-        if (allUserGroups != null) {
-            userGroups.addAll(Util.createSet(allUserGroups));
-        }
-        // add null user group
-        userGroups.add(null);
+        Util.addAll(allUserGroups, userGroups);
 
         if (acl != null) {
             final Map<StrippedUserGroupDTO, Set<String>> actionsByUserGroup = new HashMap<>();
             for (final Entry<StrippedUserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
-                if (userGroups.contains(entry.getKey())) {
-                    StrippedUserGroupDTO key = entry.getKey();
-                    actionsByUserGroup.put(key, entry.getValue());
+                StrippedUserGroupDTO userGroup = entry.getKey();
+                if (userGroup == null || userGroups.contains(userGroup)) {
+                    actionsByUserGroup.put(userGroup, entry.getValue());
                 }
             }
             result = new AccessControlListDTO(actionsByUserGroup);
@@ -338,17 +333,7 @@ public class SecurityDTOFactory {
             Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
         StrippedUserDTO mappedUser = fromOriginalToStrippedDownUser.get(user);
         if (mappedUser == null) {
-            Iterable<Role> roles = user.getRoles();
             mappedUser = new StrippedUserDTO(user.getName());
-            fromOriginalToStrippedDownUser.put(user, mappedUser);
-            Iterable<RoleDTO> rolesDTO = createRolesDTOs(roles, fromOriginalToStrippedDownUser,
-                    fromOriginalToStrippedDownUserGroup, securityService);
-            for (RoleDTO r : rolesDTO) {
-                mappedUser.addRole(r);
-            }
-            for (WildcardPermission p : user.getPermissions()) {
-                mappedUser.addPermission(p);
-            }
             fromOriginalToStrippedDownUser.put(user, mappedUser);
         }
         return mappedUser;
