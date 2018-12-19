@@ -82,7 +82,7 @@ public class MarkRessource extends AbstractSailingServerResource {
         Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName);
         String regattaName = (String) requestObject.get("regattaName");
         Regatta regatta = getService().getRegattaByName(regattaName);
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
+        SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
         RegattaLog regattaLog = getRegattaLogInternal(regattaName);
         RegattaLogDefineMarkEventImpl event = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), mark);
@@ -146,8 +146,9 @@ public class MarkRessource extends AbstractSailingServerResource {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         String leaderboardName = (String) requestObject.get("leaderboardName");
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
-                DefaultActions.UPDATE, getService().getLeaderboardByName(leaderboardName)));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         String raceColumnName = (String) requestObject.get("raceColumnName");
         String fleetName = (String) requestObject.get("fleetName");
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
@@ -220,8 +221,8 @@ public class MarkRessource extends AbstractSailingServerResource {
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
 
         String leaderboardName = (String) requestObject.get("leaderboardName");
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
-                DefaultActions.UPDATE, getService().getLeaderboardByName(leaderboardName)));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(
+                DefaultActions.UPDATE, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         String raceColumnName = (String) requestObject.get("raceColumnName");
         String fleetName = (String) requestObject.get("fleetName");
 

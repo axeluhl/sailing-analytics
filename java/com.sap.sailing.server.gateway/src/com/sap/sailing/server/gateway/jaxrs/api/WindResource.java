@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -48,7 +47,7 @@ public class WindResource extends AbstractSailingServerResource {
             String raceName = (String) regattaNameAndRaceNameObject.get("raceName");
             RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, raceName);
             // add wind only to those races the subject is permitted to update
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.TRACKED_RACE.getStringPermissionForObject(DefaultActions.UPDATE, identifier))) {
+            if (SecurityUtils.getSubject().isPermitted(identifier.getIdentifier().getStringPermission(DefaultActions.UPDATE))) {
                 JSONObject answerForRace = new JSONObject();
                 answerForRace.put("regattaNameAndRaceName", regattaNameAndRaceName);
                 if (windSourceType == WindSourceType.EXPEDITION || windSourceType == WindSourceType.WEB) {

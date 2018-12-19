@@ -31,7 +31,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -140,10 +139,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             Map<String, Map<CompetitorDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
             List<CompetitorDTO> filteredCompetitorsFromBestToWorst = new ArrayList<>();
             competitorsFromBestToWorst.forEach(competitor -> {
-                if (SecurityUtils.getSubject()
-                        .isPermitted(SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(
-                                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
-                                CompetitorImpl.getTypeRelativeObjectIdentifier(competitor.getId())))) {
+                if (SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
+                        .getStringPermission(SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC))) {
                     filteredCompetitorsFromBestToWorst.add(competitor);
                 }
             });
@@ -170,9 +167,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         List<CompetitorDTO> filteredCompetitors = new ArrayList<>();
         leaderboardDTO.competitors.forEach(competitor -> {
             if (SecurityUtils.getSubject()
-                    .isPermitted(SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(
-                            SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
-                            CompetitorImpl.getTypeRelativeObjectIdentifier(competitor.getId())))) {
+                    .isPermitted(competitor.getIdentifier()
+                            .getStringPermission(SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC))) {
                 filteredCompetitors.add(competitor);
             }
         });

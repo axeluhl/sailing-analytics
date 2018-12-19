@@ -2078,10 +2078,10 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("racecolumn") String raceColumnName) {
         final Response response;
         Regatta regatta = findRegattaByName(regattaName);
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
             getSecurityService().checkCurrentUserReadPermission(regatta);
             boolean found = false;
             for (final Series series : regatta.getSeries()) {
@@ -2122,7 +2122,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     }
 
     private RaceColumnInSeries addRaceColumn(Regatta regatta, String seriesName, String columnName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
+        SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
         return getService().apply(new AddColumnToSeries(new RegattaName(regatta.getName()), seriesName, columnName));
     }
 
@@ -2152,7 +2152,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
+            SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
             String seriesName = (String) requestObject.get("seriesName");
             String seriesNameNew = (String) requestObject.get("seriesNameNew");
             boolean isMedal = (boolean) requestObject.get("isMedal");
