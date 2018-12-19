@@ -419,7 +419,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
             final HasPermissions type = SecuredDomainType.TRACKED_RACE;
             final AccessControlledActionsColumn<RaceDTO, DefaultActionsImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
-                    new DefaultActionsImagesBarCell(stringMessages), userService, type);
+                    new DefaultActionsImagesBarCell(stringMessages), userService);
             final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                     race -> regattaRefresher.fillRegattas(), stringMessages);
             actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);

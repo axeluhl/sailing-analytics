@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
@@ -25,8 +24,7 @@ public class AccessControlledActionsColumn<T extends SecuredDTO, S extends Image
     private final UserService userService;
     private final BiFunction<Action, T, WildcardPermission> permissionFactory;
 
-    public AccessControlledActionsColumn(final S imagesBarCell, final UserService userService,
-            final HasPermissions type) {
+    public AccessControlledActionsColumn(final S imagesBarCell, final UserService userService) {
         super(imagesBarCell);
         this.userService = userService;
         this.permissionFactory = (action, object) -> object.getIdentifier().getPermission(action);

@@ -308,7 +308,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
         final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new AccessControlledActionsColumn<>(
-                new LeaderboardConfigImagesBarCell(stringMessages), userService, type);
+                new LeaderboardConfigImagesBarCell(stringMessages), userService);
 
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::editLeaderboard);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_DELETE, DELETE, leaderboardDTO -> {

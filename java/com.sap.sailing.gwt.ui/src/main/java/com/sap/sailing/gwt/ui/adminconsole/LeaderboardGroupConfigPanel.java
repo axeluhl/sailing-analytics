@@ -601,7 +601,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD_GROUP;
         final AccessControlledActionsColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
-                new LeaderboardGroupConfigImagesBarCell(stringMessages), userService, type);
+                new LeaderboardGroupConfigImagesBarCell(stringMessages), userService);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_UPDATE, UPDATE,
                 this::openEditLeaderboardGroupDialog);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_DELETE, DELETE, group -> {

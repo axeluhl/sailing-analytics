@@ -331,7 +331,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final SecuredDTOOwnerColumn<EventDTO> userColumn = SecuredDTOOwnerColumn.getUserOwnerColumn();
 
         final AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
-                new EventConfigImagesBarCell(stringMessages), userService, EVENT);
+                new EventConfigImagesBarCell(stringMessages), userService);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::openEditEventDialog);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_DELETE, DELETE, event -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
