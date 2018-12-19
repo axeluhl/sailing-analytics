@@ -49,7 +49,7 @@ public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO> impleme
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return new TypeRelativeObjectIdentifier(getId().toString());
     }
 

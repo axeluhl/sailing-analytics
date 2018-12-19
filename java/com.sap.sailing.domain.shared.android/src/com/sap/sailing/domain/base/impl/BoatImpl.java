@@ -137,8 +137,7 @@ public class BoatImpl extends RenamableImpl implements DynamicBoat {
         return SecuredDomainType.BOAT;
     }
 
-    @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(this);
     }
 

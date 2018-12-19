@@ -112,8 +112,7 @@ public class RoleDefinitionImpl implements RoleDefinition {
         return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
-    @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(this);
     }
 

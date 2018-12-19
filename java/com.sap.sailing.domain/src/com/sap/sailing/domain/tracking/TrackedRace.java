@@ -1145,8 +1145,7 @@ public interface TrackedRace
         return regattaAndRaceId.getTypeRelativeObjectIdentifier();
     }
 
-    @Override
-    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(getRaceIdentifier());
     }
 

@@ -7861,7 +7861,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Subject subject = SecurityUtils.getSubject();
         if (expeditionConnector != null) {
             for (final ExpeditionDeviceConfiguration config : expeditionConnector.getDeviceConfigurations()) {
-                if (subject.isPermitted(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObject(DefaultActions.READ, config))) {
+                if (subject.isPermitted(
+                        SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForTypeRelativeIdentifier(
+                                DefaultActions.READ, config.getTypeRelativeObjectIdentifier(ServerInfo.getName())))) {
                     result.add(config);
                 }
             }

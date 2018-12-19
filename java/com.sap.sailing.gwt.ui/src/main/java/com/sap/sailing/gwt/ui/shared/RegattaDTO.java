@@ -169,7 +169,7 @@ public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredDTO {
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return new TypeRelativeObjectIdentifier(getName());
     }
 

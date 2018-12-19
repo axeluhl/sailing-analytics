@@ -383,8 +383,7 @@ public abstract class EventBaseImpl implements EventBase {
         return SecuredDomainType.EVENT;
     }
 
-    @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(this);
     }
 

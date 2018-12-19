@@ -179,8 +179,7 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
         return SecuredDomainType.MEDIA_TRACK;
     }
 
-    @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(this);
     }
 

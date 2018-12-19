@@ -25,8 +25,7 @@ public interface SwissTimingArchiveConfiguration extends WithQualifiedObjectIden
         return SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT;
     }
 
-    @Override
-    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(getJsonURL());
     }
 

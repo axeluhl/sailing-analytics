@@ -625,8 +625,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
-    @Override
-    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(this);
     }
 

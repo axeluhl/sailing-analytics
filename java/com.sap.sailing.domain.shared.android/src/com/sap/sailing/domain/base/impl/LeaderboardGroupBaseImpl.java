@@ -71,7 +71,7 @@ public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
         return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(this);
     }
 

@@ -150,7 +150,7 @@ public class UserDTO extends SecurityUserImpl<RoleDefinitionDTO, RoleDTO, Stripp
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return new TypeRelativeObjectIdentifier(getName());
     }
 

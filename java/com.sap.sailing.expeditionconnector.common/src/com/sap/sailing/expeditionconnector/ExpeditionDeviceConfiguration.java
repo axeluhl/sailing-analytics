@@ -6,11 +6,9 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializable, WithQualifiedObjectIdentifier {
+public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializable {
     private static final long serialVersionUID = -7819154195403387909L;
 
     private final UUID deviceUuid;
@@ -78,26 +76,18 @@ public class ExpeditionDeviceConfiguration extends NamedImpl implements Serializ
                 + ", getName()=" + getName() + "]";
     }
 
-    @Override
-    @Deprecated
-    public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
-    }
-
     /**
      * Get TypeRelativeObjectIdentifer. Needs a parameter for the servername passed as a String parameter.
      * 
      */
-    @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
-        return getTypeRelativeObjectIdentifier(params[0], getName());
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String serverName) {
+        return getTypeRelativeObjectIdentifier(serverName, getName());
     }
     
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String serverName, String name) {
         return new TypeRelativeObjectIdentifier(serverName, name);
     }
 
-    @Override
     public HasPermissions getType() {
         return SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION;
     }

@@ -118,7 +118,7 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return new TypeRelativeObjectIdentifier(regattaName, getName());
     }
 

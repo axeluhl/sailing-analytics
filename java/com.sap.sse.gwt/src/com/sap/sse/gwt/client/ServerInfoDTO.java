@@ -45,8 +45,7 @@ public class ServerInfoDTO implements IsSerializable, WithQualifiedObjectIdentif
         return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
-    @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(this.serverName);
     }
 

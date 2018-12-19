@@ -15,7 +15,6 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
     private static final long serialVersionUID = -5494669910047887984L;
@@ -130,11 +129,6 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
 
             @Override
             public HasPermissions getType() {
-                return null;
-            }
-
-            @Override
-            public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
                 return null;
             }
         };

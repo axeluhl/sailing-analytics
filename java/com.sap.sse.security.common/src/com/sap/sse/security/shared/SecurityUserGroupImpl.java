@@ -51,8 +51,7 @@ public abstract class SecurityUserGroupImpl implements NamedWithID, WithQualifie
     }
 
 
-    @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return UserGroupImpl.getTypeRelativeObjectIdentifier(getId());
     }
 

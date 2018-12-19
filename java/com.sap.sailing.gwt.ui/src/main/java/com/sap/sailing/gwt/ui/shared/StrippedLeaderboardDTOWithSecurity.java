@@ -46,7 +46,7 @@ public class StrippedLeaderboardDTOWithSecurity extends StrippedLeaderboardDTO i
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return new TypeRelativeObjectIdentifier(getName());
     }
 

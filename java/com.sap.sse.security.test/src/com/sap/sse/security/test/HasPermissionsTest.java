@@ -76,12 +76,6 @@ public class HasPermissionsTest {
             public HasPermissions getType() {
                 return h;
             }
-
-            @Override
-            public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
-                return null;
-            }
-            
         };
     }
 }

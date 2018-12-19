@@ -165,7 +165,7 @@ public class PreviousCompetitorDTOImpl extends NamedSecuredObjectDTO implements 
     }
 
     @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return new TypeRelativeObjectIdentifier(getId().toString());
     }
 

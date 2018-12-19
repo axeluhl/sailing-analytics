@@ -8,7 +8,7 @@ public interface SecuredDTO {
 
     OwnershipDTO getOwnership();
 
-    TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params);
+    TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier();
 
     void setAccessControlList(AccessControlListDTO createAccessControlListDTO);
 

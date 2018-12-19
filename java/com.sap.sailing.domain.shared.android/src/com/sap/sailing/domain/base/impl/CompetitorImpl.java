@@ -257,8 +257,7 @@ public class CompetitorImpl implements DynamicCompetitor {
         return SecuredDomainType.COMPETITOR;
     }
 
-    @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(this);
     }
 

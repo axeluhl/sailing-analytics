@@ -45,8 +45,7 @@ public class LeaderboardBaseImpl implements LeaderboardBase {
         return SecuredDomainType.LEADERBOARD;
     }
 
-    @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(this);
     }
 

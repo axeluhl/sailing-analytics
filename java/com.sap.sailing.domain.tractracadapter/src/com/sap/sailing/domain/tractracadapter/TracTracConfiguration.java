@@ -49,8 +49,7 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
         return SecuredDomainType.TRACTRAC_ACCOUNT;
     }
 
-    @Override
-    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(getJSONURL());
     }
 

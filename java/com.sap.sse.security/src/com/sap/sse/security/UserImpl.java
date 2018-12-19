@@ -365,8 +365,7 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup> 
         return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier()); 
     }
 
-    @Override
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String... params) {
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return getTypeRelativeObjectIdentifier(this);
     }
 
