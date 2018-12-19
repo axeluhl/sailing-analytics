@@ -46,11 +46,7 @@ public class LeaderboardBaseImpl implements LeaderboardBase {
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(LeaderboardBase leaderboardBase) {
-        return new TypeRelativeObjectIdentifier(leaderboardBase.getName());
+        return getTypeRelativeObjectIdentifier(getName());
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String leaderboarName) {
