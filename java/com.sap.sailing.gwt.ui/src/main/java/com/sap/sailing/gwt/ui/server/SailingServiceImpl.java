@@ -476,9 +476,9 @@ import com.sap.sailing.manage2sail.RaceResultDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
+import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
-import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -1979,7 +1979,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
-        final QuickRanksDTO quickRanks = getQuickRanks(raceIdentifier, date);
+        final QuickRanksDTO quickRanks = getQuickRanksWithoutSecuritychecks(raceIdentifier, date);
         long simulationResultVersion = 0;
         if (simulationLegIdentifier != null) {
             SimulationService simulationService = getService().getSimulationService();
@@ -2475,7 +2475,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public QuickRanksDTO computeQuickRanks(RegattaAndRaceIdentifier raceIdentifier, TimePoint timePoint)
             throws NoWindException {
         final List<QuickRankDTO> result = new ArrayList<>();
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             final TimePoint actualTimePoint;
             if (timePoint == null) {
@@ -2502,7 +2502,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new QuickRanksDTO(result);
     }
 
-    private QuickRanksDTO getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
+    private QuickRanksDTO getQuickRanksWithoutSecuritychecks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
         final QuickRanksDTO result;
         if (date == null) {
             result = quickRanksLiveCache.get(raceIdentifier);
