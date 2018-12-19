@@ -29,10 +29,6 @@ public interface SwissTimingArchiveConfiguration extends WithQualifiedObjectIden
         return getTypeRelativeObjectIdentifier(getJsonURL());
     }
 
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(SwissTimingArchiveConfiguration config) {
-        return new TypeRelativeObjectIdentifier(config.getJsonURL());
-    }
-
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl) {
         return new TypeRelativeObjectIdentifier(jsonUrl);
     }

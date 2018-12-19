@@ -626,15 +626,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     }
 
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
+        return getTypeRelativeObjectIdentifier(getName());
     }
 
     static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String name) {
         return new TypeRelativeObjectIdentifier(name);
-    }
-
-    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Leaderboard leaderboard) {
-        return new TypeRelativeObjectIdentifier(leaderboard.getName());
     }
 
     static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaName regattaName) {

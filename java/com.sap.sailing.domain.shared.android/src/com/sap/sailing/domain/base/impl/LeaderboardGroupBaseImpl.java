@@ -72,11 +72,7 @@ public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(LeaderboardGroupBaseImpl leaderboarGroup) {
-        return new TypeRelativeObjectIdentifier(leaderboarGroup.getId().toString());
+        return getTypeRelativeObjectIdentifier(getId());
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID id) {

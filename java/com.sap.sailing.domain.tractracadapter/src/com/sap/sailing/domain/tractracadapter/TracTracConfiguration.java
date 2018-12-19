@@ -53,10 +53,6 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
         return getTypeRelativeObjectIdentifier(getJSONURL());
     }
 
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(TracTracConfiguration config) {
-        return new TypeRelativeObjectIdentifier(config.getJSONURL());
-    }
-
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl) {
         return new TypeRelativeObjectIdentifier(jsonUrl);
     }

@@ -41,10 +41,6 @@ public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier 
         return getTypeRelativeObjectIdentifier(getJsonURL());
     }
 
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(SwissTimingConfiguration config) {
-        return new TypeRelativeObjectIdentifier(config.getJsonURL());
-    }
-
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl) {
         return new TypeRelativeObjectIdentifier(jsonUrl);
     }

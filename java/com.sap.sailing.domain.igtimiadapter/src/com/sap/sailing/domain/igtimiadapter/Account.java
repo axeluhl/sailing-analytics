@@ -28,11 +28,7 @@ public interface Account extends WithQualifiedObjectIdentifier {
     }
 
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
-    }
-
-    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Account account) {
-        return new TypeRelativeObjectIdentifier(account.getUser().getEmail());
+        return getTypeRelativeObjectIdentifier(getUser().getEmail());
     }
 
     static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String email) {

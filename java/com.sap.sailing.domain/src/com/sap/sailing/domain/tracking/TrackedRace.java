@@ -1138,15 +1138,11 @@ public interface TrackedRace
     }
     
     public static QualifiedObjectIdentifier getIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
-        return getSecuredDomainType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier(regattaAndRaceId));
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
-        return regattaAndRaceId.getTypeRelativeObjectIdentifier();
+        return getSecuredDomainType().getQualifiedObjectIdentifier(regattaAndRaceId.getTypeRelativeObjectIdentifier());
     }
 
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(getRaceIdentifier());
+        return getRaceIdentifier().getTypeRelativeObjectIdentifier();
     }
 
     @Override

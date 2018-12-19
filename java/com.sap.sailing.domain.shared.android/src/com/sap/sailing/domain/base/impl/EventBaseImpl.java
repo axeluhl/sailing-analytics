@@ -384,11 +384,7 @@ public abstract class EventBaseImpl implements EventBase {
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(EventBase event) {
-        return new TypeRelativeObjectIdentifier(event.getId().toString());
+        return getTypeRelativeObjectIdentifier(getId());
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID id) {

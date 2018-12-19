@@ -258,11 +258,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Competitor competitor) {
-        return new TypeRelativeObjectIdentifier(competitor.getId().toString());
+        return getTypeRelativeObjectIdentifier(getId());
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Serializable id) {

@@ -252,10 +252,6 @@ public interface Regatta
         return getTypeRelativeObjectIdentifier(getName());
     }
 
-    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Regatta regatta) {
-        return new TypeRelativeObjectIdentifier(regatta.getName());
-    }
-
     static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String regattaName) {
         return new TypeRelativeObjectIdentifier(regattaName);
     }

@@ -68,11 +68,7 @@ public class RegattaNameAndRaceName extends RegattaName implements RegattaAndRac
 
     @Override
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
-        return new TypeRelativeObjectIdentifier(regattaAndRaceIdentifier.getRegattaName(), regattaAndRaceIdentifier.getRaceName());
+        return getTypeRelativeObjectIdentifier(getRegattaName(), getRaceName());
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String regattaName, String raceName) {

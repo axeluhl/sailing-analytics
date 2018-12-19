@@ -138,11 +138,7 @@ public class BoatImpl extends RenamableImpl implements DynamicBoat {
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Boat boat) {
-        return new TypeRelativeObjectIdentifier(boat.getId().toString());
+        return getTypeRelativeObjectIdentifier(getId());
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Serializable id) {

@@ -57,7 +57,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         try {
             return securityService.doWithTemporaryDefaultTenant(defaultTenant, () -> {
                 return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                        SecuredDomainType.TRACKED_RACE, RegattaNameAndRaceName.getTypeRelativeObjectIdentifier(regattaAndRaceIdentifier),
+                        SecuredDomainType.TRACKED_RACE, regattaAndRaceIdentifier.getTypeRelativeObjectIdentifier(),
                         regattaAndRaceIdentifier.toString(), () -> {
                             return innerAction.get();
                         });

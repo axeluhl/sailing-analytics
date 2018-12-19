@@ -180,11 +180,7 @@ public class MediaTrack implements Serializable, WithQualifiedObjectIdentifier {
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(MediaTrack mediaTrack) {
-        return new TypeRelativeObjectIdentifier(mediaTrack.dbId);
+        return getTypeRelativeObjectIdentifier(dbId);
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String dbId) {
