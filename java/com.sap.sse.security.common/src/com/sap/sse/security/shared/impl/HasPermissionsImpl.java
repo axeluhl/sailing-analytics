@@ -9,7 +9,6 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
-import com.sap.sse.security.shared.dto.SecuredDTO;
 
 public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     private static final long serialVersionUID = -7901836864741040400L;
@@ -94,11 +93,6 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
         return getStringPermissionForTypeRelativeIdentifiers(action, typeRelativeObjectIdentifier.toString());
     }
 
-    @Override
-    public String getStringPermissionForSecuredDTO(final Action action, final SecuredDTO securedDTO) {
-        return getStringPermissionForTypeRelativeIdentifiers(action, securedDTO.getTypeRelativeObjectIdentifier().toString());
-    }
-
     private String getStringPermissionForTypeRelativeIdentifiers(final Action action, final String... typeRelativeObjectIdentifiers) {
         assert supports(action);
         final StringBuilder result = new StringBuilder(getStringPermission(action));
@@ -128,11 +122,6 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     }
 
     @Override
-    public QualifiedObjectIdentifier getQualifiedObjectIdentifier(SecuredDTO securedDTO) {
-        return new QualifiedObjectIdentifierImpl(getName(), securedDTO.getTypeRelativeObjectIdentifier());
-    }
-
-    @Override
     public WildcardPermission[] getPermissionsForTypeRelativeIdentifier(Action[] actions,
             final TypeRelativeObjectIdentifier typeRelativeIdentifier) {
         Collection<WildcardPermission> result = new ArrayList<>();
@@ -153,11 +142,4 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
         assert supports(action);
         return new WildcardPermission(getStringPermissionForTypeRelativeIdentifier(action, object.getIdentifier().getTypeRelativeObjectIdentifier()));
     }
-
-    @Override
-    public WildcardPermission getPermissionForSecuredDTO(Action action, SecuredDTO securedDTO) {
-        assert supports(action);
-        return new WildcardPermission(getStringPermissionForTypeRelativeIdentifier(action, securedDTO.getTypeRelativeObjectIdentifier()));
-    }
-
 }

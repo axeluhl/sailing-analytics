@@ -21,13 +21,9 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -358,32 +354,6 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup> 
     @Override
     public String getValidationSecret() {
         return validationSecret;
-    }
-
-    @Override
-    public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier()); 
-    }
-
-    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this);
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(User user) {
-        return new TypeRelativeObjectIdentifier(getTypeRelativeObjectIdentifierAsString(user));
-    }
-
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String userName) {
-        return new TypeRelativeObjectIdentifier(userName);
-    }
-
-    public static String getTypeRelativeObjectIdentifierAsString(User user) {
-        return user.getName();
-    }
-
-    @Override
-    public HasPermissions getType() {
-        return SecuredSecurityTypes.USER;
     }
 
     @Override

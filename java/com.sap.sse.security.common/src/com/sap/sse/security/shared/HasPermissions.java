@@ -1,6 +1,5 @@
 package com.sap.sse.security.shared;
 
-import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
@@ -56,8 +55,6 @@ public interface HasPermissions {
      */
     String getStringPermissionForTypeRelativeIdentifier(Action action, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
 
-    String getStringPermissionForSecuredDTO(Action action, SecuredDTO securedDTO);
-
     /**
      * Produces a string permission for this permission, the <code>mode</code> specified as the second wildcard
      * permission segment, and the <code>objectIdentifier</code> as the third wildcard permission segment. The object
@@ -78,20 +75,6 @@ public interface HasPermissions {
      */
     QualifiedObjectIdentifier getQualifiedObjectIdentifier(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
 
-    QualifiedObjectIdentifier getQualifiedObjectIdentifier(SecuredDTO securedDTO);
-
-    /**
-     * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified by
-     * this permission with this permission's type name. For example, if this permission is for the "LEADERBOARD" type,
-     * and the {@code objectIdentifier} is {@code "abc"} then the resulting qualified identifier will be
-     * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
-     * 
-     * @param object
-     *            can be any object that can be passed to the identifer strategy to determine the type relative
-     *            identifier for this object. What type of object can be passed is defined by the identifer strategy
-     */
-    //QualifiedObjectIdentifier getQualifiedObjectIdentifier(WithQualifiedObjectIdentifier object);
-
     /**
      * Same as {@link #getStringPermissionForTypeRelativeIdentifiers(Action, String...)}, only that the result is a
      * {@link WildcardPermission} instead of a {@link String}
@@ -109,8 +92,6 @@ public interface HasPermissions {
      * 
      */
     WildcardPermission getPermissionForObject(Action action, WithQualifiedObjectIdentifier object);
-
-    WildcardPermission getPermissionForSecuredDTO(Action action, SecuredDTO securedDTO);
 
     /**
      * Same as {@link #getPermissionForTypeRelativeIdentifiers(Action, String...)}, only that this method gets the

@@ -1,21 +1,14 @@
 package com.sap.sse.security.shared.dto;
 
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-public interface SecuredDTO {
+public interface SecuredDTO extends WithQualifiedObjectIdentifier {
 
     AccessControlListDTO getAccessControlList();
 
     OwnershipDTO getOwnership();
 
-    TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier();
-
     void setAccessControlList(AccessControlListDTO createAccessControlListDTO);
 
     void setOwnership(OwnershipDTO createOwnershipDTO);
-
-    //void setTypeRelativeObjectIdentifier(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
-
-    //void setType(HasPermissions type);
-
 }

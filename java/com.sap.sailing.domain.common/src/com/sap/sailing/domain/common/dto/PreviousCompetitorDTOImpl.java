@@ -2,8 +2,11 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 
@@ -163,8 +166,17 @@ public class PreviousCompetitorDTOImpl extends NamedSecuredObjectDTO implements 
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
     }
-
+    
     @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.COMPETITOR;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return new TypeRelativeObjectIdentifier(getId().toString());
     }

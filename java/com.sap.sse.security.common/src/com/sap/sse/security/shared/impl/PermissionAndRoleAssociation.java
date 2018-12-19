@@ -13,10 +13,10 @@ public class PermissionAndRoleAssociation {
         String ownerUserString = "null";
         User ownerUser = role.getQualifiedForUser();
         if (ownerUser != null) {
-            ownerUserString = SecurityUserImpl.getTypeRelativeObjectIdentifierAsString(ownerUser);
+            ownerUserString = ownerUser.getIdentifier().getTypeRelativeObjectIdentifier().toString();
         }
         String roleDefinitionString = RoleDefinitionImpl.getTypeRelativeObjectIdentifierAsString(role.getRoleDefinition());
-        String userWithRoleString = SecurityUserImpl.getTypeRelativeObjectIdentifierAsString(userWithRole);
+        String userWithRoleString = userWithRole.getIdentifier().getTypeRelativeObjectIdentifier().toString();
         TypeRelativeObjectIdentifier associationTypeRelativeId = new TypeRelativeObjectIdentifier(userWithRoleString, roleDefinitionString,
                 ownerUserString, ownerTenantString);
         return associationTypeRelativeId;

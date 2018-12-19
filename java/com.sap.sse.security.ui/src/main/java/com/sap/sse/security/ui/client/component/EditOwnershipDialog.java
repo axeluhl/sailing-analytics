@@ -206,7 +206,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
                 final Consumer<T> updateCallback,
                 final StringMessages stringMessages) {
             this.userManagementService = userManagementService;
-            this.identifierFactory = type::getQualifiedObjectIdentifier;
+            this.identifierFactory = SecuredDTO::getIdentifier;
             this.updateCallback = updateCallback;
             this.stringMessages = stringMessages;
         }

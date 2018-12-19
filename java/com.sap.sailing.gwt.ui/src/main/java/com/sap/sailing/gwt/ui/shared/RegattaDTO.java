@@ -16,9 +16,12 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
@@ -167,8 +170,17 @@ public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredDTO {
             return false;
         return true;
     }
-
+    
     @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.REGATTA;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
         return new TypeRelativeObjectIdentifier(getName());
     }
