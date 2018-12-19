@@ -2471,7 +2471,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public QuickRanksDTO computeQuickRanks(RegattaAndRaceIdentifier raceIdentifier, TimePoint timePoint)
             throws NoWindException {
         final List<QuickRankDTO> result = new ArrayList<>();
-        TrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
+        TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             final TimePoint actualTimePoint;
             if (timePoint == null) {
