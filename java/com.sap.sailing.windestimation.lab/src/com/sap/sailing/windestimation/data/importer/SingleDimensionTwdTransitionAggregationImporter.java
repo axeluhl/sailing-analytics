@@ -91,8 +91,13 @@ public class SingleDimensionTwdTransitionAggregationImporter {
             twdChanges[i++] = twdChange;
         }
         double median = QuickSelect.median(twdChanges);
+        double q1 = QuickSelect.q1(twdChanges);
+        double q3 = QuickSelect.q3(twdChanges);
+        double p1 = QuickSelect.select(twdChanges, (int) (twdChanges.length * 0.01));
+        double p99 = QuickSelect.select(twdChanges, (int) (twdChanges.length * 0.99));
+
         AggregatedSingleDimensionBasedTwdTransition aggregate = new AggregatedSingleDimensionBasedTwdTransition(
-                secondsPassed, mean, std, median, entries.size());
+                secondsPassed, mean, std, median, i, q1, q3, p1, p99);
         return aggregate;
     }
 
