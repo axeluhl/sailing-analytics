@@ -292,6 +292,13 @@ public class WildcardPermission implements Serializable {
             return this;
         }
         
+        public WildcardPermissionBuilder withIds(TypeRelativeObjectIdentifier... typeRelativeObjectIdentifiers) {
+            for (TypeRelativeObjectIdentifier identifier : typeRelativeObjectIdentifiers) {
+                this.ids.add(identifier.toString());
+            }
+            return this;
+        }
+        
         public WildcardPermission build() {
             final List<Set<String>> parts = new ArrayList<>(2);
             if (types.isEmpty()) {
