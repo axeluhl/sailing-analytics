@@ -66,8 +66,9 @@ public class TaggingServiceTest {
     private final static String leaderboardName = "Leaderboard";
     private final static String raceColumnName = "RaceColumn";
     private final static String fleetName = "Default";
-    private final static WildcardPermission editLeaderboardPermission = SecuredDomainType.LEADERBOARD
-            .getPermissionForObjects(DefaultActions.UPDATE, leaderboardName);
+    private final static WildcardPermission readAndEditLeaderboardPermission = WildcardPermission.builder()
+            .withTypes(SecuredDomainType.LEADERBOARD).withActions(DefaultActions.UPDATE, DefaultActions.READ)
+            .withIds(leaderboardName).build();
 
     // tagging & utilities
     private final static Logger logger = Logger.getLogger(TaggingServiceTest.class.getName());
@@ -117,7 +118,7 @@ public class TaggingServiceTest {
 
     @Before
     public void resetEnvironment() {
-        securityService.addPermissionForUser(username, editLeaderboardPermission);
+        securityService.addPermissionForUser(username, readAndEditLeaderboardPermission);
         securityService.unsetPreference(username,
                 serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
         final RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
@@ -163,14 +164,14 @@ public class TaggingServiceTest {
                 imageURL, false, subject.getPrincipal().toString(), raceTimepoint));
         try {
             logger.info("Trying to add public tag with missing permissions which should be catched by this test.");
-            securityService.removePermissionFromUser(username, editLeaderboardPermission);
+            securityService.removePermissionFromUser(username, readAndEditLeaderboardPermission);
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, true,
                     raceTimepoint);
             fail("Tag should not be added because user is missing permissions!");
         } catch (AuthorizationException e) {
             assertTrue("Missing permissions were caught correctly!", true);
         } finally {
-            securityService.addPermissionForUser(username, editLeaderboardPermission);
+            securityService.addPermissionForUser(username, readAndEditLeaderboardPermission);
         }
         try {
             logger.info(
