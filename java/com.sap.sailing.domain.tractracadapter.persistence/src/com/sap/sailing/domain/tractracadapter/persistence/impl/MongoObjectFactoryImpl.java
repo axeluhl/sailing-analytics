@@ -39,7 +39,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         // Object with given name is updated or created if it does not exist yet
         final Document updateQuery = new Document(FieldNames.TT_CONFIG_JSON_URL.name(),
                 tracTracConfiguration.getJSONURL());
-        ttConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(updateQuery, result,
+        ttConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(updateQuery, result,
                 new UpdateOptions().upsert(true));
     }
 
