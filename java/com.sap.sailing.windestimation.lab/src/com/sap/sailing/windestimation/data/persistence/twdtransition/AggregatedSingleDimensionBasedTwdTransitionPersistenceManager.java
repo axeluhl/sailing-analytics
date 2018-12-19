@@ -6,14 +6,17 @@ import java.util.stream.Collectors;
 
 import org.json.simple.JSONObject;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.windestimation.data.AggregatedSingleDimensionBasedTwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.serialization.AggregatedSingleDimensionBasedTwdTransitionJsonDeserializer;
 import com.sap.sailing.windestimation.data.serialization.AggregatedSingleDimensionBasedTwdTransitionJsonSerializer;
+import com.sap.sailing.windestimation.data.serialization.SingleDimensionBasedTwdTransitionJsonSerializer;
 
 public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
         extends AbstractPersistenceManager<AggregatedSingleDimensionBasedTwdTransition> {
@@ -24,6 +27,13 @@ public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
     public AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(AggregatedSingleDimensionType dimensionType)
             throws UnknownHostException {
         this.collectionName = dimensionType.getCollectioName();
+        BasicDBObject indexes = new BasicDBObject(SingleDimensionBasedTwdTransitionJsonSerializer.DIMENSION_VALUE, 1);
+        getCollection().createIndex(indexes);
+    }
+
+    public PersistedElementsIterator<AggregatedSingleDimensionBasedTwdTransition> getIteratorSorted() {
+        return super.getIterator(null,
+                "{'" + AggregatedSingleDimensionBasedTwdTransitionJsonSerializer.DIMENSION_VALUE + "': 1}");
     }
 
     @Override

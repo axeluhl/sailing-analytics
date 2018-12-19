@@ -155,7 +155,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
             numberOfElements = countElements(query);
             this.dbCursor = query == null ? getCollection().find() : getCollection().find((DBObject) JSON.parse(query));
             if (sort != null) {
-                this.dbCursor = this.dbCursor.sort((DBObject) JSON.parse(query));
+                this.dbCursor = this.dbCursor.sort((DBObject) JSON.parse(sort));
             }
             LoggingUtil.logInfo(numberOfElements + " elements found in " + getCollectionName());
             prepareNext();
@@ -176,9 +176,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         private void prepareNext() {
             long nextElementNumber = currentElementNumber + 1;
             if (nextElementNumber <= limit) {
-                if (numberOfElements >= 100 &&
-                        nextElementNumber %
-                        (numberOfElements / 100) == 0) {
+                if (numberOfElements >= 100 && nextElementNumber % (numberOfElements / 100) == 0) {
                     LoggingUtil.delete(numberOfCharsDuringLastStatusLog);
                     numberOfCharsDuringLastStatusLog = LoggingUtil
                             .logInfo("Loading element " + nextElementNumber + "/" + numberOfElements + " ("

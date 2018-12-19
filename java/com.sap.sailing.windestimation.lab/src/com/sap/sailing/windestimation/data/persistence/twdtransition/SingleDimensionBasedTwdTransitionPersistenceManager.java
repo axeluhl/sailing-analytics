@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.json.simple.JSONObject;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -25,6 +26,8 @@ public class SingleDimensionBasedTwdTransitionPersistenceManager
     public SingleDimensionBasedTwdTransitionPersistenceManager(SingleDimensionType dimensionType)
             throws UnknownHostException {
         this.collectionName = dimensionType.getCollectioName();
+        BasicDBObject indexes = new BasicDBObject(SingleDimensionBasedTwdTransitionJsonSerializer.DIMENSION_VALUE, 1);
+        getCollection().createIndex(indexes);
     }
 
     @Override

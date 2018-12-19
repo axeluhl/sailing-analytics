@@ -16,8 +16,10 @@ public class AggregatedSingleDimensionBasedTwdTransitionJsonDeserializer
                 .get(AggregatedSingleDimensionBasedTwdTransitionJsonSerializer.DIMENSION_VALUE);
         double mean = (double) object.get(AggregatedSingleDimensionBasedTwdTransitionJsonSerializer.MEAN);
         double std = (double) object.get(AggregatedSingleDimensionBasedTwdTransitionJsonSerializer.STD);
+        double median = (double) object.get(AggregatedSingleDimensionBasedTwdTransitionJsonSerializer.MEDIAN);
+        long count = (long) object.get(AggregatedSingleDimensionBasedTwdTransitionJsonSerializer.COUNT);
         AggregatedSingleDimensionBasedTwdTransition twdTransition = new AggregatedSingleDimensionBasedTwdTransition(
-                dimensionValue, mean, std);
+                dimensionValue, mean, std, median, count);
         return twdTransition;
     }
 

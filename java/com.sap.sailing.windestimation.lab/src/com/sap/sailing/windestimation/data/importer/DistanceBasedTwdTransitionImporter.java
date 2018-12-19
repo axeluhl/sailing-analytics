@@ -7,13 +7,10 @@ import java.util.List;
 import java.util.ListIterator;
 
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.windestimation.data.AggregatedSingleDimensionBasedTwdTransition;
 import com.sap.sailing.windestimation.data.RaceWithWindSources;
 import com.sap.sailing.windestimation.data.SingleDimensionBasedTwdTransition;
 import com.sap.sailing.windestimation.data.WindSourceWithFixes;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
-import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager;
-import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager.AggregatedSingleDimensionType;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.RaceWithWindSourcesPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.SingleDimensionBasedTwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.SingleDimensionBasedTwdTransitionPersistenceManager.SingleDimensionType;
@@ -34,6 +31,7 @@ public class DistanceBasedTwdTransitionImporter {
         SingleDimensionBasedTwdTransitionPersistenceManager distanceBasedTwdTransitionPersistenceManager = new SingleDimensionBasedTwdTransitionPersistenceManager(
                 SingleDimensionType.DISTANCE);
         distanceBasedTwdTransitionPersistenceManager.dropCollection();
+        long totalValuesCount = 0;
         for (PersistedElementsIterator<RaceWithWindSources> iterator = racesPersistenceManager
                 .getIterator(null); iterator.hasNext();) {
             RaceWithWindSources race = iterator.next();
@@ -58,57 +56,57 @@ public class DistanceBasedTwdTransitionImporter {
                             && distanceBetweenWindSourcesInMeters >= MIN_DISTANCE_METERS) {
                         Iterator<Wind> fixesIterator = windSource.getWindFixes().iterator();
                         Iterator<Wind> otherFixesIterator = otherWindSource.getWindFixes().iterator();
-                        Wind previousOtherFix = otherFixesIterator.next();
-                        Wind previousFix = fixesIterator.next();
-                        Wind currentFix = null;
-                        Wind currentOtherFix = null;
+                        Wind currentOtherFix = otherFixesIterator.next();
+                        Wind currentFix = fixesIterator.next();
+                        Wind nextFix = null;
+                        Wind nextOtherFix = null;
                         TimePoint timePointOfLastTransition = null;
-                        double bestDuration = previousFix.getTimePoint().until(previousOtherFix.getTimePoint()).abs()
+                        double bestDuration = currentFix.getTimePoint().until(currentOtherFix.getTimePoint()).abs()
                                 .asSeconds();
                         do {
                             while (fixesIterator.hasNext()) {
-                                currentFix = fixesIterator.next();
-                                double duration = previousOtherFix.getTimePoint().until(currentFix.getTimePoint()).abs()
+                                nextFix = fixesIterator.next();
+                                double duration = currentOtherFix.getTimePoint().until(nextFix.getTimePoint()).abs()
                                         .asSeconds();
                                 if (bestDuration > duration) {
                                     bestDuration = duration;
-                                    previousFix = currentFix;
+                                    currentFix = nextFix;
                                 } else {
                                     break;
                                 }
                             }
                             while (otherFixesIterator.hasNext()) {
-                                currentOtherFix = otherFixesIterator.next();
-                                double duration = previousFix.getTimePoint().until(currentOtherFix.getTimePoint()).abs()
+                                nextOtherFix = otherFixesIterator.next();
+                                double duration = currentFix.getTimePoint().until(nextOtherFix.getTimePoint()).abs()
                                         .asSeconds();
                                 if (bestDuration > duration) {
                                     bestDuration = duration;
-                                    previousOtherFix = currentOtherFix;
+                                    currentOtherFix = nextOtherFix;
                                 } else {
                                     break;
                                 }
                             }
                             if (bestDuration <= TOLERANCE_SECONDS) {
-                                TimePoint timePointOfNewTransition = previousFix.getTimePoint()
-                                        .before(previousOtherFix.getTimePoint()) ? previousFix.getTimePoint()
-                                                : previousOtherFix.getTimePoint();
+                                TimePoint timePointOfNewTransition = currentFix.getTimePoint()
+                                        .before(currentOtherFix.getTimePoint()) ? currentFix.getTimePoint()
+                                                : currentOtherFix.getTimePoint();
                                 if (timePointOfLastTransition == null || timePointOfLastTransition
                                         .until(timePointOfNewTransition).asSeconds() >= SAMPLING_SECONDS) {
-                                    timePointOfLastTransition = previousFix.getTimePoint()
-                                            .before(previousOtherFix.getTimePoint()) ? previousOtherFix.getTimePoint()
-                                                    : previousFix.getTimePoint();
-                                    double meters = previousFix.getPosition()
-                                            .getDistance(previousOtherFix.getPosition()).getMeters();
-                                    double twdChange = previousFix.getBearing()
-                                            .getDifferenceTo(previousOtherFix.getBearing()).abs().getDegrees();
+                                    timePointOfLastTransition = currentFix.getTimePoint()
+                                            .before(currentOtherFix.getTimePoint()) ? currentOtherFix.getTimePoint()
+                                                    : currentFix.getTimePoint();
+                                    double meters = currentFix.getPosition().getDistance(currentOtherFix.getPosition())
+                                            .getMeters();
+                                    double twdChange = currentFix.getBearing()
+                                            .getDifferenceTo(currentOtherFix.getBearing()).abs().getDegrees();
                                     SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
                                             meters, twdChange);
                                     entries.add(entry);
                                 }
                             }
-                            previousFix = fixesIterator.hasNext() ? currentFix : null;
-                            previousOtherFix = otherFixesIterator.hasNext() ? currentOtherFix : null;
-                        } while (previousFix != null && previousOtherFix != null);
+                            currentFix = fixesIterator.hasNext() ? nextFix : null;
+                            currentOtherFix = otherFixesIterator.hasNext() ? nextOtherFix : null;
+                        } while (currentFix != null && currentOtherFix != null);
                     }
                 }
             }
@@ -116,58 +114,13 @@ public class DistanceBasedTwdTransitionImporter {
                 LoggingUtil.logInfo("No TWD transitions to import");
             } else {
                 distanceBasedTwdTransitionPersistenceManager.add(entries);
-                LoggingUtil.logInfo(entries.size() + " TWD transitions imported");
+                int totalEntries = entries.size();
+                totalValuesCount += totalEntries;
+                LoggingUtil.logInfo(totalEntries + " TWD transitions imported, " + totalValuesCount + " in total");
             }
         }
-        long valuesCount = 0;
-        double twdSum = 0.0;
-        double squareTwdSum = 0.0;
-        double meters = 0;
-        double metersAtLastAggregation = 0;
-        List<AggregatedSingleDimensionBasedTwdTransition> aggregates = new ArrayList<>();
-        LoggingUtil.logInfo("Aggregating persisted entries");
-        for (PersistedElementsIterator<SingleDimensionBasedTwdTransition> iterator = distanceBasedTwdTransitionPersistenceManager
-                .getIteratorSorted(); iterator.hasNext();) {
-            SingleDimensionBasedTwdTransition entry = iterator.next();
-            double newMeters = entry.getDimensionValue();
-            if (newMeters - metersAtLastAggregation >= METERS_TO_AGGREGATE) {
-                AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount, twdSum,
-                        squareTwdSum, meters);
-                aggregates.add(aggregate);
-                metersAtLastAggregation = meters;
-            }
-            meters = newMeters;
-            double twdChange = entry.getAbsTwdChangeInDegrees();
-            twdSum += twdChange;
-            squareTwdSum += twdChange * twdChange;
-            valuesCount++;
-            if (valuesCount % 10000 == 0) {
-                LoggingUtil.logInfo(valuesCount + " Entries aggregated");
-            }
-        }
-        if (metersAtLastAggregation < meters) {
-            AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount, twdSum, squareTwdSum,
-                    meters);
-            aggregates.add(aggregate);
-        }
-        LoggingUtil.logInfo("Persisting " + aggregates.size() + " aggregates");
-        AggregatedSingleDimensionBasedTwdTransitionPersistenceManager aggregatedDistanceBasedTwdTransitionPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
-                AggregatedSingleDimensionType.DISTANCE);
-        aggregatedDistanceBasedTwdTransitionPersistenceManager.dropCollection();
-        aggregatedDistanceBasedTwdTransitionPersistenceManager.add(aggregates);
         LoggingUtil.logInfo("###################\r\nDuration based TWD transitions Import finished");
-        LoggingUtil.logInfo("Totally " + valuesCount + " TWD transitions imported");
-        LoggingUtil.logInfo("Totally " + aggregates.size() + " TWD transition aggregates imported");
-    }
-
-    private static AggregatedSingleDimensionBasedTwdTransition computeAggregate(double valuesCount, double twdSum,
-            double squareTwdSum, double secondsPassed) {
-        double mean = twdSum / valuesCount;
-        double variance = (valuesCount * squareTwdSum - twdSum * twdSum) / (valuesCount * valuesCount);
-        double std = Math.sqrt(variance);
-        AggregatedSingleDimensionBasedTwdTransition aggregate = new AggregatedSingleDimensionBasedTwdTransition(
-                secondsPassed, mean, std);
-        return aggregate;
+        LoggingUtil.logInfo("Totally " + totalValuesCount + " TWD transitions imported");
     }
 
 }
