@@ -25,8 +25,13 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/restsecurity")
@@ -124,6 +129,20 @@ public class SecurityResource extends AbstractSecurityResource {
                             final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
                             User newUser = getService().createSimpleUser(username, email, password, fullName, company,
                                     Locale.ENGLISH, validationBaseURL, getService().getDefaultTenantForCurrentUser());
+                            // setuo correct role ownerships
+                            for (Role role : newUser.getRoles()) {
+                                String associationTypeIdentifier = PermissionAndRoleAssociation.get(role, newUser);
+                                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
+
+                                User currentUser = getService().getCurrentUser();
+                                if (currentUser == null) {
+                                    currentUser = newUser;
+                                }
+                                UserGroup tenant = getService().getDefaultTenantForCurrentUser();
+                                getService().setOwnership(qualifiedTypeIdentifier, currentUser, tenant);
+                            }
+
                             SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
                             return newUser;
                         }

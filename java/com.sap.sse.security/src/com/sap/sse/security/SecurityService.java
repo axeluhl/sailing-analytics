@@ -43,6 +43,10 @@ import com.sap.sse.security.shared.impl.UserGroup;
  *
  */
 public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
+    interface RoleCopyListener {
+        void onRoleCopy(User a, Role existingRole, Role copyRole);
+    }
+
     String ALL_USERNAME = "<all>";
 
     SecurityManager getSecurityManager();
@@ -415,7 +419,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void setDefaultTenantForCurrentServerForUser(String username, String defaultTenant);
     
-    void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination);
+    void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback);
 
     User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
             ActionWithResult<User> createActionReturningCreatedObject);

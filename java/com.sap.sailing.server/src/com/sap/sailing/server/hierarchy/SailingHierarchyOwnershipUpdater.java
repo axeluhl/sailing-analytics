@@ -15,11 +15,14 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SecurityService.RoleCopyListener;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -39,7 +42,7 @@ public class SailingHierarchyOwnershipUpdater {
         if (!createNewGroup) {
             updateStrategy = createExitingGroupModifyingUpdate(sourceGroup);
         } else {
-            updateStrategy = createNewGroupUsingUpdate(newGroupName, securityService, sourceGroup);
+            updateStrategy = createNewGroupUsingUpdate(newGroupName, securityService, sourceGroup, service);
         }
         return new SailingHierarchyOwnershipUpdater(service, securityService, updateStrategy, migrateCompetitors,
                 migrateBoats);
@@ -183,7 +186,7 @@ public class SailingHierarchyOwnershipUpdater {
     }
 
     private static GroupOwnerUpdateStrategy createNewGroupUsingUpdate(String newGroupName,
-            SecurityService securityService, final UserGroup sourceGroup) {
+            SecurityService securityService, final UserGroup sourceGroup, RacingEventService service) {
         if (newGroupName == null || newGroupName.isEmpty()) {
             throw new RuntimeException("No name for new Group given");
         }
@@ -205,7 +208,7 @@ public class SailingHierarchyOwnershipUpdater {
                         if (sourceGroup != null) {
                             // When migrating from an existing user group -> copy as much as possible from the
                             // existing group to make the migrated objects to be visible for most people as before
-                            groupOwnerToSet = copyUserGroup(sourceGroup, newGroupName, securityService);
+                            groupOwnerToSet = copyUserGroup(sourceGroup, newGroupName, securityService, service);
                         } else {
                             // The migration may start at an object that currently has no group owner (e.g. in case
                             // this owner was just deleted) -> in this case we just create a new group
@@ -221,16 +224,36 @@ public class SailingHierarchyOwnershipUpdater {
         return updateStrategy;
     }
 
-    private static UserGroup copyUserGroup(UserGroup userGroupToCopy, String name, SecurityService securitySerice)
-            throws UserGroupManagementException {
+    private static UserGroup copyUserGroup(UserGroup userGroupToCopy, String name, SecurityService securitySerice,
+            RacingEventService service) throws UserGroupManagementException {
         // explicitly loading the current version of the group in case the given instance e.g. originates from the UI
         // and is possible out of date.
         final UUID newGroupId = UUID.randomUUID();
         return securitySerice.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER_GROUP, newGroupId.toString(), name, () -> {
                     final UserGroup createdUserGroup = securitySerice.createUserGroup(newGroupId, name);
-                    // FIXME RoleAssociation
-                    securitySerice.copyUsersAndRoleAssociations(userGroupToCopy, createdUserGroup);
+                    securitySerice.copyUsersAndRoleAssociations(userGroupToCopy, createdUserGroup,
+                            new RoleCopyListener() {
+
+                                @Override
+                                public void onRoleCopy(User user, Role existingRole, Role copyRole) {
+                                    String existingAssociationTypeIdentifier = PermissionAndRoleAssociation
+                                            .get(existingRole, user);
+                                    String copyAssociationTypeIdentifier = PermissionAndRoleAssociation.get(copyRole,
+                                            user);
+                                    QualifiedObjectIdentifier existingQualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                            .getQualifiedObjectIdentifier(existingAssociationTypeIdentifier);
+                                    QualifiedObjectIdentifier copyQualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                            .getQualifiedObjectIdentifier(copyAssociationTypeIdentifier);
+                                    OwnershipAnnotation existingOwner = securitySerice
+                                            .getOwnership(existingQualifiedTypeIdentifier);
+                                    securitySerice.setOwnership(copyQualifiedTypeIdentifier,
+                                            existingOwner.getAnnotation().getUserOwner(),
+                                            existingOwner.getAnnotation().getTenantOwner(),
+                                            existingOwner.getDisplayNameOfAnnotatedObject());
+                                }
+                            });
+
                     return createdUserGroup;
                 });
     }

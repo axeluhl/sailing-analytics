@@ -472,9 +472,9 @@ import com.sap.sailing.manage2sail.RaceResultDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
+import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.SimulationService;
-import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -4879,6 +4879,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
                     if (viewerRole != null && defaultServerTenant != null) {
                         final Role publicAccessForServerRole = new Role(viewerRole, defaultServerTenant, null);
+                        // role ownership handling left out on purpose, as else the all user could remove the public
+                        // role from itself!
                         if (serverConfiguration.isPublic()) {
                             getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
                         } else {

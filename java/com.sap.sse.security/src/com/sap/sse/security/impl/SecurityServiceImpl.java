@@ -118,6 +118,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -262,12 +263,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                         ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
                         null);
-
                 apply(s -> s.internalSetOwnership(
                         SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), ADMIN_USERNAME, null,
                         ADMIN_USERNAME));
-                // FIXME RoleAssociation
-                addRoleForUser(adminUser, new Role(adminRoleDefinition));
+                Role adminRole = new Role(adminRoleDefinition);
+                addRoleForUser(adminUser, adminRole);
+                String associationTypeIdentifier = PermissionAndRoleAssociation.get(adminRole, adminUser);
+                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                setOwnership(qualifiedTypeIdentifier, adminUser, null);
             }
             
             if (userStore.getUserByName(SecurityService.ALL_USERNAME) == null) {
@@ -730,6 +734,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = createUserInternal(username, email, tenant, upa);
+        // ownership is handled by caller
         addRoleForUser(result,
                 new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToUserGroup(tenant, result);
@@ -1940,16 +1945,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination) {
+    public void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback) {
         for (User user : source.getUsers()) {
             addUserToUserGroup(destination, user);
         }
 
         for (Pair<User, Role> userAndRole : userStore.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
-            // FIXME RoleAssociation
+            final Role copyRole = new Role(existingRole.getRoleDefinition(), destination,
+                    existingRole.getQualifiedForUser());
             addRoleForUser(userAndRole.getA(),
-                    new Role(existingRole.getRoleDefinition(), destination, existingRole.getQualifiedForUser()));
+                    copyRole);
+            // ownership must be handled by caller via callback!
+            callback.onRoleCopy(userAndRole.getA(), existingRole, copyRole);
         }
     }
     
