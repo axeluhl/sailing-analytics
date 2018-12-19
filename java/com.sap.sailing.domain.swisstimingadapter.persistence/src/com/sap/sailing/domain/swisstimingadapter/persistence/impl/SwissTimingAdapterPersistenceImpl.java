@@ -108,7 +108,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
 
         final Document updateQuery = new Document(FieldNames.ST_CONFIG_JSON_URL.name(),
                 swissTimingConfiguration.getJsonURL());
-        stConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(updateQuery, result,
+        stConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(updateQuery, result,
                 new UpdateOptions().upsert(true));
     }
 
@@ -125,7 +125,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         Document result = new Document();
         result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonURL());
         
-        stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(result, result,
+        stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(result, result,
                 new UpdateOptions().upsert(true));
     }
 

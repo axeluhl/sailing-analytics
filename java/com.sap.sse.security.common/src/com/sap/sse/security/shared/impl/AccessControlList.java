@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class AccessControlList extends AbstractAccessControlList<UserGroup, User> {
+public class AccessControlList extends AbstractAccessControlList<UserGroup> {
     private static final long serialVersionUID = 1L;
 
     public AccessControlList(Map<UserGroup, Set<String>> permissionMap) {

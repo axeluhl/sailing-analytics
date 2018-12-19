@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.sap.sse.security.shared.impl.AbstractAccessControlList;
 
-public class AccessControlListDTO extends AbstractAccessControlList<StrippedUserGroupDTO, StrippedUserDTO> {
+public class AccessControlListDTO extends AbstractAccessControlList<StrippedUserGroupDTO> {
 
     private static final long serialVersionUID = 2878270565599189728L;
 

@@ -1,11 +1,15 @@
-This page is used to think through the features a Waypoint-inferring mechanism needs to have from a end-to-end perspective.
+This page is used to think through the features a Waypoint-inferring mechanism needs to have from an end-to-end perspective.
 
-### Scenario 1: Starting a race with no information about Marks and Waypoints. 
+### Version 2:
 
-WaypointInferrer should detect possible Marks, decide for the PassingInstructions and then store the Waypoint persistent in the race:
+WaypointInferrer should detect Marks and Waypoins in a tracked race and decide wether to add new ones to the race or update given information about the race (e.g. waypoint list already prepared, positions pinged for all marks except the windward mark, so WaypointInferrer should detect that mark position.)
 
-* If we decide for a Mark position based on a threeshold number of competitors already passed should we take in consideration the upcoming competitors for the final Mark position and if we do so how can we achieve that?
+The WaypointInferrer should be treated similar to the MarkPassingCalculator, the information is only stored in-memory, every reload of a tracked race would need the algorithm to start again.
 
-* First approach is to work only with smartphone tracked races. A check box in Smartphone Tracking connector is needed. Also SailInsight2.0 should have an option to use that feature.
+A checkbox in smartphone tracking connector next to start tracking button is needed. If checked the race is tracked with an instance of WaypointInferrer.
 
-* If that checkbox is checked the inferred marks and waypoints should also appear in CourseLayoutEditor. They can then be updated and/or refined. The EditMarkPositions feature on the RaceMap is then also enabled. 
+
+### Next steps:
+ * Implement the checkbox and the restore functionality.
+ * Improve the WaypointInferrer algorithm to match the desired behaviour.
+ * Create test cases with real data and scenarios.

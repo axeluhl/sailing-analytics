@@ -9,7 +9,7 @@ import java.util.UUID;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class AbstractUserGroupImpl<U extends SecurityUser<?, ?, ?>>
+public abstract class AbstractUserGroupImpl<U extends UserReference>
         extends SecurityUserGroupImpl {
     private static final long serialVersionUID = 1L;
 

@@ -412,7 +412,7 @@ public class UserService {
             return false;
         }
         return hasPermission(logicalSecuredObjectType.getPermission(DefaultActions.CREATE),
-                new OwnershipDTO(currentUser, getCurrentTenant()));
+                new OwnershipDTO(currentUser == null ? null : currentUser.asStrippedUser(), getCurrentTenant()));
     }
 
     public StrippedUserGroupDTO getCurrentTenant() {
@@ -446,7 +446,7 @@ public class UserService {
         // TODO: Additional check required
         // return hasPermission(SecuredSecurityTypes.SERVER.getPermissionForObjects(ServerActions.CREATE_OBJECT, oid));
         final WildcardPermission createPermission = type.getPermission(DefaultActions.CREATE);
-        final OwnershipDTO ownershipOfNewlyCreatedObject = new OwnershipDTO(currentUser, getCurrentTenant());
+        final OwnershipDTO ownershipOfNewlyCreatedObject = new OwnershipDTO(currentUser == null ? null : currentUser.asStrippedUser(), getCurrentTenant());
         return this.hasCurrentUserAnyPermission(createPermission, ownershipOfNewlyCreatedObject);
     }
     

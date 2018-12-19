@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.server;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +25,6 @@ public abstract class SecurityDTOUtil {
 
     private SecurityDTOUtil() {
     }
-
-    private static Iterable<StrippedUserGroupDTO> allUserGroups;
 
     /**
      * Adds {@link AccessControlList access control list} and {@link Ownership ownership} information for the given
@@ -109,12 +108,12 @@ public abstract class SecurityDTOUtil {
         } else {
             User user = securityService.getCurrentUser();
             if (user != null) {
-                StrippedUserDTO userDTO = new SecurityDTOFactory().createStrippedUserFromUser(user, securityService,
-                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
-                final Iterable<StrippedUserGroupDTO> allUserGroups2 = getUserGroupsForAlluser(securityService,
-                        securityDTOFactory);
+                final Iterable<StrippedUserGroupDTO> userGroups = getUserGroupsForUser(securityService,
+                        securityDTOFactory, user);
+                final Iterable<StrippedUserGroupDTO> allUserGroups2 = getUserGroupsForUser(securityService,
+                        securityDTOFactory, securityService.getAllUser());
                 securedObject.setAccessControlList(
-                        securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO, userDTO,
+                        securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO, userGroups,
                                 allUserGroups2));
             }
         }
@@ -123,15 +122,16 @@ public abstract class SecurityDTOUtil {
                 securityDTOFactory.createOwnershipDTO(ownership == null ? null : ownership.getAnnotation(),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
     }
-
+    
     /** Get the UserGroups for the user alluser. */
-    private static Iterable<StrippedUserGroupDTO> getUserGroupsForAlluser(SecurityService securityService,
-            SecurityDTOFactory securityDTOFactory) {
-        if (allUserGroups == null) {
-            if (securityService.getAllUser() != null) {
+    private static Iterable<StrippedUserGroupDTO> getUserGroupsForUser(SecurityService securityService,
+            SecurityDTOFactory securityDTOFactory, User user) {
+        Iterable<StrippedUserGroupDTO> allUserGroups;
+        if (user != null) {
             allUserGroups = securityDTOFactory.createStrippedUserGroupDTOFromUserGroups(
-                    securityService.getAllUser().getUserGroups(), new HashMap<>());
-            }
+                    user.getUserGroups(), new HashMap<>());
+        } else {
+            allUserGroups = Collections.emptySet();
         }
         return allUserGroups;
     }

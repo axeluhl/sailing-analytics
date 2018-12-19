@@ -1,7 +1,6 @@
 package com.sap.sse.security.shared;
 
 import com.sap.sse.common.Named;
-import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.WithID;
 
 /**
@@ -13,7 +12,7 @@ import com.sap.sse.common.WithID;
  *
  */
 public interface SecurityUser<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup>
-        extends NamedWithID {
+        extends UserReference {
     /**
      * Returns the "raw" permissions explicitly set for this user. This does not include permissions
      * inferred by any {@link PermissionsForRoleProvider} for the {@link #getRoles() roles} that this
