@@ -29,7 +29,7 @@ import com.sap.sse.mongodb.MongoDBService;
 public class SignInTest {
     private static final Logger logger = Logger.getLogger(SignInTest.class.getName());
     
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
 
     @Test
     public void testSimpleSignIn() throws ClientProtocolException, IOException, IllegalStateException,

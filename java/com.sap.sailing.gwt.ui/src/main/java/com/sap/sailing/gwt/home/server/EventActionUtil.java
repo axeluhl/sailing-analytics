@@ -14,7 +14,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;

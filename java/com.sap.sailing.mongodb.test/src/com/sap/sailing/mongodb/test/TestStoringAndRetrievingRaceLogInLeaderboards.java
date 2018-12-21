@@ -10,13 +10,12 @@ import static org.mockito.Mockito.when;
 import java.net.UnknownHostException;
 import java.util.UUID;
 
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -382,20 +381,18 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         mongoObjectFactory.storeLeaderboard(leaderboard);
         
-        DBObject result = new BasicDBObject();
+        Document result = new Document();
         result.put(FieldNames.TIME_AS_MILLIS.name(), now.asMillis());
         result.put(FieldNames.RACE_LOG_EVENT_CREATED_AT.name(), now.asMillis());
         result.put(FieldNames.RACE_LOG_EVENT_ID.name(), UUID.randomUUID());
         result.put(FieldNames.RACE_LOG_EVENT_PASS_ID.name(), 0);
         result.put(FieldNames.RACE_LOG_EVENT_INVOLVED_BOATS.name(), new BasicDBList());
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
-        
-        DBObject raceLogResult = new BasicDBObject();
+        Document raceLogResult = new Document();
         raceLogResult.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceColumn.getRaceLogIdentifier(defaultFleet).getIdentifier()));       
         raceLogResult.put(FieldNames.RACE_LOG_EVENT.name(), result);
-        
         MongoObjectFactoryImpl factoryImpl = (MongoObjectFactoryImpl) mongoObjectFactory;
-        factoryImpl.getRaceLogCollection().insert(raceLogResult);
+        factoryImpl.getRaceLogCollection().insertOne(raceLogResult);
     }
     
     @Test

@@ -52,8 +52,8 @@ import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ClearStateTestSupport;
 
 /**

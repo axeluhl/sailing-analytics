@@ -1,0 +1,10 @@
+Scripts that may help to convert an OSGi .launch configuration into the autostart configuration section
+for the .product file.
+
+Other scripts may help in adjusting the .launch configuration's start level and autostart settings to
+what is defined in the .product file.
+
+Example usage:
+
+  analyzeProduct.sh ../raceanalysis.product ../../com.sap.sailing.server/SailingServer\ \(No\ Proxy\,\ GENERATED\).launch
+

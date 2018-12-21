@@ -46,7 +46,7 @@ import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.media.mp4.MP4MediaParser;
 import com.sap.sailing.media.mp4.MP4ParserFakeFile;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 

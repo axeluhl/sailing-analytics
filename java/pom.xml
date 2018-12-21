@@ -89,12 +89,13 @@
         <module>com.sap.sse.gwt.adminconsole</module>
         <module>com.sap.sse.datamining</module>
         <module>com.sap.sse.datamining.shared</module>
-		<module>com.sap.sse.datamining.ui</module>
+        <module>com.sap.sse.datamining.ui</module>
         <module>com.sap.sse.security</module>
         <module>com.sap.sse.security.ui</module>
         <module>com.sap.sse.security.userstore.mongodb</module>
         <module>com.sap.sse.operationaltransformation</module>
         <module>com.sap.sse.replication</module>
+        <module>com.sap.sse.replication.interfaces</module>
         <module>com.sap.sse.threadmanager</module>
         <module>com.sap.sse.filestorage</module>
         <module>com.sap.sse.feature</module>
@@ -127,6 +128,7 @@
         <module>com.sap.sailing.expeditionconnector</module>
         <module>com.sap.sailing.expeditionconnector.persistence</module>
         <module>com.sap.sailing.server</module>
+        <module>com.sap.sailing.server.interface</module>
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>
         <module>com.sap.sailing.www</module>

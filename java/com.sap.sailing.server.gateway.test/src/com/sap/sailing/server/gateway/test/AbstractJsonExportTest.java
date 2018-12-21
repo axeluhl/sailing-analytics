@@ -24,9 +24,9 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -41,7 +41,7 @@ public abstract class AbstractJsonExportTest {
 
     public void setUp() {
         service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
-        service.getDB().dropDatabase();
+        service.getDB().drop();
 
         racingEventService = new RacingEventServiceImpl();
     }
