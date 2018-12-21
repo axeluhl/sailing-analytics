@@ -23,12 +23,18 @@ public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
 
     private final JsonSerializer<AggregatedSingleDimensionBasedTwdTransition> serializer = new AggregatedSingleDimensionBasedTwdTransitionJsonSerializer();
     private final String collectionName;
+    private final AggregatedSingleDimensionType dimensionType;
 
     public AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(AggregatedSingleDimensionType dimensionType)
             throws UnknownHostException {
+        this.dimensionType = dimensionType;
         this.collectionName = dimensionType.getCollectioName();
         BasicDBObject indexes = new BasicDBObject(SingleDimensionBasedTwdTransitionJsonSerializer.DIMENSION_VALUE, 1);
         getCollection().createIndex(indexes);
+    }
+
+    public AggregatedSingleDimensionType getDimensionType() {
+        return dimensionType;
     }
 
     public PersistedElementsIterator<AggregatedSingleDimensionBasedTwdTransition> getIteratorSorted() {

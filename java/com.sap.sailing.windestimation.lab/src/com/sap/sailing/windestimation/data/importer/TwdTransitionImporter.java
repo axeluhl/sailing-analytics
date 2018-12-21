@@ -43,7 +43,7 @@ public class TwdTransitionImporter {
                 new LabelledManeuverForEstimationTransformer());
         long twdTransitionsCount = 0;
         for (PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> iterator = racesPersistenceManager
-                .getIterator(null); iterator.hasNext();) {
+                .getIterator(); iterator.hasNext();) {
             RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> race = iterator.next();
             LoggingUtil.logInfo("Processing race " + race.getRaceName() + " of regatta " + race.getRegattaName());
             List<ManeuverWithProbabilisticTypeClassification> sortedManeuvers = getPreprocessedSortedManeuvers(

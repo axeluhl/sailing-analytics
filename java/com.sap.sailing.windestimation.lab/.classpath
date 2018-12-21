@@ -8,5 +8,7 @@
 	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/smile-data-1.5.2.jar"/>
 	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/smile-graph-1.5.2.jar"/>
 	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/smile-math-1.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/jcommon-1.0.23.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.19.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

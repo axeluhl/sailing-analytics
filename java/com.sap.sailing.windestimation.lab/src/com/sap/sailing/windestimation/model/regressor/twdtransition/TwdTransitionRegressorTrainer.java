@@ -24,7 +24,7 @@ public class TwdTransitionRegressorTrainer {
     public void trainRegressor(
             SingleDimensionPolynomialRegressor<TwdTransition, ? extends SingleDimensionBasedTwdTransitionRegressorModelMetadata> model)
             throws Exception {
-        PersistedElementsIterator<SingleDimensionBasedTwdTransition> iterator = persistenceManager.getIterator(null);
+        PersistedElementsIterator<SingleDimensionBasedTwdTransition> iterator = persistenceManager.getIterator();
         double[] x = new double[1];
         LoggingUtil.logInfo("Training of " + model.getClass() + " started...");
         while (iterator.hasNext()) {

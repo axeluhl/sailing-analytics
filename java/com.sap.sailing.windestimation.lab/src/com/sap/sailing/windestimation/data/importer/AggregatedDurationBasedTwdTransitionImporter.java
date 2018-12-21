@@ -12,7 +12,9 @@ public class AggregatedDurationBasedTwdTransitionImporter {
         SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionBasedTwdTransitionPersistenceManager = new SingleDimensionBasedTwdTransitionPersistenceManager(
                 SingleDimensionType.DURATION);
         SingleDimensionTwdTransitionAggregationImporter importer = new SingleDimensionTwdTransitionAggregationImporter(
-                singleDimensionBasedTwdTransitionPersistenceManager, AggregatedSingleDimensionType.DURATION, 1);
+                singleDimensionBasedTwdTransitionPersistenceManager, AggregatedSingleDimensionType.DURATION,
+                DurationBasedTwdTransitionImporter.SECONDS_INTERVAL_TO_SAMPLE,
+                DurationBasedTwdTransitionImporter.ANNEALING_FACTOR_FOR_SECONDS_PASSED_FOR_SAMPLING);
         importer.runAggregation();
     }
 

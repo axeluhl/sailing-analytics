@@ -6,6 +6,7 @@ import org.json.simple.parser.ParseException;
 
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.Util.Pair;
 
@@ -23,7 +24,11 @@ public interface PersistenceManager<T> {
         return countElements(null);
     }
 
+    PersistedElementsIterator<T> getIterator();
+
     PersistedElementsIterator<T> getIterator(String query);
+
+    PersistedElementsIterator<T> getIterator(DBObject query);
 
     List<T> getAllElements(String query) throws JsonDeserializationException, ParseException;
 
@@ -32,7 +37,7 @@ public interface PersistenceManager<T> {
     Pair<String, T> getNextElement(String lastId, String query) throws JsonDeserializationException, ParseException;
 
     String getFilterQueryForYear(int year, boolean exclude);
-    
+
     DB getDb();
 
     DBCollection getCollection();

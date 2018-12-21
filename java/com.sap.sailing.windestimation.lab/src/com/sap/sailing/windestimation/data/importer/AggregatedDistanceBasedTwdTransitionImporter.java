@@ -12,7 +12,7 @@ public class AggregatedDistanceBasedTwdTransitionImporter {
         SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionBasedTwdTransitionPersistenceManager = new SingleDimensionBasedTwdTransitionPersistenceManager(
                 SingleDimensionType.DISTANCE);
         SingleDimensionTwdTransitionAggregationImporter importer = new SingleDimensionTwdTransitionAggregationImporter(
-                singleDimensionBasedTwdTransitionPersistenceManager, AggregatedSingleDimensionType.DISTANCE, 10);
+                singleDimensionBasedTwdTransitionPersistenceManager, AggregatedSingleDimensionType.DISTANCE, 10, null);
         importer.runAggregation();
     }
 

@@ -31,7 +31,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     public static final int DB_PORT = 27017;
     public static final String DB_HOST = "127.0.0.1";
     public static final String DB_NAME = "windEstimation";
-    private static final String FIELD_DB_ID = "_id";
+    public static final String FIELD_DB_ID = "_id";
     private final DB db;
     private final JSONParser jsonParser = new JSONParser();
     private final JsonDeserializer<T> deserializer;
@@ -55,9 +55,13 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         return db.collectionExists(getCollectionName());
     }
 
+    public long countElements(DBObject query) {
+        return getCollection().count(query);
+    }
+
     public long countElements(String query) {
         DBObject dbQuery = query == null ? null : (DBObject) JSON.parse(query);
-        return getCollection().count(dbQuery);
+        return countElements(dbQuery);
     }
 
     @Override
@@ -81,7 +85,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         DBObject dbObject = getCollection().findOne(dbQuery);
         if (dbObject != null) {
             ObjectId dbId = (ObjectId) dbObject.get(FIELD_DB_ID);
-            T element = deserializer.deserialize(getJSONObject(dbObject.toString()));
+            T element = deserializer.deserialize(getJSONObject(dbObject));
             result = new Pair<>(dbId.toHexString(), element);
         }
         return result;
@@ -113,7 +117,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         List<T> result = new ArrayList<>(dbCursor.count());
         while (dbCursor.hasNext()) {
             DBObject dbObject = dbCursor.next();
-            T element = deserializer.deserialize(getJSONObject(dbObject.toString()));
+            T element = deserializer.deserialize(getJSONObject(dbObject));
             result.add(element);
         }
         return result;
@@ -121,16 +125,25 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
 
     @Override
     public PersistedElementsIterator<T> getIterator(String query) {
+        DBObject dbQuery = query == null ? null : (DBObject) JSON.parse(query);
+        return new PersistedElementsIteratorImpl(dbQuery);
+    }
+
+    @Override
+    public PersistedElementsIterator<T> getIterator(DBObject query) {
         return new PersistedElementsIteratorImpl(query);
     }
 
     @Override
-    public PersistedElementsIterator<T> getIterator(String query, String sort) {
-        return new PersistedElementsIteratorImpl(query, sort);
+    public PersistedElementsIterator<T> getIterator() {
+        return getIterator((DBObject) null);
     }
 
-    protected JSONObject getJSONObject(String json) throws ParseException {
-        return (JSONObject) jsonParser.parse(json);
+    @Override
+    public PersistedElementsIterator<T> getIterator(String query, String sort) {
+        DBObject dbQuery = query == null ? null : (DBObject) JSON.parse(query);
+        DBObject dbSort = sort == null ? null : (DBObject) JSON.parse(sort);
+        return new PersistedElementsIteratorImpl(dbQuery, dbSort);
     }
 
     @Override
@@ -147,15 +160,15 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         private int numberOfCharsDuringLastStatusLog = 0;
         private long limit = Long.MAX_VALUE;
 
-        public PersistedElementsIteratorImpl(String query) {
+        public PersistedElementsIteratorImpl(DBObject query) {
             this(query, null);
         }
 
-        public PersistedElementsIteratorImpl(String query, String sort) {
+        public PersistedElementsIteratorImpl(DBObject query, DBObject sort) {
             numberOfElements = countElements(query);
-            this.dbCursor = query == null ? getCollection().find() : getCollection().find((DBObject) JSON.parse(query));
+            this.dbCursor = query == null ? getCollection().find() : getCollection().find(query);
             if (sort != null) {
-                this.dbCursor = this.dbCursor.sort((DBObject) JSON.parse(sort));
+                this.dbCursor = this.dbCursor.sort(sort);
             }
             LoggingUtil.logInfo(numberOfElements + " elements found in " + getCollectionName());
             prepareNext();
@@ -185,7 +198,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
                 try {
                     if (dbCursor.hasNext()) {
                         DBObject nextDbObject = dbCursor.next();
-                        this.nextElement = deserializer.deserialize(getJSONObject(nextDbObject.toString()));
+                        this.nextElement = deserializer.deserialize(getJSONObject(nextDbObject));
                         this.currentElementNumber = nextElementNumber;
                     } else {
                         this.nextElement = null;
@@ -208,6 +221,15 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
             return this;
         }
 
+    }
+
+    protected JSONObject getJSONObject(DBObject dbObject) throws ParseException {
+        ObjectId dbId = (ObjectId) dbObject.get(AbstractPersistenceManager.FIELD_DB_ID);
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(dbObject.toString());
+        if (dbId != null) {
+            jsonObject.put(AbstractPersistenceManager.FIELD_DB_ID, dbId.toHexString());
+        }
+        return jsonObject;
     }
 
 }

@@ -19,13 +19,15 @@ public class SingleDimensionTwdTransitionAggregationImporter {
     private final SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionTwdTransitionPersistenceManager;
     private final AggregatedSingleDimensionType dimensionType;
     private final double valueIntervalToAggregate;
+    private double annealingFactor;
 
     public SingleDimensionTwdTransitionAggregationImporter(
             SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionTwdTransitionPersistenceManager,
-            AggregatedSingleDimensionType dimensionType, double valueIntervalToAggregate) {
+            AggregatedSingleDimensionType dimensionType, double valueIntervalToAggregate, Double annealingFactor) {
         this.singleDimensionTwdTransitionPersistenceManager = singleDimensionTwdTransitionPersistenceManager;
         this.dimensionType = dimensionType;
         this.valueIntervalToAggregate = valueIntervalToAggregate;
+        this.annealingFactor = annealingFactor == null ? 0.0 : annealingFactor;
     }
 
     public void runAggregation() throws UnknownHostException {
@@ -34,16 +36,17 @@ public class SingleDimensionTwdTransitionAggregationImporter {
         double twdSum = 0.0;
         double squareTwdSum = 0.0;
         double valueDifference = 0;
-        double valueDifferenceAtLastAggregation = 0;
+        double valueDifferenceAtLastAggregation = valueIntervalToAggregate;
         List<AggregatedSingleDimensionBasedTwdTransition> aggregates = new ArrayList<>();
         List<Double> entries = new ArrayList<>();
         LoggingUtil.logInfo("Aggregating persisted entries");
         for (PersistedElementsIterator<SingleDimensionBasedTwdTransition> iterator = singleDimensionTwdTransitionPersistenceManager
                 .getIteratorSorted(); iterator.hasNext();) {
             SingleDimensionBasedTwdTransition entry = iterator.next();
-            double newSecondsPassed = entry.getDimensionValue();
+            double newValueDifference = entry.getDimensionValue();
             if (valueDifference > 0
-                    && newSecondsPassed - valueDifferenceAtLastAggregation >= valueIntervalToAggregate) {
+                    && newValueDifference - valueDifferenceAtLastAggregation >= (valueIntervalToAggregate
+                            + (newValueDifference * annealingFactor))) {
                 AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount, twdSum,
                         squareTwdSum, valueDifference, entries);
                 aggregates.add(aggregate);
@@ -54,7 +57,7 @@ public class SingleDimensionTwdTransitionAggregationImporter {
                 valuesCount = 0;
                 entries.clear();
             }
-            valueDifference = newSecondsPassed;
+            valueDifference = newValueDifference;
             double twdChange = entry.getAbsTwdChangeInDegrees();
             twdSum += twdChange;
             squareTwdSum += twdChange * twdChange;

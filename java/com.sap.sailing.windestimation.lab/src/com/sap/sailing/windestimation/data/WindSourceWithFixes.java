@@ -7,12 +7,14 @@ import com.sap.sailing.domain.common.WindSourceType;
 
 public class WindSourceWithFixes {
 
+    private final String dbId;
     private final WindSourceType windSourceType;
     private final WindSourceMetadata windSourceMetadata;
     private final List<Wind> windFixes;
 
-    public WindSourceWithFixes(WindSourceMetadata windSourceMetadata, WindSourceType windSourceType,
+    public WindSourceWithFixes(String dbId, WindSourceMetadata windSourceMetadata, WindSourceType windSourceType,
             List<Wind> windFixes) {
+        this.dbId = dbId;
         this.windSourceMetadata = windSourceMetadata;
         this.windSourceType = windSourceType;
         this.windFixes = windFixes;
@@ -28,6 +30,10 @@ public class WindSourceWithFixes {
 
     public List<Wind> getWindFixes() {
         return windFixes;
+    }
+
+    public String getDbId() {
+        return dbId;
     }
 
 }

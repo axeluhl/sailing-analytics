@@ -99,8 +99,9 @@ public class ManeuverAndWindImporter {
         LoggingUtil.logInfo("Importer for CompleteManeuverCurveWithEstimationData just started");
         LoggingUtil.logInfo("Dropping old database");
         if (!skipRace) {
-            completeManeuverCurvePersistanceManager.dropDb();
-            maneuverForDataAnalysisPersistenceManager.dropDb();
+            completeManeuverCurvePersistanceManager.dropCollection();
+            maneuverForDataAnalysisPersistenceManager.dropCollection();
+            raceWithWindSourcesPersistenceManager.dropCollection();
         }
         LoggingUtil.logInfo("Fetching all existing regatta names");
         ImportStatistics importStatistics = new ImportStatistics();

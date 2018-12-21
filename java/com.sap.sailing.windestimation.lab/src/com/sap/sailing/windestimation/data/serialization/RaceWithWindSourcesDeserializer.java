@@ -6,8 +6,6 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.MongoDbFriendlyPositionJsonDeserializer;
@@ -23,9 +21,10 @@ public class RaceWithWindSourcesDeserializer implements JsonDeserializer<RaceWit
     public static final String REGATTA_NAME = "regattaName";
 
     private final MongoDbFriendlyPositionJsonDeserializer positionDeserializer = new MongoDbFriendlyPositionJsonDeserializer();
-    private final WindJsonDeserializer windDeserializer = new WindJsonDeserializer(positionDeserializer);
     private final WindSourceMetadataJsonDeserializer windSourceMetadataDeserializer = new WindSourceMetadataJsonDeserializer(
             positionDeserializer);
+    private final WindSourceJsonDeserializer windSourceDeserializer = new WindSourceJsonDeserializer(
+            new WindJsonDeserializer(positionDeserializer), windSourceMetadataDeserializer);
 
     @Override
     public RaceWithWindSources deserialize(JSONObject object) throws JsonDeserializationException {
@@ -36,22 +35,16 @@ public class RaceWithWindSourcesDeserializer implements JsonDeserializer<RaceWit
         List<WindSourceWithFixes> windSources = new ArrayList<>(windSourcesJson.size());
         for (Object windSourceObj : windSourcesJson) {
             JSONObject windSourceJson = (JSONObject) windSourceObj;
-            WindSourceMetadata windSourceMetadata = windSourceMetadataDeserializer.deserialize(windSourceJson);
-            WindSourceType windSourceType = WindSourceType
-                    .valueOf((String) windSourceJson.get(RaceWindJsonSerializer.TYPE));
-            JSONArray windFixesJson = (JSONArray) windSourceJson.get(RaceWindJsonSerializer.FIXES);
-            List<Wind> windFixes = new ArrayList<>(windFixesJson.size());
-            for (Object windObj : windFixesJson) {
-                JSONObject windJson = (JSONObject) windObj;
-                Wind wind = windDeserializer.deserialize(windJson);
-                windFixes.add(wind);
-            }
-            WindSourceWithFixes windSource = new WindSourceWithFixes(windSourceMetadata, windSourceType, windFixes);
+            WindSourceWithFixes windSource = windSourceDeserializer.deserialize(windSourceJson);
             windSources.add(windSource);
         }
         RaceWithWindSources raceWithWindSources = new RaceWithWindSources(regattaName, raceName, raceMetadata,
                 windSources);
         return raceWithWindSources;
+    }
+    
+    public WindSourceJsonDeserializer getWindSourceDeserializer() {
+        return windSourceDeserializer;
     }
 
 }

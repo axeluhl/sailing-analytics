@@ -5,13 +5,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bson.types.ObjectId;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
@@ -28,6 +32,8 @@ import com.sap.sailing.windestimation.data.serialization.RaceWithEstimationDataD
 public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extends
         AbstractPersistenceManager<RaceWithEstimationData<T>> implements RaceWithEstimationDataPersistenceManager<T> {
 
+    private static final String competitorTracksCollectioName = "competitorTracks";
+
     public AbstractRaceWithEstimationDataPersistenceManager() throws UnknownHostException {
     }
 
@@ -40,24 +46,56 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
 
     @Override
     protected JsonDeserializer<RaceWithEstimationData<T>> getNewJsonDeserializer() {
-        return new RaceWithEstimationDataDeserializer<>(getNewCompetitorTrackWithEstimationDataJsonDeserializer());
+        return new RaceWithEstimationDataDeserializer<T>(getNewCompetitorTrackWithEstimationDataJsonDeserializer()) {
+            @Override
+            public RaceWithEstimationData<T> deserialize(JSONObject raceJson) throws JsonDeserializationException {
+                JSONArray competitorTrackIdsJson = (JSONArray) raceJson
+                        .get(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS);
+                JSONArray competitorTracksJson = new JSONArray();
+                DBCollection competitorTracksCollection = getDb().getCollection(getCompetitorTracksCollectionName());
+                for (Object idObject : competitorTrackIdsJson) {
+                    DBObject dbCompetitorTrack = competitorTracksCollection
+                            .findOne(new BasicDBObject(FIELD_DB_ID, new ObjectId((String) idObject)));
+                    try {
+                        JSONObject competitorTrackJson = getJSONObject(dbCompetitorTrack);
+                        competitorTracksJson.add(competitorTrackJson);
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                raceJson.put(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS, competitorTracksJson);
+                return super.deserialize(raceJson);
+            }
+        };
     }
 
     @Override
     public void addRace(String regattaName, String trackedRaceName, WindQuality windQuality,
             List<JSONObject> competitorTracks) {
-        BasicDBList dbCompetitorTracks = new BasicDBList();
+        DBObject[] dbCompetitorTracks = new DBObject[competitorTracks.size()];
+        int i = 0;
         for (JSONObject competitorTrack : competitorTracks) {
             DBObject entry = (DBObject) JSON.parse(competitorTrack.toString());
-            dbCompetitorTracks.add(entry);
+            dbCompetitorTracks[i++] = entry;
         }
         BasicDBObject dbObject = new BasicDBObject();
         dbObject.put(RaceWithEstimationDataDeserializer.REGATTA_NAME, regattaName);
         dbObject.put(RaceWithEstimationDataDeserializer.TRACKED_RACE_NAME, trackedRaceName);
         dbObject.put(RaceWithEstimationDataDeserializer.WIND_QUALITY, windQuality.name());
-        dbObject.put(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS, dbCompetitorTracks);
+        DBCollection competitorTracksCollection = getDb().getCollection(getCompetitorTracksCollectionName());
+        competitorTracksCollection.insert(dbCompetitorTracks);
+        BasicDBList dbCompetitorTrackIds = new BasicDBList();
+        for (DBObject dbCompetitorTrack : dbCompetitorTracks) {
+            ObjectId dbId = (ObjectId) dbCompetitorTrack.get(FIELD_DB_ID);
+            dbCompetitorTrackIds.add(dbId.toHexString());
+        }
+        dbObject.put(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS, dbCompetitorTrackIds);
         DBCollection races = getDb().getCollection(getCollectionName());
         races.insert(dbObject);
+    }
+
+    protected String getCompetitorTracksCollectionName() {
+        return getCollectionName() + "." + competitorTracksCollectioName;
     }
 
     public Iterator<CompetitorTrackWithEstimationData<T>> getCompetitorTrackIterator(String query) {
