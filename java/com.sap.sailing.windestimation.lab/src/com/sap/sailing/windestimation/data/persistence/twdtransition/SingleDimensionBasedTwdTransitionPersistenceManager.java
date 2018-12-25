@@ -4,11 +4,10 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.bson.Document;
 import org.json.simple.JSONObject;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.windestimation.data.SingleDimensionBasedTwdTransition;
@@ -42,15 +41,15 @@ public class SingleDimensionBasedTwdTransitionPersistenceManager
 
     public void add(SingleDimensionBasedTwdTransition twdTransition) {
         JSONObject jsonObject = serializer.serialize(twdTransition);
-        DBObject dbObject = (DBObject) JSON.parse(jsonObject.toString());
-        getDb().getCollection(getCollectionName()).insert(dbObject);
+        Document dbObject = parseJsonString(jsonObject.toString());
+        getDb().getCollection(getCollectionName()).insertOne(dbObject);
     }
 
     public void add(List<SingleDimensionBasedTwdTransition> twdTransitions) {
-        List<DBObject> dbObjects = twdTransitions.stream()
-                .map(twdTransition -> (DBObject) JSON.parse(serializer.serialize(twdTransition).toString()))
+        List<Document> dbObjects = twdTransitions.stream()
+                .map(twdTransition -> parseJsonString(serializer.serialize(twdTransition).toString()))
                 .collect(Collectors.toList());
-        getDb().getCollection(getCollectionName()).insert(dbObjects);
+        getDb().getCollection(getCollectionName()).insertMany(dbObjects);
     }
 
     public PersistedElementsIterator<SingleDimensionBasedTwdTransition> getIteratorSorted() {

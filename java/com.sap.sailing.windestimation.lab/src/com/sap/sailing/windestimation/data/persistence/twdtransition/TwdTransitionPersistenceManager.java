@@ -4,10 +4,9 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.bson.Document;
 import org.json.simple.JSONObject;
 
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
@@ -35,15 +34,15 @@ public class TwdTransitionPersistenceManager extends AbstractPersistenceManager<
 
     public void add(TwdTransition twdTransition) {
         JSONObject jsonObject = serializer.serialize(twdTransition);
-        DBObject dbObject = (DBObject) JSON.parse(jsonObject.toString());
-        getDb().getCollection(getCollectionName()).insert(dbObject);
+        Document dbObject = parseJsonString(jsonObject.toString());
+        getDb().getCollection(getCollectionName()).insertOne(dbObject);
     }
 
     public void add(List<TwdTransition> twdTransitions) {
-        List<DBObject> dbObjects = twdTransitions.stream()
-                .map(twdTransition -> (DBObject) JSON.parse(serializer.serialize(twdTransition).toString()))
+        List<Document> dbObjects = twdTransitions.stream()
+                .map(twdTransition -> parseJsonString(serializer.serialize(twdTransition).toString()))
                 .collect(Collectors.toList());
-        getDb().getCollection(getCollectionName()).insert(dbObjects);
+        getDb().getCollection(getCollectionName()).insertMany(dbObjects);
     }
 
 }

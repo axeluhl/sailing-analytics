@@ -4,17 +4,18 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.util.JSON;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -32,17 +33,22 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     public static final String DB_HOST = "127.0.0.1";
     public static final String DB_NAME = "windEstimation";
     public static final String FIELD_DB_ID = "_id";
-    private final DB db;
+    private final MongoDatabase database;
     private final JSONParser jsonParser = new JSONParser();
     private final JsonDeserializer<T> deserializer;
+    private final MongoClient mongoClient;
+    private final DB db;
 
+    @SuppressWarnings("deprecation")
     public AbstractPersistenceManager() throws UnknownHostException {
-        db = new MongoClient(DB_HOST, DB_PORT).getDB(DB_NAME);
+        mongoClient = new MongoClient(DB_HOST, DB_PORT);
+        database = mongoClient.getDatabase(DB_NAME);
+        db = mongoClient.getDB(DB_NAME);
         deserializer = getNewJsonDeserializer();
     }
 
-    public DBCollection getCollection() {
-        return db.getCollection(getCollectionName());
+    public MongoCollection<Document> getCollection() {
+        return database.getCollection(getCollectionName());
     }
 
     protected abstract JsonDeserializer<T> getNewJsonDeserializer();
@@ -52,15 +58,21 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     }
 
     public boolean collectionExists() {
-        return db.collectionExists(getCollectionName());
+        String targetCollectionName = getCollectionName();
+        for (String collectionName : database.listCollectionNames()) {
+            if (collectionName.equals(targetCollectionName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public long countElements(DBObject query) {
+    public long countElements(Document query) {
         return getCollection().count(query);
     }
 
     public long countElements(String query) {
-        DBObject dbQuery = query == null ? null : (DBObject) JSON.parse(query);
+        Document dbQuery = query == null ? null : (Document) JSON.parse(query);
         return countElements(dbQuery);
     }
 
@@ -68,10 +80,10 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     public Pair<String, T> getNextElement(String lastId, String query)
             throws JsonDeserializationException, ParseException {
         Pair<String, T> result = null;
-        BasicDBObject gtQuery = null;
+        Document gtQuery = null;
         if (lastId != null) {
-            gtQuery = new BasicDBObject();
-            gtQuery.put(FIELD_DB_ID, new BasicDBObject("$gt", new ObjectId(lastId)));
+            gtQuery = new Document();
+            gtQuery.put(FIELD_DB_ID, new Document("$gt", new ObjectId(lastId)));
         }
         String finalQuery = null;
         if (gtQuery != null && query != null) {
@@ -81,8 +93,8 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         } else if (query != null) {
             finalQuery = query;
         }
-        DBObject dbQuery = finalQuery == null ? null : (DBObject) JSON.parse(finalQuery);
-        DBObject dbObject = getCollection().findOne(dbQuery);
+        Document dbQuery = parseJsonString(finalQuery);
+        Document dbObject = getCollection().find(dbQuery).first();
         if (dbObject != null) {
             ObjectId dbId = (ObjectId) dbObject.get(FIELD_DB_ID);
             T element = deserializer.deserialize(getJSONObject(dbObject));
@@ -109,14 +121,11 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
 
     @Override
     public List<T> getAllElements(String query) throws JsonDeserializationException, ParseException {
-        DBObject dbQuery = null;
-        if (query != null) {
-            dbQuery = (DBObject) JSON.parse(query.toString());
-        }
-        DBCursor dbCursor = getCollection().find(dbQuery);
-        List<T> result = new ArrayList<>(dbCursor.count());
+        Document dbQuery = parseJsonString(query);
+        MongoCursor<Document> dbCursor = getCollection().find(dbQuery).iterator();
+        List<T> result = new ArrayList<>();
         while (dbCursor.hasNext()) {
-            DBObject dbObject = dbCursor.next();
+            Document dbObject = dbCursor.next();
             T element = deserializer.deserialize(getJSONObject(dbObject));
             result.add(element);
         }
@@ -125,51 +134,56 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
 
     @Override
     public PersistedElementsIterator<T> getIterator(String query) {
-        DBObject dbQuery = query == null ? null : (DBObject) JSON.parse(query);
+        Document dbQuery = parseJsonString(query);
         return new PersistedElementsIteratorImpl(dbQuery);
     }
 
     @Override
-    public PersistedElementsIterator<T> getIterator(DBObject query) {
+    public PersistedElementsIterator<T> getIterator(Document query) {
         return new PersistedElementsIteratorImpl(query);
     }
 
     @Override
     public PersistedElementsIterator<T> getIterator() {
-        return getIterator((DBObject) null);
+        return getIterator((Document) null);
     }
 
     @Override
     public PersistedElementsIterator<T> getIterator(String query, String sort) {
-        DBObject dbQuery = query == null ? null : (DBObject) JSON.parse(query);
-        DBObject dbSort = sort == null ? null : (DBObject) JSON.parse(sort);
+        Document dbQuery = parseJsonString(query);
+        Document dbSort = parseJsonString(sort);
         return new PersistedElementsIteratorImpl(dbQuery, dbSort);
     }
 
     @Override
-    public DB getDb() {
+    public MongoDatabase getDb() {
+        return database;
+    }
+
+    public DB getDbOld() {
         return db;
     }
 
     protected class PersistedElementsIteratorImpl implements PersistedElementsIterator<T> {
 
-        private DBCursor dbCursor;
+        private MongoCursor<Document> dbCursor;
         private T nextElement = null;
         private long numberOfElements;
         private long currentElementNumber = 0;
         private int numberOfCharsDuringLastStatusLog = 0;
         private long limit = Long.MAX_VALUE;
 
-        public PersistedElementsIteratorImpl(DBObject query) {
+        public PersistedElementsIteratorImpl(Document query) {
             this(query, null);
         }
 
-        public PersistedElementsIteratorImpl(DBObject query, DBObject sort) {
+        public PersistedElementsIteratorImpl(Document query, Document sort) {
             numberOfElements = countElements(query);
-            this.dbCursor = query == null ? getCollection().find() : getCollection().find(query);
+            FindIterable<Document> findIterable = query == null ? getCollection().find() : getCollection().find(query);
             if (sort != null) {
-                this.dbCursor = this.dbCursor.sort(sort);
+                findIterable = findIterable.sort(sort);
             }
+            this.dbCursor = findIterable.iterator();
             LoggingUtil.logInfo(numberOfElements + " elements found in " + getCollectionName());
             prepareNext();
         }
@@ -197,7 +211,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
                 }
                 try {
                     if (dbCursor.hasNext()) {
-                        DBObject nextDbObject = dbCursor.next();
+                        Document nextDbObject = dbCursor.next();
                         this.nextElement = deserializer.deserialize(getJSONObject(nextDbObject));
                         this.currentElementNumber = nextElementNumber;
                     } else {
@@ -223,13 +237,19 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
 
     }
 
-    protected JSONObject getJSONObject(DBObject dbObject) throws ParseException {
+    protected JSONObject getJSONObject(Document dbObject) throws ParseException {
         ObjectId dbId = (ObjectId) dbObject.get(AbstractPersistenceManager.FIELD_DB_ID);
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(dbObject.toString());
+        String jsonString = dbObject.toJson();
+        jsonString = jsonString.replaceAll("\\{\\s*\\\"\\$numberLong\\\"\\s*\\:\\s*\\\"(\\d+)\\\"\\s*\\}", "$1");
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(jsonString);
         if (dbId != null) {
             jsonObject.put(AbstractPersistenceManager.FIELD_DB_ID, dbId.toHexString());
         }
         return jsonObject;
+    }
+
+    protected Document parseJsonString(String jsonString) {
+        return jsonString == null ? null : Document.parse(jsonString);
     }
 
 }

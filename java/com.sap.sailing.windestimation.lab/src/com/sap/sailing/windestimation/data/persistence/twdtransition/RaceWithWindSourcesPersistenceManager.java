@@ -1,17 +1,17 @@
 package com.sap.sailing.windestimation.data.persistence.twdtransition;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
+import com.mongodb.client.MongoCollection;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
@@ -28,7 +28,7 @@ public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceMa
     private static final String WIND_SOURCES_COLLECTION_NAME = "windSources";
 
     public RaceWithWindSourcesPersistenceManager() throws UnknownHostException {
-        BasicDBObject indexes = new BasicDBObject(RaceWindJsonSerializer.START_TIME_POINT, 1);
+        Document indexes = new Document(RaceWindJsonSerializer.START_TIME_POINT, 1);
         indexes.put(RaceWindJsonSerializer.END_TIME_POINT, 1);
         getCollection().createIndex(indexes);
     }
@@ -46,10 +46,10 @@ public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceMa
                 JSONArray windSourceIdsJson = (JSONArray) raceJson
                         .get(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS);
                 JSONArray windSourcesJson = new JSONArray();
-                DBCollection windSourcesCollection = getDb().getCollection(getWindSourcesCollectionName());
+                MongoCollection<Document> windSourcesCollection = getDb().getCollection(getWindSourcesCollectionName());
                 for (Object idObject : windSourceIdsJson) {
-                    DBObject dbWindSource = windSourcesCollection
-                            .findOne(new BasicDBObject(FIELD_DB_ID, new ObjectId((String) idObject)));
+                    Document dbWindSource = windSourcesCollection
+                            .find(new Document(FIELD_DB_ID, new ObjectId((String) idObject))).first();
                     try {
                         JSONObject windSourceJson = getJSONObject(dbWindSource);
                         windSourcesJson.add(windSourceJson);
@@ -70,25 +70,24 @@ public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceMa
     public void add(String regattaName, String raceName, JSONObject raceWithWindSourcesJson) {
 
         JSONArray windSourcesJson = (JSONArray) raceWithWindSourcesJson.get(RaceWindJsonSerializer.WIND_SOURCES);
-        DBObject[] dbWindSources = new DBObject[windSourcesJson.size()];
-        int i = 0;
+        List<Document> dbWindSources = new ArrayList<>(windSourcesJson.size());
         for (Object windSourceObj : windSourcesJson) {
-            DBObject entry = (DBObject) JSON.parse(windSourceObj.toString());
-            dbWindSources[i++] = entry;
+            Document entry = parseJsonString(windSourceObj.toString());
+            dbWindSources.add(entry);
         }
-        DBCollection windSourcesCollection = getDb().getCollection(getWindSourcesCollectionName());
-        windSourcesCollection.insert(dbWindSources);
+        MongoCollection<Document> windSourcesCollection = getDb().getCollection(getWindSourcesCollectionName());
+        windSourcesCollection.insertMany(dbWindSources);
         BasicDBList dbWindSourceIds = new BasicDBList();
-        for (DBObject dbWindSource : dbWindSources) {
+        for (Document dbWindSource : dbWindSources) {
             ObjectId dbId = (ObjectId) dbWindSource.get(FIELD_DB_ID);
             dbWindSourceIds.add(dbId.toHexString());
         }
-        DBObject dbObject = new BasicDBObject();
+        Document dbObject = new Document();
         dbObject.put(RaceWithWindSourcesDeserializer.REGATTA_NAME, regattaName);
         dbObject.put(RaceWithWindSourcesDeserializer.RACE_NAME, raceName);
         dbObject.put(RaceWindJsonSerializer.WIND_SOURCES, dbWindSourceIds);
-        DBCollection races = getDb().getCollection(getCollectionName());
-        races.insert(dbObject);
+        MongoCollection<Document> races = getDb().getCollection(getCollectionName());
+        races.insertOne(dbObject);
     }
 
     public PersistedElementsIterator<RaceWithWindSources> getIteratorForEntriesIntersectingPeriod(

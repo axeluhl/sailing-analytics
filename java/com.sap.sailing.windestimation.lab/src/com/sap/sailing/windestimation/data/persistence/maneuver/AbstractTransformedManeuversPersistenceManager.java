@@ -4,8 +4,8 @@ import java.net.UnknownHostException;
 
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
-public abstract class AbstractTransformedManeuversPersistenceManager<T>
-        extends AbstractPersistenceManager<T> implements TransformedManeuversPersistenceManager<T> {
+public abstract class AbstractTransformedManeuversPersistenceManager<T> extends AbstractPersistenceManager<T>
+        implements TransformedManeuversPersistenceManager<T> {
 
     private final PersistenceManager<?>[] dependencyToOtherPersistenceManagers;
 
@@ -42,7 +42,7 @@ public abstract class AbstractTransformedManeuversPersistenceManager<T>
         }
         dropCollection();
         LoggingUtil.logInfo("Transformation for \"" + getCollectionName() + "\" collection started.");
-        Object result = getDb().eval(getMongoDbEvalStringForTransformation());
+        Object result = getDbOld().eval(getMongoDbEvalStringForTransformation());
         LoggingUtil.logInfo("Transformation succeeded. Collection \"" + getCollectionName() + "\" created.\n" + result);
     }
 

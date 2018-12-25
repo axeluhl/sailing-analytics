@@ -7,4 +7,5 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Require-Bundle: com.sap.sse.replication.interfaces
 Automatic-Module-Name: com.sap.sailing.windestimation.lab

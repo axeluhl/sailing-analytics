@@ -46,9 +46,9 @@ public class FileSystemModelStore implements ModelStore {
                 @SuppressWarnings("unchecked")
                 ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(input);
                 if (!newModel.getContextSpecificModelMetadata().equals(loadedModel.getContextSpecificModelMetadata())) {
-                    throw new ModelPersistenceException("The configuration of the loaded model is: "
-                            + loadedModel.getContextSpecificModelMetadata() + ". \nExpected: "
-                            + newModel.getContextSpecificModelMetadata());
+                    throw new ModelPersistenceException(
+                            "The configuration of the loaded model is: " + loadedModel.getContextSpecificModelMetadata()
+                                    + ". \nExpected: " + newModel.getContextSpecificModelMetadata());
                 }
                 return loadedModel;
             } catch (IOException e) {
@@ -61,15 +61,14 @@ public class FileSystemModelStore implements ModelStore {
     @Override
     public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
-        try (FileOutputStream output = new FileOutputStream(getFileForModel(persistenceSupport,
-                trainedModel.getContextSpecificModelMetadata().getContextType()))) {
+        try (FileOutputStream output = new FileOutputStream(
+                getFileForModel(persistenceSupport, trainedModel.getContextSpecificModelMetadata().getContextType()))) {
             persistenceSupport.saveToStream(output);
         } catch (IOException e) {
             throw new ModelPersistenceException(e);
         }
     }
 
-    @Override
     public <T extends PersistableModel<?, ?>> void delete(T newModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         File modelFile = getFileForModel(persistenceSupport,

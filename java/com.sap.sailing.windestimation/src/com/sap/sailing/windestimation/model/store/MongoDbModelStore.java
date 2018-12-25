@@ -1,17 +1,12 @@
 package com.sap.sailing.windestimation.model.store;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBObject;
 import com.mongodb.MongoException;
-import com.mongodb.gridfs.GridFS;
-import com.mongodb.gridfs.GridFSDBFile;
-import com.mongodb.gridfs.GridFSInputFile;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.gridfs.GridFSBucket;
+import com.mongodb.client.gridfs.GridFSBuckets;
+import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.model.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.TrainableModel;
@@ -19,9 +14,9 @@ import com.sap.sailing.windestimation.model.TrainableModel;
 public class MongoDbModelStore implements ModelStore {
 
     private static final String CONTEXT_NAME_PREFIX = "modelFor";
-    private final DB db;
+    private final MongoDatabase db;
 
-    public MongoDbModelStore(DB db) {
+    public MongoDbModelStore(MongoDatabase db) {
         this.db = db;
     }
 
@@ -34,27 +29,20 @@ public class MongoDbModelStore implements ModelStore {
             ModelType newModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getFileName(persistenceSupport);
-        GridFS gridFs = null;
-        try {
-            gridFs = new GridFS(db, getCollectionName(newModel.getContextSpecificModelMetadata().getContextType()));
-            List<GridFSDBFile> mongoFiles = gridFs.find(fileName);
-            if (!mongoFiles.isEmpty()) {
-                GridFSDBFile mongoFile = mongoFiles.get(0);
-                ContextSpecificModelMetadata<?> requestedModelMetadata = newModel.getContextSpecificModelMetadata();
-                try (InputStream inputStream = mongoFile.getInputStream()) {
-                    @SuppressWarnings("unchecked")
-                    ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(inputStream);
-                    ContextSpecificModelMetadata<InstanceType> loadedModelMetadata = loadedModel
-                            .getContextSpecificModelMetadata();
-                    if (!requestedModelMetadata.equals(loadedModelMetadata)) {
-                        throw new ModelPersistenceException("The configuration of the loaded model is: "
-                                + loadedModelMetadata + ". \nExpected: " + requestedModelMetadata);
-                    }
-                    return loadedModel;
-                }
+        String bucketName = getCollectionName(newModel.getContextSpecificModelMetadata().getContextType());
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        try (GridFSDownloadStream inputStream = gridFs.openDownloadStreamByName(fileName)) {
+            ContextSpecificModelMetadata<?> requestedModelMetadata = newModel.getContextSpecificModelMetadata();
+            @SuppressWarnings("unchecked")
+            ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(inputStream);
+            ContextSpecificModelMetadata<InstanceType> loadedModelMetadata = loadedModel
+                    .getContextSpecificModelMetadata();
+            if (!requestedModelMetadata.equals(loadedModelMetadata)) {
+                throw new ModelPersistenceException("The configuration of the loaded model is: " + loadedModelMetadata
+                        + ". \nExpected: " + requestedModelMetadata);
             }
-            return null;
-        } catch (IOException e) {
+            return loadedModel;
+        } catch (MongoException e) {
             throw new ModelPersistenceException(e);
         }
     }
@@ -63,34 +51,12 @@ public class MongoDbModelStore implements ModelStore {
     public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         String newFileName = getFileName(persistenceSupport);
-        GridFS gridFs = null;
-        GridFSInputFile mongoFile = null;
+        String bucketName = getCollectionName(trainedModel.getContextSpecificModelMetadata().getContextType());
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try {
-            gridFs = new GridFS(db, getCollectionName(trainedModel.getContextSpecificModelMetadata().getContextType()));
-            mongoFile = gridFs.createFile();
-            mongoFile.setFilename(newFileName);
-            try (OutputStream outputStream = mongoFile.getOutputStream()) {
+            try (OutputStream outputStream = gridFs.openUploadStream(newFileName)) {
                 persistenceSupport.saveToStream(outputStream);
             }
-        } catch (Exception e) {
-            if (mongoFile != null) {
-                try {
-                    gridFs.remove(mongoFile);
-                } catch (MongoException ignore) {
-                }
-            }
-            throw new ModelPersistenceException(e);
-        }
-    }
-
-    @Override
-    public <T extends PersistableModel<?, ?>> void delete(T newModel) throws ModelPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        String fileName = getFileName(persistenceSupport);
-        try {
-            GridFS gridFs = new GridFS(db,
-                    getCollectionName(newModel.getContextSpecificModelMetadata().getContextType()));
-            gridFs.remove(fileName);
         } catch (Exception e) {
             throw new ModelPersistenceException(e);
         }
@@ -99,9 +65,7 @@ public class MongoDbModelStore implements ModelStore {
     @Override
     public void deleteAll(ContextType contextType) throws ModelPersistenceException {
         try {
-            GridFS gridFs = new GridFS(db, getCollectionName(contextType));
-            DBObject dbQuery = new BasicDBObject();
-            gridFs.remove(dbQuery);
+            GridFSBuckets.create(db, getCollectionName(contextType)).drop();
         } catch (Exception e) {
             throw new ModelPersistenceException(e);
         }

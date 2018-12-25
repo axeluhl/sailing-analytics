@@ -2,11 +2,11 @@ package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.util.List;
 
+import org.bson.Document;
 import org.json.simple.parser.ParseException;
 
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.Util.Pair;
 
@@ -28,7 +28,7 @@ public interface PersistenceManager<T> {
 
     PersistedElementsIterator<T> getIterator(String query);
 
-    PersistedElementsIterator<T> getIterator(DBObject query);
+    PersistedElementsIterator<T> getIterator(Document query);
 
     List<T> getAllElements(String query) throws JsonDeserializationException, ParseException;
 
@@ -38,9 +38,9 @@ public interface PersistenceManager<T> {
 
     String getFilterQueryForYear(int year, boolean exclude);
 
-    DB getDb();
+    MongoDatabase getDb();
 
-    DBCollection getCollection();
+    MongoCollection<Document> getCollection();
 
     PersistedElementsIterator<T> getIterator(String query, String sort);
 

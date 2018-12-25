@@ -10,8 +10,6 @@ public interface ModelStore {
     <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
             ModelType newModel) throws ModelPersistenceException;
 
-    <T extends PersistableModel<?, ?>> void delete(T newModel) throws ModelPersistenceException;
-
     void deleteAll(ContextType contextType) throws ModelPersistenceException;
 
     default <T extends PersistableModel<?, ?>> PersistenceSupport checkAndGetPersistenceSupport(T trainedModel)

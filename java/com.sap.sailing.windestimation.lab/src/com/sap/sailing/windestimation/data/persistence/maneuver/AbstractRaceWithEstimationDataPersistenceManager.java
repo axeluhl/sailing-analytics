@@ -5,16 +5,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
+import com.mongodb.client.MongoCollection;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
@@ -52,10 +50,11 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
                 JSONArray competitorTrackIdsJson = (JSONArray) raceJson
                         .get(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS);
                 JSONArray competitorTracksJson = new JSONArray();
-                DBCollection competitorTracksCollection = getDb().getCollection(getCompetitorTracksCollectionName());
+                MongoCollection<Document> competitorTracksCollection = getDb()
+                        .getCollection(getCompetitorTracksCollectionName());
                 for (Object idObject : competitorTrackIdsJson) {
-                    DBObject dbCompetitorTrack = competitorTracksCollection
-                            .findOne(new BasicDBObject(FIELD_DB_ID, new ObjectId((String) idObject)));
+                    Document dbCompetitorTrack = competitorTracksCollection
+                            .find(new Document(FIELD_DB_ID, new ObjectId((String) idObject))).first();
                     try {
                         JSONObject competitorTrackJson = getJSONObject(dbCompetitorTrack);
                         competitorTracksJson.add(competitorTrackJson);
@@ -72,26 +71,26 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
     @Override
     public void addRace(String regattaName, String trackedRaceName, WindQuality windQuality,
             List<JSONObject> competitorTracks) {
-        DBObject[] dbCompetitorTracks = new DBObject[competitorTracks.size()];
-        int i = 0;
+        List<Document> dbCompetitorTracks = new ArrayList<>(competitorTracks.size());
         for (JSONObject competitorTrack : competitorTracks) {
-            DBObject entry = (DBObject) JSON.parse(competitorTrack.toString());
-            dbCompetitorTracks[i++] = entry;
+            Document entry = parseJsonString(competitorTrack.toString());
+            dbCompetitorTracks.add(entry);
         }
-        BasicDBObject dbObject = new BasicDBObject();
+        Document dbObject = new Document();
         dbObject.put(RaceWithEstimationDataDeserializer.REGATTA_NAME, regattaName);
         dbObject.put(RaceWithEstimationDataDeserializer.TRACKED_RACE_NAME, trackedRaceName);
         dbObject.put(RaceWithEstimationDataDeserializer.WIND_QUALITY, windQuality.name());
-        DBCollection competitorTracksCollection = getDb().getCollection(getCompetitorTracksCollectionName());
-        competitorTracksCollection.insert(dbCompetitorTracks);
+        MongoCollection<Document> competitorTracksCollection = getDb()
+                .getCollection(getCompetitorTracksCollectionName());
+        competitorTracksCollection.insertMany(dbCompetitorTracks);
         BasicDBList dbCompetitorTrackIds = new BasicDBList();
-        for (DBObject dbCompetitorTrack : dbCompetitorTracks) {
+        for (Document dbCompetitorTrack : dbCompetitorTracks) {
             ObjectId dbId = (ObjectId) dbCompetitorTrack.get(FIELD_DB_ID);
             dbCompetitorTrackIds.add(dbId.toHexString());
         }
         dbObject.put(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS, dbCompetitorTrackIds);
-        DBCollection races = getDb().getCollection(getCollectionName());
-        races.insert(dbObject);
+        MongoCollection<Document> races = getDb().getCollection(getCollectionName());
+        races.insertOne(dbObject);
     }
 
     protected String getCompetitorTracksCollectionName() {
