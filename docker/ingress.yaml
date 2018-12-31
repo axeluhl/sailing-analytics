@@ -1,0 +1,12 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sailing-ingress
+spec:
+  rules:
+  - host: kw2019-master.ingress.fooz2kz8j4.test001.shoot.canary.k8s-hana.ondemand.com
+    http:
+      paths:
+      - backend:
+          serviceName: sailing-kw2019-master-svc
+          servicePort: 80
