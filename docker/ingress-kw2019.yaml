@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: sailing-ingress
+  name: sailing-kw2019-ingress
 spec:
   rules:
   - host: kw2019-master.ingress.fooz2kz8j4.test001.shoot.canary.k8s-hana.ondemand.com
