@@ -1,0 +1,3 @@
+#!/bin/bash
+helm install --name cert-manager stable/cert-manager --version v0.4.1 --set ingressShim.defaultIssuerName=letsencrypt-prod --set ingressShim.defaultIssuerKind=ClusterIssuer
+helm upgrade cert-manager stable/cert-manager
