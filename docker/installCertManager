@@ -8,7 +8,9 @@ metadata:
   name: letsencrypt-prod
 spec:
   acme:
+    # Use the following for production keys:
     #server: https://acme-v02.api.letsencrypt.org/directory
+    # Use the following for "staging" / demo keys:
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     email: axel.uhl@sap.com
     privateKeySecretRef:
