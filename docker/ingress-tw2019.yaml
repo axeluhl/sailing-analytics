@@ -25,6 +25,7 @@ metadata:
   name: sailing-tw2019-ingress
   annotations:
     kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/tls-acme: 'true'
     nginx.ingress.kubernetes.io/app-root: /gwt/Home.html#/event/:eventId=0638352a-e738-4aa1-a011-e488b3195636
 spec:
   rules:
