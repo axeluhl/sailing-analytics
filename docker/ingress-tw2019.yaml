@@ -1,7 +1,11 @@
+---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: sailing-tw2019-ingress
+  name: sailing-tw2019-master-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/app-root: /gwt/AdminConsole.html
 spec:
   rules:
   - host: tw2019-master.ingress.fooz2kz8j4.test001.shoot.canary.k8s-hana.ondemand.com
@@ -10,6 +14,16 @@ spec:
       - backend:
           serviceName: sailing-tw2019-master-svc
           servicePort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sailing-tw2019-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/app-root: /gwt/Home.html#/event/:eventId=0638352a-e738-4aa1-a011-e488b3195636
+spec:
+  rules:
   - host: tw2019.ingress.fooz2kz8j4.test001.shoot.canary.k8s-hana.ondemand.com
     http:
       paths:

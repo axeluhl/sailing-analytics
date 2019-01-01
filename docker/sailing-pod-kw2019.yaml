@@ -23,7 +23,7 @@ spec:
         cpu: "500m"
     env:
     - name: MONGODB_URI
-      value: mongodb://mongodb-mongodb-replicaset-0.mongodb-mongodb-replicaset,mongodb-mongodb-replicaset-1.mongodb-mongodb-replicaset,mongodb-mongodb-replicaset-2.mongodb-mongodb-replicaset/kw2019
+      value: mongodb://mongodb-mongodb-replicaset-0.mongodb-mongodb-replicaset,mongodb-mongodb-replicaset-1.mongodb-mongodb-replicaset,mongodb-mongodb-replicaset-2.mongodb-mongodb-replicaset/kw2019?readPreference=primaryPreferred
     livenessProbe:
       httpGet:
         path: /
