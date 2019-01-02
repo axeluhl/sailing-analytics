@@ -216,8 +216,8 @@ public interface TaggingService {
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
      * @param fleetName
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
-     * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
-     *         <b>never null</b>!
+     * @return list of {@link TagDTO tags}, empty list in case there is no logged-in user or an error occurs or there
+     *         are no tags available but <b>never null</b>!
      * @throws ServiceNotFoundException
      *             thrown if security service cannot be found
      */

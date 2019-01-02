@@ -306,10 +306,12 @@ public class TaggingServiceImpl implements TaggingService {
     public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName)
             throws AuthorizationException, ServiceNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
-        String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
-        String privateTagsJson = getSecurityService().getPreference(getCurrentUsername(), key);
-        List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
-        result.addAll(privateTags);
+        if (SecurityUtils.getSubject().getPrincipal() != null) {
+            String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
+            String privateTagsJson = getSecurityService().getPreference(getCurrentUsername(), key);
+            List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
+            result.addAll(privateTags);
+        }
         return result;
     }
 }
