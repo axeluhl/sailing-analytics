@@ -5,7 +5,9 @@ import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
@@ -27,31 +29,57 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
 
     private static final long serialVersionUID = 5673299850159956983L;
     private final AggregatedSingleDimensionBasedTwdTransitionPersistenceManager persistenceManager;
+    private JFreeChart mainChart;
+    private JFreeChart histoChart;
+    private XYSeries meanSeries;
+    private XYSeries medianSeries;
+    private XYSeries q1Series;
+    private XYSeries q3Series;
+    private XYSeries p1Series;
+    private XYSeries p99Series;
+    private XYSeries valuesSeries;
 
     public SingleDimensionAggregatesPlottingFrame(
             AggregatedSingleDimensionBasedTwdTransitionPersistenceManager persistenceManager) {
         super(persistenceManager.getCollectionName());
         this.persistenceManager = persistenceManager;
-        DefaultTableXYDataset dataset = createDataset();
-        JFreeChart chart = createChart(dataset);
+        createSeries();
+        fillSeries();
+        DefaultTableXYDataset mainDataset = createMainDataset();
+        DefaultTableXYDataset histoDataset = createHistoDataset();
+        mainChart = createMainChart(mainDataset);
+        histoChart = createHistoChart(histoDataset);
         // Create Panel
-        ChartPanel panel = new ChartPanel(chart);
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        ChartPanel mainChartPanel = new ChartPanel(mainChart);
+        ChartPanel histoChartPanel = new ChartPanel(histoChart);
+        panel.add(mainChartPanel);
+        panel.add(histoChartPanel);
         setContentPane(panel);
     }
 
-    private JFreeChart createChart(XYDataset dataset) {
-        JFreeChart chart = ChartFactory.createXYLineChart(
-                persistenceManager.getDimensionType().toString().toLowerCase(),
-                persistenceManager.getDimensionType().toString().toLowerCase(), "Abs. TWD change in degrees", dataset);
+    private void createSeries() {
+        meanSeries = new XYSeries("Mean", true, false);
+        medianSeries = new XYSeries("Median", true, false);
+        q1Series = new XYSeries("Q1", true, false);
+        q3Series = new XYSeries("Q3", true, false);
+        p1Series = new XYSeries("P1", true, false);
+        p99Series = new XYSeries("P99", true, false);
+        valuesSeries = new XYSeries("Values", true, false);
+    }
+
+    private JFreeChart createMainChart(XYDataset dataset) {
+        JFreeChart chart = ChartFactory.createXYLineChart(persistenceManager.getDimensionType().getDimensionName(),
+                persistenceManager.getDimensionType().getUnitName(), "Abs. TWD change in degrees", dataset);
         XYPlot plot = chart.getXYPlot();
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
         renderer.setSeriesPaint(0, Color.ORANGE);
-        renderer.setSeriesPaint(1, Color.PINK);
-        renderer.setSeriesPaint(2, Color.RED);
+        renderer.setSeriesPaint(1, Color.RED);
+        renderer.setSeriesPaint(2, Color.BLACK);
         renderer.setSeriesPaint(3, Color.BLACK);
-        renderer.setSeriesPaint(4, Color.BLACK);
+        renderer.setSeriesPaint(4, Color.BLUE);
         renderer.setSeriesPaint(5, Color.BLUE);
-        renderer.setSeriesPaint(6, Color.BLUE);
         renderer.setBaseShapesVisible(true);
         renderer.setBaseShapesFilled(true);
         Shape shape = new Ellipse2D.Double(0, 0, 2, 2);
@@ -76,18 +104,36 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
         return chart;
     }
 
-    protected DefaultTableXYDataset createDataset() {
+    private JFreeChart createHistoChart(XYDataset dataset) {
+        JFreeChart chart = ChartFactory.createXYLineChart(null, persistenceManager.getDimensionType().getUnitName(),
+                "Values", dataset);
+        XYPlot plot = chart.getXYPlot();
+        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+        renderer.setBaseShapesVisible(true);
+        renderer.setBaseShapesFilled(true);
+        Shape shape = new Ellipse2D.Double(0, 0, 2, 2);
+        renderer.setBaseShape(shape);
+        BasicStroke stroke = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL);
+        renderer.setBaseStroke(stroke);
+        renderer.setSeriesStroke(0, stroke);
+        renderer.setSeriesShape(0, shape);
+        plot.setRenderer(renderer);
+        plot.setBackgroundPaint(Color.white);
+        plot.setRangeGridlinesVisible(true);
+        plot.setRangeGridlinePaint(Color.BLACK);
+        plot.setDomainGridlinesVisible(true);
+        plot.setDomainGridlinePaint(Color.BLACK);
+        chart.getLegend().setFrame(BlockBorder.NONE);
+        // chart.setTitle(new TextTitle("Average Salary per Age",
+        // new Font("Serif", java.awt.Font.BOLD, 18)
+        // )
+        // );
+        return chart;
+    }
+
+    protected DefaultTableXYDataset createMainDataset() {
         DefaultTableXYDataset dataset = new DefaultTableXYDataset();
-        final XYSeries meanSeries = new XYSeries("Mean", true, false);
-        final XYSeries stdSeries = new XYSeries("Standard deviation", true, false);
-        final XYSeries medianSeries = new XYSeries("Median", true, false);
-        final XYSeries q1Series = new XYSeries("Q1", true, false);
-        final XYSeries q3Series = new XYSeries("Q3", true, false);
-        final XYSeries p1Series = new XYSeries("P1", true, false);
-        final XYSeries p99Series = new XYSeries("P99", true, false);
-        fillSeries(meanSeries, stdSeries, medianSeries, q1Series, q3Series, p1Series, p99Series);
         dataset.addSeries(meanSeries);
-        dataset.addSeries(stdSeries);
         dataset.addSeries(medianSeries);
         dataset.addSeries(q1Series);
         dataset.addSeries(q3Series);
@@ -96,23 +142,29 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
         return dataset;
     }
 
-    protected void fillSeries(XYSeries meanSeries, XYSeries stdSeries, XYSeries medianSeries, XYSeries q1Series,
-            XYSeries q3Series, XYSeries p1Series, XYSeries p99Series) {
+    protected DefaultTableXYDataset createHistoDataset() {
+        DefaultTableXYDataset dataset = new DefaultTableXYDataset();
+        dataset.addSeries(valuesSeries);
+        return dataset;
+    }
+
+    protected void fillSeries() {
         AggregatedSingleDimensionBasedTwdTransition prev = null;
         for (PersistedElementsIterator<AggregatedSingleDimensionBasedTwdTransition> iterator = persistenceManager
                 .getIteratorSorted(); iterator.hasNext();) {
             AggregatedSingleDimensionBasedTwdTransition aggregate = iterator.next();
             if (prev != null && prev.getDimensionValue() >= aggregate.getDimensionValue()) {
-                throw new IllegalStateException("prev value cannot be >= current value");
+                throw new IllegalStateException("prev value cannot be >= current value (prev = "
+                        + prev.getDimensionValue() + ", current = " + aggregate.getDimensionValue() + ")");
             }
             try {
                 meanSeries.add(aggregate.getDimensionValue(), aggregate.getMean());
-                stdSeries.add(aggregate.getDimensionValue(), aggregate.getStd());
                 medianSeries.add(aggregate.getDimensionValue(), aggregate.getMedian());
                 q1Series.add(aggregate.getDimensionValue(), aggregate.getQ1());
                 q3Series.add(aggregate.getDimensionValue(), aggregate.getQ3());
                 p1Series.add(aggregate.getDimensionValue(), aggregate.getP1());
                 p99Series.add(aggregate.getDimensionValue(), aggregate.getP99());
+                valuesSeries.add(aggregate.getDimensionValue(), aggregate.getNumberOfValues());
             } catch (Exception e) {
                 e.printStackTrace();
             }

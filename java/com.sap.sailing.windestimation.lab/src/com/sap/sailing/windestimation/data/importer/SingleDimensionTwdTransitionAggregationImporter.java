@@ -12,6 +12,8 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedS
 import com.sap.sailing.windestimation.data.persistence.twdtransition.SingleDimensionBasedTwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
+import gnu.trove.list.TFloatList;
+import gnu.trove.list.array.TFloatArrayList;
 import smile.sort.QuickSelect;
 
 public class SingleDimensionTwdTransitionAggregationImporter {
@@ -35,41 +37,42 @@ public class SingleDimensionTwdTransitionAggregationImporter {
         long valuesCount = 0;
         double twdSum = 0.0;
         double squareTwdSum = 0.0;
-        double valueDifference = 0;
-        double valueDifferenceAtLastAggregation = valueIntervalToAggregate;
         List<AggregatedSingleDimensionBasedTwdTransition> aggregates = new ArrayList<>();
-        List<Double> entries = new ArrayList<>();
         LoggingUtil.logInfo("Aggregating persisted entries");
+        TFloatList entries = new TFloatArrayList();
+        double currentBucketThreshold = valueIntervalToAggregate;
+        double nextBucketThreshold = getNextBucketThreshold(currentBucketThreshold);
+        double finalBucketThreshold = getFinalBucketThreshold(currentBucketThreshold, nextBucketThreshold);
         for (PersistedElementsIterator<SingleDimensionBasedTwdTransition> iterator = singleDimensionTwdTransitionPersistenceManager
                 .getIteratorSorted(); iterator.hasNext();) {
             SingleDimensionBasedTwdTransition entry = iterator.next();
-            double newValueDifference = entry.getDimensionValue();
-            if (valueDifference > 0
-                    && newValueDifference - valueDifferenceAtLastAggregation >= (valueIntervalToAggregate
-                            + (newValueDifference * annealingFactor))) {
-                AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount, twdSum,
-                        squareTwdSum, valueDifference, entries);
-                aggregates.add(aggregate);
-                valueDifferenceAtLastAggregation = valueDifference;
+            while (entry.getDimensionValue() > finalBucketThreshold) {
+                if (entries.size() >= 100) {
+                    AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount, twdSum,
+                            squareTwdSum, currentBucketThreshold, entries);
+                    aggregates.add(aggregate);
+                }
+                currentBucketThreshold = nextBucketThreshold;
+                nextBucketThreshold = getNextBucketThreshold(nextBucketThreshold);
+                finalBucketThreshold = getFinalBucketThreshold(currentBucketThreshold, nextBucketThreshold);
                 totalValuesCount += valuesCount;
                 twdSum = 0;
                 squareTwdSum = 0;
                 valuesCount = 0;
                 entries.clear();
             }
-            valueDifference = newValueDifference;
             double twdChange = entry.getAbsTwdChangeInDegrees();
             twdSum += twdChange;
             squareTwdSum += twdChange * twdChange;
             valuesCount++;
-            entries.add(entry.getAbsTwdChangeInDegrees());
+            entries.add((float) twdChange);
             if (valuesCount % 10000 == 0) {
                 LoggingUtil.logInfo((valuesCount + totalValuesCount) + " Entries aggregated");
             }
         }
-        if (valueDifferenceAtLastAggregation < valueDifference) {
+        if (entries.size() >= 100) {
             AggregatedSingleDimensionBasedTwdTransition aggregate = computeAggregate(valuesCount, twdSum, squareTwdSum,
-                    valueDifference, entries);
+                    currentBucketThreshold, entries);
             aggregates.add(aggregate);
             totalValuesCount += valuesCount;
         }
@@ -83,24 +86,43 @@ public class SingleDimensionTwdTransitionAggregationImporter {
         LoggingUtil.logInfo("Totally " + aggregates.size() + " TWD transition aggregates imported");
     }
 
-    private static AggregatedSingleDimensionBasedTwdTransition computeAggregate(double valuesCount, double twdSum,
-            double squareTwdSum, double secondsPassed, List<Double> entries) {
+    private double getNextBucketThreshold(double currentBucketThreshold) {
+        if(annealingFactor > 0) {
+            return currentBucketThreshold * annealingFactor;
+        }
+        return currentBucketThreshold + valueIntervalToAggregate;
+    }
+
+    private double getFinalBucketThreshold(double currentBucketThreshold, double nextBucketThreshold) {
+        return currentBucketThreshold + (nextBucketThreshold - currentBucketThreshold) / 2;
+    }
+
+    private static AggregatedSingleDimensionBasedTwdTransition computeAggregate(long valuesCount, double twdSum,
+            double squareTwdSum, double secondsPassed, TFloatList entries) {
         double mean = twdSum / valuesCount;
         double variance = (valuesCount * squareTwdSum - twdSum * twdSum) / (valuesCount * valuesCount);
         double std = Math.sqrt(variance);
-        double[] twdChanges = new double[entries.size()];
-        int i = 0;
-        for (Double twdChange : entries) {
-            twdChanges[i++] = twdChange;
+        float[] twdChanges = entries.toArray();
+        double median;
+        double q1;
+        double q3;
+        double p1;
+        double p99;
+        if (entries.size() > 1) {
+            median = QuickSelect.median(twdChanges);
+            q1 = QuickSelect.q1(twdChanges);
+            q3 = QuickSelect.q3(twdChanges);
+            p1 = QuickSelect.select(twdChanges, (int) (twdChanges.length * 0.01));
+            p99 = QuickSelect.select(twdChanges, (int) (twdChanges.length * 0.99));
+        } else {
+            median = entries.get(0);
+            q1 = median;
+            q3 = median;
+            p1 = median;
+            p99 = median;
         }
-        double median = QuickSelect.median(twdChanges);
-        double q1 = QuickSelect.q1(twdChanges);
-        double q3 = QuickSelect.q3(twdChanges);
-        double p1 = QuickSelect.select(twdChanges, (int) (twdChanges.length * 0.01));
-        double p99 = QuickSelect.select(twdChanges, (int) (twdChanges.length * 0.99));
-
         AggregatedSingleDimensionBasedTwdTransition aggregate = new AggregatedSingleDimensionBasedTwdTransition(
-                secondsPassed, mean, std, median, i, q1, q3, p1, p99);
+                secondsPassed, mean, std, median, twdChanges.length, q1, q3, p1, p99);
         return aggregate;
     }
 

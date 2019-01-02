@@ -65,16 +65,27 @@ public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
     }
 
     public enum AggregatedSingleDimensionType {
-        DISTANCE("aggregatedDistanceTwdTransition"), DURATION("aggregatedDurationTwdTransition");
+        DISTANCE("aggregatedDistanceTwdTransition", "Meters"), DURATION("aggregatedDurationTwdTransition", "Seconds");
 
         private final String collectioName;
+        private final String unitName;
 
-        private AggregatedSingleDimensionType(String collectionName) {
+        private AggregatedSingleDimensionType(String collectionName, String unitName) {
             this.collectioName = collectionName;
+            this.unitName = unitName;
         }
 
         public String getCollectioName() {
             return collectioName;
+        }
+
+        public String getUnitName() {
+            return unitName;
+        }
+
+        public String getDimensionName() {
+            String dimensionName = this.toString().toLowerCase();
+            return dimensionName.substring(0, 1).toUpperCase() + dimensionName.substring(1);
         }
     }
 

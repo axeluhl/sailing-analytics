@@ -8,4 +8,6 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.replication.interfaces
+Bundle-ClassPath: lib/trove-3.0.3.jar,
+ .
 Automatic-Module-Name: com.sap.sailing.windestimation.lab
