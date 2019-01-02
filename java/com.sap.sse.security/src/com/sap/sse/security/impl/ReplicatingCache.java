@@ -16,7 +16,7 @@ import org.apache.shiro.session.Session;
 import com.sap.sse.common.Named;
 
 /**
- * A {@link Cache}s whose modifying operations are replicated. This works because by intercepting the writing operations
+ * A {@link Cache}s whose modifying operations are replicated. This works by intercepting the writing operations
  * and running them as a replicable operation on the {@link ReplicableSecurityService}.
  * 
  * @author Axel Uhl (D043530)
