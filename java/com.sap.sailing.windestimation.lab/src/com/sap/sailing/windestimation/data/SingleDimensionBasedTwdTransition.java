@@ -3,19 +3,19 @@ package com.sap.sailing.windestimation.data;
 public class SingleDimensionBasedTwdTransition {
 
     private final double dimensionValue;
-    private final double absTwdChangeInDegrees;
+    private final double twdChangeInDegrees;
 
-    public SingleDimensionBasedTwdTransition(double dimensionValue, double absTwdChangeInDegrees) {
+    public SingleDimensionBasedTwdTransition(double dimensionValue, double twdChangeInDegrees) {
         this.dimensionValue = dimensionValue;
-        this.absTwdChangeInDegrees = absTwdChangeInDegrees;
+        this.twdChangeInDegrees = twdChangeInDegrees;
     }
 
     public double getDimensionValue() {
         return dimensionValue;
     }
 
-    public double getAbsTwdChangeInDegrees() {
-        return absTwdChangeInDegrees;
+    public double getTwdChangeInDegrees() {
+        return twdChangeInDegrees;
     }
 
 }

@@ -15,7 +15,7 @@ public class SingleDimensionBasedTwdTransitionJsonSerializer
     public JSONObject serialize(SingleDimensionBasedTwdTransition transition) {
         JSONObject json = new JSONObject();
         json.put(DIMENSION_VALUE, transition.getDimensionValue());
-        json.put(TWD_CHANGE, transition.getAbsTwdChangeInDegrees());
+        json.put(TWD_CHANGE, transition.getTwdChangeInDegrees());
         return json;
     }
 

@@ -38,6 +38,7 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
     private XYSeries p1Series;
     private XYSeries p99Series;
     private XYSeries valuesSeries;
+    private XYSeries stdSeries;
 
     public SingleDimensionAggregatesPlottingFrame(
             AggregatedSingleDimensionBasedTwdTransitionPersistenceManager persistenceManager) {
@@ -67,6 +68,7 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
         p1Series = new XYSeries("P1", true, false);
         p99Series = new XYSeries("P99", true, false);
         valuesSeries = new XYSeries("Values", true, false);
+        stdSeries = new XYSeries("Sigma", true, false);
     }
 
     private JFreeChart createMainChart(XYDataset dataset) {
@@ -80,6 +82,7 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
         renderer.setSeriesPaint(3, Color.BLACK);
         renderer.setSeriesPaint(4, Color.BLUE);
         renderer.setSeriesPaint(5, Color.BLUE);
+        renderer.setSeriesPaint(6, Color.PINK);
         renderer.setBaseShapesVisible(true);
         renderer.setBaseShapesFilled(true);
         Shape shape = new Ellipse2D.Double(0, 0, 2, 2);
@@ -139,6 +142,7 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
         dataset.addSeries(q3Series);
         dataset.addSeries(p1Series);
         dataset.addSeries(p99Series);
+        dataset.addSeries(stdSeries);
         return dataset;
     }
 
@@ -165,6 +169,7 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
                 p1Series.add(aggregate.getDimensionValue(), aggregate.getP1());
                 p99Series.add(aggregate.getDimensionValue(), aggregate.getP99());
                 valuesSeries.add(aggregate.getDimensionValue(), aggregate.getNumberOfValues());
+                stdSeries.add(aggregate.getDimensionValue(), aggregate.getStd());
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -98,7 +98,7 @@ public class DistanceBasedTwdTransitionImporter {
                             double meters = currentFix.getPosition().getDistance(currentOtherFix.getPosition())
                                     .getMeters();
                             double twdChange = currentFix.getBearing().getDifferenceTo(currentOtherFix.getBearing())
-                                    .abs().getDegrees();
+                                    .getDegrees();
                             SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(meters,
                                     twdChange);
                             entries.add(entry);

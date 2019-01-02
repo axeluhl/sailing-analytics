@@ -30,7 +30,7 @@ public class TwdTransitionRegressorTrainer {
         while (iterator.hasNext()) {
             SingleDimensionBasedTwdTransition twdTransition = iterator.next();
             x[0] = twdTransition.getDimensionValue();
-            model.train(x, twdTransition.getAbsTwdChangeInDegrees());
+            model.train(x, twdTransition.getTwdChangeInDegrees());
         }
         LoggingUtil.logInfo("Persisting trained regressor...");
         regressorModelStore.persistState(model);

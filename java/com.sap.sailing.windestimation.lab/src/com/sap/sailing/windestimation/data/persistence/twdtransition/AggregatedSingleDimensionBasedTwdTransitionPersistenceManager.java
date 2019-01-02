@@ -65,14 +65,18 @@ public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
     }
 
     public enum AggregatedSingleDimensionType {
-        DISTANCE("aggregatedDistanceTwdTransition", "Meters"), DURATION("aggregatedDurationTwdTransition", "Seconds");
+        DISTANCE("aggregatedDistanceTwdTransition", "Meters", false), DISTANCE_ABS("aggregatedDistanceAbsTwdTransition",
+                "Meters", true), DURATION("aggregatedDurationTwdTransition", "Seconds",
+                        false), DURATION_ABS("aggregatedDurationAbsTwdTransition", "Seconds", true);
 
         private final String collectioName;
         private final String unitName;
+        private final boolean absolute;
 
-        private AggregatedSingleDimensionType(String collectionName, String unitName) {
+        private AggregatedSingleDimensionType(String collectionName, String unitName, boolean absolute) {
             this.collectioName = collectionName;
             this.unitName = unitName;
+            this.absolute = absolute;
         }
 
         public String getCollectioName() {
@@ -87,6 +91,11 @@ public class AggregatedSingleDimensionBasedTwdTransitionPersistenceManager
             String dimensionName = this.toString().toLowerCase();
             return dimensionName.substring(0, 1).toUpperCase() + dimensionName.substring(1);
         }
+
+        public boolean isAbsolute() {
+            return absolute;
+        }
+
     }
 
 }

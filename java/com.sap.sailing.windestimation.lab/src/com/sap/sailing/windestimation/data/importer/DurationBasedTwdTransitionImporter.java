@@ -18,7 +18,7 @@ import com.sap.sse.common.TimePoint;
 public class DurationBasedTwdTransitionImporter {
 
     public static final double SECONDS_INTERVAL_TO_SAMPLE = 1;
-    public static final double ANNEALING_FACTOR_FOR_SECONDS_PASSED_FOR_SAMPLING = 3;
+    public static final double ANNEALING_FACTOR_FOR_SECONDS_PASSED_FOR_SAMPLING = 1.5;
 
     public static void main(String[] args) throws UnknownHostException {
         LoggingUtil.logInfo("###################\r\nDuration based TWD transitions Import started");
@@ -51,7 +51,7 @@ public class DurationBasedTwdTransitionImporter {
                         double secondsPassed = windFix.getTimePoint().until(otherWindFix.getTimePoint()).asSeconds();
                         if (secondsPassedSinceLastConsideredWindFix >= SECONDS_INTERVAL_TO_SAMPLE
                                 + lastSecondsPassed * ANNEALING_FACTOR_FOR_SECONDS_PASSED_FOR_SAMPLING) {
-                            double absTwdChange = windFix.getBearing().getDifferenceTo(otherWindFix.getBearing()).abs()
+                            double absTwdChange = windFix.getBearing().getDifferenceTo(otherWindFix.getBearing())
                                     .getDegrees();
                             SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
                                     secondsPassed, absTwdChange);
