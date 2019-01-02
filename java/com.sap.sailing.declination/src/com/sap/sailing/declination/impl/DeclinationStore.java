@@ -175,9 +175,6 @@ public class DeclinationStore {
                     int month = 6;
                     Calendar cal = new GregorianCalendar(year, month, /* dayOfMonth */ 1);
                     TimePoint timePoint = new MillisecondsTimePoint(cal.getTimeInMillis());
-                    for (double lat = -33; lat < -30; lat += grid) {
-                        fetchAndAppendDeclinationForLatitude(grid, importer, year, storedDeclinations, out, month, timePoint, lat);
-                    }
                     for (double lat = 0; lat < 90; lat += grid) {
                         fetchAndAppendDeclinationForLatitude(grid, importer, year, storedDeclinations, out, month, timePoint, lat);
                     }
