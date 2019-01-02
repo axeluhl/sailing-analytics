@@ -19,7 +19,7 @@ import com.sap.sse.common.TimePoint;
 public class DistanceBasedTwdTransitionImporter {
 
     public static final int TOLERANCE_SECONDS = 5;
-    public static final int SAMPLING_SECONDS = 60;
+    public static final int SAMPLING_SECONDS = 1;
     public static final int MAX_DISTANCE_METERS = 1000000;
     public static final int MIN_DISTANCE_METERS = 10;
 
