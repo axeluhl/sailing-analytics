@@ -185,7 +185,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == requestCodeQRCode) {
+        if (requestCode != requestCodeQRCode) {
             super.onActivityResult(requestCode, resultCode, data);
             return;
         }
