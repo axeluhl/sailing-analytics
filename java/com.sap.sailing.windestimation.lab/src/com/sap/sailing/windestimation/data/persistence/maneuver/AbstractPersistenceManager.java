@@ -170,7 +170,6 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         private T nextElement = null;
         private long numberOfElements;
         private long currentElementNumber = 0;
-        private int numberOfCharsDuringLastStatusLog = 0;
         private long limit = Long.MAX_VALUE;
 
         public PersistedElementsIteratorImpl(Document query) {
@@ -204,10 +203,8 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
             long nextElementNumber = currentElementNumber + 1;
             if (nextElementNumber <= limit) {
                 if (numberOfElements >= 100 && nextElementNumber % (numberOfElements / 100) == 0) {
-                    LoggingUtil.delete(numberOfCharsDuringLastStatusLog);
-                    numberOfCharsDuringLastStatusLog = LoggingUtil
-                            .logInfo("Loading element " + nextElementNumber + "/" + numberOfElements + " ("
-                                    + (nextElementNumber * 100 / numberOfElements) + " %) from " + getCollectionName());
+                    LoggingUtil.logInfo("## Loading element " + nextElementNumber + "/" + numberOfElements + " ("
+                            + (nextElementNumber * 100 / numberOfElements) + " %) from " + getCollectionName());
                 }
                 try {
                     if (dbCursor.hasNext()) {
