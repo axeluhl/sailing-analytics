@@ -52,7 +52,7 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
 
         for (int fixedNumberOfManeuvers = 1; fixedNumberOfManeuvers <= MAX_MANEUVERS; fixedNumberOfManeuvers++) {
             LoggingUtil.logInfo("Running evaluation with " + fixedNumberOfManeuvers + " maneuvers");
-            WindEstimatorEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(
+            WindEstimationEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(
                     MAX_TWD_DEVIATION_DEG, MAX_TWS_DEVIATION_PERCENT, MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE,
                     EVALUATE_PER_COMPETITOR_TRACK, MAX_MANEUVERS, true, fixedNumberOfManeuvers);
             PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> racesIterator = persistenceManager

@@ -9,7 +9,7 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
  * @author Vladislav Chumak (D069712)
  *
  */
-public interface WindEstimatorEvaluator<T> {
+public interface WindEstimationEvaluator<T> {
 
     WindEstimatorEvaluationResult evaluateWindEstimator(
             WindEstimatorFactory<RaceWithEstimationData<T>> windEstimatorFactory,

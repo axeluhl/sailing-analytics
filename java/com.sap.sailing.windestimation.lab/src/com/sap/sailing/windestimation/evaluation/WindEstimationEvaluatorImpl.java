@@ -17,6 +17,7 @@ import com.sap.sailing.windestimation.WindEstimationComponentWithInternals;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
+import com.sap.sailing.windestimation.data.WindQuality;
 import com.sap.sailing.windestimation.preprocessing.DummyRacePreprocessingPipeline;
 import com.sap.sailing.windestimation.preprocessing.RaceWithRandomClippingPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
@@ -27,7 +28,7 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T> {
+public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T> {
 
     private final double maxWindCourseDeviationInDegrees;
     private final double maxWindSpeedDeviationInPercent;
@@ -88,9 +89,11 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
             }
             return new EvaluationCase<>(windEstimator, preprocessedRace, targetWindPerTimePoint);
         });
-        preprocessingStream = preprocessingStream.filter(evaluationCase -> evaluationCase.getRace()
-                .getCompetitorTracks().stream().mapToInt(competitorTrack -> competitorTrack.getElements().size())
-                .sum() >= minManeuversPerRace);
+        preprocessingStream = preprocessingStream
+                .filter(evaluationCase -> evaluationCase.getRace().getWindQuality() == WindQuality.EXPEDITION
+                        && evaluationCase.getRace().getCompetitorTracks().stream()
+                                .mapToInt(competitorTrack -> competitorTrack.getElements().size())
+                                .sum() >= minManeuversPerRace);
         if (randomCompetitorTrackClipping) {
             RaceWithRandomClippingPreprocessingPipelineImpl<ManeuverForEstimation, ManeuverForEstimation> clippingPipeline = new RaceWithRandomClippingPreprocessingPipelineImpl<>(
                     new DummyRacePreprocessingPipeline<>(), fixedNumberOfManeuvers == null ? 1 : fixedNumberOfManeuvers,

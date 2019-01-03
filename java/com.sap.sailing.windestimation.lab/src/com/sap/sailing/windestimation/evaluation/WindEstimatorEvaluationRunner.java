@@ -28,7 +28,7 @@ public class WindEstimatorEvaluationRunner {
     private static final EvaluatableWindEstimationImplementation WIND_ESTIMATION_IMPLEMENTATION = EvaluatableWindEstimationImplementation.CLUSTERING;
 
     public static void main(String[] args) throws Exception {
-        WindEstimatorEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(
+        WindEstimationEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(
                 MAX_TWD_DEVIATION_DEG, MAX_TWS_DEVIATION_PERCENT, MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE,
                 EVALUATE_PER_COMPETITOR_TRACK, FIXED_NUMBER_OF_MANEUVERS == null ? 1 : FIXED_NUMBER_OF_MANEUVERS,
                 RANDOM_CLIPPING_OF_COMPETITOR_TRACKS, FIXED_NUMBER_OF_MANEUVERS);
