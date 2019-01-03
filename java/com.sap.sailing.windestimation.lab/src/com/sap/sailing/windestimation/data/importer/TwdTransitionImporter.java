@@ -9,9 +9,11 @@ import java.util.stream.Collectors;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevel;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
+import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange;
+import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.LabelledTwdTransition;
@@ -119,11 +121,12 @@ public class TwdTransitionImporter {
                                     .getDifferenceTo(
                                             new DegreeBearingImpl(currentWindCourseRange.getAvgWindCourse()).reverse())
                                     .abs();
-                            double twdChangeDegrees = previousWindCourseRange.intersect(currentWindCourseRange)
-                                    .getViolationRange();
+                            IntersectedWindRange intersectedWindRange = previousWindCourseRange
+                                    .intersect(currentWindCourseRange, CombinationModeOnViolation.INTERSECTION);
+                            double twdChangeDegrees = intersectedWindRange.getViolationRange();
                             double intersectedTwdChangeDegrees = intersectedWindRangeBasedTransitionProbabilitiesCalculator
-                                    .mergeWindRangeAndGetTransitionProbability(previousNode, previousLevel, currentNode,
-                                            currentLevel)
+                                    .mergeWindRangeAndGetTransitionProbability(previousNode, previousLevel,
+                                            intersectedWindRange, currentNode, currentLevel)
                                     .getA().getViolationRange();
                             boolean correct = currentNode
                                     .getManeuverType() == ((LabelledManeuverForEstimation) currentLevel.getManeuver())

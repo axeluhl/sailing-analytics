@@ -5,6 +5,7 @@ import java.util.List;
 import com.sap.sailing.windestimation.aggregator.hmm.AbstractBestPathsPerLevel;
 import com.sap.sailing.windestimation.aggregator.hmm.BestNodeInfo;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
+import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 import com.sap.sse.common.Util.Pair;
 
 public class AdvancedBestPathsPerLevel extends AbstractBestPathsPerLevel {
@@ -25,9 +26,9 @@ public class AdvancedBestPathsPerLevel extends AbstractBestPathsPerLevel {
 
     public AdvancedBestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode currentNode,
             List<Pair<AdvancedGraphLevel, GraphNode>> previousGraphLevelsWithBestPreviousNodes,
-            double probabilityFromStart) {
+            double probabilityFromStart, IntersectedWindRange intersectedWindRange) {
         AdvancedBestManeuverNodeInfo bestManeuverNodeInfo = new AdvancedBestManeuverNodeInfo(
-                previousGraphLevelsWithBestPreviousNodes, probabilityFromStart);
+                previousGraphLevelsWithBestPreviousNodes, probabilityFromStart, intersectedWindRange);
         bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()] = bestManeuverNodeInfo;
         return bestManeuverNodeInfo;
     }

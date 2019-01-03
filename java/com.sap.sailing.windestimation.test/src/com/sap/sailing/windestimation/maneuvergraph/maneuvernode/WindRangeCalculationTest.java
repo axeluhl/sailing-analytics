@@ -2,11 +2,11 @@ package com.sap.sailing.windestimation.maneuvergraph.maneuvernode;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange;
+import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
 
 public class WindRangeCalculationTest {
 
@@ -44,42 +44,41 @@ public class WindRangeCalculationTest {
     }
 
     @Test
-    @Ignore //ignoring due to change of intersection concept
     public void testWindRangeIntersectionCalculation() {
         WindCourseRange range = new WindCourseRange(20, 15);
         WindCourseRange other = new WindCourseRange(10, 20);
-        IntersectedWindRange intersect = range.intersect(other);
+        IntersectedWindRange intersect = range.intersect(other, CombinationModeOnViolation.INTERSECTION);
         assertEquals(intersect.getFromPortside(), 20, TOLERANCE);
         assertEquals(intersect.getAngleTowardStarboard(), 10, TOLERANCE);
         assertEquals(intersect.getViolationRange(), 0, TOLERANCE);
-        IntersectedWindRange intersect2 = other.intersect(range);
+        IntersectedWindRange intersect2 = other.intersect(range, CombinationModeOnViolation.INTERSECTION);
         assertEquals(intersect, intersect2);
 
         range = new WindCourseRange(340, 15);
         other = new WindCourseRange(350, 20);
-        intersect = range.intersect(other);
+        intersect = range.intersect(other, CombinationModeOnViolation.INTERSECTION);
         assertEquals(intersect.getFromPortside(), 350, TOLERANCE);
         assertEquals(intersect.getAngleTowardStarboard(), 5, TOLERANCE);
         assertEquals(intersect.getViolationRange(), 0, TOLERANCE);
-        intersect2 = other.intersect(range);
+        intersect2 = other.intersect(range, CombinationModeOnViolation.INTERSECTION);
         assertEquals(intersect, intersect2);
 
         range = new WindCourseRange(340, 30);
         other = new WindCourseRange(10, 20);
-        intersect = range.intersect(other);
+        intersect = range.intersect(other, CombinationModeOnViolation.INTERSECTION);
         assertEquals(intersect.getFromPortside(), 10, TOLERANCE);
         assertEquals(intersect.getAngleTowardStarboard(), 0, TOLERANCE);
         assertEquals(intersect.getViolationRange(), 0, TOLERANCE);
-        intersect2 = other.intersect(range);
+        intersect2 = other.intersect(range, CombinationModeOnViolation.INTERSECTION);
         assertEquals(intersect, intersect2);
 
         range = new WindCourseRange(340, 30);
         other = new WindCourseRange(330, 20);
-        intersect = range.intersect(other);
+        intersect = range.intersect(other, CombinationModeOnViolation.INTERSECTION);
         assertEquals(intersect.getFromPortside(), 340, TOLERANCE);
         assertEquals(intersect.getAngleTowardStarboard(), 10, TOLERANCE);
         assertEquals(intersect.getViolationRange(), 0, TOLERANCE);
-        intersect2 = other.intersect(range);
+        intersect2 = other.intersect(range, CombinationModeOnViolation.INTERSECTION);
         assertEquals(intersect, intersect2);
     }
 
@@ -87,15 +86,65 @@ public class WindRangeCalculationTest {
     public void testWindRangeIntersectionCalculationWithViolations() {
         WindCourseRange range = new WindCourseRange(20, 15);
         WindCourseRange other = new WindCourseRange(10, 4);
-        IntersectedWindRange intersect = range.intersect(other);
-        assertEquals(intersect.getFromPortside(), 10, TOLERANCE);
-        assertEquals(intersect.getAngleTowardStarboard(), 4, TOLERANCE);
+        IntersectedWindRange intersect = range.intersect(other, CombinationModeOnViolation.INTERSECTION);
+        assertEquals(intersect.getFromPortside(), 14, TOLERANCE);
+        assertEquals(intersect.getAngleTowardStarboard(), 6, TOLERANCE);
         assertEquals(intersect.getViolationRange(), 6, TOLERANCE);
-        IntersectedWindRange intersect2 = other.intersect(range);
-        assertEquals(new IntersectedWindRange(range.getFromPortside(), range.getAngleTowardStarboard(),
-                intersect.getViolationRange()), intersect2);
+        IntersectedWindRange intersect2 = other.intersect(range, CombinationModeOnViolation.INTERSECTION);
+        assertEquals(intersect, intersect2);
     }
     
+    @Test
+    public void testWindRangeExpansionCalculation() {
+        WindCourseRange range = new WindCourseRange(20, 15);
+        WindCourseRange other = new WindCourseRange(10, 20);
+        IntersectedWindRange intersect = range.intersect(other, CombinationModeOnViolation.EXPANSION);
+        assertEquals(intersect.getFromPortside(), 10, TOLERANCE);
+        assertEquals(intersect.getAngleTowardStarboard(), 25, TOLERANCE);
+        assertEquals(intersect.getViolationRange(), 0, TOLERANCE);
+        IntersectedWindRange intersect2 = other.intersect(range, CombinationModeOnViolation.EXPANSION);
+        assertEquals(intersect, intersect2);
+
+        range = new WindCourseRange(340, 15);
+        other = new WindCourseRange(350, 20);
+        intersect = range.intersect(other, CombinationModeOnViolation.EXPANSION);
+        assertEquals(intersect.getFromPortside(), 340, TOLERANCE);
+        assertEquals(intersect.getAngleTowardStarboard(), 30, TOLERANCE);
+        assertEquals(intersect.getViolationRange(), 0, TOLERANCE);
+        intersect2 = other.intersect(range, CombinationModeOnViolation.EXPANSION);
+        assertEquals(intersect, intersect2);
+
+        range = new WindCourseRange(340, 30);
+        other = new WindCourseRange(10, 20);
+        intersect = range.intersect(other, CombinationModeOnViolation.EXPANSION);
+        assertEquals(intersect.getFromPortside(), 340, TOLERANCE);
+        assertEquals(intersect.getAngleTowardStarboard(), 50, TOLERANCE);
+        assertEquals(intersect.getViolationRange(), 0, TOLERANCE);
+        intersect2 = other.intersect(range, CombinationModeOnViolation.EXPANSION);
+        assertEquals(intersect, intersect2);
+
+        range = new WindCourseRange(340, 30);
+        other = new WindCourseRange(330, 20);
+        intersect = range.intersect(other, CombinationModeOnViolation.EXPANSION);
+        assertEquals(intersect.getFromPortside(), 330, TOLERANCE);
+        assertEquals(intersect.getAngleTowardStarboard(), 40, TOLERANCE);
+        assertEquals(intersect.getViolationRange(), 0, TOLERANCE);
+        intersect2 = other.intersect(range, CombinationModeOnViolation.EXPANSION);
+        assertEquals(intersect, intersect2);
+    }
+
+    @Test
+    public void testWindRangeExpansionCalculationWithViolations() {
+        WindCourseRange range = new WindCourseRange(20, 15);
+        WindCourseRange other = new WindCourseRange(10, 4);
+        IntersectedWindRange intersect = range.intersect(other, CombinationModeOnViolation.EXPANSION);
+        assertEquals(intersect.getFromPortside(), 10, TOLERANCE);
+        assertEquals(intersect.getAngleTowardStarboard(), 25, TOLERANCE);
+        assertEquals(intersect.getViolationRange(), 6, TOLERANCE);
+        IntersectedWindRange intersect2 = other.intersect(range, CombinationModeOnViolation.EXPANSION);
+        assertEquals(intersect, intersect2);
+    }
+
     @Test
     public void testWindRangeInversion() {
         WindCourseRange range = new WindCourseRange(10, 15);

@@ -40,4 +40,5 @@ public class IntersectedWindRange extends WindCourseRange {
             return false;
         return true;
     }
+
 }

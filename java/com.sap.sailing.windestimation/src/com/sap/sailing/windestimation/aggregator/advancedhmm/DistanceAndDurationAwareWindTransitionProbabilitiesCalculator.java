@@ -4,7 +4,10 @@ import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelBase;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 import com.sap.sailing.windestimation.aggregator.hmm.SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator;
+import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange;
+import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
 import com.sap.sse.common.Distance;
@@ -25,15 +28,21 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
 
     @Override
     public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
-            GraphLevelBase previousLevel, GraphNode currentNode, GraphLevelBase currentLevel) {
+            GraphLevelBase previousLevel, IntersectedWindRange previousIntersectedWindRange, GraphNode currentNode,
+            GraphLevelBase currentLevel) {
         Duration durationPassed = getDuration(previousLevel.getManeuver(), currentLevel.getManeuver());
         Distance distancePassed = getDistance(previousLevel.getManeuver(), currentLevel.getManeuver());
         double transitionProbabilitySum = 0;
         double transitionProbabilityUntilCurrentNode = -1;
         IntersectedWindRange intersectedWindRangeUntilCurrentNode = null;
         for (GraphNode node : currentLevel.getLevelNodes()) {
-            IntersectedWindRange intersectedWindRange = previousNode.getValidWindRange()
-                    .intersect(node.getValidWindRange());
+            WindCourseRange previousWindCourseRange = previousNode
+                    .getManeuverType() == ManeuverTypeForClassification.BEAR_AWAY
+                    || previousNode.getManeuverType() == ManeuverTypeForClassification.HEAD_UP
+                            ? previousIntersectedWindRange
+                            : previousNode.getValidWindRange();
+            IntersectedWindRange intersectedWindRange = previousWindCourseRange.intersect(node.getValidWindRange(),
+                    CombinationModeOnViolation.INTERSECTION);
             double transitionProbability = getPenaltyFactorForTransition(intersectedWindRange, durationPassed,
                     distancePassed);
             transitionProbabilitySum += transitionProbability;

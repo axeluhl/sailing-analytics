@@ -16,8 +16,8 @@ public class BestPathsPerLevel extends AbstractBestPathsPerLevel {
     }
 
     public BestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode currentNode, GraphNode bestPreviousNode,
-            double probabilityFromStart) {
-        BestManeuverNodeInfo bestManeuverNodeInfo = new BestManeuverNodeInfo(bestPreviousNode, probabilityFromStart);
+            double probabilityFromStart, IntersectedWindRange intersectedWindRange) {
+        BestManeuverNodeInfo bestManeuverNodeInfo = new BestManeuverNodeInfo(bestPreviousNode, probabilityFromStart, intersectedWindRange);
         bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()] = bestManeuverNodeInfo;
         return bestManeuverNodeInfo;
     }

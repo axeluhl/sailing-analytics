@@ -246,7 +246,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     }
 
     protected Document parseJsonString(String jsonString) {
-        return jsonString == null ? null : Document.parse(jsonString);
+        return jsonString == null ? new Document() : Document.parse(jsonString);
     }
 
 }

@@ -5,9 +5,11 @@ public class BestNodeInfo {
     private double probabilityFromStart;
     private double forwardProbability;
     private double backwardProbability;
+    private final IntersectedWindRange intersectedWindRange;
 
-    public BestNodeInfo(double probabilityFromStart) {
+    public BestNodeInfo(double probabilityFromStart, IntersectedWindRange intersectedWindRange) {
         this.probabilityFromStart = probabilityFromStart;
+        this.intersectedWindRange = intersectedWindRange;
     }
 
     public double getProbabilityFromStart() {
@@ -32,6 +34,10 @@ public class BestNodeInfo {
 
     public void setBackwardProbability(double backwardProbability) {
         this.backwardProbability = backwardProbability;
+    }
+
+    public IntersectedWindRange getIntersectedWindRange() {
+        return intersectedWindRange;
     }
 
 }

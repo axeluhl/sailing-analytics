@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
+import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sse.common.Bearing;
@@ -14,13 +15,19 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
 
     @Override
     public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
-            GraphLevelBase previousLevel, GraphNode currentNode, GraphLevelBase currentLevel) {
+            GraphLevelBase previousLevel, IntersectedWindRange previousNodeIntersectedWindRange, GraphNode currentNode,
+            GraphLevelBase currentLevel) {
         double transitionProbabilitySum = 0;
         double transitionProbabilityUntilCurrentNode = -1;
         IntersectedWindRange intersectedWindRangeUntilCurrentNode = null;
         for (GraphNode node : currentLevel.getLevelNodes()) {
-            IntersectedWindRange intersectedWindRange = previousNode.getValidWindRange()
-                    .intersect(node.getValidWindRange());
+            WindCourseRange previousWindCourseRange = previousNode
+                    .getManeuverType() == ManeuverTypeForClassification.BEAR_AWAY
+                    || previousNode.getManeuverType() == ManeuverTypeForClassification.HEAD_UP
+                            ? previousNodeIntersectedWindRange
+                            : previousNode.getValidWindRange();
+            IntersectedWindRange intersectedWindRange = previousWindCourseRange.intersect(node.getValidWindRange(),
+                    CombinationModeOnViolation.INTERSECTION);
             double transitionProbability = getPenaltyFactorForTransition(intersectedWindRange);
             transitionProbabilitySum += transitionProbability;
             if (node == currentNode) {

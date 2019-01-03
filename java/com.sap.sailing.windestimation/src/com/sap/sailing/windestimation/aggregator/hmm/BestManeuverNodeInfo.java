@@ -4,8 +4,9 @@ public class BestManeuverNodeInfo extends BestNodeInfo {
 
     private final GraphNode bestPreviousNode;
 
-    public BestManeuverNodeInfo(GraphNode bestPreviousNode, double probabilityFromStart) {
-        super(probabilityFromStart);
+    public BestManeuverNodeInfo(GraphNode bestPreviousNode, double probabilityFromStart,
+            IntersectedWindRange intersectedWindRange) {
+        super(probabilityFromStart, intersectedWindRange);
         this.bestPreviousNode = bestPreviousNode;
     }
 

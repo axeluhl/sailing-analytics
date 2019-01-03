@@ -6,7 +6,6 @@ import java.util.List;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverTypeForInternalClassification;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 /**
@@ -29,20 +28,10 @@ public class GraphLevelBase {
     }
 
     private void initNodes(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
-        for (ManeuverTypeForInternalClassification maneuverType : ManeuverTypeForInternalClassification.values()) {
-            switch (maneuverType) {
-            case TACK:
-                initTackNode(transitionProbabilitiesCalculator);
-                break;
-            case JIBE:
-                initJibeNode(transitionProbabilitiesCalculator);
-                break;
-            case OTHER:
-                initHeadUpNode(transitionProbabilitiesCalculator);
-                initBearAwayNode(transitionProbabilitiesCalculator);
-                break;
-            }
-        }
+        initTackNode(transitionProbabilitiesCalculator);
+        initJibeNode(transitionProbabilitiesCalculator);
+        initHeadUpNode(transitionProbabilitiesCalculator);
+        initBearAwayNode(transitionProbabilitiesCalculator);
         normalizeNodeConfidences();
     }
 

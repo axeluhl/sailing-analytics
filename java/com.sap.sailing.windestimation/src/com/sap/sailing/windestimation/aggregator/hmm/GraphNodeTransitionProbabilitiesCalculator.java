@@ -7,7 +7,7 @@ import com.sap.sse.common.Util.Pair;
 public interface GraphNodeTransitionProbabilitiesCalculator {
 
     Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
-            GraphLevelBase previousLevel, GraphNode currentNode, GraphLevelBase currentLevel);
+            GraphLevelBase previousLevel, IntersectedWindRange previousNodeIntersectedWindRange, GraphNode currentNode, GraphLevelBase currentLevel);
 
     WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver,
             ManeuverTypeForClassification maneuverType);

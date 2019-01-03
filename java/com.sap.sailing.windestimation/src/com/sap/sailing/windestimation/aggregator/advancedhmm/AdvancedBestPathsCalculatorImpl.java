@@ -10,6 +10,7 @@ import com.sap.sailing.windestimation.aggregator.advancedhmm.AdvancedManeuverGra
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
+import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
 import com.sap.sse.common.Util.Pair;
 
 public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalculator {
@@ -52,8 +53,8 @@ public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalcula
             AdvancedBestPathsPerLevel bestPathsUntilLevel = new AdvancedBestPathsPerLevel(currentLevel);
             for (GraphNode currentNode : currentLevel.getLevelNodes()) {
                 double probability = currentNode.getConfidence() / currentLevel.getLevelNodes().size();
-                /* AdvancedBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel
-                        .addBestPreviousNodeInfo(currentNode, null, probability);
+                /* AdvancedBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(
+                        currentNode, null, probability, currentNode.getValidWindRange().toIntersected());
                 // currentNodeInfo.setForwardProbability(probability);
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
@@ -149,15 +150,19 @@ public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalcula
         for (GraphNode currentNode : currentLevel.getLevelNodes()) {
             List<Pair<AdvancedGraphLevel, GraphNode>> currentNodeBestPreviousNodes = new ArrayList<>();
             double currentNodeProbabilityFromStart = currentNode.getConfidence();
+            IntersectedWindRange finalBestIntersectedWindRange = null;
             for (AdvancedBestPathsPerLevel bestPathsUntilPreviousLevel : bestPathsUntilPreviousLevels) {
                 // double forwardProbability = 0;
                 double bestProbabilityFromStart = 0;
                 AdvancedGraphLevel previousLevel = bestPathsUntilPreviousLevel.getCurrentLevel();
                 GraphNode bestPreviousNode = null;
+                IntersectedWindRange bestIntersectedWindRange = null;
                 for (GraphNode previousNode : previousLevel.getLevelNodes()) {
+                    IntersectedWindRange previousNodeIntersectedWindRange = bestPathsUntilPreviousLevel
+                            .getBestPreviousNodeInfo(previousNode).getIntersectedWindRange();
                     Pair<IntersectedWindRange, Double> newWindRangeAndProbability = transitionProbabilitiesCalculator
-                            .mergeWindRangeAndGetTransitionProbability(previousNode, previousLevel, currentNode,
-                                    currentLevel);
+                            .mergeWindRangeAndGetTransitionProbability(previousNode, previousLevel,
+                                    previousNodeIntersectedWindRange, currentNode, currentLevel);
                     double transitionProbability = newWindRangeAndProbability.getB();
                     // double transitionObservationMultipliedProbability = transitionProbability *
                     // currentNode.getConfidence();
@@ -168,13 +173,17 @@ public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalcula
                     if (probabilityFromStart > bestProbabilityFromStart) {
                         bestProbabilityFromStart = probabilityFromStart;
                         bestPreviousNode = previousNode;
+                        bestIntersectedWindRange = newWindRangeAndProbability.getA();
                     }
                 }
                 currentNodeProbabilityFromStart *= bestProbabilityFromStart;
                 currentNodeBestPreviousNodes.add(new Pair<>(previousLevel, bestPreviousNode));
+                finalBestIntersectedWindRange = finalBestIntersectedWindRange == null ? bestIntersectedWindRange
+                        : finalBestIntersectedWindRange.intersect(bestIntersectedWindRange,
+                                CombinationModeOnViolation.EXPANSION);
             }
             /* AdvancedBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
-                    currentNodeBestPreviousNodes, currentNodeProbabilityFromStart);
+                    currentNodeBestPreviousNodes, currentNodeProbabilityFromStart, finalBestIntersectedWindRange);
             // currentNodeInfo.setForwardProbability(forwardProbability);
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
         }
