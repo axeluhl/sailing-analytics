@@ -107,28 +107,40 @@ if [[ ! -d $JAVA_HOME ]] && [[ -f "/usr/libexec/java_home" ]]; then
     JAVA_HOME=`/usr/libexec/java_home`
 fi
 JAVA_BINARY="$JAVA_HOME/bin/java"
-JAVA_VERSION=$("$JAVA_BINARY" -version 2>&1 | sed 's/^.* version "\(.*\)\.\(.*\)\..*".*$/\1.\2/; 1q')
-export JAVA_11_ARGS="-Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000"
-echo JAVA_11_ARGS is $JAVA_11_ARGS
-export JAVA_8_ARGS="-XX:ThreadPriorityPolicy=2 -XX:+UseG1GC -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
-echo JAVA_8_ARGS is $JAVA_8_ARGS
+JAVA_VERSION_OUTPUT=$("$JAVA_BINARY" -version 2>&1)
+JAVA_VERSION=$(echo "$JAVA_VERSION_OUTPUT" | sed 's/^.* version "\(.*\)\.\(.*\)\..*".*$/\1.\2/; 1q')
+export JAVA_11_LOGGING_ARGS="-Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000"
+export JAVA_11_ARGS="-Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC ${JAVA_11_LOGGING_ARGS}"
+export JAVA_8_LOGGING_ARGS="-XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
 echo JAVA_VERSION detected: $JAVA_VERSION
 if echo $JAVA_VERSION | grep -q "^11\."; then
   echo Java 11 detected
-  echo JAVA_11_ARGS are $JAVA_11_ARGS
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_11_ARGS
 else
   echo Java other than 11 detected
-  echo JAVA_8_ARGS are $JAVA_8_ARGS
+  # options for use with SAP JVM only:
+  if echo "$JAVA_VERSION_OUTPUT" | grep -q "SAP Java"; then
+    ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
+    BUILD=$( echo "$JAVA_VERSION_OUTPUT" | grep "(build [^ ]*)" )
+    MAJOR=$( echo "$BUILD" | sed -e 's/^.*(build \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)).*$/\1/' )
+    MINOR=$( echo "$BUILD" | sed -e 's/^.*(build \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)).*$/\2/' )
+    UPDATE=$( echo "$BUILD" | sed -e 's/^.*(build \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)).*$/\3/' )
+    echo "SAP JVM $MAJOR $MINOR $UPDATE detected"
+    if [ $MAJOR -ge 8 -a $MINOR -ge 1 -a $UPDATE -ge 45 ]; then
+      echo "Update 8.1.045 or later; using Java11 GC logging options"
+      LOGGING_ARGS="$JAVA_11_LOGGING_ARGS"
+    else 
+      echo "Update before 8.1.045; using Java8 GC logging options"
+      LOGGING_ARGS="$JAVA_8_LOGGING_ARGS"
+    fi
+  else
+    # non-SAP JVM 8
+    export LOGGING_ARGS="$JAVA_8_LOGGING_ARGS"
+  fi
+  export JAVA_8_ARGS="-XX:ThreadPriorityPolicy=2 -XX:+UseG1GC ${LOGGING_ARGS}"
   JAVA_VERSION_SPECIFIC_ARGS=$JAVA_8_ARGS
 fi
-echo JAVA_VERSION_SPECIFIC_ARGS are: $JAVA_VERSION_SPECIFIC_ARGS
-ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -XX:MaxGCPauseMillis=500"
-# options for use with SAP JVM only:
-if "$JAVA_BINARY" -version 2>&1 | grep -q "SAP Java"; then
-  echo SAP JVM detected
-  ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
-fi
+ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -XX:MaxGCPauseMillis=500"
 echo ADDITIONAL_JAVA_ARGS=${ADDITIONAL_JAVA_ARGS}
 ON_AMAZON=`command -v ec2-metadata`
 

@@ -23,7 +23,7 @@ if [[ ! -d "$JAVA_HOME" ]]; then
 fi
 # disable AWT requiring X11 and the correct DISPLAY variable setting; failing to do so
 # can result in trouble generating QR codes in the back-end
-ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Djava.awt.headless=true"
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Djava.awt.headless=true -Xms$MEMORY"
 PLATFORM=`uname`
 SED_ARGS="-i"
 if [[ $PLATFORM == "Darwin" ]]; then

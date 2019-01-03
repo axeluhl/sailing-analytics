@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator.AnniversaryChecker;
+import com.sap.sailing.server.interfaces.AnniversaryRaceDeterminator.AnniversaryChecker;
 
 /**
  * This {@link AnniversaryChecker} implementation determines all repdigit race counts starting at 11,111 as an

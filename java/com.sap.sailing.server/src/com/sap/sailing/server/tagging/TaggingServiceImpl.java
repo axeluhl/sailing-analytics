@@ -25,8 +25,9 @@ import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.Activator;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -305,10 +306,12 @@ public class TaggingServiceImpl implements TaggingService {
     public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName)
             throws AuthorizationException, ServiceNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
-        String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
-        String privateTagsJson = getSecurityService().getPreference(getCurrentUsername(), key);
-        List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
-        result.addAll(privateTags);
+        if (SecurityUtils.getSubject().getPrincipal() != null) {
+            String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
+            String privateTagsJson = getSecurityService().getPreference(getCurrentUsername(), key);
+            List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
+            result.addAll(privateTags);
+        }
         return result;
     }
 }

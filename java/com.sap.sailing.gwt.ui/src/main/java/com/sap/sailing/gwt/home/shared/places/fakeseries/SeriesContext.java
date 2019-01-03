@@ -23,6 +23,10 @@ public class SeriesContext {
         return new SeriesContext(null, leaderboardGroupId);
     }
     
+    public static final SeriesContext createErrorContext() {
+        return new SeriesContext(null, null);
+    }
+
     private SeriesContext(UUID seriesId, UUID leaderboardGroupId) {
         this.seriesId = seriesId;
         this.leaderboardGroupId = leaderboardGroupId;
@@ -58,4 +62,5 @@ public class SeriesContext {
     public void updateLeaderboardGroupId(UUID leaderboardGroupUUID) {
         this.leaderboardGroupId = leaderboardGroupUUID;
     }
+
 }

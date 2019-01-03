@@ -11,8 +11,8 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.User;
@@ -38,7 +38,7 @@ public class UserStoreWithPersistenceTest {
     public void setUp() throws UnknownHostException, MongoException {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
-        DB db = service.getDB();
+        MongoDatabase db = service.getDB();
         db.getCollection(CollectionNames.USERS.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();

@@ -17,7 +17,7 @@ import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 
 public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
     @Rule
-    public Timeout GPSFixStoreListenerTestTimeout = new Timeout(3 * 1000);
+    public Timeout GPSFixStoreListenerTestTimeout = Timeout.millis(3 * 1000);
 
     /**
      * {@link MongoSensorFixStoreImpl} had broken synchronization of the listeners collection (add/removeListener

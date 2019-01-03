@@ -50,7 +50,7 @@ public class SailMasterConnectivityTest {
     private Thread dummyServerThread;
     private SailMasterDummy sailMaster;
     
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(5 * 60 * 1000); // timeout after 5 minutes
 
     private SailMasterConnector connector4702;
     

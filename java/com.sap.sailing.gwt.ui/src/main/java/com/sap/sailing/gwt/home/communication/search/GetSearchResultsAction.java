@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;

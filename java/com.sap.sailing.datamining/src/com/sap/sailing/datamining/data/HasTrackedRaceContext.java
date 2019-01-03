@@ -8,6 +8,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
@@ -40,6 +42,18 @@ public interface HasTrackedRaceContext {
     
     @Dimension(messageKey="AdvantageousEndOfLine", ordinal=7)
     public NauticalSide getAdvantageousEndOfLine();
+    
+    @Statistic(messageKey="AdvantageOfStarboardSideOfStartLine")
+    public Distance getAdvantageOfStarboardSideOfStartline();
+    
+    @Statistic(messageKey="TrueWindAngleOfStartLineSeenFromStarboardSide")
+    public Bearing getTrueWindAngleOfStartLineFromStarboardSide();
+    
+    @Statistic(messageKey="StartLineLength")
+    public Distance getStartLineLength();
+    
+    @Statistic(messageKey="FinishLineLength")
+    public Distance getFinishLineLength();
     
     @Dimension(messageKey="MedalRace", ordinal=8)
     public Boolean isMedalRace();

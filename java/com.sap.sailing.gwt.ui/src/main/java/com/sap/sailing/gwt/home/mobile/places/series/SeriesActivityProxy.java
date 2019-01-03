@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.app.ActivityProxyCallback;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.ProvidesNavigationPath;
+import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
@@ -66,15 +67,22 @@ public class SeriesActivityProxy extends AbstractActivityProxy implements Provid
         if (currentPlace.getCtx().getLeaderboardGroupId() != null) {
             doStart.run();
         } else {
-            // patch old link with seriesId to new leaderboardGroup based one
-            clientFactory.getDispatch().execute(new GetEventSeriesViewAction(currentPlace.getCtx()),
-                    new ActivityProxyCallback<EventSeriesViewDTO>(clientFactory, currentPlace) {
-                        @Override
-                        public void onSuccess(EventSeriesViewDTO series) {
-                            currentPlace.getCtx().updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
-                            doStart.run();
-                        }
-                    });
+            if (currentPlace.getCtx().getSeriesId() == null) {
+                ErrorPlace errorPlace = new ErrorPlace("series and leaderboardGroup is null");
+                errorPlace.setComingFrom(errorPlace);
+                clientFactory.getPlaceController().goTo(errorPlace);
+            } else {
+                // patch old link with seriesId to new leaderboardGroup based one
+                clientFactory.getDispatch().execute(new GetEventSeriesViewAction(currentPlace.getCtx()),
+                        new ActivityProxyCallback<EventSeriesViewDTO>(clientFactory, currentPlace) {
+                            @Override
+                            public void onSuccess(EventSeriesViewDTO series) {
+                                currentPlace.getCtx().updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
+                                doStart.run();
+                            }
+                        });
+            }
+
         }
     }
 }

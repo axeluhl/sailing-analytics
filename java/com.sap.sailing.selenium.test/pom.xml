@@ -55,6 +55,16 @@
                 <id>com.sap.sailing.server.gateway.test.support</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>com.sap.sailing.routeconverterjava11extension</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>com.sap.sse.jersey.jaxbdependencyfragment</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
             </extraRequirements>
           </dependency-resolution>
         </configuration>
@@ -62,7 +72,7 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
-		<version>${tycho-version}</version>
+        <version>${tycho-version}</version>
         <configuration>
           <!-- Skip the normal tests, we'll run them in the integration-test phase -->
           <skipTests>true</skipTests>
@@ -150,6 +160,11 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.server.interface</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.server</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
@@ -160,7 +175,12 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sailing.server.replication</id>
+                  <id>com.sap.sse.replication.interfaces</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>com.sap.sse.replication</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>

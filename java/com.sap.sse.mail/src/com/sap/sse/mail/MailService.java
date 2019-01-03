@@ -8,7 +8,7 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.impl.ReplicableMailService;
 import com.sap.sse.replication.Replicable;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.util.ClearStateTestSupport;
 
 

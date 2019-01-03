@@ -1,10 +1,9 @@
 package com.sap.sailing.server.util;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.sharding.ShardingType;
-
-import junit.framework.Assert;
 
 public class ShardingLeaderBoardEncodingTest {
     @Test

@@ -4,13 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
 import org.junit.Test;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -19,8 +18,8 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.mongodb.MongoDBService;
 
 import junit.framework.TestCase;
@@ -65,15 +64,15 @@ public class LeaderboardStorageTest extends TestCase {
         service.getMongoObjectFactory().storeLeaderboard(leaderboard);
 
         // Test in db
-        DBCollection leaderboardCollection = MongoDBService.INSTANCE.getDB().getCollection("LEADERBOARDS");
+        MongoCollection<Document> leaderboardCollection = MongoDBService.INSTANCE.getDB().getCollection("LEADERBOARDS");
         BasicDBObject query = new BasicDBObject();
         query.put("LEADERBOARD_NAME", LEADERBOARD_NAME);
-        DBCursor leaderboardObjectCursor = leaderboardCollection.find();
-        DBObject dbLeaderboard = leaderboardObjectCursor.next();
-        BasicDBList carriedPointsById = (BasicDBList) dbLeaderboard.get("LEADERBOARD_CARRIED_POINTS_BY_ID");
+        FindIterable<Document> leaderboardObjectCursor = leaderboardCollection.find();
+        Document dbLeaderboard = leaderboardObjectCursor.iterator().next();
+        Iterable<?> carriedPointsById = (Iterable<?>) dbLeaderboard.get("LEADERBOARD_CARRIED_POINTS_BY_ID");
         if (carriedPointsById != null) {
             for (Object o : carriedPointsById) {
-                DBObject competitorIdAndCarriedPoints = (DBObject) o;
+                Document competitorIdAndCarriedPoints = (Document) o;
                 Serializable competitorIdFromDB = (Serializable) competitorIdAndCarriedPoints.get("COMPETITOR_ID");
                 Double carriedPointsForCompetitor = ((Number) competitorIdAndCarriedPoints
                         .get("LEADERBOARD_CARRIED_POINTS")).doubleValue();
