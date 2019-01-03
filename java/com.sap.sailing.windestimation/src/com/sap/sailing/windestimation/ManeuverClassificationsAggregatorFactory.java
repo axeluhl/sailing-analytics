@@ -9,6 +9,9 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.aggregator.advancedhmm.AdvancedBestPathsCalculatorImpl;
+import com.sap.sailing.windestimation.aggregator.advancedhmm.AdvancedManeuverGraph;
+import com.sap.sailing.windestimation.aggregator.advancedhmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClassificationForClusteringImpl;
 import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClusteringBasedWindEstimationTrackImpl;
 import com.sap.sailing.windestimation.aggregator.hmm.BestPathsCalculator;
@@ -20,14 +23,21 @@ import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
+import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculatorImpl;
 
 public class ManeuverClassificationsAggregatorFactory {
 
     private final PolarDataService polarDataService;
+    private final ModelStore modelStore;
+    private final long modelCacheKeepAliveMillis;
 
-    public ManeuverClassificationsAggregatorFactory(PolarDataService polarDataService) {
+    public ManeuverClassificationsAggregatorFactory(PolarDataService polarDataService, ModelStore modelStore,
+            long modelCacheKeepAliveMillis) {
         this.polarDataService = polarDataService;
+        this.modelStore = modelStore;
+        this.modelCacheKeepAliveMillis = modelCacheKeepAliveMillis;
     }
 
     public ManeuverClassificationsAggregator hmm() {
@@ -80,6 +90,12 @@ public class ManeuverClassificationsAggregatorFactory {
 
     public ManeuverClassificationsAggregator neighborOutlier() {
         return new NeighborBasedOutlierRemovalWindEstimator(new MiddleCourseBasedTwdCalculatorImpl());
+    }
+
+    public ManeuverClassificationsAggregator advancedHmm() {
+        return new AdvancedManeuverGraph(
+                new AdvancedBestPathsCalculatorImpl(new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
+                        new GaussianBasedTwdTransitionDistributionCache(modelStore, modelCacheKeepAliveMillis))));
     }
 
 }

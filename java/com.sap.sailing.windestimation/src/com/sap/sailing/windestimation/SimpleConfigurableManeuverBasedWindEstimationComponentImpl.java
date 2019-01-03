@@ -7,6 +7,7 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
+import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.preprocessing.RacePreprocessingPipeline;
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
@@ -17,39 +18,45 @@ import com.sap.sailing.windestimation.windinference.WindTrackCalculatorImpl;
 public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
         ManeuverBasedWindEstimationComponentImpl<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> {
 
+    private static final int MODEL_CACHE_KEEP_ALIVE_MILLIS = 3600000;
+
     public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
-            ManeuverClassifiersCache maneuverClassifiersCache, PolarDataService polarService,
+            ModelStore modelStore, PolarDataService polarService,
             RacePreprocessingPipeline<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> preprocessingPipeline,
             ManeuverClassificationsAggregatorImplementation aggregatorImplementation) {
-        super(preprocessingPipeline, maneuverClassifiersCache, aggregatorImplementation.createNewInstance(polarService),
+        super(preprocessingPipeline,
+                new ManeuverClassifiersCache(modelStore, MODEL_CACHE_KEEP_ALIVE_MILLIS, maneuverFeatures),
+                aggregatorImplementation.createNewInstance(polarService, modelStore, MODEL_CACHE_KEEP_ALIVE_MILLIS),
                 new WindTrackCalculatorImpl(new MiddleCourseBasedTwdCalculatorImpl(),
                         maneuverFeatures.isPolarsInformation() ? new PolarsBasedTwsCalculatorImpl(polarService)
                                 : new DummyBasedTwsCalculatorImpl()));
     }
 
     public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
-            ManeuverClassifiersCache maneuverClassifiersCache, PolarDataService polarService,
+            ModelStore modelStore, PolarDataService polarService,
             ManeuverClassificationsAggregatorImplementation aggregatorImplementation) {
-        this(maneuverFeatures, maneuverClassifiersCache, polarService,
+        this(maneuverFeatures, modelStore, polarService,
                 new RaceElementsFilteringPreprocessingPipelineImpl(new ManeuverForEstimationTransformer()),
                 aggregatorImplementation);
     }
 
     public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
-            ManeuverClassifiersCache maneuverClassifiersCache, PolarDataService polarService) {
-        this(maneuverFeatures, maneuverClassifiersCache, polarService,
-                ManeuverClassificationsAggregatorImplementation.HMM);
+            ModelStore modelStore, PolarDataService polarService) {
+        this(maneuverFeatures, modelStore, polarService, ManeuverClassificationsAggregatorImplementation.HMM);
     }
 
     public enum ManeuverClassificationsAggregatorImplementation {
-        HMM, CLUSTERING, MEAN_OUTLIER, NEIGHBOR_OUTLIER;
+        HMM, ADVANCED_HMM, CLUSTERING, MEAN_OUTLIER, NEIGHBOR_OUTLIER;
 
-        ManeuverClassificationsAggregator createNewInstance(PolarDataService polarService) {
+        ManeuverClassificationsAggregator createNewInstance(PolarDataService polarService, ModelStore modelStore,
+                long modelCacheKeepAliveMillis) {
             ManeuverClassificationsAggregatorFactory factory = new ManeuverClassificationsAggregatorFactory(
-                    polarService);
+                    polarService, modelStore, modelCacheKeepAliveMillis);
             switch (this) {
             case HMM:
                 return factory.hmm();
+            case ADVANCED_HMM:
+                return factory.advancedHmm();
             case CLUSTERING:
                 return factory.clustering();
             case MEAN_OUTLIER:

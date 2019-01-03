@@ -10,19 +10,18 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         implements GraphNodeTransitionProbabilitiesCalculator {
 
     protected static final int MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE = 40;
+    private static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 40;
 
+    @Override
     public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
             GraphLevelBase previousLevel, GraphNode currentNode, GraphLevelBase currentLevel) {
-        double secondsPassedSincePreviousWindRange = Math.abs(previousLevel.getManeuver().getManeuverTimePoint()
-                .until(currentLevel.getManeuver().getManeuverTimePoint()).asSeconds());
         double transitionProbabilitySum = 0;
         double transitionProbabilityUntilCurrentNode = -1;
         IntersectedWindRange intersectedWindRangeUntilCurrentNode = null;
         for (GraphNode node : currentLevel.getLevelNodes()) {
             IntersectedWindRange intersectedWindRange = previousNode.getValidWindRange()
                     .intersect(node.getValidWindRange());
-            double transitionProbability = intersectedWindRange
-                    .getPenaltyFactorForTransition(secondsPassedSincePreviousWindRange);
+            double transitionProbability = getPenaltyFactorForTransition(intersectedWindRange);
             transitionProbabilitySum += transitionProbability;
             if (node == currentNode) {
                 transitionProbabilityUntilCurrentNode = transitionProbability;
@@ -35,6 +34,23 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         double normalizedTransitionProbabilityUntilCurrentNode = transitionProbabilityUntilCurrentNode
                 / transitionProbabilitySum;
         return new Pair<>(intersectedWindRangeUntilCurrentNode, normalizedTransitionProbabilityUntilCurrentNode);
+    }
+
+    protected double getPenaltyFactorForTransition(IntersectedWindRange intersectedWindRange) {
+        double violationRange = intersectedWindRange.getViolationRange();
+        double penaltyFactor;
+        if (violationRange == 0) {
+            penaltyFactor = 1.0;
+        } else {
+            if (violationRange <= MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES) {
+                penaltyFactor = 1 / (1 + Math.pow(violationRange
+                        / MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES * 2, 2));
+            } else {
+                penaltyFactor = 1 / (1 + (Math.pow(violationRange, 2)));
+            }
+        }
+        assert (penaltyFactor > 0.0001);
+        return penaltyFactor;
     }
 
     public WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver,

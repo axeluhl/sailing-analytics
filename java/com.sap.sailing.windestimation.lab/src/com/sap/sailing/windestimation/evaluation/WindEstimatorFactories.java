@@ -8,7 +8,6 @@ import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimat
 import com.sap.sailing.windestimation.WindEstimationComponent;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstimationTransformer;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
@@ -22,13 +21,13 @@ public class WindEstimatorFactories {
 
     private final PolarDataService polarService;
     private final ManeuverFeatures maneuverFeatures;
-    private final ManeuverClassifiersCache maneuverClassifiersCache;
+    private final ModelStore modelStore;
 
     public WindEstimatorFactories(PolarDataService polarService, ManeuverFeatures maneuverFeatures,
-            ModelStore classifierModelStore) {
+            ModelStore modelStore) {
         this.polarService = polarService;
         this.maneuverFeatures = maneuverFeatures;
-        this.maneuverClassifiersCache = new ManeuverClassifiersCache(classifierModelStore, 3600000, maneuverFeatures);
+        this.modelStore = modelStore;
     }
 
     public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> get(
@@ -36,6 +35,8 @@ public class WindEstimatorFactories {
         switch (windEstimationImplementation) {
         case HMM:
             return hmm();
+        case ADVANCED_HMM:
+            return advancedHmm();
         case CLUSTERING:
             return maneuverClustering();
         case MEAN_OUTLIER:
@@ -53,8 +54,8 @@ public class WindEstimatorFactories {
 
             @Override
             public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
-                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures,
-                        maneuverClassifiersCache, polarService,
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, modelStore,
+                        polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
                                 new LabelledManeuverForEstimationTransformer()),
                         ManeuverClassificationsAggregatorImplementation.HMM);
@@ -67,13 +68,32 @@ public class WindEstimatorFactories {
         };
     }
 
+    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> advancedHmm() {
+        return new WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>>() {
+
+            @Override
+            public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, modelStore,
+                        polarService,
+                        new RaceElementsFilteringPreprocessingPipelineImpl(
+                                new LabelledManeuverForEstimationTransformer()),
+                        ManeuverClassificationsAggregatorImplementation.ADVANCED_HMM);
+            }
+
+            @Override
+            public String toString() {
+                return "Advanced HMM";
+            }
+        };
+    }
+
     public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> maneuverClustering() {
         return new WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>>() {
 
             @Override
             public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
-                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures,
-                        maneuverClassifiersCache, polarService,
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, modelStore,
+                        polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
                                 new LabelledManeuverForEstimationTransformer()),
                         ManeuverClassificationsAggregatorImplementation.CLUSTERING);
@@ -109,8 +129,8 @@ public class WindEstimatorFactories {
 
             @Override
             public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
-                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures,
-                        maneuverClassifiersCache, polarService,
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, modelStore,
+                        polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
                                 new LabelledManeuverForEstimationTransformer()),
                         ManeuverClassificationsAggregatorImplementation.MEAN_OUTLIER);
@@ -128,8 +148,8 @@ public class WindEstimatorFactories {
 
             @Override
             public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
-                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures,
-                        maneuverClassifiersCache, polarService,
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, modelStore,
+                        polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
                                 new LabelledManeuverForEstimationTransformer()),
                         ManeuverClassificationsAggregatorImplementation.NEIGHBOR_OUTLIER);

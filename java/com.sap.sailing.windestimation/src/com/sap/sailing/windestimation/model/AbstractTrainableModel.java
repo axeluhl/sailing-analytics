@@ -8,7 +8,7 @@ public abstract class AbstractTrainableModel<InstanceType, T extends ContextSpec
     private boolean trainingFinished = false;
     private double testScore = 0;
     private double trainScore = 0;
-    private int numberOfTrainingInstances;
+    private long numberOfTrainingInstances;
 
     public AbstractTrainableModel(T contextSpecificModelMetadata) {
         this.contextSpecificModelMetadata = contextSpecificModelMetadata;
@@ -30,12 +30,12 @@ public abstract class AbstractTrainableModel<InstanceType, T extends ContextSpec
     }
 
     @Override
-    public int getNumberOfTrainingInstances() {
+    public long getNumberOfTrainingInstances() {
         return numberOfTrainingInstances;
     }
 
     @Override
-    public void setTrainingStats(double trainScore, double testScore, int numberOfTrainingInstances) {
+    public void setTrainingStats(double trainScore, double testScore, long numberOfTrainingInstances) {
         this.trainScore = trainScore;
         this.testScore = testScore;
         this.numberOfTrainingInstances = numberOfTrainingInstances;

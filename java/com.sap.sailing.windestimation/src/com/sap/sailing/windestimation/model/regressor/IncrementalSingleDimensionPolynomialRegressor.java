@@ -7,14 +7,15 @@ import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 
-public class SingleDimensionPolynomialRegressor<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+public class IncrementalSingleDimensionPolynomialRegressor<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
         extends AbstractRegressorModel<InstanceType, T>
         implements IncrementallyTrainableRegressorModel<InstanceType, T> {
 
     private static final long serialVersionUID = 2275631213670766824L;
     private final IncrementalLeastSquares regression;
 
-    public SingleDimensionPolynomialRegressor(T contextSpecificModelMetadata, int polynomialOrder, boolean withBias) {
+    public IncrementalSingleDimensionPolynomialRegressor(T contextSpecificModelMetadata, int polynomialOrder,
+            boolean withBias) {
         super(contextSpecificModelMetadata);
         if (contextSpecificModelMetadata.getNumberOfInputFeatures() > 1) {
             throw new IllegalArgumentException(
@@ -62,6 +63,16 @@ public class SingleDimensionPolynomialRegressor<InstanceType, T extends ContextS
             return true;
         }
         return false;
+    }
+
+    public String getPolynomAsString() {
+        PolynomialFunction polynomialFunction;
+        try {
+            polynomialFunction = regression.getOrCreatePolynomialFunction();
+            return polynomialFunction.toString();
+        } catch (NotEnoughDataHasBeenAddedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -5,6 +5,7 @@ public class AggregatedSingleDimensionBasedTwdTransition {
     private final double dimensionValue;
     private final double mean;
     private final double std;
+    private final double zeroMeanStd;
     private final double median;
     private final long numberOfValues;
     private double q1;
@@ -12,11 +13,12 @@ public class AggregatedSingleDimensionBasedTwdTransition {
     private double p1;
     private double p99;
 
-    public AggregatedSingleDimensionBasedTwdTransition(double dimensionValue, double mean, double std, double median,
+    public AggregatedSingleDimensionBasedTwdTransition(double dimensionValue, double mean, double std, double zeroMeanStd, double median,
             long numberOfValues, double q1, double q3, double p1, double p99) {
         this.dimensionValue = dimensionValue;
         this.mean = mean;
         this.std = std;
+        this.zeroMeanStd = zeroMeanStd;
         this.median = median;
         this.numberOfValues = numberOfValues;
         this.q1 = q1;
@@ -35,6 +37,10 @@ public class AggregatedSingleDimensionBasedTwdTransition {
 
     public double getStd() {
         return std;
+    }
+    
+    public double getZeroMeanStd() {
+        return zeroMeanStd;
     }
 
     public double getMedian() {

@@ -95,7 +95,8 @@ public class SingleDimensionTwdTransitionAggregationImporter {
     private static AggregatedSingleDimensionBasedTwdTransition computeAggregate(double dimensionValue,
             TDoubleList entries) {
         double[] twdChanges = entries.toArray();
-        double std = Math.sd(twdChanges);
+        double std;
+        double zeroMeanStd;
         double median;
         double mean;
         double q1;
@@ -103,6 +104,12 @@ public class SingleDimensionTwdTransitionAggregationImporter {
         double p1;
         double p99;
         if (entries.size() > 1) {
+            std = Math.sd(twdChanges);
+            double sqSum = 0;
+            for (double twdChange : twdChanges) {
+                sqSum += twdChange * twdChange;
+            }
+            zeroMeanStd = Math.sqrt(sqSum / (twdChanges.length - 1));
             median = QuickSelect.median(twdChanges);
             mean = Math.mean(twdChanges);
             q1 = QuickSelect.q1(twdChanges);
@@ -110,6 +117,8 @@ public class SingleDimensionTwdTransitionAggregationImporter {
             p1 = QuickSelect.select(twdChanges, (int) (twdChanges.length * 0.01));
             p99 = QuickSelect.select(twdChanges, (int) (twdChanges.length * 0.99));
         } else {
+            std = 0;
+            zeroMeanStd = 0;
             median = entries.get(0);
             mean = median;
             q1 = median;
@@ -118,7 +127,7 @@ public class SingleDimensionTwdTransitionAggregationImporter {
             p99 = median;
         }
         AggregatedSingleDimensionBasedTwdTransition aggregate = new AggregatedSingleDimensionBasedTwdTransition(
-                dimensionValue, mean, std, median, twdChanges.length, q1, q3, p1, p99);
+                dimensionValue, mean, std, zeroMeanStd, median, twdChanges.length, q1, q3, p1, p99);
         return aggregate;
     }
 

@@ -17,7 +17,7 @@ public class SingleDimensionBasedTwdTransitionRegressorCache<T extends SingleDim
 
     @Override
     public T getContextSpecificModelMetadata(TwdTransition twdTransition) {
-        return modelFactory.createNewModelMetadata();
+        return modelFactory.createNewModelMetadata(twdTransition);
     }
 
 }

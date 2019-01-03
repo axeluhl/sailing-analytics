@@ -9,21 +9,20 @@ import java.util.Map;
 import com.sap.sailing.windestimation.aggregator.advancedhmm.AdvancedManeuverGraphGenerator.AdvancedManeuverGraphComponents;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
-import com.sap.sailing.windestimation.aggregator.hmm.GraphNodeTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 import com.sap.sse.common.Util.Pair;
 
 public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalculator {
 
-    private final GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
+    private final AdvancedGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
 
     public AdvancedBestPathsCalculatorImpl(
-            GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+            AdvancedGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         this.transitionProbabilitiesCalculator = transitionProbabilitiesCalculator;
     }
 
     @Override
-    public GraphNodeTransitionProbabilitiesCalculator getTransitionProbabilitiesCalculator() {
+    public AdvancedGraphNodeTransitionProbabilitiesCalculator getTransitionProbabilitiesCalculator() {
         return transitionProbabilitiesCalculator;
     }
 

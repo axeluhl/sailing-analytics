@@ -36,8 +36,6 @@ public class AdvancedManeuverGraph implements ManeuverClassificationsAggregator 
         if (sortedManeuverClassifications.isEmpty()) {
             return Collections.emptyList();
         }
-        sortedManeuverClassifications.get(0);
-
         AdvancedManeuverGraphGenerator graphGenerator = new AdvancedManeuverGraphGenerator(
                 bestPathsCalculator.getTransitionProbabilitiesCalculator());
         for (ManeuverWithProbabilisticTypeClassification maneuverClassification : sortedManeuverClassifications) {

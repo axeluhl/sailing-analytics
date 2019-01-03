@@ -8,16 +8,4 @@ public interface TrainableClassificationModel<InstanceType, T extends ContextSpe
 
     void train(double[][] x, int[] y);
 
-    double getTestScore();
-
-    double getTrainScore();
-
-    boolean hasSupportForProvidedFeatures();
-
-    boolean isModelReady();
-
-    int getNumberOfTrainingInstances();
-
-    void setTrainingStats(double trainScore, double testScore, int numberOfTrainingInstances);
-
 }

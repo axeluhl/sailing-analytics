@@ -22,7 +22,7 @@ public class AggregatedRandomDimensionPlot {
                     @Override
                     public AggregatedSingleDimensionBasedTwdTransition next() {
                         if (hasNext()) {
-                            return new AggregatedSingleDimensionBasedTwdTransition(i++, 30, 10, 20, 100000, 15, 35, 1,
+                            return new AggregatedSingleDimensionBasedTwdTransition(i++, 30, 10, 12, 20, 100000, 15, 35, 1,
                                     100);
                         }
                         return null;

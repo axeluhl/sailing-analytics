@@ -13,7 +13,7 @@ public interface TrainableModel<InstanceType, T extends ContextSpecificModelMeta
 
     boolean isModelReady();
 
-    int getNumberOfTrainingInstances();
+    long getNumberOfTrainingInstances();
 
-    void setTrainingStats(double trainScore, double testScore, int numberOfTrainingInstances);
+    void setTrainingStats(double trainScore, double testScore, long numberOfTrainingInstances);
 }

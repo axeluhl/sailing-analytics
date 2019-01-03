@@ -39,6 +39,7 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
     private XYSeries p99Series;
     private XYSeries valuesSeries;
     private XYSeries stdSeries;
+    private XYSeries zeroMeanStdSeries;
 
     public SingleDimensionAggregatesPlottingFrame(
             AggregatedSingleDimensionBasedTwdTransitionPersistenceManager persistenceManager) {
@@ -69,6 +70,7 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
         p99Series = new XYSeries("P99", true, false);
         valuesSeries = new XYSeries("Values", true, false);
         stdSeries = new XYSeries("Sigma", true, false);
+        zeroMeanStdSeries = new XYSeries("Zero mean sigma", true, false);
     }
 
     private JFreeChart createMainChart(XYDataset dataset) {
@@ -83,13 +85,14 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
         renderer.setSeriesPaint(4, Color.BLUE);
         renderer.setSeriesPaint(5, Color.BLUE);
         renderer.setSeriesPaint(6, Color.PINK);
+        renderer.setSeriesPaint(7, Color.GREEN);
         renderer.setBaseShapesVisible(true);
         renderer.setBaseShapesFilled(true);
         Shape shape = new Ellipse2D.Double(0, 0, 2, 2);
         renderer.setBaseShape(shape);
         BasicStroke stroke = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL);
         renderer.setBaseStroke(stroke);
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 8; i++) {
             renderer.setSeriesStroke(i, stroke);
             renderer.setSeriesShape(i, shape);
         }
@@ -143,6 +146,7 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
         dataset.addSeries(p1Series);
         dataset.addSeries(p99Series);
         dataset.addSeries(stdSeries);
+        dataset.addSeries(zeroMeanStdSeries);
         return dataset;
     }
 
@@ -170,6 +174,7 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
                 p99Series.add(aggregate.getDimensionValue(), aggregate.getP99());
                 valuesSeries.add(aggregate.getDimensionValue(), aggregate.getNumberOfValues());
                 stdSeries.add(aggregate.getDimensionValue(), aggregate.getStd());
+                zeroMeanStdSeries.add(aggregate.getDimensionValue(), aggregate.getZeroMeanStd());
             } catch (Exception e) {
                 e.printStackTrace();
             }

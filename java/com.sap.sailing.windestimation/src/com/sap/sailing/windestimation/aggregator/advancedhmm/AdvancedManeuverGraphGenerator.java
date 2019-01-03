@@ -3,24 +3,24 @@ package com.sap.sailing.windestimation.aggregator.advancedhmm;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.windestimation.aggregator.hmm.GraphNodeTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 public class AdvancedManeuverGraphGenerator
         extends AbstractAdvancedGraphGenerator<ManeuverWithProbabilisticTypeClassification> {
 
-    private final GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
+    private final AdvancedGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
 
     public AdvancedManeuverGraphGenerator(
-            GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+            AdvancedGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         this.transitionProbabilitiesCalculator = transitionProbabilitiesCalculator;
     }
 
     @Override
     protected double getDistanceBetweenObservations(ManeuverWithProbabilisticTypeClassification o1,
             ManeuverWithProbabilisticTypeClassification o2) {
-        // TODO Auto-generated method stub
-        return 0;
+        double compoundDistance = transitionProbabilitiesCalculator.getCompoundDistance(o1.getManeuver(),
+                o2.getManeuver());
+        return compoundDistance;
     }
 
     public AdvancedManeuverGraphComponents parseGraph() {
