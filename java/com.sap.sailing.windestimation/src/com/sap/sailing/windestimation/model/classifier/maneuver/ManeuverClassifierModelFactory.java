@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.classifier.ClassifierModelFactory;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.classifier.smile.NeuralNetworkClassifier;
@@ -13,9 +14,9 @@ import com.sap.sailing.windestimation.model.classifier.smile.NeuralNetworkClassi
 public class ManeuverClassifierModelFactory
         implements ClassifierModelFactory<ManeuverForEstimation, ManeuverClassifierModelMetadata> {
 
-    public static final ManeuverTypeForInternalClassification[] orderedSupportedTargetValues = {
-            ManeuverTypeForInternalClassification.TACK, ManeuverTypeForInternalClassification.JIBE,
-            ManeuverTypeForInternalClassification.OTHER };
+    public static final ManeuverTypeForClassification[] orderedSupportedTargetValues = {
+            ManeuverTypeForClassification.TACK, ManeuverTypeForClassification.JIBE,
+            ManeuverTypeForClassification.HEAD_UP, ManeuverTypeForClassification.BEAR_AWAY };
 
     @Override
     public TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> getNewModel(
@@ -43,7 +44,8 @@ public class ManeuverClassifierModelFactory
         return suitableClassifiers;
     }
 
-    private static ManeuverClassifierModelMetadata createModelMetadata(ManeuverFeatures maneuverFeatures, BoatClass boatClass) {
+    private static ManeuverClassifierModelMetadata createModelMetadata(ManeuverFeatures maneuverFeatures,
+            BoatClass boatClass) {
         ManeuverClassifierModelMetadata modelMetadata = new ManeuverClassifierModelMetadata(maneuverFeatures, boatClass,
                 orderedSupportedTargetValues);
         return modelMetadata;
@@ -60,7 +62,8 @@ public class ManeuverClassifierModelFactory
                 ManeuverClassifierModelMetadata modelMetadata = createModelMetadata(possibleFeatures, null);
                 modelMetadataCandidates.add(modelMetadata);
                 if (boatClass != null) {
-                    ManeuverClassifierModelMetadata modelMetadataWithBoatClass = createModelMetadata(possibleFeatures, boatClass);
+                    ManeuverClassifierModelMetadata modelMetadataWithBoatClass = createModelMetadata(possibleFeatures,
+                            boatClass);
                     modelMetadataCandidates.add(modelMetadataWithBoatClass);
                 }
             }

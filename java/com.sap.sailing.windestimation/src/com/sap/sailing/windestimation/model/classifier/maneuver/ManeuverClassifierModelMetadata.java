@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.model.store.ContextType;
 
@@ -16,16 +17,16 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
     private final int numberOfSupportedManeuverTypes;
 
     public ManeuverClassifierModelMetadata(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
-            ManeuverTypeForInternalClassification... orderedSupportedTargetValues) {
+            ManeuverTypeForClassification... orderedSupportedTargetValues) {
         super(ContextType.MANEUVER);
         this.maneuverFeatures = maneuverFeatures;
         this.boatClass = boatClass;
-        this.indexToManeuverTypeOrdinalMapping = new int[ManeuverTypeForInternalClassification.values().length];
+        this.indexToManeuverTypeOrdinalMapping = new int[ManeuverTypeForClassification.values().length];
         for (int i = 0; i < indexToManeuverTypeOrdinalMapping.length; i++) {
             indexToManeuverTypeOrdinalMapping[i] = -1;
         }
         int i = 0;
-        for (ManeuverTypeForInternalClassification supportedManeuverType : orderedSupportedTargetValues) {
+        for (ManeuverTypeForClassification supportedManeuverType : orderedSupportedTargetValues) {
             indexToManeuverTypeOrdinalMapping[supportedManeuverType.ordinal()] = i++;
         }
         numberOfSupportedManeuverTypes = i;
@@ -45,7 +46,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
     }
 
     public double[] getLikelihoodsPerManeuverTypeOrdinal(double[] likelihoodsFromModel) {
-        double[] likelihoodsPerManeuverTypes = new double[ManeuverTypeForInternalClassification.values().length];
+        double[] likelihoodsPerManeuverTypes = new double[ManeuverTypeForClassification.values().length];
         int mappedI = 0;
         for (int i = 0; i < likelihoodsPerManeuverTypes.length; i++) {
             int maneuverTypeMapping = indexToManeuverTypeOrdinalMapping[i];
@@ -100,8 +101,8 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
                 + ", numberOfSupportedManeuverTypes=" + numberOfSupportedManeuverTypes + "]";
     }
 
-    public ManeuverTypeForInternalClassification getManeuverTypeByMappingIndex(int likelihoodIndex) {
-        for (ManeuverTypeForInternalClassification maneuverType : ManeuverTypeForInternalClassification.values()) {
+    public ManeuverTypeForClassification getManeuverTypeByMappingIndex(int likelihoodIndex) {
+        for (ManeuverTypeForClassification maneuverType : ManeuverTypeForClassification.values()) {
             if (indexToManeuverTypeOrdinalMapping[maneuverType.ordinal()] == likelihoodIndex) {
                 return maneuverType;
             }
