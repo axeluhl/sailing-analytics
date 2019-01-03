@@ -40,10 +40,8 @@ public class TwdTransitionRegressorTrainer {
                 numberOfTrainingInstances += twdTransition.getNumberOfValues();
             }
         }
-        persistenceManager
-        .getIterator();
-        LoggingUtil
-                .logInfo("########## Squared error calculation started...");
+        persistenceManager.getIterator();
+        LoggingUtil.logInfo("Calculating root mean square error ...");
         double squareErrorSum = 0;
         int numberOfAggregates = 0;
         while (iterator.hasNext()) {
@@ -58,6 +56,7 @@ public class TwdTransitionRegressorTrainer {
             }
         }
         double rootMeanSquareError = Math.sqrt(squareErrorSum / numberOfAggregates);
+        LoggingUtil.logInfo("Root mean square error = " + rootMeanSquareError);
         model.setTrainingStats(rootMeanSquareError, rootMeanSquareError, numberOfTrainingInstances);
         LoggingUtil.logInfo("Persisting trained regressor...");
         regressorModelStore.persistState(model);

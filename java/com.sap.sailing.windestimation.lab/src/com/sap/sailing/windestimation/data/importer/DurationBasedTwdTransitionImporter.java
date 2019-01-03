@@ -42,22 +42,21 @@ public class DurationBasedTwdTransitionImporter {
                         .until(windFix.getTimePoint()).asSeconds() >= SECONDS_INTERVAL_TO_SAMPLE) {
                     timePointOfLastConsideredWindFix = windFix.getTimePoint();
                     TimePoint timePointOfLastConsideredOtherWindFix = timePointOfLastConsideredWindFix;
-                    double lastSecondsPassed = 0;
+                    double currentBucketThreshold = SECONDS_INTERVAL_TO_SAMPLE;
                     for (ListIterator<Wind> otherWindFixesIterator = windSource.getWindFixes()
                             .listIterator(++windFixIndex); otherWindFixesIterator.hasNext();) {
                         Wind otherWindFix = otherWindFixesIterator.next();
                         double secondsPassedSinceLastConsideredWindFix = timePointOfLastConsideredOtherWindFix
                                 .until(otherWindFix.getTimePoint()).asSeconds();
                         double secondsPassed = windFix.getTimePoint().until(otherWindFix.getTimePoint()).asSeconds();
-                        if (secondsPassedSinceLastConsideredWindFix >= SECONDS_INTERVAL_TO_SAMPLE
-                                + lastSecondsPassed * ANNEALING_FACTOR_FOR_SECONDS_PASSED_FOR_SAMPLING) {
+                        if (secondsPassedSinceLastConsideredWindFix >= currentBucketThreshold) {
                             double absTwdChange = windFix.getBearing().getDifferenceTo(otherWindFix.getBearing())
                                     .getDegrees();
                             SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
                                     secondsPassed, absTwdChange);
                             entries.add(entry);
                             timePointOfLastConsideredOtherWindFix = otherWindFix.getTimePoint();
-                            lastSecondsPassed = secondsPassed;
+                            currentBucketThreshold *= ANNEALING_FACTOR_FOR_SECONDS_PASSED_FOR_SAMPLING;
                         }
                     }
                 }
