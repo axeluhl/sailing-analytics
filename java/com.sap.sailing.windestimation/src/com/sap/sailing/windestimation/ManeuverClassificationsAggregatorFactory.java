@@ -15,14 +15,18 @@ import com.sap.sailing.windestimation.aggregator.advancedhmm.DistanceAndDuration
 import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClassificationForClusteringImpl;
 import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClusteringBasedWindEstimationTrackImpl;
 import com.sap.sailing.windestimation.aggregator.hmm.BestPathsCalculator;
+import com.sap.sailing.windestimation.aggregator.hmm.GraphNodeTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.ManeuverSequenceGraph;
+import com.sap.sailing.windestimation.aggregator.hmm.SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator;
+import com.sap.sailing.windestimation.aggregator.hmm.TwdTransitionClassifierBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.outlierremoval.MeanBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.aggregator.outlierremoval.NeighborBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
+import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassifiersCache;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculatorImpl;
@@ -40,9 +44,30 @@ public class ManeuverClassificationsAggregatorFactory {
         this.modelCacheKeepAliveMillis = modelCacheKeepAliveMillis;
     }
 
-    public ManeuverClassificationsAggregator hmm() {
-        return new ManeuverSequenceGraph(
-                new BestPathsCalculator(new IntersectedWindRangeBasedTransitionProbabilitiesCalculator()));
+    public ManeuverClassificationsAggregator hmm(
+            HmmTransitionProbabilitiesCalculator transitionProbabilitiesCalculatorType,
+            boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
+        GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator = null;
+        switch (transitionProbabilitiesCalculatorType) {
+        case SIMPLE:
+            transitionProbabilitiesCalculator = new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator(
+                    propagateIntersectedWindRangeOfHeadupAndBearAway);
+            break;
+        case INTERSECTED:
+            transitionProbabilitiesCalculator = new IntersectedWindRangeBasedTransitionProbabilitiesCalculator(
+                    propagateIntersectedWindRangeOfHeadupAndBearAway);
+            break;
+        case CLASSIFIER:
+            transitionProbabilitiesCalculator = new TwdTransitionClassifierBasedTransitionProbabilitiesCalculator(
+                    new TwdTransitionClassifiersCache(modelStore, modelCacheKeepAliveMillis),
+                    propagateIntersectedWindRangeOfHeadupAndBearAway);
+            break;
+        case GAUSSIAN_REGRESSOR:
+            transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
+                    new GaussianBasedTwdTransitionDistributionCache(modelStore, modelCacheKeepAliveMillis),
+                    propagateIntersectedWindRangeOfHeadupAndBearAway);
+        }
+        return new ManeuverSequenceGraph(new BestPathsCalculator(transitionProbabilitiesCalculator));
     }
 
     public ManeuverClassificationsAggregator clustering() {
@@ -92,10 +117,15 @@ public class ManeuverClassificationsAggregatorFactory {
         return new NeighborBasedOutlierRemovalWindEstimator(new MiddleCourseBasedTwdCalculatorImpl());
     }
 
-    public ManeuverClassificationsAggregator advancedHmm() {
+    public ManeuverClassificationsAggregator advancedHmm(boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
         return new AdvancedManeuverGraph(
                 new AdvancedBestPathsCalculatorImpl(new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
-                        new GaussianBasedTwdTransitionDistributionCache(modelStore, modelCacheKeepAliveMillis))));
+                        new GaussianBasedTwdTransitionDistributionCache(modelStore, modelCacheKeepAliveMillis),
+                        propagateIntersectedWindRangeOfHeadupAndBearAway)));
+    }
+
+    public enum HmmTransitionProbabilitiesCalculator {
+        INTERSECTED, SIMPLE, CLASSIFIER, GAUSSIAN_REGRESSOR
     }
 
 }

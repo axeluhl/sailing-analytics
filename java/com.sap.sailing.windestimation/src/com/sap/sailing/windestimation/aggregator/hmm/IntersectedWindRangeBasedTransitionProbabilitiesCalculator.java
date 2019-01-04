@@ -15,6 +15,12 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
 
     protected static final int MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE = 40;
     private static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 40;
+    private final boolean propagateIntersectedWindRangeOfHeadupAndBearAway;
+
+    public IntersectedWindRangeBasedTransitionProbabilitiesCalculator(
+            boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
+        this.propagateIntersectedWindRangeOfHeadupAndBearAway = propagateIntersectedWindRangeOfHeadupAndBearAway;
+    }
 
     @Override
     public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
@@ -26,11 +32,11 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         double transitionProbabilityUntilCurrentNode = -1;
         IntersectedWindRange intersectedWindRangeUntilCurrentNode = null;
         for (GraphNode node : currentLevel.getLevelNodes()) {
-            WindCourseRange previousWindCourseRange = previousNode
-                    .getManeuverType() == ManeuverTypeForClassification.BEAR_AWAY
-                    || previousNode.getManeuverType() == ManeuverTypeForClassification.HEAD_UP
-                            ? previousIntersectedWindRange
-                            : previousNode.getValidWindRange();
+            WindCourseRange previousWindCourseRange = propagateIntersectedWindRangeOfHeadupAndBearAway
+                    && (previousNode.getManeuverType() == ManeuverTypeForClassification.BEAR_AWAY
+                            || previousNode.getManeuverType() == ManeuverTypeForClassification.HEAD_UP)
+                                    ? previousIntersectedWindRange
+                                    : previousNode.getValidWindRange();
             IntersectedWindRange intersectedWindRange = previousWindCourseRange.intersect(node.getValidWindRange(),
                     CombinationModeOnViolation.INTERSECTION);
             TwdTransition twdTransition = constructTwdTransition(durationPassed, distancePassed,

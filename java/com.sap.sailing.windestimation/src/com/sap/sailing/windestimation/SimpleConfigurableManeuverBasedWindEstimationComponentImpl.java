@@ -2,6 +2,7 @@ package com.sap.sailing.windestimation;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory.HmmTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
@@ -19,6 +20,8 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
         ManeuverBasedWindEstimationComponentImpl<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> {
 
     private static final int MODEL_CACHE_KEEP_ALIVE_MILLIS = 3600000;
+    private static final HmmTransitionProbabilitiesCalculator transitionProbabilitiesCalculatorType = HmmTransitionProbabilitiesCalculator.INTERSECTED;
+    private static final boolean propagateIntersectedWindRangeOfHeadupAndBearAway = true;
 
     public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
             ModelStore modelStore, PolarDataService polarService,
@@ -54,9 +57,10 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
                     polarService, modelStore, modelCacheKeepAliveMillis);
             switch (this) {
             case HMM:
-                return factory.hmm();
+                return factory.hmm(transitionProbabilitiesCalculatorType,
+                        propagateIntersectedWindRangeOfHeadupAndBearAway);
             case ADVANCED_HMM:
-                return factory.advancedHmm();
+                return factory.advancedHmm(propagateIntersectedWindRangeOfHeadupAndBearAway);
             case CLUSTERING:
                 return factory.clustering();
             case MEAN_OUTLIER:
@@ -67,4 +71,5 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
             throw new IllegalArgumentException(this + " implementation type is unsupported");
         }
     }
+
 }

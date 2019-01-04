@@ -15,7 +15,9 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
     private final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache;
 
     public DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
-            GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache) {
+            GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache,
+            boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
+        super(propagateIntersectedWindRangeOfHeadupAndBearAway);
         this.gaussianBasedTwdTransitionDistributionCache = gaussianBasedTwdTransitionDistributionCache;
     }
 

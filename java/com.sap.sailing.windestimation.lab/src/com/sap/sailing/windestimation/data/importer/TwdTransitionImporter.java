@@ -85,7 +85,8 @@ public class TwdTransitionImporter {
 
     private static List<TwdTransition> getTwdTransitions(
             List<ManeuverWithProbabilisticTypeClassification> sortedManeuvers, String regattaName) {
-        SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator = new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator();
+        SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator = new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator(
+                true);
         List<TwdTransition> result = new ArrayList<>(sortedManeuvers.size()
                 * ManeuverTypeForClassification.values().length * ManeuverTypeForClassification.values().length);
         int maneuverIndex = 0;

@@ -10,7 +10,9 @@ public class TwdTransitionClassifierBasedTransitionProbabilitiesCalculator
     private final TwdTransitionClassifiersCache twdTransitionClassifiersCache;
 
     public TwdTransitionClassifierBasedTransitionProbabilitiesCalculator(
-            TwdTransitionClassifiersCache twdTransitionClassifiersCache) {
+            TwdTransitionClassifiersCache twdTransitionClassifiersCache,
+            boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
+        super(propagateIntersectedWindRangeOfHeadupAndBearAway);
         this.twdTransitionClassifiersCache = twdTransitionClassifiersCache;
     }
 
