@@ -3,27 +3,26 @@ package com.sap.sailing.windestimation.model.classifier.twdtransition;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.classifier.ClassifierModelFactory;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.model.classifier.smile.NeuralNetworkClassifier;
+import com.sap.sailing.windestimation.model.classifier.smile.LDAClassifier;
 
 public class TwdTransitionClassifierModelFactory
         implements ClassifierModelFactory<TwdTransition, TwdTransitionClassifierModelMetadata> {
 
-    private static TwdTransitionClassifierModelMetadata createModelMetadata(BoatClass boatClass) {
-        TwdTransitionClassifierModelMetadata modelMetadata = new TwdTransitionClassifierModelMetadata(boatClass);
+    private static TwdTransitionClassifierModelMetadata createModelMetadata(
+            ManeuverTypeTransition maneuverTypeTransition) {
+        TwdTransitionClassifierModelMetadata modelMetadata = new TwdTransitionClassifierModelMetadata(
+                maneuverTypeTransition);
         return modelMetadata;
     }
 
     @Override
     public TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> getNewModel(
             TwdTransitionClassifierModelMetadata contextSpecificModelMetadata) {
-        BoatClass boatClass = contextSpecificModelMetadata.getBoatClass();
-        TwdTransitionClassifierModelMetadata modelMetadata = createModelMetadata(boatClass);
-        TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classificationModel = new NeuralNetworkClassifier<>(
-                modelMetadata);
+        TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classificationModel = new LDAClassifier<>(
+                contextSpecificModelMetadata);
         return classificationModel;
     }
 
@@ -36,7 +35,7 @@ public class TwdTransitionClassifierModelFactory
         // classifiers.add(new LogisticRegressionManeuverClassifier(maneuverFeatures, boatClass,
         // supportedManeuverTypes));
         // classifiers.add(new NaiveBayesManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
-        classifiers.add(new NeuralNetworkClassifier<>(contextSpecificModelMetadata));
+        classifiers.add(new LDAClassifier<>(contextSpecificModelMetadata));
         // classifiers.add(new QDAManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
         // classifiers.add(new RandomForestManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
         // classifiers.add(new SVMManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
@@ -46,11 +45,9 @@ public class TwdTransitionClassifierModelFactory
     @Override
     public List<TwdTransitionClassifierModelMetadata> getAllValidContextSpecificModelMetadataCandidates(
             TwdTransitionClassifierModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
-        BoatClass boatClass = contextSpecificModelMetadataWithMaxFeatures.getBoatClass();
         List<TwdTransitionClassifierModelMetadata> modelMetadataCandidates = new ArrayList<>();
-        modelMetadataCandidates.add(createModelMetadata(null));
-        if (boatClass != null) {
-            modelMetadataCandidates.add(createModelMetadata(boatClass));
+        for (ManeuverTypeTransition maneuverTypeTransition : ManeuverTypeTransition.values()) {
+            modelMetadataCandidates.add(createModelMetadata(maneuverTypeTransition));
         }
         return modelMetadataCandidates;
     }

@@ -10,7 +10,6 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevel;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
-import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
@@ -28,7 +27,6 @@ import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstima
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
-import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -87,7 +85,6 @@ public class TwdTransitionImporter {
 
     private static List<TwdTransition> getTwdTransitions(
             List<ManeuverWithProbabilisticTypeClassification> sortedManeuvers, String regattaName) {
-        IntersectedWindRangeBasedTransitionProbabilitiesCalculator intersectedWindRangeBasedTransitionProbabilitiesCalculator = new IntersectedWindRangeBasedTransitionProbabilitiesCalculator();
         SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator = new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator();
         List<TwdTransition> result = new ArrayList<>(sortedManeuvers.size()
                 * ManeuverTypeForClassification.values().length * ManeuverTypeForClassification.values().length);
@@ -97,9 +94,9 @@ public class TwdTransitionImporter {
                     .listIterator(++maneuverIndex); iterator.hasNext();) {
                 ManeuverWithProbabilisticTypeClassification currentManeuver = iterator.next();
                 GraphLevel previousLevel = new GraphLevel(previousManeuver,
-                        intersectedWindRangeBasedTransitionProbabilitiesCalculator);
+                        simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator);
                 GraphLevel currentLevel = new GraphLevel(currentManeuver,
-                        intersectedWindRangeBasedTransitionProbabilitiesCalculator);
+                        simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator);
                 previousLevel.appendNextManeuverNodesLevel(currentLevel);
                 Duration duration = previousManeuver.getManeuver().getManeuverTimePoint()
                         .until(currentManeuver.getManeuver().getManeuverTimePoint());
@@ -108,34 +105,18 @@ public class TwdTransitionImporter {
                 for (GraphNode previousNode : previousLevel.getLevelNodes()) {
                     if (previousNode.getManeuverType() == ((LabelledManeuverForEstimation) previousLevel.getManeuver())
                             .getManeuverType()) {
-                        WindCourseRange previousWindCourseRange = simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
-                                .getWindCourseRangeForManeuverType(previousManeuver.getManeuver(),
-                                        previousNode.getManeuverType());
-                        Bearing bearingToPreviusManeuver = currentManeuver.getManeuver().getManeuverPosition()
-                                .getBearingGreatCircle(previousManeuver.getManeuver().getManeuverPosition());
+                        WindCourseRange previousWindCourseRange = previousNode.getValidWindRange();
                         for (GraphNode currentNode : currentLevel.getLevelNodes()) {
-                            WindCourseRange currentWindCourseRange = simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
-                                    .getWindCourseRangeForManeuverType(currentManeuver.getManeuver(),
-                                            currentNode.getManeuverType());
-                            Bearing bearingToPreviousManeuverMinusTwd = bearingToPreviusManeuver
-                                    .getDifferenceTo(
-                                            new DegreeBearingImpl(currentWindCourseRange.getAvgWindCourse()).reverse())
-                                    .abs();
+                            WindCourseRange currentWindCourseRange = currentNode.getValidWindRange();
                             IntersectedWindRange intersectedWindRange = previousWindCourseRange
                                     .intersect(currentWindCourseRange, CombinationModeOnViolation.INTERSECTION);
                             double twdChangeDegrees = intersectedWindRange.getViolationRange();
-                            double intersectedTwdChangeDegrees = intersectedWindRangeBasedTransitionProbabilitiesCalculator
-                                    .mergeWindRangeAndGetTransitionProbability(previousNode, previousLevel,
-                                            intersectedWindRange, currentNode, currentLevel)
-                                    .getA().getViolationRange();
                             boolean correct = currentNode
                                     .getManeuverType() == ((LabelledManeuverForEstimation) currentLevel.getManeuver())
                                             .getManeuverType();
                             boolean testDataset = regattaName.contains("2018");
                             LabelledTwdTransition labelledTwdTransition = new LabelledTwdTransition(distance, duration,
-                                    new DegreeBearingImpl(twdChangeDegrees),
-                                    new DegreeBearingImpl(intersectedTwdChangeDegrees),
-                                    bearingToPreviousManeuverMinusTwd, correct, previousNode.getManeuverType(),
+                                    new DegreeBearingImpl(twdChangeDegrees), correct, previousNode.getManeuverType(),
                                     currentNode.getManeuverType(), testDataset);
                             result.add(labelledTwdTransition);
                         }

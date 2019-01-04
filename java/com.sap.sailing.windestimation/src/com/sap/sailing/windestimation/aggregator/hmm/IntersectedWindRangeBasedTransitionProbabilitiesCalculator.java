@@ -3,7 +3,10 @@ package com.sap.sailing.windestimation.aggregator.hmm;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
@@ -15,8 +18,10 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
 
     @Override
     public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
-            GraphLevelBase previousLevel, IntersectedWindRange previousNodeIntersectedWindRange, GraphNode currentNode,
+            GraphLevelBase previousLevel, IntersectedWindRange previousIntersectedWindRange, GraphNode currentNode,
             GraphLevelBase currentLevel) {
+        Duration durationPassed = getDuration(previousLevel.getManeuver(), currentLevel.getManeuver());
+        Distance distancePassed = getDistance(previousLevel.getManeuver(), currentLevel.getManeuver());
         double transitionProbabilitySum = 0;
         double transitionProbabilityUntilCurrentNode = -1;
         IntersectedWindRange intersectedWindRangeUntilCurrentNode = null;
@@ -24,11 +29,13 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
             WindCourseRange previousWindCourseRange = previousNode
                     .getManeuverType() == ManeuverTypeForClassification.BEAR_AWAY
                     || previousNode.getManeuverType() == ManeuverTypeForClassification.HEAD_UP
-                            ? previousNodeIntersectedWindRange
+                            ? previousIntersectedWindRange
                             : previousNode.getValidWindRange();
             IntersectedWindRange intersectedWindRange = previousWindCourseRange.intersect(node.getValidWindRange(),
                     CombinationModeOnViolation.INTERSECTION);
-            double transitionProbability = getPenaltyFactorForTransition(intersectedWindRange);
+            TwdTransition twdTransition = constructTwdTransition(durationPassed, distancePassed,
+                    intersectedWindRange.getViolationRange(), previousNode.getManeuverType(), node.getManeuverType());
+            double transitionProbability = getPenaltyFactorForTransition(twdTransition);
             transitionProbabilitySum += transitionProbability;
             if (node == currentNode) {
                 transitionProbabilityUntilCurrentNode = transitionProbability;
@@ -43,8 +50,8 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         return new Pair<>(intersectedWindRangeUntilCurrentNode, normalizedTransitionProbabilityUntilCurrentNode);
     }
 
-    protected double getPenaltyFactorForTransition(IntersectedWindRange intersectedWindRange) {
-        double violationRange = intersectedWindRange.getViolationRange();
+    protected double getPenaltyFactorForTransition(TwdTransition twdTransition) {
+        double violationRange = twdTransition.getTwdChange().getDegrees();
         double penaltyFactor;
         if (violationRange == 0) {
             penaltyFactor = 1.0;
@@ -132,6 +139,23 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         from = from.reverse();
         WindCourseRange windRange = new WindCourseRange(from.getDegrees(), middleAngleRange);
         return windRange;
+    }
+
+    protected TwdTransition constructTwdTransition(Duration durationPassed, Distance distancePassed,
+            double twdChangeInDegrees, ManeuverTypeForClassification fromManeuverType,
+            ManeuverTypeForClassification toManeuverType) {
+        DegreeBearingImpl twdChange = new DegreeBearingImpl(twdChangeInDegrees);
+        TwdTransition twdTransition = new TwdTransition(distancePassed, durationPassed, twdChange, fromManeuverType,
+                toManeuverType);
+        return twdTransition;
+    }
+
+    protected Distance getDistance(ManeuverForEstimation fromManeuver, ManeuverForEstimation toManeuver) {
+        return fromManeuver.getManeuverPosition().getDistance(toManeuver.getManeuverPosition());
+    }
+
+    protected Duration getDuration(ManeuverForEstimation fromManeuver, ManeuverForEstimation toManeuver) {
+        return fromManeuver.getManeuverTimePoint().until(toManeuver.getManeuverTimePoint()).abs();
     }
 
 }

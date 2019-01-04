@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 
 import smile.validation.ConfusionMatrix;
 
@@ -27,22 +26,20 @@ public class ClassifierScoring<InstanceType, T extends ContextSpecificModelMetad
         this.indexOfTargetValueToLabelMapper = indexOfTargetValueToLabelMapper;
     }
 
-    public String printScoring(List<InstanceType> instances, LabelExtraction<InstanceType> labelExtraction) {
+    public String printScoring(double[][] x, int[] y) {
         T modelMetadata = trainedClassifier.getContextSpecificModelMetadata();
-        int[] target = labelExtraction.getYVector(instances);
-        int[] predicted = new int[instances.size()];
-        int i = 0;
-        for (InstanceType instance : instances) {
-            double[] x = modelMetadata.getX(instance);
-            double[] classificationResult = trainedClassifier.classifyWithProbabilities(x);
-            predicted[i++] = argmax(classificationResult);
+        int[] predicted = new int[y.length];
+        for (int i = 0; i < x.length; i++) {
+            double[] xi = x[i];
+            double[] classificationResult = trainedClassifier.classifyWithProbabilities(xi);
+            predicted[i] = argmax(classificationResult);
         }
-        int[][] confusionMatrix = new ConfusionMatrix(target, predicted).getMatrix();
+        int[][] confusionMatrix = new ConfusionMatrix(y, predicted).getMatrix();
         int supportedTargetValuesCount = modelMetadata.getNumberOfPossibleTargetValues();
         double[] precisionPerClass = new double[supportedTargetValuesCount];
         double[] recallPerClass = new double[supportedTargetValuesCount];
         double[] f1ScorePerClass = new double[supportedTargetValuesCount];
-        for (i = 0; i < supportedTargetValuesCount; i++) {
+        for (int i = 0; i < supportedTargetValuesCount; i++) {
             int tp = confusionMatrix[i][i];
             int fp = 0;
             int fn = 0;
@@ -61,6 +58,17 @@ public class ClassifierScoring<InstanceType, T extends ContextSpecificModelMetad
         lastAvgRecall = appendStatistic("Recall", recallPerClass, str);
         lastAvgF1Score = appendStatistic("F1-Score", f1ScorePerClass, str);
         return str.toString();
+    }
+
+    public String printScoring(List<InstanceType> instances, LabelExtraction<InstanceType> labelExtraction) {
+        T modelMetadata = trainedClassifier.getContextSpecificModelMetadata();
+        double[][] x = new double[instances.size()][];
+        int[] y = labelExtraction.getYVector(instances);
+        int i = 0;
+        for (InstanceType instance : instances) {
+            x[i++] = modelMetadata.getX(instance);
+        }
+        return printScoring(x, y);
     }
 
     private double appendStatistic(String statisticName, double[] statisticPerClass, StringBuilder str) {

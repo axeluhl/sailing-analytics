@@ -1,6 +1,5 @@
 package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.model.store.ContextType;
@@ -8,18 +7,16 @@ import com.sap.sailing.windestimation.model.store.ContextType;
 public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMetadata<TwdTransition> {
 
     private static final long serialVersionUID = 819528288811779220L;
+    private final ManeuverTypeTransition maneuverTypeTransition;
 
-    private final BoatClass boatClass;
-
-    public TwdTransitionClassifierModelMetadata(BoatClass boatClass) {
+    public TwdTransitionClassifierModelMetadata(ManeuverTypeTransition maneuverTypeTransition) {
         super(ContextType.TWD_TRANSITION);
-        this.boatClass = boatClass;
+        this.maneuverTypeTransition = maneuverTypeTransition;
     }
 
     @Override
     public double[] getX(TwdTransition instance) {
-        double[] x = new double[] { instance.getDistance().getMeters(), instance.getDuration().asSeconds(),
-                instance.getTwdChange().getDegrees() };
+        double[] x = new double[] { instance.getTwdChange().getDegrees() };
         return x;
     }
 
@@ -30,14 +27,14 @@ public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMe
 
     @Override
     public int getNumberOfInputFeatures() {
-        return 3;
+        return 1;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((boatClass == null) ? 0 : boatClass.hashCode());
+        result = prime * result + ((maneuverTypeTransition == null) ? 0 : maneuverTypeTransition.hashCode());
         return result;
     }
 
@@ -50,17 +47,14 @@ public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMe
         if (getClass() != obj.getClass())
             return false;
         TwdTransitionClassifierModelMetadata other = (TwdTransitionClassifierModelMetadata) obj;
-        if (boatClass == null) {
-            if (other.boatClass != null)
-                return false;
-        } else if (!boatClass.equals(other.boatClass))
+        if (maneuverTypeTransition != other.maneuverTypeTransition)
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "TwdTransitionClassifierModelMetadata [boatClass=" + boatClass + "]";
+        return "TwdTransitionClassifierModelMetadata [maneuverTypeTransition=" + maneuverTypeTransition + "]";
     }
 
     @Override
@@ -70,19 +64,11 @@ public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMe
 
     @Override
     public String getId() {
-        StringBuilder id = new StringBuilder("TwdTransitionClassification-");
-        if (getBoatClass() == null) {
-            id.append("All");
-        } else {
-            id.append(getBoatClass().getName());
-            id.append("_");
-            id.append(getBoatClass().typicallyStartsUpwind() ? "startsUpwind" : "startsDownwind");
-        }
-        return id.toString();
+        return "TwdTransitionClassification-" + maneuverTypeTransition.toString();
     }
 
-    public BoatClass getBoatClass() {
-        return boatClass;
+    public ManeuverTypeTransition getManeuverTypeTransition() {
+        return maneuverTypeTransition;
     }
 
 }

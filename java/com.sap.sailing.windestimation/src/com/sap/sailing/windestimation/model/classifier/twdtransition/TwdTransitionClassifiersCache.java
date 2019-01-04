@@ -7,23 +7,18 @@ import com.sap.sailing.windestimation.model.store.ModelStore;
 public class TwdTransitionClassifiersCache extends
         AbstractClassifiersCache<TwdTransition, TwdTransitionClassifierModelMetadata, TwdTransitionClassificationResult> {
 
-    private final boolean enableBoatClassInfo;
-
-    public TwdTransitionClassifiersCache(ModelStore classifierModelStore, long preserveLoadedClassifiersMillis,
-            boolean enableBoatClassInfo) {
+    public TwdTransitionClassifiersCache(ModelStore classifierModelStore, long preserveLoadedClassifiersMillis) {
         super(classifierModelStore, preserveLoadedClassifiersMillis, new TwdTransitionClassifierModelFactory(),
                 new TwdTransitionClassificationResultMapper());
-        this.enableBoatClassInfo = enableBoatClassInfo;
     }
 
     @Override
     public TwdTransitionClassifierModelMetadata getContextSpecificModelMetadata(TwdTransition twdTransition) {
-        TwdTransitionClassifierModelMetadata twdTrasitionModelMetadata = new TwdTransitionClassifierModelMetadata(null);
+        ManeuverTypeTransition maneuverTypeTransition = ManeuverTypeTransition
+                .valueOf(twdTransition.getFromManeuverType(), twdTransition.getToManeuverType());
+        TwdTransitionClassifierModelMetadata twdTrasitionModelMetadata = new TwdTransitionClassifierModelMetadata(
+                maneuverTypeTransition);
         return twdTrasitionModelMetadata;
-    }
-
-    public boolean isEnableBoatClassInfo() {
-        return enableBoatClassInfo;
     }
 
 }

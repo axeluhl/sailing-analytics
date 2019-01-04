@@ -7,27 +7,15 @@ import com.sap.sse.common.Duration;
 public class TwdTransition extends ManeuverTransition {
 
     private final Bearing twdChange;
-    private final Bearing intersectedTwdChange;
-    private final Bearing bearingToPreviousManeuverMinusTwd;
 
-    public TwdTransition(Distance distance, Duration duration, Bearing twdChange, Bearing intersectedTwdChange,
-            Bearing bearingToPreviousManeuverMinusTwd) {
-        super(distance, duration);
+    public TwdTransition(Distance distance, Duration duration, Bearing twdChange,
+            ManeuverTypeForClassification fromManeuverType, ManeuverTypeForClassification toManeuverType) {
+        super(distance, duration, fromManeuverType, toManeuverType);
         this.twdChange = twdChange;
-        this.intersectedTwdChange = intersectedTwdChange;
-        this.bearingToPreviousManeuverMinusTwd = bearingToPreviousManeuverMinusTwd;
     }
 
     public Bearing getTwdChange() {
         return twdChange;
-    }
-
-    public Bearing getIntersectedTwdChange() {
-        return intersectedTwdChange;
-    }
-
-    public Bearing getBearingToPreviousManeuverMinusTwd() {
-        return bearingToPreviousManeuverMinusTwd;
     }
 
 }
