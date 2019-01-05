@@ -81,7 +81,7 @@ public class TwdTransitionManualTrainingDataInputRegressorTrainer {
     }
 
     private static double[][] getTrainingDataForDuration() {
-        return new double[][] { { 0, 0 }, { 1, 1 }, { 2, 2 } };
+        return new double[][] { { 0, 0 }, { 1, 10.1952722263228 }, { 25.62890625, 15.6450221328242 } };
     }
 
     private static double[][] getTrainingDataForDistance() {

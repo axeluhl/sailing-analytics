@@ -2,26 +2,28 @@ package com.sap.sailing.windestimation.evaluation;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.sap.sailing.domain.common.BearingChangeAnalyzer;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.windestimation.WindEstimationComponentWithInternals;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
 import com.sap.sailing.windestimation.preprocessing.DummyRacePreprocessingPipeline;
 import com.sap.sailing.windestimation.preprocessing.RaceWithRandomClippingPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
-import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Bearing;
 
 /**
  * 
@@ -79,15 +81,15 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
                     .createNewEstimatorInstance();
             RaceWithEstimationData<ManeuverForEstimation> preprocessedRace = windEstimator.getPreprocessingPipeline()
                     .preprocessRace(race);
-            Map<TimePoint, Wind> targetWindPerTimePoint = new HashMap<>();
+            WindTrack targetWindTrack = new WindTrackImpl(1000, false, "targetWindTrack");
             for (CompetitorTrackWithEstimationData<T> competitorTrackWithEstimationData : race.getCompetitorTracks()) {
                 List<Wind> targetWindFixes = targetWindFixesExtractor
                         .extractTargetWindFixes(competitorTrackWithEstimationData);
                 for (Wind wind : targetWindFixes) {
-                    targetWindPerTimePoint.put(wind.getTimePoint(), wind);
+                    targetWindTrack.add(wind);
                 }
             }
-            return new EvaluationCase<>(windEstimator, preprocessedRace, targetWindPerTimePoint);
+            return new EvaluationCase<>(windEstimator, preprocessedRace, targetWindTrack);
         });
         preprocessingStream = preprocessingStream
                 .filter(evaluationCase -> evaluationCase.getRace().getWindQuality() == WindQuality.EXPEDITION
@@ -101,7 +103,7 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
             preprocessingStream = preprocessingStream
                     .map(evaluationCase -> new EvaluationCase<>(evaluationCase.getWindEstimator(),
                             clippingPipeline.preprocessRace(evaluationCase.getRace()),
-                            evaluationCase.getTargetWindFixesPerTimePoint()));
+                            evaluationCase.getTargetWindTrack()));
         } else if (fixedNumberOfManeuvers != null) {
             throw new IllegalArgumentException(
                     "fixedNumberOfManeuver requires randomClippingOfCompetitorTracks to be true");
@@ -115,16 +117,19 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
         RaceWithEstimationData<ManeuverForEstimation> raceWithEstimationData = evaluationCase.getRace();
         LoggingUtil.logInfo("Evaluating on " + raceWithEstimationData.getRegattaName() + " Race "
                 + raceWithEstimationData.getRaceName());
-        Map<TimePoint, Wind> targetWindPerTimePoint = evaluationCase.getTargetWindFixesPerTimePoint();
+        WindTrack targetWindTrack = evaluationCase.getTargetWindTrack();
         WindEstimationComponentWithInternals<RaceWithEstimationData<T>> windEstimator = evaluationCase
                 .getWindEstimator();
         List<WindWithConfidence<Void>> windTrack = windEstimator
                 .estimateWindTrackAfterPreprocessing(raceWithEstimationData);
         WindEstimatorEvaluationResult result = new WindEstimatorEvaluationResult();
+        WindTrack estimatedWindTrack = new WindTrackImpl(1000, false, "estimatedWindTrack");
         for (WindWithConfidence<Void> windWithConfidence : windTrack) {
             Wind estimatedWind = windWithConfidence.getObject();
-            Wind targetWind = targetWindPerTimePoint.get(estimatedWind.getTimePoint());
+            Wind targetWind = targetWindTrack.getAveragedWind(estimatedWind.getPosition(),
+                    estimatedWind.getTimePoint());
             if (targetWind.getBearing().getDegrees() > 0.001) {
+                estimatedWindTrack.add(estimatedWind);
                 double windCourseDeviationInDegrees = targetWind.getBearing()
                         .getDifferenceTo(estimatedWind.getBearing()).getDegrees();
                 boolean windCourseDeviationWithinTolerance = Math
@@ -136,17 +141,79 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
                     boolean windSpeedDeviationWithinTolerance = windSpeedDeviationInPercent <= maxWindSpeedDeviationInPercent;
                     result = result.mergeBySum(new WindEstimatorEvaluationResult(windCourseDeviationInDegrees,
                             windCourseDeviationWithinTolerance, windSpeedDeviationInPercent,
-                            windSpeedDeviationWithinTolerance, confidence));
+                            windSpeedDeviationWithinTolerance, confidence, null));
                 } else {
                     result = result.mergeBySum(new WindEstimatorEvaluationResult(windCourseDeviationInDegrees,
-                            windCourseDeviationWithinTolerance, confidence));
+                            windCourseDeviationWithinTolerance, confidence, null));
                 }
             }
         }
+        int numberOfPossibleManeuverTypes = ManeuverTypeForClassification.values().length;
+        int[][] confusionMatrix = new int[numberOfPossibleManeuverTypes][numberOfPossibleManeuverTypes];
+        if (!estimatedWindTrack.isEmpty()) {
+            for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : raceWithEstimationData
+                    .getCompetitorTracks()) {
+                for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
+                    Wind estimatedWind = estimatedWindTrack.getAveragedWind(maneuver.getManeuverPosition(),
+                            maneuver.getManeuverTimePoint());
+                    Wind targetWind = targetWindTrack.getAveragedWind(maneuver.getManeuverPosition(),
+                            maneuver.getManeuverTimePoint());
+                    ManeuverTypeForClassification estimatedManeuverType = determineManeuverType(maneuver,
+                            estimatedWind);
+                    ManeuverTypeForClassification targetManeuverType = determineManeuverType(maneuver, targetWind);
+                    confusionMatrix[estimatedManeuverType.ordinal()][targetManeuverType.ordinal()]++;
+
+                }
+            }
+        }
+        result.mergeBySum(new WindEstimatorEvaluationResult(confusionMatrix));
         LoggingUtil.logInfo("Evaluating on " + raceWithEstimationData.getRegattaName() + " Race "
                 + raceWithEstimationData.getRaceName() + " succeeded");
         result.printEvaluationStatistics(false);
         return result.getAvgAsSingleResult(minAccuracyPerRaceForCorrectEstimation - 0.00001);
+    }
+
+    private ManeuverTypeForClassification determineManeuverType(ManeuverForEstimation maneuver, Wind wind) {
+        ManeuverTypeForClassification maneuverType;
+        int numberOfJibes = getNumberOfJibes(maneuver, wind);
+        int numberOfTacks = getNumberOfTacks(maneuver, wind);
+        if (numberOfTacks > 0 || numberOfJibes > 0) {
+            maneuverType = numberOfTacks > 0 ? ManeuverTypeForClassification.TACK : ManeuverTypeForClassification.JIBE;
+        } else {
+            // heading up or bearing away
+            Bearing windBearing = wind.getBearing();
+            Bearing toWindBeforeManeuver = windBearing
+                    .getDifferenceTo(maneuver.getSpeedWithBearingBefore().getBearing());
+            Bearing toWindAfterManeuver = windBearing.getDifferenceTo(maneuver.getSpeedWithBearingAfter().getBearing());
+            maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees())
+                    ? ManeuverTypeForClassification.HEAD_UP
+                    : ManeuverTypeForClassification.BEAR_AWAY;
+        }
+        return maneuverType;
+    }
+
+    /**
+     * Gets the number of cases, when the boats bow was headed through the wind coming from behind.
+     */
+    protected int getNumberOfJibes(ManeuverForEstimation maneuver, Wind wind) {
+        BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
+        int numberOfJibes = wind == null ? 0
+                : bearingChangeAnalyzer.didPass(maneuver.getSpeedWithBearingBefore().getBearing(),
+                        maneuver.getCourseChangeInDegrees(), maneuver.getSpeedWithBearingAfter().getBearing(),
+                        wind.getBearing());
+        return numberOfJibes;
+    }
+
+    /**
+     * Gets the number of cases, when the boats bow was headed through the wind coming from the front.
+     */
+    protected int getNumberOfTacks(ManeuverForEstimation maneuver, Wind wind) {
+        BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;
+        int numberOfTacks = wind == null ? 0
+                : bearingChangeAnalyzer.didPass(maneuver.getSpeedWithBearingBefore().getBearing(),
+                        maneuver.getCourseChangeInDegrees(), maneuver.getSpeedWithBearingAfter().getBearing(),
+                        wind.getFrom());
+        return numberOfTacks;
     }
 
 }

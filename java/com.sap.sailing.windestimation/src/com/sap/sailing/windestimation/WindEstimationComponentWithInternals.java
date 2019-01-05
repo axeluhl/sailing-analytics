@@ -29,5 +29,5 @@ public interface WindEstimationComponentWithInternals<InputType> extends WindEst
     ManeuverClassifiersCache getManeuverClassifiersCache();
 
     WindTrackCalculator getWindTrackCalculator();
-    
+
 }

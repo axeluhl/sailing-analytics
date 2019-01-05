@@ -15,16 +15,16 @@ public class TwdTransitionJsonDeserializer implements JsonDeserializer<TwdTransi
 
     @Override
     public TwdTransition deserialize(JSONObject object) throws JsonDeserializationException {
-        long durationMillis = (long) object.get(TwdTransitionJsonSerializer.DURATION);
+        double durationSeconds = (double) object.get(TwdTransitionJsonSerializer.DURATION);
         double distanceMeters = (double) object.get(TwdTransitionJsonSerializer.DISTANCE);
         double twdChangeDegrees = (double) object.get(TwdTransitionJsonSerializer.TWD_CHANGE);
         ManeuverTypeForClassification fromManeuverType = ManeuverTypeForClassification
-                .valueOf((String) object.get(TwdTransitionJsonSerializer.FROM_MANEUVER_TYPE));
+                .values()[(int)((long) object.get(TwdTransitionJsonSerializer.FROM_MANEUVER_TYPE))];
         ManeuverTypeForClassification toManeuverType = ManeuverTypeForClassification
-                .valueOf((String) object.get(TwdTransitionJsonSerializer.TO_MANEUVER_TYPE));
+                .values()[(int)(long) object.get(TwdTransitionJsonSerializer.TO_MANEUVER_TYPE)];
         TwdTransition twdTransition = new TwdTransition(new MeterDistance(distanceMeters),
-                new MillisecondsDurationImpl(durationMillis), new DegreeBearingImpl(twdChangeDegrees), fromManeuverType,
-                toManeuverType);
+                new MillisecondsDurationImpl((long) (durationSeconds * 1000)), new DegreeBearingImpl(twdChangeDegrees),
+                fromManeuverType, toManeuverType);
         if (object.containsKey(TwdTransitionJsonSerializer.CORRECT)) {
             boolean correct = (boolean) object.get(TwdTransitionJsonSerializer.CORRECT);
             boolean testDataset = (boolean) object.get(TwdTransitionJsonSerializer.TEST_DATASET);

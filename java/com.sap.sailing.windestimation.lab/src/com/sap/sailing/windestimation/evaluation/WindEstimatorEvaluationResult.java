@@ -2,6 +2,9 @@ package com.sap.sailing.windestimation.evaluation;
 
 import java.text.DecimalFormat;
 
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.model.classifier.ConfusionMatrixScoring;
+
 /**
  * 
  * @author Vladislav Chumak (D069712)
@@ -28,13 +31,19 @@ public class WindEstimatorEvaluationResult {
     private final double sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations;
     private final double sumOfConfidencesOfCorrentWindDirectionEstimations;
     private final double sumOfConfidencesOfIncorrentWindDirectionEstimations;
+    private final int[][] confusionMatrix;
 
     public WindEstimatorEvaluationResult() {
-        this(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this(null);
+    }
+
+    public WindEstimatorEvaluationResult(int[][] confusionMatrix) {
+        this(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, confusionMatrix);
     }
 
     public WindEstimatorEvaluationResult(double windCourseErrorInDegrees, boolean windCourseErrorWithinTolerance,
-            double windSpeedErrorInKnots, boolean windSpeedErrorWithinTolerance, double confidence) {
+            double windSpeedErrorInKnots, boolean windSpeedErrorWithinTolerance, double confidence,
+            int[][] confusionMatrix) {
         this(windCourseErrorWithinTolerance ? 1 : 0, 0, windCourseErrorWithinTolerance ? 0 : 1,
                 windSpeedErrorWithinTolerance ? 1 : 0, windSpeedErrorWithinTolerance ? 0 : 1,
                 windCourseErrorWithinTolerance && windSpeedErrorWithinTolerance ? 1 : 0,
@@ -49,15 +58,17 @@ public class WindEstimatorEvaluationResult {
                         : Math.abs(windCourseErrorInDegrees),
                 windCourseErrorWithinTolerance && windSpeedErrorWithinTolerance ? Math.abs(windSpeedErrorInKnots) : 0,
                 windCourseErrorWithinTolerance && windSpeedErrorWithinTolerance ? 0 : Math.abs(windSpeedErrorInKnots),
-                windCourseErrorWithinTolerance ? confidence : 0, windCourseErrorWithinTolerance ? 0 : confidence);
+                windCourseErrorWithinTolerance ? confidence : 0, windCourseErrorWithinTolerance ? 0 : confidence,
+                confusionMatrix);
     }
 
     public WindEstimatorEvaluationResult(double windCourseErrorInDegrees, boolean windCourseErrorWithinTolerance,
-            double confidence) {
+            double confidence, int[][] confusionMatrix) {
         this(windCourseErrorWithinTolerance ? 1 : 0, 0, windCourseErrorWithinTolerance ? 0 : 1, 0, 0, 0, 0,
                 windCourseErrorWithinTolerance ? Math.abs(windCourseErrorInDegrees) : 0,
                 windCourseErrorWithinTolerance ? 0 : Math.abs(windCourseErrorInDegrees), 0, 0, 0, 0, 0, 0,
-                windCourseErrorWithinTolerance ? confidence : 0, windCourseErrorWithinTolerance ? 0 : confidence);
+                windCourseErrorWithinTolerance ? confidence : 0, windCourseErrorWithinTolerance ? 0 : confidence,
+                confusionMatrix);
     }
 
     public WindEstimatorEvaluationResult(int numberOfCorrectWindDirectionEstimations,
@@ -74,7 +85,7 @@ public class WindEstimatorEvaluationResult {
             double sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations,
             double sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations,
             double sumOfConfidencesOfCorrentWindDirectionEstimations,
-            double sumOfConfidencesOfIncorrentWindDirectionEstimations) {
+            double sumOfConfidencesOfIncorrentWindDirectionEstimations, int[][] confusionMatrix) {
         this.numberOfCorrectWindDirectionEstimations = numberOfCorrectWindDirectionEstimations;
         this.numberOfEmptyWindDirectionEstimations = numberOfEmptyWindDirectionEstimations;
         this.numberOfIncorrectWindDirectionEstimations = numberOfIncorrectWindDirectionEstimations;
@@ -92,6 +103,7 @@ public class WindEstimatorEvaluationResult {
         this.sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations = sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations;
         this.sumOfConfidencesOfCorrentWindDirectionEstimations = sumOfConfidencesOfCorrentWindDirectionEstimations;
         this.sumOfConfidencesOfIncorrentWindDirectionEstimations = sumOfConfidencesOfIncorrentWindDirectionEstimations;
+        this.confusionMatrix = confusionMatrix;
     }
 
     public int getNumberOfCorrectWindDirectionEstimations() {
@@ -268,6 +280,41 @@ public class WindEstimatorEvaluationResult {
                 + numberOfIncorrectWindDirectionEstimations + numberOfEmptyWindDirectionEstimations);
     }
 
+    public int getNumberOfCorrectlyEstimatedManeuverTypes() {
+        if (confusionMatrix == null) {
+            return 0;
+        }
+        int tp = 0;
+        for (int i = 0; i < confusionMatrix.length; i++) {
+            tp += confusionMatrix[i][i];
+        }
+        return tp;
+    }
+
+    public int getNumberOfIncorrectlyEstimatedManeuverTypes() {
+        if (confusionMatrix == null) {
+            return 0;
+        }
+        int fp = 0;
+        for (int i = 0; i < confusionMatrix.length; i++) {
+            for (int j = 0; j < confusionMatrix.length; j++) {
+                if (i != j) {
+                    fp += confusionMatrix[i][j];
+                }
+            }
+        }
+        ;
+        return fp;
+    }
+
+    public int getNumberOfAllEstimatedManeuverTypes() {
+        return getNumberOfCorrectlyEstimatedManeuverTypes() + getNumberOfIncorrectlyEstimatedManeuverTypes();
+    }
+
+    public double getPercentageOfCorrectlyEstimatedManeuverTypes() {
+        return nullSafeDivision(getNumberOfCorrectlyEstimatedManeuverTypes(), getNumberOfAllEstimatedManeuverTypes());
+    }
+
     public void printEvaluationStatistics(boolean detailed) {
         System.out.println("### Wind direction ###");
         System.out.println(" Accuracy: " + formatPercentage(getAccuracyOfWindDirectionEstimation()) + " ("
@@ -291,6 +338,10 @@ public class WindEstimatorEvaluationResult {
                 + formatPercentage(getAvgConfidenceOfIncorrectWindDirectionEstimations()));
         System.out.println(" Avg. confidence of all estimations : "
                 + formatPercentage(getAvgConfidenceOfCorrectAndIncorrectWindDirectionEstimations()));
+        System.out.println(
+                " Correctly estimated maneuvers : " + formatPercentage(getPercentageOfCorrectlyEstimatedManeuverTypes())
+                        + " (" + getNumberOfCorrectlyEstimatedManeuverTypes() + "/"
+                        + (getNumberOfAllEstimatedManeuverTypes()) + " correct)");
         if (detailed) {
             System.out.println();
             System.out.println("### Wind speed ###");
@@ -322,6 +373,8 @@ public class WindEstimatorEvaluationResult {
                     + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations()));
             System.out.println(" Avg. wind speed error of all estimations : " + formatKnots(
                     getAvgAbsWindSpeedErrorInKnotsOfCorrectAndIncorrectWindDirectionWithSpeedEstimations()));
+            System.out.println(new ConfusionMatrixScoring("Maneuver type estimation scoring",
+                    i -> ManeuverTypeForClassification.values()[i].toString()));
         }
     }
 
@@ -366,12 +419,13 @@ public class WindEstimatorEvaluationResult {
                 sumOfConfidencesOfCorrentWindDirectionEstimations
                         + other.sumOfConfidencesOfCorrentWindDirectionEstimations,
                 sumOfConfidencesOfIncorrentWindDirectionEstimations
-                        + other.sumOfConfidencesOfIncorrentWindDirectionEstimations);
+                        + other.sumOfConfidencesOfIncorrentWindDirectionEstimations,
+                mergeConfusionMatrix(confusionMatrix, other.confusionMatrix));
     }
 
     public WindEstimatorEvaluationResult getAvgAsSingleResult(double minAccuracyForCorrectEstimation) {
         if (getTotalNumberOfWindDirectionEstimations() == 0) {
-            return new WindEstimatorEvaluationResult(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            return new WindEstimatorEvaluationResult(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
         }
         if (nullSafeDivision(getTotalNumberOfWindDirectionEstimations() - getTotalNumberOfWindSpeedEstimations(),
                 getTotalNumberOfWindDirectionEstimations() + getTotalNumberOfWindSpeedEstimations()) < 0.2) {
@@ -397,7 +451,7 @@ public class WindEstimatorEvaluationResult {
                     windCourseAndSpeedCorrect ? 0
                             : getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations(),
                     windCourseCorrect ? getAvgConfidenceOfCorrectWindDirectionEstimations() : 0,
-                    windCourseCorrect ? 0 : getAvgConfidenceOfIncorrectWindDirectionEstimations());
+                    windCourseCorrect ? 0 : getAvgConfidenceOfIncorrectWindDirectionEstimations(), confusionMatrix);
         }
         boolean estimationCorrect = getAccuracyOfWindDirectionEstimation() >= minAccuracyForCorrectEstimation;
         return new WindEstimatorEvaluationResult(estimationCorrect ? 1 : 0,
@@ -405,7 +459,7 @@ public class WindEstimatorEvaluationResult {
                 estimationCorrect ? getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionEstimations() : 0,
                 estimationCorrect ? 0 : getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionEstimations(), 0, 0, 0,
                 0, 0, 0, estimationCorrect ? getAvgConfidenceOfCorrectWindDirectionEstimations() : 0,
-                estimationCorrect ? 0 : getAvgConfidenceOfIncorrectWindDirectionEstimations());
+                estimationCorrect ? 0 : getAvgConfidenceOfIncorrectWindDirectionEstimations(), confusionMatrix);
     }
 
     private double nullSafeDivision(double dividend, double divisor) {
@@ -413,6 +467,22 @@ public class WindEstimatorEvaluationResult {
             return 0;
         }
         return dividend / divisor;
+    }
+
+    private static int[][] mergeConfusionMatrix(int[][] oneConfusionMatrix, int[][] otherConfusionMatrix) {
+        if (oneConfusionMatrix == null) {
+            return otherConfusionMatrix;
+        }
+        if (otherConfusionMatrix == null) {
+            return oneConfusionMatrix;
+        }
+        int[][] newConfusionMatrix = new int[oneConfusionMatrix.length][oneConfusionMatrix[0].length];
+        for (int i = 0; i < newConfusionMatrix.length; i++) {
+            for (int j = 0; j < newConfusionMatrix.length; j++) {
+                newConfusionMatrix[i][j] = oneConfusionMatrix[i][j] + otherConfusionMatrix[i][j];
+            }
+        }
+        return newConfusionMatrix;
     }
 
 }

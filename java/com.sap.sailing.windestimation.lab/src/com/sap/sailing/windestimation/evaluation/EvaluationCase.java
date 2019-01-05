@@ -1,24 +1,21 @@
 package com.sap.sailing.windestimation.evaluation;
 
-import java.util.Map;
-
-import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.windestimation.WindEstimationComponentWithInternals;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sse.common.TimePoint;
 
 public class EvaluationCase<T> {
 
     private final WindEstimationComponentWithInternals<RaceWithEstimationData<T>> windEstimator;
     private final RaceWithEstimationData<ManeuverForEstimation> race;
-    private final Map<TimePoint, Wind> targetWindFixesPerTimePoint;
+    private final WindTrack targetWindTrack;
 
     public EvaluationCase(WindEstimationComponentWithInternals<RaceWithEstimationData<T>> windEstimator,
-            RaceWithEstimationData<ManeuverForEstimation> race, Map<TimePoint, Wind> targetWindFixesPerTimePoint) {
+            RaceWithEstimationData<ManeuverForEstimation> race, WindTrack targetWindTrack) {
         this.windEstimator = windEstimator;
         this.race = race;
-        this.targetWindFixesPerTimePoint = targetWindFixesPerTimePoint;
+        this.targetWindTrack = targetWindTrack;
     }
 
     public WindEstimationComponentWithInternals<RaceWithEstimationData<T>> getWindEstimator() {
@@ -29,8 +26,8 @@ public class EvaluationCase<T> {
         return race;
     }
 
-    public Map<TimePoint, Wind> getTargetWindFixesPerTimePoint() {
-        return targetWindFixesPerTimePoint;
+    public WindTrack getTargetWindTrack() {
+        return targetWindTrack;
     }
 
 }
