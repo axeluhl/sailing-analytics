@@ -2,7 +2,7 @@
 <resources>
 
     <style name="AppTheme.Dark" parent="AppTheme.Dark.Base">
-        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
     </style>
 
 </resources>

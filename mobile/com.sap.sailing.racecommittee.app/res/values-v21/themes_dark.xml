@@ -6,7 +6,7 @@
         <item name="android:colorPrimaryDark">@color/dark_colorPrimaryDark</item>
         <item name="android:colorAccent">@color/dark_colorAccent</item>
 
-        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
 
         <item name="android:alertDialogTheme">@style/AppTheme.Dark.AlertDialog.v21</item>
 

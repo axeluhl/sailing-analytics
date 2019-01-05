@@ -25,11 +25,11 @@ android {
         variant.assemble.doLast { assemble ->
            // Create version file
            def versionFile = new File(rootProject.ext.destinationFolder, "$packageName" + ".version")
-           versionFile.text = "$packageName" + ".apk=$verCode-$variant.buildType.name"
-           copy {
-               from variant.outputs*.outputFile
-               into rootProject.ext.destinationFolder
-           }
+//           versionFile.text = "$packageName" + ".apk=$verCode-$variant.buildType.name"
+//           copy {
+//               from variant.outputs*.outputFile
+//               into rootProject.ext.destinationFolder
+//           }
        }
     }
 

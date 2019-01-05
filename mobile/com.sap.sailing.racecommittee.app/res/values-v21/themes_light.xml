@@ -7,7 +7,7 @@
         <item name="android:colorAccent">@color/light_colorAccent</item>
         <item name="android:textColorPrimary">@color/light_colorPrimary</item>
 
-        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
 
         <item name="android:alertDialogTheme">@style/AppTheme.Light.AlertDialog.v21</item>
 
