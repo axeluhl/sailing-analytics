@@ -20,10 +20,12 @@
         <!-- You can also set colorControlNormal, colorControlActivated colorControlHighlight & colorSwitchThumbNormal. -->
 
         <item name="buttonStyle">@style/buttonStyle</item>
+        <item name="buttonBarButtonStyle">@style/buttonStyleAlertDialog</item>
 
         <item name="windowActionBar">false</item>
 
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+
     </style>
 
     <style name="Divider">
@@ -35,6 +37,10 @@
     <style name="buttonStyle" parent="Base.Widget.AppCompat.Button.Borderless">
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@drawable/button_text_colors</item>
+    </style>
+
+    <style name="buttonStyleAlertDialog" parent="@style/buttonStyle">
+        <item name="android:textColor">@drawable/button_text_colors_alert_dialog</item>
     </style>
 
 </resources>
