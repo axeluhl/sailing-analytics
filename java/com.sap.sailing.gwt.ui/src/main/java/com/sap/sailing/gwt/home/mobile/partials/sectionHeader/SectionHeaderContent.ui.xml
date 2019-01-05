@@ -1,18 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res"
-        type="com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources" />
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources" />
     <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
-
-    <ui:style>
-        .headerContentPanel {
-        display:none;
-        position:absolue;
-        right:49px;
-        }
-    </ui:style>
     <g:HTMLPanel>
         <a style="display:block;" ui:field="headerMainUi">
             <div class="{local_res.css.sectionheader_item}" ui:field="headerLeftUi">
@@ -28,13 +19,12 @@
             </div>
             <g:HTMLPanel addStyleNames="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}"
                 ui:field="headerRightUi">
+                <g:SimplePanel addStyleNames="{local_res.css.sectionheader_itemright_container}" ui:field="widgetContainerUi" />
                 <div class="{local_res.css.sectionheader_item_infotext}" style="display:none;" ui:field="infoTextUi"></div>
                 <div class="{local_res.css.sectionheader_item_arrow}" style="display:none;" ui:field="actionArrowUi"></div>
-                <g:SimplePanel ui:field="filterSelectContainerUi"></g:SimplePanel>
             </g:HTMLPanel>
         </a>
-        <g:HTMLPanel
-            addStyleNames="{local_res.css.sectionheader_itemright} {local_res.css.sectionheader_element}"
-            ui:field="headerContentUi" />
+        <g:HTMLPanel ui:field="headerContentUi"
+            addStyleNames="{local_res.css.sectionheader_itemright} {local_res.css.sectionheader_element}" />
     </g:HTMLPanel>
 </ui:UiBinder>

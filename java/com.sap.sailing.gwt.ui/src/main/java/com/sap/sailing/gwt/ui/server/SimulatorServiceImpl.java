@@ -50,7 +50,7 @@ import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplayManager;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternNotFoundException;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternSetting;
-import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.simulator.BoatClassProperties;
 import com.sap.sailing.simulator.Grid;

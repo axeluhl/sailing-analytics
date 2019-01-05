@@ -27,6 +27,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.rabbitmq.client.Channel;
 import com.sap.sse.gateway.AbstractHttpServlet;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.impl.CountingOutputStream;
@@ -208,6 +209,6 @@ public class ReplicationServlet extends AbstractHttpServlet {
         UUID uuid = UUID.fromString(req.getParameter(SERVER_UUID));
         String additional = req.getParameter(ADDITIONAL_INFORMATION);
         final String[] replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
-        return new ReplicaDescriptor(ipAddress, uuid, additional, replicableIdsAsStrings);
+        return new ReplicaDescriptorImpl(ipAddress, uuid, additional, replicableIdsAsStrings);
     }
 }

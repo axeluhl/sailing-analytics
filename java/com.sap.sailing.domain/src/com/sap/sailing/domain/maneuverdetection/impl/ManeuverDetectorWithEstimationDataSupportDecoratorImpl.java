@@ -258,7 +258,9 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
         } finally {
             maneuverDetector.track.unlockAfterRead();
         }
-
+        if(courseAtMaxTurningRate == null) {
+            courseAtMaxTurningRate = stepWithLowestSpeed.getSpeedWithBearing().getBearing();
+        }
         ManeuverLoss projectedManeuverLoss = maneuverDetector.getManeuverLoss(maneuverCurve.getMainCurveBoundaries());
         Distance distanceSailedIfNotManeuvering = maneuverCurve.getMainCurveBoundaries().getSpeedWithBearingBefore()
                 .travel(maneuverCurve.getMainCurveBoundaries().getDuration());
