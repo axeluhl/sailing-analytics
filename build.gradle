@@ -16,7 +16,6 @@ buildscript {
         classpath "com.android.tools.build:gradle:3.2.1"
         classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
         classpath "org.ajoberstar:grgit:2.3.0"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.16.0"
     }
 }
 allprojects {
@@ -70,21 +69,6 @@ ext {
     isReleaseBuild = Boolean.parseBoolean(System.env.XMAKE_RELEASE_BUILD)
 
     destinationFolder = new File("").absolutePath + "/java/com.sap.sailing.www/apps/"
-}
-
-if (!project.hasProperty("xmake")) {
-apply plugin: "com.diffplug.gradle.spotless"
-   spotless {
-       java {
-           importOrder "java", "javax", "org", "com", ""
-           removeUnusedImports()
-           eclipse().configFile("java/CodeFormatter.xml")
-           target project.fileTree(project.rootDir) {
-               include "mobile/com.sap.*/**/*.java"
-               exclude "**/generated*/**/*.*", "**/gen/**/*"
-           }
-       }
-   }
 }
 
 apply plugin: "org.ajoberstar.grgit"
