@@ -17,8 +17,7 @@ import com.sap.sse.common.TimePoint;
 
 public class DurationBasedTwdTransitionImporter {
 
-    public static final double SECONDS_INTERVAL_TO_SAMPLE = 1;
-    public static final double ANNEALING_FACTOR_FOR_SECONDS_PASSED_FOR_SAMPLING = 1.5;
+    private static final NextThresholdCalculator THRESHOLD_CALCULATOR = new AnnealingNextThresholdCalculator(1, 1.5);
 
     public static void main(String[] args) throws UnknownHostException {
         LoggingUtil.logInfo("###################\r\nDuration based TWD transitions Import started");
@@ -38,11 +37,11 @@ public class DurationBasedTwdTransitionImporter {
             List<SingleDimensionBasedTwdTransition> entries = new ArrayList<>();
             int windFixIndex = 0;
             for (Wind windFix : windSource.getWindFixes()) {
+                double currentBucketThreshold = THRESHOLD_CALCULATOR.getInitialThresholdValue();
                 if (timePointOfLastConsideredWindFix == null || timePointOfLastConsideredWindFix
-                        .until(windFix.getTimePoint()).asSeconds() >= SECONDS_INTERVAL_TO_SAMPLE) {
+                        .until(windFix.getTimePoint()).asSeconds() >= currentBucketThreshold) {
                     timePointOfLastConsideredWindFix = windFix.getTimePoint();
                     TimePoint timePointOfLastConsideredOtherWindFix = timePointOfLastConsideredWindFix;
-                    double currentBucketThreshold = SECONDS_INTERVAL_TO_SAMPLE;
                     for (ListIterator<Wind> otherWindFixesIterator = windSource.getWindFixes()
                             .listIterator(++windFixIndex); otherWindFixesIterator.hasNext();) {
                         Wind otherWindFix = otherWindFixesIterator.next();
@@ -56,7 +55,7 @@ public class DurationBasedTwdTransitionImporter {
                                     secondsPassed, absTwdChange);
                             entries.add(entry);
                             timePointOfLastConsideredOtherWindFix = otherWindFix.getTimePoint();
-                            currentBucketThreshold *= ANNEALING_FACTOR_FOR_SECONDS_PASSED_FOR_SAMPLING;
+                            currentBucketThreshold = THRESHOLD_CALCULATOR.getNextThresholdValue(currentBucketThreshold);
                         }
                     }
                 }
@@ -74,6 +73,10 @@ public class DurationBasedTwdTransitionImporter {
 
         LoggingUtil.logInfo("###################\r\nDuration based TWD transitions Import finished");
         LoggingUtil.logInfo("Totally " + totalValuesCount + " TWD transitions imported");
+    }
+
+    public static NextThresholdCalculator getThresholdCalculator() {
+        return THRESHOLD_CALCULATOR;
     }
 
 }

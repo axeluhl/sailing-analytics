@@ -22,16 +22,14 @@ public class SingleDimensionTwdTransitionAggregationImporter {
     private static final int MIN_NUMBER_OF_VALUES_PER_BUCKET = 100;
     private final SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionTwdTransitionPersistenceManager;
     private final AggregatedSingleDimensionType dimensionType;
-    private final double valueIntervalToAggregate;
-    private double annealingFactor;
+    private final NextThresholdCalculator thresholdCalculator;
 
     public SingleDimensionTwdTransitionAggregationImporter(
             SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionTwdTransitionPersistenceManager,
-            AggregatedSingleDimensionType dimensionType, double valueIntervalToAggregate, Double annealingFactor) {
+            AggregatedSingleDimensionType dimensionType, NextThresholdCalculator thresholdCalculator) {
         this.singleDimensionTwdTransitionPersistenceManager = singleDimensionTwdTransitionPersistenceManager;
         this.dimensionType = dimensionType;
-        this.valueIntervalToAggregate = valueIntervalToAggregate;
-        this.annealingFactor = annealingFactor == null ? 0.0 : annealingFactor;
+        this.thresholdCalculator = thresholdCalculator;
     }
 
     public void runAggregation() throws UnknownHostException {
@@ -39,8 +37,8 @@ public class SingleDimensionTwdTransitionAggregationImporter {
         List<AggregatedSingleDimensionBasedTwdTransition> aggregates = new ArrayList<>();
         LoggingUtil.logInfo("Aggregating persisted entries");
         TDoubleList entries = new TDoubleArrayList();
-        double currentBucketThreshold = valueIntervalToAggregate;
-        double nextBucketThreshold = getNextBucketThreshold(currentBucketThreshold);
+        double currentBucketThreshold = thresholdCalculator.getInitialThresholdValue();
+        double nextBucketThreshold = thresholdCalculator.getNextThresholdValue(currentBucketThreshold);
         double finalBucketThreshold = getFinalBucketThreshold(currentBucketThreshold, nextBucketThreshold);
         for (PersistedElementsIterator<SingleDimensionBasedTwdTransition> iterator = singleDimensionTwdTransitionPersistenceManager
                 .getIteratorSorted(); iterator.hasNext();) {
@@ -52,7 +50,7 @@ public class SingleDimensionTwdTransitionAggregationImporter {
                     aggregates.add(aggregate);
                 }
                 currentBucketThreshold = nextBucketThreshold;
-                nextBucketThreshold = getNextBucketThreshold(nextBucketThreshold);
+                nextBucketThreshold = thresholdCalculator.getNextThresholdValue(nextBucketThreshold);
                 finalBucketThreshold = getFinalBucketThreshold(currentBucketThreshold, nextBucketThreshold);
                 totalValuesCount += entries.size();
                 entries.clear();
@@ -79,13 +77,6 @@ public class SingleDimensionTwdTransitionAggregationImporter {
         LoggingUtil.logInfo("###################\r\n" + dimensionType + " based TWD transitions Import finished");
         LoggingUtil.logInfo("Totally " + totalValuesCount + " TWD transitions imported");
         LoggingUtil.logInfo("Totally " + aggregates.size() + " TWD transition aggregates imported");
-    }
-
-    private double getNextBucketThreshold(double currentBucketThreshold) {
-        if (annealingFactor > 0) {
-            return currentBucketThreshold * annealingFactor;
-        }
-        return currentBucketThreshold + valueIntervalToAggregate;
     }
 
     private double getFinalBucketThreshold(double currentBucketThreshold, double nextBucketThreshold) {

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.bson.Document;
 import org.json.simple.JSONObject;
 
+import com.mongodb.BasicDBObject;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
@@ -19,7 +20,9 @@ public class TwdTransitionPersistenceManager extends AbstractPersistenceManager<
     private final TwdTransitionJsonSerializer serializer = new TwdTransitionJsonSerializer();
 
     public TwdTransitionPersistenceManager() throws UnknownHostException {
-        super();
+        BasicDBObject indexes = new BasicDBObject(TwdTransitionJsonSerializer.FROM_MANEUVER_TYPE, 1);
+        indexes.append(TwdTransitionJsonSerializer.TO_MANEUVER_TYPE, 1);
+        getCollection().createIndex(indexes);
     }
 
     @Override

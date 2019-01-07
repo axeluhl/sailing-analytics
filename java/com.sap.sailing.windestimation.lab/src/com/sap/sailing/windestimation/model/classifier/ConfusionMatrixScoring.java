@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.model.classifier;
 
+import java.util.Arrays;
 import java.util.function.Function;
 
 /**
@@ -44,7 +45,7 @@ public class ConfusionMatrixScoring {
         lastAvgRecall = appendStatistic("Recall", recallPerClass, str);
         lastAvgF1Score = appendStatistic("F1-Score", f1ScorePerClass, str);
         str.append("\nConfusion matrix\n");
-        str.append(confusionMatrix.toString());
+        str.append(Arrays.deepToString(confusionMatrix));
         return str.toString();
     }
 
