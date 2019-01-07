@@ -12,15 +12,13 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.TransformedManeuversPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelFactory;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelMetadata;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.store.ContextType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
@@ -56,7 +54,7 @@ public class ManeuverClassifierTrainer {
             List<ManeuverForEstimation> trainManeuvers = new ArrayList<>();
             List<ManeuverForEstimation> testManeuvers = new ArrayList<>();
             for (ManeuverForEstimation maneuver : maneuvers) {
-                if (maneuver.getRegattaName().contains("2018")) {
+                if (((LabelledManeuverForEstimation) maneuver).getRegattaName().contains("2018")) {
                     testManeuvers.add(maneuver);
                 } else {
                     trainManeuvers.add(maneuver);

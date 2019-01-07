@@ -13,6 +13,8 @@ public class RaceElementsFilteringPreprocessingPipelineImpl
         implements RacePreprocessingPipeline<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> {
 
     private final CompetitorTrackTransformer<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> maneuverForEstimationTransformer;
+    private final CompetitorTrackFilteringImpl<CompleteManeuverCurveWithEstimationData> competitorTrackFiltering = new CompetitorTrackFilteringImpl<>();
+    private final ManeuverFilteringImpl maneuverFiltering = new ManeuverFilteringImpl();
 
     public RaceElementsFilteringPreprocessingPipelineImpl(
             CompetitorTrackTransformer<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> maneuverForEstimationTransformer) {
@@ -22,9 +24,8 @@ public class RaceElementsFilteringPreprocessingPipelineImpl
     @Override
     public RaceWithEstimationData<ManeuverForEstimation> preprocessRace(
             RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> race) {
-        ManeuverFilteringImpl maneuverFiltering = new ManeuverFilteringImpl();
         List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks = race.getCompetitorTracks()
-                .stream().filter(new CompetitorTrackFilteringImpl<>())
+                .stream().filter(competitorTrackFiltering)
                 .map(competitorTrack -> competitorTrack
                         .constructWithElements(maneuverForEstimationTransformer.apply(competitorTrack).getElements()
                                 .stream().filter(maneuverFiltering).collect(Collectors.toList())))

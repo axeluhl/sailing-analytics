@@ -11,27 +11,25 @@ public class LabelledManeuverForEstimation extends ManeuverForEstimation {
 
     private final ManeuverTypeForClassification maneuverType;
     private final Wind wind;
+    private final String regattaName;
 
     public LabelledManeuverForEstimation(TimePoint maneuverTimePoint, Position maneuverPosition, Bearing middleCourse,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            Bearing courseAtLowestSpeed, SpeedWithBearing averageSpeedWithBearingBefore,
-            SpeedWithBearing averageSpeedWithBearingAfter, double courseChangeInDegrees,
-            double courseChangeWithinMainCurveInDegrees, double maxTurningRateInDegreesPerSecond,
-            Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
-            double speedLossRatio, double speedGainRatio, double lowestSpeedVsExitingSpeedRatio, boolean clean,
-            boolean cleanBefore, boolean cleanAfter, ManeuverCategory maneuverCategory, double scaledSpeedBefore,
-            double scaledSpeedAfter, BoatClass boatClass, boolean markPassing, Double relativeBearingToNextMarkBefore,
-            Double relativeBearingToNextMarkAfter, String regattaName, ManeuverTypeForClassification maneuverType,
-            Wind wind) {
+            double courseChangeInDegrees, double courseChangeWithinMainCurveInDegrees,
+            double maxTurningRateInDegreesPerSecond, Double deviationFromOptimalTackAngleInDegrees,
+            Double deviationFromOptimalJibeAngleInDegrees, double speedLossRatio, double speedGainRatio,
+            double lowestSpeedVsExitingSpeedRatio, boolean clean, boolean cleanBefore, boolean cleanAfter,
+            ManeuverCategory maneuverCategory, double scaledSpeedBefore, double scaledSpeedAfter, boolean markPassing,
+            BoatClass boatClass, boolean markPassingDataAvailable, ManeuverTypeForClassification maneuverType,
+            Wind wind, String regattaName) {
         super(maneuverTimePoint, maneuverPosition, middleCourse, speedWithBearingBefore, speedWithBearingAfter,
-                courseAtLowestSpeed, averageSpeedWithBearingBefore, averageSpeedWithBearingAfter, courseChangeInDegrees,
-                courseChangeWithinMainCurveInDegrees, maxTurningRateInDegreesPerSecond,
+                courseChangeInDegrees, courseChangeWithinMainCurveInDegrees, maxTurningRateInDegreesPerSecond,
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees, speedLossRatio,
                 speedGainRatio, lowestSpeedVsExitingSpeedRatio, clean, cleanBefore, cleanAfter, maneuverCategory,
-                scaledSpeedBefore, scaledSpeedAfter, boatClass, markPassing, relativeBearingToNextMarkBefore,
-                relativeBearingToNextMarkAfter, regattaName);
+                scaledSpeedBefore, scaledSpeedAfter, markPassing, boatClass, markPassingDataAvailable);
         this.maneuverType = maneuverType;
         this.wind = wind;
+        this.regattaName = regattaName;
     }
 
     public ManeuverTypeForClassification getManeuverType() {
@@ -40,6 +38,10 @@ public class LabelledManeuverForEstimation extends ManeuverForEstimation {
 
     public Wind getWind() {
         return wind;
+    }
+
+    public String getRegattaName() {
+        return regattaName;
     }
 
 }

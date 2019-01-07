@@ -20,10 +20,7 @@ public class LabelledManeuverForEstimationTransformer extends ManeuverForEstimat
         LabelledManeuverForEstimation labelledManeuverForEstimation = new LabelledManeuverForEstimation(
                 maneuverForEstimation.getManeuverTimePoint(), maneuverForEstimation.getManeuverPosition(),
                 maneuverForEstimation.getMiddleCourse(), maneuverForEstimation.getSpeedWithBearingBefore(),
-                maneuverForEstimation.getSpeedWithBearingAfter(), maneuverForEstimation.getCourseAtLowestSpeed(),
-                maneuverForEstimation.getAverageSpeedWithBearingBefore(),
-                maneuverForEstimation.getAverageSpeedWithBearingAfter(),
-                maneuverForEstimation.getCourseChangeInDegrees(),
+                maneuverForEstimation.getSpeedWithBearingAfter(), maneuverForEstimation.getCourseChangeInDegrees(),
                 maneuverForEstimation.getCourseChangeWithinMainCurveInDegrees(),
                 maneuverForEstimation.getMaxTurningRateInDegreesPerSecond(),
                 maneuverForEstimation.getDeviationFromOptimalTackAngleInDegrees(),
@@ -32,10 +29,9 @@ public class LabelledManeuverForEstimationTransformer extends ManeuverForEstimat
                 maneuverForEstimation.getLowestSpeedVsExitingSpeedRatio(), maneuverForEstimation.isClean(),
                 maneuverForEstimation.isCleanBefore(), maneuverForEstimation.isCleanAfter(),
                 maneuverForEstimation.getManeuverCategory(), maneuverForEstimation.getScaledSpeedBefore(),
-                maneuverForEstimation.getScaledSpeedAfter(), maneuverForEstimation.getBoatClass(),
-                maneuverForEstimation.isMarkPassing(), maneuverForEstimation.getRelativeBearingToNextMarkBefore(),
-                maneuverForEstimation.getRelativeBearingToNextMarkAfter(), maneuverForEstimation.getRegattaName(),
-                maneuverType, maneuver.getWind());
+                maneuverForEstimation.getScaledSpeedAfter(), maneuverForEstimation.isMarkPassing(),
+                maneuverForEstimation.getBoatClass(), maneuverForEstimation.isMarkPassingDataAvailable(), maneuverType,
+                maneuver.getWind(), regattaName);
         return labelledManeuverForEstimation;
     }
 

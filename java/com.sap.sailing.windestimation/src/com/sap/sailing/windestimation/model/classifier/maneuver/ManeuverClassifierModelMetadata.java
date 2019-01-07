@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.model.classifier.maneuver;
 import java.util.Arrays;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.windestimation.aggregator.hmm.ProbabilityUtil;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
@@ -15,6 +16,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
     private final BoatClass boatClass;
     protected final int[] indexToManeuverTypeOrdinalMapping;
     private final int numberOfSupportedManeuverTypes;
+    private final int otherTypes;
 
     public ManeuverClassifierModelMetadata(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
             ManeuverTypeForClassification... orderedSupportedTargetValues) {
@@ -29,7 +31,15 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         for (ManeuverTypeForClassification supportedManeuverType : orderedSupportedTargetValues) {
             indexToManeuverTypeOrdinalMapping[supportedManeuverType.ordinal()] = i++;
         }
-        numberOfSupportedManeuverTypes = i;
+        int others = 0;
+        for (int j = 0; j < indexToManeuverTypeOrdinalMapping.length; j++) {
+            if (indexToManeuverTypeOrdinalMapping[j] == -1) {
+                indexToManeuverTypeOrdinalMapping[j] = i;
+                others++;
+            }
+        }
+        this.otherTypes = others;
+        numberOfSupportedManeuverTypes = i + (others > 0 ? 1 : 0);
     }
 
     public ManeuverFeatures getManeuverFeatures() {
@@ -47,12 +57,12 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
 
     public double[] getLikelihoodsPerManeuverTypeOrdinal(double[] likelihoodsFromModel) {
         double[] likelihoodsPerManeuverTypes = new double[ManeuverTypeForClassification.values().length];
-        int mappedI = 0;
-        for (int i = 0; i < likelihoodsPerManeuverTypes.length; i++) {
-            int maneuverTypeMapping = indexToManeuverTypeOrdinalMapping[i];
-            if (maneuverTypeMapping >= 0) {
-                likelihoodsPerManeuverTypes[i] = likelihoodsFromModel[mappedI++];
-            }
+        for (int j = 0; j < indexToManeuverTypeOrdinalMapping.length; j++) {
+            int mappedI = indexToManeuverTypeOrdinalMapping[j];
+            likelihoodsPerManeuverTypes[j] = likelihoodsFromModel[mappedI];
+        }
+        if (otherTypes > 1) {
+            ProbabilityUtil.normalizeLikelihoodArray(likelihoodsPerManeuverTypes);
         }
         return likelihoodsPerManeuverTypes;
     }
@@ -116,6 +126,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         int i = 0;
         inputVector[i++] = Math.abs(maneuver.getCourseChangeInDegrees());
         inputVector[i++] = maneuver.getSpeedLossRatio();
+        inputVector[i++] = maneuver.getLowestSpeedVsExitingSpeedRatio();
         inputVector[i++] = maneuver.getSpeedGainRatio();
         inputVector[i++] = maneuver.getMaxTurningRateInDegreesPerSecond();
         if (maneuverFeatures.isPolarsInformation()) {
@@ -136,7 +147,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
 
     @Override
     public int getNumberOfInputFeatures() {
-        int numberOfFeatures = 4;
+        int numberOfFeatures = 5;
         if (maneuverFeatures.isPolarsInformation()) {
             numberOfFeatures += 2;
         }
@@ -158,10 +169,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
             }
         }
         if (maneuverFeatures.isMarksInformation()) {
-            if (maneuver.getRelativeBearingToNextMarkBefore() == null
-                    || maneuver.getRelativeBearingToNextMarkAfter() == null) {
-                return false;
-            }
+            return maneuver.isMarkPassingDataAvailable();
         }
         if (boatClass != null && (maneuver.getBoatClass() == null
                 || !boatClass.getName().equals(maneuver.getBoatClass().getName()))) {

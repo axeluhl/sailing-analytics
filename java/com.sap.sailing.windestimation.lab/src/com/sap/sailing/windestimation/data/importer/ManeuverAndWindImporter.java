@@ -300,12 +300,12 @@ public class ManeuverAndWindImporter {
             List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracksWithEstimationData,
             AbstractCompleteManeuverCurveWithEstimationDataTransformer<ToType> elementsTransformer,
             JsonSerializer<ToType> elementJsonSerializer) {
-        List<CompetitorTrackWithEstimationData<ToType>> competitorTracksWithManeuversForDataAnalysis = elementsTransformer
+        List<CompetitorTrackWithEstimationData<ToType>> competitorTracksWithManeuvers = elementsTransformer
                 .transform(competitorTracksWithEstimationData);
-        Iterator<CompetitorTrackWithEstimationData<ToType>> competitorTracksWithManeuversForDataAnalysisIterator = competitorTracksWithManeuversForDataAnalysis
+        Iterator<CompetitorTrackWithEstimationData<ToType>> competitorTracksWithManeuversIterator = competitorTracksWithManeuvers
                 .iterator();
         for (JSONObject jsonCompetitorTrack : competitorTracks) {
-            CompetitorTrackWithEstimationData<ToType> competitorTrackWithEstimationData = competitorTracksWithManeuversForDataAnalysisIterator
+            CompetitorTrackWithEstimationData<ToType> competitorTrackWithEstimationData = competitorTracksWithManeuversIterator
                     .next();
             JSONArray jsonManeuvers = new JSONArray();
             for (ToType maneuver : competitorTrackWithEstimationData.getElements()) {

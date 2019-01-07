@@ -18,8 +18,8 @@ public interface CompetitorTrackTransformer<FromType, ToType>
                 competitorTrackToTransform.getCompetitorName(), competitorTrackToTransform.getBoatClass(),
                 transformedElements, competitorTrackToTransform.getAvgIntervalBetweenFixesInSeconds(),
                 competitorTrackToTransform.getDistanceTravelled(), competitorTrackToTransform.getTrackStartTimePoint(),
-                competitorTrackToTransform.getTrackEndTimePoint(), competitorTrackToTransform.getFixesCountForPolars(),
-                competitorTrackToTransform.getMarkPassingsCount(), competitorTrackToTransform.getWaypointsCount());
+                competitorTrackToTransform.getTrackEndTimePoint(), competitorTrackToTransform.getMarkPassingsCount(),
+                competitorTrackToTransform.getWaypointsCount());
         return competitorTrack;
     }
 

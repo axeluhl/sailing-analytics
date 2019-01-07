@@ -48,8 +48,6 @@ public class CompetitorTrackWithEstimationDataJsonDeserializer<T>
                 .get(CompetitorTrackWithEstimationDataJsonSerializer.DISTANCE_TRAVELLED_IN_METERS);
         Long startUnixTime = (Long) jsonObject.get(CompetitorTrackWithEstimationDataJsonSerializer.START_TIME_POINT);
         Long endUnixTime = (Long) jsonObject.get(CompetitorTrackWithEstimationDataJsonSerializer.END_TIME_POINT);
-        Long fixedCountForPolars = (Long) jsonObject
-                .get(CompetitorTrackWithEstimationDataJsonSerializer.FIXES_COUNT_FOR_POLARS);
         Long markPassingsCount = (Long) jsonObject
                 .get(CompetitorTrackWithEstimationDataJsonSerializer.MARK_PASSINGS_COUNT);
         Long waypointsCount = (Long) jsonObject.get(CompetitorTrackWithEstimationDataJsonSerializer.WAYPOINTS_COUNT);
@@ -70,8 +68,8 @@ public class CompetitorTrackWithEstimationDataJsonDeserializer<T>
                 competitorName, boatClass, completeManeuverCurves, avgIntervalBetweenFixesInSeconds,
                 distanceTravelledInMeters == null ? Distance.NULL : new MeterDistance(distanceTravelledInMeters),
                 startUnixTime == null ? null : new MillisecondsTimePoint(startUnixTime),
-                endUnixTime == null ? null : new MillisecondsTimePoint(endUnixTime), fixedCountForPolars,
-                markPassingsCount.intValue(), waypointsCount.intValue());
+                endUnixTime == null ? null : new MillisecondsTimePoint(endUnixTime), markPassingsCount.intValue(),
+                waypointsCount.intValue());
         return competitorTrackWithEstimationData;
     }
 

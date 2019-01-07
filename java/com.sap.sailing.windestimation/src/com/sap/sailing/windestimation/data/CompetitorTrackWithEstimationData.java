@@ -22,13 +22,12 @@ public class CompetitorTrackWithEstimationData<T> {
     private final Distance distanceTravelled;
     private final TimePoint trackStartTimePoint;
     private final TimePoint trackEndTimePoint;
-    private final long fixesCountForPolars;
     private final int markPassingsCount;
     private final int waypointsCount;
 
     public CompetitorTrackWithEstimationData(String competitorName, BoatClass boatClass, List<T> elements,
             double avgIntervalBetweenFixesInSeconds, Distance distanceTravelled, TimePoint trackStartTimePoint,
-            TimePoint trackEndTimePoint, long fixesCountForPolars, int markPassingsCount, int waypointsCount) {
+            TimePoint trackEndTimePoint, int markPassingsCount, int waypointsCount) {
         this.competitorName = competitorName;
         this.boatClass = boatClass;
         this.elements = elements;
@@ -36,7 +35,6 @@ public class CompetitorTrackWithEstimationData<T> {
         this.distanceTravelled = distanceTravelled;
         this.trackStartTimePoint = trackStartTimePoint;
         this.trackEndTimePoint = trackEndTimePoint;
-        this.fixesCountForPolars = fixesCountForPolars;
         this.markPassingsCount = markPassingsCount;
         this.waypointsCount = waypointsCount;
     }
@@ -74,10 +72,6 @@ public class CompetitorTrackWithEstimationData<T> {
         return trackEndTimePoint;
     }
 
-    public long getFixesCountForPolars() {
-        return fixesCountForPolars;
-    }
-
     public int getMarkPassingsCount() {
         return markPassingsCount;
     }
@@ -95,7 +89,7 @@ public class CompetitorTrackWithEstimationData<T> {
     public <S> CompetitorTrackWithEstimationData<S> constructWithElements(List<S> elements) {
         return new CompetitorTrackWithEstimationData<>(getCompetitorName(), getBoatClass(), elements,
                 getAvgIntervalBetweenFixesInSeconds(), getDistanceTravelled(), getTrackStartTimePoint(),
-                getTrackEndTimePoint(), getFixesCountForPolars(), getMarkPassingsCount(), getWaypointsCount());
+                getTrackEndTimePoint(), getMarkPassingsCount(), getWaypointsCount());
     }
 
 }

@@ -55,7 +55,10 @@ public class DurationBasedTwdTransitionImporter {
                                     secondsPassed, absTwdChange);
                             entries.add(entry);
                             timePointOfLastConsideredOtherWindFix = otherWindFix.getTimePoint();
-                            currentBucketThreshold = THRESHOLD_CALCULATOR.getNextThresholdValue(currentBucketThreshold);
+                            while (secondsPassedSinceLastConsideredWindFix >= currentBucketThreshold) {
+                                currentBucketThreshold = THRESHOLD_CALCULATOR.getNextThresholdValue(
+                                        secondsPassedSinceLastConsideredWindFix, currentBucketThreshold);
+                            }
                         }
                     }
                 }

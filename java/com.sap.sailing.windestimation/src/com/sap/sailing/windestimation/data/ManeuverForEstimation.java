@@ -13,9 +13,6 @@ public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> 
     private final Bearing middleCourse;
     private final SpeedWithBearing speedWithBearingBefore;
     private final SpeedWithBearing speedWithBearingAfter;
-    private final Bearing courseAtLowestSpeed;
-    private final SpeedWithBearing averageSpeedWithBearingBefore;
-    private final SpeedWithBearing averageSpeedWithBearingAfter;
     private final double courseChangeInDegrees;
     private final double courseChangeWithinMainCurveInDegrees;
     private final double maxTurningRateInDegreesPerSecond;
@@ -30,30 +27,23 @@ public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> 
     private final ManeuverCategory maneuverCategory;
     private final double scaledSpeedBefore;
     private final double scaledSpeedAfter;
-    private final BoatClass boatClass;
     private final boolean markPassing;
-    private final Double relativeBearingToNextMarkBefore;
-    private final Double relativeBearingToNextMarkAfter;
-    private String regattaName;
+    private final BoatClass boatClass;
+    private final boolean markPassingDataAvailable;
 
     public ManeuverForEstimation(TimePoint maneuverTimePoint, Position maneuverPosition, Bearing middleCourse,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
-            Bearing courseAtLowestSpeed, SpeedWithBearing averageSpeedWithBearingBefore,
-            SpeedWithBearing averageSpeedWithBearingAfter, double courseChangeInDegrees,
-            double courseChangeWithinMainCurveInDegrees, double maxTurningRateInDegreesPerSecond,
-            Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
-            double speedLossRatio, double speedGainRatio, double lowestSpeedVsExitingSpeedRatio, boolean clean,
-            boolean cleanBefore, boolean cleanAfter, ManeuverCategory maneuverCategory, double scaledSpeedBefore,
-            double scaledSpeedAfter, BoatClass boatClass, boolean markPassing, Double relativeBearingToNextMarkBefore,
-            Double relativeBearingToNextMarkAfter, String regattaName) {
+            double courseChangeInDegrees, double courseChangeWithinMainCurveInDegrees,
+            double maxTurningRateInDegreesPerSecond, Double deviationFromOptimalTackAngleInDegrees,
+            Double deviationFromOptimalJibeAngleInDegrees, double speedLossRatio, double speedGainRatio,
+            double lowestSpeedVsExitingSpeedRatio, boolean clean, boolean cleanBefore, boolean cleanAfter,
+            ManeuverCategory maneuverCategory, double scaledSpeedBefore, double scaledSpeedAfter, boolean markPassing,
+            BoatClass boatClass, boolean markPassingDataAvailable) {
         this.maneuverTimePoint = maneuverTimePoint;
         this.maneuverPosition = maneuverPosition;
         this.middleCourse = middleCourse;
         this.speedWithBearingBefore = speedWithBearingBefore;
         this.speedWithBearingAfter = speedWithBearingAfter;
-        this.courseAtLowestSpeed = courseAtLowestSpeed;
-        this.averageSpeedWithBearingBefore = averageSpeedWithBearingBefore;
-        this.averageSpeedWithBearingAfter = averageSpeedWithBearingAfter;
         this.courseChangeInDegrees = courseChangeInDegrees;
         this.courseChangeWithinMainCurveInDegrees = courseChangeWithinMainCurveInDegrees;
         this.maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecond;
@@ -68,11 +58,9 @@ public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> 
         this.maneuverCategory = maneuverCategory;
         this.scaledSpeedBefore = scaledSpeedBefore;
         this.scaledSpeedAfter = scaledSpeedAfter;
-        this.boatClass = boatClass;
         this.markPassing = markPassing;
-        this.relativeBearingToNextMarkBefore = relativeBearingToNextMarkBefore;
-        this.relativeBearingToNextMarkAfter = relativeBearingToNextMarkAfter;
-        this.regattaName = regattaName;
+        this.boatClass = boatClass;
+        this.markPassingDataAvailable = markPassingDataAvailable;
     }
 
     public TimePoint getManeuverTimePoint() {
@@ -93,18 +81,6 @@ public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> 
 
     public SpeedWithBearing getSpeedWithBearingAfter() {
         return speedWithBearingAfter;
-    }
-
-    public Bearing getCourseAtLowestSpeed() {
-        return courseAtLowestSpeed;
-    }
-
-    public SpeedWithBearing getAverageSpeedWithBearingBefore() {
-        return averageSpeedWithBearingBefore;
-    }
-
-    public SpeedWithBearing getAverageSpeedWithBearingAfter() {
-        return averageSpeedWithBearingAfter;
     }
 
     public double getCourseChangeInDegrees() {
@@ -163,24 +139,16 @@ public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> 
         return scaledSpeedAfter;
     }
 
-    public BoatClass getBoatClass() {
-        return boatClass;
-    }
-
-    public Double getRelativeBearingToNextMarkBefore() {
-        return relativeBearingToNextMarkBefore;
-    }
-
-    public Double getRelativeBearingToNextMarkAfter() {
-        return relativeBearingToNextMarkAfter;
-    }
-
     public boolean isMarkPassing() {
         return markPassing;
     }
 
-    public String getRegattaName() {
-        return regattaName;
+    public BoatClass getBoatClass() {
+        return boatClass;
+    }
+
+    public boolean isMarkPassingDataAvailable() {
+        return markPassingDataAvailable;
     }
 
     @Override

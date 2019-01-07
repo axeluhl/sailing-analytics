@@ -21,8 +21,8 @@ public class ManeuverClassifiersCache extends
     public ManeuverClassifierModelMetadata getContextSpecificModelMetadata(ManeuverForEstimation maneuver) {
         ManeuverFeatures maneuverFeatures = determineFinalManeuverFeatures(maneuver);
         BoatClass boatClass = maneuverFeatures.isPolarsInformation() ? maneuver.getBoatClass() : null;
-        ManeuverClassifierModelMetadata maneuverModelMetadata = new ManeuverClassifierModelMetadata(maneuverFeatures, boatClass,
-                ManeuverClassifierModelFactory.orderedSupportedTargetValues);
+        ManeuverClassifierModelMetadata maneuverModelMetadata = new ManeuverClassifierModelMetadata(maneuverFeatures,
+                boatClass, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
         return maneuverModelMetadata;
     }
 
@@ -30,8 +30,7 @@ public class ManeuverClassifiersCache extends
         boolean polars = maneuverFeatures.isPolarsInformation()
                 && maneuver.getDeviationFromOptimalJibeAngleInDegrees() != null
                 && maneuver.getDeviationFromOptimalTackAngleInDegrees() != null;
-        boolean marks = maneuverFeatures.isMarksInformation() && maneuver.getRelativeBearingToNextMarkAfter() != null
-                && maneuver.getRelativeBearingToNextMarkBefore() != null;
+        boolean marks = maneuverFeatures.isMarksInformation() && maneuver.isMarkPassingDataAvailable();
         return new ManeuverFeatures(polars, maneuverFeatures.isScaledSpeed(), marks);
     }
 

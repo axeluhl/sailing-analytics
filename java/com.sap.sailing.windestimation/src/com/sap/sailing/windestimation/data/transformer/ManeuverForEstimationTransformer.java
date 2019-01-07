@@ -72,26 +72,18 @@ public class ManeuverForEstimationTransformer
                 .getKnots() / speedScalingDivisor;
         boolean cleanBefore = isSegmentBetweenManeuversEligibleForPolarsCollection(previousManeuver, maneuver);
         boolean cleanAfter = isSegmentBetweenManeuversEligibleForPolarsCollection(maneuver, nextManeuver);
-        Double relativeBearingToNextMarkBeforeManeuverInDegrees = maneuver
-                .getRelativeBearingToNextMarkBeforeManeuver() == null ? null
-                        : maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees();
-        Double relativeBearingToNextMarkAfterManeuverInDegrees = maneuver
-                .getRelativeBearingToNextMarkAfterManeuver() == null ? null
-                        : maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees();
+        boolean markPassingDataAvailable = maneuver.getRelativeBearingToNextMarkAfterManeuver() != null
+                || maneuver.getRelativeBearingToNextMarkBeforeManeuver() != null;
         ManeuverForEstimation maneuverForEstimation = new ManeuverForEstimation(maneuver.getTimePoint(),
                 maneuver.getPosition(), maneuver.getCurveWithUnstableCourseAndSpeed().getMiddleCourse(),
                 maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore(),
                 maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter(),
-                maneuver.getMainCurve().getLowestSpeed().getBearing(),
-                maneuver.getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingBefore(),
-                maneuver.getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingAfter(),
                 maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees(),
                 maneuver.getMainCurve().getDirectionChangeInDegrees(),
                 maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(), deviationFromOptimalTackAngleInDegrees,
                 deviationFromOptimalJibeAngleInDegrees, speedLossRatio, speedGainRatio, lowestSpeedVsExitingSpeedRatio,
                 clean, cleanBefore, cleanAfter, maneuverCategory, scaledSpeedBeforeInKnots, scaledSpeedAfterInKnots,
-                boatClass, maneuver.isMarkPassing(), relativeBearingToNextMarkBeforeManeuverInDegrees,
-                relativeBearingToNextMarkAfterManeuverInDegrees, regattaName);
+                maneuver.isMarkPassing(), boatClass, markPassingDataAvailable);
         return maneuverForEstimation;
     }
 

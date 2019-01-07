@@ -18,11 +18,6 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
     public static final String SPEED_AFTER = "speedAfter";
     public static final String COURSE_BEFORE = "courseBefore";
     public static final String COURSE_AFTER = "courseAfter";
-    public static final String COURSE_AT_LOWEST_SPEED = "courseLowestSpeed";
-    public static final String AVG_SPEED_BEFORE = "avgSpeedBefore";
-    public static final String AVG_SPEED_AFTER = "avgSpeedAfter";
-    public static final String AVG_COURSE_BEFORE = "avgCourseBefore";
-    public static final String AVG_COURSE_AFTER = "avgCourseAfter";
     public static final String COURSE_CHANGE = "maneuverAngle";
     public static final String COURSE_CHANGE_MAIN_CURVE = "mainCurveAngle";
     public static final String MAX_TURNING_RATE = "maxTurnRate";
@@ -37,13 +32,13 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
     public static final String MANEUVER_CATEGORY = "category";
     public static final String SCALED_SPEED_BEFORE_IN_KNOTS = "scaledSpeedBefore";
     public static final String SCALED_SPEED_AFTER_IN_KNOTS = "scaledSpeedAfter";
-    public static final String BOAT_CLASS = "boatClass";
     public static final String MANEUVER_TYPE = "type";
     public static final String WIND_COURSE = "windCourse";
     public static final String WIND_SPEED = "windSpeed";
-    public static final String RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_IN_DEGREES = "nextMarkBefore";
-    public static final String RELATIVE_BEARING_TO_NEXT_MARK_AFTER_IN_DEGREES = "nextMarkAfter";
     public static final String MARK_PASSING = "markPassing";
+    public static final String BOAT_CLASS = "boatClass";
+    public static final String MARK_PASSING_DATA_AVAILABLE = "markPassingDataAvailable";
+    public static final String REGATTA_NAME = "regattaName";
 
     private final BoatClassJsonSerializer boatClassSerializer = new DetailedBoatClassJsonSerializer();
 
@@ -58,16 +53,6 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
         json.put(SPEED_AFTER, maneuver.getSpeedWithBearingAfter().getKnots());
         json.put(COURSE_BEFORE, maneuver.getSpeedWithBearingBefore().getBearing().getDegrees());
         json.put(COURSE_AFTER, maneuver.getSpeedWithBearingAfter().getBearing().getDegrees());
-        json.put(COURSE_AT_LOWEST_SPEED, maneuver.getCourseAtLowestSpeed().getDegrees());
-        json.put(AVG_SPEED_BEFORE, maneuver.getAverageSpeedWithBearingBefore() == null ? null
-                : maneuver.getAverageSpeedWithBearingBefore().getKnots());
-        json.put(AVG_SPEED_AFTER, maneuver.getAverageSpeedWithBearingAfter() == null ? null
-                : maneuver.getAverageSpeedWithBearingAfter().getKnots());
-        json.put(AVG_COURSE_BEFORE,
-                maneuver.getAverageSpeedWithBearingBefore() == null ? maneuver.getAverageSpeedWithBearingBefore()
-                        : maneuver.getAverageSpeedWithBearingBefore().getBearing().getDegrees());
-        json.put(AVG_COURSE_AFTER, maneuver.getAverageSpeedWithBearingAfter() == null ? null
-                : maneuver.getAverageSpeedWithBearingAfter().getBearing().getDegrees());
         json.put(COURSE_CHANGE, maneuver.getCourseChangeInDegrees());
         json.put(COURSE_CHANGE_MAIN_CURVE, maneuver.getCourseChangeWithinMainCurveInDegrees());
         json.put(MAX_TURNING_RATE, maneuver.getMaxTurningRateInDegreesPerSecond());
@@ -82,16 +67,16 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
         json.put(MANEUVER_CATEGORY, maneuver.getManeuverCategory().name());
         json.put(SCALED_SPEED_BEFORE_IN_KNOTS, maneuver.getScaledSpeedBefore());
         json.put(SCALED_SPEED_AFTER_IN_KNOTS, maneuver.getScaledSpeedAfter());
-        json.put(BOAT_CLASS, boatClassSerializer.serialize(maneuver.getBoatClass()));
-        json.put(RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_IN_DEGREES, maneuver.getRelativeBearingToNextMarkBefore());
-        json.put(RELATIVE_BEARING_TO_NEXT_MARK_AFTER_IN_DEGREES, maneuver.getRelativeBearingToNextMarkAfter());
         json.put(MARK_PASSING, maneuver.isMarkPassing());
+        json.put(BOAT_CLASS, boatClassSerializer.serialize(maneuver.getBoatClass()));
+        json.put(MARK_PASSING_DATA_AVAILABLE, maneuver.isMarkPassingDataAvailable());
         if (maneuver instanceof LabelledManeuverForEstimation) {
             LabelledManeuverForEstimation labelledManeuver = (LabelledManeuverForEstimation) maneuver;
             json.put(MANEUVER_TYPE,
                     labelledManeuver.getManeuverType() == null ? null : labelledManeuver.getManeuverType().name());
             json.put(WIND_SPEED, labelledManeuver.getWind().getKnots());
             json.put(WIND_COURSE, labelledManeuver.getWind().getBearing().getDegrees());
+            json.put(REGATTA_NAME, labelledManeuver.getRegattaName());
         }
         return json;
     }
