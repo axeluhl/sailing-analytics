@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
@@ -212,12 +213,13 @@ public class WildcardPermission implements Serializable {
      */
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        for (Set<String> part : parts) {
+        for (Set<String> unsortedPart : parts) {
+            TreeSet<String> sortedPart = new TreeSet<>(unsortedPart);
             if (buffer.length() > 0) {
                 buffer.append(PART_DIVIDER_TOKEN);
             }
             boolean first = true;
-            for (String subpart : part) {
+            for (String subpart : sortedPart) {
                 if (first) {
                     first = false;
                 } else {
