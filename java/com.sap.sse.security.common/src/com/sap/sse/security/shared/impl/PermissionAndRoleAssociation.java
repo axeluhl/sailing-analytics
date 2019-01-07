@@ -1,5 +1,7 @@
 package com.sap.sse.security.shared.impl;
 
+import com.sap.sse.security.shared.WildcardPermission;
+
 public class PermissionAndRoleAssociation {
     public static String get(Role role, User userWithRole) {
         String ownerTenantString = "null";
@@ -18,5 +20,12 @@ public class PermissionAndRoleAssociation {
                 ownerUserString, ownerTenantString);
         return associationTypeRelativeId;
     }
-}
 
+    public static String get(WildcardPermission permission, User userWithPermission) {
+        String permissionDefinitionString = permission.toString();
+        String userWithRoleString = userWithPermission.getIdentifier().getTypeRelativeObjectIdentifier();
+        String associationTypeRelativeId = WildcardPermissionEncoder.encode(userWithRoleString,
+                permissionDefinitionString);
+        return associationTypeRelativeId;
+    }
+}

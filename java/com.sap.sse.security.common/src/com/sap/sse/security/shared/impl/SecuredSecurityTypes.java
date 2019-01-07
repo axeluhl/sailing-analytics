@@ -48,6 +48,11 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
     public static final HasPermissions ROLE_ASSOCIATION = new SecuredSecurityTypes("ROLE_ASSOCIATION");
 
     /**
+     * type-relative identifier is obtainable via {@link PermissionAndRoleAssociation#getId()}
+     */
+    public static final HasPermissions PERMISSION_ASSOCIATION = new SecuredSecurityTypes("PERMISSION_ASSOCIATION");
+
+    /**
      * type-relative identifier is the {@link UserGroupImpl#getId() group ID's} string representation
      */
     public static final HasPermissions USER_GROUP = new SecuredSecurityTypes("USER_GROUP");
