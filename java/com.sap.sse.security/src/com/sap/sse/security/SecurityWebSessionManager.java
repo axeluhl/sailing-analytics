@@ -26,7 +26,18 @@ import com.sap.sse.util.TimerWithRunnable;
  */
 public class SecurityWebSessionManager extends DefaultWebSessionManager {
     private static final TimerWithRunnable timer = new TimerWithRunnable("Timer delaying Session.touch() onChange(s) notifications", /* isDaemon */ true);
+    
     private static final Duration MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY = Duration.ONE_SECOND.times(30);
+    
+    /**
+     * Wait no longer than this duration before pinging / bumping the session. The session timeout may be
+     * very long, even compared to the average life span of a server instance. If the server instance dies
+     * before having pinged / bumped the session, the ping/bump goes missing. If this continues to happen
+     * over and over, the session may actually expire although the user had pinged/bumped it once or more.
+     * Therefore, this duration has to be chosen such that in most cases it is shorter than the time a server
+     * can be expected to survive from the point in time on when the ping/bump was received.
+     */
+    private static final Duration MAX_DURATION_AFTER_WHICH_TO_PING_SESSION = Duration.ONE_HOUR;
     
     private static final WeakHashMap<Session, Void> sessionsAlreadyScheduledForOnChange = new WeakHashMap<>();
     
@@ -47,7 +58,9 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
         if (!sessionsAlreadyScheduledForOnChange.containsKey(s)) {
             sessionsAlreadyScheduledForOnChange.put(s, null);
             timer.schedule(()->{ onChange(s); sessionsAlreadyScheduledForOnChange.remove(s); },
-                    MillisecondsTimePoint.now().plus(sendDurationLatestIn).asDate());
+                    MillisecondsTimePoint.now().plus(
+                            sendDurationLatestIn.compareTo(MAX_DURATION_AFTER_WHICH_TO_PING_SESSION) > 0 ?
+                                    MAX_DURATION_AFTER_WHICH_TO_PING_SESSION : sendDurationLatestIn).asDate());
         }
     }
 

@@ -3,6 +3,7 @@ package com.sap.sailing.server.tagging;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -262,10 +263,12 @@ public class TaggingServiceImpl implements TaggingService {
     public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName)
             throws AuthorizationException, ServiceNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
-        String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
-        String privateTagsJson = getSecurityService().getPreference(getCurrentUsername(), key);
-        List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
-        result.addAll(privateTags);
+        if (SecurityUtils.getSubject().getPrincipal() != null) {
+            String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
+            String privateTagsJson = getSecurityService().getPreference(getCurrentUsername(), key);
+            List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
+            result.addAll(privateTags);
+        }
         return result;
     }
 }
