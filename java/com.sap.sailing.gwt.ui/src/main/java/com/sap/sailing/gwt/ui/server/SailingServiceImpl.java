@@ -603,6 +603,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -4865,12 +4866,34 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
                         .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName());
                 if (serverConfiguration.isSelfService() != null) {
+                    String associationTypeIdentifier = PermissionAndRoleAssociation
+                            .get(createObjectOnCurrentServerPermission, allUser);
+                    QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                            .getQualifiedObjectIdentifier(associationTypeIdentifier);
                     if (serverConfiguration.isSelfService()) {
-                        getSecurityService().addPermissionForUser(allUser.getName(),
-                                createObjectOnCurrentServerPermission);
+                        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                                SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
+                                associationTypeIdentifier, new Action() {
+
+                                    @Override
+                                    public void run() throws Exception {
+                                        getSecurityService().addPermissionForUser(allUser.getName(),
+                                                createObjectOnCurrentServerPermission);
+                                    }
+                                });
+
                     } else {
-                        getSecurityService().removePermissionFromUser(allUser.getName(),
-                                createObjectOnCurrentServerPermission);
+                        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                                new ActionWithResult<Void>() {
+
+                                    @Override
+                                    public Void run() throws Exception {
+                                        getSecurityService().removePermissionFromUser(allUser.getName(),
+                                                createObjectOnCurrentServerPermission);
+                                        return null;
+                                    }
+                                });
+
                     }
                 }
                 if (serverConfiguration.isPublic() != null) {
@@ -4878,13 +4901,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             .getRoleDefinition(SailingViewerRole.getInstance().getId());
                     final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
                     if (viewerRole != null && defaultServerTenant != null) {
-                        final Role publicAccessForServerRole = new Role(viewerRole, defaultServerTenant, null);
                         // role ownership handling left out on purpose, as else the all user could remove the public
                         // role from itself!
+                        final Role publicAccessForServerRole = new Role(viewerRole, defaultServerTenant, null);
+                        String associationTypeIdentifier = PermissionAndRoleAssociation.get(publicAccessForServerRole,
+                                allUser);
+                        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                .getQualifiedObjectIdentifier(associationTypeIdentifier);
                         if (serverConfiguration.isPublic()) {
-                            getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
+                            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                                    SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
+                                    associationTypeIdentifier, new Action() {
+
+                                        @Override
+                                        public void run() throws Exception {
+                                            getSecurityService().addRoleForUser(allUser, publicAccessForServerRole);
+                                        }
+                                    });
                         } else {
-                            getSecurityService().removeRoleFromUser(allUser.getName(), publicAccessForServerRole);
+                            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
+                                    qualifiedTypeIdentifier, new ActionWithResult<Void>() {
+
+                                        @Override
+                                        public Void run() throws Exception {
+                                            getSecurityService().removeRoleFromUser(allUser, publicAccessForServerRole);
+                                            return null;
+                                        }
+                                    });
                         }
                     } else {
                         throw new IllegalArgumentException("Viewerrole or defaultServerTenant is not existing");
