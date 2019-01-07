@@ -21,11 +21,6 @@ public abstract class AbstractSeriesPlace extends Place {
         return ctx;
     }
 
-    public AbstractSeriesPlace(String eventUuidAsString) {
-        UUID asUUID = UUID.fromString(eventUuidAsString);
-        this.ctx = SeriesContext.createWithSeriesId(asUUID);
-    }
-
     public String getTitle(String eventName) {
         return StringMessages.INSTANCE.sapSailing() + " - " + eventName;
     }
@@ -39,13 +34,20 @@ public abstract class AbstractSeriesPlace extends Place {
 	private final static String PARAM_LEADERBOARD_GROUP_UUID = "leaderboardGroupId";
        
         protected PLACE getPlaceFromParameters(Map<String, Set<String>> parameters) {
-            String leaderboardGroupIdRaw = parameters.get(PARAM_LEADERBOARD_GROUP_UUID).stream().findFirst().orElse("");
-            SeriesContext ctx;
-            if (leaderboardGroupIdRaw != null) {
+            Set<String> leaderBoardSet = parameters.get(PARAM_LEADERBOARD_GROUP_UUID);
+            SeriesContext ctx = null;
+            if (leaderBoardSet != null) {
+                String leaderboardGroupIdRaw = Util.first(leaderBoardSet);
                 ctx = SeriesContext.createWithLeaderboardGroupId(UUID.fromString(leaderboardGroupIdRaw));
             } else {
-                String eventIdRaw = parameters.get(PARAM_EVENTID).stream().findFirst().orElse("");
-                ctx = SeriesContext.createWithSeriesId(UUID.fromString(eventIdRaw));
+                Set<String> eventIdSet = parameters.get(PARAM_EVENTID);
+                if (eventIdSet != null) {
+                    String eventIdRaw = Util.first(eventIdSet);
+                    ctx = SeriesContext.createWithSeriesId(UUID.fromString(eventIdRaw));
+                } else {
+                    // trigger error handling by setting neither
+                    ctx = SeriesContext.createErrorContext();
+                }
             }
             return getRealPlace(ctx);
         }

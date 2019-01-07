@@ -31,7 +31,7 @@ public class RaceWindJsonSerializer extends AbstractTrackedRaceDataJsonSerialize
     public static final String SAMPLING_RATE = "samplingRate";
     public static final String FIXES = "fixes";
 
-    private final PositionJsonSerializer positionSerializer = new PositionJsonSerializer();
+    private final MongoDbFriendlyPositionJsonSerializer positionSerializer = new MongoDbFriendlyPositionJsonSerializer();
     private final WindJsonSerializer windSerializer = new WindJsonSerializer(positionSerializer);
 
     @Override
@@ -85,7 +85,8 @@ public class RaceWindJsonSerializer extends AbstractTrackedRaceDataJsonSerialize
                         windSourceJson.put(FIRST_POSITION, positionSerializer.serialize(firstWindSourcePosition));
                         windSourceJson.put(START_TIME_POINT, firstWindSourceTimePoint.asMillis());
                         windSourceJson.put(END_TIME_POINT, lastWindSourceTimePoint.asMillis());
-                        double samplingRate = duration.asSeconds() > 0 ? windFixesJson.size() / duration.asSeconds() : 0;
+                        double samplingRate = duration.asSeconds() > 0 ? windFixesJson.size() / duration.asSeconds()
+                                : 0;
                         windSourceJson.put(SAMPLING_RATE, samplingRate);
                         windSourceJson.put(FIXES, windFixesJson);
                         windSourcesJson.add(windSourceJson);

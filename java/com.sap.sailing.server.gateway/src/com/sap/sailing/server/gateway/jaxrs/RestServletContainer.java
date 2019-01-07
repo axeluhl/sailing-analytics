@@ -7,7 +7,7 @@ import javax.ws.rs.core.Application;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 

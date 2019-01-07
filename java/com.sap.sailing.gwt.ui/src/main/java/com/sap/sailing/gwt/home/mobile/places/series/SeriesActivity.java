@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -37,15 +38,21 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final SeriesContext ctx = place.getCtx();
-        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx), 
-                new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
-                    @Override
-                    public void onSuccess(EventSeriesViewDTO series) {
-                        ctx.updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
-                        SeriesActivity.this.series = series;
-                        initUi(panel, eventBus, series);
-                    }
-                });
+        if (ctx.getLeaderboardGroupId() == null && ctx.getSeriesId() == null) {
+            ErrorPlace errorPlace = new ErrorPlace("series and leaderboardGroup is null");
+            errorPlace.setComingFrom(errorPlace);
+            clientFactory.getPlaceController().goTo(errorPlace);
+        } else {
+            clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx),
+                    new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
+                        @Override
+                        public void onSuccess(EventSeriesViewDTO series) {
+                            ctx.updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
+                            SeriesActivity.this.series = series;
+                            initUi(panel, eventBus, series);
+                        }
+                    });
+        }
     }
     
     private void initUi(final AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {

@@ -19,8 +19,8 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.windimport.AbstractWindImporter.WindImportResult.RaceEntry;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Util;
 
 public abstract class AbstractWindImporter {

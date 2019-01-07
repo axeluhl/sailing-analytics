@@ -5,8 +5,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.mongodb.DB;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
@@ -160,7 +160,7 @@ public interface MongoObjectFactory {
 
     void removeBoat(Boat boat);
 
-    DB getDatabase();
+    MongoDatabase getDatabase();
 
     void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
 
