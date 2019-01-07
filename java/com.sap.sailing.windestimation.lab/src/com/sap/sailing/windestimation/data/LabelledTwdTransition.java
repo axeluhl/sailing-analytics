@@ -25,4 +25,10 @@ public class LabelledTwdTransition extends TwdTransition {
         return testDataset;
     }
 
+    @Override
+    public String toString() {
+        return "LabelledTwdTransition [correct=" + correct + ", testDataset=" + testDataset + ", " + super.toString()
+                + "]";
+    }
+
 }

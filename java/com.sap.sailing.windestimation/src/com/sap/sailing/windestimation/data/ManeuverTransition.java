@@ -34,4 +34,10 @@ public class ManeuverTransition {
         return toManeuverType;
     }
 
+    @Override
+    public String toString() {
+        return "ManeuverTransition [distance=" + distance + ", duration=" + duration + ", fromManeuverType="
+                + fromManeuverType + ", toManeuverType=" + toManeuverType + "]";
+    }
+    
 }

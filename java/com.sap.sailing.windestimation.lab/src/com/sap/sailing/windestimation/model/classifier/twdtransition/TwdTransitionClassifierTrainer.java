@@ -93,7 +93,7 @@ public class TwdTransitionClassifierTrainer {
         LoggingUtil.logInfo("Converting dataset to array...");
         while (iterator.hasNext()) {
             TwdTransition twdTransition = iterator.next();
-            x[i][0] = modelMetadata.getX(twdTransition)[0];
+            x[i][0] = modelMetadata.getXAsSingleValue(twdTransition);
             y[i] = labelExtraction.getY(twdTransition);
             i++;
         }

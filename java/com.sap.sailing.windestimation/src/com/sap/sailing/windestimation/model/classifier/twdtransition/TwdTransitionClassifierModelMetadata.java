@@ -16,8 +16,12 @@ public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMe
 
     @Override
     public double[] getX(TwdTransition instance) {
-        double[] x = new double[] { instance.getTwdChange().getDegrees() };
+        double[] x = new double[] { getXAsSingleValue(instance) };
         return x;
+    }
+
+    public double getXAsSingleValue(TwdTransition instance) {
+        return instance.getTwdChange().getDegrees();
     }
 
     @Override

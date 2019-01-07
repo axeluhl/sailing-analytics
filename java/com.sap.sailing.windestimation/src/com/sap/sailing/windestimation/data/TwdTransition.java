@@ -18,4 +18,11 @@ public class TwdTransition extends ManeuverTransition {
         return twdChange;
     }
 
+    @Override
+    public String toString() {
+        return "TwdTransition [twdChange=" + twdChange + ", " + super.toString() + "]";
+    }
+    
+    
+
 }
