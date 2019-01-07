@@ -121,6 +121,7 @@ public class SearchServiceTest {
         SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
         Subject fakeSubject = Mockito.mock(Subject.class);
 
+
         SecurityUtils.setSecurityManager(securityManager);
         Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
         Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();

@@ -89,7 +89,7 @@
         <module>com.sap.sse.gwt.adminconsole</module>
         <module>com.sap.sse.datamining</module>
         <module>com.sap.sse.datamining.shared</module>
-		<module>com.sap.sse.datamining.ui</module>
+        <module>com.sap.sse.datamining.ui</module>
         <module>com.sap.sse.security</module>
         <module>com.sap.sse.security.ui</module>
         <module>com.sap.sse.security.userstore.mongodb</module>

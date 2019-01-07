@@ -632,7 +632,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             }
             if (fixBefore != null && fixAfter != null) {
                 TimePoint t = null;
-                Map<Waypoint, List<Distance>> fixDistances = getDistances(c, fix);
+                Map<Waypoint, List<Distance>> fixDistances = getDistances(c, fix); // TODO bug4831 consider interpolating between fixBefore/fix/fixAfter to handle small sampling rates better
                 Map<Waypoint, List<Distance>> fixDistancesBefore = getDistances(c, fixBefore);
                 Map<Waypoint, List<Distance>> fixDistancesAfter = getDistances(c, fixAfter);
                 for (Waypoint w : waypoints) {
