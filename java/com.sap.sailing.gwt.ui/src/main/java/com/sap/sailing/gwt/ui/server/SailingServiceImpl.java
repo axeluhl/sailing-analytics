@@ -1975,7 +1975,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
-        final QuickRanksDTO quickRanks = getQuickRanks(raceIdentifier, date);
+        final QuickRanksDTO quickRanks = getQuickRanksWithoutSecuritychecks(raceIdentifier, date);
         long simulationResultVersion = 0;
         if (simulationLegIdentifier != null) {
             SimulationService simulationService = getService().getSimulationService();
@@ -2471,7 +2471,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public QuickRanksDTO computeQuickRanks(RegattaAndRaceIdentifier raceIdentifier, TimePoint timePoint)
             throws NoWindException {
         final List<QuickRankDTO> result = new ArrayList<>();
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             final TimePoint actualTimePoint;
             if (timePoint == null) {
@@ -2498,7 +2498,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new QuickRanksDTO(result);
     }
 
-    private QuickRanksDTO getQuickRanks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
+    private QuickRanksDTO getQuickRanksWithoutSecuritychecks(RegattaAndRaceIdentifier raceIdentifier, Date date) throws NoWindException {
         final QuickRanksDTO result;
         if (date == null) {
             result = quickRanksLiveCache.get(raceIdentifier);
