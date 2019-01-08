@@ -1945,6 +1945,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
+    /**
+     * This method does not handle RoleAssociationOwnerships! this must be done via the callback
+     */
     public void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback) {
         for (User user : source.getUsers()) {
             addUserToUserGroup(destination, user);
@@ -1956,7 +1959,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     existingRole.getQualifiedForUser());
             addRoleForUser(userAndRole.getA(),
                     copyRole);
-            // ownership must be handled by caller via callback!
             callback.onRoleCopy(userAndRole.getA(), existingRole, copyRole);
         }
     }

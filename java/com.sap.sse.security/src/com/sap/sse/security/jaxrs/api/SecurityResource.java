@@ -129,7 +129,7 @@ public class SecurityResource extends AbstractSecurityResource {
                             final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
                             User newUser = getService().createSimpleUser(username, email, password, fullName, company,
                                     Locale.ENGLISH, validationBaseURL, getService().getDefaultTenantForCurrentUser());
-                            // setuo correct role ownerships
+                            // setup correct role ownerships
                             for (Role role : newUser.getRoles()) {
                                 String associationTypeIdentifier = PermissionAndRoleAssociation.get(role, newUser);
                                 QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
