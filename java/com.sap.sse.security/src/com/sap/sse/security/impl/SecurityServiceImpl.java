@@ -110,6 +110,7 @@ import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserRole;
@@ -263,12 +264,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                         ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
                         null);
+
                 apply(s -> s.internalSetOwnership(
-                        SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), ADMIN_USERNAME, null,
+                        adminUser.getIdentifier(), ADMIN_USERNAME, null,
                         ADMIN_USERNAME));
                 Role adminRole = new Role(adminRoleDefinition);
                 addRoleForUser(adminUser, adminRole);
-                String associationTypeIdentifier = PermissionAndRoleAssociation.get(adminRole, adminUser);
+                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(adminRole,
+                        adminUser);
                 QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
                 setOwnership(qualifiedTypeIdentifier, adminUser, null);
@@ -276,9 +279,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             
             if (userStore.getUserByName(SecurityService.ALL_USERNAME) == null) {
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
-                createUserInternal(SecurityService.ALL_USERNAME, null, getDefaultTenant());
+                User allUser = createUserInternal(SecurityService.ALL_USERNAME, null, getDefaultTenant());
 
-                apply(s -> s.internalSetOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ALL_USERNAME),
+                apply(s -> s.internalSetOwnership(allUser.getIdentifier(),
                         ALL_USERNAME, null, ALL_USERNAME));
 
                 // The permission to create new users is initially added but not recreated on server start if the admin removed in in the meanwhile.
@@ -741,10 +744,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         
         // the new user becomes its owner to ensure the user role is correctly working
         // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
-        accessControlStore.setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), result,
-                userOwner, username);
+        accessControlStore.setOwnership(result.getIdentifier(), result, userOwner, username);
         // the new user becomes the owning user of its own specific tenant which initially only contains the new user
-        accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
+        accessControlStore.setOwnership(tenant.getIdentifier(), result, tenant, tenant.getName());
         
         result.setFullName(fullName);
         result.setCompany(company);
@@ -971,7 +973,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Iterable<RoleDefinition> getRoleDefinitions() {
         Collection<RoleDefinition> result = new ArrayList<>();
         filterObjectsWithPermissionForCurrentUser(SecuredSecurityTypes.ROLE_DEFINITION, DefaultActions.READ,
-                userStore.getRoleDefinitions(), t -> t.getId().toString(), t -> result.add(t));
+                userStore.getRoleDefinitions(), t -> result.add(t));
         return result;
     }
 
@@ -1116,7 +1118,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         UserGroup tenant = createUserGroup(UUID.randomUUID(), getDefaultTenantNameForUsername(name));
         User result = userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), tenant,
                 socialUserAccount);
-        accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
+        accessControlStore.setOwnership(tenant.getIdentifier(), result, tenant, tenant.getName());
         addUserToUserGroup(tenant, result);
         return result;
     }
@@ -1508,7 +1510,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-            HasPermissions type, String typeIdentifier, String securityDisplayName,
+            HasPermissions type, TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName,
             ActionWithResult<T> actionWithResult) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         T result = null;
@@ -1522,8 +1524,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             } else {
                 logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
             }
-            SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER
-                    .getStringPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
+            SecurityUtils.getSubject()
+                    .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                            ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
             SecurityUtils.getSubject()
                     .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
             result = actionWithResult.run();
@@ -1540,7 +1543,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
-            String typeRelativeObjectIdentifier, String securityDisplayName,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
             Action actionToCreateObject) {
         setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeRelativeObjectIdentifier,
                 securityDisplayName, () -> {
@@ -1566,7 +1569,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
             ActionWithResult<User> createActionReturningCreatedObject) {
-        QualifiedObjectIdentifier identifier = SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username);
+        QualifiedObjectIdentifier identifier = SecuredSecurityTypes.USER
+                .getQualifiedObjectIdentifier(UserImpl.getTypeRelativeObjectIdentifier(username));
         User result = null;
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
@@ -1613,27 +1617,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
-            HasPermissions.Action action, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+    public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+            HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
             if (SecurityUtils.getSubject().isPermitted(
-                    permittedObject.getStringPermissionForObjects(action, objectIdExtractor.apply(objectToCheck)))) {
+                    permittedObject.getStringPermissionForObject(action, objectToCheck))) {
                 filteredObjectsConsumer.accept(objectToCheck);
             }
         });
     }
 
     @Override
-    public <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
-            HasPermissions.Action[] actions, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+    public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
-            String typeRelativeObjectIdentifier = objectIdExtractor.apply(objectToCheck);
             boolean isPermitted = actions.length > 0;
             for (int i = 0; i < actions.length; i++) {
                 isPermitted &= SecurityUtils.getSubject().isPermitted(
-                        permittedObject.getStringPermissionForObjects(actions[i], typeRelativeObjectIdentifier));
+                        permittedObject.getStringPermissionForObject(actions[i], objectToCheck));
             }
             if (isPermitted) {
                 filteredObjectsConsumer.accept(objectToCheck);
@@ -1642,20 +1645,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
-            Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor, Function<T, R> filteredObjectsMapper) {
+    public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
+            Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper) {
         final List<R> result = new ArrayList<>();
         filterObjectsWithPermissionForCurrentUser(permittedObject, DefaultActions.READ, objectsToFilter,
-                objectIdExtractor, filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
+                filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
         return result;
     }
     
     @Override
-    public <T, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
-            HasPermissions.Action[] actions, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+    public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
+            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Function<T, R> filteredObjectsMapper) {
         final List<R> result = new ArrayList<>();
-        filterObjectsWithPermissionForCurrentUser(permittedObject, actions, objectsToFilter, objectIdExtractor,
+        filterObjectsWithPermissionForCurrentUser(permittedObject, actions, objectsToFilter,
                 filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
         return result;
     }
@@ -1666,13 +1669,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, String typeRelativeObjectIdentifier,
+    public <T extends WithQualifiedObjectIdentifier> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
             RoleDefinition roleToCheck) {
         assert type != null;
-        assert typeRelativeObjectIdentifier != null;
+        assert object != null;
         assert roleToCheck != null;
-        OwnershipAnnotation ownershipToCheck = getOwnership(
-                type.getQualifiedObjectIdentifier(typeRelativeObjectIdentifier));
+        OwnershipAnnotation ownershipToCheck = getOwnership(object.getIdentifier());
         return PermissionChecker.ownsUserASpecificRole(getCurrentUser(), getAllUser(),
                 ownershipToCheck == null ? null : ownershipToCheck.getAnnotation(), roleToCheck.getName());
     }
@@ -1840,8 +1842,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (object == null) {
             return false;
         }
-        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
-                DefaultActions.READ, object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(
+                DefaultActions.READ, object));
     }
 
     @Override
@@ -1849,8 +1851,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (object == null) {
             return false;
         }
-        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
-                DefaultActions.UPDATE, object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(
+                DefaultActions.UPDATE, object));
     }
 
     public boolean hasCurrentUserExplictPermissions(WithQualifiedObjectIdentifier object,
@@ -1860,8 +1862,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         boolean isPermitted = true;
         for (int i = 0; i < actions.length; i++) {
-            isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
-                    actions[i], object.getIdentifier().getTypeRelativeObjectIdentifier()));
+            isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(
+                    actions[i], object));
         }
         return isPermitted;
     }
@@ -1871,8 +1873,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (object == null) {
             throw new AuthorizationException();
         }
-        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.READ,
-                object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
     }
 
     @Override
@@ -1880,8 +1881,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (object == null) {
             throw new AuthorizationException();
         }
-        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.UPDATE,
-                object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
     }
 
     @Override
@@ -1889,8 +1889,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (object == null) {
             throw new AuthorizationException();
         }
-        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.DELETE,
-                object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
     }
 
     @Override
@@ -1904,8 +1903,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new AuthorizationException();
         }
         for (int i = 0; i < actions.length; i++) {
-            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(actions[i],
-                    object.getIdentifier().getTypeRelativeObjectIdentifier()));
+            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(actions[i], object));
         }
     }
 

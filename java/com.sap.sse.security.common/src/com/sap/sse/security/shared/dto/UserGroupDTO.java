@@ -5,6 +5,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.security.shared.AbstractUserGroupImpl;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO> implements SecuredDTO {
     private static final long serialVersionUID = 1L;
@@ -43,6 +46,16 @@ public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO> impleme
     @Override
     public void setOwnership(OwnershipDTO owner) {
         this.owner = owner;
+    }
+
+    @Override
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getId().toString());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredSecurityTypes.USER_GROUP;
     }
 
 }

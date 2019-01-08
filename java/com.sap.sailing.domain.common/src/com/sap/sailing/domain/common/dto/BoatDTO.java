@@ -3,11 +3,16 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.WithID;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 
-public class BoatDTO extends NamedSecuredObjectDTO implements Serializable, MappableToDevice, SecuredDTO {
+public class BoatDTO extends NamedSecuredObjectDTO implements WithID, Serializable, MappableToDevice, SecuredDTO {
     private static final long serialVersionUID = -4076992788294272162L;
 
     private String idAsString;
@@ -41,6 +46,11 @@ public class BoatDTO extends NamedSecuredObjectDTO implements Serializable, Mapp
     @Override
     public String getIdAsString() {
         return idAsString;
+    }
+
+    @Override
+    public Serializable getId() {
+        return getIdAsString();
     }
 
     public BoatClassDTO getBoatClass() {
@@ -110,4 +120,19 @@ public class BoatDTO extends NamedSecuredObjectDTO implements Serializable, Mapp
     public String toString() {
         return getName() == null ? (getBoatClass().getName() + " / " + getSailId()) : getName();
     }
+    
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.BOAT;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(idAsString);
+    }
+
 }

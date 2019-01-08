@@ -22,11 +22,12 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         super(logicalTypeName, availableActions);
         allInstances.add(this);
     }
+
     public SecuredSecurityTypes(String logicalTypeName) {
         super(logicalTypeName);
         allInstances.add(this);
     }
-    
+
     public static Iterable<HasPermissions> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
@@ -62,7 +63,8 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         CONFIGURE_LOCAL_SERVER,
         CONFIGURE_REMOTE_INSTANCES,
         IMPORT_MASTER_DATA,
-        CREATE_OBJECT
+        CREATE_OBJECT,
+        CAN_IMPORT_MASTERDATA
     }
 
     /**
@@ -70,4 +72,5 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
      * type-relative identifier is the server name
      */
     public static final HasPermissions SERVER = new SecuredSecurityTypes("SERVER", ServerActions.values());
+
 }

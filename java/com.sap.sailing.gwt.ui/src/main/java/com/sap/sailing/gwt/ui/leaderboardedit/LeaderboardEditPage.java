@@ -24,6 +24,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
@@ -57,7 +58,8 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint implements Pr
                             SAPHeaderWithAuthentication header = initHeader();
                             GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
                             AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-                    authorizedContentDecorator.setPermissionToCheck(SecuredDomainType.LEADERBOARD.getPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+                            authorizedContentDecorator.setPermissionToCheck(SecuredDomainType.LEADERBOARD.
+                                    getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(leaderboardName)));
                             authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
                                 @Override
                                 public Widget get() {

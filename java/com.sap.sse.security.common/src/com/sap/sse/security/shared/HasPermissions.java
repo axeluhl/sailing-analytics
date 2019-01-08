@@ -53,27 +53,51 @@ public interface HasPermissions {
      *            can be any string; this method will take care of encoding the identifiers such that they are legal in
      *            the context of a permission part; see also {@link PermissionStringEncoder}
      */
-    String getStringPermissionForObjects(Action action, String... typeRelativeObjectIdentifier);
-    
-    /**
-     * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified
-     * by this permission with this permission's type name. For example, if this permission is for the "LEADERBOARD"
-     * type, and the {@code objectIdentifier} is {@code "abc"} then the resulting qualified identifier will be
-     * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
-     */
-    QualifiedObjectIdentifier getQualifiedObjectIdentifier(String typeRelativeObjectIdentifier);
-    
-    /**
-     * Same as {@link #getStringPermissionForObjects(Action, String...)}, only that the result is a
-     * {@link WildcardPermission} instead of a {@link String}
-     */
-    WildcardPermission getPermissionForObjects(Action action, String... objectIdentifiers);
+    String getStringPermissionForTypeRelativeIdentifier(Action action, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
 
     /**
-     * Same as {@link #getPermissionForObjects(Action, String...)}, only that this method gets the
+     * Produces a string permission for this permission, the <code>mode</code> specified as the second wildcard
+     * permission segment, and the <code>objectIdentifier</code> as the third wildcard permission segment. The object
+     * identifiers must be unique within the scope defined by this {@link HasPermissions} which represents an object
+     * category or type, such as, e.g., "LEADERBOARD."
+     * 
+     * @param object
+     *            can be any object that can be passed to the identifer strategy to determine the type relative
+     *            identifier for this object. What type of object can be passed is defined by the identifer strategy
+     */
+    String getStringPermissionForObject(Action action, WithQualifiedObjectIdentifier object);
+
+    /**
+     * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified by
+     * this permission with this permission's type name. For example, if this permission is for the "LEADERBOARD" type,
+     * and the {@code objectIdentifier} is {@code "abc"} then the resulting qualified identifier will be
+     * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
+     */
+    QualifiedObjectIdentifier getQualifiedObjectIdentifier(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
+
+    /**
+     * Same as {@link #getStringPermissionForTypeRelativeIdentifiers(Action, String...)}, only that the result is a
+     * {@link WildcardPermission} instead of a {@link String}
+     * 
+     */
+    WildcardPermission getPermissionForTypeRelativeIdentifier(Action action, TypeRelativeObjectIdentifier objectIdentifiers);
+
+    /**
+     * Same as {@link #getStringPermissionForTypeRelativeIdentifiers(Action, String...)}, only that the result is a
+     * {@link WildcardPermission} instead of a {@link String}
+     * 
+     * @param object
+     *            can be any object that can be passed to the identifer strategy to determine the type relative
+     *            identifier for this object. What type of object can be passed is defined by the identifer strategy
+     * 
+     */
+    WildcardPermission getPermissionForObject(Action action, WithQualifiedObjectIdentifier object);
+
+    /**
+     * Same as {@link #getPermissionForTypeRelativeIdentifiers(Action, String...)}, only that this method gets the
      * {@link WildcardPermission}s for all given actions
      */
-    WildcardPermission[] getPermissionsForObjects(final Action[] actions, final String... objectIdentifiers);
+    WildcardPermission[] getPermissionsForTypeRelativeIdentifier(final Action[] actions, final TypeRelativeObjectIdentifier objectIdentifiers);
 
     public static interface Action {
         /**

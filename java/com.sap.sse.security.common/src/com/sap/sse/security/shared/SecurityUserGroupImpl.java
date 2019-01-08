@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 /**
  * A group of users; equality and hash code are based solely on the {@link #getId() ID}.
@@ -46,7 +47,12 @@ public abstract class SecurityUserGroupImpl implements NamedWithID, WithQualifie
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(id.toString());
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return UserGroupImpl.getTypeRelativeObjectIdentifier(getId());
     }
 
     @Override

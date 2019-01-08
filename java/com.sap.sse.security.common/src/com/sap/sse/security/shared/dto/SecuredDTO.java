@@ -1,6 +1,9 @@
 package com.sap.sse.security.shared.dto;
 
-public interface SecuredDTO {
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+
+public interface SecuredDTO extends WithQualifiedObjectIdentifier {
+
     AccessControlListDTO getAccessControlList();
 
     OwnershipDTO getOwnership();

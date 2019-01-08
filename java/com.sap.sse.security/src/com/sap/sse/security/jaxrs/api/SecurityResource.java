@@ -26,6 +26,7 @@ import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
@@ -131,7 +132,8 @@ public class SecurityResource extends AbstractSecurityResource {
                                     Locale.ENGLISH, validationBaseURL, getService().getDefaultTenantForCurrentUser());
                             // setup correct role ownerships
                             for (Role role : newUser.getRoles()) {
-                                String associationTypeIdentifier = PermissionAndRoleAssociation.get(role, newUser);
+                                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
+                                        .get(role, newUser);
                                 QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
 

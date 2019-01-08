@@ -2,11 +2,14 @@ package com.sap.sailing.domain.common.dto;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.SecurityInformationDTO;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
  * Master data about a single race that is to be transferred to the client.<p>
@@ -117,10 +120,18 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
         this.securityInformation.setOwnership(ownership);
     }
     
-    public String getTypeRelativeIdentifierAsString() {
-        RegattaAndRaceIdentifier regattaAndRaceId = getRaceIdentifier();
-        WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
-        return wildcardPermissionEncoder.encodeStringList(regattaAndRaceId.getRegattaName(),
-                regattaAndRaceId.getRaceName());
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.TRACKED_RACE;
     }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(regattaName, getName());
+    }
+
 }

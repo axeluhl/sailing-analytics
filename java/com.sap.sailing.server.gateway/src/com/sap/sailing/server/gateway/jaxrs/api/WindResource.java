@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -26,7 +25,6 @@ import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeseriali
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 @Path("/v1/wind")
 public class WindResource extends AbstractSailingServerResource {
@@ -47,10 +45,9 @@ public class WindResource extends AbstractSailingServerResource {
             final JSONObject regattaNameAndRaceNameObject = Helpers.toJSONObjectSafe(regattaNameAndRaceName);
             String regattaName = (String) regattaNameAndRaceNameObject.get("regattaName");
             String raceName = (String) regattaNameAndRaceNameObject.get("raceName");
+            RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, raceName);
             // add wind only to those races the subject is permitted to update
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.TRACKED_RACE.getStringPermissionForObjects(DefaultActions.UPDATE,
-                            WildcardPermissionEncoder.encode(regattaName, raceName)))) {
-                RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, raceName);
+            if (SecurityUtils.getSubject().isPermitted(identifier.getIdentifier().getStringPermission(DefaultActions.UPDATE))) {
                 JSONObject answerForRace = new JSONObject();
                 answerForRace.put("regattaNameAndRaceName", regattaNameAndRaceName);
                 if (windSourceType == WindSourceType.EXPEDITION || windSourceType == WindSourceType.WEB) {

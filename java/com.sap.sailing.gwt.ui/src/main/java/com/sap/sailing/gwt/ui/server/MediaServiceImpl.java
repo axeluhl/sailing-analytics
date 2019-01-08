@@ -94,7 +94,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     
     @Override
     public String addMediaTrack(MediaTrack mediaTrack) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermissionForObjects(DefaultActions.CREATE));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermission(DefaultActions.CREATE));
         if (mediaTrack.dbId != null) {
             throw new IllegalStateException("Property dbId must not be null for newly created media track.");
         }
@@ -142,7 +142,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     private void ensureUserCanUpdateMediaTrack(MediaTrack mediaTrack) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermissionForObjects(DefaultActions.UPDATE, mediaTrack.dbId));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermissionForObject(DefaultActions.UPDATE, mediaTrack));
     }
 
     @Override

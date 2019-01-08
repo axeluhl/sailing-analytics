@@ -187,12 +187,18 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                             leaderboardNames.add(leaderboard.getName());
                         }
                         leaderboardNames.add(newRegattaLeaderboard.getName());
-                        sailingService.updateLeaderboardGroup(selectedLeaderboardGroup.getName(), selectedLeaderboardGroup.getName(), selectedLeaderboardGroup.description,
-                                selectedLeaderboardGroup.getDisplayName(), leaderboardNames, selectedLeaderboardGroup.getOverallLeaderboardDiscardThresholds(),
-                                selectedLeaderboardGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                        sailingService.updateLeaderboardGroup(selectedLeaderboardGroup.getId(),
+                                selectedLeaderboardGroup.getName(), selectedLeaderboardGroup.getName(),
+                                selectedLeaderboardGroup.description, selectedLeaderboardGroup.getDisplayName(),
+                                leaderboardNames, selectedLeaderboardGroup.getOverallLeaderboardDiscardThresholds(),
+                                selectedLeaderboardGroup.getOverallLeaderboardScoringSchemeType(),
+                                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
-                                        errorReporter.reportError(stringMessages.failedToLinkLeaderboardToLeaderboardGroup(newRegattaLeaderboard.getName(), selectedLeaderboardGroup.getName()));
+                                        errorReporter
+                                                .reportError(stringMessages.failedToLinkLeaderboardToLeaderboardGroup(
+                                                        newRegattaLeaderboard.getName(),
+                                                        selectedLeaderboardGroup.getName()));
                                     }
 
                                     @Override

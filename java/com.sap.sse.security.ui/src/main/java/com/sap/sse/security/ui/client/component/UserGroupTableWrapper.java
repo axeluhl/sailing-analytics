@@ -6,7 +6,6 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -62,9 +61,8 @@ public class UserGroupTableWrapper extends
                 UserGroupDTO -> UserGroupDTO.getName(), userColumnListHandler);
 
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
-        final Function<UserGroupDTO, String> idFactory = UserGroupDTO::getName;
         final AccessControlledActionsColumn<UserGroupDTO, DefaultActionsImagesBarCell> actionColumn = new AccessControlledActionsColumn<>(
-                new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
+                new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(ACTION_DELETE, DELETE, userGroupDTO -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroupDTO.getName()))) {
                 userService.getUserManagementService().deleteUserGroup(userGroupDTO.getId().toString(),
@@ -93,11 +91,11 @@ public class UserGroupTableWrapper extends
         });
 
         final EditOwnershipDialog.DialogConfig<UserGroupDTO> configOwnership = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type, idFactory,
+                userService.getUserManagementService(), type,
                 user -> refreshUserList(null), stringMessages);
 
         final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, idFactory, user -> user.getAccessControlList(),
+                userService.getUserManagementService(), type, user -> user.getAccessControlList(),
                 stringMessages);
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,

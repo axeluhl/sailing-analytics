@@ -5,9 +5,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.security.shared.AbstractRole;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SecurityUserGroup;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup>
@@ -76,5 +79,24 @@ public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends Abst
     @Override
     public Iterable<G> getUserGroups() {
         return Collections.emptyList();
+    }
+
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier()); 
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getName());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredSecurityTypes.USER;
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String userName) {
+        return new TypeRelativeObjectIdentifier(userName);
     }
 }

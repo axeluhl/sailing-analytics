@@ -46,6 +46,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -67,9 +68,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      * Describes the {@link TaggingPanel#currentState current state} of the {@link TaggingPanel}.
      */
     protected enum State {
-        VIEW, // default
-        CREATE_TAG,
-        EDIT_TAG
+            VIEW, // default
+            CREATE_TAG, EDIT_TAG
     }
 
     // styling
@@ -118,8 +118,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      * 3) another user adds/deletes/changes any tag between the latest received tag and the current timer position<br/>
      * consecutively, the timer would jump to this new tag as the selection would change automatically as the latest tag
      * changed. This selection change would also trigger the timer to jump to the latest tag, which is not intended in
-     * this case. Therefor any received changes on any tags will set this boolean to true which will ignore the time jump
-     * at the selection change event and prevent this wrong behavior.
+     * this case. Therefor any received changes on any tags will set this boolean to true which will ignore the time
+     * jump at the selection change event and prevent this wrong behavior.
      * 
      * @see #raceTimesInfosReceived(Map, long, Date, long)
      */
@@ -200,7 +200,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                         if (preventTimeJumpAtSelectionChangeForOnce) {
                             preventTimeJumpAtSelectionChangeForOnce = false;
                         } else {
-                            // remove time change listener when manually selecting tag cells as this could end in an infinite loop
+                            // remove time change listener when manually selecting tag cells as this could end in an
+                            // infinite loop
                             // of timer change -> automatic selection change -> timer change -> ...
                             timer.removeTimeListener(TaggingPanel.this);
                             timer.setTime(selectedTag.getRaceTimepoint().asMillis());
@@ -628,8 +629,9 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected boolean hasPermissionToModifyPublicTags() {
         boolean hasPermission = false;
-        if (leaderboardName != null && userService.hasPermission(
-                SecuredDomainType.LEADERBOARD.getPermissionForObjects(DefaultActions.UPDATE, leaderboardName))) {
+        if (leaderboardName != null
+                && userService.hasPermission(SecuredDomainType.LEADERBOARD.getPermissionForTypeRelativeIdentifier(
+                        DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(leaderboardName)))) {
             hasPermission = true;
         }
         return hasPermission;

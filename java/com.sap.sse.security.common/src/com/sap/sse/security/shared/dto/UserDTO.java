@@ -6,13 +6,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
 public class UserDTO extends SecurityUserImpl<RoleDefinitionDTO, RoleDTO, StrippedUserGroupDTO>
-        implements Serializable, SecuredDTO {
+        implements Named, Serializable, SecuredDTO {
 
     private static final long serialVersionUID = 7556217539893146187L;
 
@@ -146,4 +148,10 @@ public class UserDTO extends SecurityUserImpl<RoleDefinitionDTO, RoleDTO, Stripp
     public StrippedUserDTO asStrippedUser() {
         return new StrippedUserDTO(getName());
     }
+
+    @Override
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getName());
+    }
+
 }

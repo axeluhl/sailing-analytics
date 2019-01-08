@@ -1,6 +1,10 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
@@ -43,4 +47,19 @@ public class StrippedLeaderboardDTOWithSecurity extends StrippedLeaderboardDTO i
     public void setOwnership(OwnershipDTO ownership) {
         this.ownership = ownership;
     }
+    
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.LEADERBOARD;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getName());
+    }
+
 }

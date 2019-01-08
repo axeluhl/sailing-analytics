@@ -95,12 +95,12 @@ public class Activator implements BundleActivator {
                         .createAndOpen(context, SecurityService.class);
                 try {
                     final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
+                    final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
                     for (ExpeditionDeviceConfiguration deviceConfiguration : expeditionTrackerFactory
                             .getDeviceConfigurations()) {
-                        QualifiedObjectIdentifier identifier = SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION
-                                .getQualifiedObjectIdentifier(WildcardPermissionEncoder.encode(ServerInfo.getName(),
-                                        deviceConfiguration.getName()));
-                        securityService.migrateOwnership(identifier, identifier.getTypeRelativeObjectIdentifier());
+                        QualifiedObjectIdentifier identifier = deviceConfiguration.getType().getQualifiedObjectIdentifier(deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()));
+                        securityService.migrateOwnership(identifier, permissionEncoder.decodePermissionPart(
+                                deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()).toString()));
                     }
                     securityService
                             .assumeOwnershipMigrated(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getName());

@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -137,9 +138,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             List<CompetitorDTO> competitorsFromBestToWorst = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumnName);
             Map<String, Map<CompetitorDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
             List<CompetitorDTO> filteredCompetitorsFromBestToWorst = new ArrayList<>();
-            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
-                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorsFromBestToWorst,
-                    competitor -> competitor.getIdAsString(), filteredCompetitorsFromBestToWorst::add);
+            competitorsFromBestToWorst.forEach(competitor -> {
+                if (SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
+                        .getStringPermission(SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC))) {
+                    filteredCompetitorsFromBestToWorst.add(competitor);
+                }
+            });
             for (CompetitorDTO competitor: filteredCompetitorsFromBestToWorst) {
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
                 LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);
@@ -161,9 +165,13 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         int competitorCounter = 1;
         // Remark: leaderboardDTO.competitors are ordered by total rank
         List<CompetitorDTO> filteredCompetitors = new ArrayList<>();
-        getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
-                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, leaderboardDTO.competitors,
-                competitor -> competitor.getIdAsString(), filteredCompetitors::add);
+        leaderboardDTO.competitors.forEach(competitor -> {
+            if (SecurityUtils.getSubject()
+                    .isPermitted(competitor.getIdentifier()
+                            .getStringPermission(SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC))) {
+                filteredCompetitors.add(competitor);
+            }
+        });
         for (CompetitorDTO competitor : filteredCompetitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
             if (maxCompetitorsCount != null && competitorCounter > maxCompetitorsCount) {

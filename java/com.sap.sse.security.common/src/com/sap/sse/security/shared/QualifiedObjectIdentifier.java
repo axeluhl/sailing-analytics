@@ -24,7 +24,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 public interface QualifiedObjectIdentifier extends Serializable {
     /**
      * The separator character used to separate the permission type {@link #name()} from the object identifier
-     * when providing a {@link #getQualifiedObjectIdentifier(String) qualified object identifier}.
+     * when providing a {@link #getQualifiedObjectIdentifierByString(String) qualified object identifier}.
      */
     char QUALIFIER_SEPARATOR = '/';
     
@@ -36,7 +36,7 @@ public interface QualifiedObjectIdentifier extends Serializable {
     /**
      * An object identifier that has to be unique only within the scope of the type identified by {@link #getTypeIdentifier()}
      */
-    String getTypeRelativeObjectIdentifier();
+    TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier();
     
     /**
      * Constructs a permission in {@link String} form that can be parsed into a {@link WildcardPermission} and which

@@ -123,7 +123,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 new IndexOptions().name("st_archive_json_url_unique").unique(true));
         
         Document result = new Document();
-        result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonUrl());
+        result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonURL());
         
         stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(result, result,
                 new UpdateOptions().upsert(true));

@@ -19,6 +19,7 @@ import com.sap.sse.security.SecurityService.RoleCopyListener;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
@@ -26,6 +27,7 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 /**
  * Encapsulates the logic to ensure consistency of group owners in the sailing domain object hierarchy.
@@ -230,16 +232,17 @@ public class SailingHierarchyOwnershipUpdater {
         // and is possible out of date.
         final UUID newGroupId = UUID.randomUUID();
         return securitySerice.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredSecurityTypes.USER_GROUP, newGroupId.toString(), name, () -> {
+                SecuredSecurityTypes.USER_GROUP, UserGroupImpl.getTypeRelativeObjectIdentifier(newGroupId), name, () -> {
                     final UserGroup createdUserGroup = securitySerice.createUserGroup(newGroupId, name);
                     securitySerice.copyUsersAndRoleAssociations(userGroupToCopy, createdUserGroup,
                             new RoleCopyListener() {
 
                                 @Override
                                 public void onRoleCopy(User user, Role existingRole, Role copyRole) {
-                                    String existingAssociationTypeIdentifier = PermissionAndRoleAssociation
+                                    TypeRelativeObjectIdentifier existingAssociationTypeIdentifier = PermissionAndRoleAssociation
                                             .get(existingRole, user);
-                                    String copyAssociationTypeIdentifier = PermissionAndRoleAssociation.get(copyRole,
+                                    TypeRelativeObjectIdentifier copyAssociationTypeIdentifier = PermissionAndRoleAssociation
+                                            .get(copyRole,
                                             user);
                                     QualifiedObjectIdentifier existingQualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                                             .getQualifiedObjectIdentifier(existingAssociationTypeIdentifier);

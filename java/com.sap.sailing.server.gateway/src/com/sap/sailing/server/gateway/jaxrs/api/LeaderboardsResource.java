@@ -576,8 +576,9 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam("startoftrackingasmillis") Long startOfTrackingAsMillis,
             @QueryParam("endoftracking") String endOfTrackingAsISO,
             @QueryParam("endoftrackingasmillis") Long endOfTrackingAsMillis) throws InvalidDateException {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
         final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
+                DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
         final Response result;
         if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
             final RaceLog raceLog = leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn().getRaceLog(leaderboardAndRaceColumnAndFleetAndResponse.getFleet());
@@ -609,9 +610,9 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(RaceLogServletConstants.PARAMS_TRACK_WIND) Boolean trackWind,
             @QueryParam(RaceLogServletConstants.PARAMS_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION) Boolean correctWindDirectionByMagneticDeclination)
                     throws NotDenotedForRaceLogTrackingException, Exception {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
         final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
-        
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
+                DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
         final ActionWithResult<Response> innerAction = () -> {
             final Response result;
             if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
@@ -698,8 +699,9 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     public Response setAutoCourse(@PathParam("leaderboardName") String leaderboardName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) throws MalformedURLException, IOException, InterruptedException {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
         final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
+                DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
         final Response result;
         if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
             final TrackedRace trackedRace = leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn().getTrackedRace(leaderboardAndRaceColumnAndFleetAndResponse.getFleet());
@@ -951,8 +953,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName)
             throws MalformedURLException, IOException, InterruptedException {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
+                DefaultActions.UPDATE, getService().getLeaderboardByName(leaderboardName)));
         return stopOrRemoveTrackedRace(leaderboardName, raceColumnName, fleetName, true);
     }
 
@@ -962,7 +964,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     public Response stopTracking(@PathParam("leaderboardName") String leaderboardName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) throws MalformedURLException, IOException, InterruptedException {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
+                DefaultActions.UPDATE, getService().getLeaderboardByName(leaderboardName)));
         return stopOrRemoveTrackedRace(leaderboardName, raceColumnName, fleetName, false);
     }
 

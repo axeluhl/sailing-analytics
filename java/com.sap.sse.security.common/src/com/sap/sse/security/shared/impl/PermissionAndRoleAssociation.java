@@ -1,31 +1,35 @@
 package com.sap.sse.security.shared.impl;
 
+import com.sap.sse.security.shared.RoleDefinitionImpl;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public class PermissionAndRoleAssociation {
-    public static String get(Role role, User userWithRole) {
+    public static TypeRelativeObjectIdentifier get(Role role, User userWithRole) {
         String ownerTenantString = "null";
         UserGroup ownerTenant = role.getQualifiedForTenant();
         if (ownerTenant != null) {
-            ownerTenantString = ownerTenant.getIdentifier().getTypeRelativeObjectIdentifier();
+            ownerTenantString = UserGroupImpl.getTypeRelativeObjectIdentifierAsString(ownerTenant);
         }
         String ownerUserString = "null";
         User ownerUser = role.getQualifiedForUser();
         if (ownerUser != null) {
-            ownerUserString = ownerUser.getIdentifier().getTypeRelativeObjectIdentifier();
+            ownerUserString = ownerUser.getIdentifier().getTypeRelativeObjectIdentifier().toString();
         }
-        String roleDefinitionString = role.getRoleDefinition().getId().toString();
-        String userWithRoleString = userWithRole.getIdentifier().getTypeRelativeObjectIdentifier();
-        String associationTypeRelativeId = WildcardPermissionEncoder.encode(userWithRoleString, roleDefinitionString,
+        String roleDefinitionString = RoleDefinitionImpl.getTypeRelativeObjectIdentifierAsString(role.getRoleDefinition());
+        String userWithRoleString = userWithRole.getIdentifier().getTypeRelativeObjectIdentifier().toString();
+        TypeRelativeObjectIdentifier associationTypeRelativeId = new TypeRelativeObjectIdentifier(userWithRoleString, roleDefinitionString,
                 ownerUserString, ownerTenantString);
         return associationTypeRelativeId;
     }
 
-    public static String get(WildcardPermission permission, User userWithPermission) {
+    public static TypeRelativeObjectIdentifier get(WildcardPermission permission, User userWithPermission) {
         String permissionDefinitionString = permission.toString();
-        String userWithRoleString = userWithPermission.getIdentifier().getTypeRelativeObjectIdentifier();
-        String associationTypeRelativeId = WildcardPermissionEncoder.encode(userWithRoleString,
-                permissionDefinitionString);
+        TypeRelativeObjectIdentifier userWithRoleString = userWithPermission.getIdentifier()
+                .getTypeRelativeObjectIdentifier();
+        TypeRelativeObjectIdentifier associationTypeRelativeId = new TypeRelativeObjectIdentifier(
+                userWithRoleString.toString(), permissionDefinitionString);
         return associationTypeRelativeId;
     }
 }
+

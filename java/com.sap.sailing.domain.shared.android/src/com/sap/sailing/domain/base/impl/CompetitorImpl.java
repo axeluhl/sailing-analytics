@@ -17,6 +17,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class CompetitorImpl implements DynamicCompetitor {
     private static final long serialVersionUID = 294603681016643157L;
@@ -248,12 +249,20 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getId().toString());
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
     public HasPermissions getType() {
         return SecuredDomainType.COMPETITOR;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getId());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Serializable id) {
+        return new TypeRelativeObjectIdentifier(id.toString());
     }
 
 }

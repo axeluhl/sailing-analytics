@@ -43,9 +43,9 @@ public class MediaSynchControl implements EditFlag {
     private final Button previewButton;
     private final Button saveButton;
     private final Button discardButton;
-    private final String mediaTrackDbId;
 
     private boolean isEditing = false;
+    private boolean isEditingAllowed = false;
     private UserService userservice;
 
     /**
@@ -65,7 +65,7 @@ public class MediaSynchControl implements EditFlag {
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
         MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack();
-        mediaTrackDbId = videoTrack.dbId;
+        isEditingAllowed = hasRightToEdit(videoTrack);
         backupVideoTrack = new MediaTrack(videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration,
                 videoTrack.mimeType, videoTrack.assignedRaces);
         this.userservice = userservice;
@@ -249,17 +249,16 @@ public class MediaSynchControl implements EditFlag {
         }
         mediaSynchAdapter.setControlsVisible(showEditUI);
         previewButton.setEnabled(showEditUI);
-        boolean hasRightToEdit = hasRightToEdit();
-        editButton.setEnabled(hasRightToEdit && !showEditUI);
-        mainPanel.getElement().getStyle().setDisplay(showEditUI && hasRightToEdit ? Display.BLOCK : Display.NONE);
+        editButton.setEnabled(isEditingAllowed && !showEditUI);
+        mainPanel.getElement().getStyle().setDisplay(showEditUI && isEditingAllowed ? Display.BLOCK : Display.NONE);
         boolean isDirty = isDirty();
         saveButton.setEnabled(showEditUI || isDirty);
         discardButton.setEnabled(showEditUI || isDirty);
     }
 
-    private boolean hasRightToEdit() {
+    private boolean hasRightToEdit(MediaTrack video) {
         return userservice.hasPermission(
-                SecuredDomainType.MEDIA_TRACK.getPermissionForObjects(DefaultActions.UPDATE, mediaTrackDbId),
+                SecuredDomainType.MEDIA_TRACK.getPermissionForObject(DefaultActions.UPDATE, video),
                 /* TODO ownership */ null);
     }
 

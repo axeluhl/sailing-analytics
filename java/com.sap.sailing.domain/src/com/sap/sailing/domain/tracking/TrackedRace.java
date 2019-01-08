@@ -65,8 +65,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -1138,9 +1138,11 @@ public interface TrackedRace
     }
     
     public static QualifiedObjectIdentifier getIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
-        WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
-        return getSecuredDomainType().getQualifiedObjectIdentifier(wildcardPermissionEncoder
-                .encodeStringList(regattaAndRaceId.getRegattaName(), regattaAndRaceId.getRaceName()));
+        return getSecuredDomainType().getQualifiedObjectIdentifier(regattaAndRaceId.getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getRaceIdentifier().getTypeRelativeObjectIdentifier();
     }
 
     @Override

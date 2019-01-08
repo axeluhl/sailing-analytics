@@ -109,6 +109,22 @@ public class RoleDefinitionImpl implements RoleDefinition {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getId().toString());
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(this);
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RoleDefinition roleDefinition) {
+        return new TypeRelativeObjectIdentifier(getTypeRelativeObjectIdentifierAsString(roleDefinition));
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID uuid) {
+        return new TypeRelativeObjectIdentifier(uuid.toString());
+    }
+
+    public static String getTypeRelativeObjectIdentifierAsString(RoleDefinition roleDefinition) {
+        return roleDefinition.getId().toString();
     }
 }

@@ -198,6 +198,8 @@ import com.sap.sailing.domain.base.configuration.impl.RacingProcedureWithConfigu
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.SWCStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -205,6 +207,7 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
+import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -317,6 +320,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.meta.MetaLeaderboardColumn;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -601,6 +605,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
@@ -609,7 +614,6 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.security.ui.server.SecurityDTOFactory;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -1016,7 +1020,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<RegattaDTO> getRegattas() {
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.REGATTA,
-                getService().getAllRegattas(), Regatta::getName, this::convertToRegattaDTO);
+                getService().getAllRegattas(), this::convertToRegattaDTO);
     }
 
     @Override
@@ -1389,7 +1393,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception {
         final Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT,
-                configs, TracTracConfiguration::getJSONURL,
+                configs,
                 ttConfig -> new TracTracConfigurationDTO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
                         ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(),
                         ttConfig.getCourseDesignUpdateURI().toString(), ttConfig.getTracTracUsername().toString(),
@@ -1401,7 +1405,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
 
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.TRACTRAC_ACCOUNT, jsonURL, name,
+                SecuredDomainType.TRACTRAC_ACCOUNT, TracTracConfiguration.getTypeRelativeObjectIdentifier(jsonURL), name,
                 () -> tractracMongoObjectFactory.storeTracTracConfiguration(
                         getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI,
                                 courseDesignUpdateURI, tracTracUsername, tracTracPassword)));
@@ -2614,8 +2618,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             UUID courseAreaId) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD,
-                leaderboardName, leaderboardDisplayName, new ActionWithResult<StrippedLeaderboardDTOWithSecurity>() {
+                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName),
+                leaderboardDisplayName, new ActionWithResult<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public StrippedLeaderboardDTOWithSecurity run() throws Exception {
                         return createStrippedLeaderboardDTOWithSecurity(
@@ -2631,7 +2635,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String leaderboardDisplayName,
             int[] discardThresholds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD, regattaIdentifier.getRegattaName(), leaderboardDisplayName,
+                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaIdentifier), leaderboardDisplayName,
                 new ActionWithResult<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public StrippedLeaderboardDTOWithSecurity run() throws Exception {
@@ -2646,7 +2650,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String displayName,
             String fullRegattaLeaderboardName) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD, name, displayName,
+                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(name), displayName,
                 new ActionWithResult<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public StrippedLeaderboardDTOWithSecurity run() throws Exception {
@@ -2662,7 +2666,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<StrippedLeaderboardDTOWithSecurity> getLeaderboardsWithSecurity() {
         final Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD,
-                leaderboards.values(), Leaderboard::getName,
+                leaderboards.values(),
                 leaderboard -> createStrippedLeaderboardDTOWithSecurity(leaderboard, false, false));
     }
 
@@ -2821,7 +2825,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardName,
             String newLeaderboardDisplayName, int[] newDiscardingThresholds, UUID newCourseAreaId) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         Leaderboard updatedLeaderboard = getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName, newLeaderboardDisplayName, newDiscardingThresholds, newCourseAreaId));
         return createStrippedLeaderboardDTOWithSecurity(updatedLeaderboard, false, false);
     }
@@ -2848,19 +2854,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void renameLeaderboard(String leaderboardName, String newLeaderboardName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new RenameLeaderboard(leaderboardName, newLeaderboardName));
     }
 
     @Override
     public void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new AddColumnToLeaderboard(columnName, leaderboardName, medalRace));
     }
 
     @Override
     public void addColumnsToLeaderboard(String leaderboardName, List<com.sap.sse.common.Util.Pair<String, Boolean>> columnsToAdd) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         for(com.sap.sse.common.Util.Pair<String, Boolean> columnToAdd: columnsToAdd) {
             getService().apply(new AddColumnToLeaderboard(columnToAdd.getA(), leaderboardName, columnToAdd.getB()));
         }
@@ -2868,7 +2879,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         for (String columnToRemove : columnsToRemove) {
             getService().apply(new RemoveLeaderboardColumn(columnToRemove, leaderboardName));
         }
@@ -2876,32 +2889,42 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeLeaderboardColumn(String leaderboardName, String columnName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new RemoveLeaderboardColumn(columnName, leaderboardName));
     }
 
     @Override
     public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new RenameLeaderboardColumn(leaderboardName, oldColumnName, newColumnName));
     }
 
     @Override
     public void updateLeaderboardColumnFactor(String leaderboardName, String columnName, Double newFactor) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new UpdateLeaderboardColumnFactor(leaderboardName, columnName, newFactor));
     }
 
     @Override
     public void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new SetSuppressedFlagForCompetitorInLeaderboard(leaderboardName, competitorIdAsString, suppressed));
     }
 
     @Override
     public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
             String fleetName, RegattaAndRaceIdentifier raceIdentifier) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         Object principal = SessionUtils.getPrincipal();
         if (principal != null) {
             logger.info(String.format("%s linked race column %s %s (%s) with tracked race %s.", principal.toString(),
@@ -2915,7 +2938,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Map<String, RegattaAndRaceIdentifier> getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.READ, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         Map<String, RegattaAndRaceIdentifier> result = new HashMap<String, RegattaAndRaceIdentifier>();
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
@@ -2936,20 +2961,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName, String fleetName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new DisconnectLeaderboardColumnFromTrackedRace(leaderboardName, raceColumnName, fleetName));
     }
 
     @Override
     public void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Double carriedPoints) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new UpdateLeaderboardCarryValue(leaderboardName, competitorIdAsString, carriedPoints));
     }
 
     @Override
     public com.sap.sse.common.Util.Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString, String raceColumnName,
             MaxPointsReason maxPointsReason, Date date) throws NoWindException {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         return getService().apply(
                 new UpdateLeaderboardMaxPointsReason(leaderboardName, raceColumnName, competitorIdAsString,
                         maxPointsReason, new MillisecondsTimePoint(date)));
@@ -2958,7 +2989,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public com.sap.sse.common.Util.Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName,
             String competitorIdAsString, String columnName, Double correctedScore, Date date) throws NoWindException {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         return getService().apply(
                 new UpdateLeaderboardScoreCorrection(leaderboardName, columnName, competitorIdAsString, correctedScore,
                         new MillisecondsTimePoint(date)));
@@ -2966,7 +2999,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity, String comment) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(
                 new UpdateLeaderboardScoreCorrectionMetadata(leaderboardName,
                         timePointOfLastCorrectionValidity == null ? null : new MillisecondsTimePoint(timePointOfLastCorrectionValidity),
@@ -2975,7 +3010,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateLeaderboardScoreCorrectionsAndMaxPointsReasons(BulkScoreCorrectionDTO updates) throws NoWindException {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, updates.getLeaderboardName()));
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(
+                        DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(updates.getLeaderboardName())));
         Date dateForResults = new Date(); // we don't care about the result date/time here; use current date as default
         for (Map.Entry<String, Map<String, Double>> e : updates.getScoreUpdatesForRaceColumnByCompetitorIdAsString().entrySet()) {
             for (Map.Entry<String, Double> raceColumnNameAndCorrectedScore : e.getValue().entrySet()) {
@@ -2993,25 +3031,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorIdAsString, String displayName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new UpdateCompetitorDisplayNameInLeaderboard(leaderboardName, competitorIdAsString, displayName));
     }
 
     @Override
     public void moveLeaderboardColumnUp(String leaderboardName, String columnName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new MoveLeaderboardColumnUp(leaderboardName, columnName));
     }
 
     @Override
     public void moveLeaderboardColumnDown(String leaderboardName, String columnName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new MoveLeaderboardColumnDown(leaderboardName, columnName));
     }
 
     @Override
     public void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
         getService().apply(new UpdateIsMedalRace(leaderboardName, columnName, isMedalRace));
     }
 
@@ -3030,8 +3076,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations() {
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT,
-                configs, SwissTimingConfiguration::getName,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, configs,
                 stConfig -> new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(),
                         stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(),
                         stConfig.getUpdateUsername(), stConfig.getUpdatePassword()));
@@ -3074,7 +3119,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String updateURL, String updateUsername, String updatePassword) throws Exception {
         if (!jsonURL.equalsIgnoreCase("test")) {
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.SWISS_TIMING_ACCOUNT, configName,
+                    SecuredDomainType.SWISS_TIMING_ACCOUNT, SwissTimingConfiguration.getTypeRelativeObjectIdentifier(jsonURL),
                     configName,
                     () -> swissTimingAdapterPersistence
                             .storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName,
@@ -3932,7 +3977,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData) {
         final Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD_GROUP,
-                leaderboardGroups.values(), lg -> lg.getId().toString(),
+                leaderboardGroups.values(),
                 leaderboardGroup -> convertToLeaderboardGroupDTO(leaderboardGroup, withGeoLocationData, false));
     }
 
@@ -4015,8 +4060,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             ScoringSchemeType overallLeaderboardScoringSchemeType, List<String> leaderBoards) {
         UUID newLeaderboardGroupId = UUID.randomUUID();
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD_GROUP, newLeaderboardGroupId.toString(), displayName,
-                new ActionWithResult<LeaderboardGroupDTO>() {
+                SecuredDomainType.LEADERBOARD_GROUP, LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(newLeaderboardGroupId),
+                displayName, new ActionWithResult<LeaderboardGroupDTO>() {
                     @Override
                     public LeaderboardGroupDTO run() throws Exception {
                         CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(
@@ -4029,9 +4074,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateLeaderboardGroup(String oldName, String newName, String newDescription, String newDisplayName,
+    public void updateLeaderboardGroup(UUID leaderboardGroupId, String oldName, String newName, String newDescription, String newDisplayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD_GROUP.getStringPermissionForObjects(DefaultActions.UPDATE, oldName));
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredDomainType.LEADERBOARD_GROUP.getStringPermissionForTypeRelativeIdentifier(
+                        DefaultActions.UPDATE,
+                        LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(leaderboardGroupId)));
         getService().apply(
                 new UpdateLeaderboardGroup(oldName, newName, newDescription, newDisplayName,
                         leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType));
@@ -4088,7 +4136,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<EventDTO> getEvents() throws MalformedURLException {
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.EVENT,
-                getService().getAllEvents(), event -> event.getId().toString(), event -> {
+                getService().getAllEvents(), event -> {
                     EventDTO eventDTO = convertToEventDTO(event, false);
                     try {
                         eventDTO.setBaseURL(getEventBaseURLFromEventOrRequest(event));
@@ -4175,7 +4223,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos,
             Iterable<String> windFinderReviewedSpotCollectionIds) throws MalformedURLException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.UPDATE, eventId.toString()))) {
+        if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForTypeRelativeIdentifier(
+                DefaultActions.UPDATE, EventBaseImpl.getTypeRelativeObjectIdentifier(eventId)))) {
             TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
             TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
             URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
@@ -4201,8 +4250,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final UUID eventUuid = UUID.randomUUID();
 
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.EVENT,
-                eventUuid.toString(), eventName, new ActionWithResult<EventDTO>() {
+                SecuredDomainType.EVENT, EventBaseImpl.getTypeRelativeObjectIdentifier(eventUuid),
+                eventName, new ActionWithResult<EventDTO>() {
                     @Override
                     public EventDTO run() throws Exception {
                         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
@@ -4274,7 +4323,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void renameEvent(UUID eventId, String newName) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.UPDATE, eventId.toString()))) {
+        if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForTypeRelativeIdentifier(
+                DefaultActions.UPDATE, EventBaseImpl.getTypeRelativeObjectIdentifier(eventId)))) {
             getService().apply(new RenameEvent(eventId, newName));
         } else {
             throw new UnauthorizedException("You are not permitted to edit event " + eventId);
@@ -4283,17 +4333,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public EventDTO getEventById(UUID id, boolean withStatisticalData) throws MalformedURLException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.READ, id.toString()))) {
-            EventDTO result = null;
-            Event event = getService().getEvent(id);
-            if (event != null) {
+        EventDTO result = null;
+        Event event = getService().getEvent(id);
+        if (event != null) {
+            if (SecurityUtils.getSubject()
+                    .isPermitted(SecuredDomainType.EVENT.getStringPermissionForObject(DefaultActions.READ, event))) {
                 result = convertToEventDTO(event, withStatisticalData);
                 result.setBaseURL(getEventBaseURLFromEventOrRequest(event));
                 result.setIsOnRemoteServer(false);
+            } else {
+                throw new UnauthorizedException("You are not permitted to view event " + id);
             }
-            return result;
         }
-        throw new UnauthorizedException("You are not permitted to view event " + id);
+        return result;
+
     }
 
     private String getEventBaseURLFromEventOrRequest(Event event) throws MalformedURLException {
@@ -4634,8 +4687,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Set<QualifiedObjectIdentifier> objectsThatWillBeImplicitlyCleanedByRemoveRegatta = new HashSet<>();
             objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(regatta.getIdentifier());
             for (RaceDefinition race : regatta.getAllRaces()) {
-                String typeRelativeObjectIdentifier = WildcardPermissionEncoder.encode(regatta.getName(),
-                        race.getName());
+                TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = RegattaNameAndRaceName
+                        .getTypeRelativeObjectIdentifier(regatta.getName(), race.getName());
                 QualifiedObjectIdentifier identifier = SecuredDomainType.TRACKED_RACE
                         .getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
                 objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(identifier);
@@ -4667,7 +4720,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Regatta regatta = getService().getRegatta(identifier);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(
-                    SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
+                    SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         getService().apply(new RemoveSeries(identifier, seriesName));
     }
@@ -4685,7 +4738,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String registrationLinkSecret) {
         Regatta regatta = getService().getRegatta(regattaName);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
@@ -4699,7 +4752,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             List<Pair<String, Integer>> columnNamesWithInsertIndex) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         List<RaceColumnInSeriesDTO> result = new ArrayList<RaceColumnInSeriesDTO>();
         for (Pair<String, Integer> columnNameAndInsertIndex : columnNamesWithInsertIndex) {
@@ -4719,7 +4772,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Integer maximumNumberOfDiscards, List<FleetDTO> fleets) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         getService().apply(
                 new UpdateSeries(regattaIdentifier, seriesName, newSeriesName, isMedal, isFleetsCanRunInParallel, resultDiscardingThresholds,
@@ -4731,7 +4784,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         for(String columnName: columnNames) {
             getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
@@ -4742,7 +4795,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void moveRaceColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         getService().apply(new MoveColumnInSeriesUp(regattaIdentifier, seriesName, columnName));
     }
@@ -4751,7 +4804,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
         }
         getService().apply(new MoveColumnInSeriesDown(regattaIdentifier, seriesName, columnName));
     }
@@ -4765,8 +4818,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
 
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.REGATTA,
-                regattaName, regattaName, new ActionWithResult<RegattaDTO>() {
+                SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName),
+                regattaName, new ActionWithResult<RegattaDTO>() {
 
                     @Override
                     public RegattaDTO run() throws Exception {
@@ -4864,16 +4917,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final User allUser = getSecurityService().getAllUser();
             if (allUser != null) {
                 final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
-                        .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName());
+                        .getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName()));
                 if (serverConfiguration.isSelfService() != null) {
-                    String associationTypeIdentifier = PermissionAndRoleAssociation
+                    TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
                             .get(createObjectOnCurrentServerPermission, allUser);
                     QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
                             .getQualifiedObjectIdentifier(associationTypeIdentifier);
                     if (serverConfiguration.isSelfService()) {
                         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                                 SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
-                                associationTypeIdentifier, new Action() {
+                                associationTypeIdentifier.toString(), new Action() {
 
                                     @Override
                                     public void run() throws Exception {
@@ -4904,14 +4957,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         // role ownership handling left out on purpose, as else the all user could remove the public
                         // role from itself!
                         final Role publicAccessForServerRole = new Role(viewerRole, defaultServerTenant, null);
-                        String associationTypeIdentifier = PermissionAndRoleAssociation.get(publicAccessForServerRole,
+                        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(
+                                publicAccessForServerRole,
                                 allUser);
                         QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                                 .getQualifiedObjectIdentifier(associationTypeIdentifier);
                         if (serverConfiguration.isPublic()) {
                             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                                     SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
-                                    associationTypeIdentifier, new Action() {
+                                    associationTypeIdentifier.toString(), new Action() {
 
                                         @Override
                                         public void run() throws Exception {
@@ -4983,10 +5037,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (urlBasedScoreCorrectionProvider != null) {
             Iterable<URL> allUrls = resultUrlRegistry.getResultUrls(resultProviderName);
             final Subject subject = SecurityUtils.getSubject();
-            final WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
             for (URL url : allUrls) {
-                if (subject.isPermitted(SecuredDomainType.RESULT_IMPORT_URL.getStringPermissionForObjects(DefaultActions.READ,
-                        wildcardPermissionEncoder.encodeStringList(resultProviderName, url.toString())))) {
+                if (subject
+                        .isPermitted(SecuredDomainType.RESULT_IMPORT_URL.getStringPermissionForTypeRelativeIdentifier(
+                                DefaultActions.READ, new TypeRelativeObjectIdentifier(
+                                        urlBasedScoreCorrectionProvider.getName(), url.toString())))) {
                     result.add(url.toString());
                 }
             }
@@ -5041,14 +5096,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence
                 .getSwissTimingArchiveConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, configs, SwissTimingArchiveConfiguration::getJsonUrl,
-                stArchiveConfig -> new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonUrl()));
+                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, configs,
+                stArchiveConfig -> new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonURL()));
     }
 
     @Override
     public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) throws Exception {
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.SWISS_TIMING_ACCOUNT, swissTimingJsonUrl,
+                SecuredDomainType.SWISS_TIMING_ACCOUNT, SwissTimingArchiveConfiguration.getTypeRelativeObjectIdentifier(swissTimingJsonUrl),
                 swissTimingJsonUrl, () -> swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(
                         swissTimingFactory.createSwissTimingArchiveConfiguration(swissTimingJsonUrl)));
     }
@@ -5163,7 +5218,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * when this method is called.
      */
     private void addRaceColumnsToRegattaSeries(RegattaDTO regatta) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Regatta.getTypeRelativeObjectIdentifier(regatta.getName())));
         for (SeriesDTO series : regatta.series) {
             List<Pair<String, Integer>> raceNamesAndInsertIndex = new ArrayList<>();
             int insertIndex = 0;
@@ -5204,13 +5261,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<UUID> eventLeaderboardGroupUUIDs = new ArrayList<>();
 
         // create Leaderboard Group
-        if (getService().getLeaderboardGroupByName(eventName) == null) {
+        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByName(eventName);
+        if (leaderboardGroup == null) {
             leaderboardGroupDTO = doCreateLeaderboardGroup(eventName, description, eventName, false,
                     null, null,
                     leaderboardNames);
             eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
         } else {
-            updateLeaderboardGroup(eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null, null);
+            updateLeaderboardGroup(leaderboardGroup.getId(), eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null, null);
             leaderboardGroupDTO = getLeaderboardGroupByName(eventName, false);
         }
         for (LeaderboardGroupDTO lg : newEvent.getLeaderboardGroups()) {
@@ -5527,8 +5585,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword) {
         // FIXME should the targetserver also check this?
-        SecurityUtils.getSubject().isPermitted(SecuredDomainType.CAN_IMPORT_MASTERDATA
-                .getStringPermissionForObjects(DefaultActions.CREATE, ServerInfo.getName()));
+        SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                ServerActions.CAN_IMPORT_MASTERDATA, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
 
         String token = getTokenForServer(urlAsString, targetServerUsername, targetServerPassword);
 
@@ -5648,16 +5706,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             @SuppressWarnings("unchecked")
             Iterable<Competitor> competitors = (Iterable<Competitor>) competitorStore.getAllCompetitors();
             result = getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
-                    requiredActionsForRead, competitors, competitor -> competitor.getIdentifier().toString(),
+                    requiredActionsForRead, competitors,
                     this::convertToCompetitorDTO);
         } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
             result = getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
                     requiredActionsForRead, competitorStore.getCompetitorsWithoutBoat(),
-                    competitor -> competitor.getIdentifier().toString(), this::convertToCompetitorDTO);
+                    this::convertToCompetitorDTO);
         } else if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == true) {
             result = getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
                     requiredActionsForRead, competitorStore.getCompetitorsWithBoat(),
-                    competitor -> competitor.getIdentifier().toString(), this::convertToCompetitorDTO);
+                    this::convertToCompetitorDTO);
         } else {
             result = Collections.emptyList();
         }
@@ -5703,8 +5761,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
             final UUID competitorUuid = UUID.randomUUID();
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.COMPETITOR, competitorUuid.toString(), competitor.getName(),
-                    new ActionWithResult<CompetitorWithBoat>() {
+                    SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUuid),
+                    competitor.getName(), new ActionWithResult<CompetitorWithBoat>() {
                         @Override
                         public CompetitorWithBoat run() throws Exception {
                             return getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
@@ -5717,7 +5775,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         }
                     });
         } else {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR.getStringPermissionForObjects(DefaultActions.UPDATE, competitor.getIdAsString()));
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(
+                    DefaultActions.UPDATE, CompetitorImpl.getTypeRelativeObjectIdentifier(competitor.getId())));
             Competitor updatedCompetitor  = getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor.getShortName(),
                                     competitor.getColor(), competitor.getEmail(), nationality,
@@ -5746,8 +5805,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
             DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.COMPETITOR, competitorUUID.toString(), competitor.getName(),
-                    new ActionWithResult<Competitor>() {
+                    SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUUID),
+                    competitor.getName(), new ActionWithResult<Competitor>() {
 
                         @Override
                         public Competitor run() throws Exception {
@@ -5759,8 +5818,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         }
                     });
         } else {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR
-                    .getStringPermissionForObjects(DefaultActions.UPDATE, competitor.getIdAsString()));
+            SecurityUtils.getSubject().checkPermission(
+                    SecuredDomainType.COMPETITOR.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                            CompetitorImpl.getTypeRelativeObjectIdentifier(competitor.getId())));
             result = getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
                     competitor.getShortName(), competitor.getColor(), competitor.getEmail(), nationality,
                     competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
@@ -5809,7 +5869,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Iterable<BoatDTO> result = getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(
                 SecuredDomainType.BOAT, requiredActionsForRead,
                 getService().getBaseDomainFactory().getCompetitorAndBoatStore().getBoats(),
-                boat -> boat.getIdentifier().toString(), this::convertToBoatDTO);
+                this::convertToBoatDTO);
         return result;
     }
 
@@ -5819,7 +5879,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.BOAT,
                 SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
                 getService().getBaseDomainFactory().getCompetitorAndBoatStore().getStandaloneBoats(),
-                boat -> boat.getIdentifier().toString(),
                 filteredObject -> result.add(convertToBoatDTO(filteredObject)));
         return result;
     }
@@ -5837,7 +5896,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             UUID boatUUID = UUID.randomUUID();
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(boat.getBoatClass().getName());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.BOAT, boatUUID.toString(), boat.getName(), new ActionWithResult<Boat>() {
+                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(), new ActionWithResult<Boat>() {
 
                         @Override
                         public Boat run() throws Exception {
@@ -5847,7 +5906,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     });
         } else {
             SecurityUtils.getSubject().checkPermission(
-                    SecuredDomainType.BOAT.getStringPermissionForObjects(DefaultActions.UPDATE, boat.getIdAsString()));
+                    SecuredDomainType.BOAT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                            BoatImpl.getTypeRelativeObjectIdentifier(boat.getId())));
             result = getService()
                     .apply(new UpdateBoat(boat.getIdAsString(), boat.getName(), boat.getColor(), boat.getSailId()));
         }
@@ -6212,7 +6272,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<String> result = new ArrayList<String>();
         for (Account account : getIgtimiConnectionFactory().getAllAccounts()) {
             final String email = account.getUser().getEmail();
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObjects(DefaultActions.READ, email))) {
+            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObject(DefaultActions.READ, account))) {
                 result.add(email);
             }
         }
@@ -6242,10 +6302,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Account account;
         if (existingAccount == null) {
             account = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.IGTIMI_ACCOUNT, eMailAddress,
+                    SecuredDomainType.IGTIMI_ACCOUNT, Account.getTypeRelativeObjectIdentifier(eMailAddress),
                     eMailAddress,
-                    () -> getIgtimiConnectionFactory()
-                            .createAccountToAccessUserData(eMailAddress, password));
+                    () -> getIgtimiConnectionFactory().createAccountToAccessUserData(eMailAddress, password));
         } else {
             logger.warning("Igtimi account "+eMailAddress+" already exists.");
             account = null; // account with that e-mail already exists
@@ -6255,9 +6314,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeIgtimiAccount(String eMailOfAccountToRemove) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObjects(
-                DefaultActions.DELETE, eMailOfAccountToRemove));
-        getIgtimiConnectionFactory().removeAccount(eMailOfAccountToRemove);
+        final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailOfAccountToRemove);
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObject(
+                DefaultActions.DELETE, existingAccount));
+        getIgtimiConnectionFactory().removeAccount(existingAccount);
     }
 
     @Override
@@ -6278,8 +6338,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Map<RegattaAndRaceIdentifier, Integer> numberOfWindFixesImportedPerRace = new HashMap<RegattaAndRaceIdentifier, Integer>();
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
             // filter account based on used permissions to read account:
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObjects(
-                    DefaultActions.READ, account.getUser().getEmail()))) {
+            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObject(
+                    DefaultActions.READ, account))) {
                 IgtimiConnection conn = igtimiConnectionFactory.connect(account);
                 Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces, correctByDeclination);
                 for (Entry<TrackedRace, Integer> resultForAccount : resultsForAccounts.entrySet()) {
@@ -7847,8 +7907,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Subject subject = SecurityUtils.getSubject();
         if (expeditionConnector != null) {
             for (final ExpeditionDeviceConfiguration config : expeditionConnector.getDeviceConfigurations()) {
-                if (subject.isPermitted(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(DefaultActions.READ,
-                        WildcardPermissionEncoder.encode(getServerInfo().getServerName(), config.getName())))) {
+                if (subject.isPermitted(
+                        SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForTypeRelativeIdentifier(
+                                DefaultActions.READ, config.getTypeRelativeObjectIdentifier(ServerInfo.getName())))) {
                     result.add(config);
                 }
             }
@@ -7860,9 +7921,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         final Subject subject = SecurityUtils.getSubject();
         subject.checkPermission(
-                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(DefaultActions.CREATE,
-                        WildcardPermissionEncoder.encode(getServerInfo().getServerName(),
-                                deviceConfiguration.getName())));
+                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForTypeRelativeIdentifier(
+                        DefaultActions.CREATE,
+                        new TypeRelativeObjectIdentifier(ServerInfo.getName(), deviceConfiguration.getName())));
 
         // TODO consider replication
         final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
@@ -7873,9 +7934,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        QualifiedObjectIdentifier identifier = SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION
-                .getQualifiedObjectIdentifier(
-                        WildcardPermissionEncoder.encode(ServerInfo.getName(), deviceConfiguration.getName()));
+        QualifiedObjectIdentifier identifier = deviceConfiguration.getType().getQualifiedObjectIdentifier(deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()));
         getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier,
                 new ActionWithResult<Void>() {
                     @Override
@@ -8176,8 +8235,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
             TimePoint sliceFrom, TimePoint sliceTo) throws ServiceException {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, raceIdentifier.getRegattaName()));
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, raceIdentifier.getRegattaName()));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Regatta.getTypeRelativeObjectIdentifier(raceIdentifier.getRegattaName())));
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(
+                        DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(raceIdentifier.getRegattaName())));
         final Locale locale = getClientLocale();
         if (!canSliceRace(raceIdentifier)) {
             throw new ServiceException(serverStringMessages.get(locale, "slicingCannotSliceRace"));
@@ -8771,8 +8835,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Boolean result;
         final User allUser = getSecurityService().getAllUser();
         if (allUser != null) {
-            result = Util.contains(allUser.getPermissions(), SecuredSecurityTypes.SERVER
-                    .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
+            result = Util.contains(allUser.getPermissions(),
+                    SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT,
+                            new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         } else {
             result = null;
         }

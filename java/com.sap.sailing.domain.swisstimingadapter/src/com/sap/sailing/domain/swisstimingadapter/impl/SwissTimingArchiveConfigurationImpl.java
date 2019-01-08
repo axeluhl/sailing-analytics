@@ -12,7 +12,7 @@ public class SwissTimingArchiveConfigurationImpl implements SwissTimingArchiveCo
     }
 
     @Override
-    public String getJsonUrl() {
+    public String getJsonURL() {
         return jsonUrl;
     }
 }

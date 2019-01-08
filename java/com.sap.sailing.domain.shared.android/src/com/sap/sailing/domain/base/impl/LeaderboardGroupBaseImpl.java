@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
     private static final long serialVersionUID = 5769435569603360651L;
@@ -67,7 +68,15 @@ public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
     }
 
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getId().toString());
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getId());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID id) {
+        return new TypeRelativeObjectIdentifier(id.toString());
     }
 
     @Override

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Document;
@@ -419,15 +418,14 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
             userColumn.setSortable(true);
 
             final HasPermissions type = SecuredDomainType.TRACKED_RACE;
-            final Function<RaceDTO, String> idFactory = race -> race.getTypeRelativeIdentifierAsString();
             final AccessControlledActionsColumn<RaceDTO, DefaultActionsImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
-                    new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
+                    new DefaultActionsImagesBarCell(stringMessages), userService);
             final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                    idFactory, race -> regattaRefresher.fillRegattas(), stringMessages);
+                    race -> regattaRefresher.fillRegattas(), stringMessages);
             actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
             
             final EditACLDialog.DialogConfig<RaceDTO> configACL = EditACLDialog.create(
-                    userService.getUserManagementService(), type, idFactory, regatta -> regattaRefresher.fillRegattas(),
+                    userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
                     stringMessages);
             actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                     configACL::openDialog);

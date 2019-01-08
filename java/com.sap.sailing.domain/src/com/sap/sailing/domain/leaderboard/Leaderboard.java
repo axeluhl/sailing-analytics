@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -37,6 +38,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 /**
  * A leaderboard is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
@@ -618,8 +620,21 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
         return result;
     }
 
+    @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getName());
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getName());
+    }
+
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String name) {
+        return new TypeRelativeObjectIdentifier(name);
+    }
+
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RegattaName regattaName) {
+        return new TypeRelativeObjectIdentifier(regattaName.getRegattaName());
     }
 
     @Override

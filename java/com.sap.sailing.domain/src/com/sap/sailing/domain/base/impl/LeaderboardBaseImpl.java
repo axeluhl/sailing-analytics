@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class LeaderboardBaseImpl implements LeaderboardBase {
     private static final long serialVersionUID = -5332972141344617372L;
@@ -36,11 +37,19 @@ public class LeaderboardBaseImpl implements LeaderboardBase {
     }
 
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getName());
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
     public HasPermissions getType() {
         return SecuredDomainType.LEADERBOARD;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getName());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String leaderboarName) {
+        return new TypeRelativeObjectIdentifier(leaderboarName);
     }
 }

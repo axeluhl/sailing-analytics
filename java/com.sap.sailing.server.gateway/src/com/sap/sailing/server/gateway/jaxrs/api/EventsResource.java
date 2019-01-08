@@ -48,6 +48,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.EventBaseImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.RankingMetrics;
@@ -64,6 +65,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -95,6 +97,7 @@ import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -204,8 +207,6 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("boatclassname") String boatClassNameParam,
             @FormParam("numberofraces") String numberOfRacesParam) throws ParseException, NotFoundException,
             NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.CREATE, eventId));
         final Response response;
         UUID id;
         try {
@@ -214,6 +215,8 @@ public class EventsResource extends AbstractSailingServerResource {
             return getBadEventErrorResponse(eventId);
         }
         Event event = getService().getEvent(id);
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredDomainType.EVENT.getStringPermissionForObject(DefaultActions.UPDATE, event));
         if (event == null) {
             response = getBadEventErrorResponse(eventId);
         } else {
@@ -371,8 +374,8 @@ public class EventsResource extends AbstractSailingServerResource {
         RegattaCreationParametersDTO regattaCreationParametersDTO = new RegattaCreationParametersDTO(
                 createDefaultSeriesCreationParameters(regattaName, numberOfRaces));
         UUID regattaId = UUID.randomUUID();
-        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.REGATTA, regattaName, 
+        Regatta regatta = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName), 
                 regattaName, new ActionWithResult<Regatta>() {
 
                     @Override
@@ -387,7 +390,7 @@ public class EventsResource extends AbstractSailingServerResource {
         SeriesCreationParametersDTO defaultSeries = regattaCreationParametersDTO.getSeriesCreationParameters()
                 .get("Default");
         addRaceColumns(regattaName, "Default", numberOfRaces);
-        updateSeries(regattaName, defaultSeries);
+        updateSeries(regatta, defaultSeries);
         return leaderboard;
     }
 
@@ -425,7 +428,7 @@ public class EventsResource extends AbstractSailingServerResource {
         Map<Locale, URL> sailorsInfoWebsiteURLs = new HashMap<Locale,URL>();
         Iterable<ImageDescriptor> images = Collections.<ImageDescriptor> emptyList();
         Iterable<VideoDescriptor> videos = Collections.<VideoDescriptor> emptyList();
-        
+
         final CompetitorRegistrationType competitorRegistrationType;
         try {
             competitorRegistrationType = CompetitorRegistrationType.valueOfOrDefault(competitorRegistrationTypeString, /* failForUnknown */ true);
@@ -438,7 +441,7 @@ public class EventsResource extends AbstractSailingServerResource {
             @Override
             public Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard> run() throws Exception {
                 Event event = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                        SecuredDomainType.EVENT, eventId.toString(),
+                        SecuredDomainType.EVENT, EventBaseImpl.getTypeRelativeObjectIdentifier(eventId),
                         eventName, new ActionWithResult<Event>() {
 
                             @Override
@@ -449,7 +452,7 @@ public class EventsResource extends AbstractSailingServerResource {
                             }
                         });
 
-                CourseArea courseArea = addCourseArea(event.getId(), "Default");
+                CourseArea courseArea = addCourseArea(event, "Default");
                 final LeaderboardGroup leaderboardGroup;
                 if (createLeaderboardGroup) {
                     leaderboardGroup = validateAndAddLeaderboardGroup(event.getId(), event.getName(), event.getDescription(), /* leaderboardGroupDisplayNameParam */ null,
@@ -494,7 +497,7 @@ public class EventsResource extends AbstractSailingServerResource {
                         .getRoleDefinition(SailingViewerRole.getInstance().getId());
                 Role groupViewer = new Role(roleDef, ownerGroup, null);
                 getSecurityService().addRoleForUser(getSecurityService().getAllUser(), groupViewer);
-                String associationTypeIdentifier = PermissionAndRoleAssociation.get(groupViewer,
+                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(groupViewer,
                         getSecurityService().getAllUser());
                 QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
@@ -519,9 +522,9 @@ public class EventsResource extends AbstractSailingServerResource {
             throws NotFoundException {
         UUID leaderboardGroupId = UUID.randomUUID();
         LeaderboardGroup leaderboardGroup = getSecurityService()
-                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                        SecuredDomainType.LEADERBOARD_GROUP, leaderboardGroupId.toString(),
-                leaderboardGroupName, new ActionWithResult<LeaderboardGroup>() {
+                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD_GROUP,
+                        LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(leaderboardGroupId), leaderboardGroupName,
+                        new ActionWithResult<LeaderboardGroup>() {
 
             @Override
             public LeaderboardGroup run() throws Exception {
@@ -552,10 +555,10 @@ public class EventsResource extends AbstractSailingServerResource {
         return ReverseGeocoder.INSTANCE.getPlacemarkNearest(new DegreePosition(Double.valueOf(lat), Double.valueOf(lng))).getName();
     }
 
-    private void updateSeries(String regattaName, SeriesCreationParametersDTO defaultSeries) {
+    private void updateSeries(Regatta regatta, SeriesCreationParametersDTO defaultSeries) {
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
-        getService().apply(new UpdateSeries(new RegattaName(regattaName), "Default", "Default", defaultSeries.isMedal(),
+                SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
+        getService().apply(new UpdateSeries(new RegattaName(regatta.getName()), "Default", "Default", defaultSeries.isMedal(),
                 defaultSeries.isFleetsCanRunInParallel(), defaultSeries.getDiscardingThresholds(),
                 defaultSeries.isStartsWithZero(), defaultSeries.isFirstColumnIsNonDiscardableCarryForward(),
                 defaultSeries.hasSplitFleetContiguousScoring(), defaultSeries.getMaximumNumberOfDiscards(),
@@ -569,14 +572,14 @@ public class EventsResource extends AbstractSailingServerResource {
         }
         int oneBasedNumberOfNextRace = Util.size(regatta.getRaceColumns())+1;
         for (int i = 1; i <= numberOfRaces; i++) {
-            addRaceColumn(regattaName, seriesName, "R"+oneBasedNumberOfNextRace++);
+            addRaceColumn(regatta, seriesName, "R"+oneBasedNumberOfNextRace++);
         }
     }
 
-    private RaceColumnInSeries addRaceColumn(String regattaName, String seriesName, String columnName) {
+    private RaceColumnInSeries addRaceColumn(Regatta regatta, String seriesName, String columnName) {
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
-        return getService().apply(new AddColumnToSeries(new RegattaName(regattaName), seriesName, columnName));
+                SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
+        return getService().apply(new AddColumnToSeries(new RegattaName(regatta.getName()), seriesName, columnName));
     }
 
     private void updateEvent(Event event, LeaderboardGroup leaderboardGroup){
@@ -591,12 +594,12 @@ public class EventsResource extends AbstractSailingServerResource {
                 event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds());
     }
 
-    private CourseArea addCourseArea(UUID eventId, String courseAreaName) {
+    private CourseArea addCourseArea(Event event, String courseAreaName) {
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.UPDATE, eventId.toString()));
+                SecuredDomainType.EVENT.getStringPermissionForObject(DefaultActions.UPDATE, event));
         String[] courseAreaNames = new String[] { courseAreaName };
         UUID[] courseAreaIds = new UUID[] { UUID.randomUUID() };
-        return getService().apply(new AddCourseAreas(eventId, courseAreaNames, courseAreaIds))[0];
+        return getService().apply(new AddCourseAreas(event.getId(), courseAreaNames, courseAreaIds))[0];
     }
 
     private void addLeaderboardToDefaultLeaderboardGroup(final RegattaLeaderboard leaderboard) {
@@ -645,7 +648,7 @@ public class EventsResource extends AbstractSailingServerResource {
 
     private RegattaLeaderboard createRegattaLeaderboard(String regattaName, int[] discardThresholds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD, regattaName, regattaName,
+                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaName), regattaName,
                 new ActionWithResult<RegattaLeaderboard>() {
 
                     @Override

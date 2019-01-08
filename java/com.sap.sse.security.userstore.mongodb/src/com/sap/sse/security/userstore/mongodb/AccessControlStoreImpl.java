@@ -13,6 +13,7 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -88,7 +89,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
                 // check if we already have an ownership for the server, create if it is missing
                 QualifiedObjectIdentifier expectedServerOwner = SecuredSecurityTypes.SERVER
-                        .getQualifiedObjectIdentifier(defaultTenant.getName());
+                        .getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(defaultTenant.getName()));
                 if (!ownerships.containsKey(expectedServerOwner)) {
                     setOwnership(expectedServerOwner, null, defaultTenant, defaultTenant.getName());
                 }

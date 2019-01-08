@@ -26,6 +26,7 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 
@@ -121,10 +122,13 @@ public class SliceRaceHandler {
     private void updateVisibility() {
         sliceButtonUi.setVisible(canSlice && visibleRange != null && allowsEditing());
     }
-    
+
     private boolean allowsEditing() {
-        return userService.hasPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, selectedRaceIdentifier.getRegattaName()))
-                && userService.hasPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        return userService.hasPermission(
+                SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        new TypeRelativeObjectIdentifier(selectedRaceIdentifier.getRegattaName())))
+                && userService.hasPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(
+                        DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(leaderboardName)));
     }
 
     private void doSlice() {

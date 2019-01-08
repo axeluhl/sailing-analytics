@@ -36,8 +36,6 @@ import org.scribe.oauth.OAuthService;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
-// GWT has similar class. 
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
@@ -185,7 +183,7 @@ public class OAuthRealm extends AbstractCompositeAuthorizingRealm {
         if (user == null) {
             try {
                 UserGroup tenant = getUserStore().createUserGroup(UUID.randomUUID(), socialname + "-tenant");
-                getAccessControlStore().setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), user, tenant, tenant.getName());
+                getAccessControlStore().setOwnership(tenant.getIdentifier(), user, tenant, tenant.getName());
                 user = getUserStore().createUser(socialname, socialUser.getProperty(Social.EMAIL.name()), tenant, socialUser);
                 tenant.add(user);
                 getUserStore().updateUserGroup(tenant);

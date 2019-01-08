@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Function;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
@@ -171,19 +170,18 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         
         // BoatTable edit features
         final HasPermissions type = SecuredDomainType.BOAT;
-        final Function<BoatDTO, String> idFactory = BoatDTO::getIdAsString;
         AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = new AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell>(
-                new BoatConfigImagesBarCell(getStringMessages()), userService, type, idFactory);
+                new BoatConfigImagesBarCell(getStringMessages()), userService);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE,
                 this::openEditBoatDialog);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
         final DialogConfig<BoatDTO> editOwnerShipDialog = EditOwnershipDialog.create(
-                userService.getUserManagementService(), SecuredDomainType.BOAT, idFactory, null, stringMessages);
+                userService.getUserManagementService(), SecuredDomainType.BOAT, null, stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openDialog);
 
         final EditACLDialog.DialogConfig<BoatDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, idFactory, null, stringMessages);
+                .create(userService.getUserManagementService(), type, null, stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
 

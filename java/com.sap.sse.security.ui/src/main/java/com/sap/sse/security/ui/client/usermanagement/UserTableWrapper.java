@@ -13,7 +13,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
@@ -160,9 +159,8 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         });
 
         final HasPermissions type = SecuredSecurityTypes.USER;
-        final Function<UserDTO, String> idFactory = UserDTO::getName;
         final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = new AccessControlledActionsColumn<>(
-                new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
+                new DefaultActionsImagesBarCell(stringMessages), userService);
         userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user, additionalPermissions));
         userActionColumn.addAction(ACTION_DELETE, DELETE, user -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {
@@ -189,11 +187,11 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         });
         final EditOwnershipDialog.DialogConfig<UserDTO> configOwnership = EditOwnershipDialog.create(
                 userService.getUserManagementService(), type,
-                idFactory, user -> refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null), stringMessages);
+                user -> refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null), stringMessages);
         
         final EditACLDialog.DialogConfig<UserDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type,
-                idFactory, user -> user.getAccessControlList(), stringMessages);
+                user -> user.getAccessControlList(), stringMessages);
         userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));

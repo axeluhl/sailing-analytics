@@ -16,6 +16,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
@@ -76,16 +77,18 @@ public class Activator implements BundleActivator {
                     }
                     for (User user : securityService.getUserList()) {
                         for (Role role : user.getRoles()) {
-                            String associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+                            TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
                             QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                            securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier);
+                            securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier.toString());
                         }
                         for (WildcardPermission permission : user.getPermissions()) {
-                            String associationTypeIdentifier = PermissionAndRoleAssociation.get(permission, user);
+                            TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
+                                    .get(permission, user);
                             QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
                                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                            securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier);
+                            securityService.migrateOwnership(associationQualifiedIdentifier,
+                                    associationTypeIdentifier.toString());
                         }
                     }
 

@@ -355,7 +355,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType);
     
-    void updateLeaderboardGroup(String oldName, String newName, String description, String newDisplayName,
+    void updateLeaderboardGroup(UUID leaderboardGroupId, String oldName, String newName, String description, String newDisplayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,

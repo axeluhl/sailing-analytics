@@ -3,23 +3,33 @@ package com.sap.sailing.domain.swisstimingadapter;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 public interface SwissTimingArchiveConfiguration extends WithQualifiedObjectIdentifier {
-    String getJsonUrl();
+
+    String getJsonURL();
 
     @Override
     default String getName() {
-        return getJsonUrl();
+        return getJsonURL();
     }
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getJsonUrl());
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
     @Override
     default HasPermissions getType() {
         return SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT;
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getJsonURL());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl) {
+        return new TypeRelativeObjectIdentifier(jsonUrl);
     }
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
@@ -23,6 +24,14 @@ public interface Account extends WithQualifiedObjectIdentifier {
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getUser().getEmail());
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getUser().getEmail());
+    }
+
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String email) {
+        return new TypeRelativeObjectIdentifier(email);
     }
 }

@@ -26,6 +26,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -40,7 +41,9 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class PermissionCheckerTest {
     private final UUID eventId = UUID.randomUUID();
-    private final WildcardPermission eventReadPermission = SecuredDomainType.EVENT.getPermissionForObjects(DefaultActions.READ, eventId.toString());
+    private final WildcardPermission eventReadPermission = SecuredDomainType.EVENT
+            .getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
+                    new TypeRelativeObjectIdentifier(eventId.toString()));
     private final UUID userTenantId = UUID.randomUUID();
     private UserGroup adminTenant;
     private User adminUser;
@@ -118,23 +121,27 @@ public class PermissionCheckerTest {
     @Test
     public void testPermissionsImpliedByOwnershipConstrainedRole() throws UserManagementException {
         final String leaderboardName = "My:Leaderboard, the only one ";
+        TypeRelativeObjectIdentifier leaderboardIdentifier = new TypeRelativeObjectIdentifier(leaderboardName);
         final String regattaName = " My:Regatta, the only one ";
-        WildcardPermission leaderboardPermission = SecuredDomainType.LEADERBOARD.getPermissionForObjects(DefaultActions.READ, leaderboardName);
-        WildcardPermission regattaPermission = SecuredDomainType.REGATTA.getPermissionForObjects(DefaultActions.READ, regattaName);
+        TypeRelativeObjectIdentifier regattaIdentifier = new TypeRelativeObjectIdentifier(regattaName);
+        WildcardPermission leaderboardPermission = SecuredDomainType.LEADERBOARD
+                .getPermissionForTypeRelativeIdentifier(DefaultActions.READ, leaderboardIdentifier);
+        WildcardPermission regattaPermission = SecuredDomainType.REGATTA.getPermissionForTypeRelativeIdentifier(
+                DefaultActions.READ, regattaIdentifier);
         assertFalse(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         // let leaderboard be owned by user
-        accessControlStore.setOwnership(SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(leaderboardName), user,
+        accessControlStore.setOwnership(SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(leaderboardIdentifier), user,
                 /* tenantOwner */ null, leaderboardName);
         // let regatta be owned by admin
-        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaName), adminUser,
+        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaIdentifier), adminUser,
                 /* tenantOwner */ null, regattaName);
         // grant user the admin role, but only for objects owned by the user (leaderboard, but not regatta)
         userStore.addRoleForUser(user.getName(),
                 new Role(AdminRole.getInstance(), /* qualifiedForTenant */ null, /* qualifiedForUser */ user));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
-        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaName), /* userOwner */ null,
+        accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaIdentifier), /* userOwner */ null,
                 /* groupOwner */ userTenant, leaderboardName);
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         // only adding the group owner doesn't grant permission yet:

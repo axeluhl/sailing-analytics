@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
@@ -248,9 +247,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         });
 
         final HasPermissions type = SecuredDomainType.REGATTA;
-        final Function<RegattaDTO, String> idFactory = RegattaDTO::getName;
         final AccessControlledActionsColumn<RegattaDTO, RegattaConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
-                new RegattaConfigImagesBarCell(stringMessages), userService, type, idFactory);
+                new RegattaConfigImagesBarCell(stringMessages), userService);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::editRegatta);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DELETE, regatta -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
@@ -258,12 +256,12 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                idFactory, regatta -> regattaRefresher.fillRegattas(), stringMessages);
+                regatta -> regattaRefresher.fillRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 config::openDialog);
 
         final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, idFactory, regatta -> regattaRefresher.fillRegattas(),
+                userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);

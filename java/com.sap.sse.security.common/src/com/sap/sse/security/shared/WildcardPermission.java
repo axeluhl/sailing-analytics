@@ -254,7 +254,8 @@ public class WildcardPermission implements Serializable {
         if (getParts().size() >= 3) {
             for (final String typeName : getParts().get(0)) {
                 for (final String encodedRelativeObjectId : getParts().get(2)) {
-                    result.add(new QualifiedObjectIdentifierImpl(typeName, encoder.decodePermissionPart(encodedRelativeObjectId)));
+                    result.add(new QualifiedObjectIdentifierImpl(typeName,
+                            new TypeRelativeObjectIdentifier(encoder.decodeStringList(encodedRelativeObjectId))));
                 }
             }
         }
@@ -290,6 +291,13 @@ public class WildcardPermission implements Serializable {
         
         public WildcardPermissionBuilder withIds(String... ids) {
             this.ids.addAll(Arrays.asList(ids));
+            return this;
+        }
+        
+        public WildcardPermissionBuilder withIds(TypeRelativeObjectIdentifier... typeRelativeObjectIdentifiers) {
+            for (TypeRelativeObjectIdentifier identifier : typeRelativeObjectIdentifiers) {
+                this.ids.add(identifier.toString());
+            }
             return this;
         }
         
