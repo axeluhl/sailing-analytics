@@ -15,8 +15,7 @@ public class ManeuverClassifierModelFactory
         implements ClassifierModelFactory<ManeuverForEstimation, ManeuverClassifierModelMetadata> {
 
     public static final ManeuverTypeForClassification[] orderedSupportedTargetValues = {
-            ManeuverTypeForClassification.TACK, ManeuverTypeForClassification.JIBE,
-            ManeuverTypeForClassification.HEAD_UP, ManeuverTypeForClassification.BEAR_AWAY };
+            ManeuverTypeForClassification.TACK, ManeuverTypeForClassification.JIBE };
 
     @Override
     public TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> getNewModel(

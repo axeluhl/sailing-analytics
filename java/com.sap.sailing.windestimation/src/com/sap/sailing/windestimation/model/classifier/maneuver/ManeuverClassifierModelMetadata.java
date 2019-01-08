@@ -119,6 +119,10 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         }
         return null;
     }
+    
+    public int getOtherTypes() {
+        return otherTypes;
+    }
 
     @Override
     public double[] getX(ManeuverForEstimation maneuver) {
@@ -168,11 +172,10 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
                 return false;
             }
         }
-        if (maneuverFeatures.isMarksInformation()) {
-            return maneuver.isMarkPassingDataAvailable();
+        if (maneuverFeatures.isMarksInformation() && !maneuver.isMarkPassingDataAvailable()) {
+            return false;
         }
-        if (boatClass != null && (maneuver.getBoatClass() == null
-                || !boatClass.getName().equals(maneuver.getBoatClass().getName()))) {
+        if (boatClass != null && !boatClass.equals(maneuver.getBoatClass())) {
             return false;
         }
         return true;
