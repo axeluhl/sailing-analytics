@@ -846,6 +846,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 final RoleDefinition viewerRole = getSecurityService()
                         .getRoleDefinition(SailingViewerRole.getInstance().getId());
                 final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+                // role ownership handling left out on purpose, initially only an admin can set this server to be non
+                // public
                 final Role publicAccessForServerRole = new Role(viewerRole, defaultServerTenant, null);
                 getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
                 getSecurityService().setSetting(initializedKey, true);

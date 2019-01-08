@@ -17,6 +17,7 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -80,6 +81,14 @@ public class Activator implements BundleActivator {
                             QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
                             securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier.toString());
+                        }
+                        for (WildcardPermission permission : user.getPermissions()) {
+                            TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
+                                    .get(permission, user);
+                            QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                            securityService.migrateOwnership(associationQualifiedIdentifier,
+                                    associationTypeIdentifier.toString());
                         }
                     }
 

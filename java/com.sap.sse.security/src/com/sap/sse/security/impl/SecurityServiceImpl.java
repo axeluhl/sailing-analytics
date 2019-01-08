@@ -119,6 +119,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -264,15 +265,24 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
                         null);
 
-                apply(s -> s.internalSetOwnership(adminUser.getIdentifier(), ADMIN_USERNAME, null, ADMIN_USERNAME));
-                addRoleForUser(adminUser, new Role(adminRoleDefinition));
+                apply(s -> s.internalSetOwnership(
+                        adminUser.getIdentifier(), ADMIN_USERNAME, null,
+                        ADMIN_USERNAME));
+                Role adminRole = new Role(adminRoleDefinition);
+                addRoleForUser(adminUser, adminRole);
+                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(adminRole,
+                        adminUser);
+                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                setOwnership(qualifiedTypeIdentifier, adminUser, null);
             }
             
             if (userStore.getUserByName(SecurityService.ALL_USERNAME) == null) {
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
                 User allUser = createUserInternal(SecurityService.ALL_USERNAME, null, getDefaultTenant());
 
-                apply(s -> s.internalSetOwnership(allUser.getIdentifier(), ALL_USERNAME, null, ALL_USERNAME));
+                apply(s -> s.internalSetOwnership(allUser.getIdentifier(),
+                        ALL_USERNAME, null, ALL_USERNAME));
 
                 // The permission to create new users is initially added but not recreated on server start if the admin removed in in the meanwhile.
                 // This allows servers to be configured to not permit self-registration of new users but only users being managed by an admin user.
@@ -727,6 +737,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = createUserInternal(username, email, tenant, upa);
+        // ownership is handled by caller
         addRoleForUser(result,
                 new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToUserGroup(tenant, result);
@@ -1572,7 +1583,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         return result;
     }
-    
+
     @Override
     public void checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             Action actionToDeleteObject) {
@@ -1932,15 +1943,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination) {
+    /**
+     * This method does not handle RoleAssociationOwnerships! this must be done via the callback
+     */
+    public void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback) {
         for (User user : source.getUsers()) {
             addUserToUserGroup(destination, user);
         }
 
         for (Pair<User, Role> userAndRole : userStore.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
+            final Role copyRole = new Role(existingRole.getRoleDefinition(), destination,
+                    existingRole.getQualifiedForUser());
             addRoleForUser(userAndRole.getA(),
-                    new Role(existingRole.getRoleDefinition(), destination, existingRole.getQualifiedForUser()));
+                    copyRole);
+            callback.onRoleCopy(userAndRole.getA(), existingRole, copyRole);
         }
     }
     

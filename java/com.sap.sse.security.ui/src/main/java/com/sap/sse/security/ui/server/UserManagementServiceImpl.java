@@ -669,10 +669,33 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 }
             }
             for (WildcardPermission permissionToRemove : permissionsToRemove) {
-                getSecurityService().removePermissionFromUser(username, permissionToRemove);
+                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
+                        .get(permissionToRemove, u);
+                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                        new ActionWithResult<Void>() {
+
+                            @Override
+                            public Void run() throws Exception {
+                                getSecurityService().removePermissionFromUser(username, permissionToRemove);
+                                return null;
+                            }
+                        });
+
             }
             for (WildcardPermission permissionToAdd : permissionsToAdd) {
-                getSecurityService().addPermissionForUser(username, permissionToAdd);
+                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
+                        .get(permissionToAdd, u);
+                getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                        SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
+                        associationTypeIdentifier.toString(), new Action() {
+
+                            @Override
+                            public void run() throws Exception {
+                                getSecurityService().addPermissionForUser(username, permissionToAdd);
+                            }
+                        });
             }
             final String message = "Set roles " + permissions + " for user " + username;
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());

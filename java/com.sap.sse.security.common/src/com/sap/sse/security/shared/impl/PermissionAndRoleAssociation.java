@@ -2,6 +2,7 @@ package com.sap.sse.security.shared.impl;
 
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WildcardPermission;
 
 public class PermissionAndRoleAssociation {
     public static TypeRelativeObjectIdentifier get(Role role, User userWithRole) {
@@ -19,6 +20,15 @@ public class PermissionAndRoleAssociation {
         String userWithRoleString = userWithRole.getIdentifier().getTypeRelativeObjectIdentifier().toString();
         TypeRelativeObjectIdentifier associationTypeRelativeId = new TypeRelativeObjectIdentifier(userWithRoleString, roleDefinitionString,
                 ownerUserString, ownerTenantString);
+        return associationTypeRelativeId;
+    }
+
+    public static TypeRelativeObjectIdentifier get(WildcardPermission permission, User userWithPermission) {
+        String permissionDefinitionString = permission.toString();
+        TypeRelativeObjectIdentifier userWithRoleString = userWithPermission.getIdentifier()
+                .getTypeRelativeObjectIdentifier();
+        TypeRelativeObjectIdentifier associationTypeRelativeId = new TypeRelativeObjectIdentifier(
+                userWithRoleString.toString(), permissionDefinitionString);
         return associationTypeRelativeId;
     }
 }
