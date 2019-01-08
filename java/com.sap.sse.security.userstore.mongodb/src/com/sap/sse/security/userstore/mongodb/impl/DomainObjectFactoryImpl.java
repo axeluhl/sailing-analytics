@@ -278,6 +278,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 for (Object o : roleNames) {
                     boolean found = false;
                     for (final RoleDefinition roleDefinition : roleDefinitionsById.values()) {
+                        // migrate old admins to new admin!
+                        logger.warning("Role " + o.toString() + " for user " + name
+                                + " found during migration. User will be migrated to new permission-vertical admin.");
+
                         if (roleDefinition.getName().equals(o.toString())) {
                             logger.info("Found role "+roleDefinition+" for old role "+o.toString()+" for user "+name);
                             roles.add(new Role(roleDefinition, defaultTenantForRoleMigration,
@@ -287,7 +291,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         }
                     }
                     if (!found) {
-                        logger.warning("Role "+o.toString()+" for user "+name+" not found during migration. User will no longer be in this role.");
+                        logger.warning("Role " + o.toString() + " for user " + name
+                                + " not found during migration. User will no longer be in this role.");
                     }
                 }
             }
