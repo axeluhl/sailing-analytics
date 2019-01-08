@@ -923,4 +923,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return null;
     }
+
+    @Override
+    public void triggerManeuverCacheRecalculation(Competitor competitor) {
+    }
 }

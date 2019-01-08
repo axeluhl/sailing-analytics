@@ -85,7 +85,7 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
 
     @Override
     public List<CompleteManeuverCurve> detectCompleteManeuverCurves() {
-        List<ManeuverSpot> maneuverSpots = maneuverDetector.detectManeuverSpots();
+        List<? extends ManeuverSpot> maneuverSpots = maneuverDetector.detectManeuverSpots();
         return maneuverSpots.stream().filter(maneuverSpot -> maneuverSpot.getManeuverCurve() != null)
                 .map(maneuverSpot -> maneuverSpot.getManeuverCurve()).collect(Collectors.toList());
     }
@@ -263,7 +263,7 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
         } finally {
             maneuverDetector.track.unlockAfterRead();
         }
-        if(courseAtMaxTurningRate == null) {
+        if (courseAtMaxTurningRate == null) {
             courseAtMaxTurningRate = stepWithLowestSpeed.getSpeedWithBearing().getBearing();
         }
         ManeuverLoss projectedManeuverLoss = maneuverDetector.getManeuverLoss(maneuverCurve.getMainCurveBoundaries());
@@ -303,7 +303,8 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore(),
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter());
         TrackTimeInfo trackTimeInfo = previousManeuverCurve == null || nextManeuverCurve == null
-                ? maneuverDetector.getTrackTimeInfo() : null;
+                ? maneuverDetector.getTrackTimeInfo()
+                : null;
         Pair<Duration, SpeedWithBearing> durationAndAvgSpeedWithBearingBefore = calculateDurationAndAvgSpeedWithBearingBetweenTimePoints(
                 previousManeuverCurve == null ? trackTimeInfo.getTrackStartTimePoint()
                         : previousManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries()
@@ -423,7 +424,7 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
         Distance result = null;
         for (Mark mark : waypoint.getMarks()) {
             Position markPosition = markPositionAtTimePointCache.getEstimatedPosition(mark);
-            if(markPosition != null) {
+            if (markPosition != null) {
                 Distance distance = markPosition.getDistance(maneuverPosition);
                 if (result == null || distance.compareTo(result) < 0) {
                     result = distance;

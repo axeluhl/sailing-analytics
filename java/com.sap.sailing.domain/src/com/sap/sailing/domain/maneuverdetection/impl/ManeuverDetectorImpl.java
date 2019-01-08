@@ -101,10 +101,10 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
      * @return an empty list if no maneuver spots were detected, otherwise the list with detected maneuver spots.
      * @see ManeuverSpot
      */
-    protected List<ManeuverSpot> detectManeuverSpots() {
+    protected List<? extends ManeuverSpot> detectManeuverSpots() {
         TrackTimeInfo startAndEndTimePoints = getTrackTimeInfo();
         if (startAndEndTimePoints != null) {
-            List<ManeuverSpot> maneuverSpots = detectManeuvers(startAndEndTimePoints.getTrackStartTimePoint(),
+            List<ManeuverSpot> maneuverSpots = detectManeuverSpots(startAndEndTimePoints.getTrackStartTimePoint(),
                     startAndEndTimePoints.getTrackEndTimePoint());
             return maneuverSpots;
         }
@@ -129,12 +129,12 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
      * @return an empty list if no maneuver spots are detected for <code>competitor</code> between <code>from</code> and
      *         <code>to</code>, or else the list of maneuver spots with corresponding maneuvers detected.
      */
-    public List<ManeuverSpot> detectManeuvers(TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
+    public List<ManeuverSpot> detectManeuverSpots(TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
         ApproximatedFixesCalculator approximatedFixesCalculator = new ApproximatedFixesCalculatorImpl(trackedRace,
                 competitor);
         Iterable<GPSFixMoving> approximatedFixes = approximatedFixesCalculator.approximate(earliestManeuverStart,
                 latestManeuverEnd);
-        return detectManeuvers(approximatedFixes, earliestManeuverStart, latestManeuverEnd);
+        return detectManeuverSpots(approximatedFixes, earliestManeuverStart, latestManeuverEnd);
     }
 
     /**
@@ -143,7 +143,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
      * be detected if at least three fixes are provided in <code>approximatedFixesToAnalyze</code>. The first and the
      * last DP-fix get never associated with a maneuver spot.
      */
-    protected List<ManeuverSpot> detectManeuvers(Iterable<GPSFixMoving> approximatingFixesToAnalyze,
+    protected List<ManeuverSpot> detectManeuverSpots(Iterable<GPSFixMoving> approximatingFixesToAnalyze,
             TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
         List<ManeuverSpot> result = new ArrayList<>();
         if (Util.size(approximatingFixesToAnalyze) > 2) {
@@ -186,12 +186,12 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
 
     /**
      * Checks whether {@code currentFix} can be grouped together with the previous fixes in order to be regarded as a
-     * single maneuver spot. For this, the {@code newCourseChangeDirection must match the direction of provided
-     * {@code lastCourseChangeDirection}. Additionally, the distance from {@code previousFix} to {@code currentFix} must
-     * be <= 3 hull lengths, or the time difference <= getApproximatedManeuverDuration().
+     * single maneuver spot. For this, the {@code newCourseChangeDirection must match the direction of provided {@code
+     * lastCourseChangeDirection}. Additionally, the distance from {@code previousFix} to {@code currentFix} must be <=
+     * 3 hull lengths, or the time difference <= getApproximatedManeuverDuration().
      * 
-     * @param lastCourseChangeDirection
-     *            The last course within previous three fixes counting from {@code currentFix}
+     * @param lastCourseChangeDirection The last course within previous three fixes counting from {@code currentFix}
+     * 
      * @param mewCourseChangeDirection
      *            The current course within {@code previousFix}, {@code currentFix} and the fix which is following after
      *            {@code currentFix}
@@ -216,10 +216,13 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         return true;
     }
 
-    protected List<Maneuver> getAllManeuversFromManeuverSpots(List<ManeuverSpot> maneuverSpots) {
+    private List<Maneuver> getAllManeuversFromManeuverSpots(List<? extends ManeuverSpot> maneuverSpots) {
         List<Maneuver> maneuvers = new ArrayList<>();
         for (ManeuverSpot maneuverSpot : maneuverSpots) {
-            for (Maneuver maneuver : maneuverSpot.getManeuvers()) {
+            ManeuverSpotWithTypedManeuvers maneuverSpotWithTypedManeuvers = createManeuverSpotWithTypedManeuversFromManeuverCurve(
+                    (List<GPSFixMoving>) maneuverSpot.getDouglasPeuckerFixes(), maneuverSpot.getManeuverSpotDirection(),
+                    maneuverSpot.getManeuverCurve());
+            for (Maneuver maneuver : maneuverSpotWithTypedManeuvers.getManeuvers()) {
                 maneuvers.add(maneuver);
             }
         }
@@ -305,9 +308,15 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             NauticalSide maneuverDirection, TimePoint earliestManeuverStart, TimePoint latestManeuverEnd) {
         CompleteManeuverCurve maneuverCurve = createCompleteManeuverCurveFromFixesGroup(douglasPeuckerFixesGroup,
                 maneuverDirection, earliestManeuverStart, latestManeuverEnd);
+        return new ManeuverSpot(douglasPeuckerFixesGroup, maneuverDirection, maneuverCurve);
+    }
+
+    protected ManeuverSpotWithTypedManeuvers createManeuverSpotWithTypedManeuversFromManeuverCurve(
+            List<GPSFixMoving> douglasPeuckerFixesGroup, NauticalSide maneuverDirection,
+            CompleteManeuverCurve maneuverCurve) {
         if (maneuverCurve == null) {
-            return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, null,
-                    new ArrayList<>(), null);
+            return new ManeuverSpotWithTypedManeuvers(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection,
+                    null, new ArrayList<>(), null);
         }
         TimePoint maneuverTimePoint = maneuverCurve.getMainCurveBoundaries().getTimePoint();
         Position maneuverPosition = track.getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
@@ -315,7 +324,8 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         Iterable<Maneuver> maneuvers = determineManeuversFromManeuverCurve(maneuverCurve.getMainCurveBoundaries(),
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries(), wind,
                 maneuverCurve.getMarkPassing());
-        return new ManeuverSpot(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection, maneuverCurve, maneuvers,
+        return new ManeuverSpotWithTypedManeuvers(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection,
+                maneuverCurve, maneuvers,
                 new WindMeasurement(maneuverTimePoint, maneuverPosition, wind == null ? null : wind.getBearing()));
     }
 
@@ -658,7 +668,8 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             Bearing toWindAfterManeuver = windBearing
                     .getDifferenceTo(maneuverMainCurveDetails.getSpeedWithBearingAfter().getBearing());
             maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees())
-                    ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                    ? ManeuverType.HEAD_UP
+                    : ManeuverType.BEAR_AWAY;
         } else {
             // no wind information; marking as UNKNOWN
             maneuverType = ManeuverType.UNKNOWN;

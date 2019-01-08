@@ -12,9 +12,10 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.ApproximatedFixesCalculator;
+import com.sap.sailing.domain.maneuverdetection.IncrementalApproximatedFixesCalculator;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
-import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
@@ -72,12 +73,15 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      */
     private final ApproximatedFixesCalculator approximatedFixesCalculator;
 
+    private final WindEstimationInteraction windEstimationInteraction;
+
     /**
      * Constructor for unit tests only.
      */
     public IncrementalManeuverDetectorImpl() {
         super();
-        this.approximatedFixesCalculator = null;
+        approximatedFixesCalculator = null;
+        windEstimationInteraction = null;
     }
 
     /**
@@ -89,8 +93,10 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      * @param competitor
      *            The competitor, whose maneuvers shall be discovered
      */
-    public IncrementalManeuverDetectorImpl(TrackedRace trackedRace, Competitor competitor) {
+    public IncrementalManeuverDetectorImpl(TrackedRace trackedRace, Competitor competitor,
+            WindEstimationInteraction windEstimationInteraction) {
         super(trackedRace, competitor);
+        this.windEstimationInteraction = windEstimationInteraction;
         // TODO Use IncrementalApproximatedFixesCalculatorImpl when its deprecation status gets fixed
         this.approximatedFixesCalculator = new ApproximatedFixesCalculatorImpl(trackedRace, competitor);
     }
@@ -103,12 +109,13 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         }
         return Collections.emptyList();
     }
-    
+
     @Override
     public List<CompleteManeuverCurve> getAlreadyDetectedManeuverCurves() {
         ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
         if (lastManeuverDetectionResult != null) {
-            return lastManeuverDetectionResult.getManeuverSpots().stream().filter(maneuverSpot -> maneuverSpot.getManeuverCurve() != null)
+            return lastManeuverDetectionResult.getManeuverSpots().stream()
+                    .filter(maneuverSpot -> maneuverSpot.getManeuverCurve() != null)
                     .map(maneuverSpot -> maneuverSpot.getManeuverCurve()).collect(Collectors.toList());
         }
         return Collections.emptyList();
@@ -117,12 +124,30 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     @Override
     public void clearState() {
         lastManeuverDetectionResult = null;
-        // TODO If IncrementalApproximatedFixesCalculator is used, call its
-        // incrementalApproximatedFixesCalculator.clearState() also.
+        if (approximatedFixesCalculator instanceof IncrementalApproximatedFixesCalculator) {
+            ((IncrementalApproximatedFixesCalculator) approximatedFixesCalculator).clearState();
+        }
     }
 
     @Override
-    protected List<ManeuverSpot> detectManeuverSpots() {
+    public List<Maneuver> detectManeuvers() {
+        List<ManeuverSpotWithTypedManeuvers> maneuverSpots = detectManeuverSpots();
+        List<Maneuver> maneuvers = getAllManeuversFromManeuverSpots(maneuverSpots);
+        return maneuvers;
+    }
+
+    private List<Maneuver> getAllManeuversFromManeuverSpots(List<ManeuverSpotWithTypedManeuvers> maneuverSpots) {
+        List<Maneuver> maneuvers = new ArrayList<>(maneuverSpots.size());
+        for (ManeuverSpotWithTypedManeuvers maneuverSpot : maneuverSpots) {
+            for (Maneuver maneuver : maneuverSpot.getManeuvers()) {
+                maneuvers.add(maneuver);
+            }
+        }
+        return maneuvers;
+    }
+
+    @Override
+    protected List<ManeuverSpotWithTypedManeuvers> detectManeuverSpots() {
         TrackTimeInfo trackTimeInfo = getTrackTimeInfo();
         if (trackTimeInfo != null) {
             TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
@@ -131,26 +156,116 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             Iterable<GPSFixMoving> douglasPeuckerFixes = approximatedFixesCalculator.approximate(earliestManeuverStart,
                     latestManeuverEnd);
             ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
-            List<ManeuverSpot> maneuverSpots;
+            List<ManeuverSpotWithTypedManeuvers> maneuverSpotsWithTypedManeuvers;
             if (lastManeuverDetectionResult == null) {
-                maneuverSpots = detectManeuvers(douglasPeuckerFixes, earliestManeuverStart, latestManeuverEnd);
+                List<ManeuverSpot> maneuverSpots = detectManeuverSpots(douglasPeuckerFixes, earliestManeuverStart,
+                        latestManeuverEnd);
+                if (windEstimationInteraction != null) {
+                    windEstimationInteraction.newManeuverSpotsDetected(maneuverSpots);
+                }
+                maneuverSpotsWithTypedManeuvers = new ArrayList<>();
+                for (ManeuverSpot maneuverSpot : maneuverSpots) {
+                    ManeuverSpotWithTypedManeuvers maneuverSpotWithTypedManeuvers = createManeuverSpotWithTypedManeuversFromManeuverCurve(
+                            (List<GPSFixMoving>) maneuverSpot.getDouglasPeuckerFixes(),
+                            maneuverSpot.getManeuverSpotDirection(), maneuverSpot.getManeuverCurve());
+                    maneuverSpotsWithTypedManeuvers.add(maneuverSpotWithTypedManeuvers);
+                }
             } else {
-                maneuverSpots = detectManeuversIncrementally(trackTimeInfo, douglasPeuckerFixes,
-                        lastManeuverDetectionResult);
+                IncrementalManeuverSpotDetectionResult detectionResult = detectManeuverSpotsIncrementally(trackTimeInfo,
+                        douglasPeuckerFixes, lastManeuverDetectionResult);
+                boolean allManeuverTypesMustBeRedetermined = false;
+                if (windEstimationInteraction != null) {
+                    allManeuverTypesMustBeRedetermined = windEstimationInteraction
+                            .newManeuverSpotsDetected(detectionResult.getNewManeuverSpots());
+                }
+                maneuverSpotsWithTypedManeuvers = getAllManeuverSpotsWithTypedManeuversFromDetectionResultSortedByTimePoint(
+                        detectionResult);
+                if (allManeuverTypesMustBeRedetermined) {
+                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                        // TODO make more efficient: 1) return from windEstimationInteraction also competitors, on whose
+                        // tracks the wind has changed 2) trigger only retypization of maneuver
+                        if (!this.competitor.equals(competitor)) {
+                            trackedRace.triggerManeuverCacheRecalculation(competitor);
+                        }
+                    }
+                }
             }
             int incrementalRunsCount = lastManeuverDetectionResult == null ? 1
                     : (lastManeuverDetectionResult.getIncrementalRunsCount() < Integer.MAX_VALUE
-                            ? lastManeuverDetectionResult.getIncrementalRunsCount() + 1 : Integer.MAX_VALUE);
-            this.lastManeuverDetectionResult = new ManeuverDetectionResult(latestRawFixTimePoint, maneuverSpots,
-                    incrementalRunsCount);
-            return maneuverSpots;
+                            ? lastManeuverDetectionResult.getIncrementalRunsCount() + 1
+                            : Integer.MAX_VALUE);
+            this.lastManeuverDetectionResult = new ManeuverDetectionResult(latestRawFixTimePoint,
+                    maneuverSpotsWithTypedManeuvers, incrementalRunsCount);
+            return maneuverSpotsWithTypedManeuvers;
         }
         return Collections.emptyList();
     }
 
-    // public for unit tests
-    public List<ManeuverSpot> detectManeuversIncrementally(TrackTimeInfo trackTimeInfo,
+    protected List<ManeuverSpotWithTypedManeuvers> getAllManeuverSpotsWithTypedManeuversFromDetectionResultSortedByTimePoint(
+            IncrementalManeuverSpotDetectionResult detectionResult) {
+        List<ManeuverSpotWithTypedManeuvers> result = new ArrayList<>();
+        Iterator<ManeuverSpotWithTypedManeuvers> exitingManeuverSpotsIterator = detectionResult
+                .getManeuverSpotsToReuse().iterator();
+        Iterator<ManeuverSpot> newManeuverSpotsIterator = detectionResult.getNewManeuverSpots().iterator();
+        ManeuverSpot currentNewManeuverSpot = newManeuverSpotsIterator.hasNext() ? newManeuverSpotsIterator.next()
+                : null;
+        ManeuverSpotWithTypedManeuvers currentExistingManeuverSpot = exitingManeuverSpotsIterator.hasNext()
+                ? exitingManeuverSpotsIterator.next()
+                : null;
+        while (true) {
+            if (currentExistingManeuverSpot != null && (currentNewManeuverSpot == null
+                    || !currentExistingManeuverSpot.getManeuverCurve().getMainCurveBoundaries().getTimePoint().after(
+                            currentNewManeuverSpot.getManeuverCurve().getMainCurveBoundaries().getTimePoint()))) {
+                ManeuverSpotWithTypedManeuvers maneuverSpotWithTypedManeuvers = getManeuverSpotWithTypedManeuversFromManeuverSpotInState(
+                        currentExistingManeuverSpot);
+                result.add(maneuverSpotWithTypedManeuvers);
+                currentExistingManeuverSpot = exitingManeuverSpotsIterator.hasNext()
+                        ? exitingManeuverSpotsIterator.next()
+                        : null;
+            } else if (currentNewManeuverSpot != null) {
+                ManeuverSpotWithTypedManeuvers maneuverSpotWithTypedManeuvers = createManeuverSpotWithTypedManeuversFromManeuverCurve(
+                        (List<GPSFixMoving>) currentNewManeuverSpot.getDouglasPeuckerFixes(),
+                        currentNewManeuverSpot.getManeuverSpotDirection(), currentNewManeuverSpot.getManeuverCurve());
+                result.add(maneuverSpotWithTypedManeuvers);
+                currentNewManeuverSpot = newManeuverSpotsIterator.hasNext() ? newManeuverSpotsIterator.next() : null;
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private ManeuverSpotWithTypedManeuvers getManeuverSpotWithTypedManeuversFromManeuverSpotInState(
+            ManeuverSpotWithTypedManeuvers currentExistingManeuverSpot) {
+        ManeuverSpotWithTypedManeuvers maneuverSpotWithTypedManeuvers;
+        if (checkManeuverSpotWindNearlySame(currentExistingManeuverSpot)
+                || currentExistingManeuverSpot.getManeuverCurve() == null) {
+            // We found an existing maneuver spot with similar fixes and estimated winds => reuse
+            // existing maneuver spot
+            maneuverSpotWithTypedManeuvers = currentExistingManeuverSpot;
+        } else {
+            // New wind information has been received which considerably differs from previous
+            // maneuver spot calculation => recalculate maneuvers of existing maneuver curve
+            CompleteManeuverCurve maneuverCurve = currentExistingManeuverSpot.getManeuverCurve();
+            WindMeasurement windMeasurement = currentExistingManeuverSpot.getWindMeasurement();
+            Wind wind = trackedRace.getWind(windMeasurement.getPosition(), windMeasurement.getTimePoint());
+            List<Maneuver> maneuvers = determineManeuversFromManeuverCurve(maneuverCurve.getMainCurveBoundaries(),
+                    maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries(), wind,
+                    maneuverCurve.getMarkPassing());
+            maneuverSpotWithTypedManeuvers = new ManeuverSpotWithTypedManeuvers(
+                    currentExistingManeuverSpot.getDouglasPeuckerFixes(),
+                    currentExistingManeuverSpot.getManeuverSpotDirection(), maneuverCurve, maneuvers,
+                    new WindMeasurement(windMeasurement.getTimePoint(), windMeasurement.getPosition(),
+                            wind.getBearing()));
+        }
+        return maneuverSpotWithTypedManeuvers;
+    }
+
+    // protected for unit tests
+    protected IncrementalManeuverSpotDetectionResult detectManeuverSpotsIncrementally(TrackTimeInfo trackTimeInfo,
             Iterable<GPSFixMoving> approximatingFixesToAnalyze, ManeuverDetectionResult lastManeuverDetectionResult) {
+        List<ManeuverSpotWithTypedManeuvers> existingManeuverSpots = new ArrayList<>();
+        List<ManeuverSpot> newManeuverSpots = new ArrayList<>();
         TimePoint earliestManeuverStart = trackTimeInfo.getTrackStartTimePoint();
         TimePoint latestManeuverEnd = trackTimeInfo.getTrackEndTimePoint();
         TimePoint latestRawFixTimePoint = trackTimeInfo.getLatestRawFixTimePoint();
@@ -158,18 +273,18 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 .asMillis();
         TimePoint latestRawFixTimePointOfPreviousManeuverDetectionIteration = lastManeuverDetectionResult
                 .getLatestRawFixTimePoint();
-        List<ManeuverSpot> result = new ArrayList<>();
         if (Util.size(approximatingFixesToAnalyze) > 2) {
             List<GPSFixMoving> fixesGroupForManeuverSpotAnalysis = new ArrayList<GPSFixMoving>();
             Iterator<GPSFixMoving> approximationPointsIter = approximatingFixesToAnalyze.iterator();
             GPSFixMoving previous = approximationPointsIter.next();
             GPSFixMoving current = approximationPointsIter.next();
             NauticalSide lastCourseChangeDirection = null;
-            ManeuverSpot matchingManeuverSpotFromState = null;
+            ManeuverSpotWithTypedManeuvers matchingManeuverSpotFromState = null;
             Iterator<GPSFixMoving> matchingFixesGroupFromStateIterator = null;
-            ListIterator<ManeuverSpot> lastManeuverSpotIteratorUsed = getExistingManeuverSpotByFirstDouglasPeuckerFix(
+            ListIterator<ManeuverSpotWithTypedManeuvers> lastManeuverSpotIteratorUsed = getExistingManeuverSpotByFirstDouglasPeuckerFix(
                     lastManeuverDetectionResult, null, current);
-            ManeuverSpot nextExistingSpot = lastManeuverSpotIteratorUsed != null ? lastManeuverSpotIteratorUsed.next()
+            ManeuverSpotWithTypedManeuvers nextExistingSpot = lastManeuverSpotIteratorUsed != null
+                    ? lastManeuverSpotIteratorUsed.next()
                     : null;
             do {
                 GPSFixMoving next = approximationPointsIter.next();
@@ -186,41 +301,12 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                     } else {
                         // check if the existing group is followed by an existing group, otherwise discard the existing
                         // maneuver spot, because it can possibly be extended by the next fix.
-                        ListIterator<ManeuverSpot> maneuverSpotIterator = getExistingManeuverSpotByFirstDouglasPeuckerFix(
+                        ListIterator<ManeuverSpotWithTypedManeuvers> maneuverSpotIterator = getExistingManeuverSpotByFirstDouglasPeuckerFix(
                                 lastManeuverDetectionResult, lastManeuverSpotIteratorUsed, current);
                         if (maneuverSpotIterator != null) {
-                            if (maneuverSpotIterator != null) {
-                                nextExistingSpot = maneuverSpotIterator.next();
-                                lastManeuverSpotIteratorUsed = maneuverSpotIterator;
-                            }
-                            if (checkManeuverSpotWindNearlySame(matchingManeuverSpotFromState)) {
-                                // We found an existing maneuver spot with similar fixes and estimated winds => reuse
-                                // existing maneuver spot
-                                result.add(matchingManeuverSpotFromState);
-                            } else {
-                                // New wind information has been received which considerably differs from previous
-                                // maneuver spot calculation => recalculate maneuvers of existing maneuver curve
-                                CompleteManeuverCurve maneuverCurve = matchingManeuverSpotFromState.getManeuverCurve();
-                                ManeuverSpot maneuverSpot;
-                                if (maneuverCurve != null) {
-                                    WindMeasurement windMeasurement = matchingManeuverSpotFromState
-                                            .getWindMeasurement();
-                                    Wind wind = trackedRace.getWind(windMeasurement.getPosition(),
-                                            windMeasurement.getTimePoint());
-                                    List<Maneuver> maneuvers = determineManeuversFromManeuverCurve(
-                                            maneuverCurve.getMainCurveBoundaries(),
-                                            maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries(), wind,
-                                            maneuverCurve.getMarkPassing());
-                                    maneuverSpot = new ManeuverSpot(
-                                            matchingManeuverSpotFromState.getDouglasPeuckerFixes(),
-                                            matchingManeuverSpotFromState.getManeuverSpotDirection(), maneuverCurve,
-                                            maneuvers, new WindMeasurement(windMeasurement.getTimePoint(),
-                                                    windMeasurement.getPosition(), wind.getBearing()));
-                                } else {
-                                    maneuverSpot = matchingManeuverSpotFromState;
-                                }
-                                result.add(maneuverSpot);
-                            }
+                            nextExistingSpot = maneuverSpotIterator.next();
+                            lastManeuverSpotIteratorUsed = maneuverSpotIterator;
+                            existingManeuverSpots.add(matchingManeuverSpotFromState);
                             fixesGroupForManeuverSpotAnalysis.clear();
                         }
                         matchingManeuverSpotFromState = null;
@@ -240,7 +326,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                         ManeuverSpot maneuverSpot = createManeuverSpotWithManeuversFromFixesGroup(
                                 fixesGroupForManeuverSpotAnalysis, lastCourseChangeDirection, earliestManeuverStart,
                                 latestManeuverEnd);
-                        result.add(maneuverSpot);
+                        newManeuverSpots.add(maneuverSpot);
                         fixesGroupForManeuverSpotAnalysis.clear();
                     }
                     lastCourseChangeDirection = courseChangeDirectionOnOriginalFixes;
@@ -249,12 +335,12 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 // check if we have a new fixes group.
                 if (fixesGroupForManeuverSpotAnalysis.size() == 1) {
                     // Check if we got an existing maneuver spot with similar fix at beginning
-                    ManeuverSpot maneuverSpot;
+                    ManeuverSpotWithTypedManeuvers maneuverSpot;
                     if (nextExistingSpot != null) {
                         maneuverSpot = nextExistingSpot;
                         nextExistingSpot = null;
                     } else {
-                        ListIterator<ManeuverSpot> maneuverSpotIterator = getExistingManeuverSpotByFirstDouglasPeuckerFix(
+                        ListIterator<ManeuverSpotWithTypedManeuvers> maneuverSpotIterator = getExistingManeuverSpotByFirstDouglasPeuckerFix(
                                 lastManeuverDetectionResult, lastManeuverSpotIteratorUsed, current);
                         if (maneuverSpotIterator != null) {
                             maneuverSpot = maneuverSpotIterator.next();
@@ -293,10 +379,10 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 ManeuverSpot maneuverSpot = createManeuverSpotWithManeuversFromFixesGroup(
                         fixesGroupForManeuverSpotAnalysis, lastCourseChangeDirection, earliestManeuverStart,
                         latestManeuverEnd);
-                result.add(maneuverSpot);
+                newManeuverSpots.add(maneuverSpot);
             }
         }
-        return result;
+        return new IncrementalManeuverSpotDetectionResult(existingManeuverSpots, newManeuverSpots);
     }
 
     /**
@@ -331,7 +417,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 .plus(getMaxDurationForAfterManeuverSectionExtension(approximateManeuverDuration));
     }
 
-    private boolean checkManeuverSpotWindNearlySame(ManeuverSpot maneuverSpot) {
+    private boolean checkManeuverSpotWindNearlySame(ManeuverSpotWithTypedManeuvers maneuverSpot) {
         if (maneuverSpot.getWindMeasurement() != null) {
             WindMeasurement windMeasurement = maneuverSpot.getWindMeasurement();
             Bearing lastWindCourse = windMeasurement.getWindCourse();
@@ -363,7 +449,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     }
 
     // for unit tests only
-    public void setLastManeuverDetectionResult(ManeuverDetectionResult lastManeuverDetectionResult) {
+    protected void setLastManeuverDetectionResult(ManeuverDetectionResult lastManeuverDetectionResult) {
         this.lastManeuverDetectionResult = lastManeuverDetectionResult;
     }
 
@@ -376,10 +462,10 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     /**
      * Tries to get an already processed maneuver spot from previous calls of {@link #detectManeuvers()} which starts
      * with a douglas peucker fix similar to the provided {@code newDouglasPeuckerFix}. This method was designed to run
-     * within loops of {@link #detectManeuversIncrementally(TrackTimeInfo, Iterable, ManeuverDetectionResult)}. In order
-     * to prevent squared iteration complexity, the method returns a {@code ListIterator} which is supposed to be used
-     * to retrieve the located existing maneuver spot, as well as to provide the same iterator for the following call of
-     * this method within following iterations, in order to resume the search iteration from the position of the
+     * within loops of {@link #detectManeuverSpotsIncrementally(TrackTimeInfo, Iterable, ManeuverDetectionResult)}. In
+     * order to prevent squared iteration complexity, the method returns a {@code ListIterator} which is supposed to be
+     * used to retrieve the located existing maneuver spot, as well as to provide the same iterator for the following
+     * call of this method within following iterations, in order to resume the search iteration from the position of the
      * previously retrieved maneuver spot.
      * 
      * @param lastManeuverDetectionResult
@@ -392,13 +478,13 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      * @return {@code null} if no corresponding maneuver spot could be found, otherwise a {@code ListIterator} which
      *         points to the matched maneuver spot in its first {@code next()} call.
      */
-    private ListIterator<ManeuverSpot> getExistingManeuverSpotByFirstDouglasPeuckerFix(
-            ManeuverDetectionResult lastManeuverDetectionResult, ListIterator<ManeuverSpot> lastIteratorUsed,
-            GPSFixMoving newDouglasPeuckerFix) {
-        ManeuverSpot firstManeuverSpotIterated = null;
+    private ListIterator<ManeuverSpotWithTypedManeuvers> getExistingManeuverSpotByFirstDouglasPeuckerFix(
+            ManeuverDetectionResult lastManeuverDetectionResult,
+            ListIterator<ManeuverSpotWithTypedManeuvers> lastIteratorUsed, GPSFixMoving newDouglasPeuckerFix) {
+        ManeuverSpotWithTypedManeuvers firstManeuverSpotIterated = null;
         if (lastIteratorUsed != null) {
             while (lastIteratorUsed.hasNext()) {
-                ManeuverSpot maneuverSpot = lastIteratorUsed.next();
+                ManeuverSpotWithTypedManeuvers maneuverSpot = lastIteratorUsed.next();
                 if (firstManeuverSpotIterated == null) {
                     firstManeuverSpotIterated = maneuverSpot;
                 }
@@ -409,10 +495,11 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 }
             }
         }
-        ListIterator<ManeuverSpot> newIterator = lastManeuverDetectionResult.getManeuverSpots().listIterator();
+        ListIterator<ManeuverSpotWithTypedManeuvers> newIterator = lastManeuverDetectionResult.getManeuverSpots()
+                .listIterator();
         // no maneuver spot detected with lastIteratorUsed. Try from beginning until firstManeuverSpotIterated
         while (newIterator.hasNext()) {
-            ManeuverSpot maneuverSpot = newIterator.next();
+            ManeuverSpotWithTypedManeuvers maneuverSpot = newIterator.next();
             if (maneuverSpot == firstManeuverSpotIterated) {
                 break;
             }
@@ -426,7 +513,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return null;
     }
 
-    // public for unit tests
+    // protected for unit tests
     /**
      * Represents a result of already performed maneuver analysis. The result is used by
      * {@link IncrementalManeuverDetectorImpl} to determine maneuvers incrementally.
@@ -434,13 +521,13 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      * @author Vladislav Chumak (D069712)
      *
      */
-    public static class ManeuverDetectionResult {
+    protected static class ManeuverDetectionResult {
 
         private final TimePoint latestFixTimePoint;
-        private final List<ManeuverSpot> maneuverSpots;
+        private final List<ManeuverSpotWithTypedManeuvers> maneuverSpots;
         private final int incrementalRunsCount;
 
-        public ManeuverDetectionResult(TimePoint latestFixTimePoint, List<ManeuverSpot> maneuverSpots,
+        public ManeuverDetectionResult(TimePoint latestFixTimePoint, List<ManeuverSpotWithTypedManeuvers> maneuverSpots,
                 int incrementalRunsCount) {
             this.latestFixTimePoint = latestFixTimePoint;
             this.maneuverSpots = maneuverSpots;
@@ -451,12 +538,33 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             return latestFixTimePoint;
         }
 
-        public List<ManeuverSpot> getManeuverSpots() {
+        public List<ManeuverSpotWithTypedManeuvers> getManeuverSpots() {
             return maneuverSpots;
         }
 
         public int getIncrementalRunsCount() {
             return incrementalRunsCount;
+        }
+
+    }
+
+    // protected for unit tests
+    protected static class IncrementalManeuverSpotDetectionResult {
+        private final List<ManeuverSpotWithTypedManeuvers> maneuverSpotsToReuse;
+        private final List<ManeuverSpot> newManeuverSpots;
+
+        public IncrementalManeuverSpotDetectionResult(List<ManeuverSpotWithTypedManeuvers> maneuverSpotsToReuse,
+                List<ManeuverSpot> newManeuverSpots) {
+            this.maneuverSpotsToReuse = maneuverSpotsToReuse;
+            this.newManeuverSpots = newManeuverSpots;
+        }
+
+        public List<ManeuverSpotWithTypedManeuvers> getManeuverSpotsToReuse() {
+            return maneuverSpotsToReuse;
+        }
+
+        public List<ManeuverSpot> getNewManeuverSpots() {
+            return newManeuverSpots;
         }
 
     }

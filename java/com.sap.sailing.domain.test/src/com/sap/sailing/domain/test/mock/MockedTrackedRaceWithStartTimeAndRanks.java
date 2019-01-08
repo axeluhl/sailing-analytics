@@ -765,4 +765,8 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return null;
     }
+
+    @Override
+    public void triggerManeuverCacheRecalculation(Competitor competitor) {
+    }
 }

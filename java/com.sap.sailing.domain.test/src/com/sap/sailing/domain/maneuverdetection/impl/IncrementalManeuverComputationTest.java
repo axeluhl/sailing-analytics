@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.NoFixesException;
+import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl.IncrementalManeuverSpotDetectionResult;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl.ManeuverDetectionResult;
 import com.sap.sailing.domain.test.AbstractManeuverDetectionTestCase;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
@@ -76,7 +77,8 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
     public void testIncrementalDouglasPeucker() throws NoWindException {
         Competitor competitor = getCompetitorByName("Findel");
         DynamicTrackedRaceImpl trackedRace = getTrackedRace();
-        IncrementalManeuverDetectorImpl maneuverDetector = new IncrementalManeuverDetectorImpl(trackedRace, competitor);
+        IncrementalManeuverDetectorImpl maneuverDetector = new IncrementalManeuverDetectorImpl(trackedRace, competitor,
+                null);
         TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
         // start from the middle
         TimePoint startTime = trackTimeInfo.getTrackEndTimePoint()
@@ -104,7 +106,8 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
             throws NoWindException, NoFixesException {
         Competitor competitor = getCompetitorByName("Findel");
         DynamicTrackedRaceImpl trackedRace = getTrackedRace();
-        IncrementalManeuverDetectorImpl maneuverDetector = new IncrementalManeuverDetectorImpl(trackedRace, competitor);
+        IncrementalManeuverDetectorImpl maneuverDetector = new IncrementalManeuverDetectorImpl(trackedRace, competitor,
+                null);
         TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
         // start from the middle
         TimePoint startTime = trackTimeInfo.getTrackEndTimePoint()
@@ -116,8 +119,10 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
                 incrementalRunsCount++);
         while (startTime.after(trackTimeInfo.getTrackStartTimePoint())) {
             TrackTimeInfo mockedTrackTimeInfo = new TrackTimeInfo(startTime, endTime, endTime);
-            List<ManeuverSpot> maneuverSpots = maneuverDetector.detectManeuversIncrementally(mockedTrackTimeInfo,
-                    douglasPeucker.approximate(startTime, endTime), lastResult);
+            IncrementalManeuverSpotDetectionResult detectionResult = maneuverDetector.detectManeuverSpotsIncrementally(
+                    mockedTrackTimeInfo, douglasPeucker.approximate(startTime, endTime), lastResult);
+            List<ManeuverSpotWithTypedManeuvers> maneuverSpots = maneuverDetector
+                    .getAllManeuverSpotsWithTypedManeuversFromDetectionResultSortedByTimePoint(detectionResult);
             lastResult = new ManeuverDetectionResult(endTime, maneuverSpots, incrementalRunsCount++);
             startTime = startTime.minus(new MillisecondsDurationImpl(30000));
             endTime = endTime.plus(new MillisecondsDurationImpl(30000));
@@ -130,7 +135,8 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
         performanceMeasurementStartedAt = System.currentTimeMillis();
         List<Maneuver> normallyDetectedManeuvers = normalManeuverDetector.detectManeuvers();
         long millisForNormalManeuverDetection = System.currentTimeMillis() - performanceMeasurementStartedAt;
-        int performanceBenefitOfIncrementalManeuverDetectionInPercent = (int) ((1.0 * (millisForNormalManeuverDetection - millisForIncrementalManeuverDetection)
+        int performanceBenefitOfIncrementalManeuverDetectionInPercent = (int) ((1.0
+                * (millisForNormalManeuverDetection - millisForIncrementalManeuverDetection)
                 / millisForNormalManeuverDetection) * 100);
         assertEquals("Incrementally calculated maneuvers differ from normally calculated maneuvers",
                 normallyDetectedManeuvers, incrementallyDetectedManeuvers);

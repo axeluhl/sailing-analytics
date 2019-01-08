@@ -697,7 +697,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
                     private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache = new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
                             /* preserve how many milliseconds */ 10000,
-                            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor));
+                            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor, null));
 
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
@@ -2674,7 +2674,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
-    protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
+    public void triggerManeuverCacheRecalculation(final Competitor competitor) {
         if (cachesSuspended) {
             triggerManeuverCacheInvalidationForAllCompetitors = true;
         } else {
