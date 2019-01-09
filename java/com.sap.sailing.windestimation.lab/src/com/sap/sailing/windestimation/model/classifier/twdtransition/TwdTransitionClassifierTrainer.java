@@ -7,6 +7,7 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransiti
 import com.sap.sailing.windestimation.data.serialization.TwdTransitionJsonSerializer;
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
+import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
 import com.sap.sailing.windestimation.util.LoggingUtil;
@@ -113,6 +114,7 @@ public class TwdTransitionClassifierTrainer {
     public static void main(String[] args) throws Exception {
         TwdTransitionPersistenceManager persistenceManager = new TwdTransitionPersistenceManager();
         ModelStore classifierModelStore = new MongoDbModelStore(persistenceManager.getDb());
+        classifierModelStore.deleteAll(PersistenceContextType.TWD_TRANSITION_CLASSIFIER);
         TwdTransitionClassifierTrainer classifierTrainer = new TwdTransitionClassifierTrainer(persistenceManager,
                 classifierModelStore);
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();

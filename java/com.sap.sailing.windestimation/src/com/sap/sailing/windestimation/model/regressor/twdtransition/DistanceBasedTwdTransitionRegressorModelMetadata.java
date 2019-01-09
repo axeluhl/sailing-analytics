@@ -1,6 +1,7 @@
 package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
 public class DistanceBasedTwdTransitionRegressorModelMetadata
         extends SingleDimensionBasedTwdTransitionRegressorModelMetadata {
@@ -10,8 +11,19 @@ public class DistanceBasedTwdTransitionRegressorModelMetadata
     private final DistanceValueRange distanceValueRange;
 
     public DistanceBasedTwdTransitionRegressorModelMetadata(DistanceValueRange distanceValueRange) {
-        super(DIMENSION_NAME, distanceValueRange.getPolynomialDegree(), distanceValueRange.isWithBias());
+        super(DIMENSION_NAME, PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR,
+                distanceValueRange.getPolynomialDegree(), distanceValueRange.isWithBias());
         this.distanceValueRange = distanceValueRange;
+    }
+
+    @Override
+    public double getFromIntervalInclusive() {
+        return distanceValueRange.getFromInclusive();
+    }
+
+    @Override
+    public double getToIntervalExclusive() {
+        return distanceValueRange.getToExclusive();
     }
 
     @Override
@@ -25,7 +37,7 @@ public class DistanceBasedTwdTransitionRegressorModelMetadata
     }
 
     public enum DistanceValueRange {
-        BEGINNING(0, 10, 2, false), REMAINDER(10, Double.MAX_VALUE, 1, true);
+        BEGINNING(0, 80, 1, false), MIDDLE(80, 1368, 1, true), REMAINDER(1368, Double.MAX_VALUE, 1, true);
 
         private final double fromInclusive;
         private final double toExclusive;
@@ -55,17 +67,6 @@ public class DistanceBasedTwdTransitionRegressorModelMetadata
             return withBias;
         }
 
-        public boolean isWithinRange(double x) {
-            if (fromInclusive <= x && (toExclusive > x || toExclusive == Double.MAX_VALUE)) {
-                return true;
-            }
-            return false;
-        }
-    }
-
-    @Override
-    public boolean isDimensionValueSupported(double dimensionValue) {
-        return distanceValueRange.isWithinRange(dimensionValue);
     }
 
 }

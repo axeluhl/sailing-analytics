@@ -229,6 +229,9 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         @Override
         public PersistedElementsIterator<T> limit(long limit) {
             this.limit = limit;
+            if(numberOfElements > limit) {
+                numberOfElements = limit;
+            }
             return this;
         }
 

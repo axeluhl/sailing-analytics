@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.model.store.ContextType;
+import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
 public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMetadata<TwdTransition> {
 
@@ -10,7 +10,7 @@ public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMe
     private final ManeuverTypeTransition maneuverTypeTransition;
 
     public TwdTransitionClassifierModelMetadata(ManeuverTypeTransition maneuverTypeTransition) {
-        super(ContextType.TWD_TRANSITION);
+        super(PersistenceContextType.TWD_TRANSITION_CLASSIFIER);
         this.maneuverTypeTransition = maneuverTypeTransition;
     }
 

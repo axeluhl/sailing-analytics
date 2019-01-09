@@ -7,7 +7,7 @@ import com.sap.sailing.windestimation.aggregator.hmm.ProbabilityUtil;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.model.store.ContextType;
+import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
 public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadata<ManeuverForEstimation> {
 
@@ -20,7 +20,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
 
     public ManeuverClassifierModelMetadata(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
             ManeuverTypeForClassification... orderedSupportedTargetValues) {
-        super(ContextType.MANEUVER);
+        super(PersistenceContextType.MANEUVER_CLASSIFIER);
         this.maneuverFeatures = maneuverFeatures;
         this.boatClass = boatClass;
         this.indexToManeuverTypeOrdinalMapping = new int[ManeuverTypeForClassification.values().length];

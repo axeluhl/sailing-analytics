@@ -16,11 +16,11 @@ public class FileSystemModelStore implements ModelStore {
     private final String destinationFolder;
     private static final String FILE_EXT = ".clf";
 
-    public FileSystemModelStore(String destinationFolder, ContextType contextType) {
+    public FileSystemModelStore(String destinationFolder, PersistenceContextType contextType) {
         this.destinationFolder = destinationFolder;
     }
 
-    private File getFileForModel(PersistenceSupport trainedModel, ContextType contextType) {
+    private File getFileForModel(PersistenceSupport trainedModel, PersistenceContextType contextType) {
         StringBuilder filePath = new StringBuilder();
         filePath.append(destinationFolder);
         filePath.append(File.separator);
@@ -81,7 +81,7 @@ public class FileSystemModelStore implements ModelStore {
     }
 
     @Override
-    public void deleteAll(ContextType contextType) throws ModelPersistenceException {
+    public void deleteAll(PersistenceContextType contextType) throws ModelPersistenceException {
         File folder = new File(destinationFolder);
         for (File file : folder.listFiles()) {
             if (file.isFile() && file.getName().endsWith(FILE_EXT)
@@ -95,7 +95,7 @@ public class FileSystemModelStore implements ModelStore {
         }
     }
 
-    private String getContextPrefix(ContextType contextType) {
+    private String getContextPrefix(PersistenceContextType contextType) {
         return CONTEXT_NAME_PREFIX + contextType.getContextName() + ".";
     }
 

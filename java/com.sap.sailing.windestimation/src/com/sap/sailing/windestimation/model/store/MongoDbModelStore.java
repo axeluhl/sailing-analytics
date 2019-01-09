@@ -63,7 +63,7 @@ public class MongoDbModelStore implements ModelStore {
     }
 
     @Override
-    public void deleteAll(ContextType contextType) throws ModelPersistenceException {
+    public void deleteAll(PersistenceContextType contextType) throws ModelPersistenceException {
         try {
             GridFSBuckets.create(db, getCollectionName(contextType)).drop();
         } catch (Exception e) {
@@ -71,7 +71,7 @@ public class MongoDbModelStore implements ModelStore {
         }
     }
 
-    private String getCollectionName(ContextType contextType) {
+    private String getCollectionName(PersistenceContextType contextType) {
         return CONTEXT_NAME_PREFIX + contextType.getContextName();
     }
 

@@ -34,5 +34,20 @@ public class NeuralNetworkClassifier<InstanceType, T extends ContextSpecificMode
         }
         return net;
     }
+    
+    @Override
+    public double[] classifyWithProbabilities(double[] x) {
+        int k = getContextSpecificModelMetadata().getNumberOfPossibleTargetValues();
+        if (k != 2) {
+            return super.classifyWithProbabilities(x);
+        }
+        x = preprocessX(x);
+        double[] likelihoods = new double[getContextSpecificModelMetadata().getNumberOfPossibleTargetValues()];
+        double[] likelihoodsInternal = new double[1];
+        internalModel.predict(x, likelihoodsInternal);
+        likelihoods[0] = 1 - likelihoodsInternal[0];
+        likelihoods[1] = likelihoodsInternal[0];
+        return likelihoods;
+    }
 
 }

@@ -16,7 +16,7 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends C
 
     private Standardizer scaler = null;
     private PCA pca = null;
-    private SoftClassifier<double[]> internalModel = null;
+    protected SoftClassifier<double[]> internalModel = null;
 
     public AbstractSmileClassificationModel(PreprocessingConfig preprocessingConfig, T contextSpecificModelMetadata) {
         super(preprocessingConfig, contextSpecificModelMetadata);
@@ -50,6 +50,13 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends C
 
     @Override
     public double[] classifyWithProbabilities(double[] x) {
+        x = preprocessX(x);
+        double[] likelihoods = new double[getContextSpecificModelMetadata().getNumberOfPossibleTargetValues()];
+        internalModel.predict(x, likelihoods);
+        return likelihoods;
+    }
+
+    protected double[] preprocessX(double[] x) {
         if (!isModelReady()) {
             throw new IllegalStateException("The classification model is not trained");
         }
@@ -59,9 +66,7 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends C
         if (pca != null) {
             x = pca.project(x);
         }
-        double[] likelihoods = new double[getContextSpecificModelMetadata().getNumberOfPossibleTargetValues()];
-        internalModel.predict(x, likelihoods);
-        return likelihoods;
+        return x;
     }
 
     @Override

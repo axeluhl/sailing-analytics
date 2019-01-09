@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.model.store.ContextType;
+import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
 public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
         extends ContextSpecificModelMetadata<TwdTransition> {
@@ -12,9 +12,9 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
     private final int polynomialDegree;
     private final boolean withBias;
 
-    public SingleDimensionBasedTwdTransitionRegressorModelMetadata(String dimensionName, int polynomialDegree,
-            boolean withBias) {
-        super(ContextType.TWD_TRANSITION);
+    public SingleDimensionBasedTwdTransitionRegressorModelMetadata(String dimensionName,
+            PersistenceContextType persistenceContextType, int polynomialDegree, boolean withBias) {
+        super(persistenceContextType);
         this.dimensionName = dimensionName;
         this.polynomialDegree = polynomialDegree;
         this.withBias = withBias;
@@ -25,6 +25,10 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
     }
 
     public abstract double getDimensionValue(TwdTransition instance);
+
+    public abstract double getFromIntervalInclusive();
+
+    public abstract double getToIntervalExclusive();
 
     @Override
     public int getNumberOfInputFeatures() {
@@ -89,7 +93,17 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
         return withBias;
     }
 
-    public abstract boolean isDimensionValueSupported(double dimensionValue);
+    public boolean isDimensionValueSupported(double dimensionValue) {
+        if (getFromIntervalInclusive() <= dimensionValue
+                && (getToIntervalExclusive() > dimensionValue || dimensionValue == Double.MAX_VALUE)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isDimensionValueSupportedForTraining(double dimensionValue) {
+        return isDimensionValueSupported(dimensionValue) || getToIntervalExclusive() == dimensionValue;
+    }
 
     @Override
     public boolean isContainsAllFeatures(TwdTransition instance) {

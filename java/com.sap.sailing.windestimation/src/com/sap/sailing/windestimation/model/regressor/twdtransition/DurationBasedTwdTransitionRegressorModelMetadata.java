@@ -1,6 +1,7 @@
 package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
 public class DurationBasedTwdTransitionRegressorModelMetadata
         extends SingleDimensionBasedTwdTransitionRegressorModelMetadata {
@@ -10,8 +11,19 @@ public class DurationBasedTwdTransitionRegressorModelMetadata
     private final DurationValueRange durationValueRange;
 
     public DurationBasedTwdTransitionRegressorModelMetadata(DurationValueRange durationValueRange) {
-        super(DIMENSION_NAME, durationValueRange.getPolynomialDegree(), durationValueRange.isWithBias());
+        super(DIMENSION_NAME, PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
+                durationValueRange.getPolynomialDegree(), durationValueRange.isWithBias());
         this.durationValueRange = durationValueRange;
+    }
+
+    @Override
+    public double getFromIntervalInclusive() {
+        return durationValueRange.getFromInclusive();
+    }
+
+    @Override
+    public double getToIntervalExclusive() {
+        return durationValueRange.getToExclusive();
     }
 
     @Override
@@ -25,7 +37,8 @@ public class DurationBasedTwdTransitionRegressorModelMetadata
     }
 
     public enum DurationValueRange {
-        BEGINNING(0, 10, 2, false), REMAINDER(10, Double.MAX_VALUE, 1, true);
+        BEGINNING(0, 5, 1, false), MIDDLE1(5, 62, 1, true), MIDDLE2(62, 5394, 1, true), REMAINDER(5394,
+                Double.MAX_VALUE, 1, true);
 
         private final double fromInclusive;
         private final double toExclusive;
@@ -55,17 +68,6 @@ public class DurationBasedTwdTransitionRegressorModelMetadata
             return withBias;
         }
 
-        public boolean isWithinRange(double x) {
-            if (fromInclusive <= x && (toExclusive > x || toExclusive == Double.MAX_VALUE)) {
-                return true;
-            }
-            return false;
-        }
-    }
-
-    @Override
-    public boolean isDimensionValueSupported(double dimensionValue) {
-        return durationValueRange.isWithinRange(dimensionValue);
     }
 
 }
