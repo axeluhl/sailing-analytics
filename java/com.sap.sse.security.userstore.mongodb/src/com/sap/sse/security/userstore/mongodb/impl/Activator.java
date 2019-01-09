@@ -17,8 +17,6 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
@@ -26,7 +24,6 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
-import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class Activator implements BundleActivator {
@@ -69,7 +66,6 @@ public class Activator implements BundleActivator {
                             context, SecurityService.class, null);
                     securityServiceServiceTracker.open();
                     final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
-                    userStore.loadAndMigrateUsers(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory());
 
                     for (User user : userStore.getUsers()) {
                         securityService.migrateOwnership(user);
@@ -99,7 +95,7 @@ public class Activator implements BundleActivator {
 
                     securityService.assumeOwnershipMigrated(SecuredSecurityTypes.SERVER.getName());
                     securityService.checkMigration(SecuredSecurityTypes.getAllInstances());
-                } catch (InterruptedException | UserGroupManagementException | UserManagementException e) {
+                } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Error in migration", e);
                 }
             }

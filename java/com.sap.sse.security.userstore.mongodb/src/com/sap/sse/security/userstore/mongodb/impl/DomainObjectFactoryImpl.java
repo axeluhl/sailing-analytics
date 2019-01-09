@@ -279,11 +279,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     boolean found = false;
                     for (final RoleDefinition roleDefinition : roleDefinitionsById.values()) {
                         // migrate old admins to new admin!
-                        logger.warning("Role " + o.toString() + " for user " + name
-                                + " found during migration. User will be migrated to new permission-vertical admin.");
-
                         if (roleDefinition.getName().equals(o.toString())) {
                             logger.info("Found role "+roleDefinition+" for old role "+o.toString()+" for user "+name);
+                            // we do not do role associations, to stay similar as before, so
                             roles.add(new Role(roleDefinition, defaultTenantForRoleMigration,
                                     /* user qualification */ null));
                             rolesMigrated = true;

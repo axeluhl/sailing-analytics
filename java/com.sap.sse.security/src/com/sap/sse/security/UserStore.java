@@ -243,4 +243,10 @@ public interface UserStore extends UserGroupProvider, Named {
     Pair<Boolean, Set<Ownership>> getExistingQualificationsForRoleDefinition(RoleDefinition roleToCheck);
 
     Set<Pair<User, Role>> getRolesQualifiedByUserGroup(UserGroup groupQualification);
+
+    /**
+     * Do not call this before the RolePrototypes are created/loaded, as else a migration cannot succeed. But do call
+     * this before the SecurityService is created, as else new defaults (eg admin user) will be created
+     */
+    void loadAndMigrateUsers() throws UserGroupManagementException, UserManagementException;
 }

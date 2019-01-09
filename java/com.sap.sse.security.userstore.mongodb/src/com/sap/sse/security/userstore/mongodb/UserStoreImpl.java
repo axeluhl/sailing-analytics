@@ -133,6 +133,10 @@ public class UserStoreImpl implements UserStore {
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
     private final transient MongoObjectFactory mongoObjectFactory;
+    /**
+     * Won't be serialized and remains <code>null</code> on the de-serializing end.
+     */
+    private final transient DomainObjectFactory domainObjectFactory;
 
     public UserStoreImpl(String defaultTenantName) throws UserGroupManagementException, UserManagementException {
         this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
@@ -141,6 +145,7 @@ public class UserStoreImpl implements UserStore {
     
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory,
             String defaultTenantName) throws UserGroupManagementException, UserManagementException {
+        this.domainObjectFactory = domainObjectFactory;
         roleDefinitions = new ConcurrentHashMap<>();
         userGroups = new ConcurrentHashMap<>();
         userGroupsByName = new ConcurrentHashMap<>();
@@ -191,7 +196,7 @@ public class UserStoreImpl implements UserStore {
     /**
      * Do not call this before the security service is ready, as else role definition migration will not work correctly
      */
-    public void loadAndMigrateUsers(final DomainObjectFactory domainObjectFactory)
+    public void loadAndMigrateUsers()
             throws UserGroupManagementException, UserManagementException {
         final Iterable<UserGroup> userGroups = domainObjectFactory.loadAllUserGroupsAndTenantsWithProxyUsers();
         for (UserGroup group : userGroups) {

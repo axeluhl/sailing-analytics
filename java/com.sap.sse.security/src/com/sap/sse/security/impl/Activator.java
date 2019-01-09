@@ -22,6 +22,8 @@ import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
+import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -135,8 +137,14 @@ public class Activator implements BundleActivator {
                     final AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
                     logger.info("Obtained UserStore service "+userStore);
                     createRoleDefinitionsFromPrototypes(bundleContext, userStore);
+                    // must be called after the definition of the prototypes and after loading actual roles, but before
+                    // loading users
+                    userStore.ensureDefaultRolesExist();
+                    // actually load the users and migrate them if required
+                    userStore.loadAndMigrateUsers();
+                    // create security service, it will also create a default admin user if no users exist
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | UserGroupManagementException | UserManagementException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }
             }

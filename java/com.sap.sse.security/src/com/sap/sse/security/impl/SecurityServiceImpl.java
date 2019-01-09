@@ -254,7 +254,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private void initEmptyStore() {
         final AdminRole adminRolePrototype = AdminRole.getInstance();
         RoleDefinition adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
-        userStore.ensureDefaultRolesExist();
         adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
         assert adminRoleDefinition != null;
         try {
