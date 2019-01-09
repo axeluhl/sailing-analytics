@@ -182,54 +182,55 @@ public class UserStoreImpl implements UserStore {
                 logger.info("Empty set of role definitions suggests we are under migration. Creating default roles.");
                 
             }
-            final Iterable<UserGroup> userGroups = domainObjectFactory.loadAllUserGroupsAndTenantsWithProxyUsers();
-            for (UserGroup group : userGroups) {
-                this.userGroups.put(group.getId(), group);
-                userGroupsByName.put(group.getName(), group);
-            }
-            // final boolean defaultTenantWasCreated = (defaultTenantName != null &&
-            // getUserGroupByName(defaultTenantName) == null);
-            // identify, create and/or set default tenant
             defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
-            for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, this.userGroups, this)) {
-                users.put(u.getName(), u);
-                // FIXME for unified user store this is not valid?
-                // if (defaultTenantWasCreated) {
-                // // if the default tenant was just created, add all users to it
-                // defaultTenant.add(u);
-                // }
-                // if (u.getDefaultTenant(ServerInfo.getName()) == null) {
-                // u.setDefaultTenant(ServerInfo.getName(), defaultTenant);
-                // }
-                addToUsersByEmail(u);
-            }
-            // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
-            // replace them based on the username key:
-            for (final UserGroup group : this.userGroups.values()) {
-                migrateProxyUsersInGroupToRealUsersByUsername(group);
-                for (final User userInGroup : group.getUsers()) {
-                    Util.addToValueSet(usersInUserGroups, group, userInGroup);
-                    Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
-                }
-            }
-            // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object
-            // anymore, remove them from the groups!
+        } else {
+            defaultTenant = null;
+        }
+    }
 
-            for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
-                if (e.getValue() != null) {
-                    final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
-                    if (accessToken != null) {
-                        final User user = users.get(e.getKey());
-                        if (user != null) {
-                            usersByAccessToken.put(accessToken, user);
-                        } else {
-                            logger.warning("Couldn't find user \""+e.getKey()+"\" for which an access token was found in the preferences");
-                        }
+    /**
+     * Do not call this before the security service is ready, as else role definition migration will not work correctly
+     */
+    public void loadAndMigrateUsers(final DomainObjectFactory domainObjectFactory)
+            throws UserGroupManagementException, UserManagementException {
+        final Iterable<UserGroup> userGroups = domainObjectFactory.loadAllUserGroupsAndTenantsWithProxyUsers();
+        for (UserGroup group : userGroups) {
+            this.userGroups.put(group.getId(), group);
+            userGroupsByName.put(group.getName(), group);
+        }
+
+        for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, this.userGroups, this)) {
+            users.put(u.getName(), u);
+            // setup all migrated users, to use the public server tenant group to match old behaviour
+            if (u.getDefaultTenant(ServerInfo.getName()) == null) {
+                u.setDefaultTenant(defaultTenant, ServerInfo.getName());
+            }
+            addToUsersByEmail(u);
+        }
+        // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
+        // replace them based on the username key:
+        for (final UserGroup group : this.userGroups.values()) {
+            migrateProxyUsersInGroupToRealUsersByUsername(group);
+            for (final User userInGroup : group.getUsers()) {
+                Util.addToValueSet(usersInUserGroups, group, userInGroup);
+                Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
+            }
+        }
+        // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object
+        // anymore, remove them from the groups!
+
+        for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
+            if (e.getValue() != null) {
+                final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
+                if (accessToken != null) {
+                    final User user = users.get(e.getKey());
+                    if (user != null) {
+                        usersByAccessToken.put(accessToken, user);
+                    } else {
+                        logger.warning("Couldn't find user \""+e.getKey()+"\" for which an access token was found in the preferences");
                     }
                 }
             }
-        } else {
-            defaultTenant = null;
         }
     }
     
