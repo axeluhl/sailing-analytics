@@ -925,6 +925,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void triggerManeuverCacheRecalculation(Competitor competitor) {
+    public void recalculateManeuverTypesAfterPossibleWindChanges(Competitor competitor,
+            Iterable<Maneuver> maneuversWithPossibleWindChanges) {
     }
 }

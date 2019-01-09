@@ -2,8 +2,8 @@ package com.sap.sailing.domain.maneuverdetection;
 
 import java.util.List;
 
-import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
+import com.sap.sailing.domain.tracking.Maneuver;
 
 /**
  * An extension of {@link ManeuverDetector} which supports incremental maneuver detection within calls of
@@ -39,5 +39,8 @@ public interface IncrementalManeuverDetector extends ManeuverDetector {
      * with increment data.
      */
     int getIncrementalRunsCount();
+
+    List<Maneuver> recalculateManeuverTypesAfterPossibleWindChangesAndGetAllManeuvers(
+            Iterable<Maneuver> maneuversWithPossibleWindChanges);
 
 }

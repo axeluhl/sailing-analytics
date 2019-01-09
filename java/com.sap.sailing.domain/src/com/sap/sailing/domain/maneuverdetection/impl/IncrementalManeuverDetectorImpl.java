@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.ApproximatedFixesCalculator;
 import com.sap.sailing.domain.maneuverdetection.IncrementalApproximatedFixesCalculator;
 import com.sap.sailing.domain.maneuverdetection.IncrementalManeuverDetector;
+import com.sap.sailing.domain.maneuverdetection.impl.WindEstimationInteraction.PossibleChangeOfManeuverTypesInfo;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -161,7 +162,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 List<ManeuverSpot> maneuverSpots = detectManeuverSpots(douglasPeuckerFixes, earliestManeuverStart,
                         latestManeuverEnd);
                 if (windEstimationInteraction != null) {
-                    windEstimationInteraction.newManeuverSpotsDetected(maneuverSpots);
+                    windEstimationInteraction.newManeuverSpotsDetected(competitor, maneuverSpots);
                 }
                 maneuverSpotsWithTypedManeuvers = new ArrayList<>();
                 for (ManeuverSpot maneuverSpot : maneuverSpots) {
@@ -170,22 +171,43 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                             maneuverSpot.getManeuverSpotDirection(), maneuverSpot.getManeuverCurve());
                     maneuverSpotsWithTypedManeuvers.add(maneuverSpotWithTypedManeuvers);
                 }
+            } else if (latestRawFixTimePoint.equals(lastManeuverDetectionResult.getLatestRawFixTimePoint())) {
+                maneuverSpotsWithTypedManeuvers = new ArrayList<>();
+                for (ManeuverSpotWithTypedManeuvers existingManeuverSpot : lastManeuverDetectionResult
+                        .getManeuverSpots()) {
+                    ManeuverSpotWithTypedManeuvers newManeuverSpot = getManeuverSpotWithTypedManeuversFromExistingManeuverSpotConsideringPossibleWindChange(
+                            existingManeuverSpot);
+                    maneuverSpotsWithTypedManeuvers.add(newManeuverSpot);
+                }
             } else {
                 IncrementalManeuverSpotDetectionResult detectionResult = detectManeuverSpotsIncrementally(trackTimeInfo,
                         douglasPeuckerFixes, lastManeuverDetectionResult);
-                boolean allManeuverTypesMustBeRedetermined = false;
+                PossibleChangeOfManeuverTypesInfo possibleChangeOfManeuverTypesInfo = null;
                 if (windEstimationInteraction != null) {
-                    allManeuverTypesMustBeRedetermined = windEstimationInteraction
-                            .newManeuverSpotsDetected(detectionResult.getNewManeuverSpots());
+                    possibleChangeOfManeuverTypesInfo = windEstimationInteraction.newManeuverSpotsDetected(competitor,
+                            detectionResult.getNewManeuverSpots());
                 }
                 maneuverSpotsWithTypedManeuvers = getAllManeuverSpotsWithTypedManeuversFromDetectionResultSortedByTimePoint(
                         detectionResult);
-                if (allManeuverTypesMustBeRedetermined) {
+                if (possibleChangeOfManeuverTypesInfo.isWindChanged()) {
                     for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                        // TODO make more efficient: 1) return from windEstimationInteraction also competitors, on whose
-                        // tracks the wind has changed 2) trigger only retypization of maneuver
-                        if (!this.competitor.equals(competitor)) {
-                            trackedRace.triggerManeuverCacheRecalculation(competitor);
+                        if (possibleChangeOfManeuverTypesInfo.isWindChangedForCompetitor(competitor)) {
+                            if (this.competitor.equals(competitor)) {
+                                List<ManeuverSpotWithTypedManeuvers> maneuverSpotsWithChangedWind = possibleChangeOfManeuverTypesInfo
+                                        .getManeuverSpotsWithChangedWindForCompetitor(competitor);
+                                maneuverSpotsWithTypedManeuvers = readjustTypedManeuverSpotsAfterWindChange(
+                                        maneuverSpotsWithTypedManeuvers, maneuverSpotsWithChangedWind);
+                            } else {
+                                List<Maneuver> maneuversWithPossibleWindChanges = new ArrayList<>();
+                                for (ManeuverSpotWithTypedManeuvers maneuverSpot : possibleChangeOfManeuverTypesInfo
+                                        .getManeuverSpotsWithChangedWindForCompetitor(competitor)) {
+                                    for (Maneuver maneuver : maneuverSpot.getManeuvers()) {
+                                        maneuversWithPossibleWindChanges.add(maneuver);
+                                    }
+                                }
+                                trackedRace.recalculateManeuverTypesAfterPossibleWindChanges(competitor,
+                                        maneuversWithPossibleWindChanges);
+                            }
                         }
                     }
                 }
@@ -199,6 +221,53 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             return maneuverSpotsWithTypedManeuvers;
         }
         return Collections.emptyList();
+    }
+
+    // TODO Would be nice if trackedRace.recalculateManeuverTypesAfterPossibleWindChanges(competitor,
+    // maneuversWithPossibleWindChanges) will call this method instead of triggerManeuverCacheRecalculation(competitor)
+    @Override
+    public List<Maneuver> recalculateManeuverTypesAfterPossibleWindChangesAndGetAllManeuvers(
+            Iterable<Maneuver> maneuversWithPossibleWindChanges) {
+        ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
+        if (lastManeuverDetectionResult == null) {
+            return detectManeuvers();
+        } else {
+            List<ManeuverSpotWithTypedManeuvers> existingManeuverSpots = lastManeuverDetectionResult.getManeuverSpots();
+            List<ManeuverSpotWithTypedManeuvers> reviewedManeuverSpots = new ArrayList<>();
+            for (ManeuverSpotWithTypedManeuvers existingManeuverSpot : existingManeuverSpots) {
+                if (Util.containsAll(maneuversWithPossibleWindChanges, existingManeuverSpot.getManeuvers())) {
+                    ManeuverSpotWithTypedManeuvers newManeuverSpot = getManeuverSpotWithTypedManeuversFromExistingManeuverSpotConsideringPossibleWindChange(
+                            existingManeuverSpot);
+                    reviewedManeuverSpots.add(newManeuverSpot);
+                } else {
+                    reviewedManeuverSpots.add(existingManeuverSpot);
+                }
+            }
+            int incrementalRunsCount = lastManeuverDetectionResult.getIncrementalRunsCount() < Integer.MAX_VALUE
+                    ? lastManeuverDetectionResult.getIncrementalRunsCount() + 1
+                    : Integer.MAX_VALUE;
+            this.lastManeuverDetectionResult = new ManeuverDetectionResult(
+                    lastManeuverDetectionResult.getLatestRawFixTimePoint(), reviewedManeuverSpots,
+                    incrementalRunsCount);
+            List<Maneuver> maneuvers = getAllManeuversFromManeuverSpots(reviewedManeuverSpots);
+            return maneuvers;
+        }
+    }
+
+    private List<ManeuverSpotWithTypedManeuvers> readjustTypedManeuverSpotsAfterWindChange(
+            List<ManeuverSpotWithTypedManeuvers> existingManeuverSpots,
+            List<ManeuverSpotWithTypedManeuvers> maneuverSpotsWithWindChange) {
+        List<ManeuverSpotWithTypedManeuvers> result = new ArrayList<>(existingManeuverSpots.size());
+        for (ManeuverSpotWithTypedManeuvers existingManeuverSpot : existingManeuverSpots) {
+            if (maneuverSpotsWithWindChange.contains(existingManeuverSpot)) {
+                ManeuverSpotWithTypedManeuvers newManeuverSpot = getManeuverSpotWithTypedManeuversFromExistingManeuverSpotConsideringPossibleWindChange(
+                        existingManeuverSpot);
+                result.add(newManeuverSpot);
+            } else {
+                result.add(existingManeuverSpot);
+            }
+        }
+        return result;
     }
 
     protected List<ManeuverSpotWithTypedManeuvers> getAllManeuverSpotsWithTypedManeuversFromDetectionResultSortedByTimePoint(
@@ -216,7 +285,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
             if (currentExistingManeuverSpot != null && (currentNewManeuverSpot == null
                     || !currentExistingManeuverSpot.getManeuverCurve().getMainCurveBoundaries().getTimePoint().after(
                             currentNewManeuverSpot.getManeuverCurve().getMainCurveBoundaries().getTimePoint()))) {
-                ManeuverSpotWithTypedManeuvers maneuverSpotWithTypedManeuvers = getManeuverSpotWithTypedManeuversFromManeuverSpotInState(
+                ManeuverSpotWithTypedManeuvers maneuverSpotWithTypedManeuvers = getManeuverSpotWithTypedManeuversFromExistingManeuverSpotConsideringPossibleWindChange(
                         currentExistingManeuverSpot);
                 result.add(maneuverSpotWithTypedManeuvers);
                 currentExistingManeuverSpot = exitingManeuverSpotsIterator.hasNext()
@@ -235,7 +304,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return result;
     }
 
-    private ManeuverSpotWithTypedManeuvers getManeuverSpotWithTypedManeuversFromManeuverSpotInState(
+    private ManeuverSpotWithTypedManeuvers getManeuverSpotWithTypedManeuversFromExistingManeuverSpotConsideringPossibleWindChange(
             ManeuverSpotWithTypedManeuvers currentExistingManeuverSpot) {
         ManeuverSpotWithTypedManeuvers maneuverSpotWithTypedManeuvers;
         if (checkManeuverSpotWindNearlySame(currentExistingManeuverSpot)

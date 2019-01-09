@@ -721,6 +721,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
     }
     
+    @Override
+    public void recalculateManeuverTypesAfterPossibleWindChanges(Competitor competitor,
+            Iterable<Maneuver> maneuversWithPossibleWindChanges) {
+        triggerManeuverCacheRecalculation(competitor);
+    }
+    
     /**
      * Precondition: race has already been set, e.g., in constructor before this method is called
      */

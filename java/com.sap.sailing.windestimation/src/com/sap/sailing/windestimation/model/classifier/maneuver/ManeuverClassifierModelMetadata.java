@@ -133,6 +133,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         inputVector[i++] = maneuver.getLowestSpeedVsExitingSpeedRatio();
         inputVector[i++] = maneuver.getSpeedGainRatio();
         inputVector[i++] = maneuver.getMaxTurningRateInDegreesPerSecond();
+        inputVector[i++] = maneuver.getSpeedWithBearingBefore().getMetersPerSecond() / maneuver.getSpeedWithBearingAfter().getMetersPerSecond();
         if (maneuverFeatures.isPolarsInformation()) {
             inputVector[i++] = maneuver.getDeviationFromOptimalTackAngleInDegrees();
             inputVector[i++] = maneuver.getDeviationFromOptimalJibeAngleInDegrees();
@@ -143,15 +144,13 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         }
         if (maneuverFeatures.isMarksInformation()) {
             inputVector[i++] = maneuver.isMarkPassing() ? 1.0 : 0.0;
-            // inputVector[i++] = maneuver.getRelativeBearingToNextMarkBefore();
-            // inputVector[i++] = maneuver.getRelativeBearingToNextMarkAfter();
         }
         return inputVector;
     }
 
     @Override
     public int getNumberOfInputFeatures() {
-        int numberOfFeatures = 5;
+        int numberOfFeatures = 6;
         if (maneuverFeatures.isPolarsInformation()) {
             numberOfFeatures += 2;
         }

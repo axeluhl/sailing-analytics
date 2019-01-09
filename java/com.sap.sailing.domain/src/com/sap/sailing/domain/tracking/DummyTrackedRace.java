@@ -704,8 +704,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         return null;
     }
-
+    
     @Override
-    public void triggerManeuverCacheRecalculation(Competitor competitor) {
+    public void recalculateManeuverTypesAfterPossibleWindChanges(Competitor competitor,
+            Iterable<Maneuver> maneuversWithPossibleWindChanges) {
     }
+
 }
