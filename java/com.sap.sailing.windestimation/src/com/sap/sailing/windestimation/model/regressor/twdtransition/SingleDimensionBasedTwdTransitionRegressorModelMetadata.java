@@ -9,15 +9,13 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
 
     private static final long serialVersionUID = 20422671027132155L;
     private final String dimensionName;
-    private final int polynomialDegree;
-    private final boolean withBias;
+    private final SupportedDimensionValueRange supportedDimensionValueRange;
 
     public SingleDimensionBasedTwdTransitionRegressorModelMetadata(String dimensionName,
-            PersistenceContextType persistenceContextType, int polynomialDegree, boolean withBias) {
+            PersistenceContextType persistenceContextType, SupportedDimensionValueRange supportedDimensionValueRange) {
         super(persistenceContextType);
         this.dimensionName = dimensionName;
-        this.polynomialDegree = polynomialDegree;
-        this.withBias = withBias;
+        this.supportedDimensionValueRange = supportedDimensionValueRange;
     }
 
     public double[] getX(TwdTransition instance) {
@@ -26,9 +24,9 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
 
     public abstract double getDimensionValue(TwdTransition instance);
 
-    public abstract double getFromIntervalInclusive();
-
-    public abstract double getToIntervalExclusive();
+    public SupportedDimensionValueRange getSupportedDimensionValueRange() {
+        return supportedDimensionValueRange;
+    }
 
     @Override
     public int getNumberOfInputFeatures() {
@@ -45,8 +43,8 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
         final int prime = 31;
         int result = 1;
         result = prime * result + ((dimensionName == null) ? 0 : dimensionName.hashCode());
-        result = prime * result + polynomialDegree;
-        result = prime * result + (withBias ? 1231 : 1237);
+        result = prime * result
+                + ((supportedDimensionValueRange == null) ? 0 : supportedDimensionValueRange.hashCode());
         return result;
     }
 
@@ -64,9 +62,10 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
                 return false;
         } else if (!dimensionName.equals(other.dimensionName))
             return false;
-        if (polynomialDegree != other.polynomialDegree)
-            return false;
-        if (withBias != other.withBias)
+        if (supportedDimensionValueRange == null) {
+            if (other.supportedDimensionValueRange != null)
+                return false;
+        } else if (!supportedDimensionValueRange.equals(other.supportedDimensionValueRange))
             return false;
         return true;
     }
@@ -74,35 +73,27 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
     @Override
     public String toString() {
         return dimensionName + "BasedTwdTransitionRegressorModelMetadata [dimensionName=" + dimensionName
-                + ", polynomialDegree=" + polynomialDegree + ", withBias=" + withBias
-                + ", getSupportedDimensionValueRangeId()=" + getSupportedDimensionValueRangeId() + "]";
+                + ", supportedDimensionValueRange=" + supportedDimensionValueRange + "]";
     }
 
     @Override
     public String getId() {
-        return dimensionName + "BasedTwdTransitionRegressor" + getSupportedDimensionValueRangeId();
-    }
-
-    protected abstract String getSupportedDimensionValueRangeId();
-
-    public int getPolynomialDegree() {
-        return polynomialDegree;
-    }
-
-    public boolean isWithBias() {
-        return withBias;
+        return dimensionName + "BasedTwdTransitionRegressor" + "From" + supportedDimensionValueRange.getFromInclusive()
+                + "To" + supportedDimensionValueRange.getToExclusive();
     }
 
     public boolean isDimensionValueSupported(double dimensionValue) {
-        if (getFromIntervalInclusive() <= dimensionValue
-                && (getToIntervalExclusive() > dimensionValue || dimensionValue == Double.MAX_VALUE)) {
+        if (supportedDimensionValueRange.getFromInclusive() <= dimensionValue
+                && (supportedDimensionValueRange.getToExclusive() > dimensionValue
+                        || dimensionValue == Double.MAX_VALUE)) {
             return true;
         }
         return false;
     }
 
     public boolean isDimensionValueSupportedForTraining(double dimensionValue) {
-        return isDimensionValueSupported(dimensionValue) || getToIntervalExclusive() == dimensionValue;
+        return isDimensionValueSupported(dimensionValue)
+                || supportedDimensionValueRange.getToExclusive() == dimensionValue;
     }
 
     @Override

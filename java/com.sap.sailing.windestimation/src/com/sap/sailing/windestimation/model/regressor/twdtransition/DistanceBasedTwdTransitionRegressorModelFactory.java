@@ -23,9 +23,10 @@ public class DistanceBasedTwdTransitionRegressorModelFactory extends
     public DistanceBasedTwdTransitionRegressorModelMetadata createNewModelMetadata(TwdTransition twdTransition) {
         double metersPassed = twdTransition.getDistance().getMeters();
         for (DistanceValueRange distanceValueRange : DistanceValueRange.values()) {
-            if (distanceValueRange.getFromInclusive() <= metersPassed
-                    && distanceValueRange.getToExclusive() > metersPassed) {
-                return new DistanceBasedTwdTransitionRegressorModelMetadata(distanceValueRange);
+            DistanceBasedTwdTransitionRegressorModelMetadata modelMetadata = new DistanceBasedTwdTransitionRegressorModelMetadata(
+                    distanceValueRange);
+            if (modelMetadata.isDimensionValueSupported(metersPassed)) {
+                return modelMetadata;
             }
         }
         throw new IllegalStateException(

@@ -23,9 +23,10 @@ public class DurationBasedTwdTransitionRegressorModelFactory extends
     public DurationBasedTwdTransitionRegressorModelMetadata createNewModelMetadata(TwdTransition twdTransition) {
         double secondsPassed = twdTransition.getDuration().asSeconds();
         for (DurationValueRange durationValueRange : DurationValueRange.values()) {
-            if (durationValueRange.getFromInclusive() <= secondsPassed
-                    && durationValueRange.getToExclusive() > secondsPassed) {
-                return new DurationBasedTwdTransitionRegressorModelMetadata(durationValueRange);
+            DurationBasedTwdTransitionRegressorModelMetadata modelMetadata = new DurationBasedTwdTransitionRegressorModelMetadata(
+                    durationValueRange);
+            if (modelMetadata.isDimensionValueSupported(secondsPassed)) {
+                return modelMetadata;
             }
         }
         throw new IllegalStateException(

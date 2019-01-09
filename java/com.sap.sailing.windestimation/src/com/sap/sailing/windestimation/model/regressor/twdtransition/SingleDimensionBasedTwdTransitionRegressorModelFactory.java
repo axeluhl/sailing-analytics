@@ -18,8 +18,9 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelFactory<T e
     @Override
     public IncrementalSingleDimensionPolynomialRegressor<TwdTransition, T> getNewModel(T contextSpecificModelMetadata) {
         IncrementalSingleDimensionPolynomialRegressor<TwdTransition, T> regressorModel = new IncrementalSingleDimensionPolynomialRegressor<>(
-                contextSpecificModelMetadata, contextSpecificModelMetadata.getPolynomialDegree(),
-                contextSpecificModelMetadata.isWithBias());
+                contextSpecificModelMetadata,
+                contextSpecificModelMetadata.getSupportedDimensionValueRange().getPolynomialDegree(),
+                contextSpecificModelMetadata.getSupportedDimensionValueRange().isWithBias());
         return regressorModel;
     }
 
@@ -27,7 +28,8 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelFactory<T e
     public List<TrainableRegressorModel<TwdTransition, T>> getAllTrainableModels(T contextSpecificModelMetadata) {
         List<TrainableRegressorModel<TwdTransition, T>> regressors = new ArrayList<>();
         regressors.add(new IncrementalSingleDimensionPolynomialRegressor<>(contextSpecificModelMetadata,
-                contextSpecificModelMetadata.getPolynomialDegree(), contextSpecificModelMetadata.isWithBias()));
+                contextSpecificModelMetadata.getSupportedDimensionValueRange().getPolynomialDegree(),
+                contextSpecificModelMetadata.getSupportedDimensionValueRange().isWithBias()));
         return regressors;
     }
 
