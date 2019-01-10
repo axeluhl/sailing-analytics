@@ -13,6 +13,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.support.SubjectThreadState;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -124,6 +125,9 @@ public class TaggingServiceTest {
 
     @Before
     public void resetEnvironment() {
+        // setup the Shiro SubjectThreadState to ensure that the tagging service can check whether a subject is logged in
+        final SubjectThreadState threadState = new SubjectThreadState(subject);
+        threadState.bind();
         securityService.addPermissionForUser(username, editLeaderboardPermission);
         securityService.unsetPreference(username,
                 serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
