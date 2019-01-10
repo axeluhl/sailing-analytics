@@ -724,7 +724,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void windChangedEvent(List<Pair<Position, TimePoint>> changedWindMeasurements,
             WindSource windSourceWithChange) {
-        shortTimeWindCache.clearCache();
+        shortTimeWindCache.clearCacheEntriesWithWindSource(windSourceWithChange);
     }
     
     /**
