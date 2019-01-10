@@ -69,7 +69,7 @@ sed $SED_ARGS "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./
 
 # Inject information for system
 HEAD_DATE=$(date "+%Y%m%d%H%M")
-sed $SED_ARGS "s/System:.*$/ System: $MONGO_URI:$MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+sed $SED_ARGS "s/System:.*$/ System: $MONGODB_URI:$MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
 
 # Apply app parameters from env.sh
 if [ "$MONGODB_URI" = "" ]; then
