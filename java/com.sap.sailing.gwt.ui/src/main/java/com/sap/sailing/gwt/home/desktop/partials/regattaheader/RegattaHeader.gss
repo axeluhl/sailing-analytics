@@ -198,13 +198,11 @@ img.regattaheader_update_title_icon {
 }
 .iconWind {
     margin-left: 0.666666666666667em;
-    border-left: 1px solid #ccc;
 }
 .iconVideo {
     padding-top: 0.277777777777778em;
 }
 .iconAudio {
     margin-left: 0.666666666666667em;
-    border-left: 1px solid #ccc;
     padding-top: 0.277777777777778em;
 }

@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.impl.PairingListTemplateFactoryImpl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class PairingListTemplateFactoryTest {
 

@@ -10,7 +10,7 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * <p>The page object representing the leaderboard.</p>

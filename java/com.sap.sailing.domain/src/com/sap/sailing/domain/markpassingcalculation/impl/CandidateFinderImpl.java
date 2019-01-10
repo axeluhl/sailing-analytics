@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -289,7 +290,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c) {
-        Set<GPSFixMoving> fixes = getAllFixes(c);
+        Iterable<GPSFixMoving> fixes = getAllFixes(c);
         distanceCache.get(c).clear();
         xteCache.get(c).clear();
         synchronized (xteCandidates) {
@@ -552,21 +553,51 @@ public class CandidateFinderImpl implements CandidateFinder {
             Iterable<GPSFixMoving> fixes, Iterable<Waypoint> waypoints) {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
-        TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
+        TreeSet<GPSFixMoving> affectedFixes = new TreeSet<GPSFixMoving>(comp);
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+        // remember last fixes to avoid expensive searches (bug4221)
+        GPSFixMoving lastIterationFix = null;
+        GPSFixMoving lastIterationAfterFix = null;
+        Iterator<GPSFixMoving> firstFixAfterIterator = null;
         for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 affectedFixes.add(fix);
-                GPSFix fixBefore = null;
-                GPSFix fixAfter = null;
+                GPSFixMoving fixBefore = null;
+                GPSFixMoving fixAfter = null;
                 final boolean fixIsValid;
                 track.lockForRead();
                 try {
                     fixIsValid = track.isValid(fix);
                     if (fixIsValid) {
                         TimePoint t = fix.getTimePoint();
-                        fixBefore = track.getLastFixBefore(t);
-                        fixAfter = track.getFirstFixAfter(t);
+                        if (fix == lastIterationAfterFix) {
+                            // bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
+                            fixBefore = lastIterationFix;
+                        } else {
+                            fixBefore = track.getLastFixBefore(t);
+                            // bug4221: searching with getFixesIterator is about as expensive, especially in large tracks,
+                            // as searching with getFirstFixAfter; but with getFixesIterator we have an iterator at hand
+                            // that we can use in case it happens to deliver as fixAfter the next fix from fixes. In this
+                            // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
+                            firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
+                        }
+                        boolean firstFixAfterIteratorHasNext;
+                        try {
+                            firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                        } catch (ConcurrentModificationException e) {
+                            // the iterator may have been obtained in a previous look execution, and another
+                            // fix may have been added to the track; let's obtain the iterator again. We're
+                            // under the track's read lock here:
+                            firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
+                            firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                        }
+                        if (firstFixAfterIteratorHasNext) {
+                            fixAfter = firstFixAfterIterator.next();
+                        } else {
+                            fixAfter = null;
+                        }
+                        lastIterationFix = fix;
+                        lastIterationAfterFix = fixAfter;
                     }
                 } finally {
                     track.unlockAfterRead();
@@ -579,21 +610,50 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
             }
         }
-        for (GPSFix fix : affectedFixes) {
-            TimePoint t = null;
+        lastIterationFix = null;
+        lastIterationAfterFix = null;
+        firstFixAfterIterator = null;
+        for (GPSFixMoving fix : affectedFixes) {
             Position p = null;
-            GPSFix fixBefore;
-            GPSFix fixAfter;
+            GPSFixMoving fixBefore;
+            GPSFixMoving fixAfter;
             try {
                 track.lockForRead();
                 TimePoint timePoint = fix.getTimePoint();
-                fixBefore = track.getLastFixBefore(timePoint);
-                fixAfter = track.getFirstFixAfter(timePoint);
+                if (fix == lastIterationAfterFix) {
+                    // bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
+                    fixBefore = lastIterationFix;
+                } else {
+                    fixBefore = track.getLastFixBefore(timePoint);
+                    // bug4221: searching with getFixesIterator is about as expensive, especially in large tracks,
+                    // as searching with getFirstFixAfter; but with getFixesIterator we have an iterator at hand
+                    // that we can use in case it happens to deliver as fixAfter the next fix from fixes. In this
+                    // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
+                    firstFixAfterIterator = track.getFixesIterator(timePoint, /* inclusive */ false);
+                }
+                boolean firstFixAfterIteratorHasNext;
+                try {
+                    firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                } catch (ConcurrentModificationException e) {
+                    // the iterator may have been obtained in a previous look execution, and another
+                    // fix may have been added to the track; let's obtain the iterator again. We're
+                    // under the track's read lock here:
+                    firstFixAfterIterator = track.getFixesIterator(timePoint, /* inclusive */ false);
+                    firstFixAfterIteratorHasNext = firstFixAfterIterator.hasNext();
+                }
+                if (firstFixAfterIteratorHasNext) {
+                    fixAfter = firstFixAfterIterator.next();
+                } else {
+                    fixAfter = null;
+                }
+                lastIterationFix = fix;
+                lastIterationAfterFix = fixAfter;
             } finally {
                 track.unlockAfterRead();
             }
             if (fixBefore != null && fixAfter != null) {
-                Map<Waypoint, List<Distance>> fixDistances = getDistances(c, fix);
+                TimePoint t = null;
+                Map<Waypoint, List<Distance>> fixDistances = getDistances(c, fix); // TODO bug4831 consider interpolating between fixBefore/fix/fixAfter to handle small sampling rates better
                 Map<Waypoint, List<Distance>> fixDistancesBefore = getDistances(c, fixBefore);
                 Map<Waypoint, List<Distance>> fixDistancesAfter = getDistances(c, fixAfter);
                 for (Waypoint w : waypoints) {
@@ -713,18 +773,38 @@ public class CandidateFinderImpl implements CandidateFinder {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+        // remember last fixes to avoid expensive searches (bug4221)
+        GPSFixMoving lastIterationFix = null;
+        GPSFixMoving lastIterationAfterFix = null;
+        Iterator<GPSFixMoving> firstFixAfterIterator = null;
         for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 TimePoint t = fix.getTimePoint();
-                GPSFix fixBefore = null;
-                GPSFix fixAfter = null;
+                GPSFixMoving fixBefore = null;
+                GPSFixMoving fixAfter = null;
                 final boolean fixIsValid;
                 track.lockForRead();
                 try {
                     fixIsValid = track.isValid(fix);
                     if (fixIsValid) {
-                        fixBefore = track.getLastFixBefore(t);
-                        fixAfter = track.getFirstFixAfter(t);
+                        if (fix == lastIterationAfterFix) {
+                            // bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
+                            fixBefore = lastIterationFix;
+                        } else {
+                            fixBefore = track.getLastFixBefore(t);
+                            // bug4221: searching with getFixesIterator is about as expensive, especially in large tracks,
+                            // as searching with getFirstFixAfter; but with getFixesIterator we have an iterator at hand
+                            // that we can use in case it happens to deliver as fixAfter the next fix from fixes. In this
+                            // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
+                            firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
+                        }
+                        if (firstFixAfterIterator.hasNext()) {
+                            fixAfter = firstFixAfterIterator.next();
+                        } else {
+                            fixAfter = null;
+                        }
+                        lastIterationFix = fix;
+                        lastIterationAfterFix = fixAfter;
                     }
                 } finally {
                     track.unlockAfterRead();

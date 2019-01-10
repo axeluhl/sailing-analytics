@@ -29,7 +29,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * This class contains several tests for the {@link LowPointFirstToWinTwoRaces} scoring rule defined by

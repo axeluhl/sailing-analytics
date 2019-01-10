@@ -23,7 +23,7 @@ if [[ ! -d "$JAVA_HOME" ]]; then
 fi
 # disable AWT requiring X11 and the correct DISPLAY variable setting; failing to do so
 # can result in trouble generating QR codes in the back-end
-ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Djava.awt.headless=true"
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Djava.awt.headless=true -Xms$MEMORY"
 PLATFORM=`uname`
 SED_ARGS="-i"
 if [[ $PLATFORM == "Darwin" ]]; then
@@ -69,22 +69,48 @@ sed $SED_ARGS "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./
 
 # Inject information for system
 HEAD_DATE=$(date "+%Y%m%d%H%M")
-sed $SED_ARGS "s/System:.*$/ System: $MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+sed $SED_ARGS "s/System:.*$/ System: $MONGO_URI:$MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
 
 # Apply app parameters from env.sh
-APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dmongo.dbName=$MONGODB_NAME -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangePort=$REPLICATION_PORT -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+if [ "$MONGODB_URI" = "" ]; then
+  APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dmongo.dbName=$MONGODB_NAME"
+else
+  APP_PARAMETERS="-Dmongo.uri=$MONGODB_URI"
+fi
+APP_PARAMETERS="$APP_PARAMETERS -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangePort=$REPLICATION_PORT -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+
+# Append mail-related environment variables to configuration/mail.properties to override defaults
+if [ -n "$MAIL_FROM" ]; then
+  echo "mail.from = $MAIL_FROM" >>configuration/mail.properties
+fi
+if [ -n "$MAIL_SMTP_HOST" ]; then
+  echo "mail.smtp.host = $MAIL_SMTP_HOST" >>configuration/mail.properties
+fi
+if [ -n "$MAIL_SMTP_PORT" ]; then
+  echo "mail.smtp.port = $MAIL_SMTP_PORT" >>configuration/mail.properties
+fi
+if [ -n "$MAIL_AUTH" ]; then
+  echo "mail.auth = $MAIL_AUTH" >>configuration/mail.properties
+fi
+if [ -n "$MAIL_SMTP_USER" ]; then
+  echo "mail.smtp.user = $MAIL_SMTP_USER" >>configuration/mail.properties
+fi
+if [ -n "$MAIL_SMTP_PASSWORD" ]; then
+  echo "mail.smtp.password = $MAIL_SMTP_PASSWORD" >>configuration/mail.properties
+fi
 
 # Apply parameters for automatic replication start
 REPLICATION_PARAMETERS="-Dreplicate.on.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT -Dreplicate.master.exchange.name=$REPLICATE_MASTER_EXCHANGE_NAME"
 
 if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
-    nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dosgi.shell.telnet.port=$TELNET_PORT -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar -configuration ./ -clean 2>/dev/null >/dev/null &
+    nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dosgi.shell.telnet.port=$TELNET_PORT -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar -configuration ./ -clean 2>/dev/null >/dev/null &
     JAVA_PID=$!
     echo "Starting server... (PID: $JAVA_PID)"
     echo "SERVER_NAME: $SERVER_NAME"
     echo "SERVER_PORT: $SERVER_PORT"
     echo "MEMORY: $MEMORY"
     echo "TELNET_PORT: $TELNET_PORT"
+    echo "MONGODB_URI: $MONGODB_URI"
     echo "MONGODB_HOST: $MONGODB_HOST"
     echo "MONGODB_PORT: $MONGODB_PORT"
     echo "MONGODB_NAME: $MONGODB_NAME"
@@ -133,10 +159,11 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     fi
 elif [[ $PARAM == "debug" ]]; then
     echo "Starting remote debugging session on port 8000 - make sure this port is open and reachable from the outside"
-    $JAVA_BINARY -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar -console -configuration ./ -clean
+    JFR_OPTIONS="-XX:+FlightRecorder -Dcom.sun.management.jmxremote.port=7091 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=7091 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost"
+    $JAVA_BINARY -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=*:8000,suspend=y $JFR_OPTIONS -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar -console -configuration ./ -clean
 
 elif [[ $PARAM == "fg" ]]; then
-    $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.3.0.v20140415-2008.jar -console -configuration ./ -clean
+    exec $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar -console -configuration ./ -clean
 
 fi
 

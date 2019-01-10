@@ -64,4 +64,15 @@ public interface SharedHomeResources extends CommonIcons {
     @MimeType("image/svg+xml")
     DataResource launchPlay();
     
+    @Source("icon-audio.png")
+    ImageResource audio();
+
+    @Source("icon-video.png")
+    ImageResource video();
+
+    @Source("icon-wind.png")
+    ImageResource wind();
+
+    @Source("raw_gps_fixes.png")
+    ImageResource gpsFixes();
 }

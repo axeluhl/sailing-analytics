@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class PairingListTemplateTest extends PairingListTemplateImpl {
 

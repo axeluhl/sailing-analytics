@@ -14,7 +14,7 @@ public class StoredDataMiningQueryDTOImpl implements StoredDataMiningQueryDTO {
 
     private UUID id;
 
-    private StatisticQueryDefinitionDTO query;
+    private ModifiableStatisticQueryDefinitionDTO query;
 
     public StoredDataMiningQueryDTOImpl() {
     }
@@ -22,7 +22,7 @@ public class StoredDataMiningQueryDTOImpl implements StoredDataMiningQueryDTO {
     public StoredDataMiningQueryDTOImpl(String name, UUID id, StatisticQueryDefinitionDTO query) {
         this.name = name;
         this.id = id;
-        this.query = query;
+        this.query = (ModifiableStatisticQueryDefinitionDTO) query;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class StoredDataMiningQueryDTOImpl implements StoredDataMiningQueryDTO {
     }
 
     public void setSerializedQuery(StatisticQueryDefinitionDTO query) {
-        this.query = query;
+        this.query = (ModifiableStatisticQueryDefinitionDTO) query;
     }
 
     @Override

@@ -30,12 +30,13 @@ import org.junit.rules.Timeout;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.Activator;
 import com.sap.sse.replication.impl.RabbitOutputStream;
-import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.replication.impl.ReplicaDescriptorImpl;
 import com.sap.sse.replication.impl.ReplicationInstancesManager;
 import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
 import com.sap.sse.replication.impl.ReplicationReceiver;
@@ -64,7 +65,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         this.servletPort = servletPort;
     }
     
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(5 * 60 * 1000); // timeout after 5 minutes
     private Thread initialLoadTestServerThread;
 
     /**
@@ -150,7 +151,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, 0, rim, new SingletonReplicablesProvider(this.master));
-        replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "", new String[] { this.master.getId().toString() });
+        replicaDescriptor = new ReplicaDescriptorImpl(InetAddress.getLocalHost(), serverUuid, "", new String[] { this.master.getId().toString() });
         
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
