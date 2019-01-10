@@ -381,7 +381,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(eventNameColumn, stringMessages.event());
         table.addColumn(venueNameColumn, stringMessages.venue());
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
-        table.addColumn(isPublicColumn, stringMessages.isPublic());
+        table.addColumn(isPublicColumn, stringMessages.isListedOnHomepage());
         table.addColumn(courseAreasColumn, stringMessages.courseAreas());
         table.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
         table.addColumn(imagesColumn, stringMessages.images());

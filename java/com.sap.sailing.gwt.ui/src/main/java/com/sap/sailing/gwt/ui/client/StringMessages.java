@@ -490,7 +490,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String actionAddEvent();
     String publicationUrl();
     String suppress();
-    String isPublic();
+    String isListedOnHomepage();
     String unsuppress();
     String suppressedCompetitors();
     String pleaseSelectASeries();
