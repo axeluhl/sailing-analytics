@@ -281,7 +281,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         // migrate old admins to new admin!
                         if (roleDefinition.getName().equals(o.toString())) {
                             logger.info("Found role "+roleDefinition+" for old role "+o.toString()+" for user "+name);
-                            // we do not do role associations, to stay similar as before, so
+                            // we do not do role associations, to stay similar as before, meaning that all admins can
+                            // edit the roles. Without this we would need to determine which admin (if
+                            // multiple present) should own this association.
                             roles.add(new Role(roleDefinition, defaultTenantForRoleMigration,
                                     /* user qualification */ null));
                             rolesMigrated = true;

@@ -59,7 +59,7 @@ public class Activator implements BundleActivator {
             MongoDBService.INSTANCE.registerExclusively(CollectionNames.class, name.name());
         }
 
-        new Thread(getClass().getName() + "userstore after SecurityService async startup") {
+        new Thread(getClass().getName() + "migrate ownerships after security service is ready") {
             public void run() {
                 try {
                     final ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker = new ServiceTracker<>(
