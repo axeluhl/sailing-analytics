@@ -68,7 +68,7 @@ public class TimeUtils {
     }
 
     public static String formatDurationSince(long milliseconds, boolean emptyHours) {
-        int secondsTillStart = (int) Math.floor(milliseconds / 1000f);
+        int secondsTillStart = (int) Math.floor(milliseconds / 1000d);
         return formatDuration(secondsTillStart, emptyHours);
     }
 
@@ -77,7 +77,7 @@ public class TimeUtils {
     }
 
     public static String formatDurationUntil(long milliseconds, boolean emptyHours) {
-        int secondsTillStart = (int) Math.ceil(milliseconds / 1000f);
+        int secondsTillStart = (int) Math.ceil(milliseconds / 1000d);
         return formatDuration(secondsTillStart, emptyHours);
     }
 

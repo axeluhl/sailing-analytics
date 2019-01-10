@@ -1,40 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
-import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
-import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
-import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.RaceApplication;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.ui.activities.SessionActivity;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
-import com.sap.sailing.racecommittee.app.utils.StringHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sailing.racecommittee.app.utils.TickListener;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
-
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -67,8 +32,40 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.RaceApplication;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.activities.SessionActivity;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Util;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+
 public class RaceListFragment extends LoggableFragment
-        implements OnItemClickListener, OnItemSelectedListener, TickListener, OnScrollListener {
+        implements OnItemClickListener, OnItemSelectedListener, OnScrollListener {
 
     private final static String TAG = RaceListFragment.class.getName();
     private final static String LAYOUT = "layout";
@@ -209,13 +206,6 @@ public class RaceListFragment extends LoggableFragment
     }
 
     @Override
-    public void notifyTick(TimePoint now) {
-        if (mAdapter != null && mAdapter.getCount() >= 0 && mUpdateList) {
-            mAdapter.notifyDataSetChanged();
-        }
-    }
-
-    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         RaceListDataTypeRace.initializeTemplates(this);
@@ -327,7 +317,6 @@ public class RaceListFragment extends LoggableFragment
     public void onPause() {
         super.onPause();
 
-        TickSingleton.INSTANCE.unregisterListener(this);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
@@ -335,7 +324,6 @@ public class RaceListFragment extends LoggableFragment
     public void onResume() {
         super.onResume();
 
-        TickSingleton.INSTANCE.registerListener(this);
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_PROTEST);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
