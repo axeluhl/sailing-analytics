@@ -189,7 +189,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 }
                 maneuverSpotsWithTypedManeuvers = getAllManeuverSpotsWithTypedManeuversFromDetectionResultSortedByTimePoint(
                         detectionResult);
-                if (possibleChangeOfManeuverTypesInfo.isWindChanged()) {
+                if (possibleChangeOfManeuverTypesInfo != null && possibleChangeOfManeuverTypesInfo.isWindChanged()) {
                     for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                         if (possibleChangeOfManeuverTypesInfo.isWindChangedForCompetitor(competitor)) {
                             if (this.competitor.equals(competitor)) {
