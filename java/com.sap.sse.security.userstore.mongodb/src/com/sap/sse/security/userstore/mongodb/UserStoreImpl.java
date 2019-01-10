@@ -405,6 +405,11 @@ public class UserStoreImpl implements UserStore {
     @Override
     public RoleDefinition createRoleDefinition(UUID roleDefinitionId, String displayName, Iterable<WildcardPermission> permissions) {
         final RoleDefinition roleDefinition = RoleDefinitionImpl.create(roleDefinitionId, displayName, permissions);
+        for (RoleDefinition value : roleDefinitions.values()) {
+            if (value.getName().equals(roleDefinition.getName())) {
+                throw new IllegalArgumentException("Role Definition with same name already exists");
+            }
+        }
         roleDefinitions.put(roleDefinitionId, roleDefinition);
         mongoObjectFactory.storeRoleDefinition(roleDefinition);
         return roleDefinition;
@@ -557,6 +562,9 @@ public class UserStoreImpl implements UserStore {
     
     @Override
     public UserGroupImpl createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
+        if (userGroupsByName.contains(name)) {
+            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
+        }
         if (userGroups.contains(groupId)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
