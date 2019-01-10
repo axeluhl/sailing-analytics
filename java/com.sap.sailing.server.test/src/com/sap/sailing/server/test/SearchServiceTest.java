@@ -17,8 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.support.SubjectThreadState;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -103,6 +106,11 @@ public class SearchServiceTest {
 
     @Before
     public void setUp() {
+        // setup the Shiro SubjectThreadState to ensure that the tagging service can check whether a subject is logged in
+        final Subject subject = Mockito.mock(Subject.class);
+        final SubjectThreadState threadState = new SubjectThreadState(subject);
+        threadState.bind();
+
         server = new RacingEventServiceImpl();
         List<Event> allEvents = new ArrayList<>();
         Util.addAll(server.getAllEvents(), allEvents);
