@@ -45,6 +45,7 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     private static final long serialVersionUID = -11522605089325440L;
@@ -706,8 +707,12 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
     
     @Override
-    public void recalculateManeuverTypesAfterPossibleWindChanges(Competitor competitor,
-            Iterable<Maneuver> maneuversWithPossibleWindChanges) {
+    public void windChangedEvent(List<Pair<Position, TimePoint>> changedWindMeasurements,
+            WindSource windSourceWithChange) {
+    }
+    
+    @Override
+    public void triggerManeuverCacheRecalculation(Competitor competitor) {
     }
 
 }

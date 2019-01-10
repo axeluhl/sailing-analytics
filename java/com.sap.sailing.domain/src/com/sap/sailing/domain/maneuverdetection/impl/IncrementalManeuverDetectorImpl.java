@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.ApproximatedFixesCalculator;
@@ -22,6 +23,7 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Incremental maneuver detector, which is capable of detecting maneuvers by a {@link #detectManeuvers()} call in an
@@ -37,13 +39,12 @@ import com.sap.sse.common.Util;
  * the existing Douglas Peucker fixes group had been determined.</li>
  * <li>The reused Douglas Peucker fixes group is far enough from the last fix of the track, so that its maneuvers cannot
  * be extended by new incoming fixes. The "far enough" is defined in
- * {@link #checkManeuverSpotFarEnoughFromLatestRawFix(TimePoint, long, TimePoint, ManeuverSpot)}.
+ * {@link #isManeuverSpotFarEnoughFromLatestRawFix(TimePoint, long, TimePoint, ManeuverSpot)}.
  * </ul>
  * With exception: the first and last calculated Douglas Peucker points are ignored during matching process, because
  * they get never added to Douglas Peucker fixes sets which represent maneuver section.
- * {@link #checkDouglasPeuckerFixesNearlySame(GPSFixMoving, GPSFixMoving)} defines whether two Douglas Peucker match and
- * are nearly same. The nearly the same measured wind is defined by
- * {@link #checkManeuverSpotWindNearlySame(ManeuverSpot)}.
+ * {@link #isDouglasPeuckerFixesNearlySame(GPSFixMoving, GPSFixMoving)} defines whether two Douglas Peucker match and
+ * are nearly same. The nearly the same measured wind is defined by {@link #isManeuverSpotWindNearlySame(ManeuverSpot)}.
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -190,26 +191,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 maneuverSpotsWithTypedManeuvers = getAllManeuverSpotsWithTypedManeuversFromDetectionResultSortedByTimePoint(
                         detectionResult);
                 if (possibleChangeOfManeuverTypesInfo != null && possibleChangeOfManeuverTypesInfo.isWindChanged()) {
-                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                        if (possibleChangeOfManeuverTypesInfo.isWindChangedForCompetitor(competitor)) {
-                            if (this.competitor.equals(competitor)) {
-                                List<ManeuverSpotWithTypedManeuvers> maneuverSpotsWithChangedWind = possibleChangeOfManeuverTypesInfo
-                                        .getManeuverSpotsWithChangedWindForCompetitor(competitor);
-                                maneuverSpotsWithTypedManeuvers = readjustTypedManeuverSpotsAfterWindChange(
-                                        maneuverSpotsWithTypedManeuvers, maneuverSpotsWithChangedWind);
-                            } else {
-                                List<Maneuver> maneuversWithPossibleWindChanges = new ArrayList<>();
-                                for (ManeuverSpotWithTypedManeuvers maneuverSpot : possibleChangeOfManeuverTypesInfo
-                                        .getManeuverSpotsWithChangedWindForCompetitor(competitor)) {
-                                    for (Maneuver maneuver : maneuverSpot.getManeuvers()) {
-                                        maneuversWithPossibleWindChanges.add(maneuver);
-                                    }
-                                }
-                                trackedRace.recalculateManeuverTypesAfterPossibleWindChanges(competitor,
-                                        maneuversWithPossibleWindChanges);
-                            }
-                        }
-                    }
+                    maneuverSpotsWithTypedManeuvers = getManeuverSpotsAfterEstimatedWindChanged(
+                            maneuverSpotsWithTypedManeuvers, possibleChangeOfManeuverTypesInfo);
                 }
             }
             int incrementalRunsCount = lastManeuverDetectionResult == null ? 1
@@ -223,35 +206,36 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return Collections.emptyList();
     }
 
-    // TODO Would be nice if trackedRace.recalculateManeuverTypesAfterPossibleWindChanges(competitor,
-    // maneuversWithPossibleWindChanges) will call this method instead of triggerManeuverCacheRecalculation(competitor)
-    @Override
-    public List<Maneuver> recalculateManeuverTypesAfterPossibleWindChangesAndGetAllManeuvers(
-            Iterable<Maneuver> maneuversWithPossibleWindChanges) {
-        ManeuverDetectionResult lastManeuverDetectionResult = this.lastManeuverDetectionResult;
-        if (lastManeuverDetectionResult == null) {
-            return detectManeuvers();
-        } else {
-            List<ManeuverSpotWithTypedManeuvers> existingManeuverSpots = lastManeuverDetectionResult.getManeuverSpots();
-            List<ManeuverSpotWithTypedManeuvers> reviewedManeuverSpots = new ArrayList<>();
-            for (ManeuverSpotWithTypedManeuvers existingManeuverSpot : existingManeuverSpots) {
-                if (Util.containsAll(maneuversWithPossibleWindChanges, existingManeuverSpot.getManeuvers())) {
-                    ManeuverSpotWithTypedManeuvers newManeuverSpot = getManeuverSpotWithTypedManeuversFromExistingManeuverSpotConsideringPossibleWindChange(
-                            existingManeuverSpot);
-                    reviewedManeuverSpots.add(newManeuverSpot);
+    private List<ManeuverSpotWithTypedManeuvers> getManeuverSpotsAfterEstimatedWindChanged(
+            List<ManeuverSpotWithTypedManeuvers> maneuverSpotsWithTypedManeuvers,
+            PossibleChangeOfManeuverTypesInfo possibleChangeOfManeuverTypesInfo) {
+        List<ManeuverSpotWithTypedManeuvers> maneuverSpotsWithChangedWindOfAllCompetitors = possibleChangeOfManeuverTypesInfo
+                .getManeuverSpotsWithChangedWindOfAllCompetitors();
+        List<Pair<Position, TimePoint>> changedWindMeasurementsOfAllCompetitors = maneuverSpotsWithChangedWindOfAllCompetitors
+                .stream().map(maneuverSpot -> new Pair<>(maneuverSpot.getWindMeasurement().getPosition(),
+                        maneuverSpot.getWindMeasurement().getTimePoint()))
+                .collect(Collectors.toList());
+        trackedRace.windChangedEvent(changedWindMeasurementsOfAllCompetitors,
+                windEstimationInteraction.getWindSource());
+        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            if (possibleChangeOfManeuverTypesInfo.isWindChangedForCompetitor(competitor)) {
+                if (this.competitor.equals(competitor)) {
+                    List<ManeuverSpotWithTypedManeuvers> maneuverSpotsWithChangedWind = possibleChangeOfManeuverTypesInfo
+                            .getManeuverSpotsWithChangedWindForCompetitor(competitor);
+                    maneuverSpotsWithTypedManeuvers = readjustTypedManeuverSpotsAfterWindChange(
+                            maneuverSpotsWithTypedManeuvers, maneuverSpotsWithChangedWind);
                 } else {
-                    reviewedManeuverSpots.add(existingManeuverSpot);
+                    for (ManeuverSpotWithTypedManeuvers maneuverSpot : possibleChangeOfManeuverTypesInfo
+                            .getManeuverSpotsWithChangedWindForCompetitor(competitor)) {
+                        if (!isManeuverSpotWindNearlySame(maneuverSpot)) {
+                            trackedRace.triggerManeuverCacheRecalculation(competitor);
+                            break;
+                        }
+                    }
                 }
             }
-            int incrementalRunsCount = lastManeuverDetectionResult.getIncrementalRunsCount() < Integer.MAX_VALUE
-                    ? lastManeuverDetectionResult.getIncrementalRunsCount() + 1
-                    : Integer.MAX_VALUE;
-            this.lastManeuverDetectionResult = new ManeuverDetectionResult(
-                    lastManeuverDetectionResult.getLatestRawFixTimePoint(), reviewedManeuverSpots,
-                    incrementalRunsCount);
-            List<Maneuver> maneuvers = getAllManeuversFromManeuverSpots(reviewedManeuverSpots);
-            return maneuvers;
         }
+        return maneuverSpotsWithTypedManeuvers;
     }
 
     private List<ManeuverSpotWithTypedManeuvers> readjustTypedManeuverSpotsAfterWindChange(
@@ -307,7 +291,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
     private ManeuverSpotWithTypedManeuvers getManeuverSpotWithTypedManeuversFromExistingManeuverSpotConsideringPossibleWindChange(
             ManeuverSpotWithTypedManeuvers currentExistingManeuverSpot) {
         ManeuverSpotWithTypedManeuvers maneuverSpotWithTypedManeuvers;
-        if (checkManeuverSpotWindNearlySame(currentExistingManeuverSpot)
+        if (isManeuverSpotWindNearlySame(currentExistingManeuverSpot)
                 || currentExistingManeuverSpot.getManeuverCurve() == null) {
             // We found an existing maneuver spot with similar fixes and estimated winds => reuse
             // existing maneuver spot
@@ -361,7 +345,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 if (matchingManeuverSpotFromState != null) {
                     if (matchingFixesGroupFromStateIterator.hasNext()) {
                         GPSFixMoving existingDouglasPeuckerFix = matchingFixesGroupFromStateIterator.next();
-                        if (!checkDouglasPeuckerFixesNearlySame(existingDouglasPeuckerFix, current)) {
+                        if (!isDouglasPeuckerFixesNearlySame(existingDouglasPeuckerFix, current)) {
                             // existing maneuver spot does not match with the fixes sequence in this run => discard
                             // existing maneuver spot and process fixesGroupForManeuverSpotAnalysis normally like in
                             // ManeuverDetectorImpl
@@ -426,7 +410,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                         // latestRawFixTimePoint.after(latestRawFixTimePointOfPreviousManeuverDetectionIteration),
                         // then we need to recalculate the maneuver spot, because the boundaries of maneuver may get
                         // extended by new incoming fixes
-                        boolean maneuverSpotIsFarEnoughFromLatestRawFix = checkManeuverSpotFarEnoughFromLatestRawFix(
+                        boolean maneuverSpotIsFarEnoughFromLatestRawFix = isManeuverSpotFarEnoughFromLatestRawFix(
                                 latestRawFixTimePoint,
                                 maxDurationForDouglasPeuckerFixExtensionInManeuverAnalysisInMillis,
                                 latestRawFixTimePointOfPreviousManeuverDetectionIteration, maneuverSpot);
@@ -458,7 +442,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      * Checks whether the provided maneuver spot is too close to {@code latestRawFixTimePoint}, so that recalculation of
      * the maneuver boundaries is needed, because the boundaries may get extended by new incoming fixes.
      */
-    private boolean checkManeuverSpotFarEnoughFromLatestRawFix(TimePoint latestRawFixTimePoint,
+    private boolean isManeuverSpotFarEnoughFromLatestRawFix(TimePoint latestRawFixTimePoint,
             long maxDurationForDouglasPeuckerFixExtensionInManeuverAnalysisInMillis,
             TimePoint latestRawFixTimePointOfPreviousManeuverDetectionIteration,
             ManeuverSpot previouslyDetectedManeuverSpotWithSameDouglasPeuckerPoints) {
@@ -486,7 +470,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 .plus(getMaxDurationForAfterManeuverSectionExtension(approximateManeuverDuration));
     }
 
-    private boolean checkManeuverSpotWindNearlySame(ManeuverSpotWithTypedManeuvers maneuverSpot) {
+    private boolean isManeuverSpotWindNearlySame(ManeuverSpotWithTypedManeuvers maneuverSpot) {
         if (maneuverSpot.getWindMeasurement() != null) {
             WindMeasurement windMeasurement = maneuverSpot.getWindMeasurement();
             Bearing lastWindCourse = windMeasurement.getWindCourse();
@@ -506,7 +490,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return true;
     }
 
-    private boolean checkDouglasPeuckerFixesNearlySame(GPSFixMoving existingDouglasPeuckerFix,
+    private boolean isDouglasPeuckerFixesNearlySame(GPSFixMoving existingDouglasPeuckerFix,
             GPSFixMoving newDouglasPeuckerFix) {
         double secondsDifference = existingDouglasPeuckerFix.getTimePoint().until(newDouglasPeuckerFix.getTimePoint())
                 .asSeconds();
@@ -558,7 +542,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                     firstManeuverSpotIterated = maneuverSpot;
                 }
                 GPSFixMoving firstFix = maneuverSpot.getDouglasPeuckerFixes().iterator().next();
-                if (checkDouglasPeuckerFixesNearlySame(newDouglasPeuckerFix, firstFix)) {
+                if (isDouglasPeuckerFixesNearlySame(newDouglasPeuckerFix, firstFix)) {
                     lastIteratorUsed.previous();
                     return lastIteratorUsed;
                 }
@@ -573,7 +557,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                 break;
             }
             GPSFixMoving firstFix = maneuverSpot.getDouglasPeuckerFixes().iterator().next();
-            if (checkDouglasPeuckerFixesNearlySame(newDouglasPeuckerFix, firstFix)) {
+            if (isDouglasPeuckerFixesNearlySame(newDouglasPeuckerFix, firstFix)) {
                 newIterator.previous();
                 return newIterator;
             }

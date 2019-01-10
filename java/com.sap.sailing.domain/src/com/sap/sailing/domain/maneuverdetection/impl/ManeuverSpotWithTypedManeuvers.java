@@ -44,5 +44,5 @@ public class ManeuverSpotWithTypedManeuvers extends ManeuverSpot {
     public WindMeasurement getWindMeasurement() {
         return windMeasurement;
     }
-
+    
 }

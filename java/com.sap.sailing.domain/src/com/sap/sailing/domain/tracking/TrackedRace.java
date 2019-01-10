@@ -1126,7 +1126,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache);
 
-    void recalculateManeuverTypesAfterPossibleWindChanges(Competitor competitor,
-            Iterable<Maneuver> maneuversWithPossibleWindChanges);
+    void windChangedEvent(List<Pair<Position, TimePoint>> changedWindMeasurements, WindSource windSourceWithChange);
+
+    void triggerManeuverCacheRecalculation(Competitor competitor);
 
 }

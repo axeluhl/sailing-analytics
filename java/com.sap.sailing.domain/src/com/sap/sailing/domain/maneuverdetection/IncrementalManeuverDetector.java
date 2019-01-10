@@ -40,7 +40,4 @@ public interface IncrementalManeuverDetector extends ManeuverDetector {
      */
     int getIncrementalRunsCount();
 
-    List<Maneuver> recalculateManeuverTypesAfterPossibleWindChangesAndGetAllManeuvers(
-            Iterable<Maneuver> maneuversWithPossibleWindChanges);
-
 }

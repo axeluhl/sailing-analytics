@@ -1229,7 +1229,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recalculateManeuverTypesAfterPossibleWindChanges(Competitor competitor,
-            Iterable<Maneuver> maneuversWithPossibleWindChanges) {
+    public void windChangedEvent(List<Pair<Position, TimePoint>> changedWindMeasurements,
+            WindSource windSourceWithChange) {
+    }
+    
+    @Override
+    public void triggerManeuverCacheRecalculation(Competitor competitor) {
     }
 }

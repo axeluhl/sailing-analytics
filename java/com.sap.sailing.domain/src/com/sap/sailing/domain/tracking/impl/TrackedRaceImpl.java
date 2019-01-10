@@ -722,9 +722,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public void recalculateManeuverTypesAfterPossibleWindChanges(Competitor competitor,
-            Iterable<Maneuver> maneuversWithPossibleWindChanges) {
-        triggerManeuverCacheRecalculation(competitor);
+    public void windChangedEvent(List<Pair<Position, TimePoint>> changedWindMeasurements,
+            WindSource windSourceWithChange) {
+        shortTimeWindCache.clearCache();
     }
     
     /**

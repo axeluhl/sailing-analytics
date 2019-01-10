@@ -89,6 +89,15 @@ public class ShortTimeWindCache {
         }
     }
     
+    public void clearCache() {
+        synchronized (order) {
+            cache.clear();
+            order.clear();
+            invalidatorHandle.cancel(/* mayInterruptIfRunning */ false);
+            invalidatorHandle = null;
+        }
+    }
+    
     protected WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p,
             TimePoint at, Set<WindSource> windSourcesToExclude) {
         WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> wind;
@@ -124,4 +133,5 @@ public class ShortTimeWindCache {
                     scheduleAtFixedRate(new CacheInvalidator(), /* delay */ preserveHowManyMilliseconds, preserveHowManyMilliseconds, TimeUnit.MILLISECONDS);
         }
     }
+
 }
