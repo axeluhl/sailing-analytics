@@ -343,6 +343,8 @@ public class WindEstimatorEvaluationResult {
                         + " (" + getNumberOfCorrectlyEstimatedManeuverTypes() + "/"
                         + (getNumberOfAllEstimatedManeuverTypes()) + " correct)");
         if (detailed) {
+            System.out.println(new ConfusionMatrixScoring("Maneuver type estimation scoring",
+                    i -> ManeuverTypeForClassification.values()[i].toString()).printScoring(confusionMatrix));
             System.out.println();
             System.out.println("### Wind speed ###");
             System.out.println(" Accuracy: " + formatPercentage(getAccuracyOfWindSpeedEstimation()) + " ("
@@ -373,8 +375,6 @@ public class WindEstimatorEvaluationResult {
                     + formatKnots(getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations()));
             System.out.println(" Avg. wind speed error of all estimations : " + formatKnots(
                     getAvgAbsWindSpeedErrorInKnotsOfCorrectAndIncorrectWindDirectionWithSpeedEstimations()));
-            System.out.println(new ConfusionMatrixScoring("Maneuver type estimation scoring",
-                    i -> ManeuverTypeForClassification.values()[i].toString()));
         }
     }
 

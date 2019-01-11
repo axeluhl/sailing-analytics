@@ -165,7 +165,7 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
                 }
             }
         }
-        result.mergeBySum(new WindEstimatorEvaluationResult(confusionMatrix));
+        result = result.mergeBySum(new WindEstimatorEvaluationResult(confusionMatrix));
         LoggingUtil.logInfo("Evaluating on " + raceWithEstimationData.getRegattaName() + " Race "
                 + raceWithEstimationData.getRaceName() + " succeeded");
         result.printEvaluationStatistics(false);
