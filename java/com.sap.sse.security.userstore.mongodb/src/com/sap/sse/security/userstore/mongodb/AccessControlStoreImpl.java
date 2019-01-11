@@ -13,10 +13,8 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
@@ -51,8 +49,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
      */
     private final NamedReentrantReadWriteLock lockForManagementMappings;
 
-    private final UserGroup defaultTenant;
-
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
@@ -65,7 +61,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     public AccessControlStoreImpl(final DomainObjectFactory domainObjectFactory,
             final MongoObjectFactory mongoObjectFactory, final UserStore userStore) {
-        this.defaultTenant = userStore.getDefaultTenant();
         accessControlLists = new ConcurrentHashMap<>();
         ownerships = new ConcurrentHashMap<>();
         userToOwnership = new ConcurrentHashMap<>();
@@ -85,13 +80,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
                     for (OwnershipAnnotation ownership : domainObjectFactory.loadAllOwnerships(userStore)) {
                         internalSetOwnershipAndmapUserAndUserGroupToOwnership(ownership);
                     }
-                }
-
-                // check if we already have an ownership for the server, create if it is missing
-                QualifiedObjectIdentifier expectedServerOwner = SecuredSecurityTypes.SERVER
-                        .getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(defaultTenant.getName()));
-                if (!ownerships.containsKey(expectedServerOwner)) {
-                    setOwnership(expectedServerOwner, null, defaultTenant, defaultTenant.getName());
                 }
             }
         });

@@ -20,10 +20,13 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.HasPermissionsProvider;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -144,6 +147,11 @@ public class Activator implements BundleActivator {
                     userStore.loadAndMigrateUsers();
                     // create security service, it will also create a default admin user if no users exist
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
+                    // check if we already have an ownership for the server, create if it is missing
+                    QualifiedObjectIdentifier expectedServerOwner = SecuredSecurityTypes.SERVER
+                            .getQualifiedObjectIdentifier(
+                                    new TypeRelativeObjectIdentifier(userStore.getDefaultTenant().getName()));
+                    securityService.setOwnershipIfNotSet(expectedServerOwner, null, userStore.getDefaultTenant());
                 } catch (InterruptedException | UserGroupManagementException | UserManagementException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }

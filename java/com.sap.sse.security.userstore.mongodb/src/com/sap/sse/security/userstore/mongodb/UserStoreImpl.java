@@ -44,16 +44,17 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
 /**
- * An implementation of the {@link UserStore} interface, intended to store its state durably in a MongoDB instance.
- * A de-serialized copy, however, will have its {@link #mongoObjectFactory} field set to <code>null</code> and will
+ * An implementation of the {@link UserStore} interface, intended to store its state durably in a MongoDB instance. A
+ * de-serialized copy, however, will have its {@link #mongoObjectFactory} field set to <code>null</code> and will
  * therefore not perform any changes to the database. This is also the reason why all access to the
- * {@link #mongoObjectFactory} field needs to be <code>null</code>-safe.<p>
+ * {@link #mongoObjectFactory} field needs to be <code>null</code>-safe.
+ * <p>
  * 
- * The storage pattern for {@link UserGroupImpl} and {@link Tenant} objects deserves some explanation. As a {@link Tenant}
- * is a specialized {@link UserGroupImpl}, this store mainly needs to keep track of the users in that {@link Tenant}. Hence,
- * the same collection is used for the storage of these user lists, and hence the same methods can be used for
- * maintaining this collection. Additionally, the tenant ID is stored in a separate collection as a "marker" which
- * entries in the user groups collection are actually tenants and not only user groups.
+ * The storage pattern for {@link UserGroupImpl} and {@link Tenant} objects deserves some explanation. As a
+ * {@link Tenant} is a specialized {@link UserGroupImpl}, this store mainly needs to keep track of the users in that
+ * {@link Tenant}. Hence, the same collection is used for the storage of these user lists, and hence the same methods
+ * can be used for maintaining this collection. Additionally, the tenant ID is stored in a separate collection as a
+ * "marker" which entries in the user groups collection are actually tenants and not only user groups.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -66,32 +67,34 @@ public class UserStoreImpl implements UserStore {
     private static final String ACCESS_TOKEN_KEY = "___access_token___";
 
     private String name = "MongoDB user store";
-    
+
     /**
      * If a valid default tenant name was passed to the constructor, this field will contain a valid
-     * {@link UserGroupImpl} object whose name equals that of the default tenant name. It will have been used
-     * during role migration where string-based roles are mapped to a corresponding {@link RoleDefinition}
-     * and the users with the original role will obtain a corresponding {@link Role} with this default
-     * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}.
+     * {@link UserGroupImpl} object whose name equals that of the default tenant name. It will have been used during
+     * role migration where string-based roles are mapped to a corresponding {@link RoleDefinition} and the users with
+     * the original role will obtain a corresponding {@link Role} with this default tenant as the
+     * {@link Role#getQualifiedForTenant() tenant qualifier}.
      */
-    private final UserGroup defaultTenant;
-    
+    private UserGroup defaultTenant;
+
     private final ConcurrentHashMap<UUID, UserGroup> userGroups;
     private final ConcurrentHashMap<String, UserGroup> userGroupsByName;
-    
+
     /**
      * Protects access to the two maps {@link #userGroupsContainingUser} and {@link #usersInUserGroups} which implement
-     * an efficient lookup for the m:n association between {@link UserGroupImpl#getUsers()} and {@link SecurityUser}. The
-     * collections also contain the relationships for the specialized {@link Tenant} objects which are not part of
+     * an efficient lookup for the m:n association between {@link UserGroupImpl#getUsers()} and {@link SecurityUser}.
+     * The collections also contain the relationships for the specialized {@link Tenant} objects which are not part of
      * {@link #userGroups} but of {@link #tenants}.
      */
-    private final NamedReentrantReadWriteLock userGroupsUserCacheLock = new NamedReentrantReadWriteLock("User Groups Cache", /* fair */ false);
+    private final NamedReentrantReadWriteLock userGroupsUserCacheLock = new NamedReentrantReadWriteLock(
+            "User Groups Cache", /* fair */ false);
     private final ConcurrentHashMap<User, Set<UserGroup>> userGroupsContainingUser;
     /**
-     * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroupImpl)} is called.
+     * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroupImpl)} is
+     * called.
      */
     private final ConcurrentHashMap<UserGroup, Set<User>> usersInUserGroups;
-    
+
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Set<User>> usersByEmail;
     private final ConcurrentHashMap<UUID, RoleDefinition> roleDefinitions;
@@ -100,35 +103,34 @@ public class UserStoreImpl implements UserStore {
     private final ConcurrentHashMap<String, String> emailForUsername;
     private final ConcurrentHashMap<String, Object> settings;
     private final ConcurrentHashMap<String, Class<?>> settingTypes;
-    
+
     /**
      * Keys are the usernames, values are the key/value pairs representing the user's preferences
      */
     private final ConcurrentHashMap<String, Map<String, String>> preferences;
-    
+
     /**
-     * Converter objects to map preference Strings to Objects.
-     * The keys must match the keys of the preferences. 
+     * Converter objects to map preference Strings to Objects. The keys must match the keys of the preferences.
      */
     private transient ConcurrentHashMap<String, PreferenceConverter<?>> preferenceConverters;
-    
+
     /**
-     * This is another view of the String preferences mapped by {@link #preferenceConverters} to Objects.
-     * Keys are the usernames, values are the key/value pairs representing the user's preferences.
+     * This is another view of the String preferences mapped by {@link #preferenceConverters} to Objects. Keys are the
+     * usernames, values are the key/value pairs representing the user's preferences.
      */
     private transient ConcurrentHashMap<String, Map<String, Object>> preferenceObjects;
-    
+
     /**
      * Keys are preferences keys as used by {@link #preferenceObjects}, values are the listeners to inform on changes of
      * the specific preference object for a {@link UserImpl}.
      */
     private transient Map<String, Set<PreferenceObjectListener<?>>> listeners;
-    
+
     /**
      * To be used for locking when working with {@link #listeners}.
      */
     private transient NamedReentrantReadWriteLock listenersLock;
-    
+
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
@@ -138,13 +140,16 @@ public class UserStoreImpl implements UserStore {
      */
     private final transient DomainObjectFactory domainObjectFactory;
 
+    private final String defaultTenantName;
+
     public UserStoreImpl(String defaultTenantName) throws UserGroupManagementException, UserManagementException {
         this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), defaultTenantName);
     }
-    
+
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory,
             String defaultTenantName) throws UserGroupManagementException, UserManagementException {
+        this.defaultTenantName = defaultTenantName;
         this.domainObjectFactory = domainObjectFactory;
         roleDefinitions = new ConcurrentHashMap<>();
         userGroups = new ConcurrentHashMap<>();
@@ -185,9 +190,8 @@ public class UserStoreImpl implements UserStore {
             }
             if (roleDefinitions.isEmpty()) {
                 logger.info("Empty set of role definitions suggests we are under migration. Creating default roles.");
-                
+
             }
-            defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
         } else {
             defaultTenant = null;
         }
@@ -196,8 +200,7 @@ public class UserStoreImpl implements UserStore {
     /**
      * Do not call this before the security service is ready, as else role definition migration will not work correctly
      */
-    public void loadAndMigrateUsers()
-            throws UserGroupManagementException, UserManagementException {
+    public void loadAndMigrateUsers() throws UserGroupManagementException, UserManagementException {
         final Iterable<UserGroup> userGroups = domainObjectFactory.loadAllUserGroupsAndTenantsWithProxyUsers();
         for (UserGroup group : userGroups) {
             this.userGroups.put(group.getId(), group);
@@ -232,30 +235,35 @@ public class UserStoreImpl implements UserStore {
                     if (user != null) {
                         usersByAccessToken.put(accessToken, user);
                     } else {
-                        logger.warning("Couldn't find user \""+e.getKey()+"\" for which an access token was found in the preferences");
+                        logger.warning("Couldn't find user \"" + e.getKey()
+                                + "\" for which an access token was found in the preferences");
                     }
                 }
             }
         }
+
+        defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
     }
-    
+
     @Override
     public void ensureDefaultRolesExist() {
         final AdminRole adminRolePrototype = AdminRole.getInstance();
         if (getRoleDefinition(adminRolePrototype.getId()) == null) {
-            logger.info("No admin role found. Creating default role \""+adminRolePrototype.getName()+"\" with permission \""+
-                    AdminRole.getInstance().getPermissions()+"\"");
-            createRoleDefinition((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(), adminRolePrototype.getPermissions());
+            logger.info("No admin role found. Creating default role \"" + adminRolePrototype.getName()
+                    + "\" with permission \"" + AdminRole.getInstance().getPermissions() + "\"");
+            createRoleDefinition((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(),
+                    adminRolePrototype.getPermissions());
         }
         final UserRole userRolePrototype = UserRole.getInstance();
         if (getRoleDefinition(userRolePrototype.getId()) == null) {
-            logger.info("No user role found. Creating default role \""+userRolePrototype.getName()+"\" with permission \""+
-                    userRolePrototype.getPermissions()+"\"");
-            createRoleDefinition((UUID) userRolePrototype.getId(), userRolePrototype.getName(), userRolePrototype.getPermissions());
+            logger.info("No user role found. Creating default role \"" + userRolePrototype.getName()
+                    + "\" with permission \"" + userRolePrototype.getPermissions() + "\"");
+            createRoleDefinition((UUID) userRolePrototype.getId(), userRolePrototype.getName(),
+                    userRolePrototype.getPermissions());
         }
         for (final PredefinedRoles otherPredefinedRole : PredefinedRoles.values()) {
             if (getRoleDefinition(otherPredefinedRole.getId()) == null) {
-                logger.info("Predefined role definition "+otherPredefinedRole+" not found; creating");
+                logger.info("Predefined role definition " + otherPredefinedRole + " not found; creating");
                 final Set<WildcardPermission> permissions = new HashSet<>();
                 for (final String stringPermission : otherPredefinedRole.getPermissions()) {
                     permissions.add(new WildcardPermission(stringPermission));
@@ -264,19 +272,18 @@ public class UserStoreImpl implements UserStore {
             }
         }
     }
-    
+
     @Override
     public UserGroup getDefaultTenant() {
         return defaultTenant;
     }
 
-    private UserGroup getOrCreateDefaultTenant(String defaultTenantName)
-            throws UserGroupManagementException {
+    private UserGroup getOrCreateDefaultTenant(String defaultTenantName) throws UserGroupManagementException {
         final UserGroup result;
         if (defaultTenantName != null) {
             final UserGroup existingTenant = getUserGroupByName(defaultTenantName);
             if (existingTenant == null) {
-                logger.info("Couldn't find default tenant "+defaultTenantName+"; creating it");
+                logger.info("Couldn't find default tenant " + defaultTenantName + "; creating it");
                 result = createUserGroup(UUID.randomUUID(), defaultTenantName);
             } else {
                 result = existingTenant;
@@ -295,7 +302,8 @@ public class UserStoreImpl implements UserStore {
             group.remove(proxyUser);
             final User realUser = users.get(proxyUser.getName());
             if (realUser == null) {
-                logger.warning("Couldn't find user "+proxyUser.getName()+" which was part of user group "+group.getName());
+                logger.warning("Couldn't find user " + proxyUser.getName() + " which was part of user group "
+                        + group.getName());
             } else {
                 group.add(realUser);
             }
@@ -310,7 +318,7 @@ public class UserStoreImpl implements UserStore {
         listenersLock = new NamedReentrantReadWriteLock(
                 UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
     }
-    
+
     protected Object readResolve() {
         for (final User user : getUsers()) {
             if (user instanceof UserImpl) {
@@ -319,7 +327,7 @@ public class UserStoreImpl implements UserStore {
         }
         return this;
     }
-    
+
     @Override
     public void clear() {
         userGroups.clear();
@@ -403,7 +411,8 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public RoleDefinition createRoleDefinition(UUID roleDefinitionId, String displayName, Iterable<WildcardPermission> permissions) {
+    public RoleDefinition createRoleDefinition(UUID roleDefinitionId, String displayName,
+            Iterable<WildcardPermission> permissions) {
         final RoleDefinition roleDefinition = RoleDefinitionImpl.create(roleDefinitionId, displayName, permissions);
         for (RoleDefinition value : roleDefinitions.values()) {
             if (value.getName().equals(roleDefinition.getName())) {
@@ -473,23 +482,26 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public String getAccessToken(String username) {
-        // TODO replace check for admin role by a check for the read permission for the access token which then has to be implied for the user by the user role
+        // TODO replace check for admin role by a check for the read permission for the access token which then has to
+        // be implied for the user by the user role
         // only the user or an administrator may request a user's access token
         final Object principal = SecurityUtils.getSubject().getPrincipal();
-        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) ||
-            (principal != null && principal.toString().equals(username))) {
+        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName())
+                || (principal != null && principal.toString().equals(username))) {
             return getPreference(username, ACCESS_TOKEN_KEY);
         } else {
-            throw new org.apache.shiro.authz.AuthorizationException("Only admin role or owner can retrieve access token");
+            throw new org.apache.shiro.authz.AuthorizationException(
+                    "Only admin role or owner can retrieve access token");
         }
     }
 
     @Override
     public void removeAccessToken(String username) {
-        // TODO replace check for admin role by a check for the read permission for the access token which then has to be implied for the user by the user role
+        // TODO replace check for admin role by a check for the read permission for the access token which then has to
+        // be implied for the user by the user role
         // only the user or an administrator may request a user's access token
-        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) ||
-            SecurityUtils.getSubject().getPrincipal().toString().equals(username)) {
+        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName())
+                || SecurityUtils.getSubject().getPrincipal().toString().equals(username)) {
             User user = users.get(username);
             if (user != null) {
                 final String accessToken = getPreference(username, ACCESS_TOKEN_KEY);
@@ -500,7 +512,8 @@ public class UserStoreImpl implements UserStore {
                 unsetPreference(username, ACCESS_TOKEN_KEY);
             }
         } else {
-            throw new org.apache.shiro.authz.AuthorizationException("Only admin role or owner can retrieve access token");
+            throw new org.apache.shiro.authz.AuthorizationException(
+                    "Only admin role or owner can retrieve access token");
         }
     }
 
@@ -527,7 +540,7 @@ public class UserStoreImpl implements UserStore {
             }
         }
     }
-    
+
     private boolean initSocialSettingsIfEmpty() {
         boolean changed = false;
         for (SocialSettingsKeys ssk : SocialSettingsKeys.values()) {
@@ -544,12 +557,12 @@ public class UserStoreImpl implements UserStore {
     public String getName() {
         return name;
     }
-    
+
     @Override
     public Iterable<UserGroup> getUserGroups() {
         return new ArrayList<>(userGroups.values());
     }
-    
+
     @Override
     public UserGroup getUserGroupByName(String name) {
         return name == null ? null : userGroupsByName.get(name);
@@ -559,7 +572,7 @@ public class UserStoreImpl implements UserStore {
     public UserGroup getUserGroup(UUID id) {
         return id == null ? null : userGroups.get(id);
     }
-    
+
     @Override
     public UserGroupImpl createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
         if (userGroupsByName.contains(name)) {
@@ -568,7 +581,7 @@ public class UserStoreImpl implements UserStore {
         if (userGroups.contains(groupId)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
-        logger.info("Creating user group: " + groupId + " with name "+name);
+        logger.info("Creating user group: " + groupId + " with name " + name);
         UserGroupImpl group = new UserGroupImpl(new HashSet<User>(), groupId, name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
@@ -644,7 +657,7 @@ public class UserStoreImpl implements UserStore {
             mongoObjectFactory.deleteUserGroup(userGroup);
         }
     }
-    
+
     @Override
     public User createUser(String name, String email, UserGroup defaultTenant, Account... accounts)
             throws UserManagementException {
@@ -654,7 +667,7 @@ public class UserStoreImpl implements UserStore {
         ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
         tenantsForServer.put(ServerInfo.getName(), defaultTenant);
         User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
-        logger.info("Creating user: " + user + " with e-mail "+email);
+        logger.info("Creating user: " + user + " with e-mail " + email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);
         }
@@ -665,7 +678,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void updateUser(User user) {
-        logger.info("Updating user "+user+" in DB");
+        logger.info("Updating user " + user + " in DB");
         users.put(user.getName(), user);
         removeFromUsersByEmail(user);
         addToUsersByEmail(user);
@@ -746,7 +759,7 @@ public class UserStoreImpl implements UserStore {
         }
         return new Pair<>(false, ownerships);
     }
-    
+
     @Override
     public Set<Pair<User, Role>> getRolesQualifiedByUserGroup(UserGroup groupQualification) {
         final Set<Pair<User, Role>> result = new HashSet<>();
@@ -894,7 +907,7 @@ public class UserStoreImpl implements UserStore {
                 }
             }
         }
-        if(value == null) {
+        if (value == null) {
             userMap.remove(key);
         } else {
             userMap.put(key, value);
@@ -946,7 +959,7 @@ public class UserStoreImpl implements UserStore {
             preferences.remove(username);
         }
         if (mongoObjectFactory != null) {
-            mongoObjectFactory.storePreferences(username, Collections.<String, String>emptyMap());
+            mongoObjectFactory.storePreferences(username, Collections.<String, String> emptyMap());
         }
         removeAllPreferenceObjectsForUser(username);
     }
@@ -956,8 +969,8 @@ public class UserStoreImpl implements UserStore {
         synchronized (preferenceObjects) {
             preferenceObjectsToRemove = preferenceObjects.remove(username);
         }
-        if(preferenceObjectsToRemove != null) {
-            for(Map.Entry<String, Object> entry: preferenceObjectsToRemove.entrySet()) {
+        if (preferenceObjectsToRemove != null) {
+            for (Map.Entry<String, Object> entry : preferenceObjectsToRemove.entrySet()) {
                 notifyListenersOnPreferenceObjectChange(username, entry.getKey(), entry.getValue(), null);
             }
         }
@@ -972,7 +985,7 @@ public class UserStoreImpl implements UserStore {
     public Map<String, Class<?>> getAllSettingTypes() {
         return settingTypes;
     }
-    
+
     @Override
     public void registerPreferenceConverter(String preferenceKey, PreferenceConverter<?> converter) {
         PreferenceConverter<?> alreadyAssociatedConverter = preferenceConverters.putIfAbsent(preferenceKey, converter);
@@ -987,7 +1000,7 @@ public class UserStoreImpl implements UserStore {
                     + " is already registered. Converter " + converter + " will not be registered");
         }
     }
-    
+
     @Override
     public void removePreferenceConverter(String preferenceKey) {
         PreferenceConverter<?> preferenceConverterToRemove = preferenceConverters.remove(preferenceKey);
@@ -997,10 +1010,10 @@ public class UserStoreImpl implements UserStore {
                 unsetPreferenceObject(username, preferenceKey);
             }
         } else {
-            logger.log(Level.WARNING, "PreferenceConverter for key " + preferenceKey
-                    + " should be removed but wasn't registered");
+            logger.log(Level.WARNING,
+                    "PreferenceConverter for key " + preferenceKey + " should be removed but wasn't registered");
         }
-        
+
     }
 
     private void updatePreferenceObjectIfConverterIsAvailable(String username, String key) {
@@ -1010,7 +1023,8 @@ public class UserStoreImpl implements UserStore {
         }
     }
 
-    private void updatePreferenceObjectWithConverter(String username, String key, PreferenceConverter<?> preferenceConverter) {
+    private void updatePreferenceObjectWithConverter(String username, String key,
+            PreferenceConverter<?> preferenceConverter) {
         final String preferenceString = getPreference(username, key);
         if (preferenceString != null) {
             try {
@@ -1047,7 +1061,7 @@ public class UserStoreImpl implements UserStore {
         Map<String, Object> userObjectMap = preferenceObjects.get(username);
         if (userObjectMap != null) {
             Object oldPreference = userObjectMap.remove(key);
-            if(oldPreference != null) {
+            if (oldPreference != null) {
                 notifyListenersOnPreferenceObjectChange(username, key, oldPreference, null);
             }
         }
@@ -1066,14 +1080,15 @@ public class UserStoreImpl implements UserStore {
         T resultT = (T) result;
         return resultT;
     }
-    
+
     @Override
     public String setPreferenceObject(String username, String key, Object preferenceObject)
             throws IllegalArgumentException {
         @SuppressWarnings("unchecked")
         PreferenceConverter<Object> preferenceConverter = (PreferenceConverter<Object>) preferenceConverters.get(key);
         if (preferenceConverter == null) {
-            throw new IllegalArgumentException("Setting preference for key "+key+" but there is no converter associated!");
+            throw new IllegalArgumentException(
+                    "Setting preference for key " + key + " but there is no converter associated!");
         }
         String stringPreference = null;
         if (preferenceObject == null) {
