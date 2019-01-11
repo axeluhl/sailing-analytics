@@ -391,7 +391,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             windTracks.createIndex(
                     new Document().append(FieldNames.RACE_ID.name(), 1)
                             .append(FieldNames.WIND_SOURCE_NAME.name(), 1).append(FieldNames.WIND_SOURCE_ID.name(), 1)
-                            .append(FieldNames.WIND.name() + "." + FieldNames.TIME_AS_MILLIS.name(), 1), new IndexOptions().unique(true));
+                            .append(FieldNames.WIND.name() + "." + FieldNames.TIME_AS_MILLIS.name(), 1),
+                            new IndexOptions().name("windByRaceSourceAndTime").unique(true));
         } catch (MongoException exception) {
             if (exception.getCode() == 10092) {
                 logger.warning(String.format(
