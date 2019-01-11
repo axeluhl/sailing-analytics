@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
+import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
+import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 
 public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
@@ -24,10 +27,13 @@ public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<In
             ModelType model = modelFactory.getNewModel(modelMetadata);
             try {
                 model = modelStore.loadPersistedState(model);
-                if (model != null && model.hasSupportForProvidedFeatures()) {
+                if (model.hasSupportForProvidedFeatures()) {
                     loadedModels.add(model);
                 }
+            } catch (ModelNotFoundException e) {
+                // ignore, because no model might be available for the specified model metadata
             } catch (ModelPersistenceException e) {
+                throw new ModelLoadingException(e);
             }
         }
 

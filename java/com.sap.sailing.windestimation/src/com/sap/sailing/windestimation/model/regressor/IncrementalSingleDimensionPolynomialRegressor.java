@@ -6,6 +6,7 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.exception.ModelOperationException;
 
 public class IncrementalSingleDimensionPolynomialRegressor<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
         extends AbstractRegressorModel<InstanceType, T>
@@ -35,7 +36,7 @@ public class IncrementalSingleDimensionPolynomialRegressor<InstanceType, T exten
         try {
             polynomialFunction = regression.getOrCreatePolynomialFunction();
         } catch (NotEnoughDataHasBeenAddedException e) {
-            throw new RuntimeException(e);
+            throw new ModelOperationException(e);
         }
         double value = polynomialFunction.value(x[0]);
         return value;
@@ -46,7 +47,7 @@ public class IncrementalSingleDimensionPolynomialRegressor<InstanceType, T exten
         try {
             polynomialFunction = regression.getOrCreatePolynomialFunction();
         } catch (NotEnoughDataHasBeenAddedException e) {
-            throw new RuntimeException(e);
+            throw new ModelOperationException(e);
         }
         double value = polynomialFunction.value(x);
         return value;
@@ -71,7 +72,7 @@ public class IncrementalSingleDimensionPolynomialRegressor<InstanceType, T exten
             polynomialFunction = regression.getOrCreatePolynomialFunction();
             return polynomialFunction.toString();
         } catch (NotEnoughDataHasBeenAddedException e) {
-            throw new RuntimeException(e);
+            throw new ModelOperationException(e);
         }
     }
 

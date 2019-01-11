@@ -7,8 +7,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.model.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.TrainableModel;
+import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
+import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
 public class FileSystemModelStore implements ModelStore {
 
@@ -55,7 +56,7 @@ public class FileSystemModelStore implements ModelStore {
                 throw new ModelPersistenceException(e);
             }
         }
-        return null;
+        throw new ModelNotFoundException(newModel.getContextSpecificModelMetadata());
     }
 
     @Override

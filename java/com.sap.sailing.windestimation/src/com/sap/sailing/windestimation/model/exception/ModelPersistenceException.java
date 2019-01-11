@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.model;
+package com.sap.sailing.windestimation.model.exception;
 
 public class ModelPersistenceException extends Exception {
 

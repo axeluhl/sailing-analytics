@@ -1,8 +1,8 @@
 package com.sap.sailing.windestimation.model.store;
 
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.model.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.TrainableModel;
+import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
 public interface ModelStore {
     <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException;

@@ -8,8 +8,9 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.model.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.TrainableModel;
+import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
+import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
 public class MongoDbModelStore implements ModelStore {
 
@@ -43,7 +44,7 @@ public class MongoDbModelStore implements ModelStore {
             }
             return loadedModel;
         } catch (MongoException e) {
-            throw new ModelPersistenceException(e);
+            throw new ModelNotFoundException(newModel.getContextSpecificModelMetadata(), e);
         }
     }
 

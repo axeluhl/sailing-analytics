@@ -11,8 +11,8 @@ import java.util.regex.Pattern;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
-import com.sap.sailing.windestimation.model.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
+import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
 import com.sap.sailing.windestimation.util.LoggingUtil;

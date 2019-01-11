@@ -16,6 +16,7 @@ import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
+import com.sap.sailing.windestimation.model.exception.ModelOperationException;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
@@ -111,7 +112,7 @@ public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractMane
                 result = Math.min(1.0, averageJibeLikelihood
                         * (1.0 + BOOST_FACTOR_FOR_JIBE_TACK_SPEED_RATIO_LIKELIHOOD * tackJibeSpeedRatioLikelihood));
             } else {
-                throw new RuntimeException(
+                throw new ModelOperationException(
                         "Internal error: no maneuvers in jibe cluster candidate but still a valid weighted average speed "
                                 + jibeClusterWeightedAverageSpeed);
             }

@@ -21,7 +21,7 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
 
     private static final int MODEL_CACHE_KEEP_ALIVE_MILLIS = 3600000;
     private static final HmmTransitionProbabilitiesCalculator transitionProbabilitiesCalculatorType = HmmTransitionProbabilitiesCalculator.INTERSECTED;
-    private static final boolean propagateIntersectedWindRangeOfHeadupAndBearAway = true;
+    private static final boolean propagateIntersectedWindRangeOfHeadupAndBearAway = false;
 
     public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
             ModelStore modelStore, PolarDataService polarService,

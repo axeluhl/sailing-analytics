@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import java.text.DecimalFormat;
 
-import com.sap.sailing.windestimation.model.ModelPersistenceException;
+import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.regressor.IncrementalSingleDimensionPolynomialRegressor;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.util.LoggingUtil;

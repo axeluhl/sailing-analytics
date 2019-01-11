@@ -84,8 +84,6 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
             return true;
         if (obj == null)
             return false;
-        if (getClass() != obj.getClass())
-            return false;
         ManeuverClassifierModelMetadata other = (ManeuverClassifierModelMetadata) obj;
         if (boatClass == null) {
             if (other.boatClass != null)
@@ -119,7 +117,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         }
         return null;
     }
-    
+
     public int getOtherTypes() {
         return otherTypes;
     }
@@ -133,7 +131,6 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         inputVector[i++] = maneuver.getLowestSpeedVsExitingSpeedRatio();
         inputVector[i++] = maneuver.getSpeedGainRatio();
         inputVector[i++] = maneuver.getMaxTurningRateInDegreesPerSecond();
-        inputVector[i++] = maneuver.getSpeedWithBearingBefore().getMetersPerSecond() / maneuver.getSpeedWithBearingAfter().getMetersPerSecond();
         if (maneuverFeatures.isPolarsInformation()) {
             inputVector[i++] = maneuver.getDeviationFromOptimalTackAngleInDegrees();
             inputVector[i++] = maneuver.getDeviationFromOptimalJibeAngleInDegrees();
@@ -150,7 +147,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
 
     @Override
     public int getNumberOfInputFeatures() {
-        int numberOfFeatures = 6;
+        int numberOfFeatures = 5;
         if (maneuverFeatures.isPolarsInformation()) {
             numberOfFeatures += 2;
         }

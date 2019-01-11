@@ -162,7 +162,6 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
                             estimatedWind);
                     ManeuverTypeForClassification targetManeuverType = determineManeuverType(maneuver, targetWind);
                     confusionMatrix[estimatedManeuverType.ordinal()][targetManeuverType.ordinal()]++;
-
                 }
             }
         }

@@ -19,14 +19,13 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.TransformedManeu
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
+import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.Util.Pair;
 
 public class ManeuverClassifierTrainer {
-    // private static final double TRAIN_TEST_SPLIT_RATIO = 0.8;
     private static final int MIN_MANEUVERS_COUNT = 500;
 
     private final TransformedManeuversPersistenceManager<ManeuverForEstimation> persistenceManager;

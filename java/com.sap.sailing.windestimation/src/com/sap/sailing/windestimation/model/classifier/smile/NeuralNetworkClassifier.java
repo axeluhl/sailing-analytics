@@ -9,6 +9,7 @@ public class NeuralNetworkClassifier<InstanceType, T extends ContextSpecificMode
         extends AbstractSmileClassificationModel<InstanceType, T> {
 
     private static final long serialVersionUID = -3364152319152090775L;
+    private static final int EPOCHS = 20;
 
     public NeuralNetworkClassifier(T contextSpecificModelMetadata) {
         super(new PreprocessingConfigBuilder().scaling().build(), contextSpecificModelMetadata);
@@ -29,12 +30,12 @@ public class NeuralNetworkClassifier<InstanceType, T extends ContextSpecificMode
                     numUnits);
         }
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < EPOCHS; i++) {
             net.learn(x, y);
         }
         return net;
     }
-    
+
     @Override
     public double[] classifyWithProbabilities(double[] x) {
         int k = getContextSpecificModelMetadata().getNumberOfPossibleTargetValues();
