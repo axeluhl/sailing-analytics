@@ -69,8 +69,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
                 penaltyFactor = 1 / (1 + (Math.pow(violationRange, 2)));
             }
         }
-        assert (penaltyFactor > 0.0001);
-        return penaltyFactor;
+        return penaltyFactor + 0.05;
     }
 
     public WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver,

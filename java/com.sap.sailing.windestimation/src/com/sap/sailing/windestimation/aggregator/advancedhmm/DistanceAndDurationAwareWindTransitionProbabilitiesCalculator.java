@@ -24,7 +24,7 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
     @Override
     protected double getPenaltyFactorForTransition(TwdTransition twdTransition) {
         double penaltyFactor = gaussianBasedTwdTransitionDistributionCache.getP(twdTransition);
-        return penaltyFactor;
+        return penaltyFactor + 0.05;
     }
 
     public double getCompoundDistance(ManeuverForEstimation fromManeuver, ManeuverForEstimation toManeuver) {
