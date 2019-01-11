@@ -4895,6 +4895,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public ServerInfoDTO getServerInfo() {
         ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, result.getIdentifier());
         return result;
     }
 

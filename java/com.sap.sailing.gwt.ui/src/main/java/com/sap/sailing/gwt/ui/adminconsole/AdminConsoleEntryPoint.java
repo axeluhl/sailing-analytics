@@ -44,8 +44,10 @@ import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
@@ -321,11 +323,14 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_REMOTE_INSTANCES, serverInfo));
 
-        LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(getSailingService(), this, getStringMessages());
+        LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(
+                getSailingService(), getUserService(), this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(localServerInstancesManagementPanel),
                 getStringMessages().localServer(),
-                SecuredSecurityTypes.SERVER.getPermissionForObject(
-                        SecuredSecurityTypes.ServerActions.CONFIGURE_LOCAL_SERVER, serverInfo));
+                WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER)
+                        .withActions(ServerActions.CONFIGURE_LOCAL_SERVER, DefaultActions.CHANGE_OWNERSHIP,
+                                DefaultActions.CHANGE_ACL)
+                        .withIds(serverInfo.getTypeRelativeObjectIdentifier()).build());
 
         final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanel<>(getUserService(), StringMessages.INSTANCE,
                 SecuredDomainType.getAllInstances(), this, tableResources);

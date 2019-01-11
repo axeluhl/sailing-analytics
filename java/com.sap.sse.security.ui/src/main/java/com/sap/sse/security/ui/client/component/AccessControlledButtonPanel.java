@@ -40,7 +40,7 @@ public class AccessControlledButtonPanel extends Composite {
     public AccessControlledButtonPanel(final UserService userService, final HasPermissions type) {
         this.createPermissionCheck = () -> userService.hasCurrentUserPermissionToCreateObjectOfType(type);
         this.removePermissionCheck = () -> userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(type);
-        userService.addUserStatusEventHandler((user, preAuth) -> buttonToPermissions.forEach(visibilityUpdater), true);
+        userService.addUserStatusEventHandler((user, preAuth) -> updateVisibility(), true);
         initWidget(panel);
     }
 
@@ -109,6 +109,13 @@ public class AccessControlledButtonPanel extends Composite {
         this.panel.add(button);
         this.visibilityUpdater.accept(button, permissionCheck);
         return button;
+    }
+
+    /**
+     * Updates the visibility of all previously added actions based on their {@link Supplier permission check}s.
+     */
+    public void updateVisibility() {
+        buttonToPermissions.forEach(visibilityUpdater);
     }
 
 }

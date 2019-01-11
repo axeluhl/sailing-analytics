@@ -4,14 +4,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
-public class ServerInfoDTO implements IsSerializable, WithQualifiedObjectIdentifier
-{
-    private static final long serialVersionUID = 4456475715605308221L;
+public class ServerInfoDTO extends NamedSecuredObjectDTO implements IsSerializable {
 
-    private String serverName;
+    private static final long serialVersionUID = 554811472250094684L;
+
     private String buildVersion;
     
     // for GWT
@@ -19,7 +18,7 @@ public class ServerInfoDTO implements IsSerializable, WithQualifiedObjectIdentif
     }
 
     public ServerInfoDTO(String serverName, String buildVersion) {
-        this.serverName = serverName;
+        setName(serverName);
         this.buildVersion = buildVersion;
     }
 
@@ -27,17 +26,8 @@ public class ServerInfoDTO implements IsSerializable, WithQualifiedObjectIdentif
         return buildVersion;
     }
 
-    public String getServerName() {
-        return serverName;
-    }
-
     public static TypeRelativeObjectIdentifier getServerIdentifier(String serverName) {
         return new TypeRelativeObjectIdentifier(serverName);
-    }
-
-    @Override
-    public String getName() {
-        return serverName;
     }
 
     @Override
@@ -46,7 +36,7 @@ public class ServerInfoDTO implements IsSerializable, WithQualifiedObjectIdentif
     }
 
     public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(this.serverName);
+        return getTypeRelativeObjectIdentifier(this.getName());
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String serverName) {
@@ -57,4 +47,5 @@ public class ServerInfoDTO implements IsSerializable, WithQualifiedObjectIdentif
     public HasPermissions getType() {
         return SecuredSecurityTypes.SERVER;
     }
+
 }

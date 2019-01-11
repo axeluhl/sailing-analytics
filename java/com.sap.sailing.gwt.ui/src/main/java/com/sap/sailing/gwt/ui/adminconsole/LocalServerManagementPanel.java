@@ -1,14 +1,21 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_ACL;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
@@ -16,108 +23,89 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LocalServerManagementPanel extends SimplePanel {
+
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
-    private final CaptionPanel serverInfoPanel;
-    private final CaptionPanel serverConfigurationPanel;
-    private CheckBox isStandaloneServerCheckbox;
-    private Label serverNameLabel;
-    private Label buildVersionLabel;
-    private CheckBox isPublicServerCheckbox;
-    private CheckBox isSelfServiceServerCheckbox;
+    private final AccessControlledButtonPanel buttonPanel;
+    private Label serverNameInfo, buildVersionInfo, groupOwnerInfo, userOwnerInfo;
+    private CheckBox isStandaloneServerCheckbox, isPublicServerCheckbox, isSelfServiceServerCheckbox;
 
-    public LocalServerManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            StringMessages stringMessages) {
+    private ServerInfoDTO currentServerInfo;
+
+    public LocalServerManagementPanel(final SailingServiceAsync sailingService, final UserService userService,
+            final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
 
-        VerticalPanel mainPanel = new VerticalPanel();
+        final Panel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
 
-        serverInfoPanel = new CaptionPanel(stringMessages.serverInformation());
-        mainPanel.add(serverInfoPanel);
+        mainPanel.add(this.buttonPanel = createServerActionsUi(userService));
+        mainPanel.add(createServerInfoUI());
+        mainPanel.add(createServerConfigurationUI());
 
-        serverConfigurationPanel = new CaptionPanel(stringMessages.serverConfiguration());
-        mainPanel.add(serverConfigurationPanel);
-        
-        createServerInfoUI();
-        createServerConfigurationUI();
-    }
-    
-    private void createServerInfoUI() {
-        VerticalPanel serverInfoContentPanel = new VerticalPanel();
-        serverInfoPanel.setContentWidget(serverInfoContentPanel);
-        
-        serverNameLabel = new Label();
-        buildVersionLabel = new Label();
-        
-        Grid grid = new Grid(2, 2);
-        grid.setWidget(0, 0, new Label(stringMessages.name() + ":"));
-        grid.setWidget(0, 1, serverNameLabel);
-        grid.setWidget(1, 0, new Label(stringMessages.buildVersion() + ":"));
-        grid.setWidget(1, 1, buildVersionLabel);
-        serverInfoContentPanel.add(grid);
-        
         refreshServerInfo();
+        refreshServerConfiguration();
     }
     
-    private void createServerConfigurationUI() {
-        VerticalPanel serverConfigurationContentPanel = new VerticalPanel();
-        serverConfigurationPanel.setContentWidget(serverConfigurationContentPanel);
-        
-        isStandaloneServerCheckbox = new CheckBox();
-        isStandaloneServerCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                serverConfigurationChanged();
-            }
-        });
+    private AccessControlledButtonPanel createServerActionsUi(final UserService userService) {
+        final HasPermissions type = SecuredSecurityTypes.SERVER;
+        final Consumer<ServerInfoDTO> updateCallback = event -> refreshServerInfo();
+        final EditOwnershipDialog.DialogConfig<ServerInfoDTO> configOwner = EditOwnershipDialog
+                .create(userService.getUserManagementService(), type, updateCallback, stringMessages);
+        final EditACLDialog.DialogConfig<ServerInfoDTO> configACL = EditACLDialog
+                .create(userService.getUserManagementService(), type, updateCallback, stringMessages);
 
-        isPublicServerCheckbox = new CheckBox();
-        isPublicServerCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                serverConfigurationChanged();
-            }
-        });
-        isPublicServerCheckbox.setEnabled(false);
+        final Predicate<DefaultActions> permissionCheck = action -> currentServerInfo != null
+                && userService.hasPermission(type.getPermission(action), currentServerInfo.getOwnership());
 
-        isSelfServiceServerCheckbox = new CheckBox();
-        isSelfServiceServerCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                serverConfigurationChanged();
-            }
-        });
-        isSelfServiceServerCheckbox.setEnabled(false);
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, type);
+        buttonPanel.addAction(stringMessages.actionChangeOwnership(), () -> permissionCheck.test(CHANGE_OWNERSHIP),
+                () -> configOwner.openDialog(currentServerInfo));
+        buttonPanel.addAction(stringMessages.actionChangeACL(), () -> permissionCheck.test(CHANGE_ACL),
+                () -> configACL.openDialog(currentServerInfo));
+        return buttonPanel;
+    }
+
+    private Widget createServerInfoUI() {
+        final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.serverInformation(), 4);
+        serverNameInfo = captionPanel.addInformation(stringMessages.name() + ":");
+        buildVersionInfo = captionPanel.addInformation(stringMessages.buildVersion() + ":");
+        groupOwnerInfo = captionPanel.addInformation(stringMessages.ownership() + " - " + stringMessages.group() + ":");
+        userOwnerInfo = captionPanel.addInformation(stringMessages.ownership() + " - " + stringMessages.user() + ":");
+        return captionPanel;
+    }
     
-        Grid grid = new Grid(3, 2);
-        grid.setWidget(0, 0, new Label(stringMessages.standaloneServer() + ":"));
-        grid.setWidget(0, 1, isStandaloneServerCheckbox);
-
-        grid.setWidget(1, 0, new Label(stringMessages.publicServer() + ":"));
-        grid.setWidget(1, 1, isPublicServerCheckbox);
-
-        grid.setWidget(2, 0, new Label(stringMessages.selfServiceServer() + ":"));
-        grid.setWidget(2, 1, isSelfServiceServerCheckbox);
-
-        serverConfigurationContentPanel.add(grid);
-        
-        refreshServerConfiguration();
+    private Widget createServerConfigurationUI() {
+        final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.serverConfiguration(), 3);
+        final Command callback = this::serverConfigurationChanged;
+        isStandaloneServerCheckbox = captionPanel.addChekBox(stringMessages.standaloneServer() + ":", callback);
+        isPublicServerCheckbox = captionPanel.addChekBox(stringMessages.publicServer() + ":", callback);
+        isSelfServiceServerCheckbox = captionPanel.addChekBox(stringMessages.selfServiceServer() + ":", callback);
+        return captionPanel;
     }    
 
     private void serverConfigurationChanged() {
-        Boolean publicServer = isPublicServerCheckbox.isEnabled() ? isPublicServerCheckbox.getValue() : null;
+        final Boolean publicServer = isPublicServerCheckbox.isEnabled() ? isPublicServerCheckbox.getValue() : null;
         // FIXME self service not yet supported
-        Boolean selfServiceServer = isSelfServiceServerCheckbox.isEnabled() ? isSelfServiceServerCheckbox.getValue()
+        final Boolean selfServiceServer = isSelfServiceServerCheckbox.isEnabled()
+                ? isSelfServiceServerCheckbox.getValue()
                 : null;
-        ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
+        final ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
                 publicServer, selfServiceServer, null);
 
         sailingService.updateServerConfiguration(serverConfig, new AsyncCallback<Void>() {
@@ -137,40 +125,30 @@ public class LocalServerManagementPanel extends SimplePanel {
     }
 
     private void refreshServerInfo() {
-        sailingService.getServerInfo(new AsyncCallback<ServerInfoDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(ServerInfoDTO result) {
-                updateServerInfo(result);
-            }
-        });
+        sailingService.getServerInfo(new RefreshAsyncCallback<>(serverInfo -> {
+            LocalServerManagementPanel.this.currentServerInfo = serverInfo;
+            LocalServerManagementPanel.this.updateServerInfo(serverInfo);
+            LocalServerManagementPanel.this.buttonPanel.updateVisibility();
+        }));
     }
 
     private void refreshServerConfiguration() {
-        sailingService.getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(ServerConfigurationDTO result) {
-                updateServerConfiguration(result);
-            }
-        });
+        sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
     }
     
     private void updateServerInfo(ServerInfoDTO result) {
-        serverNameLabel.setText(result.getServerName());
-        buildVersionLabel.setText(result.getBuildVersion() != null ? result.getBuildVersion() : "Unknown");
+        serverNameInfo.setText(result.getName());
+        buildVersionInfo.setText(result.getBuildVersion() != null ? result.getBuildVersion() : "Unknown");
+        final OwnershipDTO ownership = result.getOwnership();
+        final boolean hasGroupOwner = ownership != null && ownership.getTenantOwner() != null;
+        final boolean hasUserOwner = ownership != null && ownership.getUserOwner() != null;
+        groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
+        userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
     }
     
     private void updateServerConfiguration(ServerConfigurationDTO result) {
         isStandaloneServerCheckbox.setValue(result.isStandaloneServer(), false);
+        isStandaloneServerCheckbox.setEnabled(true);
         if (result.isPublic() != null) {
             isPublicServerCheckbox.setEnabled(true);
             isPublicServerCheckbox.setValue(result.isPublic(), false);
@@ -184,5 +162,55 @@ public class LocalServerManagementPanel extends SimplePanel {
             isSelfServiceServerCheckbox.setEnabled(false);
         }
 
+    }
+
+    private class RefreshAsyncCallback<T> implements AsyncCallback<T> {
+
+        private final Consumer<T> successCallback;
+
+        private RefreshAsyncCallback(Consumer<T> successCallback) {
+            this.successCallback = successCallback;
+        }
+
+        @Override
+        public final void onFailure(Throwable caught) {
+            errorReporter.reportError(caught.getMessage());
+        }
+
+        @Override
+        public final void onSuccess(T result) {
+            this.successCallback.accept(result);
+        }
+
+    }
+
+    private class ServerDataCaptionPanel extends CaptionPanel {
+        
+        private final Grid grid;
+        private int actualRows = 0;
+        
+        private ServerDataCaptionPanel(final String caption, final int rowCount) {
+            super(caption);
+            this.grid = new Grid(rowCount, 2);
+            setContentWidget(grid);
+        }
+
+        private Label addInformation(final String labelText) {
+            return addWidget(labelText, new Label());
+        }
+
+        private CheckBox addChekBox(final String labelText, final Command callback) {
+            final CheckBox checkBox = new CheckBox();
+            checkBox.addValueChangeHandler(event -> callback.execute());
+            checkBox.setEnabled(false);
+            return addWidget(labelText, checkBox);
+        }
+
+        private <T extends Widget> T addWidget(final String labelText, final T widget) {
+            final int nextRowIndex = actualRows++;
+            this.grid.setText(nextRowIndex, 0, labelText);
+            this.grid.setWidget(nextRowIndex, 1, widget);
+            return widget;
+        }
     }
 }
