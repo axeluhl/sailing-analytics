@@ -84,10 +84,12 @@ public class SecuredDTOOwnerColumn<T extends SecuredDTO> extends TextColumn<T> {
     public static <T extends SecuredDTO> void configureOwnerColumns(final AbstractCellTable<T> table,
             final ListHandler<T> columnSortHandler, final StringMessages stringMessages) {
         final SecuredDTOOwnerColumn<T> groupColumn = getGroupOwnerColumn();
+        groupColumn.setSortable(true);
         table.addColumn(groupColumn, stringMessages.group());
         columnSortHandler.setComparator(groupColumn, groupColumn.getComparator());
         final SecuredDTOOwnerColumn<T> userColumn = getUserOwnerColumn();
         table.addColumn(userColumn, stringMessages.user());
+        userColumn.setSortable(true);
         columnSortHandler.setComparator(userColumn, userColumn.getComparator());
     }
 

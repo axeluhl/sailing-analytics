@@ -412,10 +412,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
         
         if (userService != null) {
-            final SecuredDTOOwnerColumn<RaceDTO> groupColumn = SecuredDTOOwnerColumn.getGroupOwnerColumn();
-            groupColumn.setSortable(true);
-            final SecuredDTOOwnerColumn<RaceDTO> userColumn = SecuredDTOOwnerColumn.getUserOwnerColumn();
-            userColumn.setSortable(true);
+            SecuredDTOOwnerColumn.configureOwnerColumns(raceTable, columnSortHandler, stringMessages);
 
             final HasPermissions type = SecuredDomainType.TRACKED_RACE;
             final AccessControlledActionsColumn<RaceDTO, DefaultActionsImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
@@ -430,8 +427,6 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
             actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                     configACL::openDialog);
             
-            raceTable.addColumn(groupColumn, stringMessages.group());
-            raceTable.addColumn(userColumn, stringMessages.user());
             raceTable.addColumn(actionsColumn, stringMessages.actions());
         }
     }
