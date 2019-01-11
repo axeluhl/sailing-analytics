@@ -14,6 +14,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.SubjectThreadState;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -75,6 +76,7 @@ public class TaggingServiceTest {
     private static SecurityService securityService;
     private static TaggingService taggingService;
     private static Subject subject;
+    private static SubjectThreadState threadState;
 
     @BeforeClass
     public static void setUpClass()
@@ -108,6 +110,7 @@ public class TaggingServiceTest {
         securityService.createSimpleUser(username, email, password, fullName, company, null);
         subject = SecurityUtils.getSubject();
         subject.login(new UsernamePasswordToken(username, password));
+        threadState = new SubjectThreadState(subject);
         // setup tagging service
         taggingService = new TaggingServiceImpl(racingService);
     }
@@ -126,7 +129,6 @@ public class TaggingServiceTest {
     @Before
     public void resetEnvironment() {
         // setup the Shiro SubjectThreadState to ensure that the tagging service can check whether a subject is logged in
-        final SubjectThreadState threadState = new SubjectThreadState(subject);
         threadState.bind();
         securityService.addPermissionForUser(username, editLeaderboardPermission);
         securityService.unsetPreference(username,
@@ -150,6 +152,11 @@ public class TaggingServiceTest {
         }
     }
 
+    @After
+    public void restoreEnvironment() {
+        threadState.restore();
+    }
+    
     @Test
     public void testAddTag() {
         logger.entering(getClass().getName(), "testAddTag");
