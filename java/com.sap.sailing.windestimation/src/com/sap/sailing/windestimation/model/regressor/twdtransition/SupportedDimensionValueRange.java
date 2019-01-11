@@ -26,6 +26,10 @@ public class SupportedDimensionValueRange implements Serializable {
         return toExclusive;
     }
 
+    public double getSupportedIntervalMiddleValue() {
+        return fromInclusive + (toExclusive - fromInclusive) / 2;
+    }
+
     public int getPolynomialDegree() {
         return polynomialDegree;
     }
@@ -73,5 +77,5 @@ public class SupportedDimensionValueRange implements Serializable {
         return "SupportedDimensionValueRange [fromInclusive=" + fromInclusive + ", toExclusive=" + toExclusive
                 + ", polynomialDegree=" + polynomialDegree + ", withBias=" + withBias + "]";
     }
-    
+
 }

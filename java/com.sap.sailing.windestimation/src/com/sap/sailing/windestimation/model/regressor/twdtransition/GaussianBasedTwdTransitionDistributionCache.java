@@ -39,7 +39,7 @@ public class GaussianBasedTwdTransitionDistributionCache {
                 .getBestModel(twdTransition);
         double[] x = regressorModel.getContextSpecificModelMetadata().getX(twdTransition);
         double std = regressorModel.getValue(x);
-        double p = getGaussianP(std, x[0]);
+        double p = getGaussianP(std, twdTransition.getTwdChange().abs().getDegrees());
         return p;
     }
 

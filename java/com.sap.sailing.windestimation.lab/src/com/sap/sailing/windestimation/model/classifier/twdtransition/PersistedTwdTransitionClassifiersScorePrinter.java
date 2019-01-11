@@ -28,10 +28,9 @@ public class PersistedTwdTransitionClassifiersScorePrinter {
         List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> allClassifierModels = new ArrayList<>();
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();
         LoggingUtil.logInfo("### Loading classifiers:");
-        for (TwdTransitionClassifierModelMetadata modelMetadata : classifierModelFactory
-                .getAllValidContextSpecificModelMetadataCandidates(null)) {
+        for (ManeuverTypeTransition maneuverTypeTransition : ManeuverTypeTransition.values()) {
             LabelledTwdTransitionClassifierModelMetadata labelledModelMetadata = new LabelledTwdTransitionClassifierModelMetadata(
-                    modelMetadata.getManeuverTypeTransition());
+                    maneuverTypeTransition);
             List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> classifierModels = classifierModelFactory
                     .getAllTrainableModels(labelledModelMetadata);
             for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel : classifierModels) {

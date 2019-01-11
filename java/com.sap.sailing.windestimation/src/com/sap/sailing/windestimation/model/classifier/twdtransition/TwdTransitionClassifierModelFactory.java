@@ -15,14 +15,6 @@ import com.sap.sailing.windestimation.model.classifier.smile.QDAClassifier;
 public class TwdTransitionClassifierModelFactory
         implements ClassifierModelFactory<TwdTransition, TwdTransitionClassifierModelMetadata> {
 
-    private static TwdTransitionClassifierModelMetadata createModelMetadata(
-            ManeuverTypeTransition maneuverTypeTransition) {
-        TwdTransitionClassifierModelMetadata modelMetadata = new TwdTransitionClassifierModelMetadata(
-                maneuverTypeTransition);
-        return modelMetadata;
-    }
-
-    @Override
     public TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> getNewModel(
             TwdTransitionClassifierModelMetadata contextSpecificModelMetadata) {
         TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classificationModel = new LDAClassifier<>(
@@ -47,9 +39,7 @@ public class TwdTransitionClassifierModelFactory
     public List<TwdTransitionClassifierModelMetadata> getAllValidContextSpecificModelMetadataCandidates(
             TwdTransitionClassifierModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
         List<TwdTransitionClassifierModelMetadata> modelMetadataCandidates = new ArrayList<>();
-        for (ManeuverTypeTransition maneuverTypeTransition : ManeuverTypeTransition.values()) {
-            modelMetadataCandidates.add(createModelMetadata(maneuverTypeTransition));
-        }
+        modelMetadataCandidates.add(contextSpecificModelMetadataWithMaxFeatures);
         return modelMetadataCandidates;
     }
 

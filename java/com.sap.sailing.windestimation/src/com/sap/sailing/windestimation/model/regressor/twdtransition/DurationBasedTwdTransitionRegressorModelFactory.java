@@ -13,9 +13,7 @@ public class DurationBasedTwdTransitionRegressorModelFactory extends
     public List<DurationBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadataCandidates(
             DurationBasedTwdTransitionRegressorModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
         List<DurationBasedTwdTransitionRegressorModelMetadata> modelMetadatas = new ArrayList<>();
-        for (DurationValueRange durationValueRange : DurationValueRange.values()) {
-            modelMetadatas.add(new DurationBasedTwdTransitionRegressorModelMetadata(durationValueRange));
-        }
+        modelMetadatas.add(contextSpecificModelMetadataWithMaxFeatures);
         return modelMetadatas;
     }
 

@@ -11,10 +11,6 @@ import com.sap.sailing.windestimation.model.regressor.TrainableRegressorModel;
 public abstract class SingleDimensionBasedTwdTransitionRegressorModelFactory<T extends SingleDimensionBasedTwdTransitionRegressorModelMetadata>
         implements RegressorModelFactory<TwdTransition, T> {
 
-    public List<T> getAllValidContextSpecificModelMetadataCandidates() {
-        return getAllValidContextSpecificModelMetadataCandidates(null);
-    }
-
     @Override
     public IncrementalSingleDimensionPolynomialRegressor<TwdTransition, T> getNewModel(T contextSpecificModelMetadata) {
         IncrementalSingleDimensionPolynomialRegressor<TwdTransition, T> regressorModel = new IncrementalSingleDimensionPolynomialRegressor<>(

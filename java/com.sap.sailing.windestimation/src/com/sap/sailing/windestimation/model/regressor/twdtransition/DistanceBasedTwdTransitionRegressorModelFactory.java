@@ -13,9 +13,7 @@ public class DistanceBasedTwdTransitionRegressorModelFactory extends
     public List<DistanceBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadataCandidates(
             DistanceBasedTwdTransitionRegressorModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
         List<DistanceBasedTwdTransitionRegressorModelMetadata> modelMetadatas = new ArrayList<>();
-        for (DistanceValueRange distanceValueRange : DistanceValueRange.values()) {
-            modelMetadatas.add(new DistanceBasedTwdTransitionRegressorModelMetadata(distanceValueRange));
-        }
+        modelMetadatas.add(contextSpecificModelMetadataWithMaxFeatures);
         return modelMetadatas;
     }
 

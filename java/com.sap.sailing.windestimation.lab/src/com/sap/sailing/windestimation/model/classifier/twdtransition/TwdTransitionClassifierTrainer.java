@@ -7,9 +7,9 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransiti
 import com.sap.sailing.windestimation.data.serialization.TwdTransitionJsonSerializer;
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
+import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class TwdTransitionClassifierTrainer {
@@ -118,14 +118,14 @@ public class TwdTransitionClassifierTrainer {
         TwdTransitionClassifierTrainer classifierTrainer = new TwdTransitionClassifierTrainer(persistenceManager,
                 classifierModelStore);
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();
-        for (TwdTransitionClassifierModelMetadata modelMetadata : classifierModelFactory
-                .getAllValidContextSpecificModelMetadataCandidates(null)) {
-            LoggingUtil.logInfo("## ManeuverTypeTransition: " + modelMetadata.getManeuverTypeTransition());
+        for (ManeuverTypeTransition maneuverTypeTransition : ManeuverTypeTransition.values()) {
+            LabelledTwdTransitionClassifierModelMetadata labelledModelMetadata = new LabelledTwdTransitionClassifierModelMetadata(
+                    maneuverTypeTransition);
+            LoggingUtil.logInfo("## ManeuverTypeTransition: " + maneuverTypeTransition);
             for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> model : classifierModelFactory
-                    .getAllTrainableModels(modelMetadata)) {
+                    .getAllTrainableModels(labelledModelMetadata)) {
                 LoggingUtil.logInfo("## Classifier: " + model.getClass().getName());
-                classifierTrainer.trainClassifier(model,
-                        new LabelledTwdTransitionClassifierModelMetadata(modelMetadata.getManeuverTypeTransition()));
+                classifierTrainer.trainClassifier(model, labelledModelMetadata);
             }
         }
     }
