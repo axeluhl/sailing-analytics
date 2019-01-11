@@ -254,7 +254,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return result;
     }
 
-    protected List<ManeuverSpotWithTypedManeuvers> getAllManeuverSpotsWithTypedManeuversFromDetectionResultSortedByTimePoint(
+    // public for unit tests
+    public List<ManeuverSpotWithTypedManeuvers> getAllManeuverSpotsWithTypedManeuversFromDetectionResultSortedByTimePoint(
             IncrementalManeuverSpotDetectionResult detectionResult) {
         List<ManeuverSpotWithTypedManeuvers> result = new ArrayList<>();
         Iterator<ManeuverSpotWithTypedManeuvers> exitingManeuverSpotsIterator = detectionResult
