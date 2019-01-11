@@ -314,8 +314,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return maneuverSpotWithTypedManeuvers;
     }
 
-    // protected for unit tests
-    protected IncrementalManeuverSpotDetectionResult detectManeuverSpotsIncrementally(TrackTimeInfo trackTimeInfo,
+    // public for unit tests
+    public IncrementalManeuverSpotDetectionResult detectManeuverSpotsIncrementally(TrackTimeInfo trackTimeInfo,
             Iterable<GPSFixMoving> approximatingFixesToAnalyze, ManeuverDetectionResult lastManeuverDetectionResult) {
         List<ManeuverSpotWithTypedManeuvers> existingManeuverSpots = new ArrayList<>();
         List<ManeuverSpot> newManeuverSpots = new ArrayList<>();
@@ -501,8 +501,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return true;
     }
 
-    // for unit tests only
-    protected void setLastManeuverDetectionResult(ManeuverDetectionResult lastManeuverDetectionResult) {
+    // public for unit tests only
+    public void setLastManeuverDetectionResult(ManeuverDetectionResult lastManeuverDetectionResult) {
         this.lastManeuverDetectionResult = lastManeuverDetectionResult;
     }
 
@@ -566,7 +566,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
         return null;
     }
 
-    // protected for unit tests
+    // public for unit tests
     /**
      * Represents a result of already performed maneuver analysis. The result is used by
      * {@link IncrementalManeuverDetectorImpl} to determine maneuvers incrementally.
@@ -574,7 +574,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
      * @author Vladislav Chumak (D069712)
      *
      */
-    protected static class ManeuverDetectionResult {
+    public static class ManeuverDetectionResult {
 
         private final TimePoint latestFixTimePoint;
         private final List<ManeuverSpotWithTypedManeuvers> maneuverSpots;
@@ -601,8 +601,8 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
 
     }
 
-    // protected for unit tests
-    protected static class IncrementalManeuverSpotDetectionResult {
+    // public for unit tests
+    public static class IncrementalManeuverSpotDetectionResult {
         private final List<ManeuverSpotWithTypedManeuvers> maneuverSpotsToReuse;
         private final List<ManeuverSpot> newManeuverSpots;
 
