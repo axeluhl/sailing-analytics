@@ -40,4 +40,32 @@ public class RaceLogTrackingI18n {
         return STRING_MESSAGES.get(locale, "sailInSightAppName");
     }
 
+    // TODO: DELETE following once legacy is removed
+    public static String iOSUsers(final Locale locale) {
+        return STRING_MESSAGES.get(locale, "iOSUsers");
+    }
+
+    public static String androidUsers(final Locale locale) {
+        return STRING_MESSAGES.get(locale, "androidUsers");
+    }
+
+    public static String alternativelyVisitThisLink(final Locale locale) {
+        return STRING_MESSAGES.get(locale, "alternativelyVisitThisLink");
+    }
+
+    public static String appIos(final Locale locale) {
+        return STRING_MESSAGES.get(locale, "appIos");
+    }
+
+    public static String appAndroid(final Locale locale) {
+        return STRING_MESSAGES.get(locale, "appAndroid");
+    }
+
+    public static String scanQRCodeOrVisitUrlToRegisterAs(final Locale locale, final String appName) {
+        return STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs", appName);
+    }
+
+    public static String appStoreInstallText(final Locale locale) {
+        return STRING_MESSAGES.get(locale, "appStoreInstallText");
+    }
 }
