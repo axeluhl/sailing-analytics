@@ -381,11 +381,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private void ensureIndicesOnWindTracks(MongoCollection<Document> windTracks) {
-        windTracks.createIndex(new Document(FieldNames.RACE_ID.name(), 1)); // for new programmatic access
-        windTracks.createIndex(new Document(FieldNames.REGATTA_NAME.name(), 1)); // for export or human look-up
+        windTracks.createIndex(new Document(FieldNames.RACE_ID.name(), 1), new IndexOptions().name("windbyrace")); // for new programmatic access
+        windTracks.createIndex(new Document(FieldNames.REGATTA_NAME.name(), 1), new IndexOptions().name("windbyregatta")); // for export or human look-up
         // for legacy access to not yet migrated fixes
         windTracks.createIndex(new Document().append(FieldNames.EVENT_NAME.name(), 1)
-                .append(FieldNames.RACE_NAME.name(), 1));
+                .append(FieldNames.RACE_NAME.name(), 1), new IndexOptions().name("windbyeventandrace"));
         // Unique index
         try {
             windTracks.createIndex(
