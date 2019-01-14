@@ -18,9 +18,9 @@ Require-Bundle: org.apache.servicemix.bundles.aws-java-sdk;bundle-version="1.9.8
  com.fasterxml.jackson.core.jackson-annotations,
  com.sap.sse.common,
  com.sap.sse.mongodb,
- com.sap.sse.replication,
+ com.sap.sse.replication.interfaces,
  com.sap.sse.operationaltransformation,
  com.sap.sse,
  org.apache.commons.io,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0"
+ org.eclipse.orbit.mongodb;bundle-version="3.2.2"
 Automatic-Module-Name: com.sap.sse.filestorage

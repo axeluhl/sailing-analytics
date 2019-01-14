@@ -15,9 +15,9 @@ import com.sap.sailing.domain.igtimiadapter.impl.Activator;
 public class AbstractTestWithIgtimiConnection {
     protected IgtimiConnection connection;
     
-    @Rule public Timeout AbstractTestWithIgtimiConnectionTimeout = new Timeout(2 * 60 * 1000);
+    @Rule public Timeout AbstractTestWithIgtimiConnectionTimeout = Timeout.millis(2 * 60 * 1000);
     
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
 
     @Before
     public void setUp() throws ClientProtocolException, IOException, org.json.simple.parser.ParseException {

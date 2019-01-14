@@ -73,6 +73,10 @@ public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
      */
     Waypoint getExistingWaypointByIdOrCache(Waypoint waypoint);
 
+    BoatClass getBoatClass(String name);
+    
+    Iterable<BoatClass> getBoatClasses();
+
     BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind);
 
     /**

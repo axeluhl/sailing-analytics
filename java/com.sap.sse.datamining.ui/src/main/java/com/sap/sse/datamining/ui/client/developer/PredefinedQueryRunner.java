@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
@@ -140,9 +141,10 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
     protected void runSelectedPredefinedQuery() {
         PredefinedQueryIdentifier predefinedQueryIdentifier = selectionListBox.getValue();
         dataMiningService.getPredefinedQueryDefinition(predefinedQueryIdentifier,
-                LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<StatisticQueryDefinitionDTO>() {
+                LocaleInfo.getCurrentLocale().getLocaleName(),
+                new AsyncCallback<ModifiableStatisticQueryDefinitionDTO>() {
                     @Override
-                    public void onSuccess(StatisticQueryDefinitionDTO queryDefinition) {
+                    public void onSuccess(ModifiableStatisticQueryDefinitionDTO queryDefinition) {
                         queryDefinitionProvider.applyQueryDefinition(queryDefinition);
                         queryRunner.accept(queryDefinition);
                     }

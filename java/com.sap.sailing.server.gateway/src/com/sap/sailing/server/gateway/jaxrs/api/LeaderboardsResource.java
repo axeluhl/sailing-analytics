@@ -106,7 +106,6 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
@@ -119,6 +118,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sse.InvalidDateException;
@@ -137,6 +137,19 @@ import com.sap.sse.util.impl.UUIDHelper;
 @Path("/v1/leaderboards")
 public class LeaderboardsResource extends AbstractLeaderboardsResource {
     private static final Logger logger = Logger.getLogger(LeaderboardsResource.class.getName());
+    
+    /**
+     * When an {@link #createAutoCourse(TrackedRace, RegattaLog) automatic course inference} is requested,
+     * the COGs of competitors are analyzed to obtain a direction and length for a start and finish line.
+     * Some or all of the competitors may not have delivered fixes at race start / tracking start. Furthermore,
+     * it is not advisable to construct the line at the very beginning of the first track. Rather, we'd like
+     * the competitors to "pass" the line, meaning that at least a bit of their tracks needs to take place
+     * before crossing the line.<p>
+     * 
+     * This constant describes the duration for which we'd like to see fixes on a track before the start line
+     * or, respectively, after the finish line has been crossed.
+     */
+    private static final Duration TIME_OFFSET_FOR_HEAD_AND_TAIL_OF_TRACK_FOR_LINE_INFERENCE = Duration.ONE_MINUTE;
 
     @GET
     @Produces("application/json;charset=UTF-8")
@@ -699,8 +712,11 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
      * is returned.
      */
     private Waypoint inferFinishLine(TrackedRace trackedRace, RegattaLog regattaLog, Waypoint startLine) {
-        final TimePoint when = getEndTime(trackedRace);
-        return createLineEnclosingTracks(trackedRace, regattaLog, when, /* extrapolate */ true, /* waypoint name */ "Finish");
+        final TimePoint startTime = getStartTime(trackedRace);
+        final TimePoint endTime = getEndTime(trackedRace);
+        // search backwards for last valid fixes
+        return createLineEnclosingTracks(trackedRace, regattaLog, /* time point for mark fixes */ startTime, /* extrapolate */ true,
+                /* waypoint name */ "Finish", /* time point to start searching for valid fixes */ endTime, /* searchForward */ false);
     }
 
     private TimePoint getEndTime(TrackedRace trackedRace) {
@@ -735,15 +751,20 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
      * is returned.
      */
     private Waypoint inferStartLine(TrackedRace trackedRace, RegattaLog regattaLog) {
-        final TimePoint when = getStartTime(trackedRace);
-        return createLineEnclosingTracks(trackedRace, regattaLog, when, /* extrapolate */ false, /* waypoint name */ "Start");
+        final TimePoint startTime = getStartTime(trackedRace);
+        // search backwards for last valid fixes
+        return createLineEnclosingTracks(trackedRace, regattaLog, /* time point for mark fixes */ startTime, /* extrapolate */ true,
+                /* waypoint name */ "Start", /* time point to start searching for valid fixes */ startTime, /* searchForward */ true);
     }
 
     private static final Distance LINE_MARGIN = new MeterDistance(20);
-    private Waypoint createLineEnclosingTracks(TrackedRace trackedRace, RegattaLog regattaLog, final TimePoint when, boolean extrapolate, String waypointName) {
+
+    private Waypoint createLineEnclosingTracks(TrackedRace trackedRace, RegattaLog regattaLog,
+            final TimePoint timePointForMarkFixes, boolean extrapolate, String waypointName,
+            TimePoint timePointForCogAndSogRetrieval, boolean searchForward) {
         final Waypoint result;
-        if (when != null) {
-            final Iterable<Pair<Position, SpeedWithBearing>> positionsAndCogsAndSogs = getPositionsAndCogsAndSogs(trackedRace, when, extrapolate); 
+        if (timePointForMarkFixes != null) {
+            final Iterable<Pair<Position, SpeedWithBearing>> positionsAndCogsAndSogs = getPositionsAndCogsAndSogs(trackedRace, timePointForCogAndSogRetrieval, extrapolate, searchForward); 
             final Bearing averageCourse = getAverageCourse(positionsAndCogsAndSogs); // may return null, e.g., if COG/SOG information is missing
             if (averageCourse != null) {
                 final Bearing fromStartBoatToPinEnd = averageCourse.add(new DegreeBearingImpl(-90));
@@ -758,14 +779,14 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                             fromStartBoatToPinEnd, LINE_MARGIN);
                     final Mark startBoat = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Boat");
                     RegattaLogDefineMarkEventImpl defineStartBoatEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
-                            getService().getServerAuthor(), when, UUID.randomUUID(), startBoat);
+                            getService().getServerAuthor(), timePointForMarkFixes, UUID.randomUUID(), startBoat);
                     regattaLog.add(defineStartBoatEvent);
                     final Mark pinEnd = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Pin End");
                     RegattaLogDefineMarkEventImpl definePinEndEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
-                            getService().getServerAuthor(), when, UUID.randomUUID(), pinEnd);
+                            getService().getServerAuthor(), timePointForMarkFixes, UUID.randomUUID(), pinEnd);
                     regattaLog.add(definePinEndEvent);
-                    getRaceLogTrackingAdapter().pingMark(regattaLog, startBoat, new GPSFixImpl(startBoatPosition, when), getService());
-                    getRaceLogTrackingAdapter().pingMark(regattaLog, pinEnd, new GPSFixImpl(pinEndPosition, when), getService());
+                    getRaceLogTrackingAdapter().pingMark(regattaLog, startBoat, new GPSFixImpl(startBoatPosition, timePointForMarkFixes), getService());
+                    getRaceLogTrackingAdapter().pingMark(regattaLog, pinEnd, new GPSFixImpl(pinEndPosition, timePointForMarkFixes), getService());
                     final ControlPoint startLineControlPoint = getService().getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
                             UUID.randomUUID(), "Auto "+waypointName+" Line", pinEnd, startBoat);
                     result = getService().getBaseDomainFactory().createWaypoint(startLineControlPoint, PassingInstruction.Line);
@@ -774,7 +795,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 }
             } else {
                 result = null;
-                logger.warning(()->"COG/SOG information for race "+trackedRace.getRace().getName()+" at "+when+
+                logger.warning(()->"COG/SOG information for race "+trackedRace.getRace().getName()+" at "+timePointForMarkFixes+
                         " missing. Cannot construct a line for waypoint "+waypointName+" enclosing tracks with unknown course.");
             }
         } else {
@@ -822,16 +843,40 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         return new Pair<>(positionFarthestAhead, positionFurthestBack);
     }
 
+    /**
+     * Scans all competitor tracks for valid fixes that occur starting at {@code timePointForCogAndSogRetrieval},
+     * looking in the direction indicated by {@code searchForward}. From the earliest valid fix found this way
+     * we move {@link #TIME_OFFSET_FOR_HEAD_AND_TAIL_OF_TRACK_FOR_LINE_INFERENCE} further to obtain the positions
+     * of all competitors, hoping that at least for the competitor providing valid fixes at this point we'll find
+     * a valid position.
+     */
     private Iterable<Pair<Position, SpeedWithBearing>> getPositionsAndCogsAndSogs(TrackedRace trackedRace,
-            TimePoint when, boolean extrapolate) {
+            TimePoint timePointForCogAndSogRetrievalSearchStart, boolean extrapolate, boolean searchForward) {
         final List<Pair<Position, SpeedWithBearing>> result = new ArrayList<>();
+        // find the first valid fix in the search direction
+        TimePoint best = null;
         for (final Competitor c : trackedRace.getRace().getCompetitors()) {
             final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(c);
             if (track != null) {
-                final Position position = track.getEstimatedPosition(when, extrapolate);
-                final SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(when);
-                if (position != null && speedWithBearing != null) {
-                    result.add(new Pair<>(position, speedWithBearing));
+                GPSFixMoving firstQualifyingFix = searchForward ? track.getFirstFixAtOrAfter(timePointForCogAndSogRetrievalSearchStart) :
+                    track.getLastFixAtOrBefore(timePointForCogAndSogRetrievalSearchStart);
+                if (firstQualifyingFix != null && (best == null ||
+                        (firstQualifyingFix.getTimePoint().compareTo(best) < 0 == searchForward))) {
+                    best = firstQualifyingFix.getTimePoint();
+                }
+            }
+        }
+        if (best != null) {
+            TimePoint timePointForCogAndSogRetrieval = searchForward ? best.plus(TIME_OFFSET_FOR_HEAD_AND_TAIL_OF_TRACK_FOR_LINE_INFERENCE) :
+                best.minus(TIME_OFFSET_FOR_HEAD_AND_TAIL_OF_TRACK_FOR_LINE_INFERENCE);
+            for (final Competitor c : trackedRace.getRace().getCompetitors()) {
+                final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(c);
+                if (track != null) {
+                    final Position position = track.getEstimatedPosition(timePointForCogAndSogRetrieval, extrapolate);
+                    final SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(timePointForCogAndSogRetrieval);
+                    if (position != null && speedWithBearing != null) {
+                        result.add(new Pair<>(position, speedWithBearing));
+                    }
                 }
             }
         }

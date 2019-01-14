@@ -65,14 +65,15 @@ public class StoredDataMiningQueryDataProvider {
             update = false;
         }
 
-        dataMiningService.updateOrCreateStoredQuery(storedQuery, new AsyncCallback<StoredDataMiningQueryDTO>() {
+        dataMiningService.updateOrCreateStoredQuery((StoredDataMiningQueryDTOImpl) storedQuery,
+                new AsyncCallback<StoredDataMiningQueryDTOImpl>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log(caught.getMessage(), caught);
             }
 
             @Override
-            public void onSuccess(StoredDataMiningQueryDTO result) {
+            public void onSuccess(StoredDataMiningQueryDTOImpl result) {
                 queryDefinitions.remove(result);
                 queryDefinitions.add(result);
                 updateUi();
@@ -90,7 +91,8 @@ public class StoredDataMiningQueryDataProvider {
     public boolean removeQuery(String name) {
         Optional<StoredDataMiningQueryDTO> query = findByName(name);
         if (query.isPresent()) {
-            dataMiningService.removeStoredQuery(query.get(), new AsyncCallback<StoredDataMiningQueryDTO>() {
+            dataMiningService.removeStoredQuery((StoredDataMiningQueryDTOImpl) query.get(),
+                    new AsyncCallback<StoredDataMiningQueryDTOImpl>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -98,7 +100,7 @@ public class StoredDataMiningQueryDataProvider {
                 }
 
                 @Override
-                public void onSuccess(StoredDataMiningQueryDTO result) {
+                        public void onSuccess(StoredDataMiningQueryDTOImpl result) {
                     queryDefinitions.remove(result);
                     updateUi();
                 }
@@ -141,9 +143,9 @@ public class StoredDataMiningQueryDataProvider {
 
     /** Refresh the stored queries and update the {@link StoredDataMiningQueryPanel}. */
     private void refreshQueries() {
-        dataMiningService.retrieveStoredQueries(new AsyncCallback<ArrayList<StoredDataMiningQueryDTO>>() {
+        dataMiningService.retrieveStoredQueries(new AsyncCallback<ArrayList<StoredDataMiningQueryDTOImpl>>() {
             @Override
-            public void onSuccess(ArrayList<StoredDataMiningQueryDTO> result) {
+            public void onSuccess(ArrayList<StoredDataMiningQueryDTOImpl> result) {
                 queryDefinitions.addAll(result);
                 updateUi();
             }

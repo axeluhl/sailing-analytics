@@ -20,7 +20,7 @@ import com.sap.sailing.selenium.pages.leaderboard.PairinfListCreationDialogPO;
 import com.sap.sailing.selenium.pages.leaderboard.PairingListCreationSetupDialogPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class PairinglistTest extends AbstractSeleniumTest {
     private static final String EVENT = "TestEvent";

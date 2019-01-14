@@ -6,7 +6,9 @@ import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor;
 import com.sap.sailing.server.trackfiles.impl.doublefix.DoubleVectorFixData;
 import com.sap.sailing.server.trackfiles.impl.doublefix.DownsamplerTo1HzProcessor;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Assert;
 
 public class DownsamplerTo1HzProcessorTest {
 
@@ -67,10 +69,10 @@ public class DownsamplerTo1HzProcessorTest {
         Assert.assertEquals("Count consolidated fixes", 1, delegate.countAccepted);
         DoubleVectorFixData lastFix = delegate.lastFix;
         Assert.assertNotNull("Lastfix", lastFix);
-        Assert.assertEquals("Avg col 1", (12.4d + 0.01d - 10d + 1d + 0d) / 5d, lastFix.getFix()[0]);
-        Assert.assertEquals("Avg col 2", 9d / 5d, lastFix.getFix()[1]);
-        Assert.assertEquals("Avg col 3", 1d, lastFix.getFix()[2]);
-        Assert.assertEquals("Avg col 4", 0d, lastFix.getFix()[3]);
+        assertEquals("Avg col 1", (12.4d + 0.01d - 10d + 1d + 0d) / 5d, (double) lastFix.getFix()[0], 0.000001);
+        assertEquals("Avg col 2", 9d / 5d, (double) lastFix.getFix()[1], 0.000001);
+        assertEquals("Avg col 3", 1d, (double) lastFix.getFix()[2], 0.000001);
+        assertEquals("Avg col 4", 0d, (double) lastFix.getFix()[3], 0.000001);
     }
 
     private final class MyProcessor implements DoubleFixProcessor {
