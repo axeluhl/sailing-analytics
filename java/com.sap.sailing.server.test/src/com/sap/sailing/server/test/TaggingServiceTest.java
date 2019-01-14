@@ -81,6 +81,7 @@ public class TaggingServiceTest {
     @BeforeClass
     public synchronized static void setUpClass()
             throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException {
+        logger.info("current thread: "+Thread.currentThread());
         MongoDBService.INSTANCE.getDB().drop();
         // setup racing service and racelog
         racingService = new RacingEventServiceImpl();
@@ -117,6 +118,7 @@ public class TaggingServiceTest {
 
     @AfterClass
     public synchronized static void tearDownClass() {
+        logger.info("current thread: "+Thread.currentThread());
         try {
             subject.logout();
             securityService.deleteUser(username);
@@ -128,6 +130,7 @@ public class TaggingServiceTest {
 
     @Before
     public void resetEnvironment() {
+        logger.info("current thread: "+Thread.currentThread());
         synchronized (TaggingServiceTest.class) {
             // setup the Shiro SubjectThreadState to ensure that the tagging service can check whether a subject is logged in
             threadState.bind();
@@ -156,6 +159,7 @@ public class TaggingServiceTest {
 
     @After
     public void restoreEnvironment() {
+        logger.info("current thread: "+Thread.currentThread());
         synchronized (TaggingServiceTest.class) {
             threadState.restore();
         }
