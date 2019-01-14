@@ -247,6 +247,12 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     @Override
     public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) {
         synchronized (loadingQueueDoneCallBacks) {
+            // Synchronization: If the following peekLast() call returns an element that is consumed just before the
+            // callback is added to loadingQueueDoneCallbacks then the callback will still be triggered because the
+            // run() method also synchronizes on loadingQueueDoneCallBacks before checking for any call back to be
+            // triggered for the event just consumed. Worst case: the event is taken from the queue but not yet
+            // handled. In this case the peekLast() call will already return null and execute the loadingQueueDone(this)
+            // callback already although the event's handling has not completed yet.
             Triple<A, B, C> lastInQueue = queue.peekLast();
             // when simulator is attached, consider loading already done; the simulator simulates "live" tracking
             if (lastInQueue == null || getSimulator() != null) {

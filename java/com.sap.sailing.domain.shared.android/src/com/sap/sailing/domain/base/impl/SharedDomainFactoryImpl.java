@@ -292,9 +292,36 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
             ((WeakWaypointReference) ref).removeCacheEntry();
         }
     }
+    
+    @Override
+    public BoatClass getBoatClass(String name) {
+        return getBoatClassOrCreateIfMasterdataExists(name);
+    }
 
     @Override
+    public Iterable<BoatClass> getBoatClasses() {
+        return Collections.unmodifiableCollection(boatClassCache.values());
+    }
+    
+    @Override
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
+        synchronized (boatClassCache) {
+            BoatClass result = getBoatClassOrCreateIfMasterdataExists(name);
+            if (result == null) {
+                final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(name);
+                result = new BoatClassImpl(unifiedBoatClassName, typicallyStartsUpwind);
+                boatClassCache.put(unifiedBoatClassName, result);
+            }
+            return result;
+        }
+    }
+
+    /**
+     * @return {@code null} if no master data is found for the boat class and the cache doesn't contain a boat class
+     *         with the {@link BoatClassMasterdata#unifyBoatClassNameBasedOnExistingMasterdata(String)} unified /
+     *         canonicalized name.
+     */
+    private BoatClass getBoatClassOrCreateIfMasterdataExists(String name) {
         final BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
         final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(name);
         BoatClass result;
@@ -303,15 +330,13 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
             if (result == null) {
                 if (unifiedBoatClassName != null && boatClassMasterdata != null) {
                     result = new BoatClassImpl(boatClassMasterdata.getDisplayName(), boatClassMasterdata);
-                } else {
-                    result = new BoatClassImpl(unifiedBoatClassName, typicallyStartsUpwind);
+                    boatClassCache.put(unifiedBoatClassName, result);
                 }
-                boatClassCache.put(unifiedBoatClassName, result);
             }
             return result;
         }
     }
-    
+
     @Override
     public BoatClass getOrCreateBoatClass(final String name) {
         final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(name);

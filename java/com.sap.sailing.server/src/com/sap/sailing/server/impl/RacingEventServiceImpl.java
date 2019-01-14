@@ -195,9 +195,8 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
-import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
+import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminatorImpl;
 import com.sap.sailing.server.anniversary.RaceChangeObserverForAnniversaryDetection;
 import com.sap.sailing.server.anniversary.checker.QuarterChecker;
 import com.sap.sailing.server.anniversary.checker.SameDigitChecker;
@@ -206,7 +205,10 @@ import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
-import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.interfaces.SimulationService;
+import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sailing.server.notification.EmptySailingNotificationService;
 import com.sap.sailing.server.notification.SailingNotificationService;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
@@ -252,12 +254,10 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
-import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
 import com.sap.sailing.server.statistics.StatisticsCalculator;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
-import com.sap.sailing.server.tagging.TaggingService;
 import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
@@ -284,8 +284,8 @@ import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -487,7 +487,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final TrackedRegattaListenerManager trackedRegattaListener;
     
-    private int numberOfTrackedRacesToRestore;
+    private long numberOfTrackedRacesToRestore;
     
     private final AtomicInteger numberOfTrackedRacesRestored;
     
@@ -497,11 +497,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
 
-    private final AnniversaryRaceDeterminator anniversaryRaceDeterminator;
+    private final AnniversaryRaceDeterminatorImpl anniversaryRaceDeterminator;
 
     /**
      * Observes {@link TrackedRegatta} and {@link TrackedRace} instances known to trigger an update of
-     * {@link AnniversaryRaceDeterminator} if the number of anniversary race candidates changes. To do this, the
+     * {@link AnniversaryRaceDeterminatorImpl} if the number of anniversary race candidates changes. To do this, the
      * instance is registered as {@link TrackedRegattaListener} on the {@link TrackedRegattaListenerManager} know by
      * this service.
      */
@@ -804,7 +804,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore();
         }
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
-        anniversaryRaceDeterminator = new AnniversaryRaceDeterminator(this, remoteSailingServerSet,
+        anniversaryRaceDeterminator = new AnniversaryRaceDeterminatorImpl(this, remoteSailingServerSet,
                 new QuarterChecker(), new SameDigitChecker());
         raceChangeObserverForAnniversaryDetection = new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator);
         this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
@@ -4047,7 +4047,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public int getNumberOfTrackedRacesToRestore() {
+    public long getNumberOfTrackedRacesToRestore() {
         return numberOfTrackedRacesToRestore;
     }
 
@@ -4251,7 +4251,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public AnniversaryRaceDeterminator getAnniversaryRaceDeterminator() {
+    public AnniversaryRaceDeterminatorImpl getAnniversaryRaceDeterminator() {
         return anniversaryRaceDeterminator;
     }
     

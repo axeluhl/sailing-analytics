@@ -121,6 +121,7 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
     protected FocusWidget getInitialFocusWidget() {
         return nameBox;
     }
+
     protected StringMessages getStringMessages() {
         return stringMessages;
     }

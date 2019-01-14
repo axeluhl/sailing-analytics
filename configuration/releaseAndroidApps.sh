@@ -50,7 +50,7 @@ if [ $# -eq 0 ]; then
     echo "  https://wiki.sapsailing.com/wiki/info/landscape/building-and-deploying#building-deploying-stopping-and-starting-server-instances"
     echo "-m Disable upgrading the AndroidManifest.xml versionCode and versionName"
     echo "-p Disable upgrading the pom.xml and MANIFEST.MF versions"
-    echo "-g Disable the final git push operation to refs/for/$RELEASE_BRANCH"
+    echo "-g Disable the final git push operation to $RELEASE_BRANCH"
     echo "-r The git remote; defaults to origin"
     echo ""
     echo "Example: $0 CR-Id: 012003146900000486712016"
@@ -120,7 +120,7 @@ git commit -a -m "Upgraded Android apps from version $OLD_POM_VERSION to $NEW_PO
 git commit --amend -m "`git show -s --pretty=format:%s%n%n%b`
 $JCWB_CHANGE_REQUEST_ID_GIT_TAG"
 if [ "$PERFORM_GIT_OPERATIONS" = "1" ]; then
-  git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:refs/for/$RELEASE_BRANCH
+  git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$RELEASE_BRANCH
 fi
 
 echo "Now go to https://git.wdf.sap.corp/#/dashboard/self and vote on your change, using the \"Reply\" button."
