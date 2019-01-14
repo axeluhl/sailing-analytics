@@ -80,10 +80,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
-        parent.addView(view, 1);
-        return parent;
+        return inflater.inflate(R.layout.list_fragment, container, false);
     }
 
     @Override

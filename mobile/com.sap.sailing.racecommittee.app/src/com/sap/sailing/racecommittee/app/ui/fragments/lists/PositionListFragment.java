@@ -1,7 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import java.util.ArrayList;
-import java.util.List;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -13,12 +17,8 @@ import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListAdapter;
-import android.widget.ListView;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PositionListFragment extends LoggableListFragment {
 
@@ -38,11 +38,7 @@ public class PositionListFragment extends LoggableListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
-        if (view != null) {
-            parent.addView(view, 1);
-        }
+        View view = inflater.inflate(R.layout.list_fragment, container, false);
 
         preferences = AppPreferences.on(getActivity());
 
@@ -70,7 +66,7 @@ public class PositionListFragment extends LoggableListFragment {
 
         host = (PositionSelectedListenerHost) getActivity();
 
-        return parent;
+        return view;
     }
 
     @Override
