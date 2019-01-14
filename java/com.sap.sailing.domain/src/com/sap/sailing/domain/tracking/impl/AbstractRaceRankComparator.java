@@ -49,7 +49,7 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
     private final ConcurrentMap<Competitor, MarkPassing> lastMarkPassingBeforeTimePoint;
     private final ConcurrentMap<Competitor, TrackedLegOfCompetitor> currentLeg;
     
-    private final MarkPassing NULL_MARK_PASSING = new MarkPassingImpl(null, null, null);
+    private final MarkPassing NULL_MARK_PASSING = new MarkPassingImpl(null, null, null, null);
     private final TrackedLegOfCompetitor NULL_TRACKED_LEG_OF_COMPETITOR = new TrackedLegOfCompetitorImpl(null, null, null);
     
     /**

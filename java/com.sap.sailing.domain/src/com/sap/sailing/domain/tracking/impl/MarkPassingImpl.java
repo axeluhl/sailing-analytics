@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sse.common.TimePoint;
 
@@ -10,12 +11,14 @@ public class MarkPassingImpl implements MarkPassing {
     private final TimePoint timePoint;
     private final Waypoint waypoint;
     private final Competitor competitor;
+    private final Candidate candidate;
     
-    public MarkPassingImpl(TimePoint timePoint, Waypoint waypoint, Competitor competitor) {
+    public MarkPassingImpl(TimePoint timePoint, Waypoint waypoint, Competitor competitor, Candidate candidate) {
     	super();
     	this.timePoint = timePoint;
         this.waypoint = waypoint;
         this.competitor = competitor;
+        this.candidate = candidate;
     }
 
     @Override
@@ -41,6 +44,10 @@ public class MarkPassingImpl implements MarkPassing {
     @Override
     public MarkPassing getOriginal() {
         return this;
+    }
+    
+    public Candidate getCandidate() {
+        return this.candidate;
     }
 
 }

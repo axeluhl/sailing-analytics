@@ -2,11 +2,13 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +104,12 @@ public class CandidateChooserImpl implements CandidateChooser {
      * lead to the edge being discarded.
      */
     private static final Speed MINIMUM_REASONABLE_SPEED = new KnotSpeedImpl(3);
+    
+    /**
+     * Candidate filtering will be used for exclude Candidates which are very close from time perspective
+     * and match certain criteria. See {@link addCandidates(Competitor c, Iterable<Candidate> newCandidates)} for details 
+     */
+    private static final long CANDIDATE_FILTER_TIME_WINDOW = 10 * 1000;
 
     private static final Speed MAXIMUM_REASONABLE_SPEED = GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING;
 
@@ -198,6 +206,32 @@ public class CandidateChooserImpl implements CandidateChooser {
             allEdges.put(c, new HashMap<Candidate, Set<Edge>>());
             fixedPasses.addAll(startAndEnd);
             addCandidates(c, startAndEnd);
+            
+        }
+    }
+    
+    /*
+     * Bug 4221
+     * optional function to log markpassing distribution
+     */
+    public void logMarkpassingDistribution() {
+        for (Competitor c : currentMarkPasses.keySet()) {
+            int xteCnt = 0;
+            int distCnt = 0;
+            Map<Waypoint, MarkPassing> currentCompPasses = currentMarkPasses.get(c);
+            for( Waypoint wpi : currentCompPasses.keySet()) {
+                MarkPassingImpl mp = (MarkPassingImpl)currentCompPasses.get(wpi);
+                if (mp.getCandidate() instanceof XTECandidateImpl) {
+                    xteCnt++;
+                } else {
+                    if (mp.getCandidate() instanceof DistanceCandidateImpl) {
+                        distCnt++;
+                    } else {
+                       logger.warning("unknown candidate type"); 
+                    }                    
+                }
+            }
+            logger.warning("markpasses count:" + currentCompPasses.size() + ", xte:" + xteCnt + ", dist:" + distCnt + " for " + c);
         }
     }
     
@@ -518,7 +552,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                 List<MarkPassing> newMarkPassings = new ArrayList<>();
                 for (Candidate can : mostLikelyCandidates) {
                     if (can != start && can != end) {
-                        MarkPassingImpl newMarkPassing = new MarkPassingImpl(can.getTimePoint(), can.getWaypoint(), c);
+                        MarkPassingImpl newMarkPassing = new MarkPassingImpl(can.getTimePoint(), can.getWaypoint(), c, can);
                         currentPasses.put(newMarkPassing.getWaypoint(), newMarkPassing);
                         newMarkPassings.add(newMarkPassing);
                     }
@@ -684,7 +718,82 @@ public class CandidateChooserImpl implements CandidateChooser {
         return totalGreatCircleDistance;
     }
 
+    /**
+     * New candidates will be added. The list of incoming Candidates will be filtered.
+     */
     private void addCandidates(Competitor c, Iterable<Candidate> newCandidates) {
+        
+        // bug 4221 - filter candidates
+        List<Candidate> filteredCandidates = new ArrayList<Candidate>();
+        int size = ((Collection<?>) newCandidates).size();
+        if (size > 2) {
+            Hashtable<Waypoint, ArrayList<Candidate>> organizedList = new Hashtable<Waypoint, ArrayList<Candidate>>();
+            logger.finest("candidate count before candidate filtering: " + size);
+            int cnt = 0;
+            for (Candidate can : newCandidates) {
+                boolean isDistCan = false;
+                Waypoint wp = can.getWaypoint();
+                if ( can.getClass().getName().endsWith("DistanceCandidateImpl")) {
+                    isDistCan = true;
+                }
+                filteredCandidates.add(can);
+                if (!isDistCan) {
+                    // not for XTE Candidates (yet)
+                } else {
+                    // filtering for Distance Candidates
+                    ArrayList<Candidate> canWpList = organizedList.get(wp);
+                    if (null == canWpList) {
+                        canWpList = new ArrayList<Candidate>();
+                        organizedList.put(wp, canWpList);
+                    }
+                    canWpList.add(can);
+                    
+                }
+            }
+            // list of organized Candidates ready for analyzing
+            Set<Waypoint> keys = organizedList.keySet();
+            System.out.println(" " + c.getName());
+            Candidate lastCan = null;
+            int deleteCnt = 0;
+            for(Waypoint key: keys) {
+                int wpCnt = 0;
+                int innerDelCnt = 0;
+                ArrayList<Candidate> canWpList = organizedList.get(key);
+                wpCnt = canWpList.size();
+                for (int j=0; j<canWpList.size(); j++) {
+                    Candidate can = canWpList.get(j);
+                    if (lastCan != null) {
+                        if (can.getTimePoint().asMillis() - lastCan.getTimePoint().asMillis() < CANDIDATE_FILTER_TIME_WINDOW ) {
+                            // close enough
+                            if (can.getProbability() > lastCan.getProbability()) {
+                                // better than last one - delete last One
+                                if (filteredCandidates.contains(lastCan)) {
+                                    filteredCandidates.remove(lastCan);
+                                }
+                                innerDelCnt++;
+                                deleteCnt++;
+                            } else {
+                                // delete actual one
+                                innerDelCnt++;
+                                deleteCnt++;
+                                if (filteredCandidates.contains(can)) {
+                                    filteredCandidates.remove(can);
+                                }
+                                continue;
+                            }
+                        }
+                    }
+                    lastCan = can;
+                }
+                logger.finest("count of entries in "+ key + " is: "+ wpCnt + " (toDelete:" + innerDelCnt + ")");
+            }
+            logger.finest(" would delete: " + deleteCnt);
+            
+            
+            logger.warning("before: " + size + " after candidate filtering: " + filteredCandidates.size() + " for " + c.getName());
+            
+            newCandidates = filteredCandidates;
+        }
         LockUtil.lockForWrite(perCompetitorLocks.get(c));
         try {
             for (Candidate can : newCandidates) {

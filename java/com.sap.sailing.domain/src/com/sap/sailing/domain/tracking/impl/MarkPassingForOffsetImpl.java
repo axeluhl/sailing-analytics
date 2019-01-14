@@ -13,7 +13,7 @@ public class MarkPassingForOffsetImpl extends MarkPassingImpl implements MarkPas
 
     
     public MarkPassingForOffsetImpl(TimePoint timePoint, Waypoint waypoint, Competitor competitor, MarkPassing markPassingforOffset) {
-        super(timePoint, waypoint, competitor);
+        super(timePoint, waypoint, competitor, null);
         this.markpassingforOffset = markPassingforOffset;
     }
 
