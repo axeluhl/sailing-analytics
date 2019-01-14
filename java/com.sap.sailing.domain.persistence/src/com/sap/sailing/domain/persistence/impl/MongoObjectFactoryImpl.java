@@ -1548,7 +1548,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> result = database.getCollection(CollectionNames.REGATTA_LOGS.name());
         Document index = new Document(FieldNames.REGATTA_LOG_IDENTIFIER_TYPE.name(), 1);
         index.put(FieldNames.REGATTA_LOG_IDENTIFIER_NAME.name(), 1);
-        result.createIndex(index);
+        result.createIndex(index, new IndexOptions().name("regattaLogById"));
         return result;
     }
     

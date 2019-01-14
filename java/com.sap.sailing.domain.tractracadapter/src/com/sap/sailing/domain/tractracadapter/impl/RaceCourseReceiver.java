@@ -264,7 +264,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                 /* time over which to average speed: */ race.getBoatClass()
                         .getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm, raceLogResolver,
-                /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+                /* ThreadLocalTransporter not needed because the RaceTracker is not active on a replica */ Optional.empty());
         if (runAfterCreatingTrackedRace != null) {
             runAfterCreatingTrackedRace.accept(trackedRace);
         }

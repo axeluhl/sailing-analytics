@@ -1,3 +1,9 @@
+## Amazon Simple Email Service (SES) Set-Up
+
+[https://eu-west-1.console.aws.amazon.com/sns/home?region=eu-west-1](https://eu-west-1.console.aws.amazon.com/sns/home?region=eu-west-1) can be used to set up e-mail services. We have done this for the ``sapsailing.com`` domain which is verified and has the necessary Route53 DNS set-up for DKIM validation.
+
+An IAM user can be generated with SES for SMTP authentication. The SMTP server is ``email-smtp.eu-west-1.amazonaws.com`` on port ``25`` which can be entered into the ``mail.properties`` file of servers. Authorization is required, and we "bake" the standard user's authorization into the ``/home/sailing/servers/server/configuration/mail.properties`` file in our AWS AMI images.
+
 ## DNS entries for mails regarding DNS setup
 - SPF record for zone `sapsailing.com` which points to `"v=spf1 mx ip4:54.229.94.254 -all"`
 - MX record for zone `sapsailing.com` which points to `10 mail.sapsailing.com`

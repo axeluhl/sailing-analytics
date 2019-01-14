@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.client.component;
 
 import com.sap.sse.security.shared.dto.UserDTO;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -10,5 +11,10 @@ public class ChangePasswordDialog extends AbstractUserDialog {
         super(stringMessages, stringMessages.changePassword(), userManagementService, user, callback);
         getNameBox().setEnabled(false);
         getEmailBox().setEnabled(false);
+    }
+
+    @Override
+    protected FocusWidget getInitialFocusWidget() {
+        return getPwBox();
     }
 }
