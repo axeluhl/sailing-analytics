@@ -14,7 +14,6 @@ import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NoWindException;
@@ -36,7 +35,6 @@ import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 public class OutlierDetectionTest extends AbstractManeuverDetectionTestCase {
     public OutlierDetectionTest() throws MalformedURLException, URISyntaxException {
         super();
-        AbstractTracTracLiveTestTimeout = Timeout.millis(5 * 60 * 1000); // this can take a little longer than the default 3min timeout allows for... raising to 5min
     }
 
     @Before
