@@ -36,10 +36,10 @@ public abstract class DeclinationServiceTest<I extends DeclinationImporter> exte
 
     @Test
     public void testDeclinationQueryNotMatchedInStore() throws IOException, ClassNotFoundException, ParseException {
-        Declination result = service.getDeclination(new MillisecondsTimePoint(simpleDateFormat.parse("2019-02-03").getTime()),
+        Declination result = service.getDeclination(new MillisecondsTimePoint(simpleDateFormat.parse("2020-02-03").getTime()),
                 new DegreePosition(51, -5), /* timeoutForOnlineFetchInMilliseconds */ 5000);
         assertNotNull(result);
-        assertEquals(-1.9565, result.getBearing().getDegrees(), 0.001);
+        assertEquals(-1.80464, result.getBearing().getDegrees(), 0.001);
         assertEquals(0.15244, result.getAnnualChange().getDegrees(), 0.001);
     }
 

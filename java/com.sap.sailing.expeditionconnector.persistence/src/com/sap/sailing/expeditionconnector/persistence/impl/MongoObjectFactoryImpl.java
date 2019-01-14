@@ -22,7 +22,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         this.expeditionDeviceConfigurationsCollection = db.getCollection(CollectionNames.EXPEDITION_DEVICE_CONFIGURATIONS.name());
         BasicDBObject index = new BasicDBObject();
         index.put(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_UUID.name(), 1);
-        expeditionDeviceConfigurationsCollection.createIndex(index, new IndexOptions().unique(true));
+        expeditionDeviceConfigurationsCollection.createIndex(index, new IndexOptions().name("uuidindex").unique(true));
     }
 
     private Document getExpeditionDeviceConfigurationDBKey(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {

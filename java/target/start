@@ -23,7 +23,7 @@ if [[ ! -d "$JAVA_HOME" ]]; then
 fi
 # disable AWT requiring X11 and the correct DISPLAY variable setting; failing to do so
 # can result in trouble generating QR codes in the back-end
-ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Djava.awt.headless=true -Xms$MEMORY"
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Djava.awt.headless=true -Xms$MEMORY -Dosgi.debug=$PWD/configuration/debug.properties"
 PLATFORM=`uname`
 SED_ARGS="-i"
 if [[ $PLATFORM == "Darwin" ]]; then
@@ -69,7 +69,8 @@ sed $SED_ARGS "s/127.0.0.1:[0-9][0-9][0-9][0-9]\//127.0.0.1:$SERVER_PORT\//g" ./
 
 # Inject information for system
 HEAD_DATE=$(date "+%Y%m%d%H%M")
-sed $SED_ARGS "s/System:.*$/ System: $MONGO_URI:$MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
+MONGODB_URI_FOR_SED=$( echo "$MONGODB_URI" | sed -e 's/^mongodb:\/\///' -e 's/^[^:]*:[^@]*@//' -e 's/\//\\\//g' -e 's/&/\\&/g' )
+sed $SED_ARGS "s/System:.*$/ System: $MONGODB_URI_FOR_SED:$MONGODB_HOST:$MONGODB_PORT\/$MONGODB_NAME-$EXPEDITION_PORT-$REPLICATION_HOST:$REPLICATION_PORT\/$REPLICATION_CHANNEL Started: $HEAD_DATE/g" ./configuration/jetty/version.txt
 
 # Apply app parameters from env.sh
 if [ "$MONGODB_URI" = "" ]; then
