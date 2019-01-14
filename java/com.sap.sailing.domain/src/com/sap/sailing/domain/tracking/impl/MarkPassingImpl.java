@@ -21,6 +21,14 @@ public class MarkPassingImpl implements MarkPassing {
         this.candidate = candidate;
     }
 
+    public MarkPassingImpl(TimePoint timePoint, Waypoint waypoint, Competitor competitor) {
+        super();
+        this.timePoint = timePoint;
+        this.waypoint = waypoint;
+        this.competitor = competitor;
+        this.candidate = null;
+    }
+
     @Override
     public TimePoint getTimePoint() {
         return timePoint;
