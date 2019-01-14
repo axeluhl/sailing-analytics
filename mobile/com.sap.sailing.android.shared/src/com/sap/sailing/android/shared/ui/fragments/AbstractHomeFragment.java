@@ -104,7 +104,7 @@ public abstract class AbstractHomeFragment extends BaseFragment {
      * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
      */
     protected void displayAPIErrorRecommendRetry() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setMessage(getString(R.string.notify_user_api_call_failed));
         builder.setCancelable(true);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

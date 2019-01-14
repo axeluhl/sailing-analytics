@@ -1,14 +1,5 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.racecommittee.app.R;
-
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,6 +7,15 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.racecommittee.app.R;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class AutoUpdaterChecker {
 
@@ -128,7 +128,7 @@ public class AutoUpdaterChecker {
                         + context.getString(R.string.auto_update_with_store, AppUtils.with(context).getStoreName());
             }
 
-            AlertDialog.Builder updateDialog = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder updateDialog = new AlertDialog.Builder(context);
             updateDialog.setTitle(R.string.auto_update).setMessage(String.format(messageFormat, serverVersion))
                     .setPositiveButton(
                             context.getString(needsUpdate ? R.string.auto_update_install : android.R.string.ok),
@@ -190,7 +190,7 @@ public class AutoUpdaterChecker {
         @Override
         public void onError() {
             dialog.dismiss();
-            AlertDialog.Builder errorDialog = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder errorDialog = new AlertDialog.Builder(context);
             errorDialog.setTitle(R.string.auto_update).setMessage(R.string.auto_update_error)
                     .setPositiveButton(android.R.string.ok, null).show();
         }

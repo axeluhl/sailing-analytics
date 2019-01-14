@@ -1,11 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListView;
 
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.domain.base.EventBase;
@@ -23,16 +27,12 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sse.common.Named;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v7.app.AlertDialog;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListView;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 
 public abstract class NamedListFragment<T extends Named> extends LoggableListFragment
         implements LoadClient<Collection<T>>, DialogListenerHost {
@@ -105,7 +105,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         showProgressBar(false);
 
         if (reason instanceof UnauthorizedException) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(R.string.loading_failure);
             builder.setPositiveButton(android.R.string.ok, null);
             builder.setMessage(getActivity().getString(R.string.user_unauthorized));

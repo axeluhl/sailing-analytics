@@ -1,11 +1,5 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.EulaHelper;
-import com.sap.sailing.android.shared.util.LicenseHelper;
-import com.sap.sailing.android.tracking.app.R;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +12,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.LicenseHelper;
+import com.sap.sailing.android.tracking.app.R;
+
 import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.model.Notices;
 
@@ -63,7 +64,6 @@ public class AboutFragment extends BaseFragment {
         notices.addNotice(licenseHelper.getDialogNotice(getActivity()));
         LicensesDialog.Builder builder = new LicensesDialog.Builder(getActivity());
         builder.setTitle(getString(R.string.license_information));
-        builder.setThemeResourceId(R.style.AppTheme_AlertDialog);
         builder.setNotices(notices);
         builder.build().show();
     }

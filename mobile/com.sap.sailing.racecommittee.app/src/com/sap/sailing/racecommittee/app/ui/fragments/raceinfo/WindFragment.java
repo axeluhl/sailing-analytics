@@ -1,14 +1,30 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.ColorInt;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
+import android.text.InputFilter;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.NumberPicker;
+import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -49,31 +65,15 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.net.Uri;
-import android.os.Bundle;
-import android.support.annotation.ColorInt;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.text.InputFilter;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.NumberPicker;
-import android.widget.TextView;
+import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class WindFragment extends BaseFragment
         implements CompassDirectionListener, OnRaceUpdatedListener, OnSuccessListener<Location> {
@@ -531,7 +531,7 @@ public class WindFragment extends BaseFragment
         for (final ManagedRace r : mManagedRaces) {
             selected[i++] = mSelectedRaces.contains(r);
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(getString(R.string.wind_select_race));
         builder.setMultiChoiceItems(races.toArray(new String[races.size()]), selected,
                 new DialogInterface.OnMultiChoiceClickListener() {
@@ -580,7 +580,7 @@ public class WindFragment extends BaseFragment
 
         @Override
         public void onClick(View v) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(R.string.wind_from);
             View layout = getActivity().getLayoutInflater().inflate(R.layout.wind_input_course, null);
             final CompassView compassView = (CompassView) layout.findViewById(R.id.compass_view);
@@ -612,7 +612,7 @@ public class WindFragment extends BaseFragment
 
         @Override
         public void onClick(View v) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(R.string.wind_speed);
             View layout = getActivity().getLayoutInflater().inflate(R.layout.wind_input_speed, null);
             final NumberPicker speed = (NumberPicker) layout.findViewById(R.id.wind_speed);

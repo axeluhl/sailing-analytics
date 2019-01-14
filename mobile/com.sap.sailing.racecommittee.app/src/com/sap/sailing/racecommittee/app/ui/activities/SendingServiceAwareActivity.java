@@ -1,8 +1,17 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.util.Date;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.AsyncTask;
+import android.os.IBinder;
+import android.support.v7.app.AlertDialog;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -17,18 +26,9 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.AsyncTask;
-import android.os.IBinder;
-import android.support.v7.app.AlertDialog;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.widget.Toast;
+import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
+import java.util.Date;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity
         implements AuthCheckTask.AuthCheckTaskListener {
@@ -198,7 +198,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity
             if (getSupportActionBar() != null) {
                 context = getSupportActionBar().getThemedContext();
             }
-            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(getString(R.string.sending_exception_title));
             builder.setMessage(getString(R.string.sending_exception_message));
             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

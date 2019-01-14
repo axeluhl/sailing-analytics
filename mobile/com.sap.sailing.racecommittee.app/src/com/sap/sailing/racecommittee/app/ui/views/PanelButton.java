@@ -1,9 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.utils.TouchEventListener;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,6 +18,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.utils.TouchEventListener;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class PanelButton extends FrameLayout implements DialogInterface.OnClickListener {
 
@@ -321,7 +321,7 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
 
     protected void showChangeDialog(DialogInterface.OnClickListener positiveButton,
             DialogInterface.OnClickListener negativeButton) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getContext().getString(R.string.change_title));
         builder.setMessage(getContext().getString(R.string.change_message));
         builder.setPositiveButton(getContext().getString(R.string.change_proceed), positiveButton);

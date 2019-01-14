@@ -1,17 +1,9 @@
 package com.sap.sailing.android.tracking.app.utils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.security.NoSuchAlgorithmException;
-import java.util.Set;
-import java.util.UUID;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.support.v7.app.AlertDialog;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -46,10 +38,18 @@ import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer
 import com.sap.sse.common.Util;
 import com.sap.sse.shared.media.ImageDescriptor;
 
-import android.content.DialogInterface;
-import android.net.Uri;
-import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
+import java.util.Set;
+import java.util.UUID;
 
 public class CheckinManager {
 
@@ -397,7 +397,7 @@ public class CheckinManager {
      */
     private void displayAPIErrorRecommendRetry() {
         setCheckinData(null);
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage(activity.getString(R.string.notify_user_api_call_failed));
         builder.setCancelable(true);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

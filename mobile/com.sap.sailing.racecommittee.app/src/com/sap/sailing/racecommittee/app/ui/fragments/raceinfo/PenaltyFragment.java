@@ -1,13 +1,31 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.io.Serializable;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -49,33 +67,14 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.view.ContextThemeWrapper;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
+import java.io.Serializable;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PenaltyFragment extends BaseFragment
         implements PopupMenu.OnMenuItemClickListener, ItemListener, SearchView.SearchTextWatcher {
@@ -183,8 +182,7 @@ public class PenaltyFragment extends BaseFragment
             penaltyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(
-                            new ContextThemeWrapper(getActivity(), R.style.AppTheme_AlertDialog));
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                     final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
                     builder.setTitle(R.string.select_penalty_reason);
                     builder.setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
@@ -594,7 +592,7 @@ public class PenaltyFragment extends BaseFragment
         mAdapter.notifyDataSetChanged();
         setPublishButton();
         if (changedCompetitor.size() > 0) { // show message to user
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(R.string.refresh_title);
             StringBuilder string = new StringBuilder(1024);
             for (String competitor : changedCompetitor.values()) {
@@ -683,7 +681,7 @@ public class PenaltyFragment extends BaseFragment
                 competitor.getCompetitorId(), competitor.getCompetitorDisplayName(), competitor.getOneBasedRank(),
                 competitor.getMaxPointsReason(), competitor.getScore(), competitor.getFinishingTime(),
                 competitor.getComment(), competitor.getMergeState());
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(item.getCompetitorDisplayName());
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item,
                 mCompetitorResults.getFirstRankZeroPosition() +

@@ -1,17 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
-import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
-import com.sap.sailing.android.shared.ui.views.EditSetPreference;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.BuildConfig;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.utils.QRHelper;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -23,6 +11,18 @@ import android.support.v7.preference.Preference.OnPreferenceClickListener;
 import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceScreen;
 import android.widget.Toast;
+
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
+import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
+import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
+import com.sap.sailing.android.shared.ui.views.EditSetPreference;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.BuildConfig;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
@@ -65,8 +65,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
                         AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
                         if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),
-                                    R.style.AppTheme_AlertDialog);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                             builder.setTitle(getString(R.string.non_public_changed_title));
                             builder.setMessage(getString(R.string.app_refresh_message));
                             builder.setPositiveButton(android.R.string.ok, null);
@@ -126,7 +125,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
                 if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                     builder.setTitle(getString(R.string.url_refresh_title));
                     builder.setMessage(getString(R.string.app_refresh_message));
                     builder.setPositiveButton(android.R.string.ok, null);

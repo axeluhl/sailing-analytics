@@ -1,9 +1,18 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -34,19 +43,10 @@ import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.content.DialogInterface;
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class CourseFragmentMarks extends CourseFragment
         implements CourseMarkAdapter.MarkClick, HolderAwareOnDragListener {
@@ -90,7 +90,7 @@ public class CourseFragmentMarks extends CourseFragment
             mReset.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle(mReset.getText());
                     if (mReset.getTag() != null) {
                         builder.setMessage(getString(R.string.reset_message_1));
@@ -387,7 +387,7 @@ public class CourseFragmentMarks extends CourseFragment
     }
 
     private void createPassingInstructionDialog(final CourseListDataElementWithIdImpl courseElement) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         final PassingInstruction[] passingInstructionsRelevantForUserEntry = PassingInstruction.relevantValues();
         final CharSequence[] i18NPassingInstructions = getI18NPassingInstructions(
                 passingInstructionsRelevantForUserEntry);
@@ -475,7 +475,7 @@ public class CourseFragmentMarks extends CourseFragment
     }
 
     private void createUsePreviousCourseDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(getString(R.string.use_previous_course_dialog_title));
         builder.setMessage(R.string.use_previous_course_dialog_message);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {

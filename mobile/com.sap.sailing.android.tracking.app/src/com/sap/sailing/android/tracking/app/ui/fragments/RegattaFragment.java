@@ -1,22 +1,5 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.LocationHelper;
-import com.sap.sailing.android.tracking.app.BuildConfig;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
-import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -39,6 +22,23 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.LocationHelper;
+import com.sap.sailing.android.tracking.app.BuildConfig;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
+import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -212,7 +212,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
      * Ask user if he wants to take a new picture or select an existing one.
      */
     public void showChooseExistingPictureOrTakeNewPhotoAlert() {
-        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.add_photo_select)
                 .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
                 .setPositiveButton(R.string.existing_image, new DialogInterface.OnClickListener() {

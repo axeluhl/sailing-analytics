@@ -1,11 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
@@ -21,6 +15,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ImageView;
+
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
 
@@ -202,7 +202,7 @@ public abstract class BasePanelFragment extends RaceFragment {
 
     protected void showChangeDialog(DialogInterface.OnClickListener positiveButton,
             DialogInterface.OnClickListener negativeButton) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(getString(R.string.change_title));
         builder.setMessage(getString(R.string.change_message));
         builder.setPositiveButton(getString(R.string.change_proceed), positiveButton);

@@ -1,9 +1,12 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -13,13 +16,10 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.support.v7.app.AlertDialog;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class AutoUpdater {
 
@@ -68,7 +68,7 @@ public class AutoUpdater {
     }
 
     protected void showUpdatedNotification() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
         OnClickListener okListener = new OnClickListener() {
             @Override

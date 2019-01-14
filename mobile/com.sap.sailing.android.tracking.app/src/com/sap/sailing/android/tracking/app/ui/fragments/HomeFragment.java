@@ -1,11 +1,27 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Date;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.annotation.SuppressLint;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ClickableSpan;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
@@ -40,29 +56,12 @@ import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
 
-import android.annotation.SuppressLint;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.ClickableSpan;
-import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Date;
 
 public class HomeFragment extends AbstractHomeFragment implements LoaderCallbacks<Cursor> {
 
@@ -239,7 +238,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}",
                     checkinData.competitorSailId.isEmpty() ? checkinData.competitorName : checkinData.competitorSailId);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage(message1 + "\n\n" + message2);
             builder.setCancelable(true);
             builder.setPositiveButton(getString(R.string.confirm_data_is_correct),
@@ -349,8 +348,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                 .getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
         final int type = cursor.getInt(cursor.getColumnIndex(AnalyticsContract.Checkin.CHECKIN_TYPE));
         DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
-        AlertDialog.Builder builder = new AlertDialog.Builder(
-                new ContextThemeWrapper(getActivity(), R.style.AppTheme_AlertDialog));
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setMessage(getString(R.string.confirm_delete_checkin));
         builder.setCancelable(true);
         builder.setNegativeButton(getString(R.string.no), null);

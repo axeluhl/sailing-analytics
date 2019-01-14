@@ -1,6 +1,15 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import org.json.JSONObject;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
@@ -17,16 +26,7 @@ import com.sap.sailing.android.tracking.app.valueobjects.BoatInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
 
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import org.json.JSONObject;
 
 public class BuoyActivity extends AbstractBaseActivity {
 
@@ -129,7 +129,7 @@ public class BuoyActivity extends AbstractBaseActivity {
     }
 
     private void displayCheckoutConfirmationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.warning);
         builder.setMessage(R.string.checkout_warning_message);
         builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {

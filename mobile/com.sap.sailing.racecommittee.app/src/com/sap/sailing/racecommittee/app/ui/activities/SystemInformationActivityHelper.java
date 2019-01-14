@@ -1,12 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.util.Date;
-
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.EulaHelper;
-import com.sap.sailing.android.shared.util.LicenseHelper;
-import com.sap.sailing.racecommittee.app.R;
-
 import android.content.pm.PackageInfo;
 import android.text.format.DateFormat;
 import android.view.View;
@@ -14,6 +7,14 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.LicenseHelper;
+import com.sap.sailing.racecommittee.app.R;
+
+import java.util.Date;
+
 import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.model.Notices;
 
@@ -134,7 +135,6 @@ public class SystemInformationActivityHelper {
         notices.addNotice(licenseHelper.getDialogNotice(activity));
         LicensesDialog.Builder builder = new LicensesDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.license_information));
-        builder.setThemeResourceId(R.style.AppTheme_AlertDialog);
         builder.setNotices(notices);
         builder.build().show();
     }

@@ -1,9 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.ListView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -28,20 +38,10 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.app.Activity;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.ListView;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 
 public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemClick {
 
@@ -216,7 +216,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
     private void abortRunningRaces(final TimePoint now, final Flags flag) {
         final RacingActivity activity = (RacingActivity) getActivity();
         final LinkedHashMap<String, ManagedRace> races = activity.getRunningRaces();
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         View layout = LayoutInflater.from(builder.getContext()).inflate(R.layout.race_november_dialog, null);
         RecyclerView recyclerView = (RecyclerView) layout.findViewById(R.id.abort_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));

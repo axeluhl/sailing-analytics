@@ -1,26 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
-import com.sap.sailing.racecommittee.app.ui.activities.PasswordActivity;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.CourseDesignerPreferenceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaSpecificPreferenceFragment;
-import com.sap.sailing.racecommittee.app.ui.views.decoration.PreferenceMarginItemDecoration;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,6 +21,27 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
+import com.sap.sailing.racecommittee.app.ui.activities.PasswordActivity;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.CourseDesignerPreferenceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaSpecificPreferenceFragment;
+import com.sap.sailing.racecommittee.app.ui.views.decoration.PreferenceMarginItemDecoration;
+
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainPreferenceFragment extends LoggableFragment {
 
@@ -116,7 +116,7 @@ public class MainPreferenceFragment extends LoggableFragment {
             items.add(new PreferenceItem(getString(R.string.logout), R.drawable.ic_logout_yellow_24dp, new Runnable() {
                 @Override
                 public void run() {
-                    new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
+                    new AlertDialog.Builder(requireContext())
                             .setTitle(R.string.logout_dialog_title)
                             .setMessage(getString(R.string.logout_dialog_message))
                             .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

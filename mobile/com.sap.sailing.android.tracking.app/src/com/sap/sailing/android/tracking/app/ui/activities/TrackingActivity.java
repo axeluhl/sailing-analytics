@@ -1,5 +1,26 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.Button;
+
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
@@ -24,27 +45,6 @@ import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.viewpagerindicator.CirclePageIndicator;
-
-import android.Manifest;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.widget.Button;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
 
@@ -415,7 +415,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     public void showStopTrackingConfirmationDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.please_confirm).setMessage(R.string.do_you_really_want_to_stop_tracking)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 

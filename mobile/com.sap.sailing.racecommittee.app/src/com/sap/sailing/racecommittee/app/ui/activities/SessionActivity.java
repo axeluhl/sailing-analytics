@@ -1,13 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.R;
-
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.R;
 
 public abstract class SessionActivity extends BaseActivity {
 
@@ -41,7 +41,7 @@ public abstract class SessionActivity extends BaseActivity {
 
     public boolean logoutSession() {
         ExLog.i(this, TAG, String.format("Logging out from activity %s", this.getClass().getSimpleName()));
-        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.change_dialog_title)).setMessage(getString(R.string.change_dialog_message))
                 .setPositiveButton(android.R.string.ok, new OnClickListener() {
                     @Override
@@ -55,7 +55,7 @@ public abstract class SessionActivity extends BaseActivity {
 
     public void forceLogout() {
         ExLog.w(this, TAG, String.format("Forcing Logout from activity %s", this.getClass().getSimpleName()));
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(this.getString(R.string.data_reload_title));
         builder.setMessage(this.getString(R.string.data_reload_message));
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

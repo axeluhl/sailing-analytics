@@ -1,19 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
-import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
-import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
-import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
-import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
-import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
-import com.sap.sailing.android.buoy.positioning.app.util.MarkerUtils;
-import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
-import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -27,6 +13,20 @@ import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
+import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
+import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
+import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
+import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
+import com.sap.sailing.android.buoy.positioning.app.util.MarkerUtils;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
+import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 
 public class RegattaActivity extends AbstractRegattaActivity<CheckinData> {
 
@@ -164,7 +164,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData> {
     }
 
     private void displayCheckoutConfirmationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.warning);
         builder.setMessage(R.string.checkout_warning_message);
         builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {

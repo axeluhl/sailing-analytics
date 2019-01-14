@@ -36,9 +36,7 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyDH-Dwy5yFlyBa2-VUgiZ3qGGUO8M_0MPY" />
 
-        <activity
-            android:name=".ui.activities.LoginActivity"
-            android:windowSoftInputMode="adjustPan">
+        <activity android:name=".ui.activities.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -61,13 +59,10 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.activities.RacingActivity"
-            android:windowSoftInputMode="adjustPan" />
+        <activity android:name=".ui.activities.RacingActivity" />
         <activity android:name=".ui.activities.PasswordActivity" />
         <activity
             android:name=".ui.activities.PreferenceActivity"
-            android:windowSoftInputMode="adjustPan"
             android:theme="@style/PreferenceTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />

@@ -1,9 +1,25 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.util.SparseBooleanArray;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -27,27 +43,10 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.util.SparseBooleanArray;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.TimePicker;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class ProtestTimeDialogFragment extends AttachedDialogFragment implements View.OnClickListener {
 
@@ -463,8 +462,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
             final EditText duration = (EditText) layout.findViewById(R.id.protest_duration);
             duration.setText(String.valueOf(mDuration));
             duration.setSelection(duration.length());
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextWrapper(v.getContext()),
-                    R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(v.getContext().getString(R.string.protest_duration_dialog_title));
             builder.setView(layout);
             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

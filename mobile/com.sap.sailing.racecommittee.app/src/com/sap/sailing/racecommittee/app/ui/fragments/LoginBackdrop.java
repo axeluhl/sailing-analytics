@@ -1,32 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.sap.sailing.android.shared.data.LoginData;
-import com.sap.sailing.android.shared.data.http.UnauthorizedException;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
-import com.sap.sailing.android.shared.util.AuthCheckTask;
-import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.android.shared.util.LoginTask;
-import com.sap.sailing.android.shared.util.LoginTask.LoginTaskListener;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.BackPressListener;
-import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
-import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
-import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
-import com.sap.sailing.racecommittee.app.utils.QRHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -57,6 +30,33 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
+import com.sap.sailing.android.shared.data.LoginData;
+import com.sap.sailing.android.shared.data.http.UnauthorizedException;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
+import com.sap.sailing.android.shared.util.AuthCheckTask;
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.LoginTask;
+import com.sap.sailing.android.shared.util.LoginTask.LoginTaskListener;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.BackPressListener;
+import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 public class LoginBackdrop extends Fragment implements BackPressListener {
 
@@ -269,7 +269,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                     final EditText device_id = (EditText) view.findViewById(R.id.device_id);
                     device_id.setText(pref.getDeviceIdentifier(null));
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), R.style.AppTheme_AlertDialog);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                     builder.setView(view);
                     builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
@@ -387,7 +387,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                             .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
                 } else if (exception instanceof IOException && !(exception instanceof FileNotFoundException)) { // connection
                                                                                                                 // error
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                     builder.setTitle(R.string.hello_call_error_title);
                     builder.setMessage(R.string.hello_call_error_message);
                     builder.setPositiveButton(R.string.hello_call_error_positive,
@@ -402,7 +402,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    getActivity().finish();
+                                    requireActivity().finish();
                                 }
                             });
                     builder.setNeutralButton(R.string.hello_call_error_neutral, new DialogInterface.OnClickListener() {

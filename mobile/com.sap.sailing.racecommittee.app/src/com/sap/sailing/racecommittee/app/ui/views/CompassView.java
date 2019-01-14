@@ -1,9 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
-import java.util.Locale;
-
-import com.sap.sailing.racecommittee.app.R;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,6 +18,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.sap.sailing.racecommittee.app.R;
+
+import java.util.Locale;
 
 public class CompassView extends RelativeLayout {
 
@@ -120,7 +120,7 @@ public class CompassView extends RelativeLayout {
     }
 
     private void generateAndShowAlert() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getContext().getString(R.string.error_wrong_degree_value_title));
         builder.setMessage(getContext().getString(R.string.error_wrong_degree_value_message));
         builder.setPositiveButton(android.R.string.ok, null);

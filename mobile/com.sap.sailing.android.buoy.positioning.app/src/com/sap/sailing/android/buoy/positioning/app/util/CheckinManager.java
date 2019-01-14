@@ -1,19 +1,11 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.simple.parser.ParseException;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
@@ -39,12 +31,20 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSeri
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.net.Uri;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.widget.Toast;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.parser.ParseException;
+
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class CheckinManager {
     private final static String TAG = CheckinManager.class.getName();
@@ -300,7 +300,7 @@ public class CheckinManager {
      * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
      */
     private void displayAPIErrorRecommendRetry() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setMessage(mContext.getString(R.string.notify_user_api_call_failed));
         builder.setCancelable(true);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

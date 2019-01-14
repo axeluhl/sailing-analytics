@@ -1,12 +1,5 @@
 package com.sap.sailing.android.shared.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import com.sap.sailing.android.shared.R;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.support.annotation.StyleRes;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -24,6 +16,13 @@ import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
+
+import com.sap.sailing.android.shared.R;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class EulaHelper {
 
@@ -48,23 +47,14 @@ public class EulaHelper {
 
     public void showEulaDialogIfNotAccepted(OnEulaAcceptedListener acceptedHandler) {
         if (!this.isEulaAccepted()) {
-            showEulaDialog(R.style.AppTheme_AlertDialog, acceptedHandler);
+            showEulaDialog(acceptedHandler);
             return;
         }
         acceptedHandler.eulaAccepted();
     }
 
-    public void showEulaDialog(@StyleRes int theme, @Nullable final OnEulaAcceptedListener acceptedHandler) {
-        AlertDialog.Builder builder;
-        switch (theme) {
-        case NO_THEME:
-            builder = new AlertDialog.Builder(mContext);
-            break;
-
-        default:
-            builder = new AlertDialog.Builder(mContext, theme);
-        }
-
+    public void showEulaDialog(@Nullable final OnEulaAcceptedListener acceptedHandler) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle(R.string.eula_title);
         builder.setMessage(getSpannableMessage(builder.getContext().getTheme()));
         builder.setCancelable(false);

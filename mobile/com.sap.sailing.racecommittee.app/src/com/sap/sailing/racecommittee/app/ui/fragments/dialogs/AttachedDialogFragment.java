@@ -1,13 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.R;
-
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+
+import com.sap.sailing.android.shared.logging.ExLog;
 
 public abstract class AttachedDialogFragment extends LoggableDialogFragment {
     private final static String TAG = AttachedDialogFragment.class.getName();
@@ -20,9 +20,10 @@ public abstract class AttachedDialogFragment extends LoggableDialogFragment {
 
     protected abstract DialogListenerHost getListenerHost();
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return createDialog(new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
+        return createDialog(new AlertDialog.Builder(requireContext())
                 .setNegativeButton(getNegativeButtonLabel(), new OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         onNegativeButton();
