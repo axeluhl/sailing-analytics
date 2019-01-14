@@ -1,14 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.NumberPicker;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
@@ -39,20 +44,15 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.util.NaturalComparator;
 
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.NumberPicker;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.TimePicker;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class StartTimeFragment extends BaseFragment
         implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
@@ -594,13 +594,7 @@ public class StartTimeFragment extends BaseFragment
             BitmapHelper.setBackground(mRelativeButton, null);
         }
 
-        int id;
-        if (AppConstants.LIGHT_THEME.equals(preferences.getTheme())) {
-            id = R.drawable.nav_drawer_tab_button_light;
-        } else {
-            id = R.drawable.nav_drawer_tab_button_dark;
-        }
-        Drawable drawable = ContextCompat.getDrawable(getActivity(), id);
+        Drawable drawable = ContextCompat.getDrawable(getActivity(), R.drawable.nav_drawer_tab_button);
         switch (tab) {
         case RELATIVE:
             if (mRelative != null) {

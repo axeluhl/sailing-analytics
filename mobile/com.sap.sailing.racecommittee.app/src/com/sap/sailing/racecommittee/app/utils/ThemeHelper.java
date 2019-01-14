@@ -1,15 +1,5 @@
 package com.sap.sailing.racecommittee.app.utils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Paint;
@@ -25,18 +15,15 @@ import android.widget.NumberPicker;
 import android.widget.PopupMenu;
 import android.widget.TimePicker;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHelper;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 public class ThemeHelper {
 
     private static final String TAG = ThemeHelper.class.getName();
-
-    public static void setTheme(Activity activity) {
-        String theme = AppPreferences.on(activity).getTheme();
-        if (AppConstants.LIGHT_THEME.equals(theme)) {
-            activity.setTheme(R.style.AppTheme_Light);
-        } else {
-            activity.setTheme(R.style.AppTheme_Dark);
-        }
-    }
 
     public static void positioningPopupMenu(Context context, PopupMenu popupMenu, View anchor) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {

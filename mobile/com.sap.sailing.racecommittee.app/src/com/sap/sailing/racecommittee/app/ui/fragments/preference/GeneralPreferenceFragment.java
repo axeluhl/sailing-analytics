@@ -45,20 +45,6 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
         bindPreferenceSummaryToSet(findPreference(R.string.preference_course_areas_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_mail_key));
-        bindPreferenceToListEntry(findPreference(R.string.preference_theme_key),
-                getString(R.string.preference_theme_default));
-        addOnPreferenceChangeListener(findPreference(R.string.preference_theme_key), new OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
-                builder.setTitle(getString(R.string.theme_changed_title));
-                builder.setMessage(R.string.theme_changed_message);
-                builder.setPositiveButton(getString(android.R.string.ok), null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
-                return true;
-            }
-        });
         addOnPreferenceChangeListener(findPreference(R.string.preference_non_public_events_key),
                 new OnPreferenceChangeListener() {
                     @Override

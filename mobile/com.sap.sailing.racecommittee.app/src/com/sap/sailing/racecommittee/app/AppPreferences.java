@@ -1,9 +1,14 @@
 package com.sap.sailing.racecommittee.app;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.preference.PreferenceManager;
+import android.provider.Settings.Secure;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -19,15 +24,10 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.preference.PreferenceManager;
-import android.provider.Settings.Secure;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
@@ -542,11 +542,6 @@ public class AppPreferences {
         helper.getEditor()
                 .putBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key), editable)
                 .commit();
-    }
-
-    public String getTheme() {
-        return helper.getString(context.getString(R.string.preference_theme_key),
-                context.getResources().getString(R.string.preference_theme_default));
     }
 
     public void setAccessToken(String accessToken) {

@@ -42,7 +42,6 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -175,13 +174,7 @@ public class RaceListFragment extends LoggableFragment
             BitmapHelper.setBackground(mCurrentRacesButton, null);
             BitmapHelper.setBackground(mAllRacesButton, null);
 
-            int id;
-            if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(getActivity()).getTheme())) {
-                id = R.drawable.nav_drawer_tab_button_light;
-            } else {
-                id = R.drawable.nav_drawer_tab_button_dark;
-            }
-            Drawable drawable = ContextCompat.getDrawable(getActivity(), id);
+            Drawable drawable = ContextCompat.getDrawable(getActivity(), R.drawable.nav_drawer_tab_button);
             switch (getFilterMode()) {
             case ALL:
                 mAllRacesButton.setTextColor(colorOrange);

@@ -348,7 +348,6 @@
     <string name="settings_category_developer">Entwickler Optionen</string>
     <string name="preference_offline_header">Offline Modus</string>
     <string name="preference_offline_summary">Deaktiviert die Verbindung zum Server und benutzt statische Daten</string>
-    <string name="preference_theme_header">Darstellungsmodus</string>
     <string name="gate_start_nationality">Nation</string>
     <string name="gate_start_number">Nr.</string>
     <string name="gate_start_set_pathfinder">Pathfinder setzen</string>
