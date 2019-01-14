@@ -633,7 +633,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 } else {
                     counter += 1;
                 }
-            } 
+            }
         }
         logger.info("Stored data progress in tracker "+getID()+" for race(s) "+getRace()+": "+progress);
         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);

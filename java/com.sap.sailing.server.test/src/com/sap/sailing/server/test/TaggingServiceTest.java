@@ -13,6 +13,8 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.support.SubjectThreadState;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -74,10 +76,12 @@ public class TaggingServiceTest {
     private static SecurityService securityService;
     private static TaggingService taggingService;
     private static Subject subject;
+    private static SubjectThreadState threadState;
 
     @BeforeClass
-    public static void setUpClass()
+    public synchronized static void setUpClass()
             throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException {
+        logger.info("current thread: "+Thread.currentThread());
         MongoDBService.INSTANCE.getDB().drop();
         // setup racing service and racelog
         racingService = new RacingEventServiceImpl();
@@ -107,12 +111,14 @@ public class TaggingServiceTest {
         securityService.createSimpleUser(username, email, password, fullName, company, null);
         subject = SecurityUtils.getSubject();
         subject.login(new UsernamePasswordToken(username, password));
+        threadState = new SubjectThreadState(subject);
         // setup tagging service
         taggingService = new TaggingServiceImpl(racingService);
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public synchronized static void tearDownClass() {
+        logger.info("current thread: "+Thread.currentThread());
         try {
             subject.logout();
             securityService.deleteUser(username);
@@ -124,28 +130,41 @@ public class TaggingServiceTest {
 
     @Before
     public void resetEnvironment() {
-        securityService.addPermissionForUser(username, editLeaderboardPermission);
-        securityService.unsetPreference(username,
-                serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
-        final RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
-        if (raceLog != null) {
-            for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
-                try {
-                    raceLog.revokeEvent(event.getAuthor(), event);
-                } catch (NotRevokableException e) {
-                    logger.warning(
-                            "Could not clean up test setup for TaggingServiceTest as public tag could not be removed!");
+        logger.info("current thread: "+Thread.currentThread());
+        synchronized (TaggingServiceTest.class) {
+            // setup the Shiro SubjectThreadState to ensure that the tagging service can check whether a subject is logged in
+            threadState.bind();
+            securityService.addPermissionForUser(username, editLeaderboardPermission);
+            securityService.unsetPreference(username,
+                    serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
+            final RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
+            if (raceLog != null) {
+                for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
+                    try {
+                        raceLog.revokeEvent(event.getAuthor(), event);
+                    } catch (NotRevokableException e) {
+                        logger.warning(
+                                "Could not clean up test setup for TaggingServiceTest as public tag could not be removed!");
+                    }
                 }
             }
-        }
-        try {
-            List<TagDTO> tags = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false);
-            logger.info("Tags after environment reset: " + tags.toString());
-        } catch (Exception e) {
-            logger.severe("Could not reset test environment");
+            try {
+                List<TagDTO> tags = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false);
+                logger.info("Tags after environment reset: " + tags.toString());
+            } catch (Exception e) {
+                logger.severe("Could not reset test environment");
+            }
         }
     }
 
+    @After
+    public void restoreEnvironment() {
+        logger.info("current thread: "+Thread.currentThread());
+        synchronized (TaggingServiceTest.class) {
+            threadState.restore();
+        }
+    }
+    
     @Test
     public void testAddTag() {
         logger.entering(getClass().getName(), "testAddTag");

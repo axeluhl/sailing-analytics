@@ -279,6 +279,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
     cp -v $PROJECT_HOME/java/target/configuration/mail.properties configuration/
+    cp -v $PROJECT_HOME/java/target/configuration/debug.properties configuration/
     cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
     cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
