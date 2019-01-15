@@ -1,6 +1,7 @@
 package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -14,6 +15,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.SubjectThreadState;
+import org.apache.shiro.util.ThreadContext;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -109,6 +111,7 @@ public class TaggingServiceTest {
         }
         // create & login user
         securityService.createSimpleUser(username, email, password, fullName, company, null);
+        ThreadContext.unbindSubject(); // ensure that a new subject is created that knows the current security manager
         subject = SecurityUtils.getSubject();
         subject.login(new UsernamePasswordToken(username, password));
         threadState = new SubjectThreadState(subject);
@@ -134,6 +137,9 @@ public class TaggingServiceTest {
         synchronized (TaggingServiceTest.class) {
             // setup the Shiro SubjectThreadState to ensure that the tagging service can check whether a subject is logged in
             threadState.bind();
+            assertSame(securityService.getSecurityManager(), ThreadContext.getSecurityManager());
+            assertSame(subject, SecurityUtils.getSubject());
+            assertEquals(username, subject.getPrincipal());
             securityService.addPermissionForUser(username, editLeaderboardPermission);
             securityService.unsetPreference(username,
                     serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));

@@ -15,6 +15,7 @@ import javax.mail.MessagingException;
 import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.domain.abstractlog.impl.LastEventOfTypeFinder;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
@@ -212,7 +213,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
                     int passId = toRaceLog.getCurrentPassId();
                     RaceLogEvent newCourseEvent = new RaceLogCourseDesignChangedEventImpl(now,
-                            service.getServerAuthor(), passId, newCourse, CourseDesignerMode.ADMIN_CONSOLE);
+                         // TODO bug 4853: introduce priority as a parameter
+                            new LogEventAuthorImpl(service.getServerAuthor().getName(), /* priority */ 1),
+                            passId, newCourse, CourseDesignerMode.ADMIN_CONSOLE);
                     toRaceLog.add(newCourseEvent);
                 }
 
