@@ -7,12 +7,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
-import android.support.v4.app.ActivityCompat;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.text.InputFilter;
@@ -26,11 +28,18 @@ import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -76,7 +85,8 @@ import java.util.Locale;
 import java.util.Set;
 
 public class WindFragment extends BaseFragment
-        implements CompassDirectionListener, OnRaceUpdatedListener, OnSuccessListener<Location> {
+        implements CompassDirectionListener, OnRaceUpdatedListener,
+        OnSuccessListener<LocationSettingsResponse>, OnFailureListener {
 
     private final static String TAG = WindFragment.class.getName();
     private final static long FIVE_SEC = 5000;
@@ -84,6 +94,7 @@ public class WindFragment extends BaseFragment
     private final static int MIN_KTS = 3;
     private final static int MAX_KTS = 30;
     private final static int REQUEST_PERMISSIONS_REQUEST_CODE = 42;
+    private final static int REQUEST_CHECK_SETTINGS = 43;
 
     private View mHeaderLayout;
     private View mContentLayout;
@@ -105,7 +116,9 @@ public class WindFragment extends BaseFragment
     private ImageView mEditSpeed;
 
     private FusedLocationProviderClient apiClient;
+    private SettingsClient settingsClient;
     private LocationRequest locationRequest;
+    private LocationSettingsRequest locationSettingsRequest;
     private Location mCurrentLocation;
     private LocationCallback mLocationCallback;
 
@@ -142,11 +155,15 @@ public class WindFragment extends BaseFragment
         super.onCreate(savedInstanceState);
 
         // initialize the googleApiClient for location requests
-        apiClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        apiClient = LocationServices.getFusedLocationProviderClient(requireContext());
+        settingsClient = LocationServices.getSettingsClient(requireContext());
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(FIVE_SEC);
         locationRequest.setFastestInterval(EVERY_POSITION_CHANGE);
+        locationSettingsRequest = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest)
+                .build();
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -154,7 +171,6 @@ public class WindFragment extends BaseFragment
                 refreshUI(false);
             }
         };
-        resumeApiClient();
     }
 
     @Override
@@ -226,21 +242,14 @@ public class WindFragment extends BaseFragment
         if (mCompassView != null) {
             mCompassView.setDirectionListener(this);
         }
-
-        if (!hasPermissions()) {
-            requestPermissions(new String[] { Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION }, REQUEST_PERMISSIONS_REQUEST_CODE);
-            return;
-        }
-        resumeApiClient();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         // disconnect googleApiClient and unregister position poller
-        pauseApiClient();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+        stopLocationUpdates();
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mReceiver);
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
@@ -257,8 +266,8 @@ public class WindFragment extends BaseFragment
         Collections.sort(mManagedRaces, new CurrentRaceComparator());
         mSelectedRaces = new ArrayList<>();
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-        // connect googleApiClient and register position poller
-        resumeApiClient();
+        // Check the location settings
+        checkLocationSettings();
         // register receiver to be notified if race is tracked
         IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
@@ -323,20 +332,32 @@ public class WindFragment extends BaseFragment
     }
 
     /**
-     * starts the googleApiClient to get location updates
+     * Determines if location settings are adequate.
+     * If they are not, begins the process of presenting a location settings dialog to the user.
+     */
+    private void checkLocationSettings() {
+        if (hasPermissions()) {
+            settingsClient.checkLocationSettings(locationSettingsRequest)
+                    .addOnSuccessListener(this)
+                    .addOnFailureListener(this);
+        } else {
+            requestPermissions();
+        }
+    }
+
+    /**
+     * Requests location updates from the FusedLocationApi.
      */
     @SuppressWarnings("MissingPermission")
-    private void resumeApiClient() {
-        if (!hasPermissions()) {
-            requestPermissions(new String[] { Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION }, REQUEST_PERMISSIONS_REQUEST_CODE);
-            return;
-        }
+    private void startLocationUpdates() {
         apiClient.requestLocationUpdates(locationRequest, mLocationCallback, null);
         apiClient.getLastLocation();
     }
 
-    private void pauseApiClient() {
+    /**
+     * Removes location updates from the FusedLocationApi.
+     */
+    private void stopLocationUpdates() {
         apiClient.removeLocationUpdates(mLocationCallback);
     }
 
@@ -468,10 +489,19 @@ public class WindFragment extends BaseFragment
     }
 
     @Override
-    public void onSuccess(Location location) {
-        if (location != null) {
-            mCurrentLocation = location;
-            refreshUI(false);
+    public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+        startLocationUpdates();
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception e) {
+        int statusCode = ((ApiException) e).getStatusCode();
+        if (statusCode == CommonStatusCodes.RESOLUTION_REQUIRED) {
+            try {
+                ResolvableApiException resolvable = (ResolvableApiException) e;
+                resolvable.startResolutionForResult(requireActivity(), REQUEST_CHECK_SETTINGS);
+            } catch (IntentSender.SendIntentException ignored) {
+            }
         }
     }
 
@@ -500,11 +530,13 @@ public class WindFragment extends BaseFragment
     }
 
     private boolean hasPermissions() {
-        boolean fine = ActivityCompat.checkSelfPermission(getActivity(),
+        return ContextCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        boolean coarse = ActivityCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        return fine && coarse;
+    }
+
+    private void requestPermissions() {
+        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_PERMISSIONS_REQUEST_CODE);
     }
 
     /**
