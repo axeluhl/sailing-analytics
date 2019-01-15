@@ -48,3 +48,4 @@ s|<name>[^<]*</name>|<name>bug'$BUG_ID'</name>|
 }' "$CONFIGFILE"
 curl -s -XPOST "$HUDSON_BASE_URL/createItem?name=bug$BUG_ID" -u "$USERNAME:$PASSWORD" --data-binary "@$CONFIGFILE" -H "Content-Type:text/xml"
 rm "$CONFIGFILE"
+echo "Find your new, enabled Hudson job at $HUDSON_BASE_URL/job/bug$BUG_ID/"
