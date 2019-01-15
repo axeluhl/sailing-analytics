@@ -20,8 +20,8 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
         ManeuverBasedWindEstimationComponentImpl<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> {
 
     private static final int MODEL_CACHE_KEEP_ALIVE_MILLIS = 3600000;
-    private static final HmmTransitionProbabilitiesCalculator transitionProbabilitiesCalculatorType = HmmTransitionProbabilitiesCalculator.INTERSECTED;
-    private static final boolean propagateIntersectedWindRangeOfHeadupAndBearAway = false;
+    private static final HmmTransitionProbabilitiesCalculator transitionProbabilitiesCalculatorType = HmmTransitionProbabilitiesCalculator.GAUSSIAN_REGRESSOR;
+    private static final boolean propagateIntersectedWindRangeOfHeadupAndBearAway = true;
 
     public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
             ModelStore modelStore, PolarDataService polarService,
@@ -49,7 +49,7 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
     }
 
     public enum ManeuverClassificationsAggregatorImplementation {
-        HMM, ADVANCED_HMM, CLUSTERING, MEAN_OUTLIER, NEIGHBOR_OUTLIER;
+        HMM, MST_HMM, CLUSTERING, MEAN_OUTLIER, NEIGHBOR_OUTLIER;
 
         ManeuverClassificationsAggregator createNewInstance(PolarDataService polarService, ModelStore modelStore,
                 long modelCacheKeepAliveMillis) {
@@ -59,8 +59,8 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
             case HMM:
                 return factory.hmm(transitionProbabilitiesCalculatorType,
                         propagateIntersectedWindRangeOfHeadupAndBearAway);
-            case ADVANCED_HMM:
-                return factory.advancedHmm(propagateIntersectedWindRangeOfHeadupAndBearAway);
+            case MST_HMM:
+                return factory.mstHmm(propagateIntersectedWindRangeOfHeadupAndBearAway);
             case CLUSTERING:
                 return factory.clustering();
             case MEAN_OUTLIER:

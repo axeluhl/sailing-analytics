@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.advancedhmm;
+package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
-import com.sap.sailing.windestimation.aggregator.advancedhmm.AdvancedManeuverGraphGenerator.AdvancedManeuverGraphComponents;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
+import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
@@ -17,11 +17,11 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProb
  * @author Vladislav Chumak (D069712)
  *
  */
-public class AdvancedManeuverGraph implements ManeuverClassificationsAggregator {
+public class MstManeuverGraph implements ManeuverClassificationsAggregator {
 
-    private final AdvancedBestPathsCalculator bestPathsCalculator;
+    private final MstBestPathsCalculator bestPathsCalculator;
 
-    public AdvancedManeuverGraph(AdvancedBestPathsCalculator bestPathsCalculator) {
+    public MstManeuverGraph(MstBestPathsCalculator bestPathsCalculator) {
         this.bestPathsCalculator = bestPathsCalculator;
     }
 
@@ -36,12 +36,12 @@ public class AdvancedManeuverGraph implements ManeuverClassificationsAggregator 
         if (sortedManeuverClassifications.isEmpty()) {
             return Collections.emptyList();
         }
-        AdvancedManeuverGraphGenerator graphGenerator = new AdvancedManeuverGraphGenerator(
+        MstManeuverGraphGenerator graphGenerator = new MstManeuverGraphGenerator(
                 bestPathsCalculator.getTransitionProbabilitiesCalculator());
         for (ManeuverWithProbabilisticTypeClassification maneuverClassification : sortedManeuverClassifications) {
             graphGenerator.addNode(maneuverClassification);
         }
-        AdvancedManeuverGraphComponents graphComponents = graphGenerator.parseGraph();
+        MstManeuverGraphComponents graphComponents = graphGenerator.parseGraph();
         List<ManeuverWithEstimatedType> maneuversWithEstimatedType = new ArrayList<>();
         List<GraphLevelInference> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
         for (GraphLevelInference inference : bestPath) {

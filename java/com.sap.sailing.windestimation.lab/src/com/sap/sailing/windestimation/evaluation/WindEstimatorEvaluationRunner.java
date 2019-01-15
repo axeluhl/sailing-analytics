@@ -15,10 +15,10 @@ import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class WindEstimatorEvaluationRunner {
 
-    private static final Integer MAX_RACES = 20;
+    private static final Integer MAX_RACES = null;
     private static final Integer FIXED_NUMBER_OF_MANEUVERS = 10;
     private static final boolean RANDOM_CLIPPING_OF_COMPETITOR_TRACKS = true;
-    private static final boolean EVALUATE_PER_COMPETITOR_TRACK = false;
+    private static final boolean EVALUATE_PER_COMPETITOR_TRACK = true;
     private static final boolean ENABLE_MARKS_INFORMATION = false;
     private static final boolean ENABLE_SCALED_SPEED = true;
     private static final boolean ENABLE_POLARS = true;

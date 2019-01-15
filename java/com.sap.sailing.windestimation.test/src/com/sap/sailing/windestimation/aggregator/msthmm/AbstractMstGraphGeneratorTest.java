@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.advancedhmm;
+package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,11 +7,12 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.windestimation.aggregator.advancedhmm.AbstractAdvancedGraphGenerator.NodeWithDistance;
-import com.sap.sailing.windestimation.aggregator.advancedhmm.AbstractAdvancedGraphGenerator.NodeWithNeighbors;
+import com.sap.sailing.windestimation.aggregator.msthmm.AbstractMstGraphGenerator;
+import com.sap.sailing.windestimation.aggregator.msthmm.AbstractMstGraphGenerator.NodeWithDistance;
+import com.sap.sailing.windestimation.aggregator.msthmm.AbstractMstGraphGenerator.NodeWithNeighbors;
 import com.sap.sse.common.Util.Pair;
 
-public class AbstractAdvancedGraphGeneratorTest {
+public class AbstractMstGraphGeneratorTest {
 
     private static final double DOUBLE_TOLERANCE = 0.0000001;
 
@@ -24,7 +25,7 @@ public class AbstractAdvancedGraphGeneratorTest {
 
     @Test
     public void testOrderedInsert() {
-        MockedAdvancedGraphGenerator generator = new MockedAdvancedGraphGenerator();
+        MockedMstGraphGenerator generator = new MockedMstGraphGenerator();
         generator.addNode(tuple(0, 0));
         generator.addNode(tuple(3, 3));
         generator.addNode(tuple(5, 5));
@@ -33,7 +34,7 @@ public class AbstractAdvancedGraphGeneratorTest {
 
     @Test
     public void testWith3ElementsMiddleInsertedLast() {
-        MockedAdvancedGraphGenerator generator = new MockedAdvancedGraphGenerator();
+        MockedMstGraphGenerator generator = new MockedMstGraphGenerator();
         generator.addNode(tuple(0, 0));
         generator.addNode(tuple(5, 5));
         generator.addNode(tuple(3, 3));
@@ -42,7 +43,7 @@ public class AbstractAdvancedGraphGeneratorTest {
 
     @Test
     public void testCircle() {
-        MockedAdvancedGraphGenerator generator = new MockedAdvancedGraphGenerator();
+        MockedMstGraphGenerator generator = new MockedMstGraphGenerator();
         generator.addNode(tuple(5, 0));
         generator.addNode(tuple(5, 10));
         generator.addNode(tuple(0, 5));
@@ -52,7 +53,7 @@ public class AbstractAdvancedGraphGeneratorTest {
 
     @Test
     public void testCircleWithMiddle() {
-        MockedAdvancedGraphGenerator generator = new MockedAdvancedGraphGenerator();
+        MockedMstGraphGenerator generator = new MockedMstGraphGenerator();
         generator.addNode(tuple(5, 0));
         generator.addNode(tuple(5, 10));
         generator.addNode(tuple(0, 5));
@@ -63,7 +64,7 @@ public class AbstractAdvancedGraphGeneratorTest {
 
     @Test
     public void testAdvancedStuff() {
-        MockedAdvancedGraphGenerator generator = new MockedAdvancedGraphGenerator();
+        MockedMstGraphGenerator generator = new MockedMstGraphGenerator();
         generator.addNode(tuple(0, 0)); // 1
         generator.addNode(tuple(10, 0)); // 2
         generator.addNode(tuple(20, 0)); // 3
@@ -76,7 +77,7 @@ public class AbstractAdvancedGraphGeneratorTest {
 
     @Test
     public void testAdvancedStuff2() {
-        MockedAdvancedGraphGenerator generator = new MockedAdvancedGraphGenerator();
+        MockedMstGraphGenerator generator = new MockedMstGraphGenerator();
         generator.addNode(tuple(5, 1)); // 1
         generator.addNode(tuple(4, 0)); // 2
         generator.addNode(tuple(12, 3)); // 3
@@ -92,7 +93,7 @@ public class AbstractAdvancedGraphGeneratorTest {
 
     @Test
     public void testCircleReverse() {
-        MockedAdvancedGraphGenerator generator = new MockedAdvancedGraphGenerator();
+        MockedMstGraphGenerator generator = new MockedMstGraphGenerator();
         generator.addNode(tuple(5, 0)); // 1
         generator.addNode(tuple(9, 3)); // 2
         generator.addNode(tuple(7, 6)); // 3
@@ -103,12 +104,12 @@ public class AbstractAdvancedGraphGeneratorTest {
         // 4 (1->6) + 3 (6->5) + 3 (5->4) + 4 (4->3) + 5 (3->2) = 19
     }
 
-    private void assertMstCorrect(MockedAdvancedGraphGenerator generator, double targetEdgesWeightSum) {
+    private void assertMstCorrect(MockedMstGraphGenerator generator, double targetEdgesWeightSum) {
         double calculatedMstWeightSum = getWeightSumOfEdges(generator);
         assertEquals(targetEdgesWeightSum, calculatedMstWeightSum, DOUBLE_TOLERANCE);
     }
 
-    private double getWeightSumOfEdges(MockedAdvancedGraphGenerator generator) {
+    private double getWeightSumOfEdges(MockedMstGraphGenerator generator) {
         List<NodeWithNeighbors<Tuple>> nodes = generator.getNodes();
         NodeWithNeighbors<Tuple> firstNode = nodes.get(0);
         return getWeightSumOfEdges(firstNode, null);
@@ -131,7 +132,7 @@ public class AbstractAdvancedGraphGeneratorTest {
         return new Tuple(a, b);
     }
 
-    private static class MockedAdvancedGraphGenerator extends AbstractAdvancedGraphGenerator<Tuple> {
+    private static class MockedMstGraphGenerator extends AbstractMstGraphGenerator<Tuple> {
 
         @Override
         protected double getDistanceBetweenObservations(Tuple o1, Tuple o2) {

@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.advancedhmm;
+package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,20 +7,20 @@ import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelBase;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNodeTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
-public class AdvancedGraphLevel extends GraphLevelBase {
+public class MstGraphLevel extends GraphLevelBase {
 
-    private final AdvancedGraphLevel parent;
-    private final List<AdvancedGraphLevel> children = new ArrayList<>();
+    private final MstGraphLevel parent;
+    private final List<MstGraphLevel> children = new ArrayList<>();
     private final double distanceToParent;
 
-    public AdvancedGraphLevel(ManeuverWithProbabilisticTypeClassification observation,
+    public MstGraphLevel(ManeuverWithProbabilisticTypeClassification observation,
             GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         super(observation, transitionProbabilitiesCalculator);
         parent = null;
         distanceToParent = 0;
     }
 
-    private AdvancedGraphLevel(AdvancedGraphLevel parent, double distanceToParent,
+    private MstGraphLevel(MstGraphLevel parent, double distanceToParent,
             ManeuverWithProbabilisticTypeClassification observation,
             GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         super(observation, transitionProbabilitiesCalculator);
@@ -28,15 +28,15 @@ public class AdvancedGraphLevel extends GraphLevelBase {
         this.distanceToParent = distanceToParent;
     }
 
-    public AdvancedGraphLevel addChild(double distanceToParent, ManeuverWithProbabilisticTypeClassification observation,
+    public MstGraphLevel addChild(double distanceToParent, ManeuverWithProbabilisticTypeClassification observation,
             GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
-        AdvancedGraphLevel child = new AdvancedGraphLevel(this, distanceToParent, observation,
+        MstGraphLevel child = new MstGraphLevel(this, distanceToParent, observation,
                 transitionProbabilitiesCalculator);
         children.add(child);
         return child;
     }
 
-    public AdvancedGraphLevel getParent() {
+    public MstGraphLevel getParent() {
         return parent;
     }
 
@@ -44,7 +44,7 @@ public class AdvancedGraphLevel extends GraphLevelBase {
         return distanceToParent;
     }
 
-    public List<AdvancedGraphLevel> getChildren() {
+    public List<MstGraphLevel> getChildren() {
         return children;
     }
 

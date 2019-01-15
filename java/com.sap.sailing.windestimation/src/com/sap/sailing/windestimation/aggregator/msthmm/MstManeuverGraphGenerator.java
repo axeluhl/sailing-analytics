@@ -1,17 +1,17 @@
-package com.sap.sailing.windestimation.aggregator.advancedhmm;
+package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
-public class AdvancedManeuverGraphGenerator
-        extends AbstractAdvancedGraphGenerator<ManeuverWithProbabilisticTypeClassification> {
+public class MstManeuverGraphGenerator
+        extends AbstractMstGraphGenerator<ManeuverWithProbabilisticTypeClassification> {
 
-    private final AdvancedGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
+    private final MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
 
-    public AdvancedManeuverGraphGenerator(
-            AdvancedGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+    public MstManeuverGraphGenerator(
+            MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         this.transitionProbabilitiesCalculator = transitionProbabilitiesCalculator;
     }
 
@@ -23,24 +23,24 @@ public class AdvancedManeuverGraphGenerator
         return compoundDistance;
     }
 
-    public AdvancedManeuverGraphComponents parseGraph() {
+    public MstManeuverGraphComponents parseGraph() {
         List<NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification>> nodes = getNodes();
         if (nodes.isEmpty()) {
             return null;
         }
-        List<AdvancedGraphLevel> leafs = new ArrayList<>();
+        List<MstGraphLevel> leafs = new ArrayList<>();
         NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> firstNode = nodes.get(0);
-        AdvancedGraphLevel firstGraphLevel = new AdvancedGraphLevel(firstNode.getObservation(),
+        MstGraphLevel firstGraphLevel = new MstGraphLevel(firstNode.getObservation(),
                 transitionProbabilitiesCalculator);
         parseGraphFromNodes(firstNode, firstGraphLevel, null, leafs);
-        AdvancedManeuverGraphComponents graphComponents = new AdvancedManeuverGraphComponents(firstGraphLevel, leafs);
+        MstManeuverGraphComponents graphComponents = new MstManeuverGraphComponents(firstGraphLevel, leafs);
         return graphComponents;
     }
 
     private void parseGraphFromNodes(NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> previousNode,
-            AdvancedGraphLevel previousGraphLevel,
+            MstGraphLevel previousGraphLevel,
             NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> parentOfPreviousNode,
-            List<AdvancedGraphLevel> leafs) {
+            List<MstGraphLevel> leafs) {
         List<NodeWithDistance<ManeuverWithProbabilisticTypeClassification>> childNodes = previousNode.getNeighbors();
         if (childNodes.size() == 1) {
             leafs.add(previousGraphLevel);
@@ -49,7 +49,7 @@ public class AdvancedManeuverGraphGenerator
                 NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> childNode = childNodeWithDistance
                         .getNodeWithNeighbors();
                 if (childNode != parentOfPreviousNode) {
-                    AdvancedGraphLevel newGraphLevel = previousGraphLevel.addChild(childNodeWithDistance.getDistance(),
+                    MstGraphLevel newGraphLevel = previousGraphLevel.addChild(childNodeWithDistance.getDistance(),
                             childNode.getObservation(), transitionProbabilitiesCalculator);
                     parseGraphFromNodes(childNode, newGraphLevel, previousNode, leafs);
                 }
@@ -57,20 +57,20 @@ public class AdvancedManeuverGraphGenerator
         }
     }
 
-    public static class AdvancedManeuverGraphComponents {
-        private final AdvancedGraphLevel root;
-        private final List<AdvancedGraphLevel> leafs;
+    public static class MstManeuverGraphComponents {
+        private final MstGraphLevel root;
+        private final List<MstGraphLevel> leafs;
 
-        public AdvancedManeuverGraphComponents(AdvancedGraphLevel root, List<AdvancedGraphLevel> leafs) {
+        public MstManeuverGraphComponents(MstGraphLevel root, List<MstGraphLevel> leafs) {
             this.root = root;
             this.leafs = leafs;
         }
 
-        public AdvancedGraphLevel getRoot() {
+        public MstGraphLevel getRoot() {
             return root;
         }
 
-        public List<AdvancedGraphLevel> getLeafs() {
+        public List<MstGraphLevel> getLeafs() {
             return leafs;
         }
     }

@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.advancedhmm;
+package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.sap.sse.common.Util.Triple;
 
-public abstract class AbstractAdvancedGraphGenerator<T> {
+public abstract class AbstractMstGraphGenerator<T> {
 
     private List<NodeWithNeighbors<T>> nodes = new ArrayList<>();
 

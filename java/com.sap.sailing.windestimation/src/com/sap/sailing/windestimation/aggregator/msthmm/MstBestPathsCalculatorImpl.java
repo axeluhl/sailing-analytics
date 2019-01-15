@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.advancedhmm;
+package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,24 +6,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.windestimation.aggregator.advancedhmm.AdvancedManeuverGraphGenerator.AdvancedManeuverGraphComponents;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
+import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
 import com.sap.sse.common.Util.Pair;
 
-public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalculator {
+public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
 
-    private final AdvancedGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
+    private final MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
 
-    public AdvancedBestPathsCalculatorImpl(
-            AdvancedGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+    public MstBestPathsCalculatorImpl(
+            MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         this.transitionProbabilitiesCalculator = transitionProbabilitiesCalculator;
     }
 
     @Override
-    public AdvancedGraphNodeTransitionProbabilitiesCalculator getTransitionProbabilitiesCalculator() {
+    public MstGraphNodeTransitionProbabilitiesCalculator getTransitionProbabilitiesCalculator() {
         return transitionProbabilitiesCalculator;
     }
 
@@ -47,18 +47,18 @@ public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalcula
      * currentNodeInfo.setBackwardProbability(backwardProbability); } nextLevel = currentLevel; } }
      */
     @Override
-    public List<GraphLevelInference> getBestNodes(AdvancedManeuverGraphComponents graphComponents) {
-        Map<AdvancedGraphLevel, AdvancedBestPathsPerLevel> bestPathsPerLevel = new HashMap<>();
-        for (AdvancedGraphLevel currentLevel : graphComponents.getLeafs()) {
-            AdvancedBestPathsPerLevel bestPathsUntilLevel = new AdvancedBestPathsPerLevel(currentLevel);
+    public List<GraphLevelInference> getBestNodes(MstManeuverGraphComponents graphComponents) {
+        Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel = new HashMap<>();
+        for (MstGraphLevel currentLevel : graphComponents.getLeafs()) {
+            MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
             for (GraphNode currentNode : currentLevel.getLevelNodes()) {
                 double probability = currentNode.getConfidence() / currentLevel.getLevelNodes().size();
-                /* AdvancedBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(
+                /* MstBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(
                         currentNode, null, probability, currentNode.getValidWindRange().toIntersected());
                 // currentNodeInfo.setForwardProbability(probability);
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
-            AdvancedGraphLevel nextLevel = currentLevel;
+            MstGraphLevel nextLevel = currentLevel;
             while ((nextLevel = nextLevel.getParent()) != null) {
                 computeBestPathsToNextLevel(currentLevel.getParent(), bestPathsPerLevel);
             }
@@ -67,9 +67,9 @@ public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalcula
         return inference;
     }
 
-    private List<GraphLevelInference> inferShortestPath(AdvancedGraphLevel root,
-            Map<AdvancedGraphLevel, AdvancedBestPathsPerLevel> bestPathsPerLevel) {
-        AdvancedBestPathsPerLevel bestPathsUntilLevel = bestPathsPerLevel.get(root);
+    private List<GraphLevelInference> inferShortestPath(MstGraphLevel root,
+            Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel) {
+        MstBestPathsPerLevel bestPathsUntilLevel = bestPathsPerLevel.get(root);
         double maxProbability = 0;
         GraphNode bestRootNode = null;
         double probabilitiesSum = 0;
@@ -103,15 +103,15 @@ public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalcula
         return result;
     }
 
-    private void inferShortestPath(AdvancedGraphLevel lastLevel, GraphNode lastNode, double confidence,
-            List<GraphLevelInference> result, Map<AdvancedGraphLevel, AdvancedBestPathsPerLevel> bestPathsPerLevel) {
+    private void inferShortestPath(MstGraphLevel lastLevel, GraphNode lastNode, double confidence,
+            List<GraphLevelInference> result, Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel) {
         if (lastLevel.getChildren().isEmpty()) {
             return;
         }
-        AdvancedBestPathsPerLevel lastLevelInfo = bestPathsPerLevel.get(lastLevel);
-        AdvancedBestManeuverNodeInfo lastNodeInfo = lastLevelInfo.getBestPreviousNodeInfo(lastNode);
-        for (Pair<AdvancedGraphLevel, GraphNode> child : lastNodeInfo.getPreviousGraphLevelsWithBestPreviousNodes()) {
-            AdvancedGraphLevel currentLevel = child.getA();
+        MstBestPathsPerLevel lastLevelInfo = bestPathsPerLevel.get(lastLevel);
+        MstBestManeuverNodeInfo lastNodeInfo = lastLevelInfo.getBestPreviousNodeInfo(lastNode);
+        for (Pair<MstGraphLevel, GraphNode> child : lastNodeInfo.getPreviousGraphLevelsWithBestPreviousNodes()) {
+            MstGraphLevel currentLevel = child.getA();
             GraphNode currentNode = child.getB();
             while (currentLevel != null) {
                 /*
@@ -122,8 +122,8 @@ public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalcula
                 GraphLevelInference entry = new GraphLevelInference(currentLevel, currentNode, confidence);
                 result.add(entry);
                 if (currentLevel.getChildren().size() == 1) {
-                    AdvancedBestPathsPerLevel currentLevelInfo = bestPathsPerLevel.get(currentLevel);
-                    AdvancedBestManeuverNodeInfo currentNodeInfo = currentLevelInfo
+                    MstBestPathsPerLevel currentLevelInfo = bestPathsPerLevel.get(currentLevel);
+                    MstBestManeuverNodeInfo currentNodeInfo = currentLevelInfo
                             .getBestPreviousNodeInfo(currentNode);
                     currentNode = currentNodeInfo.getPreviousGraphLevelsWithBestPreviousNodes().get(0).getB();
                     currentLevel = currentLevel.getChildren().get(0);
@@ -135,26 +135,26 @@ public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalcula
         }
     }
 
-    private void computeBestPathsToNextLevel(AdvancedGraphLevel nextLevel,
-            Map<AdvancedGraphLevel, AdvancedBestPathsPerLevel> bestPathsPerLevel) {
-        AdvancedGraphLevel currentLevel = nextLevel;
+    private void computeBestPathsToNextLevel(MstGraphLevel nextLevel,
+            Map<MstGraphLevel, MstBestPathsPerLevel> bestPathsPerLevel) {
+        MstGraphLevel currentLevel = nextLevel;
         // check that all branches until current (joining) node are processed
-        List<AdvancedBestPathsPerLevel> bestPathsUntilPreviousLevels = new ArrayList<>();
-        for (AdvancedGraphLevel previousLevel : currentLevel.getChildren()) {
-            AdvancedBestPathsPerLevel bestPathsUntilPreviousLevel = bestPathsPerLevel.get(previousLevel);
+        List<MstBestPathsPerLevel> bestPathsUntilPreviousLevels = new ArrayList<>();
+        for (MstGraphLevel previousLevel : currentLevel.getChildren()) {
+            MstBestPathsPerLevel bestPathsUntilPreviousLevel = bestPathsPerLevel.get(previousLevel);
             if (bestPathsUntilPreviousLevel == null) {
                 return;
             }
         }
-        AdvancedBestPathsPerLevel bestPathsUntilLevel = new AdvancedBestPathsPerLevel(currentLevel);
+        MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
         for (GraphNode currentNode : currentLevel.getLevelNodes()) {
-            List<Pair<AdvancedGraphLevel, GraphNode>> currentNodeBestPreviousNodes = new ArrayList<>();
+            List<Pair<MstGraphLevel, GraphNode>> currentNodeBestPreviousNodes = new ArrayList<>();
             double currentNodeProbabilityFromStart = currentNode.getConfidence();
             IntersectedWindRange finalBestIntersectedWindRange = null;
-            for (AdvancedBestPathsPerLevel bestPathsUntilPreviousLevel : bestPathsUntilPreviousLevels) {
+            for (MstBestPathsPerLevel bestPathsUntilPreviousLevel : bestPathsUntilPreviousLevels) {
                 // double forwardProbability = 0;
                 double bestProbabilityFromStart = 0;
-                AdvancedGraphLevel previousLevel = bestPathsUntilPreviousLevel.getCurrentLevel();
+                MstGraphLevel previousLevel = bestPathsUntilPreviousLevel.getCurrentLevel();
                 GraphNode bestPreviousNode = null;
                 IntersectedWindRange bestIntersectedWindRange = null;
                 for (GraphNode previousNode : previousLevel.getLevelNodes()) {
@@ -182,7 +182,7 @@ public class AdvancedBestPathsCalculatorImpl implements AdvancedBestPathsCalcula
                         : finalBestIntersectedWindRange.intersect(bestIntersectedWindRange,
                                 CombinationModeOnViolation.EXPANSION);
             }
-            /* AdvancedBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
+            /* MstBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
                     currentNodeBestPreviousNodes, currentNodeProbabilityFromStart, finalBestIntersectedWindRange);
             // currentNodeInfo.setForwardProbability(forwardProbability);
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);

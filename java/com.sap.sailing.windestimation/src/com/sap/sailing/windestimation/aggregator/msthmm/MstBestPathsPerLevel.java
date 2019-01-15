@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.advancedhmm;
+package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import java.util.List;
 
@@ -8,33 +8,33 @@ import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 import com.sap.sse.common.Util.Pair;
 
-public class AdvancedBestPathsPerLevel extends AbstractBestPathsPerLevel {
+public class MstBestPathsPerLevel extends AbstractBestPathsPerLevel {
 
-    private final AdvancedBestManeuverNodeInfo[] bestPreviousNodeInfosPerManeuverNode;
-    private final AdvancedGraphLevel currentLevel;
+    private final MstBestManeuverNodeInfo[] bestPreviousNodeInfosPerManeuverNode;
+    private final MstGraphLevel currentLevel;
 
-    public AdvancedBestPathsPerLevel(AdvancedGraphLevel currentLevel) {
+    public MstBestPathsPerLevel(MstGraphLevel currentLevel) {
         this.currentLevel = currentLevel;
-        this.bestPreviousNodeInfosPerManeuverNode = new AdvancedBestManeuverNodeInfo[currentLevel.getLevelNodes()
+        this.bestPreviousNodeInfosPerManeuverNode = new MstBestManeuverNodeInfo[currentLevel.getLevelNodes()
                 .size()];
     }
 
     @Override
-    public AdvancedBestManeuverNodeInfo getBestPreviousNodeInfo(GraphNode currentNode) {
+    public MstBestManeuverNodeInfo getBestPreviousNodeInfo(GraphNode currentNode) {
         return bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()];
     }
 
-    public AdvancedBestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode currentNode,
-            List<Pair<AdvancedGraphLevel, GraphNode>> previousGraphLevelsWithBestPreviousNodes,
+    public MstBestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode currentNode,
+            List<Pair<MstGraphLevel, GraphNode>> previousGraphLevelsWithBestPreviousNodes,
             double probabilityFromStart, IntersectedWindRange intersectedWindRange) {
-        AdvancedBestManeuverNodeInfo bestManeuverNodeInfo = new AdvancedBestManeuverNodeInfo(
+        MstBestManeuverNodeInfo bestManeuverNodeInfo = new MstBestManeuverNodeInfo(
                 previousGraphLevelsWithBestPreviousNodes, probabilityFromStart, intersectedWindRange);
         bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()] = bestManeuverNodeInfo;
         return bestManeuverNodeInfo;
     }
 
     @Override
-    public AdvancedGraphLevel getCurrentLevel() {
+    public MstGraphLevel getCurrentLevel() {
         return currentLevel;
     }
 

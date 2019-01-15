@@ -9,9 +9,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.aggregator.advancedhmm.AdvancedBestPathsCalculatorImpl;
-import com.sap.sailing.windestimation.aggregator.advancedhmm.AdvancedManeuverGraph;
-import com.sap.sailing.windestimation.aggregator.advancedhmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClassificationForClusteringImpl;
 import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClusteringBasedWindEstimationTrackImpl;
 import com.sap.sailing.windestimation.aggregator.hmm.BestPathsCalculator;
@@ -20,6 +17,9 @@ import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRangeBasedTr
 import com.sap.sailing.windestimation.aggregator.hmm.ManeuverSequenceGraph;
 import com.sap.sailing.windestimation.aggregator.hmm.SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.TwdTransitionClassifierBasedTransitionProbabilitiesCalculator;
+import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculatorImpl;
+import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraph;
+import com.sap.sailing.windestimation.aggregator.msthmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.outlierremoval.MeanBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.aggregator.outlierremoval.NeighborBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
@@ -117,9 +117,9 @@ public class ManeuverClassificationsAggregatorFactory {
         return new NeighborBasedOutlierRemovalWindEstimator(new MiddleCourseBasedTwdCalculatorImpl());
     }
 
-    public ManeuverClassificationsAggregator advancedHmm(boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
-        return new AdvancedManeuverGraph(
-                new AdvancedBestPathsCalculatorImpl(new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
+    public ManeuverClassificationsAggregator mstHmm(boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
+        return new MstManeuverGraph(
+                new MstBestPathsCalculatorImpl(new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
                         new GaussianBasedTwdTransitionDistributionCache(modelStore, modelCacheKeepAliveMillis),
                         propagateIntersectedWindRangeOfHeadupAndBearAway)));
     }

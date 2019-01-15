@@ -35,8 +35,8 @@ public class WindEstimatorFactories {
         switch (windEstimationImplementation) {
         case HMM:
             return hmm();
-        case ADVANCED_HMM:
-            return advancedHmm();
+        case MST_HMM:
+            return mstHmm();
         case CLUSTERING:
             return maneuverClustering();
         case MEAN_OUTLIER:
@@ -68,7 +68,7 @@ public class WindEstimatorFactories {
         };
     }
 
-    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> advancedHmm() {
+    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> mstHmm() {
         return new WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>>() {
 
             @Override
@@ -77,12 +77,12 @@ public class WindEstimatorFactories {
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
                                 new LabelledManeuverForEstimationTransformer()),
-                        ManeuverClassificationsAggregatorImplementation.ADVANCED_HMM);
+                        ManeuverClassificationsAggregatorImplementation.MST_HMM);
             }
 
             @Override
             public String toString() {
-                return "Advanced HMM";
+                return "MST HMM";
             }
         };
     }

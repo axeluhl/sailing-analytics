@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.aggregator.advancedhmm;
+package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import com.sap.sailing.windestimation.aggregator.hmm.SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
@@ -10,7 +10,7 @@ import com.sap.sse.common.Duration;
 
 public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
         extends SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
-        implements AdvancedGraphNodeTransitionProbabilitiesCalculator {
+        implements MstGraphNodeTransitionProbabilitiesCalculator {
 
     private static final double LA_PLACE_TRANSITION_PROBABILITY = 0.0001;
     private final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache;
