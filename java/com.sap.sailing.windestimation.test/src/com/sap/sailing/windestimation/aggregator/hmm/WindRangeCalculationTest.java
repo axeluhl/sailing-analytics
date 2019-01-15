@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.maneuvernode;
+package com.sap.sailing.windestimation.aggregator.hmm;
 
 import static org.junit.Assert.assertEquals;
 

@@ -32,21 +32,27 @@ public class AdvancedManeuverGraphGenerator
         NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> firstNode = nodes.get(0);
         AdvancedGraphLevel firstGraphLevel = new AdvancedGraphLevel(firstNode.getObservation(),
                 transitionProbabilitiesCalculator);
-        parseGraphFromNodes(firstNode.getNeighbors(), firstGraphLevel, leafs);
+        parseGraphFromNodes(firstNode, firstGraphLevel, null, leafs);
         AdvancedManeuverGraphComponents graphComponents = new AdvancedManeuverGraphComponents(firstGraphLevel, leafs);
         return graphComponents;
     }
 
-    private void parseGraphFromNodes(List<NeighborWithDistance<ManeuverWithProbabilisticTypeClassification>> nodes,
-            AdvancedGraphLevel parent, List<AdvancedGraphLevel> leafs) {
-        if (nodes.isEmpty()) {
-            leafs.add(parent);
+    private void parseGraphFromNodes(NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> previousNode,
+            AdvancedGraphLevel previousGraphLevel,
+            NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> parentOfPreviousNode,
+            List<AdvancedGraphLevel> leafs) {
+        List<NodeWithDistance<ManeuverWithProbabilisticTypeClassification>> childNodes = previousNode.getNeighbors();
+        if (childNodes.size() == 1) {
+            leafs.add(previousGraphLevel);
         } else {
-            for (NeighborWithDistance<ManeuverWithProbabilisticTypeClassification> nodeWithDistance : nodes) {
-                NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> node = nodeWithDistance.getNeighbor();
-                AdvancedGraphLevel newGraphLevel = parent.addChild(nodeWithDistance.getDistance(),
-                        node.getObservation(), transitionProbabilitiesCalculator);
-                parseGraphFromNodes(node.getNeighbors(), newGraphLevel, leafs);
+            for (NodeWithDistance<ManeuverWithProbabilisticTypeClassification> childNodeWithDistance : childNodes) {
+                NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> childNode = childNodeWithDistance
+                        .getNodeWithNeighbors();
+                if (childNode != parentOfPreviousNode) {
+                    AdvancedGraphLevel newGraphLevel = previousGraphLevel.addChild(childNodeWithDistance.getDistance(),
+                            childNode.getObservation(), transitionProbabilitiesCalculator);
+                    parseGraphFromNodes(childNode, newGraphLevel, previousNode, leafs);
+                }
             }
         }
     }

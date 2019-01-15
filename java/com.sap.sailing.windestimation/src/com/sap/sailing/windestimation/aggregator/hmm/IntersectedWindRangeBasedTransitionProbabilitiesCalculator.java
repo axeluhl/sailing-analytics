@@ -13,6 +13,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         implements GraphNodeTransitionProbabilitiesCalculator {
 
+    private static final double LA_PLACE_TRANSITION_PROBABILITY = 0.001;
     protected static final int MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE = 40;
     private static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 40;
     private final boolean propagateIntersectedWindRangeOfHeadupAndBearAway;
@@ -69,7 +70,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
                 penaltyFactor = 1 / (1 + (Math.pow(violationRange, 2)));
             }
         }
-        return penaltyFactor + 0.05;
+        return penaltyFactor + LA_PLACE_TRANSITION_PROBABILITY;
     }
 
     public WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver,

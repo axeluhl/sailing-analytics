@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.sap.sse.common.Util.Triple;
+
 public abstract class AbstractAdvancedGraphGenerator<T> {
 
     private List<NodeWithNeighbors<T>> nodes = new ArrayList<>();
@@ -14,49 +16,49 @@ public abstract class AbstractAdvancedGraphGenerator<T> {
 
     public void addNode(T observation) {
         NodeWithNeighbors<T> newNode = new NodeWithNeighbors<>(observation);
-        LinkedList<NeighborWithDistance<T>> distancesFromOtherNodes = getDistancesFromOtherNodes(observation);
-        if (distancesFromOtherNodes.isEmpty()) {
-            nodes.add(newNode);
-        } else {
+        LinkedList<NodeWithDistance<T>> distancesFromOtherNodes = getDistancesFromNearestOtherNodes(observation);
+        nodes.add(newNode);
+        if (!distancesFromOtherNodes.isEmpty()) {
             Collections.sort(distancesFromOtherNodes);
-            NeighborWithDistance<T> closestNeighborWithDistance = distancesFromOtherNodes.removeFirst();
-            nodes.add(newNode);
+            NodeWithDistance<T> closestNeighborWithDistance = distancesFromOtherNodes.removeFirst();
             addEdge(newNode, closestNeighborWithDistance);
-            if (!distancesFromOtherNodes.isEmpty()) {
-                optimizeEdges(newNode, distancesFromOtherNodes, closestNeighborWithDistance);
-            }
+            optimizeEdges(newNode, distancesFromOtherNodes, closestNeighborWithDistance);
         }
     }
 
     private void optimizeEdges(NodeWithNeighbors<T> newNode,
-            LinkedList<NeighborWithDistance<T>> distancesFromOtherNodes,
-            NeighborWithDistance<T> currentNeighborWithDistance) {
-        NodeWithNeighbors<T> currentNeighbor = currentNeighborWithDistance.getNeighbor();
-        for (NeighborWithDistance<T> neighborWithDistance : currentNeighbor.getNeighbors()) {
-            NodeWithNeighbors<T> nextNeighbor = neighborWithDistance.getNeighbor();
-            double distanceToImprove = neighborWithDistance.getDistance();
-            for (Iterator<NeighborWithDistance<T>> iterator = distancesFromOtherNodes.iterator(); iterator.hasNext();) {
-                NeighborWithDistance<T> candidate = iterator.next();
-                if (distanceToImprove <= candidate.getDistance()) {
-                    if (canReach(newNode, currentNeighbor, newNode)) {
-                        removeEdge(currentNeighbor, nextNeighbor);
-                        addEdge(newNode, candidate);
+            LinkedList<NodeWithDistance<T>> distancesFromNewNodeToOtherNodes,
+            NodeWithDistance<T> currentNeighborWithDistance) {
+        NodeWithNeighbors<T> currentNeighborNode = currentNeighborWithDistance.getNodeWithNeighbors();
+        List<NodeWithDistance<T>> neighborsOfCurrentNeighborNode = new ArrayList<>(currentNeighborNode.getNeighbors());
+        for (NodeWithDistance<T> subNeighborWithDistance : neighborsOfCurrentNeighborNode) {
+            NodeWithNeighbors<T> subNeighborNode = subNeighborWithDistance.getNodeWithNeighbors();
+            if (subNeighborNode != newNode) {
+                for (Iterator<NodeWithDistance<T>> iterator = distancesFromNewNodeToOtherNodes.iterator(); iterator
+                        .hasNext();) {
+                    NodeWithDistance<T> candidate = iterator.next();
+                    Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> canReachAndEdgeWithHighestDistance = canReach(
+                            candidate.getNodeWithNeighbors(), currentNeighborNode, newNode);
+                    if (canReachAndEdgeWithHighestDistance != null
+                            && canReachAndEdgeWithHighestDistance.getA() > candidate.getDistance()) {
+                        removeEdge(canReachAndEdgeWithHighestDistance.getB(),
+                                canReachAndEdgeWithHighestDistance.getC());
                         iterator.remove();
-                        optimizeEdges(newNode, distancesFromOtherNodes, candidate);
+                        addEdge(newNode, candidate);
+                        optimizeEdges(newNode, distancesFromNewNodeToOtherNodes, candidate);
                         break;
                     }
-                } else {
-                    break;
                 }
             }
         }
     }
 
-    private LinkedList<NeighborWithDistance<T>> getDistancesFromOtherNodes(T observation) {
-        LinkedList<NeighborWithDistance<T>> result = new LinkedList<>();
+    // TODO implement with Octree so that the octree returns the nearest x elements to observation
+    private LinkedList<NodeWithDistance<T>> getDistancesFromNearestOtherNodes(T observation) {
+        LinkedList<NodeWithDistance<T>> result = new LinkedList<>();
         for (NodeWithNeighbors<T> node : nodes) {
             double distance = getDistanceBetweenObservations(observation, node.getObservation());
-            NeighborWithDistance<T> neighborWithDistance = new NeighborWithDistance<>(node, distance);
+            NodeWithDistance<T> neighborWithDistance = new NodeWithDistance<>(node, distance);
             result.add(neighborWithDistance);
         }
         return result;
@@ -64,9 +66,10 @@ public abstract class AbstractAdvancedGraphGenerator<T> {
 
     protected abstract double getDistanceBetweenObservations(T o1, T o2);
 
-    private void addEdge(NodeWithNeighbors<T> newNode, NeighborWithDistance<T> closestNeighborWithDistance) {
+    private void addEdge(NodeWithNeighbors<T> newNode, NodeWithDistance<T> closestNeighborWithDistance) {
         newNode.addNeighbor(closestNeighborWithDistance);
-        closestNeighborWithDistance.getNeighbor().addNeighbor(newNode, closestNeighborWithDistance.getDistance());
+        closestNeighborWithDistance.getNodeWithNeighbors().addNeighbor(newNode,
+                closestNeighborWithDistance.getDistance());
     }
 
     private void removeEdge(NodeWithNeighbors<T> a, NodeWithNeighbors<T> b) {
@@ -74,32 +77,35 @@ public abstract class AbstractAdvancedGraphGenerator<T> {
         b.removeNeighbor(a);
     }
 
-    private boolean canReach(NodeWithNeighbors<T> nodeToReach, NodeWithNeighbors<T> nodeToStartFrom,
-            NodeWithNeighbors<T> firstNodeOfPathToIgnore) {
-        return canReach(nodeToReach, nodeToStartFrom, firstNodeOfPathToIgnore, 0);
+    private Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> canReach(NodeWithNeighbors<T> nodeToReach,
+            NodeWithNeighbors<T> nodeToStartFrom, NodeWithNeighbors<T> firstNodeOfPathToIgnore) {
+        return canReach(nodeToReach, nodeToStartFrom, firstNodeOfPathToIgnore, 0,
+                new Triple<>(0.0, nodeToReach, nodeToStartFrom));
     }
 
-    private boolean canReach(NodeWithNeighbors<T> nodeToReach, NodeWithNeighbors<T> nodeToStartFrom,
-            NodeWithNeighbors<T> firstNodeOfPathToIgnore, int currentDepth) {
+    private Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> canReach(NodeWithNeighbors<T> nodeToReach,
+            NodeWithNeighbors<T> nodeToStartFrom, NodeWithNeighbors<T> firstNodeOfPathToIgnore, int currentDepth,
+            Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> edgeWithHighestDistance) {
         if (nodeToStartFrom == nodeToReach) {
-            return true;
-        }
-        for (NeighborWithDistance<T> neighborWithDistance : nodeToStartFrom.getNeighbors()) {
-            NodeWithNeighbors<T> node = neighborWithDistance.getNeighbor();
-            if (nodeToReach == node) {
-                return true;
-            }
+            return edgeWithHighestDistance;
         }
         if (currentDepth < MAX_DEPTH_FOR_DFS) {
             int nextDepth = currentDepth + 1;
-            for (NeighborWithDistance<T> neighborWithDistance : nodeToStartFrom.getNeighbors()) {
-                NodeWithNeighbors<T> node = neighborWithDistance.getNeighbor();
-                if (canReach(nodeToReach, node, nodeToStartFrom, nextDepth)) {
-                    return true;
+            for (NodeWithDistance<T> neighborWithDistance : nodeToStartFrom.getNeighbors()) {
+                NodeWithNeighbors<T> node = neighborWithDistance.getNodeWithNeighbors();
+                if (node != firstNodeOfPathToIgnore) {
+                    double distance = neighborWithDistance.getDistance();
+                    Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> newEdgeWithHighestDistance = distance > edgeWithHighestDistance
+                            .getA() ? new Triple<>(distance, nodeToStartFrom, node) : edgeWithHighestDistance;
+                    Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> canReachAndEdgeWithHighestDistance = canReach(
+                            nodeToReach, node, nodeToStartFrom, nextDepth, newEdgeWithHighestDistance);
+                    if (canReachAndEdgeWithHighestDistance != null) {
+                        return canReachAndEdgeWithHighestDistance;
+                    }
                 }
             }
         }
-        return false;
+        return null;
     }
 
     public List<NodeWithNeighbors<T>> getNodes() {
@@ -107,7 +113,7 @@ public abstract class AbstractAdvancedGraphGenerator<T> {
     }
 
     protected static class NodeWithNeighbors<T> {
-        private final List<NeighborWithDistance<T>> neighbors = new ArrayList<>(2);
+        private final List<NodeWithDistance<T>> neighbors = new ArrayList<>(2);
         private final T observation;
 
         public NodeWithNeighbors(T observation) {
@@ -115,11 +121,11 @@ public abstract class AbstractAdvancedGraphGenerator<T> {
         }
 
         public void addNeighbor(NodeWithNeighbors<T> nodeWithNeighbors, double distance) {
-            NeighborWithDistance<T> neighborWithDistance = new NeighborWithDistance<>(nodeWithNeighbors, distance);
+            NodeWithDistance<T> neighborWithDistance = new NodeWithDistance<>(nodeWithNeighbors, distance);
             addNeighbor(neighborWithDistance);
         }
 
-        public void addNeighbor(NeighborWithDistance<T> neighborWithDistance) {
+        public void addNeighbor(NodeWithDistance<T> neighborWithDistance) {
             neighbors.add(neighborWithDistance);
         }
 
@@ -128,25 +134,50 @@ public abstract class AbstractAdvancedGraphGenerator<T> {
             neighbors.remove(nodeWithNeighbors);
         }
 
-        public List<NeighborWithDistance<T>> getNeighbors() {
+        public List<NodeWithDistance<T>> getNeighbors() {
             return neighbors;
         }
 
         public T getObservation() {
             return observation;
         }
+
+        @Override
+        public String toString() {
+            return "NodeWithNeighbors [observation=" + observation + "]";
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((observation == null) ? 0 : observation.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj instanceof NodeWithDistance<?>) {
+                if (((NodeWithDistance<?>) obj).neighbor == this) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
-    protected static class NeighborWithDistance<T> implements Comparable<NeighborWithDistance<T>> {
+    protected static class NodeWithDistance<T> implements Comparable<NodeWithDistance<T>> {
         private final NodeWithNeighbors<T> neighbor;
         private final double distance;
 
-        public NeighborWithDistance(NodeWithNeighbors<T> neighbor, double distance) {
+        public NodeWithDistance(NodeWithNeighbors<T> neighbor, double distance) {
             this.neighbor = neighbor;
             this.distance = distance;
         }
 
-        public NodeWithNeighbors<T> getNeighbor() {
+        public NodeWithNeighbors<T> getNodeWithNeighbors() {
             return neighbor;
         }
 
@@ -155,7 +186,7 @@ public abstract class AbstractAdvancedGraphGenerator<T> {
         }
 
         @Override
-        public int compareTo(NeighborWithDistance<T> o) {
+        public int compareTo(NodeWithDistance<T> o) {
             return Double.compare(distance, o.getDistance());
         }
 
@@ -170,6 +201,12 @@ public abstract class AbstractAdvancedGraphGenerator<T> {
                 return true;
             return false;
         }
+
+        @Override
+        public String toString() {
+            return "NodeWithDistance [neighbor=" + neighbor + ", distance=" + distance + "]";
+        }
+
     }
 
 }

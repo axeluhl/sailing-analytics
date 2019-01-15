@@ -12,6 +12,7 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
         extends SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
         implements AdvancedGraphNodeTransitionProbabilitiesCalculator {
 
+    private static final double LA_PLACE_TRANSITION_PROBABILITY = 0.0001;
     private final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache;
 
     public DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
@@ -24,7 +25,7 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
     @Override
     protected double getPenaltyFactorForTransition(TwdTransition twdTransition) {
         double penaltyFactor = gaussianBasedTwdTransitionDistributionCache.getP(twdTransition);
-        return penaltyFactor + 0.05;
+        return penaltyFactor + LA_PLACE_TRANSITION_PROBABILITY;
     }
 
     public double getCompoundDistance(ManeuverForEstimation fromManeuver, ManeuverForEstimation toManeuver) {
