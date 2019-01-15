@@ -26,7 +26,7 @@ import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
-    private static int requestCodeQRCode = 45392;
+    private static int REQUEST_CODE_QR_CODE = 45392;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -165,30 +165,28 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     private void requestQRCodeScan() {
         Intent intent = new Intent(getContext(), BarcodeCaptureActivity.class);
-        startActivityForResult(intent, requestCodeQRCode);
+        startActivityForResult(intent, REQUEST_CODE_QR_CODE);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != requestCodeQRCode) {
-            super.onActivityResult(requestCode, resultCode, data);
-            return;
-        }
-        if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
-            Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-            QRHelper.with(getActivity()).saveData(barcode.displayValue);
+        if (requestCode == REQUEST_CODE_QR_CODE) {
+            if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
+                Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                QRHelper.with(getActivity()).saveData(barcode.displayValue);
 
-            final AppPreferences appPreferences = AppPreferences.on(getActivity());
-            appPreferences.setNeedConfigRefresh(true);
-            // update device identifier in ui
-            EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
-            identifierPreference.setText(appPreferences.getDeviceIdentifier());
-            identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
-            // update server url in ui
-            EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
-            serverUrlPreference.setText(appPreferences.getServerBaseURL());
-        } else {
-            Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
+                final AppPreferences appPreferences = AppPreferences.on(getActivity());
+                appPreferences.setNeedConfigRefresh(true);
+                // update device identifier in ui
+                EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
+                identifierPreference.setText(appPreferences.getDeviceIdentifier());
+                identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
+                // update server url in ui
+                EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
+                serverUrlPreference.setText(appPreferences.getServerBaseURL());
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
+            }
         }
     }
 }
