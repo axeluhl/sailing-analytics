@@ -8,6 +8,9 @@ RUN wget -O /tmp/RELEASE.tar.gz http://releases.sapsailing.com/RELEASE/RELEASE.t
 RUN apt-get install -y vim
 COPY vimrc /root/.vimrc
 RUN apt-get install -y telnet dnsutils net-tools
+RUN wget -O /tmp/rds.pem https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem \
+ && /opt/sapjvm_8/bin/keytool -importcert -alias AWSRDS -file /tmp/rds.pem -keystore /opt/sapjvm_8/jre/lib/security/cacerts -noprompt -storepass changeit \
+ && rm /tmp/rds.pem
 COPY env.sh .
 COPY start .
 COPY JavaSE-11.profile .
