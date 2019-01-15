@@ -732,7 +732,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName, AsyncCallback<Collection<CompetitorAndBoatDTO>> callback);
 
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            List<Util.Pair<ControlPointDTO, PassingInstruction>> course, AsyncCallback<Void> callback);
+            List<Util.Pair<ControlPointDTO, PassingInstruction>> course, int priority, AsyncCallback<Void> callback);
 
     void addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
             String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint,
@@ -857,7 +857,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
 
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
-            Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
+            Set<Triple<String, String, String>> toTriples, int priority, AsyncCallback<Void> callback);
 
     void addMarkToRegattaLog(String leaderboardName, MarkDTO mark, AsyncCallback<Void> asyncCallback);
 

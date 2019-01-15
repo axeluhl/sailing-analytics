@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -210,7 +211,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                         newTo = fixTP;
                     }
                 }
-                fixesCollection.insertMany(dbFixes);
+                fixesCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).insertMany(dbFixes);
                 final Document updateOperation = new Document();
                 final Document newMetadata = new Document();
                 newMetadata.put(FieldNames.DEVICE_ID.name(), dbDeviceId);
@@ -225,7 +226,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                 storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
                 updateOperation.append("$set", newMetadata);
                 updateOperation.append("$inc", new Document(FieldNames.NUM_FIXES.name(), nrOfTotalFixes));
-                metadataCollection.updateOne(getDeviceQuery(device), updateOperation, new UpdateOptions().upsert(true));
+                metadataCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).updateOne(getDeviceQuery(device), updateOperation, new UpdateOptions().upsert(true));
             } catch (TransformationException e) {
                 logger.log(Level.WARNING, "Could not store fix in MongoDB");
                 e.printStackTrace();

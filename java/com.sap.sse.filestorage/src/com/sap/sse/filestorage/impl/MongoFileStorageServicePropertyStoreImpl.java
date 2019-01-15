@@ -29,12 +29,13 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
         Document index = new Document().append(FieldNames.SERVICE_NAME.name(), 1)
                 .append(FieldNames.PROPERTY_NAME.name(), 1);
         try {
-        	propertiesCollection.createIndex(index, new IndexOptions().name("unique service name/property name combination").unique(true));
-        } catch (Exception e)  {
-        	logger.info("Problem creating index, probably due to index format change; dropping indexes and creating again...");
-        	// could be that the index was created with different properties; need to remove and create again:
-        	propertiesCollection.dropIndexes();
-        	propertiesCollection.createIndex(index, new IndexOptions().name("unique service name/property name combination").unique(true));
+            propertiesCollection.createIndex(index,
+                    new IndexOptions().name("svcpropnameunique").unique(true));
+        } catch (Exception e) {
+            logger.info("Problem creating index, probably due to index format change; dropping indexes and creating again...");
+            // could be that the index was created with different properties; need to remove and create again:
+            propertiesCollection.dropIndexes();
+            propertiesCollection.createIndex(index, new IndexOptions().name("svcpropnameunique").unique(true));
         }
         activeServiceCollection = dbService.getDB().getCollection(ACTIVE_SERVICE_COLLECTION_NAME);
     }
