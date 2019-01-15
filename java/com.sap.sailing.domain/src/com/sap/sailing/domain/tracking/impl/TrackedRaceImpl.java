@@ -2904,6 +2904,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private void resumeAllCachesNotUpdatingWhileLoading() {
         cachesSuspended = false;
+        shortTimeWindCache.clearCache();
         for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
             competitorTrack.resumeValidityCaching();
         }
