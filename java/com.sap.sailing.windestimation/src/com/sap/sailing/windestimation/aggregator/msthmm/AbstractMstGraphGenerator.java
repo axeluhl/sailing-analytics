@@ -2,7 +2,6 @@ package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,27 +25,22 @@ public abstract class AbstractMstGraphGenerator<T> {
         }
     }
 
-    private void optimizeEdges(NodeWithNeighbors<T> newNode,
-            LinkedList<NodeWithDistance<T>> distancesFromNewNodeToOtherNodes,
+    private void optimizeEdges(NodeWithNeighbors<T> newNode, List<NodeWithDistance<T>> distancesFromNewNodeToOtherNodes,
             NodeWithDistance<T> currentNeighborWithDistance) {
         NodeWithNeighbors<T> currentNeighborNode = currentNeighborWithDistance.getNodeWithNeighbors();
         List<NodeWithDistance<T>> neighborsOfCurrentNeighborNode = new ArrayList<>(currentNeighborNode.getNeighbors());
         for (NodeWithDistance<T> subNeighborWithDistance : neighborsOfCurrentNeighborNode) {
             NodeWithNeighbors<T> subNeighborNode = subNeighborWithDistance.getNodeWithNeighbors();
             if (subNeighborNode != newNode) {
-                for (Iterator<NodeWithDistance<T>> iterator = distancesFromNewNodeToOtherNodes.iterator(); iterator
-                        .hasNext();) {
-                    NodeWithDistance<T> candidate = iterator.next();
+                for (NodeWithDistance<T> candidate : distancesFromNewNodeToOtherNodes) {
                     Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> canReachAndEdgeWithHighestDistance = canReach(
                             candidate.getNodeWithNeighbors(), currentNeighborNode, newNode);
                     if (canReachAndEdgeWithHighestDistance != null
                             && canReachAndEdgeWithHighestDistance.getA() > candidate.getDistance()) {
                         removeEdge(canReachAndEdgeWithHighestDistance.getB(),
                                 canReachAndEdgeWithHighestDistance.getC());
-                        iterator.remove();
                         addEdge(newNode, candidate);
                         optimizeEdges(newNode, distancesFromNewNodeToOtherNodes, candidate);
-                        break;
                     }
                 }
             }

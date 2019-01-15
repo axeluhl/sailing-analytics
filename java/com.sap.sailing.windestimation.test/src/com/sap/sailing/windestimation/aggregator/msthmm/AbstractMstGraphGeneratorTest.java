@@ -120,7 +120,6 @@ public class AbstractMstGraphGeneratorTest {
         for (NodeWithDistance<Tuple> neighbor : node.getNeighbors()) {
             NodeWithNeighbors<Tuple> neighborNode = neighbor.getNodeWithNeighbors();
             if (neighborNode != previousNode) {
-                System.out.println(node + " connected to " + neighbor);
                 weightSum += neighbor.getDistance();
                 weightSum += getWeightSumOfEdges(neighborNode, node);
             }

@@ -5,13 +5,11 @@ import java.util.List;
 
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
-public class MstManeuverGraphGenerator
-        extends AbstractMstGraphGenerator<ManeuverWithProbabilisticTypeClassification> {
+public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<ManeuverWithProbabilisticTypeClassification> {
 
     private final MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
 
-    public MstManeuverGraphGenerator(
-            MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+    public MstManeuverGraphGenerator(MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         this.transitionProbabilitiesCalculator = transitionProbabilitiesCalculator;
     }
 
@@ -42,7 +40,7 @@ public class MstManeuverGraphGenerator
             NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> parentOfPreviousNode,
             List<MstGraphLevel> leafs) {
         List<NodeWithDistance<ManeuverWithProbabilisticTypeClassification>> childNodes = previousNode.getNeighbors();
-        if (childNodes.size() == 1) {
+        if (parentOfPreviousNode != null && childNodes.size() == 1) {
             leafs.add(previousGraphLevel);
         } else {
             for (NodeWithDistance<ManeuverWithProbabilisticTypeClassification> childNodeWithDistance : childNodes) {

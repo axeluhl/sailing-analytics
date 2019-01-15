@@ -17,8 +17,7 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
 
     private final MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
 
-    public MstBestPathsCalculatorImpl(
-            MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+    public MstBestPathsCalculatorImpl(MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         this.transitionProbabilitiesCalculator = transitionProbabilitiesCalculator;
     }
 
@@ -53,14 +52,13 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
             for (GraphNode currentNode : currentLevel.getLevelNodes()) {
                 double probability = currentNode.getConfidence() / currentLevel.getLevelNodes().size();
-                /* MstBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(
-                        currentNode, null, probability, currentNode.getValidWindRange().toIntersected());
+                /* MstBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
+                        null, probability, currentNode.getValidWindRange().toIntersected());
                 // currentNodeInfo.setForwardProbability(probability);
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
-            MstGraphLevel nextLevel = currentLevel;
-            while ((nextLevel = nextLevel.getParent()) != null) {
-                computeBestPathsToNextLevel(currentLevel.getParent(), bestPathsPerLevel);
+            while ((currentLevel = currentLevel.getParent()) != null) {
+                computeBestPathsToNextLevel(currentLevel, bestPathsPerLevel);
             }
         }
         List<GraphLevelInference> inference = inferShortestPath(graphComponents.getRoot(), bestPathsPerLevel);
@@ -123,8 +121,7 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                 result.add(entry);
                 if (currentLevel.getChildren().size() == 1) {
                     MstBestPathsPerLevel currentLevelInfo = bestPathsPerLevel.get(currentLevel);
-                    MstBestManeuverNodeInfo currentNodeInfo = currentLevelInfo
-                            .getBestPreviousNodeInfo(currentNode);
+                    MstBestManeuverNodeInfo currentNodeInfo = currentLevelInfo.getBestPreviousNodeInfo(currentNode);
                     currentNode = currentNodeInfo.getPreviousGraphLevelsWithBestPreviousNodes().get(0).getB();
                     currentLevel = currentLevel.getChildren().get(0);
                 } else {
@@ -145,6 +142,7 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             if (bestPathsUntilPreviousLevel == null) {
                 return;
             }
+            bestPathsUntilPreviousLevels.add(bestPathsUntilPreviousLevel);
         }
         MstBestPathsPerLevel bestPathsUntilLevel = new MstBestPathsPerLevel(currentLevel);
         for (GraphNode currentNode : currentLevel.getLevelNodes()) {
