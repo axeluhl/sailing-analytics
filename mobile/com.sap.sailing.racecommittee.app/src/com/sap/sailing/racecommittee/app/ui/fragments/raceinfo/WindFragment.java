@@ -158,7 +158,7 @@ public class WindFragment extends BaseFragment
         apiClient = LocationServices.getFusedLocationProviderClient(requireContext());
         settingsClient = LocationServices.getSettingsClient(requireContext());
         locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
         locationRequest.setInterval(FIVE_SEC);
         locationRequest.setFastestInterval(EVERY_POSITION_CHANGE);
         locationSettingsRequest = new LocationSettingsRequest.Builder()
