@@ -542,6 +542,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             for (int zGroup = 0; zGroup < pairingList.length; zGroup++) {
                 int[][] groupAssignments = new int[competitors / groups][competitors / groups];
                 for (int zPlace = 0; zPlace < (competitors / groups); zPlace++) {
+                    //select single group to optimize
                     System.arraycopy(assignments[pairingList[zGroup][zPlace]], 0, groupAssignments[zPlace], 0,
                             (competitors / groups));
                 }
@@ -550,6 +551,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     int prevFlight = (int) (zGroup / groups) - 1;
                     int prevPosition = -1;
                     if (prevFlight >= 0) {
+                        //search for previous position
                         for (int i = prevFlight * groups; i < prevFlight * groups + groups; i++) {
                             for (int j = 0; j < (competitors / groups); j++) {
                                 if (pairingList[i][j] == pairingList[zGroup][position[0]]) {
@@ -560,6 +562,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     }
                     if (groupAssignments[position[0]][position[1]] > averageAssignments - 1
                             && groupAssignments[position[0]][position[1]] < averageAssignments + 1) {
+                        //no more optimizations possible 
                         break;
                     } else {
                         int temp = 0;
@@ -657,45 +660,73 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     /**
-     * Returns an index that has the greatest difference to neededAssignments
-     * 
+     * There is an neededAssigments value created in <code> improveCompetitorAllocations</code>. This value 
+     * represents the number of times a competitor has to be on one boat to get the best possible competitor 
+     * allocation. In this method this value is used to find the competitor which assignment is the worst. 
+     * That means the number of assignments to one special boat is far to low or far to high. This can be 
+     * calculated by: absolute value of given assignment - needed assignment.
+     *        
      * @param groupAssignments
      *            array that contains the values
      * @param neededAssigments
      *            reference value
-     * @return int array with 2 indices that represent row and column of the worst value
+     * @return int array with 2 indices that represent row and column of the worst value in the two dimensional array groupAssignments
      */
     private int[] findWorstValuePosition(int[][] groupAssignments, int neededAssigments) {
         int[] worstValuePos = new int[2];
         int worstValue = 0;
+        //search the hole groupAssignments array for worst value 
         for (int i = 0; i < groupAssignments.length; i++) {
             for (int z = 0; z < groupAssignments[0].length; z++) {
                 if (groupAssignments[i][z] >= 0) {
-                    if (groupAssignments[i][z] > worstValue) {
+                    if (Math.abs(groupAssignments[i][z]-neededAssigments) > worstValue) {
                         worstValuePos[0] = i;
                         worstValuePos[1] = z;
-                        worstValue = groupAssignments[i][z];
+                        worstValue = Math.abs(groupAssignments[i][z]-neededAssigments);
                     }
                 }
             }
         }
         return worstValuePos;
     }
-
-    private int getBestPositionToChangeTo(int[] arr, int previousPosition) {
-        int[] temp = new int[arr.length];
-        System.arraycopy(arr, 0, temp, 0, arr.length);
+    /**
+     * This method searches for the position a competitor should be changed to, to improve the competitor 
+     * allocations as most as possible. The decision depends on the field <code>boatChangeFactor</code>. 
+     * If this value is 0, the method returns the position on which a competitor is too rarely registered 
+     * and should be changed to to get a better competitor allocation.
+     * 
+     * If the value is greater than 0, the method can take the allocation in the previous flight into 
+     * consideration. The value represents a kind of tolerance to deviate from the best possible value 
+     * to place the competitor on a position, which he was on in the last group. The method starts at the 
+     * best position and proofs if the competitor on this position in the last group if yes return this 
+     * position, if not go on with the next position. This is done as often as the tolerance allows it.
+     * If no position is found the best position to change to is returned regardless of the position 
+     * in the last flight. This is necessary if you would like to minimize boat changes at the expense 
+     * of competitor allocations.    
+     * 
+     * @param competitorAllocations
+     *          array that contains the current competitor allocations for one competitor 
+     * @param previousPosition
+     *          position of the competitor that need to be changed in the previous group
+     * @return
+     *          position the competitor should be changed to
+     */           
+    private int getBestPositionToChangeTo(int[] competitorAllocations, int previousPosition) {
+        int[] temp = new int[competitorAllocations.length];
+        System.arraycopy(competitorAllocations, 0, temp, 0, competitorAllocations.length);
         Arrays.sort(temp);
+        //search for best position to change to with consideration of previous position
         for (int i = 0; i < boatChangeFactor; i++) {
-            for (int j = 0; j < arr.length; j++) {
-                if (temp[i] == arr[j] && j == previousPosition) {
-                    return j;
+            for (int position = 0; position < competitorAllocations.length; position++) {
+                if (temp[i] == competitorAllocations[position] && position == previousPosition) {
+                    return position;
                 }
             }
         }
-        for (int j = 0; j < arr.length; j++) {
-            if (temp[0] == arr[j]) {
-                return j;
+        //search for best position to change to regardless of previous position
+        for (int position = 0; position < competitorAllocations.length; position++) {
+            if (temp[0] == competitorAllocations[position]) {
+                return position;
             }
         }
         return -1;
