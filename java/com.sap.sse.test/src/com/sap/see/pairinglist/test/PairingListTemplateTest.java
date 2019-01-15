@@ -62,8 +62,8 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
 
     @Test
     public void testAverageQualityForSingleCase() {
-        final int count = 20;
-        double[] results = new double[20];
+        final int count = 40;
+        double[] results = new double[40];
         for (int i = 0; i < count; i++) {
             int[][] template = this.createPairingListTemplate(15, 3, 18);
             results[i] = calcStandardDev(incrementAssociations(template, new int[18][18]));
