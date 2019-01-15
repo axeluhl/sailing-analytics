@@ -1,12 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
-import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
-import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
-import com.sap.sailing.android.shared.ui.fragments.AbstractHomeFragment;
-
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -14,6 +7,13 @@ import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
+import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
+import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
+import com.sap.sailing.android.shared.ui.fragments.AbstractHomeFragment;
 
 public class StartActivity extends AbstractStartActivity<CheckinData> {
 
@@ -29,7 +29,9 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
             int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
             toolbar.setPadding(sidePadding, 0, 0, 0);
         }
-        replaceFragment(R.id.content_frame, new HomeFragment());
+        if (savedInstanceState == null) {
+            replaceFragment(R.id.content_frame, new HomeFragment());
+        }
     }
 
     @Override

@@ -1,6 +1,13 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import java.util.List;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -18,14 +25,7 @@ import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
 
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import java.util.List;
 
 public class StartActivity extends AbstractStartActivity<CheckinData> {
 
@@ -45,7 +45,9 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
             int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
             toolbar.setPadding(sidePadding, 0, 0, 0);
         }
-        replaceFragment(R.id.content_frame, new HomeFragment());
+        if (savedInstanceState == null) {
+            replaceFragment(R.id.content_frame, new HomeFragment());
+        }
         refreshDatabase();
 
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
