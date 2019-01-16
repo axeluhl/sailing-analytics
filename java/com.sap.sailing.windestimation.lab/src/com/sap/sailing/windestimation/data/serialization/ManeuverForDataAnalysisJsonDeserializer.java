@@ -43,7 +43,6 @@ public class ManeuverForDataAnalysisJsonDeserializer implements JsonDeserializer
                 .get(ManeuverForDataAnalysisJsonSerializer.MANEUVER_DURATION_IN_SECONDS);
         double recoveryPhaseDurationInSeconds = (double) object
                 .get(ManeuverForDataAnalysisJsonSerializer.RECOVERY_PHASE_DURATION_IN_SECONDS);
-        double timeLossInSeconds = (double) object.get(ManeuverForDataAnalysisJsonSerializer.TIME_LOSS_IN_SECONDS);
         boolean clean = (boolean) object.get(ManeuverForDataAnalysisJsonSerializer.CLEAN);
         ManeuverCategory maneuverCategory = ManeuverCategory
                 .valueOf((String) object.get(ManeuverForDataAnalysisJsonSerializer.MANEUVER_CATEGORY));
@@ -71,9 +70,9 @@ public class ManeuverForDataAnalysisJsonDeserializer implements JsonDeserializer
                 speedLossRatio, speedGainRatio, lowestSpeedVsExitingSpeedRatio, maximalTurningRateInDegreesPerSecond,
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees,
                 relativeBearingToNextMarkBeforeInDegrees, relativeBearingToNextMarkAfterInDegrees,
-                mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
-                timeLossInSeconds, clean, maneuverCategory, twaBeforeInDegrees, twaAfterInDegrees, twsInKnots,
-                speedBeforeInKnots, speedAfterInKnots, twaAtMiddleCourseInDegrees, twaAtMiddleCourseMainCurveInDegrees,
+                mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds, clean,
+                maneuverCategory, twaBeforeInDegrees, twaAfterInDegrees, twsInKnots, speedBeforeInKnots,
+                speedAfterInKnots, twaAtMiddleCourseInDegrees, twaAtMiddleCourseMainCurveInDegrees,
                 twaAtLowestSpeedInDegrees, twaAtMaxTurningRateInDegrees, starboardManeuver, scaledSpeedBeforeInKnots,
                 scaledSpeedAfterInKnots, markPassing);
     }

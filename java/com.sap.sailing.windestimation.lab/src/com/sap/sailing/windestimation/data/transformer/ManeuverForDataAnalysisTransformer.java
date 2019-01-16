@@ -89,12 +89,6 @@ public class ManeuverForDataAnalysisTransformer
         double maneuverDurationInSeconds = maneuver.getCurveWithUnstableCourseAndSpeed().getDuration().asSeconds();
         double recoveryPhaseDurationInSeconds = maneuver.getMainCurve().getTimePointAfter()
                 .until(maneuver.getCurveWithUnstableCourseAndSpeed().getTimePointAfter()).asSeconds();
-        double timeLossInSeconds = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
-                .getMetersPerSecond() > 0
-                        ? maneuver.getCurveWithUnstableCourseAndSpeed().getDistanceLost().getMeters()
-                                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
-                                        .getMetersPerSecond()
-                        : 0;
         boolean clean = isManeuverClean(maneuver, previousManeuver, nextManeuver);
         ManeuverCategory maneuverCategory = getManeuverCategory(maneuver);
         double twaBeforeInDegrees = maneuver.getWind().getFrom()
@@ -122,9 +116,9 @@ public class ManeuverForDataAnalysisTransformer
                 lowestSpeedVsExitingSpeedRatio, maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(),
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees,
                 relativeBearingToNextMarkBeforeManeuverInDegrees, relativeBearingToNextMarkAfterManeuverInDegrees,
-                mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
-                timeLossInSeconds, clean, maneuverCategory, twaBeforeInDegrees, twaAfterInDegrees, twsInKnots,
-                speedBeforeInKnots, speedAfterInKnots, twaAtMiddleCourseInDegrees, twaAtMiddleCourseMainCurveInDegrees,
+                mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds, clean,
+                maneuverCategory, twaBeforeInDegrees, twaAfterInDegrees, twsInKnots, speedBeforeInKnots,
+                speedAfterInKnots, twaAtMiddleCourseInDegrees, twaAtMiddleCourseMainCurveInDegrees,
                 twaAtLowestSpeedInDegrees, twaAtMaxTurningRateInDegrees, starboardManeuver,
                 speedBeforeInKnots / speedScalingDivisor, speedAfterInKnots / speedScalingDivisor,
                 maneuver.isMarkPassing());
@@ -145,10 +139,12 @@ public class ManeuverForDataAnalysisTransformer
             return null;
         case JIBE:
             return Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) > 120
-                    ? ManeuverTypeForDataAnalysis._180_JIBE : ManeuverTypeForDataAnalysis.JIBE;
+                    ? ManeuverTypeForDataAnalysis._180_JIBE
+                    : ManeuverTypeForDataAnalysis.JIBE;
         case TACK:
             return Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) > 120
-                    ? ManeuverTypeForDataAnalysis._180_TACK : ManeuverTypeForDataAnalysis.TACK;
+                    ? ManeuverTypeForDataAnalysis._180_TACK
+                    : ManeuverTypeForDataAnalysis.TACK;
         }
         throw new IllegalStateException();
     }

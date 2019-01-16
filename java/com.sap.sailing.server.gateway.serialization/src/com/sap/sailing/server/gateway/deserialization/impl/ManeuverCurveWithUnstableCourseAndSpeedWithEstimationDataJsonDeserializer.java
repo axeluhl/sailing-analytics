@@ -4,9 +4,9 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.maneuverdetection.ManeuverCurveBoundariesWithDetailedManeuverLoss;
 import com.sap.sailing.domain.maneuverdetection.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer;
 import com.sap.sse.common.Duration;
@@ -19,12 +19,12 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  *
  */
 public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer
-        extends ManeuverCurveBoundariesWithDetailedManeuverLossJsonDeserializer {
+        extends ManeuverCurveBoundariesJsonDeserializer {
 
     @Override
     public ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData deserialize(JSONObject object)
             throws JsonDeserializationException {
-        ManeuverCurveBoundariesWithDetailedManeuverLoss boundaries = super.deserialize(object);
+        ManeuverCurveBoundaries boundaries = super.deserialize(object);
         Double avgSpeedBeforeInKnots = (Double) object.get(
                 ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonSerializer.AVERAGE_SPEED_BEFORE_IN_KNOTS);
         Double avgCogBefore = (Double) object.get(
@@ -52,13 +52,10 @@ public class ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeseri
         return new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl(boundaries.getTimePointBefore(),
                 boundaries.getTimePointAfter(), boundaries.getSpeedWithBearingBefore(),
                 boundaries.getSpeedWithBearingAfter(), boundaries.getDirectionChangeInDegrees(),
-                boundaries.getLowestSpeed(), convertSpeedWithBearing(avgSpeedBeforeInKnots, avgCogBefore),
-                convertDuration(secondsBefore), gpsFixesCountBefore,
-                convertSpeedWithBearing(avgSpeedAfterInKnots, avgCogAfter), convertDuration(secondsAfter),
-                gpsFixesCountAfter, boundaries.getDistanceSailedWithinManeuver(),
-                boundaries.getDistanceSailedWithinManeuverTowardMiddleAngleProjection(),
-                boundaries.getDistanceSailedIfNotManeuvering(),
-                boundaries.getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering(), gpsFixesCount,
+                boundaries.getLowestSpeed(), boundaries.getHighestSpeed(),
+                convertSpeedWithBearing(avgSpeedBeforeInKnots, avgCogBefore), convertDuration(secondsBefore),
+                gpsFixesCountBefore, convertSpeedWithBearing(avgSpeedAfterInKnots, avgCogAfter),
+                convertDuration(secondsAfter), gpsFixesCountAfter, gpsFixesCount,
                 convertDuration(longestIntervalBetweenTwoFixes),
                 convertDuration(intervalBetweenLastFixOfCurveAndNextFix),
                 convertDuration(intervalBetweenFirstFixOfCurveAndPreviousFix));

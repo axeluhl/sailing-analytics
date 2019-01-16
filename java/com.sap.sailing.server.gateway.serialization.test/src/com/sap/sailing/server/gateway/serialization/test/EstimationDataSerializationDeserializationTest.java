@@ -74,20 +74,13 @@ public class EstimationDataSerializationDeserializationTest {
         MillisecondsTimePoint maxTurningRateTimePoint = new MillisecondsTimePoint(
                 dateFormat.parse("06/23/2011-15:28:33"));
         int gpsFixesCountMainCurve = 4;
-        Distance distanceSailedWithinManeuverMainCurve = new MeterDistance(4.4);
-        Distance distanceSailedWithinManeuverTowardMiddleAngleProjectionMainCurve = new MeterDistance(3.6);
-        Distance distanceSailedIfNotManeuveringMainCurve = new MeterDistance(6.4);
-        Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuveringMainCurve = new MeterDistance(5.7);
         Duration longestIntervalBetweenTwoFixesMainCurve = new MillisecondsDurationImpl(4253);
         ManeuverMainCurveWithEstimationData mainCurve = new ManeuverMainCurveWithEstimationDataImpl(
                 timePointMainCurveBefore, timePointMainCurveAfter, speedWithBearingMainCurveBefore,
                 speedWithBearingMainCurveAfter, directionChangeMainCurveInDegrees, lowestSpeed, lowestSpeedTimePoint,
                 highestSpeed, highestSpeedTimePoint, maxTurningRateTimePoint, maxTurningRateInDegreesPerSecond,
-                courseAtMaxTurningRate, distanceSailedWithinManeuverMainCurve,
-                distanceSailedWithinManeuverTowardMiddleAngleProjectionMainCurve,
-                distanceSailedIfNotManeuveringMainCurve,
-                distanceSailedTowardMiddleAngleProjectionIfNotManeuveringMainCurve, avgTurningRateInDegreesPerSecond,
-                gpsFixesCountMainCurve, longestIntervalBetweenTwoFixesMainCurve);
+                courseAtMaxTurningRate, avgTurningRateInDegreesPerSecond, gpsFixesCountMainCurve,
+                longestIntervalBetweenTwoFixesMainCurve);
 
         MillisecondsTimePoint timePointBefore = new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:10"));
         MillisecondsTimePoint timePointAfter = new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:55"));
@@ -95,30 +88,24 @@ public class EstimationDataSerializationDeserializationTest {
         SpeedWithBearing speedWithBearingAfter = new KnotSpeedWithBearingImpl(7.5, new DegreeBearingImpl(101.1));
         double directionChangeInDegrees = 81.1;
         Speed maneuverLowestSpeed = new KnotSpeedImpl(2.9);
+        Speed maneuverHighestSpeed = new KnotSpeedImpl(5.4);
         SpeedWithBearing avgSpeedWithBearingBefore = new KnotSpeedWithBearingImpl(4.999, new DegreeBearingImpl(32.202));
         SpeedWithBearing avgSpeedWithBearingAfter = new KnotSpeedWithBearingImpl(5.3333, new DegreeBearingImpl(90.234));
         Duration durationFromPreviousManeuverEndToManeuverStart = new MillisecondsDurationImpl(10001);
         Duration durationFromManeuverEndToNextManeuverStart = new MillisecondsDurationImpl(20000);
         int gpsFixesCountFromPreviousManeuverEndToManeuverStart = 2;
         int gpsFixesCountFromManeuverEndToNextManeuverStart = 222;
-        Distance distanceSailedWithinManeuver = new MeterDistance(77.4);
-        Distance distanceSailedWithinManeuverTowardMiddleAngleProjection = new MeterDistance(66.6);
-        Distance distanceSailedIfNotManeuvering = new MeterDistance(99.4);
-        Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering = new MeterDistance(88.7);
         int gpsFixesCount = 133445;
         Duration longestIntervalBetweenTwoFixes = new MillisecondsDurationImpl(5643);
         Duration intervalBetweenLastFixOfCurveAndNextFix = new MillisecondsDurationImpl(1574);
         Duration intervalBetweenFirstFixOfCurveAndPreviousFix = new MillisecondsDurationImpl(78566);
         ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl curve = new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl(
                 timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter,
-                directionChangeInDegrees, maneuverLowestSpeed, avgSpeedWithBearingBefore,
+                directionChangeInDegrees, maneuverLowestSpeed, maneuverHighestSpeed, avgSpeedWithBearingBefore,
                 durationFromPreviousManeuverEndToManeuverStart, gpsFixesCountFromPreviousManeuverEndToManeuverStart,
                 avgSpeedWithBearingAfter, durationFromManeuverEndToNextManeuverStart,
-                gpsFixesCountFromManeuverEndToNextManeuverStart, distanceSailedWithinManeuver,
-                distanceSailedWithinManeuverTowardMiddleAngleProjection, distanceSailedIfNotManeuvering,
-                distanceSailedTowardMiddleAngleProjectionIfNotManeuvering, gpsFixesCount,
-                longestIntervalBetweenTwoFixes, intervalBetweenLastFixOfCurveAndNextFix,
-                intervalBetweenFirstFixOfCurveAndPreviousFix);
+                gpsFixesCountFromManeuverEndToNextManeuverStart, gpsFixesCount, longestIntervalBetweenTwoFixes,
+                intervalBetweenLastFixOfCurveAndNextFix, intervalBetweenFirstFixOfCurveAndPreviousFix);
 
         SpeedWithBearing windSpeedWithBearing = new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(340));
         DegreePosition maneuverPosition = new DegreePosition(50.325246, 11.148556);
@@ -186,14 +173,6 @@ public class EstimationDataSerializationDeserializationTest {
                 .getCurveWithUnstableCourseAndSpeed().getGpsFixesCountFromPreviousManeuverEndToManeuverStart());
         assertEquals(gpsFixesCountFromManeuverEndToNextManeuverStart,
                 deserialized.getCurveWithUnstableCourseAndSpeed().getGpsFixesCountFromManeuverEndToNextManeuverStart());
-        assertEquals(distanceSailedWithinManeuver,
-                deserialized.getCurveWithUnstableCourseAndSpeed().getDistanceSailedWithinManeuver());
-        assertEquals(distanceSailedWithinManeuverTowardMiddleAngleProjection, deserialized
-                .getCurveWithUnstableCourseAndSpeed().getDistanceSailedWithinManeuverTowardMiddleAngleProjection());
-        assertEquals(distanceSailedIfNotManeuvering,
-                deserialized.getCurveWithUnstableCourseAndSpeed().getDistanceSailedIfNotManeuvering());
-        assertEquals(distanceSailedTowardMiddleAngleProjectionIfNotManeuvering, deserialized
-                .getCurveWithUnstableCourseAndSpeed().getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering());
         assertEquals(gpsFixesCount, deserialized.getCurveWithUnstableCourseAndSpeed().getGpsFixesCount());
         assertEquals(longestIntervalBetweenTwoFixes,
                 deserialized.getCurveWithUnstableCourseAndSpeed().getLongestIntervalBetweenTwoFixes());
@@ -219,14 +198,6 @@ public class EstimationDataSerializationDeserializationTest {
         assertEquals(courseAtMaxTurningRate, deserialized.getMainCurve().getCourseAtMaxTurningRate());
         assertEquals(maxTurningRateTimePoint, deserialized.getMainCurve().getTimePointOfMaxTurningRate());
         assertEquals(gpsFixesCountMainCurve, deserialized.getMainCurve().getGpsFixesCount());
-        assertEquals(distanceSailedWithinManeuverMainCurve,
-                deserialized.getMainCurve().getDistanceSailedWithinManeuver());
-        assertEquals(distanceSailedWithinManeuverTowardMiddleAngleProjectionMainCurve,
-                deserialized.getMainCurve().getDistanceSailedWithinManeuverTowardMiddleAngleProjection());
-        assertEquals(distanceSailedIfNotManeuveringMainCurve,
-                deserialized.getMainCurve().getDistanceSailedIfNotManeuvering());
-        assertEquals(distanceSailedTowardMiddleAngleProjectionIfNotManeuveringMainCurve,
-                deserialized.getMainCurve().getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering());
         assertEquals(longestIntervalBetweenTwoFixesMainCurve,
                 deserialized.getMainCurve().getLongestIntervalBetweenTwoFixes());
     }
@@ -252,20 +223,13 @@ public class EstimationDataSerializationDeserializationTest {
         MillisecondsTimePoint maxTurningRateTimePoint = new MillisecondsTimePoint(
                 dateFormat.parse("06/23/2011-15:28:33"));
         int gpsFixesCountMainCurve = 0;
-        Distance distanceSailedWithinManeuverMainCurve = null;
-        Distance distanceSailedWithinManeuverTowardMiddleAngleProjectionMainCurve = null;
-        Distance distanceSailedIfNotManeuveringMainCurve = null;
-        Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuveringMainCurve = null;
         Duration longestIntervalBetweenTwoFixesMainCurve = Duration.NULL;
         ManeuverMainCurveWithEstimationData mainCurve = new ManeuverMainCurveWithEstimationDataImpl(
                 timePointMainCurveBefore, timePointMainCurveAfter, speedWithBearingMainCurveBefore,
                 speedWithBearingMainCurveAfter, directionChangeMainCurveInDegrees, lowestSpeed, lowestSpeedTimePoint,
                 highestSpeed, highestSpeedTimePoint, maxTurningRateTimePoint, maxTurningRateInDegreesPerSecond,
-                courseAtMaxTurningRate, distanceSailedWithinManeuverMainCurve,
-                distanceSailedWithinManeuverTowardMiddleAngleProjectionMainCurve,
-                distanceSailedIfNotManeuveringMainCurve,
-                distanceSailedTowardMiddleAngleProjectionIfNotManeuveringMainCurve, avgTurningRateInDegreesPerSecond,
-                gpsFixesCountMainCurve, longestIntervalBetweenTwoFixesMainCurve);
+                courseAtMaxTurningRate, avgTurningRateInDegreesPerSecond, gpsFixesCountMainCurve,
+                longestIntervalBetweenTwoFixesMainCurve);
 
         MillisecondsTimePoint timePointBefore = new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:10"));
         MillisecondsTimePoint timePointAfter = new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:28:55"));
@@ -273,30 +237,24 @@ public class EstimationDataSerializationDeserializationTest {
         SpeedWithBearing speedWithBearingAfter = new KnotSpeedWithBearingImpl(7.5, new DegreeBearingImpl(101.1));
         double directionChangeInDegrees = 81.1;
         Speed maneuverLowestSpeed = new KnotSpeedImpl(2.9);
+        Speed maneuverHighestSpeed = new KnotSpeedImpl(5.4);
         SpeedWithBearing avgSpeedWithBearingBefore = null;
         SpeedWithBearing avgSpeedWithBearingAfter = null;
         Duration durationFromPreviousManeuverEndToManeuverStart = null;
         Duration durationFromManeuverEndToNextManeuverStart = null;
         int gpsFixesCountFromPreviousManeuverEndToManeuverStart = 0;
         int gpsFixesCountFromManeuverEndToNextManeuverStart = 0;
-        Distance distanceSailedWithinManeuver = null;
-        Distance distanceSailedWithinManeuverTowardMiddleAngleProjection = null;
-        Distance distanceSailedIfNotManeuvering = null;
-        Distance distanceSailedTowardMiddleAngleProjectionIfNotManeuvering = null;
         int gpsFixesCount = 133445;
         Duration longestIntervalBetweenTwoFixes = Duration.NULL;
         Duration intervalBetweenLastFixOfCurveAndNextFix = Duration.NULL;
         Duration intervalBetweenFirstFixOfCurveAndPreviousFix = Duration.NULL;
         ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl curve = new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl(
                 timePointBefore, timePointAfter, speedWithBearingBefore, speedWithBearingAfter,
-                directionChangeInDegrees, maneuverLowestSpeed, avgSpeedWithBearingBefore,
+                directionChangeInDegrees, maneuverLowestSpeed, maneuverHighestSpeed, avgSpeedWithBearingBefore,
                 durationFromPreviousManeuverEndToManeuverStart, gpsFixesCountFromPreviousManeuverEndToManeuverStart,
                 avgSpeedWithBearingAfter, durationFromManeuverEndToNextManeuverStart,
-                gpsFixesCountFromManeuverEndToNextManeuverStart, distanceSailedWithinManeuver,
-                distanceSailedWithinManeuverTowardMiddleAngleProjection, distanceSailedIfNotManeuvering,
-                distanceSailedTowardMiddleAngleProjectionIfNotManeuvering, gpsFixesCount,
-                longestIntervalBetweenTwoFixes, intervalBetweenLastFixOfCurveAndNextFix,
-                intervalBetweenFirstFixOfCurveAndPreviousFix);
+                gpsFixesCountFromManeuverEndToNextManeuverStart, gpsFixesCount, longestIntervalBetweenTwoFixes,
+                intervalBetweenLastFixOfCurveAndNextFix, intervalBetweenFirstFixOfCurveAndPreviousFix);
 
         Wind wind = null;
 
@@ -361,14 +319,6 @@ public class EstimationDataSerializationDeserializationTest {
                 .getCurveWithUnstableCourseAndSpeed().getGpsFixesCountFromPreviousManeuverEndToManeuverStart());
         assertEquals(gpsFixesCountFromManeuverEndToNextManeuverStart,
                 deserialized.getCurveWithUnstableCourseAndSpeed().getGpsFixesCountFromManeuverEndToNextManeuverStart());
-        assertEquals(distanceSailedWithinManeuver,
-                deserialized.getCurveWithUnstableCourseAndSpeed().getDistanceSailedWithinManeuver());
-        assertEquals(distanceSailedWithinManeuverTowardMiddleAngleProjection, deserialized
-                .getCurveWithUnstableCourseAndSpeed().getDistanceSailedWithinManeuverTowardMiddleAngleProjection());
-        assertEquals(distanceSailedIfNotManeuvering,
-                deserialized.getCurveWithUnstableCourseAndSpeed().getDistanceSailedIfNotManeuvering());
-        assertEquals(distanceSailedTowardMiddleAngleProjectionIfNotManeuvering, deserialized
-                .getCurveWithUnstableCourseAndSpeed().getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering());
         assertEquals(gpsFixesCount, deserialized.getCurveWithUnstableCourseAndSpeed().getGpsFixesCount());
         assertEquals(longestIntervalBetweenTwoFixes,
                 deserialized.getCurveWithUnstableCourseAndSpeed().getLongestIntervalBetweenTwoFixes());
@@ -394,14 +344,6 @@ public class EstimationDataSerializationDeserializationTest {
         assertEquals(courseAtMaxTurningRate, deserialized.getMainCurve().getCourseAtMaxTurningRate());
         assertEquals(maxTurningRateTimePoint, deserialized.getMainCurve().getTimePointOfMaxTurningRate());
         assertEquals(gpsFixesCountMainCurve, deserialized.getMainCurve().getGpsFixesCount());
-        assertEquals(distanceSailedWithinManeuverMainCurve,
-                deserialized.getMainCurve().getDistanceSailedWithinManeuver());
-        assertEquals(distanceSailedWithinManeuverTowardMiddleAngleProjectionMainCurve,
-                deserialized.getMainCurve().getDistanceSailedWithinManeuverTowardMiddleAngleProjection());
-        assertEquals(distanceSailedIfNotManeuveringMainCurve,
-                deserialized.getMainCurve().getDistanceSailedIfNotManeuvering());
-        assertEquals(distanceSailedTowardMiddleAngleProjectionIfNotManeuveringMainCurve,
-                deserialized.getMainCurve().getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering());
         assertEquals(longestIntervalBetweenTwoFixesMainCurve,
                 deserialized.getMainCurve().getLongestIntervalBetweenTwoFixes());
     }

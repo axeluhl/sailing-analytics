@@ -16,7 +16,6 @@ public class ManeuverForDataAnalysis {
     private final double mainCurveDurationInSeconds;
     private final double maneuverDurationInSeconds;
     private final double recoveryPhaseDurationInSeconds;
-    private final double timeLossInSeconds;
     private final boolean clean;
     private final ManeuverCategory maneuverCategory;
     private final double lowestSpeedVsExitingSpeedRatio;
@@ -42,11 +41,11 @@ public class ManeuverForDataAnalysis {
             Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
             Double relativeBearingToNextMarkBefore, Double relativeBearingToNextMarkAfter,
             double mainCurveDurationInSeconds, double maneuverDurationInSeconds, double recoveryPhaseDurationInSeconds,
-            double timeLossInSeconds, boolean clean, ManeuverCategory maneuverCategory, double twaBeforeInDegrees,
-            double twaAfterInDegrees, double twsInKnots, double speedBeforeInKnots, double speedAfterInKnots,
-            double twaAtMiddleCourseInDegrees, double twaAtMiddleCourseMainCurveInDegrees,
-            double twaAtLowestSpeedInDegrees, double twaAtMaxTurningRateInDegrees, boolean starboardManeuver,
-            double scaledSpeedBeforeInKnots, double scaledSpeedAfterInKnots, boolean markPassing) {
+            boolean clean, ManeuverCategory maneuverCategory, double twaBeforeInDegrees, double twaAfterInDegrees,
+            double twsInKnots, double speedBeforeInKnots, double speedAfterInKnots, double twaAtMiddleCourseInDegrees,
+            double twaAtMiddleCourseMainCurveInDegrees, double twaAtLowestSpeedInDegrees,
+            double twaAtMaxTurningRateInDegrees, boolean starboardManeuver, double scaledSpeedBeforeInKnots,
+            double scaledSpeedAfterInKnots, boolean markPassing) {
         this.maneuverType = maneuverType;
         this.absoluteTotalCourseChangeInDegrees = absoluteTotalCourseChangeInDegrees;
         this.absoluteTotalCourseChangeWithinMainCurveInDegrees = absoluteTotalCourseChangeWithinMainCurveInDegrees;
@@ -63,7 +62,6 @@ public class ManeuverForDataAnalysis {
         this.mainCurveDurationInSeconds = mainCurveDurationInSeconds;
         this.maneuverDurationInSeconds = maneuverDurationInSeconds;
         this.recoveryPhaseDurationInSeconds = recoveryPhaseDurationInSeconds;
-        this.timeLossInSeconds = timeLossInSeconds;
         this.clean = clean;
         this.maneuverCategory = maneuverCategory;
         this.twaBeforeInDegrees = twaBeforeInDegrees;
@@ -131,10 +129,6 @@ public class ManeuverForDataAnalysis {
 
     public double getRecoveryPhaseDurationInSeconds() {
         return recoveryPhaseDurationInSeconds;
-    }
-
-    public double getTimeLossInSeconds() {
-        return timeLossInSeconds;
     }
 
     public ManeuverTypeForDataAnalysis getManeuverType() {

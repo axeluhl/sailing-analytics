@@ -74,5 +74,12 @@ public interface ManeuverCurveBoundaries {
      * @return The lowest speed within maneuver curve
      */
     Speed getLowestSpeed();
+    
+    /**
+     * Gets the highest speed sailed within the maneuver curve.
+     * 
+     * @return The highest speed within maneuver curve
+     */
+    Speed getHighestSpeed();
 
 }

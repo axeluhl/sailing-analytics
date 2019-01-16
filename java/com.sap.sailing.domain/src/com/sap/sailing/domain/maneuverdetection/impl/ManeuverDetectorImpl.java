@@ -504,24 +504,38 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
                 speedWithBearingSteps, timePoint);
         double courseChangeInDegreesBefore = 0;
         Speed lowestSpeedBefore = null;
+        Speed highestSpeedBefore = null;
         SpeedWithBearingStep lastStepBefore = null;
         for (SpeedWithBearingStep step : splitSteps.getA()) {
             courseChangeInDegreesBefore += step.getCourseChangeInDegrees();
-            if (lowestSpeedBefore == null || lowestSpeedBefore.compareTo(step.getSpeedWithBearing()) > 0) {
+            if (lastStepBefore == null) {
                 lowestSpeedBefore = step.getSpeedWithBearing();
+                highestSpeedBefore = lowestSpeedBefore;
+            }
+            if (lowestSpeedBefore.compareTo(step.getSpeedWithBearing()) > 0) {
+                lowestSpeedBefore = step.getSpeedWithBearing();
+            }
+            if (highestSpeedBefore.compareTo(step.getSpeedWithBearing()) < 0) {
+                highestSpeedBefore = step.getSpeedWithBearing();
             }
             lastStepBefore = step;
         }
         double courseChangeInDegreesAfter = 0;
         Speed lowestSpeedAfter = null;
+        Speed highestSpeedAfter = null;
         SpeedWithBearingStep firstStepAfter = null;
         for (SpeedWithBearingStep step : splitSteps.getB()) {
             if (firstStepAfter == null) {
                 firstStepAfter = step;
+                lowestSpeedAfter = step.getSpeedWithBearing();
+                highestSpeedAfter = lowestSpeedAfter;
             }
             courseChangeInDegreesAfter += step.getCourseChangeInDegrees();
-            if (lowestSpeedAfter == null || lowestSpeedAfter.compareTo(step.getSpeedWithBearing()) > 0) {
+            if (lowestSpeedAfter.compareTo(step.getSpeedWithBearing()) > 0) {
                 lowestSpeedAfter = step.getSpeedWithBearing();
+            }
+            if (highestSpeedAfter.compareTo(step.getSpeedWithBearing()) < 0) {
+                highestSpeedAfter = step.getSpeedWithBearing();
             }
         }
         if (lastStepBefore == null || firstStepAfter == null) {
@@ -530,11 +544,12 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         ManeuverCurveBoundaries firstManeuverDetails = new ManeuverCurveBoundariesImpl(
                 maneuverUnstableCourseAndSpeedBoundaries.getTimePointBefore(), lastStepBefore.getTimePoint(),
                 maneuverUnstableCourseAndSpeedBoundaries.getSpeedWithBearingBefore(),
-                lastStepBefore.getSpeedWithBearing(), courseChangeInDegreesBefore, lowestSpeedBefore);
+                lastStepBefore.getSpeedWithBearing(), courseChangeInDegreesBefore, lowestSpeedBefore,
+                highestSpeedBefore);
         ManeuverCurveBoundaries lastManeuverDetails = new ManeuverCurveBoundariesImpl(firstStepAfter.getTimePoint(),
                 maneuverUnstableCourseAndSpeedBoundaries.getTimePointAfter(), firstStepAfter.getSpeedWithBearing(),
                 maneuverUnstableCourseAndSpeedBoundaries.getSpeedWithBearingAfter(), courseChangeInDegreesAfter,
-                lowestSpeedAfter);
+                lowestSpeedAfter, highestSpeedAfter);
         return new Pair<>(firstManeuverDetails, lastManeuverDetails);
     }
 
@@ -899,11 +914,20 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
                 && lowestSpeed.compareTo(afterManeuverSectionExtension.getLowestSpeedWithinExtensionArea()) > 0) {
             lowestSpeed = afterManeuverSectionExtension.getLowestSpeedWithinExtensionArea();
         }
+        Speed highestSpeed = maneuverMainCurveDetails.getHighestSpeed();
+        if (highestSpeed == null || beforeManeuverSectionExtension.getHighestSpeedWithinExtensionArea() != null
+                && highestSpeed.compareTo(beforeManeuverSectionExtension.getHighestSpeedWithinExtensionArea()) < 0) {
+            highestSpeed = beforeManeuverSectionExtension.getHighestSpeedWithinExtensionArea();
+        }
+        if (highestSpeed == null || afterManeuverSectionExtension.getHighestSpeedWithinExtensionArea() != null
+                && highestSpeed.compareTo(afterManeuverSectionExtension.getHighestSpeedWithinExtensionArea()) < 0) {
+            highestSpeed = afterManeuverSectionExtension.getHighestSpeedWithinExtensionArea();
+        }
         return new ManeuverCurveBoundariesImpl(beforeManeuverSectionExtension.getExtensionTimePoint(),
                 afterManeuverSectionExtension.getExtensionTimePoint(),
                 beforeManeuverSectionExtension.getSpeedWithBearingAtExtensionTimePoint(),
                 afterManeuverSectionExtension.getSpeedWithBearingAtExtensionTimePoint(), totalCourseChangeInDegrees,
-                lowestSpeed);
+                lowestSpeed, highestSpeed);
     }
 
     /**
@@ -953,6 +977,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         TimePoint stableBearingAnalysisUntil = maneuverStart == null ? maneuverMainCurveDetails.getTimePointBefore()
                 : maneuverStart.getExtensionTimePoint();
         Speed lowestSpeed = maneuverStart == null ? null : maneuverStart.getLowestSpeedWithinExtensionArea();
+        Speed highestSpeed = maneuverStart == null ? null : maneuverStart.getHighestSpeedWithinExtensionArea();
         double courseChangeSinceManeuverMainCurveInDegrees = maneuverStart == null ? 0
                 : maneuverStart.getCourseChangeInDegreesWithinExtensionArea();
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, earliestTimePointForSpeedTrendAnalysis,
@@ -968,15 +993,19 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
                     || lowestSpeed.compareTo(stableBearingExtension.getLowestSpeedWithinExtensionArea()) > 0) {
                 lowestSpeed = stableBearingExtension.getLowestSpeedWithinExtensionArea();
             }
+            if (highestSpeed == null
+                    || highestSpeed.compareTo(stableBearingExtension.getHighestSpeedWithinExtensionArea()) < 0) {
+                highestSpeed = stableBearingExtension.getHighestSpeedWithinExtensionArea();
+            }
         }
         return maneuverStart != null
                 ? new ManeuverCurveBoundaryExtension(maneuverStart.getExtensionTimePoint(),
                         maneuverStart.getSpeedWithBearingAtExtensionTimePoint(),
                         courseChangeSinceManeuverMainCurveInDegrees
                                 + maneuverStart.getCourseChangeInDegreesWithinExtensionArea(),
-                        lowestSpeed)
+                        lowestSpeed, highestSpeed)
                 : new ManeuverCurveBoundaryExtension(maneuverMainCurveDetails.getTimePointBefore(),
-                        maneuverMainCurveDetails.getSpeedWithBearingBefore(), 0, null);
+                        maneuverMainCurveDetails.getSpeedWithBearingBefore(), 0, null, null);
     }
 
     private boolean isCourseChangeLimitExceededForCurveExtension(
@@ -1037,6 +1066,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         TimePoint stableBearingAnalysisFrom = maneuverEnd == null ? maneuverMainCurveDetails.getTimePointAfter()
                 : maneuverEnd.getExtensionTimePoint();
         Speed lowestSpeed = maneuverEnd == null ? null : maneuverEnd.getLowestSpeedWithinExtensionArea();
+        Speed highestSpeed = maneuverEnd == null ? null : maneuverEnd.getHighestSpeedWithinExtensionArea();
         double courseChangeSinceManeuverMainCurveInDegrees = maneuverEnd == null ? 0
                 : maneuverEnd.getCourseChangeInDegreesWithinExtensionArea();
         stepsToAnalyze = getSpeedWithBearingStepsWithinTimeRange(stepsToAnalyze, stableBearingAnalysisFrom,
@@ -1052,13 +1082,17 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
                     || lowestSpeed.compareTo(stableBearingExtension.getLowestSpeedWithinExtensionArea()) > 0) {
                 lowestSpeed = stableBearingExtension.getLowestSpeedWithinExtensionArea();
             }
+            if (highestSpeed == null
+                    || highestSpeed.compareTo(stableBearingExtension.getHighestSpeedWithinExtensionArea()) < 0) {
+                highestSpeed = stableBearingExtension.getHighestSpeedWithinExtensionArea();
+            }
         }
         return maneuverEnd != null
                 ? new ManeuverCurveBoundaryExtension(maneuverEnd.getExtensionTimePoint(),
                         maneuverEnd.getSpeedWithBearingAtExtensionTimePoint(),
-                        courseChangeSinceManeuverMainCurveInDegrees, lowestSpeed)
+                        courseChangeSinceManeuverMainCurveInDegrees, lowestSpeed, highestSpeed)
                 : new ManeuverCurveBoundaryExtension(maneuverMainCurveDetails.getTimePointAfter(),
-                        maneuverMainCurveDetails.getSpeedWithBearingAfter(), 0, null);
+                        maneuverMainCurveDetails.getSpeedWithBearingAfter(), 0, null, null);
     }
 
     protected Duration getMaxDurationForAfterManeuverSectionExtension(Duration approximateManeuverDuration) {
@@ -1097,14 +1131,13 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             localMaximumSearch = step -> globalMaximumSearchUntilTimePoint == null ? false
                     : step.getTimePoint().after(globalMaximumSearchUntilTimePoint);
         }
-
         double previousSpeedInKnots = 0;
         double maxSpeedInKnots = 0;
         SpeedWithBearingStep stepWithMaxSpeed = null;
         double courseChangeSinceMainCurveBeforeSpeedMaximumInDegrees = 0;
         double courseChangeAfterStepWithSpeedMaximum = 0;
         Speed lowestSpeed = null;
-
+        Speed highestSpeed = null;
         for (SpeedWithBearingStep speedWithBearingStep : finalStepsToAnalyze) {
             courseChangeAfterStepWithSpeedMaximum += speedWithBearingStep.getCourseChangeInDegrees();
             double speedInKnots = speedWithBearingStep.getSpeedWithBearing().getKnots();
@@ -1123,6 +1156,9 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
                 if (lowestSpeed == null || lowestSpeed.compareTo(speedWithBearingStep.getSpeedWithBearing()) > 0) {
                     lowestSpeed = speedWithBearingStep.getSpeedWithBearing();
                 }
+                if (highestSpeed == null || highestSpeed.compareTo(speedWithBearingStep.getSpeedWithBearing()) < 0) {
+                    highestSpeed = speedWithBearingStep.getSpeedWithBearing();
+                }
             }
             previousSpeedInKnots = speedInKnots;
         }
@@ -1135,7 +1171,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         return stepWithMaxSpeed == null ? null
                 : new ManeuverCurveBoundaryExtension(stepWithMaxSpeed.getTimePoint(),
                         stepWithMaxSpeed.getSpeedWithBearing(), courseChangeSinceMainCurveBeforeSpeedMaximumInDegrees,
-                        lowestSpeed);
+                        lowestSpeed, highestSpeed);
     }
 
     private Iterable<SpeedWithBearingStep> cloneAndReverseIterable(SpeedWithBearingStepsIterable stepsToAnalyze) {
@@ -1171,12 +1207,11 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         } else {
             finalStepsToAnalyze = stepsToAnalyze;
         }
-
         SpeedWithBearingStep previousStep = null;
         SpeedWithBearingStep stepUntilStableBearing = null;
         double courseChangeUntilStepWithStableBearingInDegrees = 0;
         Speed lowestSpeed = null;
-
+        Speed highestSpeed = null;
         for (SpeedWithBearingStep currentStep : finalStepsToAnalyze) {
             if (previousStep != null) {
                 double courseChangePerSecondInDegrees = Math.abs(currentStep.getCourseChangeInDegrees()
@@ -1189,6 +1224,9 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             if (lowestSpeed == null || lowestSpeed.compareTo(currentStep.getSpeedWithBearing()) > 0) {
                 lowestSpeed = currentStep.getSpeedWithBearing();
             }
+            if (highestSpeed == null || highestSpeed.compareTo(currentStep.getSpeedWithBearing()) < 0) {
+                highestSpeed = currentStep.getSpeedWithBearing();
+            }
             courseChangeUntilStepWithStableBearingInDegrees += currentStep.getCourseChangeInDegrees();
             previousStep = currentStep;
         }
@@ -1198,7 +1236,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         return stepUntilStableBearing == null ? null
                 : new ManeuverCurveBoundaryExtension(stepUntilStableBearing.getTimePoint(),
                         stepUntilStableBearing.getSpeedWithBearing(), courseChangeUntilStepWithStableBearingInDegrees,
-                        lowestSpeed);
+                        lowestSpeed, highestSpeed);
     }
 
     /**
@@ -1227,6 +1265,8 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         double maxTurningRateInDegreesPerSecondCandidate = 0;
         Speed lowestSpeed = null;
         Speed lowestSpeedCandidate = null;
+        Speed highestSpeed = null;
+        Speed highestSpeedCandidate = null;
         TimePoint maneuverTimePoint = null;
         TimePoint maneuverTimePointCandidate = null;
         TimePoint previousTimePoint = null;
@@ -1255,7 +1295,8 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
                     bestBoundariesBeforeReset = new ManeuverMainCurveDetailsWithBearingSteps(
                             refinedTimePointBeforeManeuver, refinedTimePointAfterManeuver, maneuverTimePoint,
                             refinedSpeedWithBearingBeforeManeuver, refinedSpeedWithBearingAfterManeuver,
-                            maxCourseChangeInDegrees, maxTurningRateInDegreesPerSecond, lowestSpeed, null);
+                            maxCourseChangeInDegrees, maxTurningRateInDegreesPerSecond, lowestSpeed, highestSpeed,
+                            null);
                 }
                 currentCourseChangeInDegrees = 0;
                 maxCourseChangeInDegrees = 0;
@@ -1266,12 +1307,15 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
                 turningRateMinimumReachedAtMainCurveBeginning = false;
                 maneuverTimePoint = maneuverTimePointCandidate = null;
                 maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecondCandidate = 0;
-                lowestSpeed = lowestSpeedCandidate = entry.getSpeedWithBearing();
+                highestSpeed = highestSpeedCandidate = lowestSpeed = lowestSpeedCandidate = entry.getSpeedWithBearing();
             } else {
                 turningRateMinimumReachedAtMainCurveBeginning = true;
             }
             if (lowestSpeedCandidate == null || lowestSpeedCandidate.compareTo(entry.getSpeedWithBearing()) > 0) {
                 lowestSpeedCandidate = entry.getSpeedWithBearing();
+            }
+            if (highestSpeedCandidate == null || highestSpeedCandidate.compareTo(entry.getSpeedWithBearing()) < 0) {
+                highestSpeedCandidate = entry.getSpeedWithBearing();
             }
             // Check whether the course change is performed in the target direction of maneuver. If yes, consider
             // the step to locate the maneuver time point with the highest turning rate within main curve.
@@ -1293,6 +1337,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
                 maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecondCandidate;
                 maneuverTimePoint = maneuverTimePointCandidate;
                 lowestSpeed = lowestSpeedCandidate;
+                highestSpeed = highestSpeedCandidate;
             }
             previousTimePoint = timePoint;
         }
@@ -1308,6 +1353,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             maxCourseChangeInDegrees = bestBoundariesBeforeReset.getDirectionChangeInDegrees();
             maxTurningRateInDegreesPerSecond = bestBoundariesBeforeReset.getMaxTurningRateInDegreesPerSecond();
             lowestSpeed = bestBoundariesBeforeReset.getLowestSpeed();
+            highestSpeed = bestBoundariesBeforeReset.getHighestSpeed();
         }
         if (refinedTimePointBeforeManeuver == null) {
             // Should not occur, if bearingStepsToAnalyze.size() > 0 and first BearingStep.getCourseChangeInDegrees() ==
@@ -1325,7 +1371,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         ManeuverMainCurveDetailsWithBearingSteps mainCurveDetails = new ManeuverMainCurveDetailsWithBearingSteps(
                 refinedTimePointBeforeManeuver, refinedTimePointAfterManeuver, maneuverTimePoint,
                 refinedSpeedWithBearingBeforeManeuver, refinedSpeedWithBearingAfterManeuver, maxCourseChangeInDegrees,
-                maxTurningRateInDegreesPerSecond, lowestSpeed, maneuverMainCurveSpeedWithBearingSteps);
+                maxTurningRateInDegreesPerSecond, lowestSpeed, highestSpeed, maneuverMainCurveSpeedWithBearingSteps);
         return mainCurveDetails;
     }
 

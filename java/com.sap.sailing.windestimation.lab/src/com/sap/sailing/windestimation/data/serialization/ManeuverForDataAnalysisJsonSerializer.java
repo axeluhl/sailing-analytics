@@ -24,7 +24,6 @@ public class ManeuverForDataAnalysisJsonSerializer implements JsonSerializer<Man
     public static final String MANEUVER_DURATION_IN_SECONDS = "maneuverDuration";
     public static final String MAIN_CURVE_DURATION_IN_SECONDS = "mainCurveDuration";
     public static final String RECOVERY_PHASE_DURATION_IN_SECONDS = "recoveryPhaseDuration";
-    public static final String TIME_LOSS_IN_SECONDS = "timeLoss";
     public static final String CLEAN = "clean";
     public static final String MANEUVER_CATEGORY = "category";
     public static final String TWA_BEFORE_IN_DEGREES = "twaBefore";
@@ -61,7 +60,6 @@ public class ManeuverForDataAnalysisJsonSerializer implements JsonSerializer<Man
         json.put(MANEUVER_DURATION_IN_SECONDS, maneuver.getManeuverDurationInSeconds());
         json.put(MAIN_CURVE_DURATION_IN_SECONDS, maneuver.getMainCurveDurationInSeconds());
         json.put(RECOVERY_PHASE_DURATION_IN_SECONDS, maneuver.getRecoveryPhaseDurationInSeconds());
-        json.put(TIME_LOSS_IN_SECONDS, maneuver.getTimeLossInSeconds());
         json.put(CLEAN, maneuver.isClean());
         json.put(MANEUVER_CATEGORY, maneuver.getManeuverCategory().name());
         json.put(TWA_BEFORE_IN_DEGREES, maneuver.getTwaBeforeInDegrees());

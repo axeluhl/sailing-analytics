@@ -3,9 +3,9 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.maneuverdetection.ManeuverCurveBoundariesWithDetailedManeuverLoss;
 import com.sap.sailing.domain.maneuverdetection.ManeuverMainCurveWithEstimationData;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverMainCurveWithEstimationDataImpl;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.serialization.impl.ManeuverMainCurveWithEstimationDataJsonSerializer;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -17,14 +17,11 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverMainCurveWithEstimationDataJsonDeserializer
-        extends ManeuverCurveBoundariesWithDetailedManeuverLossJsonDeserializer {
+public class ManeuverMainCurveWithEstimationDataJsonDeserializer extends ManeuverCurveBoundariesJsonDeserializer {
 
     @Override
     public ManeuverMainCurveWithEstimationData deserialize(JSONObject object) throws JsonDeserializationException {
-        ManeuverCurveBoundariesWithDetailedManeuverLoss boundaries = super.deserialize(object);
-        Double highestSpeedInKnots = (Double) object
-                .get(ManeuverMainCurveWithEstimationDataJsonSerializer.HIGHEST_SPEED_IN_KNOTS);
+        ManeuverCurveBoundaries boundaries = super.deserialize(object);
         Double courseAtLowestSpeed = (Double) object
                 .get(ManeuverMainCurveWithEstimationDataJsonSerializer.COURSE_AT_LOWEST_SPEED);
         Double courseAtHighestSpeed = (Double) object
@@ -51,14 +48,11 @@ public class ManeuverMainCurveWithEstimationDataJsonDeserializer
                 new KnotSpeedWithBearingImpl(boundaries.getLowestSpeed().getKnots(),
                         new DegreeBearingImpl(courseAtLowestSpeed)),
                 new MillisecondsTimePoint(lowestSpeedTimePointMillis),
-                new KnotSpeedWithBearingImpl(highestSpeedInKnots, new DegreeBearingImpl(courseAtHighestSpeed)),
+                new KnotSpeedWithBearingImpl(boundaries.getHighestSpeed().getKnots(),
+                        new DegreeBearingImpl(courseAtHighestSpeed)),
                 new MillisecondsTimePoint(highestSpeedTimePointMillis),
                 new MillisecondsTimePoint(maxTurningRateTimePointMillis), maxTurningRateInDegreesPerSecond,
-                new DegreeBearingImpl(courseAtMaxTurningRate), boundaries.getDistanceSailedWithinManeuver(),
-                boundaries.getDistanceSailedWithinManeuverTowardMiddleAngleProjection(),
-                boundaries.getDistanceSailedIfNotManeuvering(),
-                boundaries.getDistanceSailedTowardMiddleAngleProjectionIfNotManeuvering(),
-                avgTurningRateInDegreesPerSecond, gpsFixesCount,
+                new DegreeBearingImpl(courseAtMaxTurningRate), avgTurningRateInDegreesPerSecond, gpsFixesCount,
                 new MillisecondsDurationImpl((long) (longestIntervalBetweenTwoFixes * 1000.0)));
     }
 

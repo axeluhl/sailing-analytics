@@ -85,13 +85,20 @@ public class LowGPSSamplingRateManeuverDetectorImpl extends AbstractManeuverDete
         } catch (NoWindException e) {
         }
         ManeuverType maneuverType;
+        SpeedWithBearing lowestSpeed;
+        SpeedWithBearing highestSpeed;
+        if (speedWithBearingOnApproximationAtBeginning.compareTo(speedWithBearingOnApproximationAtBeginning) < 0) {
+            lowestSpeed = speedWithBearingOnApproximationAtBeginning;
+            highestSpeed = speedWithBearingOnApproximationAtEnd;
+        } else {
+            lowestSpeed = speedWithBearingOnApproximationAtEnd;
+            highestSpeed = speedWithBearingOnApproximationAtBeginning;
+        }
         ManeuverCurveBoundaries maneuverCurve = new ManeuverCurveBoundariesImpl(
                 maneuverTimePoint.minus(getApproximateManeuverDuration().divide(2)),
                 maneuverTimePoint.plus(getApproximateManeuverDuration().times(3.0)),
                 speedWithBearingOnApproximationAtBeginning, speedWithBearingOnApproximationAtEnd,
-                totalCourseChangeInDegrees,
-                speedWithBearingOnApproximationAtBeginning.compareTo(speedWithBearingOnApproximationAtBeginning) < 0
-                        ? speedWithBearingOnApproximationAtBeginning : speedWithBearingOnApproximationAtEnd);
+                totalCourseChangeInDegrees, lowestSpeed, highestSpeed);
 
         if (wind != null) {
             if (getNumberOfTacks(maneuverCurve, wind) > 0) {
@@ -106,7 +113,8 @@ public class LowGPSSamplingRateManeuverDetectorImpl extends AbstractManeuverDete
                 Bearing toWindAfterManeuver = windBearing
                         .getDifferenceTo(speedWithBearingOnApproximationAtEnd.getBearing());
                 maneuverType = Math.abs(toWindBeforeManeuver.getDegrees()) < Math.abs(toWindAfterManeuver.getDegrees())
-                        ? ManeuverType.HEAD_UP : ManeuverType.BEAR_AWAY;
+                        ? ManeuverType.HEAD_UP
+                        : ManeuverType.BEAR_AWAY;
             }
         } else {
             // no wind information; marking as UNKNOWN
