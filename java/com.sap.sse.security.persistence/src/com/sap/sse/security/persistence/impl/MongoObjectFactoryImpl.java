@@ -23,7 +23,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         sessionCollection = mongoDatabase.getCollection(CollectionNames.SESSIONS.name());
         sessionCollection.createIndex(new Document().
                 append(FieldNames.CACHE_NAME.name(), 1).
-                append(FieldNames.SESSION_ID.name(), 1), new IndexOptions().name("sessionid"));
+                append(FieldNames.SESSION_ID.name(), 1), new IndexOptions().name("cachenameandsessionid"));
     }
 
     private Document getKey(String cacheName, Session session) {

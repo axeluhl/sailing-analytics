@@ -32,7 +32,6 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
@@ -153,13 +152,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Activator.setSecurityService(this);
         }
         operationsSentToMasterForReplication = new HashSet<>();
-        cacheManager = loadReplicationCacheManagerContents();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = store;
         this.mailServiceTracker = mailServiceTracker;
         // Create default users if no users exist yet.
         initEmptyStore();
         Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
+        cacheManager = loadReplicationCacheManagerContents();
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
         final Section urlsSection = shiroConfiguration.getSection("urls");
@@ -185,9 +184,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final ReplicatingCacheManager result = new ReplicatingCacheManager();
         for (Entry<String, Set<Session>> cacheNameAndSessions : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSessionsByCacheName().entrySet()) {
             final String cacheName = cacheNameAndSessions.getKey();
-            final Cache<Object, Object> cache = result.getCache(cacheName);
+            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName);
             for (final Session session : cacheNameAndSessions.getValue()) {
-                cache.put(session.getId(), session);
+                cache.put(session.getId(), session, /* store */ false);
                 count++;
             }
         }

@@ -56,6 +56,10 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
 
     @Override
     public V put(K key, V value) throws CacheException {
+        return put(key, value, /* store */ true);
+    }
+
+    public V put(K key, V value, boolean store) throws CacheException {
         if (logger.isLoggable(Level.FINER)) {
             logger.finer("put("+key+", "+value+") into cache "+name+"@"+System.identityHashCode(this));
             if (value instanceof Session) {
@@ -67,7 +71,7 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         final String myName = name;
         securityService.replicate(s->
             s.getCacheManager().getCache(myName).put(key, value));
-        if (value instanceof Session) {
+        if (store && value instanceof Session) {
             securityService.storeSession(getName(), (Session) value);
         }
         return result;
