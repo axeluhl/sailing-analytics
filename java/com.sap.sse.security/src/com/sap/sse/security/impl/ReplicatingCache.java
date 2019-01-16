@@ -67,6 +67,9 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         final String myName = name;
         securityService.replicate(s->
             s.getCacheManager().getCache(myName).put(key, value));
+        if (value instanceof Session) {
+            securityService.storeSession(getName(), (Session) value);
+        }
         return result;
     }
 
@@ -89,6 +92,9 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         final String myName = name;
         securityService.replicate(s->
             s.getCacheManager().getCache(myName).remove(key));
+        if (result instanceof Session) {
+            securityService.removeSession(getName(), (Session) result);
+        }
         return result;
     }
 
@@ -99,6 +105,7 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         securityService.replicate(s->{ 
             s.getCacheManager().getCache(myName).clear(); return null;
         });
+        securityService.removeAllSessions();
     }
 
     @Override

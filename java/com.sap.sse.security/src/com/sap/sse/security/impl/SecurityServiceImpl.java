@@ -32,6 +32,7 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
@@ -40,6 +41,7 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.mgt.CachingSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.Factory;
 import org.apache.shiro.web.config.WebIniSecurityManagerFactory;
@@ -85,6 +87,7 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -150,7 +153,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Activator.setSecurityService(this);
         }
         operationsSentToMasterForReplication = new HashSet<>();
-        cacheManager = new ReplicatingCacheManager();
+        cacheManager = loadReplicationCacheManagerContents();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = store;
         this.mailServiceTracker = mailServiceTracker;
@@ -174,6 +177,22 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
+    }
+
+    private ReplicatingCacheManager loadReplicationCacheManagerContents() {
+        logger.info("Loading session cache manager contents");
+        int count = 0;
+        final ReplicatingCacheManager result = new ReplicatingCacheManager();
+        for (Entry<String, Set<Session>> cacheNameAndSessions : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSessionsByCacheName().entrySet()) {
+            final String cacheName = cacheNameAndSessions.getKey();
+            final Cache<Object, Object> cache = result.getCache(cacheName);
+            for (final Session session : cacheNameAndSessions.getValue()) {
+                cache.put(session.getId(), session);
+                count++;
+            }
+        }
+        logger.info("Loaded "+count+" sessions");
+        return result;
     }
 
     @Override
@@ -1101,5 +1120,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public <T> T getPreferenceObject(String username, String key) {
         ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         return store.getPreferenceObject(username, key);
+    }
+
+    @Override
+    public void storeSession(String cacheName, Session session) {
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSession(cacheName, session);
+    }
+
+    @Override
+    public void removeSession(String cacheName, Session session) {
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().removeSession(cacheName, session);
+    }
+
+    @Override
+    public void removeAllSessions() {
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().removeAllSessions();
     }
 }

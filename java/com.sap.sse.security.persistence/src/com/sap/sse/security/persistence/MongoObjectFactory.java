@@ -4,8 +4,10 @@ import org.apache.shiro.session.Session;
 
 public interface MongoObjectFactory {
 
-    void storeSession(Session session);
+    void storeSession(String cacheName, Session session);
 
-    void removeSession(Session session);
+    void removeSession(String cacheName, Session session);
+
+    void removeAllSessions();
 
 }
