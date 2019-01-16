@@ -26,6 +26,7 @@ do
 done
 
 CONFIGFILE=$(mktemp mylocalconfigXXXX.xml)
+RESPONSE_HEADERS=$(mktemp responseheadersXXXX)
 HUDSON_BASE_URL=https://hudson.sapsailing.com
 BUGZILLA_BASE=https://bugzilla.sapsailing.com/bugzilla
 COPY_TEMPLATE_JOB=CopyTemplate
@@ -46,6 +47,12 @@ N
 N
 s|<name>[^<]*</name>|<name>bug'$BUG_ID'</name>|
 }' "$CONFIGFILE"
-curl -s -XPOST "$HUDSON_BASE_URL/createItem?name=bug$BUG_ID" -u "$USERNAME:$PASSWORD" --data-binary "@$CONFIGFILE" -H "Content-Type:text/xml"
+curl -D "$RESPONSE_HEADERS" -s -XPOST "$HUDSON_BASE_URL/createItem?name=bug$BUG_ID" -u "$USERNAME:$PASSWORD" --data-binary "@$CONFIGFILE" -H "Content-Type:text/xml" >/dev/null 2>/dev/null
+RESPONSE_CODE=$(cat "$RESPONSE_HEADERS" | head -n 1 | cut -d ' ' -f2 )
+if [[ "$RESPONSE_CODE" =~ "2.." ]]; then
+  echo "Find your new, enabled Hudson job at $HUDSON_BASE_URL/job/bug$BUG_ID/"
+else
+  echo "Error. HTTP response code $RESPONSE_CODE. Did the job already exist?"
+fi
 rm "$CONFIGFILE"
-echo "Find your new, enabled Hudson job at $HUDSON_BASE_URL/job/bug$BUG_ID/"
+rm "$RESPONSE_HEADERS"
