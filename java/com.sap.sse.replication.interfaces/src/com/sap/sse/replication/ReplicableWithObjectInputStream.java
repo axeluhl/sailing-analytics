@@ -186,8 +186,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         // TODO bug4018: if sending the operation fails, e.g., because of an HTTP response code != 2xx, enqueue the operation for retry
         addOperationSentToMasterForReplication(operationWithResultWithIdWrapper);
         URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(this.getId().toString());
-        final HttpURLConnection connection = (HttpURLConnection) HttpUrlConnectionHelper.redirectConnection(url); // sets doOutput to true
-        connection.setRequestMethod("POST");
+        final HttpURLConnection connection = (HttpURLConnection) HttpUrlConnectionHelper.redirectConnection(url, "POST"); // sets doOutput to true
         logger.info("Sending operation "+operation+" to master "+masterDescriptor+"'s replicable with ID "+this+" for initial execution and replication");
         connection.connect();
         OutputStream outputStream = connection.getOutputStream();
