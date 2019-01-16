@@ -92,6 +92,7 @@
         <module>com.sap.sse.datamining.ui</module>
         <module>com.sap.sse.security</module>
         <module>com.sap.sse.security.persistence</module>
+        <module>com.sap.sse.security.persistence.test</module>
         <module>com.sap.sse.security.ui</module>
         <module>com.sap.sse.security.userstore.mongodb</module>
         <module>com.sap.sse.operationaltransformation</module>
