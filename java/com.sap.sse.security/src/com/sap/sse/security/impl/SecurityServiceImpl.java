@@ -136,11 +136,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
 
-    // private static final long MIGRATION_CHECK_DELAY = 20000;
-    
     private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();;
-
-    // private final Timer migrationTimer;
 
     private CachingSecurityManager securityManager;
     
@@ -169,8 +165,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
-    
-    // private TimerTask migrationCompleteCheckTask;
 
     private static Ini shiroConfiguration;
 
