@@ -92,12 +92,6 @@
             android:name=".service.MarkerService"
             android:exported="false"/>
 
-        <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
-            </intent-filter>
-        </receiver>
-
         <provider
             android:name=".provider.AnalyticsProvider"
             android:authorities="com.sap.sailing.android.buoy.positioning.app.provider.db"

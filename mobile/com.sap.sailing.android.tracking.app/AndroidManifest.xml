@@ -129,11 +129,6 @@
         </service>
         <!--<service android:name=".service.GcmIntentService" />-->
 
-        <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
-            </intent-filter>
-        </receiver>
         <receiver android:name=".receiver.PowerConnectionReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>

@@ -1,13 +1,20 @@
 package com.sap.sailing.android.shared.services.sending;
 
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
+import android.os.Binder;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
 
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -17,17 +24,14 @@ import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
-import android.app.Service;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Service that handles sending messages to a webservice. Deals with an offline setting by buffering the messages in a
@@ -76,6 +80,8 @@ public class MessageSendingService extends Service implements MessageSendingList
     protected final static String TAG = MessageSendingService.class.getSimpleName();
 
     private ConnectivityManager connectivityManager;
+    ConnectivityManager.NetworkCallback networkCallback;
+    private BroadcastReceiver connectivityChangedReceiver;
     private Handler handler;
     private final IBinder mBinder = new MessageSendingBinder();
     private MessagePersistenceManager persistenceManager;
@@ -281,31 +287,34 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     private void handleSendMessages(Intent intent) {
         ExLog.i(this, TAG, "Trying to send a message...");
-        if (!isConnected()) {
+        if (isConnected()) {
+            sendMessage(intent);
+        } else {
             ExLog.i(this, TAG, "Send aborted because there is no connection.");
             try {
                 persistenceManager.persistIntent(intent);
             } catch (UnsupportedEncodingException e) {
                 ExLog.e(this, TAG, "Could not persist message (unsupported encoding)");
             }
-            ConnectivityChangedReceiver.enable(this);
+            registerNetworkCallback();
             serviceLogger.onMessageSentFailed();
             reportApiConnectivity(APIConnectivity.notReachable);
             reportUnsentGPSFixesCount();
-        } else {
-            sendMessage(intent);
         }
     }
 
     private void handleDelayedMessages() {
         ExLog.i(this, TAG, "Trying to resend stored messages...");
         isHandlerSet = false;
-        if (!isConnected()) {
-            ExLog.i(this, TAG, "Resend aborted because there is no connection.");
-            ConnectivityChangedReceiver.enable(this);
-            serviceLogger.onMessageSentFailed();
-        } else {
+        if (isConnected()) {
+            // Reset callback and receiver which were registered when connection was lost
+            networkCallback = null;
+            connectivityChangedReceiver = null;
             sendNextDelayedMessage();
+        } else {
+            ExLog.i(this, TAG, "Resend aborted because there is no connection.");
+            registerNetworkCallback();
+            serviceLogger.onMessageSentFailed();
         }
     }
 
@@ -404,6 +413,27 @@ public class MessageSendingService extends Service implements MessageSendingList
     private boolean isConnected() {
         NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnected();
+    }
+
+    private void registerNetworkCallback() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (networkCallback == null) {
+                networkCallback = new ConnectivityManager.NetworkCallback() {
+                    @Override
+                    public void onAvailable(Network network) {
+                        connectivityManager.unregisterNetworkCallback(this);
+                        handleDelayedMessages();
+                    }
+                };
+                connectivityManager.registerDefaultNetworkCallback(networkCallback);
+            }
+        } else {
+            if (connectivityChangedReceiver == null) {
+                connectivityChangedReceiver = new ConnectivityChangedReceiver();
+                IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+                registerReceiver(connectivityChangedReceiver, filter);
+            }
+        }
     }
 
     /**
