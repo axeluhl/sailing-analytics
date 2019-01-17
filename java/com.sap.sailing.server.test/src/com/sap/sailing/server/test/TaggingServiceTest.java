@@ -135,7 +135,7 @@ public class TaggingServiceTest {
             assertSame(securityService.getSecurityManager(), ThreadContext.getSecurityManager());
             assertSame(subject, SecurityUtils.getSubject());
             assertEquals(username, subject.getPrincipal());
-            securityService.addPermissionForUser(username, editLeaderboardPermission);
+            securityService.addPermissionForUser(username, readAndEditLeaderboardPermission);
             securityService.unsetPreference(username,
                     serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
             final RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
