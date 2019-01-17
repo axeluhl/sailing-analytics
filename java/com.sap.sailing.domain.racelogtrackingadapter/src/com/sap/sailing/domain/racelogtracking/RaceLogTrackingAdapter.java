@@ -111,9 +111,10 @@ public interface RaceLogTrackingAdapter {
     /**
      * Copy the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the {@code to}
      * race logs. The {@link Mark}s and {@link ControlPoint}s are reused and not duplicated.
+     * @param priority TODO
      */
     void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
-            RacingEventService service);
+            RacingEventService service, int priority);
 
     void copyCompetitors(RaceColumn fromRaceColumn, Fleet fromFleet, Iterable<Pair<RaceColumn, Fleet>> toRaces);
 }

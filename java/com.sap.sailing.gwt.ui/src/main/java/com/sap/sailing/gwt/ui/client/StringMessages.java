@@ -2215,6 +2215,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String sailorProfileRemoveMessage();
     String showInDataMining();
     String confirmDeletion();
+    String priorityMustBeANonNegativeNumber();
     String selfServiceServer();
     String publicServer();
     String updatedServerSetupError();
