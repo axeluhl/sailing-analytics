@@ -9,9 +9,14 @@ import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.cache.CacheManager;
 
+import com.sap.sse.security.persistence.PersistenceFactory;
+
 /**
- * Wraps a {@link CacheManager} and makes all modifying operations replicate their changes. This happens by wrapping
- * all {@link Cache}s by an object that intercepts the writing operations, producing replicating operations.
+ * Wraps a {@link CacheManager} and makes all modifying operations replicate their changes and store them persistently.
+ * This happens by wrapping all {@link Cache}s by an object that intercepts the writing operations, producing
+ * replicating operations.
+ * 
+ * @see PersistenceFactory
  * 
  * @author Axel Uhl (D043530)
  *

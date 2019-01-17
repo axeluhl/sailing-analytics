@@ -32,7 +32,8 @@ Require-Bundle: javax.servlet;bundle-version="3.1.0",
  com.sap.sse,
  com.sap.sse.mail,
  com.sap.sse.shared.android,
- com.sap.sse.replication.interfaces;bundle-version="1.0.0"
+ com.sap.sse.replication.interfaces,
+ com.sap.sse.security.persistence
 Web-ContextPath: /security
 Export-Package: com.sap.sse.security,
  com.sap.sse.security.impl,
