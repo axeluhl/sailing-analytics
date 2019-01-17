@@ -362,6 +362,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
+import com.sap.sailing.domain.tracking.MailInvitationType;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -688,6 +689,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private static final int LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE = 100;
     
     private static final int LEADERBOARD_DIFFERENCE_CACHE_SIZE = 50;
+
+    private static final String MAILTYPE_PROPERTY = "com.sap.sailing.domain.tracking.MailInvitationType";
 
     private ResourceBundleStringMessages serverStringMessages;
 
@@ -7332,9 +7335,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (CompetitorDTO c : competitorDtos) {
             competitors.add(getCompetitor(c));
         }
+        MailInvitationType type = MailInvitationType
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
-                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName));
+                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
     }
     
     @Override
@@ -7343,8 +7348,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
-                emails, iOSAppUrl, androidAppUrl, getLocale(localeInfoName));
+        MailInvitationType type = MailInvitationType
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+        getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash, emails,
+                iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
     }
 
     @Override
