@@ -67,6 +67,8 @@ public class PermissionCheckerTest {
     public void setUp() throws UserGroupManagementException, UserManagementException {
         final String adminTenantName = "admin-tenant";
         userStore = new UserStoreImpl(adminTenantName);
+        userStore.ensureDefaultRolesExist();
+        userStore.loadAndMigrateUsers();
         accessControlStore = new AccessControlStoreImpl(userStore);
         AbstractCompositeAuthorizingRealm.setTestStores(userStore, accessControlStore);
         realm = new UsernamePasswordRealm();

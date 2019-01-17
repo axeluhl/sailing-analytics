@@ -35,6 +35,8 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
                     throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, UserGroupManagementException {
                 final UserStore userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), "TestDefaultTenant");
+                userStore.ensureDefaultRolesExist();
+                userStore.loadAndMigrateUsers();
                 final AccessControlStore accessControlStore = new AccessControlStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
                 final SecurityServiceImpl newMaster = new SecurityServiceImpl(userStore, accessControlStore);

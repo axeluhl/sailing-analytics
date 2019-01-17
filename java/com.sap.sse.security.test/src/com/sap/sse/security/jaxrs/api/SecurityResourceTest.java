@@ -51,6 +51,8 @@ public class SecurityResourceTest {
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
             store = new UserStoreImpl("TestDefaultTenant");
+            store.ensureDefaultRolesExist();
+            store.loadAndMigrateUsers();
             accessControlStore = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStore);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,

@@ -78,6 +78,8 @@ public class UserStoreWithPersistenceTest {
     private void newStore() {
         try {
             store = new UserStoreImpl("TestDefaultTenant");
+            store.ensureDefaultRolesExist();
+            store.loadAndMigrateUsers();
         } catch (UserGroupManagementException | UserManagementException e) {
             throw new RuntimeException(e);
         }
