@@ -25,7 +25,11 @@ import com.sap.sse.mail.SerializableMultipartMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.shared.media.ImageDescriptor;
 
-public abstract class RaceLogTrackingInvitationMailBuilder {
+/**
+ * Builder to create invitation mails for competitor and buoy tracking. This class ensures that the mail is being sent
+ * as text and html body to support a great variety of mail clients.
+ */
+abstract class RaceLogTrackingInvitationMailBuilder {
     private static final Logger LOG = Logger.getLogger(RaceLogTrackingInvitationMailBuilder.class.getName());
     /**
      * System separator can't be used, as the reader might use any mail client and OS. This line break seems to work
