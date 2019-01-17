@@ -18,6 +18,15 @@ public class HttpUrlConnectionHelper {
      */
     public static URLConnection redirectConnection(URL url, Duration timeout,
             Consumer<URLConnection> preConnectionModifier) throws MalformedURLException, IOException {
+        return redirectConnection(url, timeout, /* optional request method */ null, preConnectionModifier);
+    }
+    
+    /**
+     * Redirects the connection using the <code>Location</code> header. Make sure to set
+     * the timeout if you expect the response to take longer.
+     */
+    public static URLConnection redirectConnection(URL url, Duration timeout, String optionalRequestMethod,
+            Consumer<URLConnection> preConnectionModifier) throws MalformedURLException, IOException {
         URLConnection urlConnection = null;
         URL nextUrl = url;
         for (int counterOfRedirects = 0; counterOfRedirects <= HTTP_MAX_REDIRECTS; counterOfRedirects++) {
@@ -27,6 +36,9 @@ public class HttpUrlConnectionHelper {
                 preConnectionModifier.accept(urlConnection);
             }
             urlConnection.setDoOutput(true);
+            if (optionalRequestMethod != null) {
+                ((HttpURLConnection)urlConnection).setRequestMethod(optionalRequestMethod);
+            }
             urlConnection.setReadTimeout((int) timeout.asMillis());
             if (urlConnection instanceof HttpURLConnection) {
                 final HttpURLConnection connection = (HttpURLConnection) urlConnection;
@@ -48,5 +60,9 @@ public class HttpUrlConnectionHelper {
     
     public static URLConnection redirectConnection(URL url) throws MalformedURLException, IOException {
         return redirectConnection(url, Duration.ONE_MINUTE.times(10), null);
+    }
+    
+    public static URLConnection redirectConnection(URL url, String optionalRequestMethod) throws MalformedURLException, IOException {
+        return redirectConnection(url, Duration.ONE_MINUTE.times(10), optionalRequestMethod, null);
     }
 }
