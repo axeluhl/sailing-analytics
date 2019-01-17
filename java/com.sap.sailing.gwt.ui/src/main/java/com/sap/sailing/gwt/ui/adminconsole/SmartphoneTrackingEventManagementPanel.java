@@ -33,7 +33,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -52,7 +51,6 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
-import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
@@ -361,15 +359,15 @@ public class SmartphoneTrackingEventManagementPanel
                             raceColumnDTOAndFleetDTO);
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DEFINE_COURSE.equals(value)) {
                     new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, 
-                            fleetName, new DialogCallback<List<com.sap.sse.common.Util.Pair<ControlPointDTO,PassingInstruction>>>() {
+                            fleetName, new DialogCallback<RaceLogTrackingCourseDefinitionDialog.Result>() {
                         @Override
                         public void cancel() {
                         }
 
                         @Override
-                        public void ok(List<Pair<ControlPointDTO, PassingInstruction>> waypointPairs) {
-                            sailingService.addCourseDefinitionToRaceLog(leaderboardName, raceColumnName, fleetName, waypointPairs,
-                                    new AsyncCallback<Void>() {
+                        public void ok(RaceLogTrackingCourseDefinitionDialog.Result waypointPairs) {
+                            sailingService.addCourseDefinitionToRaceLog(leaderboardName, raceColumnName, fleetName, waypointPairs.getWaypoints(),
+                                    waypointPairs.getPriority(), new AsyncCallback<Void>() {
                                 @Override
                                 public void onSuccess(Void result) {
                                     loadAndRefreshLeaderboard(leaderboardName);
