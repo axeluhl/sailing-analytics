@@ -46,6 +46,7 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.mgt.CachingSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.Factory;
 import org.apache.shiro.web.config.WebIniSecurityManagerFactory;
@@ -97,6 +98,7 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
@@ -1971,4 +1973,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void clearState() throws Exception {
     }
 
+    @Override
+    public void storeSession(String cacheName, Session session) {
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSession(cacheName, session);
+    }
+
+    @Override
+    public void removeSession(String cacheName, Session session) {
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().removeSession(cacheName, session);
+    }
+
+    @Override
+    public void removeAllSessions() {
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().removeAllSessions();
+    }
 }

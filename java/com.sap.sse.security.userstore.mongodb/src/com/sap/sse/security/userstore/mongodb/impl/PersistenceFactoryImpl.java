@@ -25,17 +25,7 @@ public class PersistenceFactoryImpl implements PersistenceFactory {
     }
 
     @Override
-    public DomainObjectFactory getDomainObjectFactory(MongoDBService mongoDBService) {
-        return new DomainObjectFactoryImpl(mongoDBService.getDB());
-    }
-
-    @Override
     public MongoObjectFactory getDefaultMongoObjectFactory() {
         return defaultMongoObjectFactory;
-    }
-
-    @Override
-    public MongoObjectFactory getMongoObjectFactory(MongoDBService mongoDBService) {
-        return new MongoObjectFactoryImpl(mongoDBService.getDB());
     }
 }

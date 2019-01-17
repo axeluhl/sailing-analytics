@@ -40,7 +40,9 @@ public class QRCodePresenter {
             dataCollector = new DataCollector(view);
             retrieveRegatta(regattaName, regattaRegistrationLinkSecret);
         } else {
-            if (eventId == null || invitationMode == InvitationMode.COMPETITOR && competitorId == null
+        if (eventId == null
+                || (invitationMode == InvitationMode.COMPETITOR || invitationMode == InvitationMode.COMPETITOR_2)
+                        && competitorId == null
                     || leaderboardNameFromUrl == null || leaderboardNameFromUrl.equals("") || checkInUrl == null
                     || checkInUrl.equals("")) {
                 view.setError();
@@ -163,6 +165,11 @@ public class QRCodePresenter {
                                     + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
                                     + QRCodePresenter.this.checkInUrl;
                             break;
+                    case COMPETITOR_2:
+                        branchIoUrl = BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO + "?"
+                                + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
+                                + QRCodePresenter.this.checkInUrl;
+                        break;
                         default:
                             break;
                         }

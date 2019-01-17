@@ -40,6 +40,7 @@ public class QRCodePlace extends AbstractBasePlace {
     }
 
     public enum InvitationMode {
+        COMPETITOR_2,
         COMPETITOR,
         PUBLIC_INVITE,
         BOUY_TENDER
@@ -65,7 +66,8 @@ public class QRCodePlace extends AbstractBasePlace {
                     if (leaderboardName == null) {
                         GWT.log("No parameter " + PARAM_LEADERBOARD_NAME + " found!");
                     }
-                    if (competitorId == null && mode == InvitationMode.COMPETITOR) {
+                if (competitorId == null
+                        && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
                         GWT.log("No parameter " + PARAM_COMPETITOR_ID + " found!");
                     }
                     if (competitorId != null && mode == InvitationMode.BOUY_TENDER) {

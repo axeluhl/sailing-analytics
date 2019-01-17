@@ -3,6 +3,8 @@ package com.sap.sse.security.impl;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.shiro.session.Session;
+
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -77,5 +79,11 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalDeleteRoleDefinition(UUID roleDefinitionId);
     
     Void internalUpdateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties);
+
+    void storeSession(String cacheName, Session value);
+
+    void removeSession(String cacheName, Session result);
+
+    void removeAllSessions();
 
 }
