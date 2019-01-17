@@ -335,10 +335,7 @@ public class MarkPassingCalculator {
             } finally {
                 logger.fine("MarkPassingCalculator Listen thread terminating for race "+raceName);
             }
-            // bug 4221
-            // optional analysis function, comment out for default
-            //((CandidateChooserImpl)chooser).logMarkpassingDistribution();
-
+            logger.finest(()->chooser.logMarkpassingDistribution());
         }
 
         private void updateManuallySetMarkPassings(List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,

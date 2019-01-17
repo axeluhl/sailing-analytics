@@ -638,7 +638,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         private final MarkPassing original;
 
         public MarkPassingFromRaceLogProvidedFinishingTimeImpl(TimePoint timePoint, Waypoint waypoint, Competitor competitor, MarkPassing original) {
-            super(timePoint, waypoint, competitor, null);
+            super(timePoint, waypoint, competitor);
             this.original = original;
         }
 

@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -210,11 +209,9 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
     }
     
-    /*
-     * Bug 4221
-     * optional function to log markpassing distribution
-     */
-    public void logMarkpassingDistribution() {
+    @Override
+    public String logMarkpassingDistribution() {
+        StringBuilder sb = new StringBuilder();
         for (Competitor c : currentMarkPasses.keySet()) {
             int xteCnt = 0;
             int distCnt = 0;
@@ -227,12 +224,14 @@ public class CandidateChooserImpl implements CandidateChooser {
                     if (mp.getCandidate() instanceof DistanceCandidateImpl) {
                         distCnt++;
                     } else {
-                       logger.warning("unknown candidate type"); 
+                       sb.append("unknown candidate type\n"); 
                     }                    
                 }
             }
-            logger.warning("markpasses count:" + currentCompPasses.size() + ", xte:" + xteCnt + ", dist:" + distCnt + " for " + c);
+            sb.append("markpasses count:" + currentCompPasses.size() + ", xte:" + xteCnt + ", dist:" + distCnt + " for " + c);
+            sb.append('\n');
         }
+        return sb.toString();
     }
     
     private NamedReentrantReadWriteLock createCompetitorLock(Competitor c) {
@@ -720,20 +719,20 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     /**
      * New candidates will be added. The list of incoming Candidates will be filtered.
+     * TODO bug4221 Assumption that candidates are sorted by time
+     * 
      */
     private void addCandidates(Competitor c, Iterable<Candidate> newCandidates) {
-        
         // bug 4221 - filter candidates
         List<Candidate> filteredCandidates = new ArrayList<Candidate>();
-        int size = ((Collection<?>) newCandidates).size();
+        int size = Util.size(newCandidates);
         if (size > 2) {
             Hashtable<Waypoint, ArrayList<Candidate>> organizedList = new Hashtable<Waypoint, ArrayList<Candidate>>();
             logger.finest("candidate count before candidate filtering: " + size);
-            int cnt = 0;
             for (Candidate can : newCandidates) {
                 boolean isDistCan = false;
                 Waypoint wp = can.getWaypoint();
-                if ( can.getClass().getName().endsWith("DistanceCandidateImpl")) {
+                if (can instanceof DistanceCandidateImpl) {
                     isDistCan = true;
                 }
                 filteredCandidates.add(can);
@@ -747,7 +746,6 @@ public class CandidateChooserImpl implements CandidateChooser {
                         organizedList.put(wp, canWpList);
                     }
                     canWpList.add(can);
-                    
                 }
             }
             // list of organized Candidates ready for analyzing
