@@ -190,10 +190,7 @@ public class UserStoreImpl implements UserStore {
             }
             if (roleDefinitions.isEmpty()) {
                 logger.info("Empty set of role definitions suggests we are under migration. Creating default roles.");
-
             }
-        } else {
-            defaultTenant = null;
         }
     }
 
