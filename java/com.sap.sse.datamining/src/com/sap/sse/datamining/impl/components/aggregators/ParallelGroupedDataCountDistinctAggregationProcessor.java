@@ -50,9 +50,9 @@ public class ParallelGroupedDataCountDistinctAggregationProcessor
     @Override
     protected void handleElement(GroupedDataEntry<Object> element) {
         GroupKey key = element.getKey();
-        Util.addToValueSet(countMap, key, element.getDataEntry(), new Util.ValueSetConstructor<Object>() {
+        Util.addToValueSet(countMap, key, element.getDataEntry(), new Util.ValueCollectionConstructor<Object, Set<Object>>() {
             @Override
-            public Set<Object> createSet() {
+            public Set<Object> createValueCollection() {
                 return ConcurrentHashMap.newKeySet();
             }
         });

@@ -2,15 +2,14 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
@@ -33,6 +32,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -108,7 +108,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * Candidate filtering will be used for exclude Candidates which are very close from time perspective
      * and match certain criteria. See {@link addCandidates(Competitor c, Iterable<Candidate> newCandidates)} for details 
      */
-    private static final long CANDIDATE_FILTER_TIME_WINDOW = 10 * 1000;
+    private static final Duration CANDIDATE_FILTER_TIME_WINDOW = Duration.ONE_SECOND.times(10);
 
     private static final Speed MAXIMUM_REASONABLE_SPEED = GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING;
 
@@ -341,7 +341,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         final Boolean isGateStart = race.isGateStart();
         Map<Candidate, Set<Edge>> edges = allEdges.get(c);
         for (Candidate newCan : newCandidates) {
-            final Set<Candidate> competitorCandidates = candidates.get(c);
+            final Set<Candidate> competitorCandidates = candidates.get(c); // TODO bug4221: use a filtered view of candidates
             synchronized (competitorCandidates) {
                 for (Candidate oldCan : competitorCandidates) {
                     final Candidate early;
@@ -722,84 +722,53 @@ public class CandidateChooserImpl implements CandidateChooser {
      * TODO bug4221 Assumption that candidates are sorted by time
      * 
      */
-    private void addCandidates(Competitor c, Iterable<Candidate> newCandidates) {
+    private void addCandidates(final Competitor competitor, final Iterable<Candidate> newCandidates) {
         // bug 4221 - filter candidates
-        List<Candidate> filteredCandidates = new ArrayList<Candidate>();
+        final List<Candidate> filteredCandidates = new ArrayList<>();
         int size = Util.size(newCandidates);
         if (size > 2) {
-            Hashtable<Waypoint, ArrayList<Candidate>> organizedList = new Hashtable<Waypoint, ArrayList<Candidate>>();
             logger.finest("candidate count before candidate filtering: " + size);
-            for (Candidate can : newCandidates) {
-                boolean isDistCan = false;
-                Waypoint wp = can.getWaypoint();
-                if (can instanceof DistanceCandidateImpl) {
-                    isDistCan = true;
-                }
-                filteredCandidates.add(can);
-                if (!isDistCan) {
-                    // not for XTE Candidates (yet)
-                } else {
-                    // filtering for Distance Candidates
-                    ArrayList<Candidate> canWpList = organizedList.get(wp);
-                    if (null == canWpList) {
-                        canWpList = new ArrayList<Candidate>();
-                        organizedList.put(wp, canWpList);
-                    }
-                    canWpList.add(can);
-                }
-            }
+            Util.addAll(newCandidates, filteredCandidates);
             // list of organized Candidates ready for analyzing
-            Set<Waypoint> keys = organizedList.keySet();
-            System.out.println(" " + c.getName());
-            Candidate lastCan = null;
-            int deleteCnt = 0;
-            for(Waypoint key: keys) {
-                int wpCnt = 0;
-                int innerDelCnt = 0;
-                ArrayList<Candidate> canWpList = organizedList.get(key);
-                wpCnt = canWpList.size();
-                for (int j=0; j<canWpList.size(); j++) {
-                    Candidate can = canWpList.get(j);
-                    if (lastCan != null) {
-                        if (can.getTimePoint().asMillis() - lastCan.getTimePoint().asMillis() < CANDIDATE_FILTER_TIME_WINDOW ) {
-                            // close enough
-                            if (can.getProbability() > lastCan.getProbability()) {
-                                // better than last one - delete last One
-                                if (filteredCandidates.contains(lastCan)) {
-                                    filteredCandidates.remove(lastCan);
-                                }
-                                innerDelCnt++;
-                                deleteCnt++;
-                            } else {
-                                // delete actual one
-                                innerDelCnt++;
-                                deleteCnt++;
-                                if (filteredCandidates.contains(can)) {
-                                    filteredCandidates.remove(can);
-                                }
-                                continue;
-                            }
+            final int deleteCnt[] = new int[1];
+            Collections.sort(filteredCandidates, TimedComparator.INSTANCE);
+            final int innerDelCnt[] = new int[1];
+            final Candidate lastCan[] = new Candidate[1];
+            filteredCandidates.stream().filter(c->c instanceof DistanceCandidateImpl).forEach(distCan->{
+                if (lastCan[0] != null) {
+                    if (lastCan[0].getTimePoint().until(distCan.getTimePoint()).compareTo(CANDIDATE_FILTER_TIME_WINDOW) < 0) {
+                        // close enough
+                        innerDelCnt[0]++;
+                        deleteCnt[0]++;
+                        if (distCan.getProbability() > lastCan[0].getProbability()) {
+                            // TODO maybe only remove if the lesser probability is small enough
+                            // better than last one - delete last One
+                            filteredCandidates.remove(lastCan[0]);
+                            lastCan[0] = distCan;
+                        } else {
+                            // delete actual one
+                            filteredCandidates.remove(distCan);
                         }
+                    } else {
+                        lastCan[0] = distCan;
                     }
-                    lastCan = can;
+                } else {
+                    lastCan[0] = distCan;
                 }
-                logger.finest("count of entries in "+ key + " is: "+ wpCnt + " (toDelete:" + innerDelCnt + ")");
-            }
-            logger.finest(" would delete: " + deleteCnt);
-            
-            
-            logger.warning("before: " + size + " after candidate filtering: " + filteredCandidates.size() + " for " + c.getName());
-            
-            newCandidates = filteredCandidates;
+            });
+//                logger.finest("count of entries in "+ waypointAndCandidateSet.getKey() + " is: "+ wpCnt + " (toDelete:" + innerDelCnt + ")");
+            logger.finest(" would delete: " + deleteCnt[0]);
+            logger.warning("before: " + size + " after candidate filtering: " + filteredCandidates.size() + " for " + competitor.getName());
         }
-        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        LockUtil.lockForWrite(perCompetitorLocks.get(competitor));
         try {
-            for (Candidate can : newCandidates) {
-                candidates.get(c).add(can);
+            for (Candidate can : filteredCandidates) {
+                candidates.get(competitor).add(can);
             }
-            createNewEdges(c, newCandidates);
+            // TODO here would be a good place to apply candidate filtering; let createNewEdges consider only those candidates passing the filter
+            createNewEdges(competitor, newCandidates);
         } finally {
-            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(competitor));
         }
     }
 

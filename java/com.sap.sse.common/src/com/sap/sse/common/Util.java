@@ -457,16 +457,16 @@ public class Util {
      * made. This is the caller's obligation.
      */
     public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        addToValueSet(map, key, value, new ValueSetConstructor<V>() {
+        addToValueSet(map, key, value, new ValueCollectionConstructor<V, Set<V>>() {
             @Override
-            public Set<V> createSet() {
+            public Set<V> createValueCollection() {
                 return new HashSet<V>();
             }
         });
     }
 
-    public static interface ValueSetConstructor<T> {
-        Set<T> createSet();
+    public static interface ValueCollectionConstructor<T, C extends Collection<T>> {
+        C createValueCollection();
     }
     
     /**
@@ -474,13 +474,13 @@ public class Util {
      * then adds {@code value} to that set. No synchronization / concurrency control effort is
      * made. This is the caller's obligation.
      */
-    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value, ValueSetConstructor<V> setConstructor) {
-        Set<V> set = map.get(key);
-        if (set == null) {
-            set = setConstructor.createSet();
-            map.put(key, set);
+    public static <K, V, C extends Collection<V>> void addToValueSet(Map<K, C> map, K key, V value, ValueCollectionConstructor<V, C> setConstructor) {
+        C coll = map.get(key);
+        if (coll == null) {
+            coll = setConstructor.createValueCollection();
+            map.put(key, coll);
         }
-        set.add(value);
+        coll.add(value);
     }
 
     /**
