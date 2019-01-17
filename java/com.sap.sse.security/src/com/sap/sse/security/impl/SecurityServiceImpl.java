@@ -203,12 +203,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         // migrationTimer = new Timer();
 
         operationsSentToMasterForReplication = new HashSet<>();
-        cacheManager = loadReplicationCacheManagerContents();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.userStore = userStore;
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
+        cacheManager = loadReplicationCacheManagerContents();
         Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
