@@ -207,6 +207,8 @@ public class UserStoreImpl implements UserStore {
             userGroupsByName.put(group.getName(), group);
         }
 
+        defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
+
         for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, this.userGroups, this)) {
             users.put(u.getName(), u);
             // setup all migrated users, to use the public server tenant group to match old behaviour
@@ -241,8 +243,6 @@ public class UserStoreImpl implements UserStore {
                 }
             }
         }
-
-        defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
     }
 
     @Override
