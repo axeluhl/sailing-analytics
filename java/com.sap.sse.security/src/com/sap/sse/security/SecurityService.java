@@ -433,4 +433,10 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             ActionWithResult<T> actionToDeleteObject);
     
     <T> T doWithTemporaryDefaultTenant(UserGroup tenant, ActionWithResult<T> action);
+
+    /**
+     * Before using a SecuritySystem, it is necessary to initialize the service, to ensure roles and acls are correctly
+     * setup
+     */
+    void initialize();
 }

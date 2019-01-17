@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.shiro.cache.CacheManager;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -49,6 +50,10 @@ public class Activator implements BundleActivator {
     private static AccessControlStore testAccessControlStore;
 
     private ServiceTracker<RolePrototypeProvider, RolePrototypeProvider> rolePrototypeProviderTracker;
+
+    private ServiceTracker<UserStore, UserStore> userStoreTracker;
+
+    private ServiceTracker<AccessControlStore, AccessControlStore> accessControlStoreTracker;
     
     public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
@@ -81,6 +86,32 @@ public class Activator implements BundleActivator {
         } else {
             waitForUserStoreService(bundleContext);
         }
+        context.registerService(ClearStateTestSupport.class, new ClearStateTestSupport() {
+            
+            @Override
+            public void clearState() throws Exception {
+                Activator.this.clearState();
+            }
+        }, null);
+    }
+
+    /**
+     * This method will clean the userStore and AccessControllStore, and reset the securityService. It will then
+     * reinitialize them in the same fashion an empty server will do.
+     */
+    protected void clearState() throws InterruptedException, UserGroupManagementException, UserManagementException {
+        UserStore userStore = userStoreTracker.waitForService(0);
+        userStore.clear();
+        createRoleDefinitionsFromPrototypes(context, userStore);
+        userStore.ensureDefaultRolesExist();
+        userStore.loadAndMigrateUsers();
+        AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
+        accessControlStore.clear();
+        securityService.initialize();
+        CacheManager cm = securityService.getCacheManager();
+        if (cm instanceof ReplicatingCacheManager) {
+            ((ReplicatingCacheManager) cm).clear();
+        }
     }
 
     private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore userStore, AccessControlStore accessControlStore) {
@@ -89,6 +120,7 @@ public class Activator implements BundleActivator {
         hasPermissionsProviderTracker.open();
         securityService = new SecurityServiceImpl(ServiceTrackerFactory.createAndOpen(context, MailService.class),
                 userStore, accessControlStore, new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), /* setAsActivatorSecurityService */ true);
+        securityService.initialize();
         registration = context.registerService(SecurityService.class.getName(), securityService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, securityService.getId().toString());
@@ -126,9 +158,10 @@ public class Activator implements BundleActivator {
 
     private void waitForUserStoreService(BundleContext bundleContext) {
         context = bundleContext;
-        final ServiceTracker<UserStore, UserStore> tracker = new ServiceTracker<>(bundleContext, UserStore.class, /* customizer */ null);
-        final ServiceTracker<AccessControlStore, AccessControlStore> accessControlStoreTracker = new ServiceTracker<>(bundleContext, AccessControlStore.class, /* customizer */ null);
-        tracker.open();
+        userStoreTracker = new ServiceTracker<>(bundleContext, UserStore.class, /* customizer */ null);
+        accessControlStoreTracker = new ServiceTracker<>(bundleContext, AccessControlStore.class,
+                /* customizer */ null);
+        userStoreTracker.open();
         accessControlStoreTracker.open();
         new Thread("ServiceTracker waiting for UserStore service") {
             @Override
@@ -136,7 +169,7 @@ public class Activator implements BundleActivator {
                 try {
                     Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // ensure that classpath:... Shiro ini files are resolved properly
                     logger.info("Waiting for UserStore service...");
-                    final UserStore userStore = tracker.waitForService(0);
+                    final UserStore userStore = userStoreTracker.waitForService(0);
                     final AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
                     logger.info("Obtained UserStore service "+userStore);
                     createRoleDefinitionsFromPrototypes(bundleContext, userStore);

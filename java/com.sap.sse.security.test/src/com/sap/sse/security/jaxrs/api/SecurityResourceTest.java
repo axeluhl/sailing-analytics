@@ -58,6 +58,7 @@ public class SecurityResourceTest {
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,
                     store, accessControlStore, /* hasPermissionsProvider */null,
                     /* setAsActivatorSecurityService */ true);
+            service.initialize();
             SecurityUtils.setSecurityManager(service.getSecurityManager());
             service.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE",
                     /* validation URL */ Locale.ENGLISH, null, null);

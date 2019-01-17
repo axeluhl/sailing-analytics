@@ -60,6 +60,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
+            result.initialize();
             return result;
         }
 
@@ -71,6 +72,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
             SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore);
+            result.initialize();
             result.clearReplicaState();
             return result;
         }

@@ -39,7 +39,6 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
 import org.apache.shiro.crypto.RandomNumberGenerator;
@@ -214,9 +213,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
-        // Create default users if no users exist yet.
-        initEmptyStore();
-        initEmptyAccessControlStore();
         Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
@@ -245,6 +241,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
         this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+    }
+
+    @Override
+    public void initialize() {
+        initEmptyStore();
+        initEmptyAccessControlStore();
     }
 
     /**
@@ -1788,18 +1790,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void clearState() throws Exception {
-        userStore.clear();
-        accessControlStore.clear();
-        initEmptyStore();
-        initEmptyAccessControlStore();
-        CacheManager cm = getSecurityManager().getCacheManager();
-        if (cm instanceof ReplicatingCacheManager) {
-            ((ReplicatingCacheManager) cm).clear();
-        }
-    }
-
-    @Override
     public void migrateOwnership(WithQualifiedObjectIdentifier identifier) {
         migrateOwnership(identifier.getIdentifier(), identifier.getName());
     }
@@ -1974,4 +1964,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             temporaryDefaultTenant.set(previousValue);
         }
     }
+
+    @Override
+    // See com.sap.sse.security.impl.Activator.clearState(), moved due to required reinitialisation sequence for
+    // permission-vertical
+    public void clearState() throws Exception {
+    }
+
 }
