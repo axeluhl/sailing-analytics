@@ -2,16 +2,28 @@ package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 import com.sap.sse.common.Util.Triple;
 
 public abstract class AbstractMstGraphGenerator<T> {
 
-    private List<NodeWithNeighbors<T>> nodes = new ArrayList<>();
+    private final List<NodeWithNeighbors<T>> nodes;
 
     private static final int MAX_DEPTH_FOR_DFS = 10;
+
+    public AbstractMstGraphGenerator() {
+        this(new ArrayList<>());
+    }
+
+    // for object cloning
+    protected AbstractMstGraphGenerator(List<NodeWithNeighbors<T>> nodes) {
+        this.nodes = nodes;
+    }
 
     public void addNode(T observation) {
         NodeWithNeighbors<T> newNode = new NodeWithNeighbors<>(observation);
@@ -19,29 +31,17 @@ public abstract class AbstractMstGraphGenerator<T> {
         nodes.add(newNode);
         if (!distancesFromOtherNodes.isEmpty()) {
             Collections.sort(distancesFromOtherNodes);
-            NodeWithDistance<T> closestNeighborWithDistance = distancesFromOtherNodes.removeFirst();
+            NodeWithDistance<T> closestNeighborWithDistance = distancesFromOtherNodes.get(0);
             addEdge(newNode, closestNeighborWithDistance);
-            optimizeEdges(newNode, distancesFromOtherNodes, closestNeighborWithDistance);
-        }
-    }
-
-    private void optimizeEdges(NodeWithNeighbors<T> newNode, List<NodeWithDistance<T>> distancesFromNewNodeToOtherNodes,
-            NodeWithDistance<T> currentNeighborWithDistance) {
-        NodeWithNeighbors<T> currentNeighborNode = currentNeighborWithDistance.getNodeWithNeighbors();
-        List<NodeWithDistance<T>> neighborsOfCurrentNeighborNode = new ArrayList<>(currentNeighborNode.getNeighbors());
-        for (NodeWithDistance<T> subNeighborWithDistance : neighborsOfCurrentNeighborNode) {
-            NodeWithNeighbors<T> subNeighborNode = subNeighborWithDistance.getNodeWithNeighbors();
-            if (subNeighborNode != newNode) {
-                for (NodeWithDistance<T> candidate : distancesFromNewNodeToOtherNodes) {
-                    Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> canReachAndEdgeWithHighestDistance = canReach(
-                            candidate.getNodeWithNeighbors(), currentNeighborNode, newNode);
-                    if (canReachAndEdgeWithHighestDistance != null
-                            && canReachAndEdgeWithHighestDistance.getA() > candidate.getDistance()) {
-                        removeEdge(canReachAndEdgeWithHighestDistance.getB(),
-                                canReachAndEdgeWithHighestDistance.getC());
-                        addEdge(newNode, candidate);
-                        optimizeEdges(newNode, distancesFromNewNodeToOtherNodes, candidate);
-                    }
+            for (ListIterator<NodeWithDistance<T>> iterator = distancesFromOtherNodes.listIterator(1); iterator
+                    .hasNext();) {
+                NodeWithDistance<T> otherCloseNeighbor = iterator.next();
+                Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> canReachAndEdgeWithHighestDistance = canReach(
+                        otherCloseNeighbor.getNodeWithNeighbors(), newNode);
+                if (canReachAndEdgeWithHighestDistance != null
+                        && canReachAndEdgeWithHighestDistance.getA() > otherCloseNeighbor.getDistance()) {
+                    removeEdge(canReachAndEdgeWithHighestDistance.getB(), canReachAndEdgeWithHighestDistance.getC());
+                    addEdge(newNode, otherCloseNeighbor);
                 }
             }
         }
@@ -72,9 +72,8 @@ public abstract class AbstractMstGraphGenerator<T> {
     }
 
     private Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> canReach(NodeWithNeighbors<T> nodeToReach,
-            NodeWithNeighbors<T> nodeToStartFrom, NodeWithNeighbors<T> firstNodeOfPathToIgnore) {
-        return canReach(nodeToReach, nodeToStartFrom, firstNodeOfPathToIgnore, 0,
-                new Triple<>(0.0, nodeToReach, nodeToStartFrom));
+            NodeWithNeighbors<T> nodeToStartFrom) {
+        return canReach(nodeToReach, nodeToStartFrom, null, 0, new Triple<>(0.0, nodeToReach, nodeToStartFrom));
     }
 
     private Triple<Double, NodeWithNeighbors<T>, NodeWithNeighbors<T>> canReach(NodeWithNeighbors<T> nodeToReach,
@@ -104,6 +103,30 @@ public abstract class AbstractMstGraphGenerator<T> {
 
     public List<NodeWithNeighbors<T>> getNodes() {
         return nodes;
+    }
+
+    public List<NodeWithNeighbors<T>> getClonedNodes() {
+        List<NodeWithNeighbors<T>> clonedNodes = new ArrayList<>(nodes.size());
+        Map<NodeWithNeighbors<T>, NodeWithNeighbors<T>> existingToNewNodesMapping = new HashMap<>();
+        for (NodeWithNeighbors<T> node : nodes) {
+            NodeWithNeighbors<T> clonedNode = existingToNewNodesMapping.get(node);
+            if (clonedNode == null) {
+                clonedNode = new NodeWithNeighbors<T>(node.getObservation());
+                existingToNewNodesMapping.put(node, clonedNode);
+            }
+            for (NodeWithDistance<T> neighborNodeWithDistance : node.getNeighbors()) {
+                NodeWithNeighbors<T> neighborNode = neighborNodeWithDistance.getNodeWithNeighbors();
+                NodeWithNeighbors<T> clonedNeighborNode = existingToNewNodesMapping.get(neighborNode);
+                if (clonedNeighborNode == null) {
+                    clonedNeighborNode = new NodeWithNeighbors<T>(neighborNode.getObservation());
+                    existingToNewNodesMapping.put(neighborNode, clonedNeighborNode);
+                }
+                NodeWithDistance<T> clonedNeighborNodeWithDistance = new NodeWithDistance<>(clonedNeighborNode,
+                        neighborNodeWithDistance.getDistance());
+                clonedNode.addNeighbor(clonedNeighborNodeWithDistance);
+            }
+        }
+        return clonedNodes;
     }
 
     protected static class NodeWithNeighbors<T> {
