@@ -209,7 +209,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         // migrationTimer = new Timer();
 
         operationsSentToMasterForReplication = new HashSet<>();
-        cacheManager = new ReplicatingCacheManager();
+        cacheManager = loadReplicationCacheManagerContents();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.userStore = userStore;
         this.accessControlStore = accessControlStore;
@@ -233,6 +233,22 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
+    }
+
+    private ReplicatingCacheManager loadReplicationCacheManagerContents() {
+        logger.info("Loading session cache manager contents");
+        int count = 0;
+        final ReplicatingCacheManager result = new ReplicatingCacheManager();
+        for (Entry<String, Set<Session>> cacheNameAndSessions : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSessionsByCacheName().entrySet()) {
+            final String cacheName = cacheNameAndSessions.getKey();
+            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName);
+            for (final Session session : cacheNameAndSessions.getValue()) {
+                cache.put(session.getId(), session, /* store */ false);
+                count++;
+            }
+        }
+        logger.info("Loaded "+count+" sessions");
+        return result;
     }
 
     @Override
