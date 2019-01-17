@@ -15,6 +15,7 @@ import javax.mail.MessagingException;
 import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.domain.abstractlog.impl.LastEventOfTypeFinder;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
@@ -193,7 +194,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
-            RacingEventService service) {
+            RacingEventService service, int priority) {
         CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog,
                 /* onlyCoursesWithValidWaypointList */ true).analyze();
         final Set<Mark> marks = new HashSet<>();
@@ -213,7 +214,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
                     int passId = toRaceLog.getCurrentPassId();
                     RaceLogEvent newCourseEvent = new RaceLogCourseDesignChangedEventImpl(now,
-                            service.getServerAuthor(), passId, newCourse, CourseDesignerMode.ADMIN_CONSOLE);
+                            new LogEventAuthorImpl(service.getServerAuthor().getName(), priority),
+                            passId, newCourse, CourseDesignerMode.ADMIN_CONSOLE);
                     toRaceLog.add(newCourseEvent);
                 }
 
