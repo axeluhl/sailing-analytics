@@ -103,6 +103,12 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Repl
     void stoppedReplicatingFrom(ReplicationMasterDescriptor master);
 
     /**
+     * @return the descriptor of the master from which this replica is replicating this {@link Replicable}, or
+     *         {@code null} if this {@link Replicable} is currently running as a master.
+     */
+    ReplicationMasterDescriptor getMasterDescriptor();
+
+    /**
      * An operation execution listener must be able to process notifications of operations being executed that have
      * type <code>S</code> or any more specific type. The listener can achieve this also by accepting any type more general than
      * <code>S</code>.
@@ -173,10 +179,10 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Repl
         if (!hasSentOperationToMaster(operation)) {
             assert !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
             try {
-                setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(true);
+                setCurrentlyApplyingOperationReceivedFromMaster(true);
                 applyReplicated(operation);
             } finally {
-                setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
+                setCurrentlyApplyingOperationReceivedFromMaster(false);
             }
         } else {
             logger.fine("Ignoring operation "+operation+" received back from master after having sent it there for execution and replication earlier");
@@ -184,39 +190,70 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Repl
     }
 
     /**
+     * Responds with what has been passed to the last invocation to {@link #setCurrentlyFillingFromInitialLoad(boolean)}
+     * and {@link #setCurrentlyApplyingOperationReceivedFromMaster(boolean)}, respectively, in the calling thread; the
+     * default is <code>false</code>. This is required in order to not replicate operations triggered on the replica
+     * while receiving the initial load back to the master.
+     */
+    default boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
+        return isCurrentlyFillingFromInitialLoad() || isCurrentlyApplyingOperationReceivedFromMaster();
+    }
+    
+    /**
      * Responds with what has been passed to the last invocation to
-     * {@link #setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean)} in the calling thread;
+     * {@link #setCurrentlyApplyingOperationReceivedFromMaster(boolean)} in the calling thread;
      * the default is <code>false</code>. This is required in order to not replicate operations triggered on the replica
      * while receiving the initial load back to the master.
      */
-    boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
+    boolean isCurrentlyFillingFromInitialLoad();
+    
+    /**
+     * Responds with what has been passed to the last invocation to
+     * {@link #setCurrentlyFillingFromInitialLoad(boolean)} in the calling thread;
+     * the default is <code>false</code>. This is required in order to not replicate operations triggered on the replica
+     * while receiving the initial load back to the master.
+     */
+    boolean isCurrentlyApplyingOperationReceivedFromMaster();
     
     /**
      * {@link #isCurrentlyFillingFromInitialLoad} responds with what has been passed to the last invocation to this
      * method in the calling thread; the default is <code>false</code>. This is required in order to not replicate
      * operations triggered on the replica while receiving the initial load back to the master.
      */
-    void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean b);
+    void setCurrentlyFillingFromInitialLoad(boolean b);
+
+    /**
+     * {@link #isCurrentlyFillingFromInitialLoad} responds with what has been passed to the last invocation to this
+     * method in the calling thread; the default is <code>false</code>. This is required in order to not replicate
+     * operations triggered on the replica while receiving the initial load back to the master.
+     */
+    void setCurrentlyApplyingOperationReceivedFromMaster(boolean b);
 
     default ThreadLocalTransporter getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
         return new ThreadLocalTransporter() {
-            private boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster;
-            private boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMasterAtBeginningOfTask;
+            private boolean currentlyFillingFromInitialLoad;
+            private boolean currentlyFillingFromInitialLoadAtBeginningOfTask;
+            private boolean currentlyApplyingOperationReceivedFromMaster;
+            private boolean currentlyApplyingOperationReceivedFromMasterAtBeginningOfTask;
             
             @Override
             public void rememberThreadLocalStates() {
-                currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
+                currentlyFillingFromInitialLoad = isCurrentlyFillingFromInitialLoad();
+                currentlyApplyingOperationReceivedFromMasterAtBeginningOfTask = isCurrentlyApplyingOperationReceivedFromMaster();
             }
 
             @Override
             public void pushThreadLocalStates() {
-                currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMasterAtBeginningOfTask = isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster();
-                setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+                currentlyFillingFromInitialLoadAtBeginningOfTask = isCurrentlyFillingFromInitialLoad();
+                setCurrentlyFillingFromInitialLoad(currentlyFillingFromInitialLoad);
+                currentlyApplyingOperationReceivedFromMasterAtBeginningOfTask = isCurrentlyFillingFromInitialLoad();
+                setCurrentlyFillingFromInitialLoad(currentlyApplyingOperationReceivedFromMaster);
             }
 
             @Override
             public void popThreadLocalStates() {
-                setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMasterAtBeginningOfTask);
+                setCurrentlyFillingFromInitialLoad(currentlyFillingFromInitialLoadAtBeginningOfTask);
+                setCurrentlyApplyingOperationReceivedFromMaster(currentlyApplyingOperationReceivedFromMasterAtBeginningOfTask);
             }
         };
     }

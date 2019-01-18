@@ -66,7 +66,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     @Override
     default void initiallyFillFrom(InputStream is) throws IOException, ClassNotFoundException, InterruptedException {
         assert !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(); // no nested receiving of initial load
-        setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(true);
+        setCurrentlyFillingFromInitialLoad(true);
         try {
             final ObjectInputStream objectInputStream = createObjectInputStreamResolvingAgainstCache(is);
             ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
@@ -77,7 +77,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
                 Thread.currentThread().setContextClassLoader(oldContextClassloader);
             }
         } finally {
-            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
+            setCurrentlyFillingFromInitialLoad(false);
         }
     }
     
@@ -227,12 +227,6 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     void addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper<S, ?> operationWithResultWithIdWrapper);
 
     /**
-     * @return the descriptor of the master from which this replica is replicating this {@link Replicable}, or
-     *         {@code null} if this {@link Replicable} is currently running as a master.
-     */
-    ReplicationMasterDescriptor getMasterDescriptor();
-
-    /**
      * The operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
      * service object. It is then replicated to all replicas if and only if the operation is marked as
      * {@link OperationWithResult#isRequiresExplicitTransitiveReplication()}.
@@ -242,7 +236,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     default <T> T applyReplicated(OperationWithResult<S, T> operation) {
         OperationWithResult<S, T> reso = (OperationWithResult<S, T>) operation;
         try {
-            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(true);
+            setCurrentlyApplyingOperationReceivedFromMaster(true);
             @SuppressWarnings("unchecked")
             S replicable = (S) this;
             T result = reso.internalApplyTo(replicable);
@@ -256,7 +250,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
             logger.log(Level.SEVERE, "apply", e);
             throw new RuntimeException(e);
         } finally {
-            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
+            setCurrentlyApplyingOperationReceivedFromMaster(false);
         }
     }
 }

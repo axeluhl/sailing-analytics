@@ -118,8 +118,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
     
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
     
+    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+
     private static Ini shiroConfiguration;
     static {
         shiroConfiguration = new Ini();
@@ -195,13 +197,23 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
-        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
+    public boolean isCurrentlyFillingFromInitialLoad() {
+        return currentlyFillingFromInitialLoad.get();
     }
 
     @Override
-    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
-        this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
+        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+    }
+
+    @Override
+    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
+        return currentlyApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
+        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
     }
 
     /**

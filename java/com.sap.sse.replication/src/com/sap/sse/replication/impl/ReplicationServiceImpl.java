@@ -40,6 +40,7 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
@@ -55,7 +56,7 @@ import net.jpountz.lz4.LZ4BlockOutputStream;
  * 
  * The observers are registered only when there are replicas registered. If the last replica is de-registered, the
  * service stops observing the {@link Replicable}. Operations received that require replication are sent to the
- * {@link Exchange} to which replica queues can bind, using a {@link ReplicationReceiver}. By prefixing each message
+ * {@link Exchange} to which replica queues can bind, using a {@link ReplicationReceiverImpl}. By prefixing each message
  * with the {@link Object#toString()} representation of the {@link Replicable}'s {@link Replicable#getId() ID} the
  * receiver can determine to which {@link Replicable} to forward the operation. As such, this service multiplexes the
  * replication channels for potentially many {@link Replicable}s living in this server instance.
@@ -123,7 +124,7 @@ public class ReplicationServiceImpl implements ReplicationService {
      * For this instance running as a replica, the replicator receives messages from the master's queue and applies them
      * to the local replica.
      */
-    private ReplicationReceiver replicator;
+    private ReplicationReceiverImpl replicator;
 
     private final Map<String, ReplicationServiceExecutionListener<?>> executionListenersByReplicableIdAsString;
 
@@ -219,6 +220,11 @@ public class ReplicationServiceImpl implements ReplicationService {
      */
     private final Map<ReplicationMasterDescriptor, InitialLoadRequest> initialLoadChannels;
 
+    /**
+     * Will be set
+     */
+    private boolean replicationStarting;
+
     private static class InitialLoadRequest {
         private final Channel channelForInitialLoad;
         private final Iterable<Replicable<?, ?>> replicables;
@@ -313,7 +319,8 @@ public class ReplicationServiceImpl implements ReplicationService {
         return replicablesProvider;
     }
 
-    protected ReplicationReceiver getReplicator() {
+    @Override
+    public ReplicationReceiver getReplicator() {
         return replicator;
     }
 
@@ -608,7 +615,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             final URL initialLoadURL = master.getInitialLoadURL(replicables);
             logger.info("Initial load URL is " + initialLoadURL);
             // start receiving messages already now, but start in suspended mode
-            replicator = new ReplicationReceiver(master, replicablesProvider, /* startSuspended */true, consumer);
+            replicator = new ReplicationReceiverImpl(master, replicablesProvider, /* startSuspended */true, consumer);
             // clear Replicable state here, before starting to receive and de-serialize operations which builds up
             // new state, e.g., in competitor store
             for (Replicable<?, ?> r : replicables) {
@@ -805,5 +812,15 @@ public class ReplicationServiceImpl implements ReplicationService {
             String exchangeName, int servletPort, int messagingPort, String queueName,
             Iterable<Replicable<?, ?>> replicables) {
         return new ReplicationMasterDescriptorImpl(messagingHostname, exchangeName, messagingPort, queueName, hostname, servletPort, replicables);
+    }
+
+    @Override
+    public void setReplicationStarting(boolean b) {
+        this.replicationStarting = b;
+    }
+    
+    @Override
+    public boolean isReplicationStarting() {
+        return this.replicationStarting;
     }
 }

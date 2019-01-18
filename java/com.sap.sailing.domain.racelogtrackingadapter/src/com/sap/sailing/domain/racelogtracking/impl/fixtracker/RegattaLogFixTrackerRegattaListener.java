@@ -119,7 +119,8 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     
     // Replication related methods and fields
     private final ConcurrentHashMap<OperationExecutionListener<RegattaLogFixTrackerRegattaListener>, OperationExecutionListener<RegattaLogFixTrackerRegattaListener>> operationExecutionListeners = new ConcurrentHashMap<>();
-    private final ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
     private final Set<OperationWithResultWithIdWrapper<RegattaLogFixTrackerRegattaListener, ?>> operationsSentToMasterForReplication = new HashSet<>();
     private ReplicationMasterDescriptor master;
 
@@ -161,13 +162,23 @@ public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaA
     }
 
     @Override
-    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
-        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
+    public boolean isCurrentlyFillingFromInitialLoad() {
+        return currentlyFillingFromInitialLoad.get();
     }
 
     @Override
-    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean b) {
-        this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(b);
+    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
+        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+    }
+
+    @Override
+    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
+        return currentlyApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
+        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
     }
 
     @Override
