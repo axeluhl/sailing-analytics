@@ -204,25 +204,24 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
      */
     default <T> T apply(OperationWithResult<S, T> operation) {
         boolean needToRemoveThreadLocal = false;
+        if (operation instanceof OperationWithResultWithIdWrapper<?, ?>) {
+            idOfOperationBeingExecuted.set(((OperationWithResultWithIdWrapper<?, ?>) operation).getId());
+            needToRemoveThreadLocal = true;
+        }
+        final T result = applyReplicated(operation);
+        ReplicationMasterDescriptor masterDescriptor = getMasterDescriptor();
         try {
-            if (operation instanceof OperationWithResultWithIdWrapper<?, ?>) {
-                idOfOperationBeingExecuted.set(((OperationWithResultWithIdWrapper<?, ?>) operation).getId());
-                needToRemoveThreadLocal = true;
-            }
-            ReplicationMasterDescriptor masterDescriptor = getMasterDescriptor();
-            final T result = applyReplicated(operation);
             if (masterDescriptor != null) {
                 sendReplicaInitiatedOperationToMaster(operation);
             }
-            return result;
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "apply", e);
-            throw new RuntimeException(e);
+            logger.log(Level.SEVERE, "Exception trying to send operation "+operation+" to master for replication", e);
         } finally {
             if (needToRemoveThreadLocal) {
                 idOfOperationBeingExecuted.remove();
             }
         }
+        return result;
     }
 
     void addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper<S, ?> operationWithResultWithIdWrapper);
