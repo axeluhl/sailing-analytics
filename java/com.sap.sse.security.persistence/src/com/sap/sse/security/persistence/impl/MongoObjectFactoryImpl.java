@@ -82,8 +82,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void removeAllSessions() {
-        sessionCollection.deleteMany(new Document());
+    public void removeAllSessions(String cacheName) {
+        sessionCollection.deleteMany(new Document(FieldNames.CACHE_NAME.name(), cacheName));
     }
     
     @Override

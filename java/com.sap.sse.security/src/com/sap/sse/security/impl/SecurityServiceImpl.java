@@ -1132,7 +1132,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void removeAllSessions() {
-        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().removeAllSessions();
+    public void removeAllSessions(String cacheName) {
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().removeAllSessions(cacheName);
     }
 }
