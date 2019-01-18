@@ -233,6 +233,13 @@ public class WindFragment extends BaseFragment
         setupLayouts(false);
 
         refreshUI(false);
+
+        if (hasPermissions()) {
+            // Check the location settings
+            checkLocationSettings();
+        } else {
+            requestPermissions();
+        }
     }
 
     @Override
@@ -266,14 +273,14 @@ public class WindFragment extends BaseFragment
         Collections.sort(mManagedRaces, new CurrentRaceComparator());
         mSelectedRaces = new ArrayList<>();
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-        // Check the location settings
-        checkLocationSettings();
         // register receiver to be notified if race is tracked
         IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
         // Contact server and ask if race is tracked and map is allowed to show.
         WindHelper.isTrackedRace(getActivity(), getRace());
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+
+        startLocationUpdates();
     }
 
     @Override
@@ -336,13 +343,9 @@ public class WindFragment extends BaseFragment
      * If they are not, begins the process of presenting a location settings dialog to the user.
      */
     private void checkLocationSettings() {
-        if (hasPermissions()) {
-            settingsClient.checkLocationSettings(locationSettingsRequest)
-                    .addOnSuccessListener(this)
-                    .addOnFailureListener(this);
-        } else {
-            requestPermissions();
-        }
+        settingsClient.checkLocationSettings(locationSettingsRequest)
+                .addOnSuccessListener(this)
+                .addOnFailureListener(this);
     }
 
     /**
@@ -537,6 +540,18 @@ public class WindFragment extends BaseFragment
     private void requestPermissions() {
         requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 REQUEST_PERMISSIONS_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            // Check if the only required permission has been granted.
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Access fine location permission has been granted.
+                checkLocationSettings();
+            }
+        }
     }
 
     /**
