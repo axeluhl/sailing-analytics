@@ -726,7 +726,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         // bug 4221 - filter candidates
         final List<Candidate> filteredCandidates = new ArrayList<>();
         int size = Util.size(newCandidates);
-        if (size > 2) {
+        if (size > 0) { //2) {
             logger.finest("candidate count before candidate filtering: " + size);
             Util.addAll(newCandidates, filteredCandidates);
             // list of organized Candidates ready for analyzing
