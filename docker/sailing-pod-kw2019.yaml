@@ -7,7 +7,7 @@ metadata:
 spec:
   containers:
   - name: sailing
-    image: donaldduck70/sapsailing:build-201812301655
+    image: donaldduck70/sapsailing:bug4018-201901182300
     imagePullPolicy: Always
     ports:
     - containerPort: 8888
@@ -27,6 +27,13 @@ spec:
     livenessProbe:
       httpGet:
         path: /
+        port: http-port
+      initialDelaySeconds: 10
+      periodSeconds: 30
+    readinessProbe:
+      exec:
+        command:
+        - ./status
         port: http-port
       initialDelaySeconds: 10
       periodSeconds: 30
