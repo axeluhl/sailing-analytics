@@ -34,7 +34,6 @@ spec:
       exec:
         command:
         - ./status
-        port: http-port
       initialDelaySeconds: 10
       periodSeconds: 30
   imagePullSecrets:
