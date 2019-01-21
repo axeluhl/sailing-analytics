@@ -16,7 +16,7 @@ import org.apache.shiro.session.Session;
 import com.sap.sse.common.Named;
 
 /**
- * A {@link Cache}s whose modifying operations are replicated. This works because by intercepting the writing operations
+ * A {@link Cache}s whose modifying operations are replicated. This works by intercepting the writing operations
  * and running them as a replicable operation on the {@link ReplicableSecurityService}.
  * 
  * @author Axel Uhl (D043530)
@@ -56,6 +56,10 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
 
     @Override
     public V put(K key, V value) throws CacheException {
+        return put(key, value, /* store */ true);
+    }
+
+    public V put(K key, V value, boolean store) throws CacheException {
         if (logger.isLoggable(Level.FINER)) {
             logger.finer("put("+key+", "+value+") into cache "+name+"@"+System.identityHashCode(this));
             if (value instanceof Session) {
@@ -67,6 +71,9 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         final String myName = name;
         securityService.replicate(s->
             s.getCacheManager().getCache(myName).put(key, value));
+        if (store && value instanceof Session) {
+            securityService.storeSession(getName(), (Session) value);
+        }
         return result;
     }
 
@@ -89,6 +96,9 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         final String myName = name;
         securityService.replicate(s->
             s.getCacheManager().getCache(myName).remove(key));
+        if (result instanceof Session) {
+            securityService.removeSession(getName(), (Session) result);
+        }
         return result;
     }
 
@@ -99,6 +109,7 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         securityService.replicate(s->{ 
             s.getCacheManager().getCache(myName).clear(); return null;
         });
+        securityService.removeAllSessions();
     }
 
     @Override

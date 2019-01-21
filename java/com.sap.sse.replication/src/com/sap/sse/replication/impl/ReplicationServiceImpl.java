@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -130,9 +131,11 @@ public class ReplicationServiceImpl implements ReplicationService {
 
     /**
      * Used to synchronize write access and replacements of {@link #outboundBuffer}, {@link #outboundObjectBuffer} and
-     * {@link #outboundBufferClasses} when the timer scoops up the messages to send.
+     * {@link #outboundBufferClasses} when the timer scoops up the messages to send. Ensure we get a unique object
+     * by using a random number appended to an empty string; otherwise, string collation may collate different monitors
+     * constructed from equal string literals.
      */
-    private final Object outboundBufferMonitor = "";
+    private final Object outboundBufferMonitor = ""+new Random().nextDouble();
 
     /**
      * Sending operations as serialized Java objects using binary RabbitMQ messages comes at an overhead. To reduce the

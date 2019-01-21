@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
+import com.sap.sailing.domain.tracking.MailInvitationType;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -95,7 +96,7 @@ public interface RaceLogTrackingAdapter {
      */
     void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
             String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, String iOSAppUrl, String androidAppUrl,
-            Locale locale) throws MailException;
+            Locale locale, MailInvitationType type) throws MailException;
 
     /**
      * Invite buoy tenders for buoy pinging via the Buoy Tender App by sending out emails.
@@ -104,14 +105,16 @@ public interface RaceLogTrackingAdapter {
      * @throws MailException
      */
     void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
-            String emails, String iOSAppUrl, String androidAppUrl, Locale locale) throws MailException;
+            String emails, String iOSAppUrl, String androidAppUrl, Locale locale, MailInvitationType type)
+            throws MailException;
 
     /**
      * Copy the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the {@code to}
      * race logs. The {@link Mark}s and {@link ControlPoint}s are reused and not duplicated.
+     * @param priority TODO
      */
     void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
-            RacingEventService service);
+            RacingEventService service, int priority);
 
     void copyCompetitors(RaceColumn fromRaceColumn, Fleet fromFleet, Iterable<Pair<RaceColumn, Fleet>> toRaces);
 }
