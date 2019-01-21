@@ -260,7 +260,7 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Repl
     
     /**
      * If an operation equal to <code>operationWithResultWithIdWrapper</code> has previously been passed to a call to
-     * {@link #addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper)}, the call returns <code>true</code>
+     * {@link OperationsToMasterSender#addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper)}, the call returns <code>true</code>
      * exactly once.
      */
     boolean hasSentOperationToMaster(OperationWithResult<S, ?> operation);

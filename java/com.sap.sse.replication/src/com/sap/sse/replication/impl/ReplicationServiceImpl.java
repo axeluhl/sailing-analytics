@@ -35,6 +35,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
@@ -42,6 +43,7 @@ import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.UnsentOperationsForMasterQueue;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -74,7 +76,7 @@ import net.jpountz.lz4.LZ4BlockOutputStream;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl implements ReplicationService {
+public class ReplicationServiceImpl implements ReplicationService, UnsentOperationsForMasterQueue {
     private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
 
     private final ReplicationInstancesManager replicationInstancesManager;
@@ -192,6 +194,8 @@ public class ReplicationServiceImpl implements ReplicationService {
      * 
      */
     private TimerTask sendingTask;
+    
+    private final UnsentOperationsSenderJob unsentOperationsSenderJob;
 
     /**
      * Defines for how many milliseconds the {@link #timer} will wait since the first operation has been added to an
@@ -290,6 +294,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             final ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider)
             throws IOException {
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
+        unsentOperationsSenderJob = new UnsentOperationsSenderJob();
         executionListenersByReplicableIdAsString = new HashMap<>();
         initialLoadChannels = new ConcurrentHashMap<>();
         this.replicationInstancesManager = replicationInstancesManager;
@@ -822,5 +827,10 @@ public class ReplicationServiceImpl implements ReplicationService {
     @Override
     public boolean isReplicationStarting() {
         return this.replicationStarting;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        unsentOperationsSenderJob.retrySendingLater(operationWithResult, sender);
     }
 }

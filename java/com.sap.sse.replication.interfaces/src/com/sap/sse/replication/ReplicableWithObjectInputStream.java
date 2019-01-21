@@ -1,25 +1,19 @@
 package com.sap.sse.replication;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.WithID;
 import com.sap.sse.operationaltransformation.Operation;
-import com.sap.sse.util.HttpUrlConnectionHelper;
 
-public interface ReplicableWithObjectInputStream<S, O extends OperationWithResult<S, ?>> extends Replicable<S, O> {
+public interface ReplicableWithObjectInputStream<S, O extends OperationWithResult<S, ?>> extends OperationsToMasterSender<S, O> {
     static final Logger logger = Logger.getLogger(ReplicableWithObjectInputStream.class.getName());
     
     /**
@@ -172,35 +166,12 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     Iterable<OperationExecutionListener<S>> getOperationExecutionListeners();
 
     /**
-     * When a replica has initiated (not received through replication) an operation, this operation needs to be sent to
-     * the master for execution from where it will replicate across the replication tree. This method uses the
-     * {@link ReplicationMasterDescriptor#getSendReplicaInitiatedOperationToMasterURL(String) URL for sending an
-     * operation to the replication servlet on the master} and through the POST request's output stream first sends the
-     * target replicable's ID as a string using a {@link DataOutputStream}, then
-     * {@link #writeOperation(OperationWithResult, OutputStream, boolean) serializes the operation}.
-     */
-    default <T> void sendReplicaInitiatedOperationToMaster(OperationWithResult<S, T> operation) throws IOException {
-        ReplicationMasterDescriptor masterDescriptor = getMasterDescriptor();
-        assert masterDescriptor != null;
-        final OperationWithResultWithIdWrapper<S, T> operationWithResultWithIdWrapper = new OperationWithResultWithIdWrapper<S, T>(operation);
-        // TODO bug4018: if sending the operation fails, e.g., because of an HTTP response code != 2xx, enqueue the operation for retry
-        addOperationSentToMasterForReplication(operationWithResultWithIdWrapper);
-        URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(this.getId().toString());
-        final HttpURLConnection connection = (HttpURLConnection) HttpUrlConnectionHelper.redirectConnection(url, "POST"); // sets doOutput to true
-        logger.info("Sending operation "+operation+" to master "+masterDescriptor+"'s replicable with ID "+this+" for initial execution and replication");
-        connection.connect();
-        OutputStream outputStream = connection.getOutputStream();
-        DataOutputStream dos = new DataOutputStream(outputStream);
-        dos.writeUTF(getId().toString());
-        this.writeOperation(operationWithResultWithIdWrapper, outputStream, /* closeStream */ true);
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        bufferedReader.close();
-    }
-
-    /**
      * Checks whether this replicable is a replica. If yes, the operation is executed locally and sent to the master
-     * server for execution. Otherwise, {@link #applyReplicated(OperationWithResult)} is invoked which executes and
-     * replicates the operation immediately.
+     * server for execution. If sending the operation fails with an {@link IOException}, the operation will be enqueued
+     * for a later re-try using the
+     * {@link #retrySendingLater(OperationWithResultWithIdWrapper, OperationsToMasterSender)} method. Note that this may
+     * also happen while in a resend attempt. Otherwise, {@link #applyReplicated(OperationWithResult)} is invoked which
+     * executes and replicates the operation immediately.
      */
     default <T> T apply(OperationWithResult<S, T> operation) {
         boolean needToRemoveThreadLocal = false;
@@ -214,8 +185,12 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
             if (masterDescriptor != null) {
                 sendReplicaInitiatedOperationToMaster(operation);
             }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Exception trying to send operation "+operation+" to master for replication", e);
+        } catch (IOException e) {
+            logger.log(Level.INFO, "Error sending operation "+operation+" to master "+masterDescriptor+
+                    ". Queueing for later delivery.");
+            // remove the operation that failed to arrive on the master server from those marked as sent to master for now:
+            hasSentOperationToMaster(operation);
+            retrySendingLater(operation, this);
         } finally {
             if (needToRemoveThreadLocal) {
                 idOfOperationBeingExecuted.remove();
@@ -223,8 +198,6 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         }
         return result;
     }
-
-    void addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper<S, ?> operationWithResultWithIdWrapper);
 
     /**
      * The operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
