@@ -397,8 +397,6 @@ public class ReplicationServiceImpl implements ReplicationService, UnsentOperati
             final ReplicationServiceExecutionListener<S> listener = new ReplicationServiceExecutionListener<S>(this, replicable);
             executionListenersByReplicableIdAsString.put(replicable.getId().toString(), listener);
         }
-        // the following is idempotent and needs no roll-back
-        replicable.setUnsentOperationToMasterSender(unsentOperationsSenderJob);
     }
 
     @Override
@@ -627,6 +625,7 @@ public class ReplicationServiceImpl implements ReplicationService, UnsentOperati
             // new state, e.g., in competitor store
             for (Replicable<?, ?> r : replicables) {
                 r.clearReplicaState();
+                r.setUnsentOperationToMasterSender(this);
                 r.startedReplicatingFrom(master);
             }
             replicatorThread = new Thread(replicator, "Replicator receiving from " + master.getMessagingHostname() + "/"
