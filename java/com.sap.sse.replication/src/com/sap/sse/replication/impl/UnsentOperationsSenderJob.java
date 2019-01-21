@@ -11,7 +11,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationsToMasterSender;
-import com.sap.sse.replication.UnsentOperationsForMasterQueue;
+import com.sap.sse.replication.UnsentOperationsToMasterSender;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -29,7 +29,7 @@ import com.sap.sse.util.ThreadPoolUtil;
  * @author Axel Uhl (d043530)
  *
  */
-public class UnsentOperationsSenderJob implements UnsentOperationsForMasterQueue, Runnable {
+public class UnsentOperationsSenderJob implements UnsentOperationsToMasterSender, Runnable {
     private static final Logger logger = Logger.getLogger(UnsentOperationsSenderJob.class.getName());
     private final static Duration MAX_WAIT_TIME_BETWEEN_ATTEMPTS = Duration.ONE_MINUTE;
     
@@ -65,6 +65,7 @@ public class UnsentOperationsSenderJob implements UnsentOperationsForMasterQueue
      */
     private synchronized void ensureScheduled() {
         if (!scheduled) {
+            logger.info("Scheduling replication operation re-send to master in "+nextWaitDuration);
             ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(this,
                     /* delay */ nextWaitDuration.asMillis(), TimeUnit.MILLISECONDS);
             scheduled = true;

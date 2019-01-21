@@ -6,7 +6,7 @@ package com.sap.sse.replication;
  * @author Axel Uhl (d043530)
  *
  */
-public interface UnsentOperationsForMasterQueue {
+public interface UnsentOperationsToMasterSender {
     /**
      * When this replica was unable to send an operation to the master, e.g., for connectivity issues or the
      * master currently not being available, passing the operation to this method will enqueue the operation
@@ -16,5 +16,5 @@ public interface UnsentOperationsForMasterQueue {
      * 
      * @param sender the object to use to try to send the operation to the master server upon the next attempt
      */
-    <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(OperationWithResult<S, T> operationWithResultWithIdWrapper, OperationsToMasterSender<S, O> sender);
+    <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender);
 }

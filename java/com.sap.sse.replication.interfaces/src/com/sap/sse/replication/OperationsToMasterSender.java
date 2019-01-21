@@ -7,10 +7,30 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.logging.Logger;
 
+import com.sap.sse.common.WithID;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
-public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>> extends Replicable<S, O>, UnsentOperationsForMasterQueue {
+public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>> extends UnsentOperationsToMasterSender, WithID {
+    final Logger logger = Logger.getLogger(OperationsToMasterSender.class.getName());
+    
+    /**
+     * @return the descriptor of the master from which this replica is replicating this {@link Replicable}, or
+     *         {@code null} if this {@link Replicable} is currently running as a master.
+     */
+    ReplicationMasterDescriptor getMasterDescriptor();
+
+    /**
+     * Writes an operation to an output stream such that it can be read by {@link #readOperation}.
+     * 
+     * @param closeStream
+     *            if <code>true</code>, the stream will be closed after having written the operation; in any case, the
+     *            content written will be flushed to the <code>outputStream</code> so that the caller may continue to
+     *            invoke this method for other operations and/or on other replicables without producing corrupt data.
+     */
+    void writeOperation(OperationWithResult<?, ?> operation, OutputStream outputStream, boolean closeStream) throws IOException;
+
     /**
      * When a replica has initiated (not received through replication) an operation, this operation needs to be sent to
      * the master for execution from where it will replicate across the replication tree. This method uses the

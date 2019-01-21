@@ -72,7 +72,10 @@ import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.UnsentOperationsToMasterSender;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
@@ -121,6 +124,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+    
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
+     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)}
+     * method.
+     */
+    private UnsentOperationsToMasterSender unsentOperationsToMasterSender;
 
     private static Ini shiroConfiguration;
     static {
@@ -1146,5 +1157,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void removeAllSessions(String cacheName) {
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().removeAllSessions(cacheName);
+    }
+
+    @Override
+    public void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service) {
+        this.unsentOperationsToMasterSender = service;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationsToMasterSender != null) {
+            unsentOperationsToMasterSender.retrySendingLater(operationWithResult, sender);
+        }
     }
 }

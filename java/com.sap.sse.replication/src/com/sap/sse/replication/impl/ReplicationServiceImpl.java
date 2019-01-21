@@ -43,7 +43,7 @@ import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.UnsentOperationsForMasterQueue;
+import com.sap.sse.replication.UnsentOperationsToMasterSender;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -76,7 +76,7 @@ import net.jpountz.lz4.LZ4BlockOutputStream;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl implements ReplicationService, UnsentOperationsForMasterQueue {
+public class ReplicationServiceImpl implements ReplicationService, UnsentOperationsToMasterSender {
     private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
 
     private final ReplicationInstancesManager replicationInstancesManager;
@@ -261,7 +261,7 @@ public class ReplicationServiceImpl implements ReplicationService, UnsentOperati
             synchronized (replicationInstancesManager) {
                 // .. and at least one of them wants to replicate the replicable with that ID
                 if (Util.contains(replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating(), replicable.getId().toString())) {
-                    ensureOperationExecutionListener(replicable);
+                    ensureOperationExecutionListenerAndInjectResetToMasterService(replicable);
                 }
             }
         }
@@ -383,7 +383,7 @@ public class ReplicationServiceImpl implements ReplicationService, UnsentOperati
     private void addAsListenerToReplicables(String[] replicableIdsAsStringForReplicablesToReplicate) {
         for (final String replicableIdAsStringForReplicableToReplicate : replicableIdsAsStringForReplicablesToReplicate) {
             Replicable<?, ?> replicable = getReplicable(replicableIdAsStringForReplicableToReplicate, /* wait */ true);
-            ensureOperationExecutionListener(replicable);
+            ensureOperationExecutionListenerAndInjectResetToMasterService(replicable);
         }
     }
 
@@ -392,11 +392,13 @@ public class ReplicationServiceImpl implements ReplicationService, UnsentOperati
      * {@code replicable} and remembered in {@link #executionListenersByReplicableIdAsString}. Otherwise, this method is
      * a no-op.
      */
-    private <S> void ensureOperationExecutionListener(Replicable<S, ?> replicable) {
+    private <S> void ensureOperationExecutionListenerAndInjectResetToMasterService(Replicable<S, ?> replicable) {
         if (!executionListenersByReplicableIdAsString.containsKey(replicable.getId().toString())) {
             final ReplicationServiceExecutionListener<S> listener = new ReplicationServiceExecutionListener<S>(this, replicable);
             executionListenersByReplicableIdAsString.put(replicable.getId().toString(), listener);
         }
+        // the following is idempotent and needs no roll-back
+        replicable.setUnsentOperationToMasterSender(unsentOperationsSenderJob);
     }
 
     @Override

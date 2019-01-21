@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import com.sap.sse.common.WithID;
 import com.sap.sse.operationaltransformation.Operation;
 
-public interface ReplicableWithObjectInputStream<S, O extends OperationWithResult<S, ?>> extends OperationsToMasterSender<S, O> {
+public interface ReplicableWithObjectInputStream<S, O extends OperationWithResult<S, ?>> extends Replicable<S, O> {
     static final Logger logger = Logger.getLogger(ReplicableWithObjectInputStream.class.getName());
     
     /**
@@ -123,7 +123,11 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
             try {
                 sendReplicaInitiatedOperationToMaster(castOperation);
             } catch (IOException e) {
-                logger.log(Level.SEVERE, "Exception trying to send operation "+operation+" to master for replication", e);
+                logger.log(Level.INFO, "Error sending operation "+operation+" to master "+getMasterDescriptor()+
+                        ". Queueing for later delivery.");
+                // remove the operation that failed to arrive on the master server from those marked as sent to master for now:
+                hasSentOperationToMaster(operation);
+                retrySendingLater(castOperation, this);
             }
         }
         replicateReplicated(operation); // this anticipates receiving the operation back from master; then, the operation will be ignored;
