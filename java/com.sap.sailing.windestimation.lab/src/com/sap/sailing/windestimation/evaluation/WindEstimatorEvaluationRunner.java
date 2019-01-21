@@ -25,7 +25,7 @@ public class WindEstimatorEvaluationRunner {
     private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.75;
     private static final double MAX_TWS_DEVIATION_PERCENT = 0.2;
     private static final int MAX_TWD_DEVIATION_DEG = 20;
-    private static final EvaluatableWindEstimationImplementation WIND_ESTIMATION_IMPLEMENTATION = EvaluatableWindEstimationImplementation.HMM;
+    private static final EvaluatableWindEstimationImplementation WIND_ESTIMATION_IMPLEMENTATION = EvaluatableWindEstimationImplementation.MST_HMM;
 
     public static void main(String[] args) throws Exception {
         WindEstimationEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(

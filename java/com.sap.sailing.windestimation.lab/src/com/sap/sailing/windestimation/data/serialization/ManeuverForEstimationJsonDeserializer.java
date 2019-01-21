@@ -45,8 +45,6 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
         double lowestVsExitingSpeedRatio = (double) object
                 .get(ManeuverForEstimationJsonSerializer.LOWEST_VS_EXITING_SPEED_RATIO);
         boolean clean = (boolean) object.get(ManeuverForEstimationJsonSerializer.CLEAN);
-        boolean cleanBefore = (boolean) object.get(ManeuverForEstimationJsonSerializer.CLEAN_BEFORE);
-        boolean cleanAfter = (boolean) object.get(ManeuverForEstimationJsonSerializer.CLEAN_AFTER);
         ManeuverCategory maneuverCategory = ManeuverCategory
                 .valueOf((String) object.get(ManeuverForEstimationJsonSerializer.MANEUVER_CATEGORY));
         double scaledSpeedBefore = (double) object
@@ -63,8 +61,8 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
                 new KnotSpeedWithBearingImpl(speedAfterInKnots, new DegreeBearingImpl(cogAfter)), courseChangeInDegrees,
                 courseChangeMainCurveInDegrees, maxTurningRateInDegrees, deviationFromOptimalTackAngleInDegrees,
                 deviationFromOptimalJibeAngleInDegrees, speedLossRatio, speedGainRatio, lowestVsExitingSpeedRatio,
-                clean, cleanBefore, cleanAfter, maneuverCategory, scaledSpeedBefore, scaledSpeedAfter, markPassing,
-                boatClass, markPassingDataAvailable);
+                clean, maneuverCategory, scaledSpeedBefore, scaledSpeedAfter, markPassing, boatClass,
+                markPassingDataAvailable);
         if (object.containsKey(ManeuverForEstimationJsonSerializer.WIND_SPEED)) {
             String maneuverTypeStr = (String) object.get(ManeuverForEstimationJsonSerializer.MANEUVER_TYPE);
             ManeuverTypeForClassification maneuverType = maneuverTypeStr == null ? null
@@ -79,9 +77,8 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
                     maneuver.getDeviationFromOptimalTackAngleInDegrees(),
                     maneuver.getDeviationFromOptimalJibeAngleInDegrees(), maneuver.getSpeedLossRatio(),
                     maneuver.getSpeedGainRatio(), maneuver.getLowestSpeedVsExitingSpeedRatio(), maneuver.isClean(),
-                    maneuver.isCleanBefore(), maneuver.isCleanAfter(), maneuver.getManeuverCategory(),
-                    maneuver.getScaledSpeedBefore(), maneuver.getScaledSpeedAfter(), markPassing,
-                    maneuver.getBoatClass(), maneuver.isMarkPassingDataAvailable(), maneuverType,
+                    maneuver.getManeuverCategory(), maneuver.getScaledSpeedBefore(), maneuver.getScaledSpeedAfter(),
+                    markPassing, maneuver.getBoatClass(), maneuver.isMarkPassingDataAvailable(), maneuverType,
                     new WindImpl(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint(),
                             new KnotSpeedWithBearingImpl(windSpeedInKnots, new DegreeBearingImpl(windCourse))),
                     regattaName);

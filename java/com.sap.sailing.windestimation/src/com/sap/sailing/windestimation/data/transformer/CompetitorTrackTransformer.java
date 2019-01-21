@@ -14,12 +14,8 @@ public interface CompetitorTrackTransformer<FromType, ToType>
     default CompetitorTrackWithEstimationData<ToType> transform(
             CompetitorTrackWithEstimationData<FromType> competitorTrackToTransform) {
         List<ToType> transformedElements = transformElements(competitorTrackToTransform);
-        CompetitorTrackWithEstimationData<ToType> competitorTrack = new CompetitorTrackWithEstimationData<>(
-                competitorTrackToTransform.getCompetitorName(), competitorTrackToTransform.getBoatClass(),
-                transformedElements, competitorTrackToTransform.getAvgIntervalBetweenFixesInSeconds(),
-                competitorTrackToTransform.getDistanceTravelled(), competitorTrackToTransform.getTrackStartTimePoint(),
-                competitorTrackToTransform.getTrackEndTimePoint(), competitorTrackToTransform.getMarkPassingsCount(),
-                competitorTrackToTransform.getWaypointsCount());
+        CompetitorTrackWithEstimationData<ToType> competitorTrack = competitorTrackToTransform
+                .constructWithElements(transformedElements);
         return competitorTrack;
     }
 

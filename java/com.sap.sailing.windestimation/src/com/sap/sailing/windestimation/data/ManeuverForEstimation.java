@@ -22,8 +22,6 @@ public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> 
     private final double speedGainRatio;
     private final double lowestSpeedVsExitingSpeedRatio;
     private final boolean clean;
-    private final boolean cleanBefore;
-    private final boolean cleanAfter;
     private final ManeuverCategory maneuverCategory;
     private final double scaledSpeedBefore;
     private final double scaledSpeedAfter;
@@ -36,9 +34,9 @@ public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> 
             double courseChangeInDegrees, double courseChangeWithinMainCurveInDegrees,
             double maxTurningRateInDegreesPerSecond, Double deviationFromOptimalTackAngleInDegrees,
             Double deviationFromOptimalJibeAngleInDegrees, double speedLossRatio, double speedGainRatio,
-            double lowestSpeedVsExitingSpeedRatio, boolean clean, boolean cleanBefore, boolean cleanAfter,
-            ManeuverCategory maneuverCategory, double scaledSpeedBefore, double scaledSpeedAfter, boolean markPassing,
-            BoatClass boatClass, boolean markPassingDataAvailable) {
+            double lowestSpeedVsExitingSpeedRatio, boolean clean, ManeuverCategory maneuverCategory,
+            double scaledSpeedBefore, double scaledSpeedAfter, boolean markPassing, BoatClass boatClass,
+            boolean markPassingDataAvailable) {
         this.maneuverTimePoint = maneuverTimePoint;
         this.maneuverPosition = maneuverPosition;
         this.middleCourse = middleCourse;
@@ -53,8 +51,6 @@ public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> 
         this.speedGainRatio = speedGainRatio;
         this.lowestSpeedVsExitingSpeedRatio = lowestSpeedVsExitingSpeedRatio;
         this.clean = clean;
-        this.cleanBefore = cleanBefore;
-        this.cleanAfter = cleanAfter;
         this.maneuverCategory = maneuverCategory;
         this.scaledSpeedBefore = scaledSpeedBefore;
         this.scaledSpeedAfter = scaledSpeedAfter;
@@ -117,14 +113,6 @@ public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> 
 
     public boolean isClean() {
         return clean;
-    }
-
-    public boolean isCleanBefore() {
-        return cleanBefore;
-    }
-
-    public boolean isCleanAfter() {
-        return cleanAfter;
     }
 
     public ManeuverCategory getManeuverCategory() {

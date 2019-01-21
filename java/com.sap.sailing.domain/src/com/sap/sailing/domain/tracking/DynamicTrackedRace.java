@@ -63,14 +63,6 @@ public interface DynamicTrackedRace extends TrackedRace {
     }
     
     /**
-     * Like {@link #recordWind(Wind, WindSource)}, only that filtering may be disabled by setting
-     * <code>applyFilter</code> to <code>false</code>.
-     */
-    boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter);
-
-    void removeWind(Wind wind, WindSource windSource);
-
-    /**
      * The raw, updating feed of a single competitor participating in this race
      */
     DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);

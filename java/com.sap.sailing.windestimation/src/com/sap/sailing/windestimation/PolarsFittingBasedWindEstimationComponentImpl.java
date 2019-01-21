@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -18,6 +19,8 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProb
 import com.sap.sailing.windestimation.preprocessing.PreprocessingPipeline;
 import com.sap.sailing.windestimation.windinference.WindTrackCalculator;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * 
@@ -38,13 +41,13 @@ public class PolarsFittingBasedWindEstimationComponentImpl<InputType>
     }
 
     @Override
-    public List<WindWithConfidence<Void>> estimateWindTrack(InputType input) {
+    public List<WindWithConfidence<Pair<Position, TimePoint>>> estimateWindTrack(InputType input) {
         RaceWithEstimationData<ManeuverForEstimation> race = preprocessingPipeline.preprocessRace(input);
         return estimateWindTrackAfterPreprocessing(race);
     }
 
     @Override
-    public List<WindWithConfidence<Void>> estimateWindTrackAfterPreprocessing(
+    public List<WindWithConfidence<Pair<Position, TimePoint>>> estimateWindTrackAfterPreprocessing(
             RaceWithEstimationData<ManeuverForEstimation> race) {
         PolarsFittingWindEstimation windEstimation = new PolarsFittingWindEstimation(polarService,
                 race.getCompetitorTracks());
@@ -52,7 +55,7 @@ public class PolarsFittingBasedWindEstimationComponentImpl<InputType>
                 .flatMap(competitorTrack -> competitorTrack.getElements().stream())
                 .sorted((one, two) -> one.getManeuverTimePoint().compareTo(two.getManeuverTimePoint()))
                 .collect(Collectors.toList());
-        List<WindWithConfidence<Void>> result = new ArrayList<>();
+        List<WindWithConfidence<Pair<Position, TimePoint>>> result = new ArrayList<>();
         WindWithConfidence<Void> wind = windEstimation.estimateAverageWind();
         if (wind != null) {
             for (ManeuverForEstimation maneuver : maneuvers) {
@@ -65,7 +68,8 @@ public class PolarsFittingBasedWindEstimationComponentImpl<InputType>
                             && Math.abs(Math.abs(twaBefore.getDegrees()) - Math.abs(twaAfter.getDegrees())) <= 20) {
                         Wind newWind = new WindImpl(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint(),
                                 wind.getObject());
-                        result.add(new WindWithConfidenceImpl<Void>(newWind, wind.getConfidence(), null,
+                        result.add(new WindWithConfidenceImpl<>(newWind, wind.getConfidence(),
+                                new Pair<>(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint()),
                                 newWind.getKnots() > 0));
                     }
                 }
@@ -75,13 +79,13 @@ public class PolarsFittingBasedWindEstimationComponentImpl<InputType>
     }
 
     @Override
-    public List<WindWithConfidence<Void>> estimateWindTrackAfterManeuverClassification(
+    public List<WindWithConfidence<Pair<Position, TimePoint>>> estimateWindTrackAfterManeuverClassification(
             RaceWithEstimationData<ManeuverWithProbabilisticTypeClassification> raceWithManeuverClassifications) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<WindWithConfidence<Void>> estimateWindTrackAfterManeuverClassificationsAggregation(
+    public List<WindWithConfidence<Pair<Position, TimePoint>>> estimateWindTrackAfterManeuverClassificationsAggregation(
             List<ManeuverWithEstimatedType> improvedManeuverClassifications) {
         throw new UnsupportedOperationException();
     }

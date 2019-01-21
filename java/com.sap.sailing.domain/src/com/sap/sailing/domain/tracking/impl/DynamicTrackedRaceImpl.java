@@ -1004,23 +1004,16 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
-        final boolean result;
-        if (!applyFilter || takesWindFixWithTimePoint(wind.getTimePoint())) {
-            result = getOrCreateWindTrack(windSource).add(wind);
-            updated(wind.getTimePoint());
-            triggerManeuverCacheRecalculationForAllCompetitors();
+        boolean result = super.recordWind(wind, windSource, applyFilter);
+        if (result) {
             notifyListeners(wind, windSource);
-        } else {
-            result = false;
         }
         return result;
     }
 
     @Override
     public void removeWind(Wind wind, WindSource windSource) {
-        getOrCreateWindTrack(windSource).remove(wind);
-        updated(/* time point */null); // wind events shouldn't advance race time
-        triggerManeuverCacheRecalculationForAllCompetitors();
+        super.removeWind(wind, windSource);
         notifyListenersWindRemoved(wind, windSource);
     }
 

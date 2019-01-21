@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.windinference;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -13,6 +14,8 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEsti
 import com.sap.sailing.windestimation.util.WindUtil;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 public class WindTrackCalculatorImpl implements WindTrackCalculator {
 
@@ -25,9 +28,9 @@ public class WindTrackCalculatorImpl implements WindTrackCalculator {
     }
 
     @Override
-    public List<WindWithConfidence<Void>> getWindTrackFromManeuverClassifications(
+    public List<WindWithConfidence<Pair<Position, TimePoint>>> getWindTrackFromManeuverClassifications(
             List<ManeuverWithEstimatedType> improvedManeuverClassifications) {
-        List<WindWithConfidence<Void>> windFixes = new ArrayList<>();
+        List<WindWithConfidence<Pair<Position, TimePoint>>> windFixes = new ArrayList<>();
         for (ManeuverWithEstimatedType maneuverWithEstimatedType : improvedManeuverClassifications) {
             Bearing windCourse = twdCalculator.getTwd(maneuverWithEstimatedType);
             if (windCourse != null) {
@@ -36,7 +39,7 @@ public class WindTrackCalculatorImpl implements WindTrackCalculator {
                 Speed avgWindSpeed = twsCalculator.getWindSpeed(maneuver, windCourse);
                 Wind wind = new WindImpl(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint(),
                         new KnotSpeedWithBearingImpl(avgWindSpeed.getKnots(), windCourse));
-                windFixes.add(new WindWithConfidenceImpl<Void>(wind, maneuverWithEstimatedType.getConfidence(), null,
+                windFixes.add(new WindWithConfidenceImpl<>(wind, maneuverWithEstimatedType.getConfidence(), new Pair<>(wind.getPosition(), wind.getTimePoint()),
                         avgWindSpeed.getKnots() > 0));
             }
         }

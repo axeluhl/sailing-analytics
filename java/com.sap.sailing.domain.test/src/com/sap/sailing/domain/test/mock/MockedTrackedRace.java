@@ -1229,11 +1229,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void windChangedEvent(List<Pair<Position, TimePoint>> changedWindMeasurements,
-            WindSource windSourceWithChange) {
+    public PolarDataService getPolarDataService() {
+        return null;
     }
-    
-    @Override
-    public void triggerManeuverCacheRecalculation(Competitor competitor) {
-    }
+
 }

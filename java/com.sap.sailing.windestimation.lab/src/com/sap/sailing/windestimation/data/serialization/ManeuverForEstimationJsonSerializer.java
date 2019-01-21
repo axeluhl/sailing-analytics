@@ -27,8 +27,6 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
     public static final String SPEED_GAIN_RATIO = "speedGain";
     public static final String LOWEST_VS_EXITING_SPEED_RATIO = "lowestVsExitingSpeedRatio";
     public static final String CLEAN = "clean";
-    public static final String CLEAN_BEFORE = "cleanBefore";
-    public static final String CLEAN_AFTER = "cleanAfter";
     public static final String MANEUVER_CATEGORY = "category";
     public static final String SCALED_SPEED_BEFORE_IN_KNOTS = "scaledSpeedBefore";
     public static final String SCALED_SPEED_AFTER_IN_KNOTS = "scaledSpeedAfter";
@@ -62,8 +60,6 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
         json.put(SPEED_GAIN_RATIO, maneuver.getSpeedGainRatio());
         json.put(LOWEST_VS_EXITING_SPEED_RATIO, maneuver.getLowestSpeedVsExitingSpeedRatio());
         json.put(CLEAN, maneuver.isClean());
-        json.put(CLEAN_BEFORE, maneuver.isCleanBefore());
-        json.put(CLEAN_AFTER, maneuver.isCleanAfter());
         json.put(MANEUVER_CATEGORY, maneuver.getManeuverCategory().name());
         json.put(SCALED_SPEED_BEFORE_IN_KNOTS, maneuver.getScaledSpeedBefore());
         json.put(SCALED_SPEED_AFTER_IN_KNOTS, maneuver.getScaledSpeedAfter());

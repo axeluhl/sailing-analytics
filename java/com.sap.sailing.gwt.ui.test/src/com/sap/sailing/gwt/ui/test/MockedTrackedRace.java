@@ -78,7 +78,6 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.ThreadLocalTransporter;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
@@ -926,11 +925,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void windChangedEvent(List<Pair<Position, TimePoint>> changedWindMeasurements,
-            WindSource windSourceWithChange) {
+    public PolarDataService getPolarDataService() {
+        return null;
     }
-    
-    @Override
-    public void triggerManeuverCacheRecalculation(Competitor competitor) {
-    }
+
 }

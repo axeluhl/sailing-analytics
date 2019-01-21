@@ -169,8 +169,12 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     public int getNumberOfWindFixes() {
         final Iterable<WindSource> windSources = getTrackedRace().getWindSources();
         final Iterable<WindSource> windSourcesToExclude = getTrackedRace().getWindSourcesToExclude();
-        final Iterable<WindSource> windSourcesToUse = StreamSupport.stream(windSources.spliterator(), /* parallel */ false).filter(ws->!Util.contains(windSourcesToExclude, ws)).
-                filter(ws->ws.getType()!=WindSourceType.TRACK_BASED_ESTIMATION).collect(Collectors.toList());
+        final Iterable<WindSource> windSourcesToUse = StreamSupport
+                .stream(windSources.spliterator(), /* parallel */ false)
+                .filter(ws -> !Util.contains(windSourcesToExclude, ws))
+                .filter(ws -> ws.getType() != WindSourceType.TRACK_BASED_ESTIMATION
+                        && ws.getType() != WindSourceType.MANEUVER_BASED_ESTIMATION)
+                .collect(Collectors.toList());
         return getNumberOfRawFixes(windSourcesToUse, (windSource, trackedRace)->trackedRace.getOrCreateWindTrack(windSource));
     }
 

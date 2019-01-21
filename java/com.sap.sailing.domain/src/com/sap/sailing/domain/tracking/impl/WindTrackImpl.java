@@ -273,7 +273,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             do {
                 if (beforeWind != null && (beforeDistanceToAt <= afterDistanceToAt || afterWind == null)) {
                     windFixesToAverage.add(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(beforeWind,
-                            getBaseConfidence(), new Util.Pair<Position, TimePoint>(beforeWind.getPosition(), beforeWind
+                            getConfidenceOfInternalWindFixUnsynchronized(beforeWind), new Util.Pair<Position, TimePoint>(beforeWind.getPosition(), beforeWind
                                     .getTimePoint()), useSpeed));
                     if (beforeIntervalEnd == null) {
                         beforeIntervalEnd = beforeWind.getTimePoint();
@@ -287,7 +287,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     }
                 } else if (afterWind != null) {
                     windFixesToAverage.add(new WindWithConfidenceImpl<Util.Pair<Position, TimePoint>>(afterWind,
-                            getBaseConfidence(), new Util.Pair<Position, TimePoint>(afterWind.getPosition(), afterWind
+                            getConfidenceOfInternalWindFixUnsynchronized(afterWind), new Util.Pair<Position, TimePoint>(afterWind.getPosition(), afterWind
                                     .getTimePoint()), useSpeed));
                     if (afterIntervalStart == null) {
                         afterIntervalStart = afterWind.getTimePoint();
@@ -311,6 +311,15 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         } finally {
             unlockAfterRead();
         }
+    }
+
+    /**
+     * Gets the confidence for the specified wind fix. Not being <code>synchronized</code>, it does not obtain this
+     * object's monitor. Subclasses may use this carefully if they can guarantee there are no concurrency issues with
+     * the internal fixes while iterating over the result of {@link #getInternalFixes()}.
+     */
+    protected double getConfidenceOfInternalWindFixUnsynchronized(Wind windFix) {
+        return getBaseConfidence();
     }
 
     /**

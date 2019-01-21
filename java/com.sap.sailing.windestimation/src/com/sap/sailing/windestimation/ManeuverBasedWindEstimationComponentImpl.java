@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
@@ -11,7 +12,9 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifi
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.preprocessing.PreprocessingPipeline;
-import com.sap.sailing.windestimation.windinference.WindTrackCalculator;;
+import com.sap.sailing.windestimation.windinference.WindTrackCalculator;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;;
 
 public class ManeuverBasedWindEstimationComponentImpl<InputType>
         implements WindEstimationComponentWithInternals<InputType> {
@@ -32,13 +35,13 @@ public class ManeuverBasedWindEstimationComponentImpl<InputType>
     }
 
     @Override
-    public List<WindWithConfidence<Void>> estimateWindTrack(InputType input) {
+    public List<WindWithConfidence<Pair<Position, TimePoint>>> estimateWindTrack(InputType input) {
         RaceWithEstimationData<ManeuverForEstimation> race = preprocessingPipeline.preprocessRace(input);
         return estimateWindTrackAfterPreprocessing(race);
     }
 
     @Override
-    public List<WindWithConfidence<Void>> estimateWindTrackAfterPreprocessing(
+    public List<WindWithConfidence<Pair<Position, TimePoint>>> estimateWindTrackAfterPreprocessing(
             RaceWithEstimationData<ManeuverForEstimation> race) {
         List<CompetitorTrackWithEstimationData<ManeuverWithProbabilisticTypeClassification>> competitorTracks = race
                 .getCompetitorTracks().stream().map(competitorTrack -> {
@@ -53,7 +56,7 @@ public class ManeuverBasedWindEstimationComponentImpl<InputType>
     }
 
     @Override
-    public List<WindWithConfidence<Void>> estimateWindTrackAfterManeuverClassification(
+    public List<WindWithConfidence<Pair<Position, TimePoint>>> estimateWindTrackAfterManeuverClassification(
             RaceWithEstimationData<ManeuverWithProbabilisticTypeClassification> raceWithManeuverClassifications) {
         List<ManeuverWithEstimatedType> improvedManeuverClassifications = maneuverClassificationsAggregator
                 .aggregateManeuverClassifications(raceWithManeuverClassifications);
@@ -61,9 +64,9 @@ public class ManeuverBasedWindEstimationComponentImpl<InputType>
     }
 
     @Override
-    public List<WindWithConfidence<Void>> estimateWindTrackAfterManeuverClassificationsAggregation(
+    public List<WindWithConfidence<Pair<Position, TimePoint>>> estimateWindTrackAfterManeuverClassificationsAggregation(
             List<ManeuverWithEstimatedType> improvedManeuverClassifications) {
-        List<WindWithConfidence<Void>> windTrack = windTrackCalculator
+        List<WindWithConfidence<Pair<Position, TimePoint>>> windTrack = windTrackCalculator
                 .getWindTrackFromManeuverClassifications(improvedManeuverClassifications);
         return windTrack;
     }

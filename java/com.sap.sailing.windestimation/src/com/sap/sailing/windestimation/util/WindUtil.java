@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 import smile.sort.QuickSelect;
 
@@ -29,15 +32,15 @@ public class WindUtil {
         return result;
     }
 
-    public static List<WindWithConfidence<Void>> getWindFixesWithMedianTws(
-            List<WindWithConfidence<Void>> windFixes) {
+    public static List<WindWithConfidence<Pair<Position, TimePoint>>> getWindFixesWithMedianTws(
+            List<WindWithConfidence<Pair<Position, TimePoint>>> windFixes) {
         if (windFixes.size() <= 1) {
             return windFixes;
         }
         double[] windSpeedsInKnots = new double[windFixes.size()];
         int i = 0;
         int zerosCount = 0;
-        for (WindWithConfidence<Void> windFix : windFixes) {
+        for (WindWithConfidence<Pair<Position, TimePoint>> windFix : windFixes) {
             double windSpeedInKnots = windFix.getObject().getKnots();
             if (windSpeedInKnots > 0) {
                 windSpeedsInKnots[i++] = windFix.getObject().getKnots();
@@ -53,10 +56,10 @@ public class WindUtil {
         }
         double avgWindSpeedInKnots = windSpeedsInKnots.length == 1 ? windSpeedsInKnots[0]
                 : QuickSelect.median(windSpeedsInKnots);
-        List<WindWithConfidence<Void>> result = new ArrayList<>();
-        for (WindWithConfidence<Void> windFix : windFixes) {
+        List<WindWithConfidence<Pair<Position, TimePoint>>> result = new ArrayList<>();
+        for (WindWithConfidence<Pair<Position, TimePoint>> windFix : windFixes) {
             Wind wind = windFix.getObject();
-            WindWithConfidence<Void> newWindFix = new WindWithConfidenceImpl<Void>(
+            WindWithConfidence<Pair<Position, TimePoint>> newWindFix = new WindWithConfidenceImpl<>(
                     new WindImpl(wind.getPosition(), wind.getTimePoint(),
                             new KnotSpeedWithBearingImpl(avgWindSpeedInKnots, wind.getBearing())),
                     windFix.getConfidence(), windFix.getRelativeTo(), avgWindSpeedInKnots > 0);

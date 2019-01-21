@@ -23,7 +23,7 @@ import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
-import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstimationTransformer;
+import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
@@ -40,7 +40,7 @@ public class TwdTransitionImporter {
         twdTransitionPersistenceManager.dropCollection();
         DummyManeuverClassifier maneuverClassifier = new DummyManeuverClassifier();
         RaceElementsFilteringPreprocessingPipelineImpl preprocessingPipeline = new RaceElementsFilteringPreprocessingPipelineImpl(
-                new LabelledManeuverForEstimationTransformer());
+                new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer());
         long twdTransitionsCount = 0;
         for (PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> iterator = racesPersistenceManager
                 .getIterator(); iterator.hasNext();) {

@@ -36,7 +36,7 @@ public class RaceWithEstimationDataDeserializer<T> implements JsonDeserializer<R
         for (Object competitorTrackObj : competitorTracks) {
             JSONObject competitorTrack = (JSONObject) competitorTrackObj;
             CompetitorTrackWithEstimationData<T> competitorTrackWithEstimationData = competitorTrackWithEstimationDataJsonDeserializer
-                    .deserialize(competitorTrack);
+                    .deserialize(competitorTrack, regattaName, raceName);
             competitorTracksWithEstimationData.add(competitorTrackWithEstimationData);
         }
         RaceWithEstimationData<T> raceWithEstimationData = new RaceWithEstimationData<>(regattaName, raceName,

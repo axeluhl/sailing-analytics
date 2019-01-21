@@ -67,6 +67,7 @@ public class TargetTimeEstimationTest {
         WindSource source = mock(WindSource.class);
         Set<WindSource> sources = Collections.singleton(source);
         when(trackedRace.getWindSources(WindSourceType.TRACK_BASED_ESTIMATION)).thenReturn(sources);
+        when(trackedRace.getWindSources(WindSourceType.MANEUVER_BASED_ESTIMATION)).thenReturn(sources);
         when(trackedRace.getWind(any(Position.class), eq(timepoint))).thenReturn(wind);
         when(trackedRace.getWind(any(Position.class), eq(timepoint), any(Set.class))).thenReturn(wind);
         

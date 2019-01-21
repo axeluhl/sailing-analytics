@@ -2,10 +2,13 @@ package com.sap.sailing.windestimation;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.ManeuverBasedWindEstimationComponentImpl;
+import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
+import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory;
 import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory.HmmTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
+import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.store.ModelStore;
@@ -20,8 +23,8 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
         ManeuverBasedWindEstimationComponentImpl<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> {
 
     private static final int MODEL_CACHE_KEEP_ALIVE_MILLIS = 3600000;
-    private static final HmmTransitionProbabilitiesCalculator transitionProbabilitiesCalculatorType = HmmTransitionProbabilitiesCalculator.GAUSSIAN_REGRESSOR;
-    private static final boolean propagateIntersectedWindRangeOfHeadupAndBearAway = true;
+    private static final HmmTransitionProbabilitiesCalculator transitionProbabilitiesCalculatorType = HmmTransitionProbabilitiesCalculator.INTERSECTED;
+    private static final boolean propagateIntersectedWindRangeOfHeadupAndBearAway = false;
 
     public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
             ModelStore modelStore, PolarDataService polarService,
@@ -39,7 +42,7 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
             ModelStore modelStore, PolarDataService polarService,
             ManeuverClassificationsAggregatorImplementation aggregatorImplementation) {
         this(maneuverFeatures, modelStore, polarService,
-                new RaceElementsFilteringPreprocessingPipelineImpl(new ManeuverForEstimationTransformer()),
+                new RaceElementsFilteringPreprocessingPipelineImpl(new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                 aggregatorImplementation);
     }
 

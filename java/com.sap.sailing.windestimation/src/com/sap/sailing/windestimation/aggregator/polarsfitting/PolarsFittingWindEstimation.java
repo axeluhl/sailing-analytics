@@ -42,10 +42,8 @@ public class PolarsFittingWindEstimation {
         this(polarService);
         for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : competitorTracks) {
             for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
-                if (maneuver.isCleanBefore()) {
+                if (maneuver.isClean()) {
                     addSpeedWithCourseRecord(maneuver.getSpeedWithBearingBefore(), competitorTrack.getBoatClass());
-                }
-                if (maneuver.isCleanAfter()) {
                     addSpeedWithCourseRecord(maneuver.getSpeedWithBearingAfter(), competitorTrack.getBoatClass());
                 }
             }
@@ -214,16 +212,14 @@ public class PolarsFittingWindEstimation {
     public Speed getWindSpeed(ManeuverForEstimation maneuver, Bearing windCourse) {
         WindSpeedRange windSpeedRange = null;
         BoatClass boatClass = maneuver.getBoatClass();
-        if (maneuver.isCleanBefore()) {
+        if (maneuver.isClean()) {
             double absTwaInDegrees = Math.abs(windCourse.reverse()
                     .getDifferenceTo(maneuver.getSpeedWithBearingBefore().getBearing()).getDegrees());
             double avgSpeedInKnots = maneuver.getSpeedWithBearingBefore().getKnots();
             windSpeedRange = getWindSpeedRange(boatClass, avgSpeedInKnots, absTwaInDegrees);
-        }
-        if (maneuver.isCleanAfter()) {
-            double absTwaInDegrees = Math.abs(windCourse.reverse()
+            absTwaInDegrees = Math.abs(windCourse.reverse()
                     .getDifferenceTo(maneuver.getSpeedWithBearingAfter().getBearing()).getDegrees());
-            double avgSpeedInKnots = maneuver.getSpeedWithBearingAfter().getKnots();
+            avgSpeedInKnots = maneuver.getSpeedWithBearingAfter().getKnots();
             WindSpeedRange currentTwaWindSpeedRange = getWindSpeedRange(boatClass, avgSpeedInKnots, absTwaInDegrees);
             if (currentTwaWindSpeedRange != null) {
                 windSpeedRange = windSpeedRange == null ? currentTwaWindSpeedRange

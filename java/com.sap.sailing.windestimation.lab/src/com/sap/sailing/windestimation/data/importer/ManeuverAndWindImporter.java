@@ -41,9 +41,9 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.RaceWithWin
 import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
 import com.sap.sailing.windestimation.data.serialization.ManeuverForDataAnalysisJsonSerializer;
 import com.sap.sailing.windestimation.data.serialization.ManeuverForEstimationJsonSerializer;
-import com.sap.sailing.windestimation.data.transformer.AbstractCompleteManeuverCurveWithEstimationDataTransformer;
-import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstimationTransformer;
-import com.sap.sailing.windestimation.data.transformer.ManeuverForDataAnalysisTransformer;
+import com.sap.sailing.windestimation.data.transformer.CompetitorTrackTransformer;
+import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer;
+import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 /**
@@ -64,8 +64,8 @@ public class ManeuverAndWindImporter {
     private final RaceWithManeuverForDataAnalysisPersistenceManager maneuverForDataAnalysisPersistenceManager;
     private final RaceWithManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager;
     private final RaceWithWindSourcesPersistenceManager raceWithWindSourcesPersistenceManager;
-    private final ManeuverForDataAnalysisTransformer maneuverForDataAnalysisTransformer;
-    private final LabelledManeuverForEstimationTransformer maneuverForEstimationTransformer;
+    private final CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer maneuverForDataAnalysisTransformer;
+    private final CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer maneuverForEstimationTransformer;
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
     private final ManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
     private boolean skipRace;
@@ -75,8 +75,8 @@ public class ManeuverAndWindImporter {
         this.maneuverForDataAnalysisPersistenceManager = new RaceWithManeuverForDataAnalysisPersistenceManager();
         this.maneuverForEstimationPersistenceManager = new RaceWithManeuverForEstimationPersistenceManager();
         this.raceWithWindSourcesPersistenceManager = new RaceWithWindSourcesPersistenceManager();
-        this.maneuverForDataAnalysisTransformer = new ManeuverForDataAnalysisTransformer();
-        this.maneuverForEstimationTransformer = new LabelledManeuverForEstimationTransformer();
+        this.maneuverForDataAnalysisTransformer = new CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer();
+        this.maneuverForEstimationTransformer = new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer();
         this.maneuverForDataAnalysisJsonSerializer = new ManeuverForDataAnalysisJsonSerializer();
         this.maneuverForEstimationJsonSerializer = new ManeuverForEstimationJsonSerializer();
     }
@@ -230,7 +230,7 @@ public class ManeuverAndWindImporter {
             if (!maneuverCurves.isEmpty()) {
                 competitorTracks.add(competitorTrack);
                 CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData = competitorTrackWithEstimationDataJsonDeserializer
-                        .deserialize(competitorTrack);
+                        .deserialize(competitorTrack, regattaName, trackedRaceName);
                 competitorTrack.put("clean",
                         competitorTrackWithEstimationData.isClean()
                                 && competitorTrackWithEstimationData
@@ -298,7 +298,7 @@ public class ManeuverAndWindImporter {
 
     private <ToType> void addTransformedElementsToCompetitorTrackJson(List<JSONObject> competitorTracks,
             List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracksWithEstimationData,
-            AbstractCompleteManeuverCurveWithEstimationDataTransformer<ToType> elementsTransformer,
+            CompetitorTrackTransformer<CompleteManeuverCurveWithEstimationData, ToType> elementsTransformer,
             JsonSerializer<ToType> elementJsonSerializer) {
         List<CompetitorTrackWithEstimationData<ToType>> competitorTracksWithManeuvers = elementsTransformer
                 .transform(competitorTracksWithEstimationData);

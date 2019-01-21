@@ -71,7 +71,6 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * Simple mock for {@link TrackedRace} for leaderboard testing; the leaderboard only requests {@link #hasStarted(TimePoint)} and
@@ -768,11 +767,18 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void windChangedEvent(List<Pair<Position, TimePoint>> changedWindMeasurements,
-            WindSource windSourceWithChange) {
+    public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
+        return false;
     }
-    
+
     @Override
-    public void triggerManeuverCacheRecalculation(Competitor competitor) {
+    public void removeWind(Wind wind, WindSource windSource) {
+        
     }
+
+    @Override
+    public PolarDataService getPolarDataService() {
+        return null;
+    }
+
 }

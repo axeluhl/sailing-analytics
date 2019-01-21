@@ -14,7 +14,7 @@ public abstract class AbstractMstGraphGenerator<T> {
 
     private final List<NodeWithNeighbors<T>> nodes;
 
-    private static final int MAX_DEPTH_FOR_DFS = 10;
+    private static final int MAX_DEPTH_FOR_DFS = 100;
 
     public AbstractMstGraphGenerator() {
         this(new ArrayList<>());

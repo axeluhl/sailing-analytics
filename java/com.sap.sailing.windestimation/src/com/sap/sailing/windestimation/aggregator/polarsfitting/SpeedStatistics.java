@@ -1,7 +1,10 @@
 package com.sap.sailing.windestimation.aggregator.polarsfitting;
 
-public class SpeedStatistics {
+import java.io.Serializable;
 
+public class SpeedStatistics implements Serializable {
+
+    private static final long serialVersionUID = 3722822093000803195L;
     private double sumOfSpeeds = 0;
     private int speedsCount = 0;
 
@@ -13,7 +16,7 @@ public class SpeedStatistics {
     public double getAvgSpeed() {
         return sumOfSpeeds / speedsCount;
     }
-    
+
     public int getSpeedsCount() {
         return speedsCount;
     }

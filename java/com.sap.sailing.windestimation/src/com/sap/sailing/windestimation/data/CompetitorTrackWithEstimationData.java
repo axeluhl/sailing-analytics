@@ -15,6 +15,8 @@ import com.sap.sse.common.TimePoint;
  */
 public class CompetitorTrackWithEstimationData<T> {
 
+    private final String regattaName;
+    private final String raceName;
     private final String competitorName;
     private final BoatClass boatClass;
     private final List<T> elements;
@@ -25,9 +27,9 @@ public class CompetitorTrackWithEstimationData<T> {
     private final int markPassingsCount;
     private final int waypointsCount;
 
-    public CompetitorTrackWithEstimationData(String competitorName, BoatClass boatClass, List<T> elements,
-            double avgIntervalBetweenFixesInSeconds, Distance distanceTravelled, TimePoint trackStartTimePoint,
-            TimePoint trackEndTimePoint, int markPassingsCount, int waypointsCount) {
+    public CompetitorTrackWithEstimationData(String regattaName, String raceName, String competitorName,
+            BoatClass boatClass, List<T> elements, double avgIntervalBetweenFixesInSeconds, Distance distanceTravelled,
+            TimePoint trackStartTimePoint, TimePoint trackEndTimePoint, int markPassingsCount, int waypointsCount) {
         this.competitorName = competitorName;
         this.boatClass = boatClass;
         this.elements = elements;
@@ -37,6 +39,8 @@ public class CompetitorTrackWithEstimationData<T> {
         this.trackEndTimePoint = trackEndTimePoint;
         this.markPassingsCount = markPassingsCount;
         this.waypointsCount = waypointsCount;
+        this.regattaName = regattaName;
+        this.raceName = raceName;
     }
 
     public String getCompetitorName() {
@@ -80,6 +84,14 @@ public class CompetitorTrackWithEstimationData<T> {
         return waypointsCount;
     }
 
+    public String getRegattaName() {
+        return regattaName;
+    }
+
+    public String getRaceName() {
+        return raceName;
+    }
+
     public boolean isClean() {
         return avgIntervalBetweenFixesInSeconds < 8 && new MeterPerSecondSpeedImpl(
                 distanceTravelled.getMeters() / trackStartTimePoint.until(trackEndTimePoint).asSeconds())
@@ -87,9 +99,9 @@ public class CompetitorTrackWithEstimationData<T> {
     }
 
     public <S> CompetitorTrackWithEstimationData<S> constructWithElements(List<S> elements) {
-        return new CompetitorTrackWithEstimationData<>(getCompetitorName(), getBoatClass(), elements,
-                getAvgIntervalBetweenFixesInSeconds(), getDistanceTravelled(), getTrackStartTimePoint(),
-                getTrackEndTimePoint(), getMarkPassingsCount(), getWaypointsCount());
+        return new CompetitorTrackWithEstimationData<S>(getRegattaName(), getRaceName(), getCompetitorName(),
+                getBoatClass(), elements, getAvgIntervalBetweenFixesInSeconds(), getDistanceTravelled(),
+                getTrackStartTimePoint(), getTrackEndTimePoint(), getMarkPassingsCount(), getWaypointsCount());
     }
 
 }

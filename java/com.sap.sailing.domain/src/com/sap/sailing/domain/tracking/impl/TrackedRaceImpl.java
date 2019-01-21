@@ -537,6 +537,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
         windTracks.put(trackBasedWindSource,
                 getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
+        WindSource maneuverBasedWindSource = new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION);
+        windTracks.put(maneuverBasedWindSource,
+                getOrCreateWindTrack(maneuverBasedWindSource, delayForWindEstimationCacheInvalidation));
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         if (useInternalMarkPassingAlgorithm) {
@@ -563,6 +566,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } catch (InterruptedException e) {
             logger.log(Level.SEVERE, "Waiting for loading from stores to finish was interrupted", e);
         }
+    }
+    
+    @Override
+    public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
+        final boolean result;
+        if (!applyFilter || takesWindFixWithTimePoint(wind.getTimePoint())) {
+            result = getOrCreateWindTrack(windSource).add(wind);
+            if (result) {
+                updated(wind.getTimePoint());
+                triggerManeuverCacheRecalculationForAllCompetitors();
+            }
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
+    @Override
+    public void removeWind(Wind wind, WindSource windSource) {
+        getOrCreateWindTrack(windSource).remove(wind);
+        updated(/* time point */null); // wind events shouldn't advance race time
+        triggerManeuverCacheRecalculationForAllCompetitors();
     }
 
     @Override
@@ -719,12 +744,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         }
                     }
                 }, /* nameForLocks */"Maneuver cache for race " + getRace().getName());
-    }
-    
-    @Override
-    public void windChangedEvent(List<Pair<Position, TimePoint>> changedWindMeasurements,
-            WindSource windSourceWithChange) {
-        shortTimeWindCache.clearCacheEntriesWithWindSource(windSourceWithChange);
     }
     
     /**
@@ -2344,6 +2363,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         Set<WindSource> estimationExcluded = new HashSet<>();
         estimationExcluded.addAll(getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         estimationExcluded.addAll(getWindSources(WindSourceType.COURSE_BASED));
+        estimationExcluded.addAll(getWindSources(WindSourceType.MANEUVER_BASED_ESTIMATION));
         if (bearings != null) {
             int numberOfFixesUpwind = bearings.get(LegType.UPWIND).getA().size();
             if (numberOfFixesUpwind > 0) {
@@ -3801,5 +3821,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                     .getEstimatedPosition(at, false), at, windPositionMode), at);
         }
         return wind;
+    }
+    
+    @Override
+    public PolarDataService getPolarDataService() {
+        return polarDataService;
     }
 }

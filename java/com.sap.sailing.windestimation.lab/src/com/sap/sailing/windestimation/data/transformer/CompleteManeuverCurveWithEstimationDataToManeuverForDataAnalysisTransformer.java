@@ -3,20 +3,26 @@ package com.sap.sailing.windestimation.data.transformer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForDataAnalysis;
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForDataAnalysis;
 
-public class ManeuverForDataAnalysisTransformer
-        extends AbstractCompleteManeuverCurveWithEstimationDataTransformer<ManeuverForDataAnalysis> {
+public class CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer
+        implements CompetitorTrackTransformer<CompleteManeuverCurveWithEstimationData, ManeuverForDataAnalysis> {
+
+    private final ManeuverForEstimationTransformer internalTransformer = new ManeuverForEstimationTransformer();
 
     @Override
     public List<ManeuverForDataAnalysis> transformElements(
             CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithElementsToTransform) {
-        double speedScalingDivisor = getSpeedScalingDivisor(competitorTrackWithElementsToTransform.getElements());
+        List<ConvertableToManeuverForEstimation> convertableManeuvers = ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData
+                .getConvertableManeuvers(competitorTrackWithElementsToTransform.getElements());
+        double speedScalingDivisor = internalTransformer.getSpeedScalingDivisor(convertableManeuvers);
         List<ManeuverForDataAnalysis> maneuversForClassification = new ArrayList<>();
         CompleteManeuverCurveWithEstimationData previousManeuver = null;
         CompleteManeuverCurveWithEstimationData maneuver = null;
@@ -24,7 +30,8 @@ public class ManeuverForDataAnalysisTransformer
                 .getElements()) {
             if (maneuver != null) {
                 ManeuverForDataAnalysis maneuverForClassification = getManeuverForDataAnalysis(maneuver,
-                        previousManeuver, nextManeuver, speedScalingDivisor);
+                        previousManeuver, nextManeuver, speedScalingDivisor,
+                        competitorTrackWithElementsToTransform.getBoatClass());
                 if (maneuverForClassification != null) {
                     maneuversForClassification.add(maneuverForClassification);
                 }
@@ -34,7 +41,7 @@ public class ManeuverForDataAnalysisTransformer
         }
         if (maneuver != null) {
             ManeuverForDataAnalysis maneuverForClassification = getManeuverForDataAnalysis(maneuver, previousManeuver,
-                    null, speedScalingDivisor);
+                    null, speedScalingDivisor, competitorTrackWithElementsToTransform.getBoatClass());
             if (maneuverForClassification != null) {
                 maneuversForClassification.add(maneuverForClassification);
             }
@@ -44,15 +51,24 @@ public class ManeuverForDataAnalysisTransformer
 
     private ManeuverForDataAnalysis getManeuverForDataAnalysis(CompleteManeuverCurveWithEstimationData maneuver,
             CompleteManeuverCurveWithEstimationData previousManeuver,
-            CompleteManeuverCurveWithEstimationData nextManeuver, double speedScalingDivisor) {
+            CompleteManeuverCurveWithEstimationData nextManeuver, double speedScalingDivisor, BoatClass boatClass) {
         if (maneuver.getWind() == null) {
             return null;
         }
+        Double courseChangeInDegreesWithinTurningSectionOfPreviousManeuver = previousManeuver == null ? null
+                : previousManeuver.getMainCurve().getDirectionChangeInDegrees();
+        Double courseChangeInDegreesWithinTurningSectionOfNextManeuver = nextManeuver.getMainCurve()
+                .getDirectionChangeInDegrees();
+        ManeuverForEstimation maneuverForEstimation = internalTransformer
+                .getManeuverForEstimation(
+                        new ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData(maneuver,
+                                courseChangeInDegreesWithinTurningSectionOfPreviousManeuver,
+                                courseChangeInDegreesWithinTurningSectionOfNextManeuver),
+                        speedScalingDivisor, boatClass);
         ManeuverTypeForDataAnalysis maneuverType = getManeuverTypeForDataAnalysis(maneuver);
-        double absoluteTotalCourseChangeInDegrees = Math
-                .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
+        double absoluteTotalCourseChangeInDegrees = Math.abs(maneuverForEstimation.getCourseChangeInDegrees());
         double absoluteTotalCourseChangeWithinMainCurveInDegrees = Math
-                .abs(maneuver.getMainCurve().getDirectionChangeInDegrees());
+                .abs(maneuverForEstimation.getCourseChangeWithinMainCurveInDegrees());
         double speedInSpeedOutRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter()
                 .getKnots() < 0.1 ? 0
                         : maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots()
@@ -60,25 +76,13 @@ public class ManeuverForDataAnalysisTransformer
         double oversteeringInDegrees = Math
                 .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing()
                         .getDifferenceTo(maneuver.getMainCurve().getSpeedWithBearingAfter().getBearing()).getDegrees());
-        double speedLossRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 0
-                ? maneuver.getCurveWithUnstableCourseAndSpeed().getLowestSpeed().getKnots()
-                        / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots()
-                : 0;
-        double speedGainRatio = maneuver.getMainCurve().getHighestSpeed().getKnots() > 0
-                ? maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots()
-                        / maneuver.getMainCurve().getHighestSpeed().getKnots()
-                : 0;
-        double lowestSpeedVsExitingSpeedRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter()
-                .getKnots() > 0
-                        ? maneuver.getCurveWithUnstableCourseAndSpeed().getLowestSpeed().getKnots()
-                                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots()
-                        : 0;
-        Double deviationFromOptimalTackAngleInDegrees = maneuver.getTargetTackAngleInDegrees() == null ? null
-                : Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
-                        - maneuver.getTargetTackAngleInDegrees();
-        Double deviationFromOptimalJibeAngleInDegrees = maneuver.getTargetJibeAngleInDegrees() == null ? null
-                : Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
-                        - maneuver.getTargetJibeAngleInDegrees();
+        double speedLossRatio = maneuverForEstimation.getSpeedLossRatio();
+        double speedGainRatio = maneuverForEstimation.getSpeedGainRatio();
+        double lowestSpeedVsExitingSpeedRatio = maneuverForEstimation.getLowestSpeedVsExitingSpeedRatio();
+        Double deviationFromOptimalTackAngleInDegrees = maneuverForEstimation
+                .getDeviationFromOptimalTackAngleInDegrees();
+        Double deviationFromOptimalJibeAngleInDegrees = maneuverForEstimation
+                .getDeviationFromOptimalJibeAngleInDegrees();
         Double relativeBearingToNextMarkBeforeManeuverInDegrees = maneuver
                 .getRelativeBearingToNextMarkBeforeManeuver() == null ? null
                         : maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees();
@@ -89,8 +93,8 @@ public class ManeuverForDataAnalysisTransformer
         double maneuverDurationInSeconds = maneuver.getCurveWithUnstableCourseAndSpeed().getDuration().asSeconds();
         double recoveryPhaseDurationInSeconds = maneuver.getMainCurve().getTimePointAfter()
                 .until(maneuver.getCurveWithUnstableCourseAndSpeed().getTimePointAfter()).asSeconds();
-        boolean clean = isManeuverClean(maneuver, previousManeuver, nextManeuver);
-        ManeuverCategory maneuverCategory = getManeuverCategory(maneuver);
+        boolean clean = maneuverForEstimation.isClean();
+        ManeuverCategory maneuverCategory = maneuverForEstimation.getManeuverCategory();
         double twaBeforeInDegrees = maneuver.getWind().getFrom()
                 .getDifferenceTo(maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getBearing())
                 .getDegrees();
@@ -98,9 +102,8 @@ public class ManeuverForDataAnalysisTransformer
                 .getDifferenceTo(maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing())
                 .getDegrees();
         double twsInKnots = maneuver.getWind().getKnots();
-        double speedBeforeInKnots = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
-                .getKnots();
-        double speedAfterInKnots = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots();
+        double speedBeforeInKnots = maneuverForEstimation.getSpeedWithBearingBefore().getKnots();
+        double speedAfterInKnots = maneuverForEstimation.getSpeedWithBearingAfter().getKnots();
         double twaAtMiddleCourseInDegrees = maneuver.getWind().getFrom()
                 .getDifferenceTo(maneuver.getCurveWithUnstableCourseAndSpeed().getMiddleCourse()).getDegrees();
         double twaAtMiddleCourseMainCurveInDegrees = maneuver.getWind().getFrom()
@@ -109,11 +112,11 @@ public class ManeuverForDataAnalysisTransformer
                 .getDifferenceTo(maneuver.getMainCurve().getLowestSpeed().getBearing()).getDegrees();
         double twaAtMaxTurningRateInDegrees = maneuver.getWind().getFrom()
                 .getDifferenceTo(maneuver.getMainCurve().getCourseAtMaxTurningRate()).getDegrees();
-        boolean starboardManeuver = maneuver.getMainCurve().getDirectionChangeInDegrees() > 0;
+        boolean starboardManeuver = maneuverForEstimation.getCourseChangeWithinMainCurveInDegrees() > 0;
         ManeuverForDataAnalysis maneuverForClassification = new ManeuverForDataAnalysis(maneuverType,
                 absoluteTotalCourseChangeInDegrees, absoluteTotalCourseChangeWithinMainCurveInDegrees,
                 speedInSpeedOutRatio, oversteeringInDegrees, speedLossRatio, speedGainRatio,
-                lowestSpeedVsExitingSpeedRatio, maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(),
+                lowestSpeedVsExitingSpeedRatio, maneuverForEstimation.getMaxTurningRateInDegreesPerSecond(),
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees,
                 relativeBearingToNextMarkBeforeManeuverInDegrees, relativeBearingToNextMarkAfterManeuverInDegrees,
                 mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds, clean,

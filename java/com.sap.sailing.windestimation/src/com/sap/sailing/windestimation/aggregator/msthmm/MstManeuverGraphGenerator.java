@@ -5,11 +5,18 @@ import java.util.List;
 
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
-public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<ManeuverWithProbabilisticTypeClassification> {
+public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<ManeuverWithProbabilisticTypeClassification>
+        implements Cloneable {
 
     private final MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
 
     public MstManeuverGraphGenerator(MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+        this.transitionProbabilitiesCalculator = transitionProbabilitiesCalculator;
+    }
+
+    protected MstManeuverGraphGenerator(List<NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification>> nodes,
+            MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+        super(nodes);
         this.transitionProbabilitiesCalculator = transitionProbabilitiesCalculator;
     }
 
@@ -53,6 +60,11 @@ public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<Maneuve
                 }
             }
         }
+    }
+
+    @Override
+    public MstManeuverGraphGenerator clone() {
+        return new MstManeuverGraphGenerator(getClonedNodes(), transitionProbabilitiesCalculator);
     }
 
     public static class MstManeuverGraphComponents {

@@ -320,6 +320,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String legMiddleWindSourceTypeName();
     String courseBasedWindSourceTypeName();
     String trackBasedEstimationWindSourceTypeName();
+    String maneuverBasedEstimationWindSourceTypeName();
     String windSensorWindSourceTypeName();
     String webWindSourceTypeName();
     String raceCommitteeWindSourceTypeName();
@@ -943,6 +944,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String legMiddleWindSourceTypeTooltip();
     String courseBasedWindSourceTypeTooltip();
     String trackBasedEstimationWindSourceTypeTooltip();
+    String maneuverBasedEstimationWindSourceTypeTooltip();
     String windSensorWindSourceTypeTooltip();
     String webWindSourceTypeTooltip();
     String raceCommitteeWindSourceTypeTooltip();
@@ -2192,6 +2194,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noStatisticsFoundForCompetitors();
     String sailorProfileRemoveMessage();
     String showInDataMining();
-
     String confirmDeletion();
 }

@@ -18,5 +18,5 @@ public class PolarsBasedTwsCalculatorImpl implements TwsFromManeuverCalculator {
     public Speed getWindSpeed(ManeuverForEstimation maneuver, Bearing windCourse) {
         return polarsFittingWindEstimation.getWindSpeed(maneuver, windCourse);
     }
-
+    
 }

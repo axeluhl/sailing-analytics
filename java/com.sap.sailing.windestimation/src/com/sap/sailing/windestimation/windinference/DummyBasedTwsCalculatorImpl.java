@@ -7,10 +7,6 @@ import com.sap.sse.common.Speed;
 
 public class DummyBasedTwsCalculatorImpl implements TwsFromManeuverCalculator {
 
-    public DummyBasedTwsCalculatorImpl() {
-        // TODO Auto-generated constructor stub
-    }
-    
     @Override
     public Speed getWindSpeed(ManeuverForEstimation maneuver, Bearing windCourse) {
         return new KnotSpeedImpl(0.0);

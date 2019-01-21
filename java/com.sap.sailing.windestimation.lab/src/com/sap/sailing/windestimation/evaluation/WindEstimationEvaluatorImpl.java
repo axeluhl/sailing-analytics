@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -24,6 +25,8 @@ import com.sap.sailing.windestimation.preprocessing.DummyRacePreprocessingPipeli
 import com.sap.sailing.windestimation.preprocessing.RaceWithRandomClippingPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * 
@@ -120,11 +123,11 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
         WindTrack targetWindTrack = evaluationCase.getTargetWindTrack();
         WindEstimationComponentWithInternals<RaceWithEstimationData<T>> windEstimator = evaluationCase
                 .getWindEstimator();
-        List<WindWithConfidence<Void>> windTrack = windEstimator
+        List<WindWithConfidence<Pair<Position, TimePoint>>> windTrack = windEstimator
                 .estimateWindTrackAfterPreprocessing(raceWithEstimationData);
         WindEstimatorEvaluationResult result = new WindEstimatorEvaluationResult();
         WindTrack estimatedWindTrack = new WindTrackImpl(1000, false, "estimatedWindTrack");
-        for (WindWithConfidence<Void> windWithConfidence : windTrack) {
+        for (WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence : windTrack) {
             Wind estimatedWind = windWithConfidence.getObject();
             Wind targetWind = targetWindTrack.getAveragedWind(estimatedWind.getPosition(),
                     estimatedWind.getTimePoint());

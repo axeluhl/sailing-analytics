@@ -7,7 +7,7 @@ import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimat
 import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl.ManeuverClassificationsAggregatorImplementation;
 import com.sap.sailing.windestimation.WindEstimationComponent;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sailing.windestimation.data.transformer.LabelledManeuverForEstimationTransformer;
+import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
@@ -57,7 +57,7 @@ public class WindEstimatorFactories {
                 return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, modelStore,
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
-                                new LabelledManeuverForEstimationTransformer()),
+                                new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                         ManeuverClassificationsAggregatorImplementation.HMM);
             }
 
@@ -76,7 +76,7 @@ public class WindEstimatorFactories {
                 return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, modelStore,
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
-                                new LabelledManeuverForEstimationTransformer()),
+                                new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                         ManeuverClassificationsAggregatorImplementation.MST_HMM);
             }
 
@@ -95,7 +95,7 @@ public class WindEstimatorFactories {
                 return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, modelStore,
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
-                                new LabelledManeuverForEstimationTransformer()),
+                                new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                         ManeuverClassificationsAggregatorImplementation.CLUSTERING);
             }
 
@@ -113,7 +113,7 @@ public class WindEstimatorFactories {
             public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
                 return new PolarsFittingBasedWindEstimationComponentImpl<>(
                         new RaceElementsFilteringPreprocessingPipelineImpl(
-                                new LabelledManeuverForEstimationTransformer()),
+                                new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                         polarService);
             }
 
@@ -132,7 +132,7 @@ public class WindEstimatorFactories {
                 return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, modelStore,
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
-                                new LabelledManeuverForEstimationTransformer()),
+                                new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                         ManeuverClassificationsAggregatorImplementation.MEAN_OUTLIER);
             }
 
@@ -151,7 +151,7 @@ public class WindEstimatorFactories {
                 return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, modelStore,
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
-                                new LabelledManeuverForEstimationTransformer()),
+                                new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                         ManeuverClassificationsAggregatorImplementation.NEIGHBOR_OUTLIER);
             }
 

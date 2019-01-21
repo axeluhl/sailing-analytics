@@ -18,8 +18,7 @@ import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CompetitorTrackWithEstimationDataJsonDeserializer<T>
-        implements JsonDeserializer<CompetitorTrackWithEstimationData<T>> {
+public class CompetitorTrackWithEstimationDataJsonDeserializer<T> {
 
     private final JSONParser jsonParser = new JSONParser();
     private final BoatClassJsonDeserializer boatClassJsonDeserializer;
@@ -31,8 +30,8 @@ public class CompetitorTrackWithEstimationDataJsonDeserializer<T>
         this.competitorTrackElementsJsonDeserializer = competitorTrackElementsJsonDeserializer;
     }
 
-    @Override
-    public CompetitorTrackWithEstimationData<T> deserialize(JSONObject jsonObject) throws JsonDeserializationException {
+    public CompetitorTrackWithEstimationData<T> deserialize(JSONObject jsonObject, String regattaName, String raceName)
+            throws JsonDeserializationException {
         String competitorName = (String) jsonObject
                 .get(CompetitorTrackWithEstimationDataJsonSerializer.COMPETITOR_NAME);
         Double avgIntervalBetweenFixesInSeconds = (Double) jsonObject
@@ -65,7 +64,8 @@ public class CompetitorTrackWithEstimationDataJsonDeserializer<T>
             completeManeuverCurves.add(elements);
         }
         CompetitorTrackWithEstimationData<T> competitorTrackWithEstimationData = new CompetitorTrackWithEstimationData<>(
-                competitorName, boatClass, completeManeuverCurves, avgIntervalBetweenFixesInSeconds,
+                regattaName, raceName, competitorName, boatClass, completeManeuverCurves,
+                avgIntervalBetweenFixesInSeconds,
                 distanceTravelledInMeters == null ? Distance.NULL : new MeterDistance(distanceTravelledInMeters),
                 startUnixTime == null ? null : new MillisecondsTimePoint(startUnixTime),
                 endUnixTime == null ? null : new MillisecondsTimePoint(endUnixTime), markPassingsCount.intValue(),
