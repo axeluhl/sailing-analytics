@@ -29,6 +29,10 @@ In file ``/etc/mongod.conf`` comment the line
 ```
 #  bindIp: 127.0.0.1  # Listen to local interface only, comment to listen on all interfaces.
 ```
+and instead add
+```
+  bindIp: 0.0.0.0
+```
 
 so that MongoDB listens on all interfaces, not only localhost. Furthermore, set the ``directoryPerDB`` property to ``true`` and provide a replication set name using the ``replication.replSetName`` property.
 
@@ -66,7 +70,7 @@ processManagement:
 net:
   port: 27017
 #  bindIp: 127.0.0.1  # Listen to local interface only, comment to listen on all interfaces.
-
+  bindIp: 0.0.0.0
 
 #security:
 
