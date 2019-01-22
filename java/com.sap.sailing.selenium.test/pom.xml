@@ -205,6 +205,11 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.windestimation</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.domain.deckmanadapter</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
