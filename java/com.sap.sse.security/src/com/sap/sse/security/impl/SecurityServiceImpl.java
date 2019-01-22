@@ -147,7 +147,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     private final ReplicatingCacheManager cacheManager;
     
-    private UserStore userStore;
+    private UserStore store;
     private AccessControlStore accessControlStore;
     
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
@@ -204,7 +204,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
         operationsSentToMasterForReplication = new HashSet<>();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
-        this.userStore = userStore;
+        this.store = userStore;
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
@@ -271,7 +271,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
         assert adminRoleDefinition != null;
         try {
-            if (!userStore.hasUsers()) {
+            if (!store.hasUsers()) {
                 logger.info("No users found, creating default user \""+ADMIN_USERNAME+"\" with password \""+ADMIN_DEFAULT_PASSWORD+"\"");
                 final User adminUser = createSimpleUser(ADMIN_USERNAME, "nobody@sapsailing.com",
                         ADMIN_DEFAULT_PASSWORD,
@@ -290,7 +290,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 setOwnership(qualifiedTypeIdentifier, adminUser, null);
             }
             
-            if (userStore.getUserByName(SecurityService.ALL_USERNAME) == null) {
+            if (store.getUserByName(SecurityService.ALL_USERNAME) == null) {
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
                 User allUser = createUserInternal(SecurityService.ALL_USERNAME, null, getDefaultTenant());
 
@@ -333,7 +333,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void resetPassword(final String username, String passwordResetBaseURL) throws UserManagementException, MailException {
-        final User user = userStore.getUserByName(username);
+        final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -406,7 +406,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public RoleDefinition getRoleDefinition(UUID idOfRoleDefinition) {
-        return userStore.getRoleDefinition(idOfRoleDefinition);
+        return store.getRoleDefinition(idOfRoleDefinition);
     }
 
     /**
@@ -578,34 +578,34 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Iterable<UserGroup> getUserGroupList() {
-        return userStore.getUserGroups();
+        return store.getUserGroups();
     }
 
     @Override
     public UserGroup getUserGroup(UUID id) {
-        return userStore.getUserGroup(id);
+        return store.getUserGroup(id);
     }
 
     @Override
     public UserGroup getUserGroupByName(String name) {
-        return userStore.getUserGroupByName(name);
+        return store.getUserGroupByName(name);
     }
 
     @Override
     public Iterable<UserGroup> getUserGroupsOfUser(User user) {
-        return userStore.getUserGroupsOfUser(user);
+        return store.getUserGroupsOfUser(user);
     }
 
     @Override
     public UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException {
         logger.info("Creating user group "+name+" with ID "+id);
         apply(s->s.internalCreateUserGroup(id, name));
-        return userStore.getUserGroup(id);
+        return store.getUserGroup(id);
     }
 
     @Override
     public Void internalCreateUserGroup(UUID id, String name) throws UserGroupManagementException {
-        userStore.createUserGroup(id, name);
+        store.createUserGroup(id, name);
         return null;
     }
 
@@ -622,7 +622,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalAddUserToUserGroup(UUID groupId, String username) {
         final UserGroup userGroup = getUserGroup(groupId);
         userGroup.add(getUserByName(username));
-        userStore.updateUserGroup(userGroup);
+        store.updateUserGroup(userGroup);
         return null;
     }
     
@@ -630,7 +630,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalRemoveUserFromUserGroup(UUID groupId, String username) {
         final UserGroup userGroup = getUserGroup(groupId);
         userGroup.remove(getUserByName(username));
-        userStore.updateUserGroup(userGroup);
+        store.updateUserGroup(userGroup);
         return null;
     }
     
@@ -657,14 +657,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
         } else {
             accessControlStore.removeAllOwnershipsFor(userGroup);
-            userStore.deleteUserGroup(userGroup);
+            store.deleteUserGroup(userGroup);
         }
         return null;
     }
 
     @Override
     public Iterable<User> getUserList() {
-        return userStore.getUsers();
+        return store.getUsers();
     }
 
     @Override
@@ -693,7 +693,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         try {
             subject.login(token);
             final String username = (String) token.getPrincipal();
-            return userStore.getUserByName(username);
+            return store.getUserByName(username);
         } catch (AuthenticationException e) {
             logger.log(Level.INFO, "Authentication failed with access token "+accessToken);
             throw e;
@@ -709,17 +709,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public User getUserByName(String name) {
-        return userStore.getUserByName(name);
+        return store.getUserByName(name);
     }
     
     @Override
     public User getUserByAccessToken(String accessToken) {
-        return userStore.getUserByAccessToken(accessToken);
+        return store.getUserByAccessToken(accessToken);
     }
 
     @Override
     public User getUserByEmail(String email) {
-        return userStore.getUserByEmail(email);
+        return store.getUserByEmail(email);
     }
 
     @Override
@@ -727,7 +727,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             String company, Locale locale, final String validationBaseURL, UserGroup userOwner)
             throws UserManagementException, MailException, UserGroupManagementException {
         logger.info("Creating user "+username);
-        if (userStore.getUserByName(username) != null) {
+        if (store.getUserByName(username) != null) {
             logger.warning("User "+username+" already exists");
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -738,9 +738,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } else if (password == null || password.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
-        if (userStore.getUserGroupByName(defaultTenantNameForUsername) != null) {
+        if (store.getUserGroupByName(defaultTenantNameForUsername) != null) {
             logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
-            tenant = userStore.getUserGroupByName(defaultTenantNameForUsername);
+            tenant = store.getUserGroupByName(defaultTenantNameForUsername);
         } else {
             logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
             tenant = createUserGroup(UUID.randomUUID(), defaultTenantNameForUsername);
@@ -785,7 +785,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private User createUserInternal(String username, String email, UserGroup defaultTenant, Account... accounts)
             throws UserManagementException {
-        final User result = userStore.createUser(username, email, defaultTenant, accounts); // TODO: get the principal
+        final User result = store.createUser(username, email, defaultTenant, accounts); // TODO: get the principal
                                                                                             // as owner
         // now the user creation needs to be replicated so that when replicating role addition and group assignment
         // the replica will be able to resolve the user correctly
@@ -799,13 +799,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalStoreUser(User user) {
-        userStore.updateUser(user);
+        store.updateUser(user);
         return null;
     }
 
     @Override
     public void updateSimpleUserPassword(String username, String newPassword) throws UserManagementException {
-        final User user = userStore.getUserByName(username);
+        final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -829,7 +829,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException {
-        final User user = userStore.getUserByName(username);
+        final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -845,7 +845,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public boolean checkPassword(String username, String password) throws UserManagementException {
-        final User user = userStore.getUserByName(username);
+        final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -856,7 +856,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public boolean checkPasswordResetSecret(String username, String passwordResetSecret) throws UserManagementException {
-        final User user = userStore.getUserByName(username);
+        final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -865,7 +865,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void updateSimpleUserEmail(final String username, final String newEmail, final String validationBaseURL) throws UserManagementException {
-        final User user = userStore.getUserByName(username);
+        final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -887,7 +887,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public boolean validateEmail(String username, String validationSecret) throws UserManagementException {
-        final User user = userStore.getUserByName(username);
+        final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -951,7 +951,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public RoleDefinition internalCreateRoleDefinition(UUID roleId, String name) {
-        return userStore.createRoleDefinition(roleId, name, Collections.emptySet());
+        return store.createRoleDefinition(roleId, name, Collections.emptySet());
     }
     
     @Override
@@ -962,8 +962,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalDeleteRoleDefinition(UUID roleId) {
-        final RoleDefinition role = userStore.getRoleDefinition(roleId);
-        userStore.removeRoleDefinition(role);
+        final RoleDefinition role = store.getRoleDefinition(roleId);
+        store.removeRoleDefinition(role);
         return null;
     }
 
@@ -974,11 +974,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalUpdateRoleDefinition(RoleDefinition roleWithNewProperties) {
-        final RoleDefinition role = userStore.getRoleDefinition(roleWithNewProperties.getId());
+        final RoleDefinition role = store.getRoleDefinition(roleWithNewProperties.getId());
         role.setName(roleWithNewProperties.getName());
-        userStore.setRoleDefinitionDisplayName(roleWithNewProperties.getId(), role.getName());
+        store.setRoleDefinitionDisplayName(roleWithNewProperties.getId(), role.getName());
         role.setPermissions(roleWithNewProperties.getPermissions());
-        userStore.setRoleDefinitionPermissions(role.getId(), role.getPermissions());
+        store.setRoleDefinitionPermissions(role.getId(), role.getPermissions());
         return null;
     }
 
@@ -986,7 +986,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Iterable<RoleDefinition> getRoleDefinitions() {
         Collection<RoleDefinition> result = new ArrayList<>();
         filterObjectsWithPermissionForCurrentUser(SecuredSecurityTypes.ROLE_DEFINITION, DefaultActions.READ,
-                userStore.getRoleDefinitions(), t -> result.add(t));
+                store.getRoleDefinitions(), t -> result.add(t));
         return result;
     }
 
@@ -1006,7 +1006,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
             String nameOfUserQualifyingRole) throws UserManagementException {
-        userStore.addRoleForUser(username, new Role(getRoleDefinition(roleDefinitionId),
+        store.addRoleForUser(username, new Role(getRoleDefinition(roleDefinitionId),
                 getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
         return null;
     }
@@ -1027,14 +1027,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
             String nameOfUserQualifyingRole) throws UserManagementException {
-        userStore.removeRoleFromUser(username, new Role(getRoleDefinition(roleDefinitionId),
+        store.removeRoleFromUser(username, new Role(getRoleDefinition(roleDefinitionId),
                 getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
         return null;
     }
 
     @Override
     public Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException {
-        return userStore.getPermissionsFromUser(username);
+        return store.getPermissionsFromUser(username);
     }
 
     @Override
@@ -1044,7 +1044,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalRemovePermissionForUser(String username, WildcardPermission permissionToRemove) throws UserManagementException {
-        userStore.removePermissionFromUser(username, permissionToRemove);
+        store.removePermissionFromUser(username, permissionToRemove);
         return null;
     }
 
@@ -1055,13 +1055,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException {
-        userStore.addPermissionForUser(username, permissionToAdd);
+        store.addPermissionForUser(username, permissionToAdd);
         return null;
     }
 
     @Override
     public void deleteUser(String username) throws UserManagementException {
-        final User userToDelete = userStore.getUserByName(username);
+        final User userToDelete = store.getUserByName(username);
         if (userToDelete == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -1070,7 +1070,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalDeleteUser(String username) throws UserManagementException {
-        User userToDelete = userStore.getUserByName(username);
+        User userToDelete = store.getUserByName(username);
         if (userToDelete != null) {
             // remove all permissions the user has
             accessControlStore.removeAllOwnershipsFor(userToDelete);
@@ -1092,7 +1092,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             for (UserGroup userGroup : userToDelete.getUserGroups()) {
                 internalRemoveUserFromUserGroup(userGroup.getId(), userToDelete.getName());
             }
-            userStore.deleteUser(username);
+            store.deleteUser(username);
         }
         return null;
     }
@@ -1104,32 +1104,32 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Boolean internalSetSetting(String key, Object setting) {
-        return userStore.setSetting(key, setting);
+        return store.setSetting(key, setting);
     }
 
     @Override
     public <T> T getSetting(String key, Class<T> clazz) {
-        return userStore.getSetting(key, clazz);
+        return store.getSetting(key, clazz);
     }
 
     @Override
     public Map<String, Object> getAllSettings() {
-        return userStore.getAllSettings();
+        return store.getAllSettings();
     }
 
     @Override
     public Map<String, Class<?>> getAllSettingTypes() {
-        return userStore.getAllSettingTypes();
+        return store.getAllSettingTypes();
     }
 
     @Override
     public User createSocialUser(String name, SocialUserAccount socialUserAccount)
             throws UserManagementException, UserGroupManagementException {
-        if (userStore.getUserByName(name) != null) {
+        if (store.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         UserGroup tenant = createUserGroup(UUID.randomUUID(), getDefaultTenantNameForUsername(name));
-        User result = userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), tenant,
+        User result = store.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), tenant,
                 socialUserAccount);
         accessControlStore.setOwnership(tenant.getIdentifier(), result, tenant, tenant.getName());
         addUserToUserGroup(tenant, result);
@@ -1165,7 +1165,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     + OAuthRealm.class.getName() + ".");
             throw new UserManagementException("An error occured while authenticating the user!");
         }
-        User user = userStore.getUserByName(username);
+        User user = store.getUserByName(username);
         if (user == null) {
             logger.info("Could not find user " + username);
             throw new UserManagementException("An error occured while authenticating the user!");
@@ -1188,7 +1188,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 if (username == null || username.length() <= 0) {
                     result = null;
                 } else {
-                    result = userStore.getUserByName(username);
+                    result = store.getUserByName(username);
                 }
             }
         }
@@ -1254,17 +1254,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         switch (authProvider) {
         case ClientUtils.FACEBOOK: {
             service = new ServiceBuilder().provider(FacebookApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FACEBOOK_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.GOOGLE: {
             service = new ServiceBuilder().provider(GoogleApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_SECRET.name(), String.class))
-                    .scope(userStore.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_SCOPE.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_APP_SECRET.name(), String.class))
+                    .scope(store.getSetting(SocialSettingsKeys.OAUTH_GOOGLE_SCOPE.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
 
             break;
@@ -1272,39 +1272,39 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
         case ClientUtils.TWITTER: {
             service = new ServiceBuilder().provider(TwitterApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_TWITTER_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
         case ClientUtils.YAHOO: {
             service = new ServiceBuilder().provider(YahooApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_YAHOO_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.LINKEDIN: {
             service = new ServiceBuilder().provider(LinkedInApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_LINKEDIN_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.INSTAGRAM: {
             service = new ServiceBuilder().provider(InstagramApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_INSTAGRAM_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.GITHUB: {
             service = new ServiceBuilder().provider(GithubApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_GITHUB_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
 
@@ -1312,24 +1312,24 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
         case ClientUtils.IMGUR: {
             service = new ServiceBuilder().provider(ImgUrApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_IMGUR_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.FLICKR: {
             service = new ServiceBuilder().provider(FlickrApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FLICKR_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.VIMEO: {
             service = new ServiceBuilder().provider(VimeoApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_VIMEO_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
@@ -1337,24 +1337,24 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         case ClientUtils.WINDOWS_LIVE: {
             // a Scope must be specified
             service = new ServiceBuilder().provider(LiveApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_WINDOWS_LIVE_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).scope("wl.basic").build();
             break;
         }
 
         case ClientUtils.TUMBLR: {
             service = new ServiceBuilder().provider(TumblrApi.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_TUMBLR_LIVE_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
 
         case ClientUtils.FOURSQUARE: {
             service = new ServiceBuilder().provider(Foursquare2Api.class)
-                    .apiKey(userStore.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_ID.name(), String.class))
-                    .apiSecret(userStore.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_SECRET.name(), String.class))
+                    .apiKey(store.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_ID.name(), String.class))
+                    .apiSecret(store.getSetting(SocialSettingsKeys.OAUTH_FOURSQUARE_APP_SECRET.name(), String.class))
                     .callback(ClientUtils.getCallbackUrl()).build();
             break;
         }
@@ -1377,7 +1377,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalAddSetting(String key, Class<?> clazz) {
-        userStore.addSetting(key, clazz);
+        store.addSetting(key, clazz);
         return null;
     }
 
@@ -1434,13 +1434,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalSetPreference(final String username, final String key, final String value) {
-        userStore.setPreference(username, key, value);
+        store.setPreference(username, key, value);
         return null;
     }
     
     @Override
     public String internalSetPreferenceObject(final String username, final String key, final Object value) {
-        return userStore.setPreferenceObject(username, key, value);
+        return store.setPreferenceObject(username, key, value);
     }
     
     @Override
@@ -1450,24 +1450,24 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalUnsetPreference(String username, String key) {
-        userStore.unsetPreference(username, key);
+        store.unsetPreference(username, key);
         return null;
     }
 
     @Override
     public Void internalSetAccessToken(String username, String accessToken) {
-        userStore.setAccessToken(username, accessToken);
+        store.setAccessToken(username, accessToken);
         return null;
     }
     
     @Override
     public String getAccessToken(String username) {
-        return userStore.getAccessToken(username);
+        return store.getAccessToken(username);
     }
 
     @Override
     public String getOrCreateAccessToken(String username) {
-        String result = userStore.getAccessToken(username);
+        String result = store.getAccessToken(username);
         if (result == null) {
             result = createAccessToken(username);
         }
@@ -1476,18 +1476,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalRemoveAccessToken(String username) {
-        userStore.removeAccessToken(username);
+        store.removeAccessToken(username);
         return null;
     }
 
     @Override
     public String getPreference(String username, String key) {
-        return userStore.getPreference(username, key);
+        return store.getPreference(username, key);
     }
 
     @Override
     public Map<String, String> getAllPreferences(String username) {
-        return userStore.getAllPreferences(username);
+        return store.getAllPreferences(username);
     }
     
     @Override
@@ -1518,7 +1518,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public UserGroup getDefaultTenant() {
-        return userStore.getDefaultTenant();
+        return store.getDefaultTenant();
     }
 
     @Override
@@ -1678,7 +1678,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public User getAllUser() {
-        return userStore.getUserByName(SecurityService.ALL_USERNAME);
+        return store.getUserByName(SecurityService.ALL_USERNAME);
     }
     
     @Override
@@ -1711,7 +1711,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     // ----------------- Replication -------------
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
-        userStore.clear();
+        store.clear();
         accessControlStore.clear();
     }
 
@@ -1722,7 +1722,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstSecurityCache(is, userStore, null);
+        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store, null);
     }
 
     @Override
@@ -1733,12 +1733,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         // overriding thread context class loader because the user store may be provided by a different bundle;
         // We're assuming here that the user store service is provided by the same bundle in the replica as on the master.
         ClassLoader oldCCL = Thread.currentThread().getContextClassLoader();
-        if (userStore != null) {
-            Thread.currentThread().setContextClassLoader(userStore.getClass().getClassLoader());
+        if (store != null) {
+            Thread.currentThread().setContextClassLoader(store.getClass().getClassLoader());
         }
         try {
             UserStore newUserStore = (UserStore) is.readObject();
-            userStore.replaceContentsFrom(newUserStore);
+            store.replaceContentsFrom(newUserStore);
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
@@ -1756,7 +1756,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(cacheManager);
-        objectOutputStream.writeObject(userStore);
+        objectOutputStream.writeObject(store);
         objectOutputStream.writeObject(accessControlStore);
     }
 
@@ -1916,7 +1916,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public boolean hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(RoleDefinition role,
             Iterable<WildcardPermission> permissionsToCheck) {
-        Pair<Boolean, Set<Ownership>> qualificationsToCheck = userStore.getExistingQualificationsForRoleDefinition(role);
+        Pair<Boolean, Set<Ownership>> qualificationsToCheck = store.getExistingQualificationsForRoleDefinition(role);
         final Iterable<Ownership> effectiveQualificationsToCheck = Boolean.TRUE.equals(qualificationsToCheck.getA())
                 ? Collections.singletonList(null)
                 : qualificationsToCheck.getB();
@@ -1932,7 +1932,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public <T> T getPreferenceObject(String username, String key) {
-        return userStore.getPreferenceObject(username, key);
+        return store.getPreferenceObject(username, key);
     }
 
     @Override
@@ -1940,7 +1940,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         User user = getUserByName(username);
         UserGroup newDefaultTenant = getUserGroup(UUID.fromString(defaultTenant));
         user.setDefaultTenant(newDefaultTenant, ServerInfo.getName());
-        userStore.updateUser(user);
+        store.updateUser(user);
     }
     
     @Override
@@ -1952,7 +1952,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             addUserToUserGroup(destination, user);
         }
 
-        for (Pair<User, Role> userAndRole : userStore.getRolesQualifiedByUserGroup(source)) {
+        for (Pair<User, Role> userAndRole : store.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
             final Role copyRole = new Role(existingRole.getRoleDefinition(), destination,
                     existingRole.getQualifiedForUser());
