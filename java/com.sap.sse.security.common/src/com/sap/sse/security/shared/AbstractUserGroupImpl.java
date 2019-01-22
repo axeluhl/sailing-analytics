@@ -1,23 +1,24 @@
 package com.sap.sse.security.shared;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 /**
  * A group of users; equality and hash code are based solely on the {@link #getId() ID}.
- * 
- * @author Axel Uhl (d043530)
- *
  */
-public abstract class AbstractUserGroupImpl<U extends UserReference>
+public abstract class AbstractUserGroupImpl<U extends UserReference, RD extends RoleDefinition>
         extends SecurityUserGroupImpl {
-    private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = 5449819084645794859L;
 
     private Set<U> users;
+    protected Map<RD, Boolean> roleDefinitionMap;
 
-    public AbstractUserGroupImpl(Set<U> users, UUID id, String name) {
+    protected AbstractUserGroupImpl(UUID id, String name, Set<U> users, Map<RD, Boolean> roleDefinitionMap) {
         super(id, name);
         this.users = users;
+        this.roleDefinitionMap = roleDefinitionMap;
     }
 
     public Iterable<U> getUsers() {
@@ -34,5 +35,13 @@ public abstract class AbstractUserGroupImpl<U extends UserReference>
 
     public boolean contains(U user) {
         return users.contains(user);
+    }
+
+    public void put(final RD roleDefinition, final boolean forAll) {
+        this.roleDefinitionMap.put(null, forAll);
+    }
+
+    public void remove(final RD roleDefinition) {
+        this.roleDefinitionMap.remove(roleDefinition);
     }
 }

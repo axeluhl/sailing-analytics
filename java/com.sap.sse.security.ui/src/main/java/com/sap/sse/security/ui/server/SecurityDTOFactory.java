@@ -138,6 +138,18 @@ public class SecurityDTOFactory {
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
     }
 
+    private Map<RoleDefinitionDTO, Boolean> createUserGroupRoleDefinitionDTOs(
+            final Map<RoleDefinition, Boolean> roleDefinitions, final SecurityService securityService,
+            final Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
+            final Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
+        final Map<RoleDefinitionDTO, Boolean> roleDefinitionDTOs = new HashMap<>();
+        for (Entry<RoleDefinition, Boolean> entry : roleDefinitions.entrySet()) {
+            roleDefinitionDTOs.put(createRoleDefinitionDTO(entry.getKey(), securityService,
+                    fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup), entry.getValue());
+        }
+        return roleDefinitionDTOs;
+    }
+
     public SocialUserDTO createSocialUserDTO(SocialUserAccount socialUser) {
         SocialUserDTO socialUserDTO = new SocialUserDTO(socialUser.getProperty(Social.PROVIDER.name()));
         socialUserDTO.setSessionId(socialUser.getSessionId());
@@ -183,7 +195,11 @@ public class SecurityDTOFactory {
         if (userGroup == null) {
             result = null;
         } else {
-            result = new UserGroupDTO(createStrippedUsersFromUsers(userGroup.getUsers(), securityService, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),userGroup.getId(), userGroup.getName());
+            result = new UserGroupDTO(userGroup.getId(), userGroup.getName(),
+                    createStrippedUsersFromUsers(userGroup.getUsers(), securityService, fromOriginalToStrippedDownUser,
+                            fromOriginalToStrippedDownUserGroup),
+                    createUserGroupRoleDefinitionDTOs(userGroup.getRoleDefinitionMap(), securityService,
+                            fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
             SecurityDTOUtil.addSecurityInformation(this, securityService, result, userGroup.getIdentifier(),
                     fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         }

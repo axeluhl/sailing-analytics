@@ -590,7 +590,7 @@ public class UserStoreImpl implements UserStore {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
         logger.info("Creating user group: " + groupId + " with name " + name);
-        UserGroupImpl group = new UserGroupImpl(new HashSet<User>(), groupId, name);
+        UserGroupImpl group = new UserGroupImpl(groupId, name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }

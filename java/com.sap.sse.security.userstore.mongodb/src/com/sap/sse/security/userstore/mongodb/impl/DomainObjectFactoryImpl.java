@@ -167,7 +167,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 users.add(new UserProxy((String) o));
             }
         }
-        return new UserGroupImpl(users, id, name);
+        // FIXME load user group role definitions
+        return new UserGroupImpl(id, name, users, new HashMap<RoleDefinition, Boolean>());
     }
 
     /**

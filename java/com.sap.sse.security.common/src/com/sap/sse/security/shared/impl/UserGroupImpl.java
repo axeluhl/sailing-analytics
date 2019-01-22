@@ -1,21 +1,26 @@
 package com.sap.sse.security.shared.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.security.shared.AbstractUserGroupImpl;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
-public class UserGroupImpl extends AbstractUserGroupImpl<User> implements UserGroup {
-    private static final long serialVersionUID = 1L;
+public class UserGroupImpl extends AbstractUserGroupImpl<User, RoleDefinition> implements UserGroup {
 
-    public UserGroupImpl(Set<User> users, UUID id, String name) {
-        super(users, id, name);
-    }
+    private static final long serialVersionUID = -1290667868080992763L;
 
     public UserGroupImpl(UUID id, String name) {
-        super(new HashSet<User>(), id, name);
+        super(id, name, new HashSet<User>(), new HashMap<RoleDefinition, Boolean>());
+    }
+
+    public UserGroupImpl(UUID id, String name, Set<User> users, Map<RoleDefinition, Boolean> roleDefinitionMap) {
+        super(id, name, users, roleDefinitionMap);
     }
 
     static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UserGroup userGroup) {
@@ -28,5 +33,10 @@ public class UserGroupImpl extends AbstractUserGroupImpl<User> implements UserGr
 
     public static String getTypeRelativeObjectIdentifierAsString(UserGroup userGroup) {
         return userGroup.getId().toString();
+    }
+
+    @Override
+    public Map<RoleDefinition, Boolean> getRoleDefinitionMap() {
+        return Collections.unmodifiableMap(roleDefinitionMap);
     }
 }
