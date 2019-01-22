@@ -45,8 +45,10 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
     private final Map<OperationExecutionListener<ReplicableFileStorageManagementService>, OperationExecutionListener<ReplicableFileStorageManagementService>> operationExecutionListeners = new ConcurrentHashMap<>();
     private final Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication = new HashSet<>();
     private ReplicationMasterDescriptor replicationMasterDescriptor;
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
     
+    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+
     /**
      * Is set to an {@link EmptyFileStorageServicePropertyStoreImpl} on replicas.
      */
@@ -215,12 +217,22 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
     }
 
     @Override
-    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean b) {
-        currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(b);
+    public boolean isCurrentlyFillingFromInitialLoad() {
+        return currentlyFillingFromInitialLoad.get();
     }
-    
+
     @Override
-    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
-        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
+    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
+        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+    }
+
+    @Override
+    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
+        return currentlyApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
+        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
     }
 }

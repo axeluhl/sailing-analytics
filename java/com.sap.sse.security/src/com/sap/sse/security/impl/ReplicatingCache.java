@@ -109,7 +109,7 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         securityService.replicate(s->{ 
             s.getCacheManager().getCache(myName).clear(); return null;
         });
-        securityService.removeAllSessions();
+        securityService.removeAllSessions(getName());
     }
 
     @Override

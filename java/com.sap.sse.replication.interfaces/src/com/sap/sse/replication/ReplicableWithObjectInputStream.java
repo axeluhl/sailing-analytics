@@ -66,7 +66,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     @Override
     default void initiallyFillFrom(InputStream is) throws IOException, ClassNotFoundException, InterruptedException {
         assert !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(); // no nested receiving of initial load
-        setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(true);
+        setCurrentlyFillingFromInitialLoad(true);
         try {
             final ObjectInputStream objectInputStream = createObjectInputStreamResolvingAgainstCache(is);
             ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
@@ -77,7 +77,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
                 Thread.currentThread().setContextClassLoader(oldContextClassloader);
             }
         } finally {
-            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
+            setCurrentlyFillingFromInitialLoad(false);
         }
     }
     
@@ -204,34 +204,27 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
      */
     default <T> T apply(OperationWithResult<S, T> operation) {
         boolean needToRemoveThreadLocal = false;
+        if (operation instanceof OperationWithResultWithIdWrapper<?, ?>) {
+            idOfOperationBeingExecuted.set(((OperationWithResultWithIdWrapper<?, ?>) operation).getId());
+            needToRemoveThreadLocal = true;
+        }
+        final T result = applyReplicated(operation);
+        ReplicationMasterDescriptor masterDescriptor = getMasterDescriptor();
         try {
-            if (operation instanceof OperationWithResultWithIdWrapper<?, ?>) {
-                idOfOperationBeingExecuted.set(((OperationWithResultWithIdWrapper<?, ?>) operation).getId());
-                needToRemoveThreadLocal = true;
-            }
-            ReplicationMasterDescriptor masterDescriptor = getMasterDescriptor();
-            final T result = applyReplicated(operation);
             if (masterDescriptor != null) {
                 sendReplicaInitiatedOperationToMaster(operation);
             }
-            return result;
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "apply", e);
-            throw new RuntimeException(e);
+            logger.log(Level.SEVERE, "Exception trying to send operation "+operation+" to master for replication", e);
         } finally {
             if (needToRemoveThreadLocal) {
                 idOfOperationBeingExecuted.remove();
             }
         }
+        return result;
     }
 
     void addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper<S, ?> operationWithResultWithIdWrapper);
-
-    /**
-     * @return the descriptor of the master from which this replica is replicating this {@link Replicable}, or
-     *         {@code null} if this {@link Replicable} is currently running as a master.
-     */
-    ReplicationMasterDescriptor getMasterDescriptor();
 
     /**
      * The operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
@@ -243,7 +236,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     default <T> T applyReplicated(OperationWithResult<S, T> operation) {
         OperationWithResult<S, T> reso = (OperationWithResult<S, T>) operation;
         try {
-            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(true);
+            setCurrentlyApplyingOperationReceivedFromMaster(true);
             @SuppressWarnings("unchecked")
             S replicable = (S) this;
             T result = reso.internalApplyTo(replicable);
@@ -257,7 +250,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
             logger.log(Level.SEVERE, "apply", e);
             throw new RuntimeException(e);
         } finally {
-            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
+            setCurrentlyApplyingOperationReceivedFromMaster(false);
         }
     }
 }

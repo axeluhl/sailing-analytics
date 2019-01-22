@@ -1,6 +1,7 @@
 package com.sap.sse.security.impl;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -56,14 +57,14 @@ public class ReplicatingCacheManager implements CacheManager, Serializable {
         if (castCache == null) {
             this.caches.put(name, otherCache);
         } else {
-            putAll(castCache, otherCache);
+            putAll(otherCache, castCache);
         }
     }
 
-    private <K, V> void putAll(final ReplicatingCache<K, V> from, ReplicatingCache<K, V> into) {
-        from.clear();
-        for (K k:into.keys()) {
-            from.put(k, into.get(k));
+    private <K, V> void putAll(ReplicatingCache<K, V> from, final ReplicatingCache<K, V> to) {
+        to.clear();
+        for (K k : from.keys()) {
+            to.put(k, from.get(k));
         }
     }
     
@@ -71,6 +72,11 @@ public class ReplicatingCacheManager implements CacheManager, Serializable {
      * For test purposes; clears all state held by this cache manager.
      */
     public void clear() {
-        this.caches.clear();
+        final ReplicableSecurityService securityService = (ReplicableSecurityService) Activator.getSecurityService();
+        for (final Iterator<Entry<String, ReplicatingCache<?, ?>>> i=caches.entrySet().iterator(); i.hasNext(); ) {
+            final Entry<String, ReplicatingCache<?, ?>> cacheNameAndCache = i.next();
+            securityService.removeAllSessions(cacheNameAndCache.getKey());
+            i.remove();
+        }
     }
 }

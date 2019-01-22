@@ -79,7 +79,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.ReplicationReceiver;
+import com.sap.sse.replication.impl.ReplicationReceiverImpl;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
 
 public class InitialLoadReplicationObjectIdentityTest extends AbstractServerReplicationTest {
@@ -196,7 +196,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         /* fire up replication */
         performReplicationSetup();
         ReplicationMasterDescriptor the_master = replicationDescriptorPair.getB(); /* master descriptor */
-        ReplicationReceiver replicator = replicationDescriptorPair.getA()
+        ReplicationReceiverImpl replicator = replicationDescriptorPair.getA()
                 .startToReplicateFromButDontYetFetchInitialLoad(the_master, /* startReplicatorSuspended */true);
         replicationDescriptorPair.getA().initialLoad();
         replicator.setSuspended(false);

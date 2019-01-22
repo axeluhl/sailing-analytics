@@ -84,4 +84,33 @@ public class SessionPersistenceTest {
         mof.removeSession(cacheName, session);
         assertTrue(dof.loadSessionsByCacheName().isEmpty());
     }
+
+    @Test
+    public void testSessionExpiry() throws InterruptedException {
+        final String cacheName = "shiroSessionCache";
+        final String host = "myHost";
+        final String id = UUID.randomUUID().toString();
+        final Date start = new Date();
+        final Date last = new Date();
+        final long timeout = 5000l; // 5s
+        final SimpleSession session = new SimpleSession();
+        session.setId(id);
+        session.setHost(host);
+        session.setStartTimestamp(start);
+        session.setLastAccessTime(last);
+        session.setTimeout(timeout);
+        mof.storeSession(cacheName, session);
+        final Map<String, Set<Session>> sessions = dof.loadSessionsByCacheName();
+        // expecting the session to be still there because the 10s haven't expired yet:
+        final Session readSession = sessions.get(cacheName).iterator().next();
+        assertEquals(session, readSession);
+        assertEquals(id, readSession.getId());
+        assertEquals(host, readSession.getHost());
+        assertEquals(start, readSession.getStartTimestamp());
+        assertEquals(last, readSession.getLastAccessTime());
+        assertEquals(timeout, readSession.getTimeout());
+        Thread.sleep(timeout);
+        final Map<String, Set<Session>> sessionsWithoutExpired = dof.loadSessionsByCacheName();
+        assertTrue(sessionsWithoutExpired.isEmpty());
+    }
 }

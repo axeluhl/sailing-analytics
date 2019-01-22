@@ -2,8 +2,10 @@ package com.sap.sse.security.persistence.impl;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.mgt.SimpleSession;
@@ -13,9 +15,12 @@ import org.bson.Document;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.persistence.DomainObjectFactory;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
+    private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
     private final MongoCollection<Document> sessionsCollection;
     
     public DomainObjectFactoryImpl(MongoDatabase mongoDatabase) {
@@ -25,11 +30,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Map<String, Set<Session>> loadSessionsByCacheName() {
         final Map<String, Set<Session>> sessionsByCacheName = new HashMap<>();
+        final Set<Serializable> expiredSessionIds = new HashSet<>();
         sessionsCollection.find().forEach((Document sessionDocument)->{
             final String cacheName = sessionDocument.getString(FieldNames.CACHE_NAME.name());
             final Session session = loadSession(sessionDocument);
-            Util.addToValueSet(sessionsByCacheName, cacheName, session);
+            if (new MillisecondsTimePoint(session.getLastAccessTime()).plus(new MillisecondsDurationImpl(session.getTimeout())).before(MillisecondsTimePoint.now())) {
+                // expired
+                logger.info("Session "+session+" expired");
+                expiredSessionIds.add(session.getId());
+            } else {
+                Util.addToValueSet(sessionsByCacheName, cacheName, session);
+            }
         });
+        expiredSessionIds.forEach(id->sessionsCollection.deleteOne(new Document(FieldNames.SESSION_ID.name(), id)));
         return sessionsByCacheName;
     }
 

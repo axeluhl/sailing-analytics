@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,10 +18,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.jpountz.lz4.LZ4BlockInputStream;
-import net.jpountz.lz4.LZ4BlockOutputStream;
-
 import org.apache.commons.lang.StringEscapeUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -29,8 +29,12 @@ import com.sap.sse.gateway.AbstractHttpServlet;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.impl.CountingOutputStream;
+
+import net.jpountz.lz4.LZ4BlockInputStream;
+import net.jpountz.lz4.LZ4BlockOutputStream;
 
 /**
  * The servlet supports registering and de-registering a replica from a master and can send the serialized initial load
@@ -47,8 +51,12 @@ public class ReplicationServlet extends AbstractHttpServlet {
     
     private static final long serialVersionUID = 4835516998934433846L;
     
-    public enum Action { REGISTER, INITIAL_LOAD, DEREGISTER }
+    public enum Action { REGISTER, INITIAL_LOAD, DEREGISTER, STATUS }
     
+    /**
+     * The parameter value found in the parameter with this name must have a value that matches any of the
+     * {@link Action} names.
+     */
     public static final String ACTION = "action";
     public static final String SERVER_UUID = "uuid";
     public static final String ADDITIONAL_INFORMATION = "additional";
@@ -94,16 +102,19 @@ public class ReplicationServlet extends AbstractHttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter(ACTION);
-        logger.info("Received replication request, action is "+action);
+        logger.fine("Received replication request, action is "+action);
         String[] replicableIdsAsStrings;
         switch (Action.valueOf(action)) {
         case REGISTER:
+            logger.info("Received replica registration request");
             registerClientWithReplicationService(req, resp);
             break;
         case DEREGISTER:
+            logger.info("Received replica deregistration request");
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
+            logger.info("Received replication initial load request");
             replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
             Channel channel = getReplicationService().createMasterChannel();
             try {
@@ -140,10 +151,65 @@ public class ReplicationServlet extends AbstractHttpServlet {
             } finally {
                 channel.getConnection().close();
             }
+        case STATUS:
+            try {
+                reportStatus(resp);
+            } catch (IllegalAccessException e) {
+                logger.info("Error obtaining replication status: " + e.getMessage());
+                logger.log(Level.SEVERE, "doGet", e);
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                e.printStackTrace(resp.getWriter());
+            }
+            break;
         default:
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + StringEscapeUtils.escapeHtml(action) + " not understood. Must be one of "
                     + Arrays.toString(Action.values()));
         }
+    }
+
+    /**
+     * The status is reported as a JSON document. For each replicable it describes the status which tells
+     * whether the replicable is still fetching its initial load, as well as the length of the queue of
+     * inbound operations not yet processed. The JSON document is printed to the response object's writer.
+     */
+    private void reportStatus(HttpServletResponse resp) throws IllegalAccessException, IOException {
+        final JSONObject result = new JSONObject();
+        final JSONArray replicablesJSON = new JSONArray();
+        synchronized (getReplicationService()) {
+            final ReplicationReceiver replicationReceiver = getReplicationService().getReplicator();
+            final boolean isReplicationStarting = getReplicationService().isReplicationStarting();
+            final boolean isReplica = isReplicationStarting || replicationReceiver != null;
+            result.put("replica", isReplica);
+            result.put("replicationstarting", isReplicationStarting);
+            result.put("suspended", replicationReceiver == null ? false : replicationReceiver.isSuspended());
+            result.put("stopped", replicationReceiver == null ? false : replicationReceiver.isBeingStopped());
+            result.put("messagequeuelength", replicationReceiver == null ? 0 : replicationReceiver.getMessageQueueSize());
+            final JSONArray operationQueueLengths = new JSONArray();
+            result.put("operationqueuelengths", operationQueueLengths);
+            int totalOperationQueueLengths = 0;
+            if (replicationReceiver != null) {
+                for (final Entry<String, Integer> queueLength : replicationReceiver.getOperationQueueSizes().entrySet()) {
+                    final JSONObject queueLengthJSON = new JSONObject();
+                    queueLengthJSON.put("id", queueLength.getKey());
+                    queueLengthJSON.put("length", queueLength.getValue());
+                    totalOperationQueueLengths += queueLength.getValue();
+                    operationQueueLengths.add(queueLengthJSON);
+                }
+            }
+            result.put("totaloperationqueuelength", totalOperationQueueLengths);
+            boolean initialLoadRunning = false;
+            for (final Replicable<?, ?> replicable : getReplicationService().getAllReplicables()) {
+                final JSONObject replicableJSON = new JSONObject();
+                replicableJSON.put("id", replicable.getId());
+                replicableJSON.put("initialloadrunning", replicable.isCurrentlyFillingFromInitialLoad());
+                initialLoadRunning = initialLoadRunning || replicable.isCurrentlyFillingFromInitialLoad();
+                replicablesJSON.add(replicableJSON);
+            }
+            result.put("replicables", replicablesJSON);
+            result.put("available", !isReplica || (!isReplicationStarting && !initialLoadRunning));
+        }
+        resp.setContentType("application/json;charset=UTF-8");
+        resp.getWriter().print(result.toJSONString());
     }
 
     @Override
