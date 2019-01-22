@@ -95,8 +95,9 @@ public class UnsentOperationsSenderJob implements OperationsToMasterSendingQueue
                     ensureScheduled();
                 }
                 empty = queue.isEmpty();
-                assert empty || !sendOk;
-                assert empty || scheduled;
+                if (empty) {
+                    scheduled = false;
+                }
             }
         }
     }

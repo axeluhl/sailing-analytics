@@ -33,16 +33,32 @@ public class UnsentOperationSenderJobTest implements OperationsToMasterSender<Ra
     public void setUp() {
         job = new UnsentOperationsSenderJob();
         resendCount = 0;
-        latch = new CountDownLatch(1);
     }
     
     @Test
     public void testResendThatFailsAtLeastOnce() throws InterruptedException, BrokenBarrierException {
         final OperationWithResult<RacingEventService, String> operationWithResult = null;
         final OperationsToMasterSender<RacingEventService, OperationWithResult<RacingEventService, String>> sender = this;
+        latch = new CountDownLatch(1);
         job.scheduleForSending(operationWithResult, sender);
         latch.await();
         assertEquals(MAX_RESEND_COUNT+1, resendCount);
+    }
+
+    @Test
+    public void testSendingTwoOpsFollowedByAnotherOne() throws InterruptedException, BrokenBarrierException {
+        final OperationWithResult<RacingEventService, String> operationWithResult = null;
+        final OperationsToMasterSender<RacingEventService, OperationWithResult<RacingEventService, String>> sender = this;
+        latch = new CountDownLatch(2);
+        job.scheduleForSending(operationWithResult, sender);
+        job.scheduleForSending(operationWithResult, sender);
+        latch.await();
+        Thread.sleep(100);
+        assertEquals(MAX_RESEND_COUNT+2, resendCount);
+        latch = new CountDownLatch(1);
+        job.scheduleForSending(operationWithResult, sender);
+        latch.await();
+        assertEquals(MAX_RESEND_COUNT+3, resendCount);
     }
 
     public <T> void sendReplicaInitiatedOperationToMaster(OperationWithResult<RacingEventService, T> operation) throws IOException {
