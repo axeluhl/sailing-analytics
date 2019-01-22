@@ -100,18 +100,19 @@ public class Activator implements BundleActivator {
      * reinitialize them in the same fashion an empty server will do.
      */
     protected void clearState() throws InterruptedException, UserGroupManagementException, UserManagementException {
-        UserStore userStore = userStoreTracker.waitForService(0);
-        userStore.clear();
-        createRoleDefinitionsFromPrototypes(context, userStore);
-        userStore.ensureDefaultRolesExist();
-        userStore.loadAndMigrateUsers();
-        AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
-        accessControlStore.clear();
-        securityService.initialize();
         CacheManager cm = securityService.getCacheManager();
         if (cm instanceof ReplicatingCacheManager) {
             ((ReplicatingCacheManager) cm).clear();
         }
+
+        UserStore userStore = userStoreTracker.waitForService(0);
+        AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
+        userStore.clear();
+        accessControlStore.clear();
+        createRoleDefinitionsFromPrototypes(context, userStore);
+        userStore.ensureDefaultRolesExist();
+        userStore.ensureDefaultTenantExists();
+        securityService.initialize();
     }
 
     private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore userStore, AccessControlStore accessControlStore) {
