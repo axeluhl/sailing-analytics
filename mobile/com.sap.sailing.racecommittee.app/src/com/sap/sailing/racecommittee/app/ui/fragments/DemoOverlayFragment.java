@@ -15,7 +15,8 @@ public class DemoOverlayFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.demo_overlay, container, false);
 
         AppPreferences preferences = AppPreferences.on(inflater.getContext());

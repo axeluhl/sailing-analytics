@@ -50,7 +50,7 @@
             <module>install-android-sdk</module>
         </modules>
         <properties>
-            <!-- By default, the Android API *.jar is hosted in MAven repositories under "android:android".
+            <!-- By default, the Android API *.jar is hosted in Maven repositories under "android:android".
                  On Lean DI, the deviant coordinates "com.google.download.android:android".
                  To make this work without the need of a duplicate definition of the dependencies by profile,
                  the groupId of this artifact is defined by a property so that we can easily change it for Lean DI. -->
@@ -93,7 +93,7 @@
               <layout>p2</layout>
               <url>http://download.eclipse.org/releases/luna/</url>
           </repository>
-  <!--        
+  <!--
           <repository>
               <id>sap-nexus</id>
               <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>

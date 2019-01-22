@@ -3,17 +3,18 @@ package com.sap.sailing.racecommittee.app.utils;
 import java.util.Calendar;
 import java.util.Locale;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.racecommittee.app.R;
+
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
 
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.racecommittee.app.R;
-
 public class TimeUtils extends com.sap.sailing.android.shared.util.TimeUtils {
 
-    public static void initTimePickerWithSeconds(Context context, final Calendar time, @Nullable final TimePicker timePicker, @Nullable NumberPicker secondPicker) {
+    public static void initTimePickerWithSeconds(Context context, final Calendar time,
+            @Nullable final TimePicker timePicker, @Nullable NumberPicker secondPicker) {
         int textColor = ThemeHelper.getColor(context, R.attr.white);
         int dividerColor = ThemeHelper.getColor(context, R.attr.sap_yellow_1);
         if (timePicker != null) {

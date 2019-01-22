@@ -16,7 +16,7 @@
     <module>com.sap.sailing.android.shared</module>
     <module>com.sap.sailing.racecommittee.app</module>
     <module>com.sap.sailing.android.tracking.app</module>
-    <module>com.sap.sailing.buoy.positioning</module>
+    <module>com.sap.sailing.android.buoy.positioning.app</module>
   </modules>
 
   <properties>

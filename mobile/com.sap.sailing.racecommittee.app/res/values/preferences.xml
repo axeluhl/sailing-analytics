@@ -129,17 +129,6 @@
     <string name="preference_offline_key" translatable="false">is_data_offline</string>
     <bool name="preference_offline_default">false</bool>
 
-    <string name="preference_theme_key" translatable="false">theme</string>
-    <string name="preference_theme_default" translatable="false">light</string>
-    <string-array name="preference_theme_values">
-        <item>dark</item>
-        <item>light</item>
-    </string-array>
-    <string-array name="preference_theme_entries">
-        <item>Dark</item>
-        <item>Light</item>
-    </string-array>
-
     <string name="preference_non_public_events_key" translatable="false">show_non_public_events</string>
     <bool name="preference_non_public_events_default">false</bool>
 

@@ -122,13 +122,20 @@ class CheckInData: NSObject {
     }
 
     convenience init?(url: URL) {
-        guard let host = url.host else { return nil }
+
+        // handle the case where a user uses the app to scan a QR code containing a branch.io deeplink
+        let branchQueryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
+        let checkinUrl = branchQueryItems?.first(where: {$0.name == "checkin_url"}).map { URL(string: $0.value!)! }
+
+        let unwrappedUrl = checkinUrl ?? url
+
+        guard let host = unwrappedUrl.host else { return nil }
         
         // Set server URL
-        let serverURL = url.scheme! + "://" + host + (url.port != nil ? ":\(url.port!)" : "")
+        let serverURL = unwrappedUrl.scheme! + "://" + host + (unwrappedUrl.port != nil ? ":\(unwrappedUrl.port!)" : "")
         
         // In query component replace '+' occurrences with '%20' as a workaround for bug 3664
-        var components = URLComponents(string: url.absoluteString)
+        var components = URLComponents(string: unwrappedUrl.absoluteString)
         components?.percentEncodedQuery = components?.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%20")
         guard let queryItems = components?.queryItems else { return nil }
         
