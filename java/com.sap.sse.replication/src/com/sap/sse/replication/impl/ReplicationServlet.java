@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.rabbitmq.client.Channel;
@@ -29,6 +28,7 @@ import com.sap.sse.gateway.AbstractHttpServlet;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.impl.CountingOutputStream;
@@ -72,17 +72,24 @@ public class ReplicationServlet extends AbstractHttpServlet {
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
-    private final OSGiReplicableTracker replicablesProvider;
+    private final ReplicablesProvider replicablesProvider;
     
     public ReplicationServlet() throws Exception {
-        BundleContext context = Activator.getDefaultContext();
-        replicablesProvider = new OSGiReplicableTracker(context);
-        replicationServiceTracker = new ServiceTracker<ReplicationService, ReplicationService>(context, ReplicationService.class.getName(), null);
-        replicationServiceTracker.open();
+        this(new OSGiReplicableTracker(Activator.getDefaultContext()),
+                new ServiceTracker<ReplicationService, ReplicationService>(Activator.getDefaultContext(),
+                        ReplicationService.class.getName(), /* tracker customizer */ null));
     }
 
+    public ReplicationServlet(ReplicablesProvider replicablesProvider, ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker) {
+        this.replicablesProvider = replicablesProvider;
+        this.replicationServiceTracker = replicationServiceTracker;
+        if (replicationServiceTracker != null) {
+            replicationServiceTracker.open();
+        }
+    }
+    
     protected ReplicationService getReplicationService() {
-        return replicationServiceTracker.getService();
+        return replicationServiceTracker == null ? null : replicationServiceTracker.getService();
     }
 
     /**
@@ -212,8 +219,11 @@ public class ReplicationServlet extends AbstractHttpServlet {
         resp.getWriter().print(result.toJSONString());
     }
 
+    /**
+     * Made public for test support
+     */
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         InputStream is = req.getInputStream();
         DataInputStream dis = new DataInputStream(is);
         String replicableIdAsString = dis.readUTF();
