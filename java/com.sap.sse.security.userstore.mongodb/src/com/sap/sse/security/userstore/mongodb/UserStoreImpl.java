@@ -195,6 +195,16 @@ public class UserStoreImpl implements UserStore {
     }
 
     /**
+     * Do only call for testcases, to ensure the Server is correctly setup, without loading all users
+     * 
+     * @throws UserGroupManagementException
+     */
+    @Override
+    public void ensureDefaultTenantExists() throws UserGroupManagementException {
+        defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
+    }
+
+    /**
      * Do not call this before the security service is ready, as else role definition migration will not work correctly
      */
     public void loadAndMigrateUsers() throws UserGroupManagementException, UserManagementException {
@@ -204,7 +214,8 @@ public class UserStoreImpl implements UserStore {
             userGroupsByName.put(group.getName(), group);
         }
 
-        defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
+        // do this here, in case the default tenant was just loaded before
+        ensureDefaultTenantExists();
 
         for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, this.userGroups, this)) {
             users.put(u.getName(), u);

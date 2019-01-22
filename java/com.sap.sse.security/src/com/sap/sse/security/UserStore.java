@@ -249,4 +249,6 @@ public interface UserStore extends UserGroupProvider, Named {
      * this before the SecurityService is created, as else new defaults (eg admin user) will be created
      */
     void loadAndMigrateUsers() throws UserGroupManagementException, UserManagementException;
+
+    void ensureDefaultTenantExists() throws UserGroupManagementException;
 }
