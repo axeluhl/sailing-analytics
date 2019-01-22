@@ -54,6 +54,7 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -1131,5 +1132,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     void removeWind(Wind wind, WindSource windSource);
 
     PolarDataService getPolarDataService();
+
+    void setWindEstimation(IncrementalWindEstimationTrack windEstimation);
 
 }

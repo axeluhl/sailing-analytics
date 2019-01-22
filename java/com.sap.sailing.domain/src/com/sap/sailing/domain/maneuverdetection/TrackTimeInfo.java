@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.maneuverdetection.impl;
+package com.sap.sailing.domain.maneuverdetection;
 
 import com.sap.sse.common.TimePoint;
 

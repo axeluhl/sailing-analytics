@@ -1,6 +1,8 @@
 package com.sap.sailing.windestimation.model.exception;
 
-public class ModelPersistenceException extends Exception {
+import java.io.IOException;
+
+public class ModelPersistenceException extends IOException {
 
     private static final long serialVersionUID = -7672415389872133921L;
 
@@ -17,11 +19,6 @@ public class ModelPersistenceException extends Exception {
 
     public ModelPersistenceException(String message, Throwable cause) {
         super(message, cause);
-    }
-
-    public ModelPersistenceException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 
 }

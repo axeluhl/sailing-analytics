@@ -83,6 +83,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -1231,6 +1232,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public PolarDataService getPolarDataService() {
         return null;
+    }
+
+    @Override
+    public void setWindEstimation(IncrementalWindEstimationTrack windEstimation) {
     }
 
 }

@@ -49,4 +49,9 @@ public class GaussianBasedTwdTransitionDistributionCache {
         return p;
     }
 
+    public void clearCache() {
+        durationBasedTwdTransitionRegressorCache.clearCache();
+        distanceBasedTwdTransitionRegressorCache.clearCache();
+    }
+
 }

@@ -146,6 +146,7 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -384,6 +385,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient ShortTimeWindCache shortTimeWindCache;
     
     private transient PolarDataService polarDataService;
+    
+    private transient IncrementalWindEstimationTrack windEstimation;
 
     /**
      * Tells how ranks are to be assigned to the competitors at any time during the race. For one-design boat classes
@@ -404,7 +407,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient RaceLogResolver raceLogResolver;
     
     private final NamedReentrantReadWriteLock sensorTracksLock;
-
+    
     /**
      * Constructs the tracked race with one-design ranking.
      */
@@ -537,9 +540,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
         windTracks.put(trackBasedWindSource,
                 getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
-        WindSource maneuverBasedWindSource = new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION);
-        windTracks.put(maneuverBasedWindSource,
-                getOrCreateWindTrack(maneuverBasedWindSource, delayForWindEstimationCacheInvalidation));
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         if (useInternalMarkPassingAlgorithm) {
@@ -728,7 +728,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
                     private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache = new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
                             /* preserve how many milliseconds */ 10000,
-                            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor, null));
+                            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor, windEstimation));
 
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
@@ -964,6 +964,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * and not {@link Object}.
      */
     private final String updateStartOfRaceCacheFieldsMonitor = ""+new Random().nextDouble();
+
     protected void updateStartOfRaceCacheFields() {
         synchronized (updateStartOfRaceCacheFieldsMonitor) {
             TimePoint newStartTime = null;
@@ -3596,6 +3597,21 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
         this.polarDataService = polarDataService;
+    }
+    
+    public void setWindEstimation(IncrementalWindEstimationTrack windEstimation) {
+        if (this.windEstimation != windEstimation) {
+            if (this.windEstimation != null) {
+                windTracks.remove(this.windEstimation.getWindSource());
+            }
+            if (windEstimation != null) {
+                windTracks.put(windEstimation.getWindSource(), windEstimation);
+            }
+            this.windEstimation = windEstimation;
+            // TODO review
+            shortTimeWindCache.clearCache();
+            triggerManeuverCacheRecalculationForAllCompetitors();
+        }
     }
 
     /**

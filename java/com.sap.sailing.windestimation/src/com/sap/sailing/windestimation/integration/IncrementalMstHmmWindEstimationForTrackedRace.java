@@ -11,13 +11,13 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
-import com.sap.sailing.domain.maneuverdetection.impl.WindEstimationInteraction;
+import com.sap.sailing.domain.maneuverdetection.TrackTimeInfo;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
 import com.sap.sailing.windestimation.aggregator.msthmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculator;
@@ -34,7 +34,8 @@ import com.sap.sailing.windestimation.windinference.WindTrackCalculatorImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
-public class InteractiveMstHmmWindEstimationForTrackedRace extends WindTrackImpl implements WindEstimationInteraction {
+public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
+        implements IncrementalWindEstimationTrack {
 
     private static final long serialVersionUID = 6654969432545619955L;
     private static final double WIND_COURSE_TOLERANCE_IN_DEGREES_TO_IGNORE_FOR_REUSE = 1.0;
@@ -46,20 +47,13 @@ public class InteractiveMstHmmWindEstimationForTrackedRace extends WindTrackImpl
     private final TrackedRace trackedRace;
     private WindSource windSource;
 
-    public InteractiveMstHmmWindEstimationForTrackedRace(TrackedRace trackedRace, WindSource windSource,
-            long millisecondsOverWhichToAverage) {
-        this(trackedRace, windSource, trackedRace.getPolarDataService(), millisecondsOverWhichToAverage,
-                DefaultModelCaches.MANEUVER_CLASSIFIERS_CACHE,
-                DefaultModelCaches.GAUSSIAN_TWD_DELTA_TRANSITION_DISTRIBUTION_CACHE);
-    }
-
-    public InteractiveMstHmmWindEstimationForTrackedRace(TrackedRace trackedRace, WindSource windSource,
+    public IncrementalMstHmmWindEstimationForTrackedRace(TrackedRace trackedRace, WindSource windSource,
             PolarDataService polarDataService, long millisecondsOverWhichToAverage,
             ManeuverClassifiersCache maneuverClassifiersCache,
             GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache) {
         super(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE,
                 WindSourceType.MANEUVER_BASED_ESTIMATION.useSpeed() && polarDataService != null,
-                InteractiveMstHmmWindEstimationForTrackedRace.class.getName());
+                IncrementalMstHmmWindEstimationForTrackedRace.class.getName());
         this.trackedRace = trackedRace;
         this.windSource = windSource;
         DistanceAndDurationAwareWindTransitionProbabilitiesCalculator transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
@@ -131,6 +125,11 @@ public class InteractiveMstHmmWindEstimationForTrackedRace extends WindTrackImpl
     protected double getConfidenceOfInternalWindFixUnsynchronized(Wind windFix) {
         WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = windTrackWithConfidences.get(windFix);
         return super.getConfidenceOfInternalWindFixUnsynchronized(windFix) * windWithConfidence.getConfidence();
+    }
+
+    @Override
+    public WindSource getWindSource() {
+        return windSource;
     }
 
 }

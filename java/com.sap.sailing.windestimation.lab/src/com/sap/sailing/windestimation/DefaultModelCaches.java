@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.integration;
+package com.sap.sailing.windestimation;
 
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;

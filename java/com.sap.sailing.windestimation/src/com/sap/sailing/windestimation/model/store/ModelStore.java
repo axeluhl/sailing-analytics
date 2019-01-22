@@ -1,5 +1,7 @@
 package com.sap.sailing.windestimation.model.store;
 
+import java.util.Map;
+
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.model.TrainableModel;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
@@ -11,6 +13,10 @@ public interface ModelStore {
             ModelType newModel) throws ModelPersistenceException;
 
     void deleteAll(PersistenceContextType contextType) throws ModelPersistenceException;
+
+    Map<String, byte[]> exportAllPersistedModels(PersistenceContextType contextType) throws ModelPersistenceException;
+
+    void importPersistedModels(Map<String, byte[]> exportedPersistedModels, PersistenceContextType contextType) throws ModelPersistenceException;
 
     default <T extends PersistableModel<?, ?>> PersistenceSupport checkAndGetPersistenceSupport(T trainedModel)
             throws ModelPersistenceException {

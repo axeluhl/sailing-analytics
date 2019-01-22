@@ -49,7 +49,7 @@ public class ShortTimeAfterLastHitCache<K, V> {
                 Entry<K, ValueWithTimestampSinceLastHit<V>> entry = iterator.next();
                 if (entry.getValue().getTimestampSinceLastHit() < oldestToKeep) {
                     iterator.remove();
-                    if(cachedValueCleaningCallback != null) {
+                    if (cachedValueCleaningCallback != null) {
                         cachedValueCleaningCallback.cleanValue(entry.getKey(), entry.getValue().getValue());
                     }
                 }
@@ -59,6 +59,27 @@ public class ShortTimeAfterLastHitCache<K, V> {
                     invalidatorHandle.cancel(/* mayInterruptIfRunning */ false);
                     invalidatorHandle = null;
                 }
+            }
+        }
+    }
+
+    public void clearCache() {
+        if (cachedValueCleaningCallback != null) {
+            for (Iterator<Entry<K, ValueWithTimestampSinceLastHit<V>>> iterator = cache.entrySet().iterator(); iterator
+                    .hasNext();) {
+                Entry<K, ValueWithTimestampSinceLastHit<V>> entry = iterator.next();
+                iterator.remove();
+                if (cachedValueCleaningCallback != null) {
+                    cachedValueCleaningCallback.cleanValue(entry.getKey(), entry.getValue().getValue());
+                }
+            }
+        } else {
+            cache.clear();
+        }
+        synchronized (cache) {
+            if (cache.isEmpty()) {
+                invalidatorHandle.cancel(/* mayInterruptIfRunning */ false);
+                invalidatorHandle = null;
             }
         }
     }

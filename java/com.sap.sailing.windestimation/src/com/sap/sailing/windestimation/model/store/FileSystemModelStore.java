@@ -5,6 +5,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.model.TrainableModel;
@@ -22,13 +27,20 @@ public class FileSystemModelStore implements ModelStore {
     }
 
     private File getFileForModel(PersistenceSupport trainedModel, PersistenceContextType contextType) {
+        StringBuilder fileName = new StringBuilder();
+        fileName.append(getContextPrefix(contextType));
+        fileName.append(trainedModel.getPersistenceKey());
+        fileName.append(FILE_EXT);
+        String finalFileName = replaceSystemChars(fileName.toString());
+        return getFileForModel(finalFileName, contextType);
+    }
+
+    private File getFileForModel(String fileName, PersistenceContextType contextType) {
         StringBuilder filePath = new StringBuilder();
         filePath.append(destinationFolder);
         filePath.append(File.separator);
-        filePath.append(getContextPrefix(contextType));
-        filePath.append(trainedModel.getPersistenceKey());
-        filePath.append(FILE_EXT);
-        String finalFilePath = replaceSystemChars(filePath.toString());
+        filePath.append(fileName);
+        String finalFilePath = filePath.toString();
         return new File(finalFilePath);
     }
 
@@ -98,6 +110,41 @@ public class FileSystemModelStore implements ModelStore {
 
     private String getContextPrefix(PersistenceContextType contextType) {
         return CONTEXT_NAME_PREFIX + contextType.getContextName() + ".";
+    }
+
+    @Override
+    public Map<String, byte[]> exportAllPersistedModels(PersistenceContextType contextType)
+            throws ModelPersistenceException {
+        Map<String, byte[]> exportedModels = new HashMap<>();
+        File folder = new File(destinationFolder);
+        for (File file : folder.listFiles()) {
+            String fileName = file.getName();
+            if (file.isFile() && fileName.endsWith(FILE_EXT) && fileName.startsWith(getContextPrefix(contextType))) {
+                byte[] exportedModel;
+                try {
+                    exportedModel = Files.readAllBytes(file.toPath());
+                } catch (IOException e) {
+                    throw new ModelPersistenceException("Could not read model \"" + fileName + "\" from filesystem", e);
+                }
+                exportedModels.put(fileName, exportedModel);
+            }
+        }
+        return exportedModels;
+    }
+
+    @Override
+    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, PersistenceContextType contextType)
+            throws ModelPersistenceException {
+        for (Entry<String, byte[]> entry : exportedPersistedModels.entrySet()) {
+            String fileName = entry.getKey();
+            byte[] exportedModel = entry.getValue();
+            Path modelPath = Paths.get(destinationFolder, fileName);
+            try {
+                Files.write(modelPath, exportedModel);
+            } catch (IOException e) {
+                throw new ModelPersistenceException("Could not store model \"" + fileName + "\" on filesystem", e);
+            }
+        }
     }
 
 }

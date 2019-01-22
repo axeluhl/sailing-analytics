@@ -24,16 +24,9 @@ public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<In
                 .getAllValidContextSpecificModelMetadataCandidates(contextSpecificModelMetadataWithMaxFeatures);
         List<ModelType> loadedModels = new ArrayList<>();
         for (T modelMetadata : modelMetadataCandidates) {
-            ModelType model = modelFactory.getNewModel(modelMetadata);
-            try {
-                model = modelStore.loadPersistedState(model);
-                if (model.hasSupportForProvidedFeatures()) {
-                    loadedModels.add(model);
-                }
-            } catch (ModelNotFoundException e) {
-                // ignore, because no model might be available for the specified model metadata
-            } catch (ModelPersistenceException e) {
-                throw new ModelLoadingException(e);
+            ModelType loadedModel = loadModel(modelMetadata);
+            if (loadedModel != null && loadedModel.hasSupportForProvidedFeatures()) {
+                loadedModels.add(loadedModel);
             }
         }
 
@@ -50,6 +43,19 @@ public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<In
             }
         }
         return bestModel;
+    }
+
+    public ModelType loadModel(T contextSpecificModelMetadata) {
+        ModelType model = modelFactory.getNewModel(contextSpecificModelMetadata);
+        ModelType loadedModel = null;
+        try {
+            loadedModel = modelStore.loadPersistedState(model);
+        } catch (ModelNotFoundException e) {
+            // ignore, because no model might be available for the specified model metadata
+        } catch (ModelPersistenceException e) {
+            throw new ModelLoadingException(e);
+        }
+        return loadedModel;
     }
 
 }

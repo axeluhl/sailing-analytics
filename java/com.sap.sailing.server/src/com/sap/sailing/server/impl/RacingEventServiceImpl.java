@@ -194,6 +194,7 @@ import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminatorImpl;
@@ -440,6 +441,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             RacingEventService.class.getName(), 0);
 
     private PolarDataService polarDataService;
+    
+    private WindEstimationFactoryService windEstimationFactoryService;
 
     private final SimulationService simulationService;
 
@@ -3922,6 +3925,35 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
+    public void setWindEstimationFactoryService(WindEstimationFactoryService service) {
+        if (this.windEstimationFactoryService == null && service != null) {
+            windEstimationFactoryService = service;
+            windEstimationFactoryService.registerDomainFactory(baseDomainFactory);
+            setWindEstimationOnAllTrackedRaces(service);
+        }
+    }
+
+    private void setWindEstimationOnAllTrackedRaces(WindEstimationFactoryService service) {
+        Iterable<Regatta> allRegattas = getAllRegattas();
+        for (Regatta regatta : allRegattas) {
+            DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+            if (trackedRegatta != null) {
+                trackedRegatta.lockTrackedRacesForRead();
+                try {
+                    Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+                    for (TrackedRace trackedRace : trackedRaces) {
+                        trackedRace.setWindEstimation(
+                                service == null ? null : service.createIncrementalWindEstimationTrack(trackedRace));
+                    }
+                } catch (Throwable e) {
+                    logger.log(Level.SEVERE, "Error reconstructing the polars for tracked races", e);
+                } finally {
+                    trackedRegatta.unlockTrackedRacesAfterRead();
+                }
+            }
+        }
+    }
+
     private void setPolarDataServiceOnAllTrackedRaces(PolarDataService service) {
         Iterable<Regatta> allRegattas = getAllRegattas();
         for (Regatta regatta : allRegattas) {
@@ -3949,6 +3981,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (polarDataService == service) {
             polarDataService = null;
             setPolarDataServiceOnAllTrackedRaces(null);
+        }
+    }
+    
+    public void unsetWindEstimationFactoryService(WindEstimationFactoryService service) {
+        if (windEstimationFactoryService == service) {
+            windEstimationFactoryService = null;
+            setWindEstimationOnAllTrackedRaces(null);
         }
     }
 

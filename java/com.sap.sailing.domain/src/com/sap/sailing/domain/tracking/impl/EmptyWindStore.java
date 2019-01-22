@@ -21,10 +21,6 @@ public class EmptyWindStore implements WindStore {
         case TRACK_BASED_ESTIMATION:
             return new TrackBasedEstimationWindTrackImpl(trackedRace, millisecondsOverWhichToAverage,
                     WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence(), delayForWindEstimationCacheInvalidation);
-        case MANEUVER_BASED_ESTIMATION:
-            // TODO devise suitable osgi bundle architecture to access windestimation
-            // return new InteractiveMstHmmWindEstimationForTrackedRace(trackedRace, windSource, millisecondsOverWhichToAverage);
-            return new WindTrackImpl(millisecondsOverWhichToAverage, false, "Dummy");
         default:
             return new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().useSpeed(), "WindTrack for source "+windSource);
         }

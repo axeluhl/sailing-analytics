@@ -2,7 +2,6 @@ package com.sap.sailing.domain.maneuverdetection;
 
 import java.util.List;
 
-import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.Maneuver;
 

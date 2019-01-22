@@ -45,4 +45,9 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
         return modelStore;
     }
 
+    @Override
+    public void clearCache() {
+        modelCache.clearCache();
+    }
+
 }

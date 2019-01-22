@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.NoFixesException;
+import com.sap.sailing.domain.maneuverdetection.TrackTimeInfo;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl.IncrementalManeuverSpotDetectionResult;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl.ManeuverDetectionResult;
 import com.sap.sailing.domain.test.AbstractManeuverDetectionTestCase;
