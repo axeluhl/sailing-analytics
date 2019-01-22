@@ -67,6 +67,7 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
                 new WindImpl(/* position */null, new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:30")),
                         new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(55))),
                 new WindSourceImpl(WindSourceType.WEB));
+        getTrackedRace().waitForManeuverDetectionToFinish();
     }
 
     // TODO Think about how to implement an incremental douglas peucker which matches exactly the non-incremental

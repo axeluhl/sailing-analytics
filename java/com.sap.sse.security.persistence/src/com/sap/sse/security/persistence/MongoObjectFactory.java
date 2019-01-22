@@ -8,6 +8,6 @@ public interface MongoObjectFactory {
 
     void removeSession(String cacheName, Session session);
 
-    void removeAllSessions();
+    void removeAllSessions(String cacheName);
 
 }

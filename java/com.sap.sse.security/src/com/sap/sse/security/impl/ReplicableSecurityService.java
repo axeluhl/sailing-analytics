@@ -49,6 +49,6 @@ public interface ReplicableSecurityService extends SecurityService {
 
     void removeSession(String cacheName, Session result);
 
-    void removeAllSessions();
+    void removeAllSessions(String cacheName);
 
 }

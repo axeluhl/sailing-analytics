@@ -131,6 +131,7 @@ public class Activator implements BundleActivator {
     private void checkIfAutomaticReplicationShouldStart(ReplicationService serverReplicationMasterService, String masterExchangeName, final ReplicablesProvider replicablesProvider) {
         String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);
         if (replicateOnStart != null && !replicateOnStart.isEmpty()) {
+            serverReplicationMasterService.setReplicationStarting(true);
             final String[] replicableIdsAsStrings = replicateOnStart.split(",");
             new Thread("ServiceTracker waiting for Replicables "+Arrays.toString(replicableIdsAsStrings)) {
                 @Override
@@ -158,6 +159,7 @@ public class Activator implements BundleActivator {
                             Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()), replicables);
                     try {
                         serverReplicationMasterService.startToReplicateFrom(master);
+                        serverReplicationMasterService.setReplicationStarting(false);
                         logger.info("Automatic replication has been started.");
                     } catch (ClassNotFoundException | IOException | InterruptedException e) {
                         logger.log(Level.SEVERE, "Error with automatic replication from "+master, e);

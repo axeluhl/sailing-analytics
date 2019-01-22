@@ -716,6 +716,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public synchronized void waitForLoadingToFinish() throws InterruptedException {
     }
+    
+    public void waitForManeuverDetectionToFinish() {
+        for (Competitor competitor : getRace().getCompetitors()) {
+            getManeuvers(competitor, true);
+        }
+    }
 
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(

@@ -35,12 +35,15 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.UnsentOperationsToMasterSender;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -55,7 +58,7 @@ import net.jpountz.lz4.LZ4BlockOutputStream;
  * 
  * The observers are registered only when there are replicas registered. If the last replica is de-registered, the
  * service stops observing the {@link Replicable}. Operations received that require replication are sent to the
- * {@link Exchange} to which replica queues can bind, using a {@link ReplicationReceiver}. By prefixing each message
+ * {@link Exchange} to which replica queues can bind, using a {@link ReplicationReceiverImpl}. By prefixing each message
  * with the {@link Object#toString()} representation of the {@link Replicable}'s {@link Replicable#getId() ID} the
  * receiver can determine to which {@link Replicable} to forward the operation. As such, this service multiplexes the
  * replication channels for potentially many {@link Replicable}s living in this server instance.
@@ -73,7 +76,7 @@ import net.jpountz.lz4.LZ4BlockOutputStream;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl implements ReplicationService {
+public class ReplicationServiceImpl implements ReplicationService, UnsentOperationsToMasterSender {
     private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
 
     private final ReplicationInstancesManager replicationInstancesManager;
@@ -123,7 +126,7 @@ public class ReplicationServiceImpl implements ReplicationService {
      * For this instance running as a replica, the replicator receives messages from the master's queue and applies them
      * to the local replica.
      */
-    private ReplicationReceiver replicator;
+    private ReplicationReceiverImpl replicator;
 
     private final Map<String, ReplicationServiceExecutionListener<?>> executionListenersByReplicableIdAsString;
 
@@ -191,6 +194,8 @@ public class ReplicationServiceImpl implements ReplicationService {
      * 
      */
     private TimerTask sendingTask;
+    
+    private final UnsentOperationsSenderJob unsentOperationsSenderJob;
 
     /**
      * Defines for how many milliseconds the {@link #timer} will wait since the first operation has been added to an
@@ -218,6 +223,11 @@ public class ReplicationServiceImpl implements ReplicationService {
      * to replicate from that master should be started.
      */
     private final Map<ReplicationMasterDescriptor, InitialLoadRequest> initialLoadChannels;
+
+    /**
+     * Will be set
+     */
+    private boolean replicationStarting;
 
     private static class InitialLoadRequest {
         private final Channel channelForInitialLoad;
@@ -251,7 +261,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             synchronized (replicationInstancesManager) {
                 // .. and at least one of them wants to replicate the replicable with that ID
                 if (Util.contains(replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating(), replicable.getId().toString())) {
-                    ensureOperationExecutionListener(replicable);
+                    ensureOperationExecutionListenerAndInjectResetToMasterService(replicable);
                 }
             }
         }
@@ -284,6 +294,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             final ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider)
             throws IOException {
         timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
+        unsentOperationsSenderJob = new UnsentOperationsSenderJob();
         executionListenersByReplicableIdAsString = new HashMap<>();
         initialLoadChannels = new ConcurrentHashMap<>();
         this.replicationInstancesManager = replicationInstancesManager;
@@ -313,7 +324,8 @@ public class ReplicationServiceImpl implements ReplicationService {
         return replicablesProvider;
     }
 
-    protected ReplicationReceiver getReplicator() {
+    @Override
+    public ReplicationReceiver getReplicator() {
         return replicator;
     }
 
@@ -371,7 +383,7 @@ public class ReplicationServiceImpl implements ReplicationService {
     private void addAsListenerToReplicables(String[] replicableIdsAsStringForReplicablesToReplicate) {
         for (final String replicableIdAsStringForReplicableToReplicate : replicableIdsAsStringForReplicablesToReplicate) {
             Replicable<?, ?> replicable = getReplicable(replicableIdAsStringForReplicableToReplicate, /* wait */ true);
-            ensureOperationExecutionListener(replicable);
+            ensureOperationExecutionListenerAndInjectResetToMasterService(replicable);
         }
     }
 
@@ -380,7 +392,7 @@ public class ReplicationServiceImpl implements ReplicationService {
      * {@code replicable} and remembered in {@link #executionListenersByReplicableIdAsString}. Otherwise, this method is
      * a no-op.
      */
-    private <S> void ensureOperationExecutionListener(Replicable<S, ?> replicable) {
+    private <S> void ensureOperationExecutionListenerAndInjectResetToMasterService(Replicable<S, ?> replicable) {
         if (!executionListenersByReplicableIdAsString.containsKey(replicable.getId().toString())) {
             final ReplicationServiceExecutionListener<S> listener = new ReplicationServiceExecutionListener<S>(this, replicable);
             executionListenersByReplicableIdAsString.put(replicable.getId().toString(), listener);
@@ -608,11 +620,12 @@ public class ReplicationServiceImpl implements ReplicationService {
             final URL initialLoadURL = master.getInitialLoadURL(replicables);
             logger.info("Initial load URL is " + initialLoadURL);
             // start receiving messages already now, but start in suspended mode
-            replicator = new ReplicationReceiver(master, replicablesProvider, /* startSuspended */true, consumer);
+            replicator = new ReplicationReceiverImpl(master, replicablesProvider, /* startSuspended */true, consumer);
             // clear Replicable state here, before starting to receive and de-serialize operations which builds up
             // new state, e.g., in competitor store
             for (Replicable<?, ?> r : replicables) {
                 r.clearReplicaState();
+                r.setUnsentOperationToMasterSender(this);
                 r.startedReplicatingFrom(master);
             }
             replicatorThread = new Thread(replicator, "Replicator receiving from " + master.getMessagingHostname() + "/"
@@ -805,5 +818,20 @@ public class ReplicationServiceImpl implements ReplicationService {
             String exchangeName, int servletPort, int messagingPort, String queueName,
             Iterable<Replicable<?, ?>> replicables) {
         return new ReplicationMasterDescriptorImpl(messagingHostname, exchangeName, messagingPort, queueName, hostname, servletPort, replicables);
+    }
+
+    @Override
+    public void setReplicationStarting(boolean b) {
+        this.replicationStarting = b;
+    }
+    
+    @Override
+    public boolean isReplicationStarting() {
+        return this.replicationStarting;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        unsentOperationsSenderJob.retrySendingLater(operationWithResult, sender);
     }
 }
