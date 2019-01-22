@@ -31,6 +31,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
@@ -60,8 +61,8 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
  * @author Axel Uhl (d043530)
  * 
  */
-public class ReplicationReceiver implements Runnable {
-    private final static Logger logger = Logger.getLogger(ReplicationReceiver.class.getName());
+public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
+    private final static Logger logger = Logger.getLogger(ReplicationReceiverImpl.class.getName());
     
     private static final long CHECK_INTERVAL_MILLIS = 2000; // how long (milliseconds) to pause before checking connection again
     private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
@@ -129,7 +130,7 @@ public class ReplicationReceiver implements Runnable {
      * @param consumer
      *            the RabbitMQ consumer from which to load messages
      */
-    public ReplicationReceiver(ReplicationMasterDescriptor master, ReplicablesProvider replicableProvider, boolean startSuspended, QueueingConsumer consumer) {
+    public ReplicationReceiverImpl(ReplicationMasterDescriptor master, ReplicablesProvider replicableProvider, boolean startSuspended, QueueingConsumer consumer) {
         this.queueByReplicableIdAsString = new HashMap<>();
         this.master = master;
         this.replicableProvider = replicableProvider;
@@ -273,11 +274,18 @@ public class ReplicationReceiver implements Runnable {
         }
     }
 
-    /**
-     * @return the number of unprocessed messages in the inbound message queue
-     */
-    private int getMessageQueueSize() throws IllegalAccessException {
+    @Override
+    public int getMessageQueueSize() throws IllegalAccessException {
         return getInboundMessageQueue().size();
+    }
+    
+    @Override
+    public Map<String, Integer> getOperationQueueSizes() {
+        final Map<String, Integer> result = new HashMap<>();
+        for (final Entry<String, LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>>> e : queueByReplicableIdAsString.entrySet()) {
+            result.put(e.getKey(), e.getValue().size());
+        }
+        return result;
     }
 
     /**
@@ -382,6 +390,7 @@ public class ReplicationReceiver implements Runnable {
         apply(castOperation, castReplicable);
     }
 
+    @Override
     public synchronized boolean isSuspended() {
         return suspended;
     }
@@ -404,6 +413,7 @@ public class ReplicationReceiver implements Runnable {
         notifyAll(); // notify those waiting for stopped
     }
     
+    @Override
     public synchronized boolean isBeingStopped() {
         return stopped;
     }
@@ -414,9 +424,7 @@ public class ReplicationReceiver implements Runnable {
         return "Replicator for master "+master+", queue size: "+queueSize;
     }
 
-    /**
-     * @return <code>true</code> if all queues for all replicables are empty
-     */
+    @Override
     public boolean isQueueEmptyOrStopped() throws IllegalAccessException {
         return isBeingStopped() ||
                 (_queue == null || getInboundMessageQueue().isEmpty()) && !queueByReplicableIdAsString.values().stream().anyMatch(q->!q.isEmpty());

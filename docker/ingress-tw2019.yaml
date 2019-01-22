@@ -8,7 +8,7 @@ metadata:
     kubernetes.io/tls-acme: 'true'
 spec:
   rules:
-  - host: tw2019-master.ingress.fooz2kz8j4.test001.shoot.canary.k8s-hana.ondemand.com
+  - host: tw2019-master.k8s.sapsailing.com
     http:
       paths:
       - backend:
@@ -17,7 +17,7 @@ spec:
   tls:
   - secretName: tw2019-master-tls-cert
     hosts:
-    - tw2019-master.ingress.fooz2kz8j4.test001.shoot.canary.k8s-hana.ondemand.com
+    - tw2019-master.k8s.sapsailing.com
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -29,7 +29,7 @@ metadata:
     nginx.ingress.kubernetes.io/app-root: /gwt/Home.html#/event/:eventId=0638352a-e738-4aa1-a011-e488b3195636
 spec:
   rules:
-  - host: t.ingress.fooz2kz8j4.test001.shoot.canary.k8s-hana.ondemand.com
+  - host: t.k8s.sapsailing.com
     http:
       paths:
       - backend:
@@ -38,4 +38,4 @@ spec:
   tls:
   - secretName: tw2019-tls-cert
     hosts:
-    - t.ingress.fooz2kz8j4.test001.shoot.canary.k8s-hana.ondemand.com
+    - t.k8s.sapsailing.com
