@@ -285,7 +285,10 @@ import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.UnsentOperationsToMasterSender;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -510,6 +513,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE; 
     
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
+     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)}
+     * method.
+     */
+    private UnsentOperationsToMasterSender unsentOperationsToMasterSender;
+
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -4351,5 +4362,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 /* flag image */ null, team, competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat);
         return competitorWithBoat;
+    }
+
+    @Override
+    public void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service) {
+        this.unsentOperationsToMasterSender = service;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationsToMasterSender != null) {
+            unsentOperationsToMasterSender.retrySendingLater(operationWithResult, sender);
+        }
     }
 }

@@ -31,7 +31,9 @@ import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.UnsentOperationsToMasterSender;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class MailServiceImpl implements ReplicableMailService {
@@ -51,6 +53,14 @@ public class MailServiceImpl implements ReplicableMailService {
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
     private final MailServiceResolver mailServiceResolver;
+    
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
+     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)}
+     * method.
+     */
+    private UnsentOperationsToMasterSender unsentOperationForMasterQueue;
 
     public MailServiceImpl(Properties mailProperties, MailServiceResolver mailServiceResolver) {
         this.mailProperties = mailProperties;
@@ -243,5 +253,18 @@ public class MailServiceImpl implements ReplicableMailService {
     @Override
     public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
         this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
+    }
+
+    @Override
+    public void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service) {
+        this.unsentOperationForMasterQueue = service;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationForMasterQueue != null) {
+            unsentOperationForMasterQueue.retrySendingLater(operationWithResult, sender);
+        }
     }
 }

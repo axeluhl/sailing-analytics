@@ -8,8 +8,6 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.logging.Logger;
 
-
-import com.sap.sse.common.WithID;
 import com.sap.sse.operationaltransformation.Operation;
 import com.sap.sse.operationaltransformation.OperationWithTransformationSupport;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
@@ -57,7 +55,8 @@ import com.sap.sse.util.ThreadLocalTransporter;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Replicator<S, O>, WithID {
+public interface Replicable<S, O extends OperationWithResult<S, ?>>
+extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O> {
     static final Logger logger = Logger.getLogger(Replicable.class.getName());
     
     /**
@@ -101,12 +100,6 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Repl
     void startedReplicatingFrom(ReplicationMasterDescriptor master);
     
     void stoppedReplicatingFrom(ReplicationMasterDescriptor master);
-
-    /**
-     * @return the descriptor of the master from which this replica is replicating this {@link Replicable}, or
-     *         {@code null} if this {@link Replicable} is currently running as a master.
-     */
-    ReplicationMasterDescriptor getMasterDescriptor();
 
     /**
      * An operation execution listener must be able to process notifications of operations being executed that have
@@ -159,16 +152,6 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Repl
      * receiving and {@link #initiallyFillFrom(InputStream) filling} the initial load has completed.
      */
     O readOperation(InputStream inputStream) throws IOException, ClassNotFoundException;
-
-    /**
-     * Writes an operation to an output stream such that it can be read by {@link #readOperation}.
-     * 
-     * @param closeStream
-     *            if <code>true</code>, the stream will be closed after having written the operation; in any case, the
-     *            content written will be flushed to the <code>outputStream</code> so that the caller may continue to
-     *            invoke this method for other operations and/or on other replicables without producing corrupt data.
-     */
-    void writeOperation(OperationWithResult<?, ?> operation, OutputStream outputStream, boolean closeStream) throws IOException;
 
     /**
      * Checks if {@link #hasSentOperationToMaster(OperationWithResultWithIdWrapper) the operation was previously
@@ -260,9 +243,17 @@ public interface Replicable<S, O extends OperationWithResult<S, ?>> extends Repl
     
     /**
      * If an operation equal to <code>operationWithResultWithIdWrapper</code> has previously been passed to a call to
-     * {@link #addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper)}, the call returns <code>true</code>
+     * {@link OperationsToMasterSender#addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper)}, the call returns <code>true</code>
      * exactly once.
      */
     boolean hasSentOperationToMaster(OperationWithResult<S, ?> operation);
     
+    
+    /**
+     * Injects a service into this replicable that this instance of {@link UnsentOperationsToMasterSender} can use
+     * as a delegate to implement the {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)}
+     * method. This replicable may not be able to enqueue operations for re-trying sending to master after
+     * an error occurred unless this method has been used to announce the service.
+     */
+    void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service);
 }
