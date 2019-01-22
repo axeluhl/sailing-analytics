@@ -292,12 +292,15 @@ import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.UnsentOperationsToMasterSender;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -521,7 +524,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final RaceChangeObserverForAnniversaryDetection raceChangeObserverForAnniversaryDetection;
 
-    private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE;
+    private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE; 
+    
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
+     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)}
+     * method.
+     */
+    private UnsentOperationsToMasterSender unsentOperationsToMasterSender;
 
     private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
 
@@ -1051,14 +1062,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private Iterable<Pair<Event, Boolean>> loadStoredEvents() {
-
         Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = domainObjectFactory.loadAllEvents(); 
         for (Pair<Event, Boolean> eventAndFlag : loadedEventsWithRequireStoreFlag) {
             Event event = eventAndFlag.getA();
             if (event.getId() != null)
                 eventsById.put(event.getId(), event);
         }
-
         return loadedEventsWithRequireStoreFlag;
     }
     
@@ -2951,6 +2960,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
         mongoObjectFactory.removeLeaderboardGroup(groupName);
+        if (leaderboardGroup != null && leaderboardGroup.getOverallLeaderboard() != null) {
+            removeLeaderboard(leaderboardGroup.getOverallLeaderboard().getName());
+        }
     }
 
     @Override
@@ -4517,5 +4529,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     public SecurityService getSecurityService() {
         return securityServiceTracker.getService();
+    }
+
+    public void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service) {
+        this.unsentOperationsToMasterSender = service;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationsToMasterSender != null) {
+            unsentOperationsToMasterSender.retrySendingLater(operationWithResult, sender);
+        }
     }
 }

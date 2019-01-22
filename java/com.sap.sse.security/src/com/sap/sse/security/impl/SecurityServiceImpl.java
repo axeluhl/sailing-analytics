@@ -39,7 +39,6 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
 import org.apache.shiro.crypto.RandomNumberGenerator;
@@ -81,7 +80,10 @@ import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.UnsentOperationsToMasterSender;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
@@ -152,7 +154,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private AccessControlStore accessControlStore;
     
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
-    
     private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
     /**
@@ -168,6 +169,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
+    
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
+     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)}
+     * method.
+     */
+    private UnsentOperationsToMasterSender unsentOperationsToMasterSender;
 
     private static Ini shiroConfiguration;
 
@@ -1995,8 +2004,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service) {
+        this.unsentOperationsToMasterSender = service;
+    }
+    @Override
     public void storeSession(String cacheName, Session session) {
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSession(cacheName, session);
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationsToMasterSender != null) {
+            unsentOperationsToMasterSender.retrySendingLater(operationWithResult, sender);
+        }
     }
 
     @Override
