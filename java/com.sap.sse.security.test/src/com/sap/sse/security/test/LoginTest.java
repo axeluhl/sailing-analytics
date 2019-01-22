@@ -52,7 +52,7 @@ public class LoginTest {
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         userStore = new UserStoreImpl(DEFAULT_TENANT_NAME);
         userStore.ensureDefaultRolesExist();
-        userStore.loadAndMigrateUsers();
+        userStore.ensureDefaultTenantExists();
         accessControlStore = new AccessControlStoreImpl(userStore);
         
         Activator.setTestStores(userStore, accessControlStore);

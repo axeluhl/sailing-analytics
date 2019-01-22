@@ -52,7 +52,7 @@ public class SecurityResourceTest {
         try {
             store = new UserStoreImpl("TestDefaultTenant");
             store.ensureDefaultRolesExist();
-            store.loadAndMigrateUsers();
+            store.ensureDefaultTenantExists();
             accessControlStore = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStore);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,

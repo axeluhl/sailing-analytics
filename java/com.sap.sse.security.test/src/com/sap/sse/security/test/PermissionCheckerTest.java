@@ -68,7 +68,7 @@ public class PermissionCheckerTest {
         final String adminTenantName = "admin-tenant";
         userStore = new UserStoreImpl(adminTenantName);
         userStore.ensureDefaultRolesExist();
-        userStore.loadAndMigrateUsers();
+        userStore.ensureDefaultTenantExists();
         accessControlStore = new AccessControlStoreImpl(userStore);
         AbstractCompositeAuthorizingRealm.setTestStores(userStore, accessControlStore);
         realm = new UsernamePasswordRealm();
