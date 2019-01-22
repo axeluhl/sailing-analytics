@@ -5,10 +5,12 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Logger;
 
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.cache.CacheManager;
+import org.apache.shiro.session.Session;
 
 import com.sap.sse.security.persistence.PersistenceFactory;
 
@@ -23,6 +25,8 @@ import com.sap.sse.security.persistence.PersistenceFactory;
  *
  */
 public class ReplicatingCacheManager implements CacheManager, Serializable {
+    private static final Logger logger = Logger.getLogger(ReplicatingCacheManager.class.getName());
+
     private static final long serialVersionUID = -8035346668009900228L;
     private ConcurrentMap<String, ReplicatingCache<?, ?>> caches;
     
@@ -71,12 +75,20 @@ public class ReplicatingCacheManager implements CacheManager, Serializable {
     /**
      * For test purposes; clears all state held by this cache manager.
      */
-    public void clear() {
+    public <V> void clear() {
         final ReplicableSecurityService securityService = (ReplicableSecurityService) Activator.getSecurityService();
         for (final Iterator<Entry<String, ReplicatingCache<?, ?>>> i=caches.entrySet().iterator(); i.hasNext(); ) {
             final Entry<String, ReplicatingCache<?, ?>> cacheNameAndCache = i.next();
-            securityService.removeAllSessions(cacheNameAndCache.getKey());
-            i.remove();
+            for( Object s:cacheNameAndCache.getValue().values()) {
+                if (s instanceof Session) {
+                    Session session = (Session) s;
+                    securityService.removeSession(cacheNameAndCache.getKey(), session);
+                    session.stop();
+                    logger.info("clearing Session " + session.getId());
+                }
+            }
+            // do not remove the ReplicatingCache here, as it might be possible that shire holds references to it, so
+            // only clean it
         }
     }
 }
