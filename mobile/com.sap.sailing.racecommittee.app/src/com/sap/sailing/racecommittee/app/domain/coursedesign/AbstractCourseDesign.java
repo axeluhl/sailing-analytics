@@ -6,7 +6,7 @@ import java.util.Set;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.Bearing;
 
-public abstract class AbstractCourseDesign implements CourseDesign{
+public abstract class AbstractCourseDesign implements CourseDesign {
     private Position startBoatPosition;
     private Double windSpeed;
     private Bearing windDirection;
@@ -14,12 +14,12 @@ public abstract class AbstractCourseDesign implements CourseDesign{
     private Position referencePoint;
     private Set<PositionedMark> courseDesignSpecificMarks = new HashSet<PositionedMark>();
     private String courseDesignDescription = "";
-    
+
     @Override
     public String getCourseDesignDescription() {
         return courseDesignDescription;
     }
-    
+
     @Override
     public void setCourseDesignDescription(String courseDesignDescription) {
         this.courseDesignDescription = courseDesignDescription;
@@ -34,12 +34,12 @@ public abstract class AbstractCourseDesign implements CourseDesign{
     public void setCourseDesignSpecificMarks(Set<PositionedMark> courseDesignSpecificMarks) {
         this.courseDesignSpecificMarks = courseDesignSpecificMarks;
     }
-    
+
     @Override
     public Position getReferencePoint() {
         return referencePoint;
     }
-    
+
     @Override
     public void setReferencePoint(Position referencePoint) {
         this.referencePoint = referencePoint;

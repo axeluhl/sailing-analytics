@@ -25,7 +25,7 @@
             android:title="@string/device_identifier"
             android:selectable="false"/>
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="@string/preference_heading_with_declination_subtracted_key"
             android:switchTextOn="@string/preference_heading_with_declination_subtracted_is_enabled"

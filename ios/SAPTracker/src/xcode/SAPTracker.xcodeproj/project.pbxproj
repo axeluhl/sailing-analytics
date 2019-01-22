@@ -301,6 +301,14 @@
 		7FED45CC1A25F5910022505F /* leaderboard1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C61A25F5900022505F /* leaderboard1.json */; };
 		9E95C3D61C723AB30016632B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95C3D51C723AB30016632B /* Constants.swift */; };
 		9ECBDDAE1C9C4F0300F76AEB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */; };
+		B3150BA920FF42D9006D742A /* SAPTracker.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = B3150B2920FE3280006D742A /* SAPTracker.entitlements */; };
+		B3150BAF20FF452C006D742A /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BAE20FF452C006D742A /* AdSupport.framework */; };
+		B3150BB120FF4532006D742A /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BB020FF4532006D742A /* SafariServices.framework */; };
+		B3150BB320FF453D006D742A /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BB220FF453D006D742A /* MobileCoreServices.framework */; };
+		B3150BB520FF4548006D742A /* CoreSpotlight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BB420FF4548006D742A /* CoreSpotlight.framework */; };
+		B3150BB720FF454D006D742A /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BB620FF454D006D742A /* iAd.framework */; };
+		B31EE1A320FF915E0097AA40 /* Branch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BAA20FF4518006D742A /* Branch.framework */; };
+		B31EE1A420FF915E0097AA40 /* Branch.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B3150BAA20FF4518006D742A /* Branch.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C8150BA51DCC6FDB0087C9C2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8150BA71DCC6FDB0087C9C2 /* InfoPlist.strings */; };
 		C8289F3A1F386D8300A76953 /* SignUpRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8289F391F386D8300A76953 /* SignUpRequestManager.swift */; };
 		C843D47F1EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */; };
@@ -419,6 +427,20 @@
 			remoteInfo = SAPTracker;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B31EE1A520FF915E0097AA40 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				B31EE1A420FF915E0097AA40 /* Branch.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		64FDEBD220D12C390086C2F4 /* AFImageDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFImageDownloader.h; sourceTree = "<group>"; };
@@ -720,6 +742,13 @@
 		7FED45C61A25F5900022505F /* leaderboard1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = leaderboard1.json; sourceTree = "<group>"; };
 		9E95C3D51C723AB30016632B /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		B3150B2920FE3280006D742A /* SAPTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SAPTracker.entitlements; sourceTree = "<group>"; };
+		B3150BAA20FF4518006D742A /* Branch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Branch.framework; path = SAPTracker/Libraries/Branch.framework; sourceTree = "<group>"; };
+		B3150BAE20FF452C006D742A /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
+		B3150BB020FF4532006D742A /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
+		B3150BB220FF453D006D742A /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		B3150BB420FF4548006D742A /* CoreSpotlight.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreSpotlight.framework; path = System/Library/Frameworks/CoreSpotlight.framework; sourceTree = SDKROOT; };
+		B3150BB620FF454D006D742A /* iAd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iAd.framework; path = System/Library/Frameworks/iAd.framework; sourceTree = SDKROOT; };
 		C8150BA61DCC6FDB0087C9C2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C8150BA81DCC6FDD0087C9C2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C8289F391F386D8300A76953 /* SignUpRequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpRequestManager.swift; sourceTree = "<group>"; };
@@ -863,6 +892,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B3150BB720FF454D006D742A /* iAd.framework in Frameworks */,
+				B3150BB520FF4548006D742A /* CoreSpotlight.framework in Frameworks */,
+				B31EE1A320FF915E0097AA40 /* Branch.framework in Frameworks */,
+				B3150BB320FF453D006D742A /* MobileCoreServices.framework in Frameworks */,
+				B3150BB120FF4532006D742A /* SafariServices.framework in Frameworks */,
+				B3150BAF20FF452C006D742A /* AdSupport.framework in Frameworks */,
 				7FC5232D19F6AEE800BBFDCC /* AVFoundation.framework in Frameworks */,
 				7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */,
 			);
@@ -883,6 +918,12 @@
 		7AC6457280AEA3EC18F5E846 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B3150BAA20FF4518006D742A /* Branch.framework */,
+				B3150BB620FF454D006D742A /* iAd.framework */,
+				B3150BB420FF4548006D742A /* CoreSpotlight.framework */,
+				B3150BB220FF453D006D742A /* MobileCoreServices.framework */,
+				B3150BB020FF4532006D742A /* SafariServices.framework */,
+				B3150BAE20FF452C006D742A /* AdSupport.framework */,
 				7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */,
 				7F83F17519F1574700C53328 /* CoreLocation.framework */,
 			);
@@ -1231,6 +1272,7 @@
 		7F83F15219F154F000C53328 /* SAPTracker */ = {
 			isa = PBXGroup;
 			children = (
+				B3150B2920FE3280006D742A /* SAPTracker.entitlements */,
 				7F83F15519F154F000C53328 /* AppDelegate.swift */,
 				C8739DC71D2A653F00A89F3C /* Classes */,
 				C8F71EA31D8691F700826DE4 /* Libraries */,
@@ -1641,6 +1683,7 @@
 				7F83F14D19F154F000C53328 /* Frameworks */,
 				7F83F14E19F154F000C53328 /* Resources */,
 				7FF3E4BE1A1DFCF20012F1FB /* ShellScript */,
+				B31EE1A520FF915E0097AA40 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1680,8 +1723,14 @@
 				TargetAttributes = {
 					7F83F14F19F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
+						DevelopmentTeam = F9U235EA4J;
 						LastSwiftMigration = 0820;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.SafariKeychain = {
+								enabled = 1;
+							};
+						};
 					};
 					7F83F16419F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
@@ -1716,6 +1765,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B3150BA920FF42D9006D742A /* SAPTracker.entitlements in Resources */,
 				C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */,
 				7F14A1EC1A13B9A6001C1ECB /* SZ.png in Resources */,
 				7F14A1C91A13B9A6001C1ECB /* PE.png in Resources */,
@@ -2281,17 +2331,22 @@
 		7F83F17019F154F000C53328 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_ENTITLEMENTS = SAPTracker/SAPTracker.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = F9U235EA4J;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/SAPTracker/Libraries",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.sap.sailing.ios.SAPTracker.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2304,17 +2359,22 @@
 		7F83F17119F154F000C53328 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_ENTITLEMENTS = SAPTracker/SAPTracker.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = F9U235EA4J;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/SAPTracker/Libraries",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.sap.sailing.ios.SAPTracker.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";

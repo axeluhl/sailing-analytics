@@ -1,7 +1,7 @@
 package com.sap.sailing.racecommittee.app.data.clients;
 
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Loader;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 
 /**
  * Interface to hide complexity of {@link LoaderCallbacks#onLoadFinished(Loader, Object)}. Keep in mind that all

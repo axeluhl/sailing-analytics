@@ -4,15 +4,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import android.content.Context;
-import android.content.Intent;
-
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollingService;
+
+import android.content.Context;
+import android.content.Intent;
 
 public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>> {
 
@@ -23,12 +23,12 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
 
         this.context = context;
     }
-    
+
     @Override
     public boolean hasCachedResults() {
         return !manager.getDataStore().getRaces().isEmpty();
     }
-    
+
     @Override
     public Collection<ManagedRace> getCachedResults() {
         return manager.getDataStore().getRaces();
@@ -56,8 +56,10 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
         final Set<RaceState> raceStatesWithUnresolvedStartTimes = new HashSet<>();
         for (ManagedRace race : data) {
             race.calculateRaceState();
-            if (race.getState() != null && race.getState().getStartTimeFinderResult().getResolutionFailed() == ResolutionFailed.RACE_LOG_UNRESOLVED) {
-                // perhaps the race that this race's start time depends on hasn't been loaded yet; remember and try to resolve in the
+            if (race.getState() != null && race.getState().getStartTimeFinderResult()
+                    .getResolutionFailed() == ResolutionFailed.RACE_LOG_UNRESOLVED) {
+                // perhaps the race that this race's start time depends on hasn't been loaded yet; remember and try to
+                // resolve in the
                 // next pass
                 raceStatesWithUnresolvedStartTimes.add(race.getState());
             }
@@ -68,7 +70,8 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
             final Set<RaceState> resolved = new HashSet<>();
             for (final RaceState raceState : raceStatesWithUnresolvedStartTimes) {
                 raceState.forceUpdate();
-                if (raceState.getStartTimeFinderResult().getResolutionFailed() != ResolutionFailed.RACE_LOG_UNRESOLVED) {
+                if (raceState.getStartTimeFinderResult()
+                        .getResolutionFailed() != ResolutionFailed.RACE_LOG_UNRESOLVED) {
                     resolved.add(raceState);
                 }
             }

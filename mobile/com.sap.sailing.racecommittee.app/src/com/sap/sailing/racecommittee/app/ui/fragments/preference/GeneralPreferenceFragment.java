@@ -1,5 +1,20 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.preference.CheckBoxPreference;
+import android.support.v7.preference.EditTextPreference;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.Preference.OnPreferenceChangeListener;
+import android.support.v7.preference.Preference.OnPreferenceClickListener;
+import android.support.v7.preference.PreferenceCategory;
+import android.support.v7.preference.PreferenceScreen;
+import android.widget.Toast;
+
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
+import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -9,23 +24,9 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.EditTextPreference;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceCategory;
-import android.preference.PreferenceScreen;
-import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
-
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
-    private static int requestCodeQRCode = 45392;
+    private static int REQUEST_CODE_QR_CODE = 45392;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,33 +45,21 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
         bindPreferenceSummaryToSet(findPreference(R.string.preference_course_areas_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_mail_key));
-        bindPreferenceToListEntry(findPreference(R.string.preference_theme_key), getString(R.string.preference_theme_default));
-        addOnPreferenceChangeListener(findPreference(R.string.preference_theme_key), new OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
-                builder.setTitle(getString(R.string.theme_changed_title));
-                builder.setMessage(R.string.theme_changed_message);
-                builder.setPositiveButton(getString(android.R.string.ok), null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
-                return true;
-            }
-        });
-        addOnPreferenceChangeListener(findPreference(R.string.preference_non_public_events_key), new OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
-                if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
-                    builder.setTitle(getString(R.string.non_public_changed_title));
-                    builder.setMessage(getString(R.string.app_refresh_message));
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.show();
-                }
-                return true;
-            }
-        });
+        addOnPreferenceChangeListener(findPreference(R.string.preference_non_public_events_key),
+                new OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
+                        if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                            builder.setTitle(getString(R.string.non_public_changed_title));
+                            builder.setMessage(getString(R.string.app_refresh_message));
+                            builder.setPositiveButton(android.R.string.ok, null);
+                            builder.show();
+                        }
+                        return true;
+                    }
+                });
     }
 
     private void setupPolling() {
@@ -122,7 +111,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
                 if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                     builder.setTitle(getString(R.string.url_refresh_title));
                     builder.setMessage(getString(R.string.app_refresh_message));
                     builder.setPositiveButton(android.R.string.ok, null);
@@ -174,41 +163,30 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         });
     }
 
-    private boolean requestQRCodeScan() {
-        try {
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, requestCodeQRCode);
-            return true;
-        } catch (Exception e) {
-            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            startActivity(marketIntent);
-        }
-        return false;
+    private void requestQRCodeScan() {
+        Intent intent = new Intent(getContext(), BarcodeCaptureActivity.class);
+        startActivityForResult(intent, REQUEST_CODE_QR_CODE);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != requestCodeQRCode) {
-            super.onActivityResult(requestCode, resultCode, data);
-            return;
-        }
+        if (requestCode == REQUEST_CODE_QR_CODE) {
+            if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
+                Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                QRHelper.with(getActivity()).saveData(barcode.displayValue);
 
-        if (resultCode == Activity.RESULT_OK) {
-            QRHelper.with(getActivity()).saveData(data.getStringExtra("SCAN_RESULT"));
-
-            final AppPreferences appPreferences = AppPreferences.on(getActivity());
-            appPreferences.setNeedConfigRefresh(true);
-            // update device identifier in ui
-            EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
-            identifierPreference.setText(appPreferences.getDeviceIdentifier());
-            identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
-            // update server url in ui
-            EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
-            serverUrlPreference.setText(appPreferences.getServerBaseURL());
-        } else {
-            Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
+                final AppPreferences appPreferences = AppPreferences.on(getActivity());
+                appPreferences.setNeedConfigRefresh(true);
+                // update device identifier in ui
+                EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
+                identifierPreference.setText(appPreferences.getDeviceIdentifier());
+                identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
+                // update server url in ui
+                EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
+                serverUrlPreference.setText(appPreferences.getServerBaseURL());
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
+            }
         }
     }
 }

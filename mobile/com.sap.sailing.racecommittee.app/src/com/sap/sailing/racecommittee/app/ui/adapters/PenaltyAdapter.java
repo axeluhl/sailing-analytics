@@ -1,24 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
-import com.sap.sailing.racecommittee.app.utils.StringHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.util.NaturalComparator;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -33,6 +14,25 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
 
@@ -105,17 +105,17 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
         }
         Drawable mergeIcon;
         switch (item.getMergeState()) {
-            case WARNING:
-                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
-                break;
+        case WARNING:
+            mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
+            break;
 
-            case ERROR:
-                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
-                break;
+        case ERROR:
+            mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
+            break;
 
-            default:
-                mergeIcon = null;
-                break;
+        default:
+            mergeIcon = null;
+            break;
         }
         holder.mItemMergeState.setImageDrawable(mergeIcon);
     }
@@ -156,7 +156,8 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
                 result.addAll(mCompetitor);
             } else {
                 for (int i = 0; i < mCompetitor.size(); i++) {
-                    if (StringHelper.on(mContext).containsIgnoreCase(mCompetitor.get(i).getCompetitorDisplayName(), mFilter)) {
+                    if (StringHelper.on(mContext).containsIgnoreCase(mCompetitor.get(i).getCompetitorDisplayName(),
+                            mFilter)) {
                         result.add(mCompetitor.get(i));
                     }
                 }
@@ -168,19 +169,19 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     private void sortData() {
         Comparator<CompetitorResultEditableImpl> comparator = null;
         switch (mOrderBy) {
-            case SAILING_NUMBER:
-                comparator = new DisplayNameComparator(SAILING_NUMBER_POSITION);
-                break;
+        case SAILING_NUMBER:
+            comparator = new DisplayNameComparator(SAILING_NUMBER_POSITION);
+            break;
 
-            case COMPETITOR_NAME:
-                comparator = new DisplayNameComparator(COMPETITOR_NAME_POSITION);
-                break;
+        case COMPETITOR_NAME:
+            comparator = new DisplayNameComparator(COMPETITOR_NAME_POSITION);
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
 
-        if (comparator != null) {
+        if (mFiltered != null && comparator != null) {
             Collections.sort(mFiltered, comparator);
         }
         notifyDataSetChanged();

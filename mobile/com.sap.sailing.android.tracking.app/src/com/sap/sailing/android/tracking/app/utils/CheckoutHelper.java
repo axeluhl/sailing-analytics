@@ -20,11 +20,12 @@ import android.net.Uri;
 public class CheckoutHelper {
     private static String TAG = CheckoutHelper.class.getName();
 
-    public void checkoutCompetitor(AbstractBaseActivity activity, String leaderboardName, String eventServer, String competitorId,
-        NetworkHelper.NetworkHelperSuccessListener successListener, NetworkHelper.NetworkHelperFailureListener failureListener) {
+    public void checkoutCompetitor(AbstractBaseActivity activity, String leaderboardName, String eventServer,
+            String competitorId, NetworkHelper.NetworkHelperSuccessListener successListener,
+            NetworkHelper.NetworkHelperFailureListener failureListener) {
         AppPreferences prefs = new AppPreferences(activity);
         final String checkoutURLStr = eventServer
-            + prefs.getServerCheckoutPath().replace("{leaderboard-name}", Uri.encode(leaderboardName));
+                + prefs.getServerCheckoutPath().replace("{leaderboard-name}", Uri.encode(leaderboardName));
 
         activity.showProgressDialog(R.string.please_wait, R.string.checking_out);
 
@@ -41,19 +42,22 @@ public class CheckoutHelper {
         }
 
         try {
-            HttpJsonPostRequest request = new HttpJsonPostRequest(activity, new URL(checkoutURLStr), checkoutData.toString());
+            HttpJsonPostRequest request = new HttpJsonPostRequest(activity, new URL(checkoutURLStr),
+                    checkoutData.toString());
             com.sap.sailing.android.shared.util.NetworkHelper.getInstance(activity).executeHttpJsonRequestAsync(request,
-                successListener, failureListener);
+                    successListener, failureListener);
 
         } catch (MalformedURLException e) {
             ExLog.w(activity, TAG, "Error, can't check out, MalformedURLException: " + e.getMessage());
         }
     }
 
-    public void checkoutMark(AbstractBaseActivity activity, String leaderboardName, String eventServer, String id, int type, NetworkHelper.NetworkHelperSuccessListener successListener, NetworkHelper.NetworkHelperFailureListener failureListener) {
+    public void checkoutMark(AbstractBaseActivity activity, String leaderboardName, String eventServer, String id,
+            int type, NetworkHelper.NetworkHelperSuccessListener successListener,
+            NetworkHelper.NetworkHelperFailureListener failureListener) {
         AppPreferences prefs = new AppPreferences(activity);
         final String checkoutURLStr = eventServer
-            + prefs.getServerCheckoutPath().replace("{leaderboard-name}", Uri.encode(leaderboardName));
+                + prefs.getServerCheckoutPath().replace("{leaderboard-name}", Uri.encode(leaderboardName));
 
         activity.showProgressDialog(R.string.please_wait, R.string.checking_out);
 
@@ -74,9 +78,10 @@ public class CheckoutHelper {
         }
 
         try {
-            HttpJsonPostRequest request = new HttpJsonPostRequest(activity, new URL(checkoutURLStr), checkoutData.toString());
+            HttpJsonPostRequest request = new HttpJsonPostRequest(activity, new URL(checkoutURLStr),
+                    checkoutData.toString());
             com.sap.sailing.android.shared.util.NetworkHelper.getInstance(activity).executeHttpJsonRequestAsync(request,
-                successListener, failureListener);
+                    successListener, failureListener);
 
         } catch (MalformedURLException e) {
             ExLog.w(activity, TAG, "Error, can't check out, MalformedURLException: " + e.getMessage());
