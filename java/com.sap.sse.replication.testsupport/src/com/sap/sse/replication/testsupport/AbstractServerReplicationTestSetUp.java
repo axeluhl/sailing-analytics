@@ -375,6 +375,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                 }
                             }
                             pw.close();
+                            inputStream.close();
                             logger.info("Request handled successfully.");
                         }
                     } catch (IOException | ServletException e) {
