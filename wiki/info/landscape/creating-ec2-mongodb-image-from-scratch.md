@@ -100,3 +100,14 @@ will change the ownerships of the directory mounted from ephemeral storage accor
 ## MongoDB Replica Set Configuration
 
 Connect to the MongoDB on that instance, then issue the command ``rs.initiate()`` in order to turn the instance into the "seed" of a replica set. You can then, for the time being, ``quit()`` the mongo shell. Re-connecting, e.g., with ``mongo "mongodb://localhost:27017/?replicaSet=live"``, will show the ``PRIMARY`` of the new replica set.
+
+
+TODO: not functional yet; clients don't see the PRIMARY because it wants to re-direct to localhost/127.0.0.1. rs.config() shows the issue:
+
+```
+        "members" : [
+                {
+                        "_id" : 0,
+                        "host" : "localhost:27017",
+                        ...
+```
