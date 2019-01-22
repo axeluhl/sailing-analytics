@@ -43,7 +43,7 @@ import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.UnsentOperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -76,7 +76,7 @@ import net.jpountz.lz4.LZ4BlockOutputStream;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl implements ReplicationService, UnsentOperationsToMasterSender {
+public class ReplicationServiceImpl implements ReplicationService, OperationsToMasterSendingQueue {
     private static final Logger logger = Logger.getLogger(ReplicationServiceImpl.class.getName());
 
     private final ReplicationInstancesManager replicationInstancesManager;
@@ -831,7 +831,7 @@ public class ReplicationServiceImpl implements ReplicationService, UnsentOperati
     }
 
     @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
-        unsentOperationsSenderJob.retrySendingLater(operationWithResult, sender);
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        unsentOperationsSenderJob.scheduleForSending(operationWithResult, sender);
     }
 }

@@ -11,7 +11,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationsToMasterSender;
-import com.sap.sse.replication.UnsentOperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -29,7 +29,7 @@ import com.sap.sse.util.ThreadPoolUtil;
  * @author Axel Uhl (d043530)
  *
  */
-public class UnsentOperationsSenderJob implements UnsentOperationsToMasterSender, Runnable {
+public class UnsentOperationsSenderJob implements OperationsToMasterSendingQueue, Runnable {
     private static final Logger logger = Logger.getLogger(UnsentOperationsSenderJob.class.getName());
     private final static Duration MAX_WAIT_TIME_BETWEEN_ATTEMPTS = Duration.ONE_MINUTE;
     
@@ -49,11 +49,11 @@ public class UnsentOperationsSenderJob implements UnsentOperationsToMasterSender
     }
 
     private void resetWaitDuration() {
-        nextWaitDuration = Duration.ONE_SECOND;
+        nextWaitDuration = Duration.ONE_MILLISECOND;
     }
 
     @Override
-    public synchronized <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(
+    public synchronized <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
             OperationWithResult<S, T> operationWithResult,
             OperationsToMasterSender<S, O> sender) {
         queue.addLast(new Pair<>(operationWithResult, sender));
@@ -74,14 +74,29 @@ public class UnsentOperationsSenderJob implements UnsentOperationsToMasterSender
 
     @Override
     public void run() {
-        synchronized (this) { // FIXME synchronization too coarse-grained
-            while (!queue.isEmpty() && tryToSend(queue.getFirst())) {
-                queue.removeFirst();
-                resetWaitDuration();
+        boolean empty = false;
+        Pair<OperationWithResult<?, ?>, OperationsToMasterSender<?, ?>> first = null;
+        boolean sendOk = true;
+        while (!empty && sendOk) {
+            first = queue.peekFirst();
+            if (first != null) {
+                sendOk = tryToSend(first);
+            } else {
+                sendOk = false;
             }
-            scheduled = false;
-            if (!queue.isEmpty()) {
-                ensureScheduled();
+            synchronized (this) { // FIXME synchronization too coarse-grained
+                if (sendOk) {
+                    resetWaitDuration();
+                    queue.removeFirst();
+                } else {
+                    incrementWaitDuration();
+                    // stop this loop (because sendOk==false) and re-schedule
+                    scheduled = false;
+                    ensureScheduled();
+                }
+                empty = queue.isEmpty();
+                assert empty || !sendOk;
+                assert empty || scheduled;
             }
         }
     }
@@ -104,8 +119,9 @@ public class UnsentOperationsSenderJob implements UnsentOperationsToMasterSender
             result = true;
         } catch (IOException e) {
             result = false;
-            incrementWaitTime();
-            logger.log(Level.INFO, "Error re-sending operation "+operation+" to master "+sender.getMasterDescriptor()+
+            // remove the operation that failed to arrive on the master server from those marked as sent to master for now:
+            sender.hasSentOperationToMaster(operation);
+            logger.log(Level.INFO, "Error (re-)sending operation "+operation+" to master "+sender.getMasterDescriptor()+
                     ". Will try again in "+nextWaitDuration);
         }
         return result;
@@ -114,7 +130,7 @@ public class UnsentOperationsSenderJob implements UnsentOperationsToMasterSender
     /**
      * Doubles the wait duration, capping at {@link #MAX_WAIT_TIME_BETWEEN_ATTEMPTS}.
      */
-    private void incrementWaitTime() {
+    private void incrementWaitDuration() {
         if (nextWaitDuration.compareTo(MAX_WAIT_TIME_BETWEEN_ATTEMPTS) < 0) {
             nextWaitDuration = nextWaitDuration.times(2);
             if (nextWaitDuration.compareTo(MAX_WAIT_TIME_BETWEEN_ATTEMPTS) > 0) {
