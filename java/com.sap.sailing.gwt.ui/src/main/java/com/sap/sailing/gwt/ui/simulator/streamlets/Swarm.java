@@ -91,7 +91,7 @@ public class Swarm implements TimeListener {
         cosineOfAverageLatitude = 1.0; // default to equator
         diffPx = new Vector(0, 0);
         valueRange = new ValueRangeFlexibleBoundaries(/* wind speed in knots */ 0.0, /* wind speed in knots */ 60.0,
-                /* percentage */ 0.15);
+                /* percentage */ 0.15, /* minimumHalfBoundaryWidthInKnots */ 0.35);
         colorMapper = new ColorMapper(valueRange, !colored);
     }
 

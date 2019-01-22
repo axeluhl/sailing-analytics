@@ -55,6 +55,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
+import com.sap.sailing.domain.tracking.MailInvitationType;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -193,7 +194,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
-            RacingEventService service) {
+            RacingEventService service, int priority) {
         CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog,
                 /* onlyCoursesWithValidWaypointList */ true).analyze();
         final Set<Mark> marks = new HashSet<>();
@@ -213,8 +214,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
                     int passId = toRaceLog.getCurrentPassId();
                     RaceLogEvent newCourseEvent = new RaceLogCourseDesignChangedEventImpl(now,
-                         // TODO bug 4853: introduce priority as a parameter
-                            new LogEventAuthorImpl(service.getServerAuthor().getName(), /* priority */ 1),
+                            new LogEventAuthorImpl(service.getServerAuthor().getName(), priority),
                             passId, newCourse, CourseDesignerMode.ADMIN_CONSOLE);
                     toRaceLog.add(newCourseEvent);
                 }
@@ -287,8 +287,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
-            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, String iOSAppUrl, String androidAppUrl,
-            Locale locale) throws MailException {
+            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, String legacyIOSAppUrl, String legacyAndroidAppUrl,
+            Locale locale, MailInvitationType type) throws MailException {
         final StringBuilder occuredExceptions = new StringBuilder();
         for (final Competitor competitor : competitors) {
             final String toAddress = competitor.getEmail();
@@ -298,14 +298,12 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                             serverUrlWithoutTrailingSlash, event.getId().toString(), leaderboard.getName(),
                             DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING, competitor.getId().toString(),
                             NonGwtUrlHelper.INSTANCE);
-                    final RaceLogTrackingInvitationMailBuilder mail = new RaceLogTrackingInvitationMailBuilder(locale)
-                            .withSubject(competitor.getName()) //
-                            .addEventLogo(event) //
-                            .addHeadline(event, leaderboard) //
-                            .addSailInSightIntroductoryText(competitor.getName()) //
-                            .addQrCodeImage(url) //
-                            .addOpenInAppTextAndLinks(url, iOSAppUrl, androidAppUrl) //
-                            .addInstallAppTextAndLinks(iOSAppUrl, androidAppUrl);
+                    RaceLogTrackingInvitationMailBuilder mail = getMailBuilder(type, locale);
+                    mail.withSubject(competitor.getName())
+                            .addEventLogo(event)
+                            .addHeadline(event, leaderboard)
+                            .addSailInSightIntroductoryText(competitor.getName())
+                            .addSailInsightDeeplink(url, legacyIOSAppUrl, legacyAndroidAppUrl);
                     getMailService().sendMail(toAddress, mail.getSubject(), mail.getMultipartSupplier());
                 } catch (MessagingException | MailException | IOException e) {
                     logger.log(Level.SEVERE, "Error while trying to send invitation mail to competitor"
@@ -321,7 +319,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
-            String emails, String iOSAppUrl, String androidAppUrl, Locale locale) throws MailException {
+            String emails, String legacyIOSAppUrl, String legacyAndroidAppUrl, Locale locale, MailInvitationType type)
+            throws MailException {
         final StringBuilder occuredExceptions = new StringBuilder();
         final String[] emailArray = emails.split(",");
         // http://<host>/buoy-tender/checkin?event_id=<event-id>&leaderboard_name=<leaderboard-name>
@@ -330,14 +329,12 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         for (String toAddress : emailArray) {
             try {
                 final String buoyTender = RaceLogTrackingI18n.buoyTender(locale);
-                final RaceLogTrackingInvitationMailBuilder mail = new RaceLogTrackingInvitationMailBuilder(locale)
-                        .withSubject(buoyTender) //
-                        .addEventLogo(event) //
-                        .addHeadline(event, leaderboard) //
-                        .addBuoyPingerIntroductoryText(buoyTender) //
-                        .addQrCodeImage(url) //
-                        .addOpenInAppTextAndLinks(url, iOSAppUrl, androidAppUrl) //
-                        .addInstallAppTextAndLinks(iOSAppUrl, androidAppUrl);
+                RaceLogTrackingInvitationMailBuilder mail = getMailBuilder(type, locale);
+                mail.withSubject(buoyTender)
+                .addEventLogo(event)
+                .addHeadline(event, leaderboard)
+                .addBuoyPingerIntroductoryText(buoyTender)
+                        .addBuoyPingerDeeplink(url, legacyIOSAppUrl, legacyAndroidAppUrl);
                 getMailService().sendMail(toAddress, mail.getSubject(), mail.getMultipartSupplier());
             } catch (MessagingException | MailException | IOException e) {
                 logger.log(Level.SEVERE, "Error while trying to send invitation mail to buoy tender "
@@ -348,5 +345,23 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         if (!(occuredExceptions.length() == 0)) {
             throw new MailException(occuredExceptions.toString());
         }
+    }
+
+    private RaceLogTrackingInvitationMailBuilder getMailBuilder(MailInvitationType type, Locale locale) {
+        final RaceLogTrackingInvitationMailBuilder mail;
+        switch (type) {
+        case LEGACY:
+            mail = new LegacyRaceLogTrackingInvitationMailBuilder(locale);
+            break;
+        case SailInsight1:
+            mail = new BranchIO1RaceLogTrackingInvitationMailBuilder(locale);
+            break;
+        case SailInsight2:
+            mail = new BranchIO2RaceLogTrackingInvitationMailBuilder(locale);
+            break;
+        default:
+            throw new IllegalArgumentException("Unhandled mail type");
+        }
+        return mail;
     }
 }

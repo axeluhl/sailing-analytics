@@ -42,6 +42,6 @@ public class HttpUrlConnectionHelper {
     }
     
     public static URLConnection redirectConnection(URL url) throws MalformedURLException, IOException {
-    	return redirectConnection(url, Duration.ONE_MINUTE.times(10));
+        return redirectConnection(url, Duration.ONE_MINUTE.times(10));
     }
 }
