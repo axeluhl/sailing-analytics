@@ -436,7 +436,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     /**
      * Before using a SecuritySystem, it is necessary to initialize the service, to ensure roles and acls are correctly
-     * setup
+     * setup. CALL THIS AFTER: the role prototypes exist, the default roles exist, users are loaded (in case of stored
+     * default ones)
      */
     void initialize();
 }
