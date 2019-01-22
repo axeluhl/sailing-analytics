@@ -45,6 +45,12 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalRemoveUserFromUserGroup(UUID groupId, String username) throws UserGroupManagementException;
     
+    Void internalPutRoleDefinitionToUserGroup(UUID groupId, UUID roleDefinitionId, boolean forAll)
+            throws UserGroupManagementException;
+
+    Void internalRemoveRoleDefinitionFromUserGroup(UUID groupId, UUID roleDefinitionId)
+            throws UserGroupManagementException;
+
     Void internalStoreUser(User user);
 
     Void internalSetPreference(String username, String key, String value);

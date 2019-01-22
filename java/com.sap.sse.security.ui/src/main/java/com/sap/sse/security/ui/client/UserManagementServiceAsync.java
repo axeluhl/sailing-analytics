@@ -65,6 +65,12 @@ public interface UserManagementServiceAsync {
 
     void removeUserFromUserGroup(String tenantIdAsString, String username, AsyncCallback<Void> asyncCallback);
 
+    void putRoleDefintionToUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString, boolean forAll,
+            AsyncCallback<Void> callback);
+
+    void removeRoleDefintionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString,
+            AsyncCallback<Void> callback);
+
     /**
      * Returns those users the requesting user can read
      */

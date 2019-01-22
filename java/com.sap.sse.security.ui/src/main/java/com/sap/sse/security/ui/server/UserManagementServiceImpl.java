@@ -378,6 +378,34 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
+    public void putRoleDefintionToUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString,
+            boolean forAll) throws UnauthorizedException {
+        final UserGroup userGroup = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
+        if (SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.UPDATE, userGroup))) {
+            final RoleDefinition roleDefinition = getSecurityService()
+                    .getRoleDefinition(UUID.fromString(roleDefinitionIdAsString));
+            getSecurityService().putRoleDefinitionToUserGroup(userGroup, roleDefinition, forAll);
+        } else {
+            throw new UnauthorizedException("Not permitted to add role definition to group");
+        }
+    }
+
+    @Override
+    public void removeRoleDefintionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString)
+            throws UnauthorizedException {
+        final UserGroup userGroup = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
+        if (SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.DELETE, userGroup))) {
+            final RoleDefinition roleDefinition = getSecurityService()
+                    .getRoleDefinition(UUID.fromString(roleDefinitionIdAsString));
+            getSecurityService().removeRoleDefintionFromUserGroup(userGroup, roleDefinition);
+        } else {
+            throw new UnauthorizedException("Not permitted to remove role definition from group");
+        }
+    }
+
+    @Override
     public Collection<UserDTO> getUserList() throws UnauthorizedException {
         List<UserDTO> users = new ArrayList<>();
         for (User u : getSecurityService().getUserList()) {

@@ -136,6 +136,10 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void removeUserFromUserGroup(UserGroup group, User user);
 
+    void putRoleDefinitionToUserGroup(UserGroup group, RoleDefinition roleDefinition, boolean forAll);
+
+    void removeRoleDefintionFromUserGroup(UserGroup group, RoleDefinition roleDefinition);
+
     void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
 
     Iterable<User> getUserList();

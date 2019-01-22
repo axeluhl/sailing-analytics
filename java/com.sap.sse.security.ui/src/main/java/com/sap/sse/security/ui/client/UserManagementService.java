@@ -59,6 +59,12 @@ public interface UserManagementService extends RemoteService {
 
     void removeUserFromUserGroup(String userGroupIdAsString, String user) throws UnauthorizedException;
 
+    void putRoleDefintionToUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString, boolean forAll)
+            throws UnauthorizedException;
+
+    void removeRoleDefintionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString)
+            throws UnauthorizedException;
+
     Collection<UserDTO> getUserList() throws UnauthorizedException;
 
     UserDTO getUserByName(String username) throws UnauthorizedException;

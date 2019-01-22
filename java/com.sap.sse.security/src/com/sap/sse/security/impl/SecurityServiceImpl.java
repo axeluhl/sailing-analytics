@@ -664,6 +664,37 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public void putRoleDefinitionToUserGroup(UserGroup userGroup, RoleDefinition roleDefinition, boolean forAll) {
+        logger.info("Removing role definition " + roleDefinition.getName() + "(forAll = " + forAll + ") to group "
+                + userGroup.getName());
+        apply(s -> s.internalPutRoleDefinitionToUserGroup(userGroup.getId(), roleDefinition.getId(), forAll));
+    }
+
+    @Override
+    public Void internalPutRoleDefinitionToUserGroup(UUID groupId, UUID roleDefinitionId, boolean forAll)
+            throws UserGroupManagementException {
+        final UserGroup userGroup = getUserGroup(groupId);
+        userGroup.put(getRoleDefinition(roleDefinitionId), forAll);
+        store.updateUserGroup(userGroup);
+        return null;
+    }
+
+    @Override
+    public void removeRoleDefintionFromUserGroup(UserGroup userGroup, RoleDefinition roleDefinition) {
+        logger.info("Removing role definition " + roleDefinition.getName() + " from group " + userGroup.getName());
+        apply(s -> s.internalRemoveRoleDefinitionFromUserGroup(userGroup.getId(), roleDefinition.getId()));
+    }
+
+    @Override
+    public Void internalRemoveRoleDefinitionFromUserGroup(UUID groupId, UUID roleDefinitionId)
+            throws UserGroupManagementException {
+        final UserGroup userGroup = getUserGroup(groupId);
+        userGroup.remove(getRoleDefinition(roleDefinitionId));
+        store.updateUserGroup(userGroup);
+        return null;
+    }
+
+    @Override
     public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
         logger.info("Removing user group "+userGroup.getName());
         final UUID groupId = userGroup.getId();
