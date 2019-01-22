@@ -52,6 +52,7 @@ public class CompleteManeuverCurvesWithEstimationDataJsonSerializer implements C
         ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
         List<ManeuverSpot> maneuverSpots = maneuverDetector.detectManeuverSpots(from, to);
         List<CompleteManeuverCurve> maneuverCurves = maneuverSpots.stream()
+                .filter(maneuverSpot -> maneuverSpot.getManeuverCurve() != null)
                 .map(maneuverSpot -> maneuverSpot.getManeuverCurve()).collect(Collectors.toList());
         ManeuverDetectorWithEstimationDataSupport maneuverDetectorWithEstimationData = new ManeuverDetectorWithEstimationDataSupportDecoratorImpl(
                 maneuverDetector, polarDataService);

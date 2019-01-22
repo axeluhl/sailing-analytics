@@ -221,7 +221,7 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
         List<Maneuver> maneuvers = new ArrayList<>();
         for (ManeuverSpot maneuverSpot : maneuverSpots) {
             ManeuverSpotWithTypedManeuvers maneuverSpotWithTypedManeuvers = createManeuverSpotWithTypedManeuversFromManeuverCurve(
-                    (List<GPSFixMoving>) maneuverSpot.getDouglasPeuckerFixes(), maneuverSpot.getManeuverSpotDirection(),
+                    maneuverSpot.getDouglasPeuckerFixes(), maneuverSpot.getManeuverSpotDirection(),
                     maneuverSpot.getManeuverCurve());
             for (Maneuver maneuver : maneuverSpotWithTypedManeuvers.getManeuvers()) {
                 maneuvers.add(maneuver);
@@ -316,17 +316,16 @@ public class ManeuverDetectorImpl extends AbstractManeuverDetectorImpl {
             List<GPSFixMoving> douglasPeuckerFixesGroup, NauticalSide maneuverDirection,
             CompleteManeuverCurve maneuverCurve) {
         if (maneuverCurve == null) {
-            return new ManeuverSpotWithTypedManeuvers(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection,
-                    null, new ArrayList<>(), null);
+            return new ManeuverSpotWithTypedManeuvers(douglasPeuckerFixesGroup, maneuverDirection, null,
+                    new ArrayList<>(), null);
         }
         TimePoint maneuverTimePoint = maneuverCurve.getMainCurveBoundaries().getTimePoint();
         Position maneuverPosition = track.getEstimatedPosition(maneuverTimePoint, /* extrapolate */false);
         final Wind wind = trackedRace.getWind(maneuverPosition, maneuverTimePoint);
-        Iterable<Maneuver> maneuvers = determineManeuversFromManeuverCurve(maneuverCurve.getMainCurveBoundaries(),
+        List<Maneuver> maneuvers = determineManeuversFromManeuverCurve(maneuverCurve.getMainCurveBoundaries(),
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries(), wind,
                 maneuverCurve.getMarkPassing());
-        return new ManeuverSpotWithTypedManeuvers(new ArrayList<>(douglasPeuckerFixesGroup), maneuverDirection,
-                maneuverCurve, maneuvers,
+        return new ManeuverSpotWithTypedManeuvers(douglasPeuckerFixesGroup, maneuverDirection, maneuverCurve, maneuvers,
                 new WindMeasurement(maneuverTimePoint, maneuverPosition, wind == null ? null : wind.getBearing()));
     }
 
