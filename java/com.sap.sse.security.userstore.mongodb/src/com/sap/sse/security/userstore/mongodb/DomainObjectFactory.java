@@ -30,7 +30,7 @@ public interface DomainObjectFactory {
      * {@link UserGroupImpl#add(SecurityUser)} have to be used for this process.
      * <p>
      */
-    Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers();
+    Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers(Map<UUID, RoleDefinition> roleDefinitionsById);
     
     /**
      * @param defaultTenantForRoleMigration

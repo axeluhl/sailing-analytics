@@ -208,7 +208,8 @@ public class UserStoreImpl implements UserStore {
      * Do not call this before the security service is ready, as else role definition migration will not work correctly
      */
     public void loadAndMigrateUsers() throws UserGroupManagementException, UserManagementException {
-        final Iterable<UserGroup> userGroups = domainObjectFactory.loadAllUserGroupsAndTenantsWithProxyUsers();
+        final Iterable<UserGroup> userGroups = domainObjectFactory
+                .loadAllUserGroupsAndTenantsWithProxyUsers(roleDefinitions);
         for (UserGroup group : userGroups) {
             this.userGroups.put(group.getId(), group);
             userGroupsByName.put(group.getName(), group);

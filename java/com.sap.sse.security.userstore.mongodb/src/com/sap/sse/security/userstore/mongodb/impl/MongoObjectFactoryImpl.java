@@ -140,6 +140,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbUsernames.add(user.getName());
         }
         dbUserGroup.put(FieldNames.UserGroup.USERNAMES.name(), dbUsernames);
+        BasicDBList dbRoleDefinitionMap = new BasicDBList();
+        for (Entry<RoleDefinition, Boolean> entry : group.getRoleDefinitionMap().entrySet()) {
+            Document dbRoleDef = new Document();
+            dbRoleDef.put(FieldNames.UserGroup.ROLE_DEFINITION_MAP_ROLE_ID.name(), entry.getKey().getId());
+            dbRoleDef.put(FieldNames.UserGroup.ROLE_DEFINITION_MAP_FOR_ALL.name(), entry.getValue());
+            dbRoleDefinitionMap.add(dbRoleDefinitionMap);
+        }
+        dbUserGroup.put(FieldNames.UserGroup.ROLE_DEFINITION_MAP.name(), dbRoleDefinitionMap);
+
         userGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUserGroup, new UpdateOptions().upsert(true));
     }
     

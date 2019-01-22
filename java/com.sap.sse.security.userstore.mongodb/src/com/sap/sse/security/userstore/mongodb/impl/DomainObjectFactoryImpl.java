@@ -141,12 +141,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers() {
+    public Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers(
+            Map<UUID, RoleDefinition> roleDefinitionsById) {
         Set<UserGroup> userGroups = new HashSet<>();
         MongoCollection<org.bson.Document> userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
         try {
             for (Document o : userGroupCollection.find()) {
-                final UserGroup userGroup = loadUserGroupWithProxyUsers(o);
+                final UserGroup userGroup = loadUserGroupWithProxyUsers(o, roleDefinitionsById);
                 userGroups.add(userGroup);
             }
         } catch (Exception e) {
@@ -156,7 +157,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return userGroups;
     }
     
-    private UserGroup loadUserGroupWithProxyUsers(Document groupDBObject) {
+    private UserGroup loadUserGroupWithProxyUsers(Document groupDBObject, Map<UUID, RoleDefinition> roleDefinitionsById) {
         final UUID id = (UUID) groupDBObject.get(FieldNames.UserGroup.ID.name());
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
         Set<User> users = new HashSet<>();
@@ -167,8 +168,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 users.add(new UserProxy((String) o));
             }
         }
-        // FIXME load user group role definitions
-        return new UserGroupImpl(id, name, users, new HashMap<RoleDefinition, Boolean>());
+        final Map<RoleDefinition, Boolean> roleDefinitionMap = new HashMap<>();
+        @SuppressWarnings("unchecked")
+        List<Object> dbRoleDefinitionMap = (List<Object>) groupDBObject
+                .get(FieldNames.UserGroup.ROLE_DEFINITION_MAP.name());
+        if (dbRoleDefinitionMap != null) {
+            for (Object roleDefO : dbRoleDefinitionMap) {
+                final Document roleDefEntry = (Document) roleDefO;
+                final UUID roleDefId = roleDefEntry.get(FieldNames.UserGroup.ROLE_DEFINITION_MAP_ROLE_ID.name(),
+                        UUID.class);
+                final Boolean forAll = roleDefEntry.getBoolean(FieldNames.UserGroup.ROLE_DEFINITION_MAP_FOR_ALL.name());
+                roleDefinitionMap.put(roleDefinitionsById.get(roleDefId), forAll);
+            }
+        }
+        return new UserGroupImpl(id, name, users, roleDefinitionMap);
     }
 
     /**
