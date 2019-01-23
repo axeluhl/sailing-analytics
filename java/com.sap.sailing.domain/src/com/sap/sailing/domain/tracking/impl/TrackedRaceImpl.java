@@ -387,6 +387,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient PolarDataService polarDataService;
     
     private transient IncrementalWindEstimationTrack windEstimation;
+    
+    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache = new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
+            /* preserve how many milliseconds */ 10000,
+            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor, windEstimation));
 
     /**
      * Tells how ranks are to be assigned to the competitors at any time during the race. For one-design boat classes
@@ -726,9 +730,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
         return new SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval>(
                 new AbstractCacheUpdater<Competitor, List<Maneuver>, EmptyUpdateInterval>() {
-                    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache = new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
-                            /* preserve how many milliseconds */ 10000,
-                            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor, windEstimation));
 
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
@@ -3606,9 +3607,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (windEstimation != null) {
                 windTracks.put(windEstimation.getWindSource(), windEstimation);
-                // TODO get complete maneuver curves and feed them to windEstimation? Before that clear windCache?
             }
             this.windEstimation = windEstimation;
+            // TODO Make more efficient by reusing the state of incremental maneuver detectors. The already computed
+            // complete maneuver curves can be fed directly to the windEstimation.
+            maneuverDetectorPerCompetitorCache.clearCache();
+            shortTimeWindCache.clearCache();
+            triggerManeuverCacheRecalculationForAllCompetitors();
         }
     }
 
