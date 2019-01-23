@@ -8,12 +8,15 @@ if [ "$release" = "" ]; then
   rm $INDEX
   echo Latest release is $release
 fi
-GITROOT=`dirname $0`/..
+GITROOT="`dirname $0`/.."
+DOCKERDIR="${GITROOT}/docker"
+DOCKERFILE="$DOCKERDIR/Dockerfile"
 echo "Copying files from GITROOT $GITROOT into Docker workspace"
 cp "$GITROOT/java/target/env.sh" .
 cp "$GITROOT/java/target/start" .
 cp "$GITROOT/java/target/configuration/JavaSE-11.profile" .
-cat Dockerfile.tpl | sed -e "s/RELEASE/${release}/g" >Dockerfile
+cat ${DOCKERFILE}.tpl | sed -e "s/RELEASE/${release}/g" >${DOCKERFILE}
+cd "$DOCKERDIR"
 docker build -t sapsailing:$release .
 echo "Cleaning up..."
 rm start env.sh JavaSE-11.profile Dockerfile
