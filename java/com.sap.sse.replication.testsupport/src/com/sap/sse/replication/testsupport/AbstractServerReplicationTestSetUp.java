@@ -2,9 +2,11 @@ package com.sap.sse.replication.testsupport;
 
 import static org.junit.Assert.assertFalse;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
@@ -287,9 +289,10 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                         }
                         boolean stop = false;
                         while (!stop) {
-                            Socket s = ss.accept();
-                            final InputStream inputStream = s.getInputStream();
-                            String request = readLine(inputStream);
+                            final Socket s = ss.accept();
+                            String request = new BufferedReader(new InputStreamReader(s.getInputStream())).readLine();
+//                            final InputStream inputStream = s.getInputStream();
+//                            String request = readLine(inputStream);
                             logger.info("received request "+request);
                             PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
                             if (request.startsWith("POST /replication/replication")) {
@@ -299,7 +302,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                     @Override
                                     public boolean isFinished() {
                                         try {
-                                            return inputStream.available() <= 0;
+                                            return s.getInputStream().available() <= 0;
                                         } catch (IOException e) {
                                             throw new RuntimeException(e);
                                         }
@@ -308,7 +311,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                     @Override
                                     public boolean isReady() {
                                         try {
-                                            return inputStream.available() > 0;
+                                            return s.getInputStream().available() > 0;
                                         } catch (IOException e) {
                                             throw new RuntimeException(e);
                                         }
@@ -320,7 +323,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
 
                                     @Override
                                     public int read() throws IOException {
-                                        return inputStream.read();
+                                        return s.getInputStream().read();
                                     }
                                 });
                                 final HttpServletResponse responseMock = Mockito.mock(HttpServletResponse.class);
@@ -337,7 +340,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                         return null;
                                     }
                                 }).when(responseMock).sendError(Matchers.anyInt(), Matchers.isA(String.class));
-                                while (!readLine(inputStream).isEmpty());
+                                while (!readLine(s.getInputStream()).isEmpty());
                                 servlet.doPost(requestMock, responseMock);
                                 if (!error[0]) {
                                     pw.println("HTTP/1.1 200 OK");
@@ -375,13 +378,14 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                 }
                             }
                             pw.close();
-                            inputStream.close();
+                            s.getInputStream().close();
                             s.close();
                             logger.info("Request handled successfully.");
                         }
                     } catch (IOException | ServletException e) {
                         throw new RuntimeException(e);
                     } finally {
+                        logger.info("replication servlet emulation done");
                         try {
                             if (ss != null) {
                                 ss.close();
