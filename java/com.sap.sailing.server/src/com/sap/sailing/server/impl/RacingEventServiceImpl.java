@@ -3946,7 +3946,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                                 service == null ? null : service.createIncrementalWindEstimationTrack(trackedRace));
                     }
                 } catch (Throwable e) {
-                    logger.log(Level.SEVERE, "Error reconstructing the polars for tracked races", e);
+                    logger.log(Level.SEVERE, "Error reconstructing the wind estimation models for tracked races", e);
                 } finally {
                     trackedRegatta.unlockTrackedRacesAfterRead();
                 }

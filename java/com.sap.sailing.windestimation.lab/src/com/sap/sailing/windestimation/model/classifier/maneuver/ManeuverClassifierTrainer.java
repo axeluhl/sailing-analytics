@@ -114,11 +114,11 @@ public class ManeuverClassifierTrainer {
         classifierModelStore.deleteAll(PersistenceContextType.MANEUVER_CLASSIFIER);
         ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(persistenceManager,
                 classifierModelStore);
-        ManeuverClassifierModelFactory classifierModelFactory = new ManeuverClassifierModelFactory();
+        ManeuverClassifierModelFactory classifierModelFactory = new ManeuverClassifierModelFactory(polarService);
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
             LoggingUtil.logInfo(
                     "### Training classifier for all boat classes with maneuver features: " + maneuverFeatures);
-            LabelledManeuverModelMetadata maneuverModelMetadata = new LabelledManeuverModelMetadata(maneuverFeatures,
+            LabelledManeuverClassifierModelMetadata maneuverModelMetadata = new LabelledManeuverClassifierModelMetadata(maneuverFeatures,
                     null, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
             List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> allTrainableModels = classifierModelFactory
                     .getAllTrainableModels(maneuverModelMetadata);
@@ -133,7 +133,7 @@ public class ManeuverClassifierTrainer {
             for (BoatClass boatClass : allBoatClasses) {
                 LoggingUtil.logInfo("### Training classifier for boat class " + boatClass + " with maneuver features: "
                         + maneuverFeatures);
-                LabelledManeuverModelMetadata maneuverModelMetadata = new LabelledManeuverModelMetadata(
+                LabelledManeuverClassifierModelMetadata maneuverModelMetadata = new LabelledManeuverClassifierModelMetadata(
                         maneuverFeatures, boatClass, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
                 List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> allTrainableClassifierModels = classifierModelFactory
                         .getAllTrainableModels(maneuverModelMetadata);

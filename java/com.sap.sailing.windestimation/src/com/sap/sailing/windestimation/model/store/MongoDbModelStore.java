@@ -19,24 +19,19 @@ import com.sap.sailing.windestimation.model.TrainableModel;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
-public class MongoDbModelStore implements ModelStore {
+public class MongoDbModelStore extends AbstractModelStore {
 
-    private static final String CONTEXT_NAME_PREFIX = "modelFor";
     private final MongoDatabase db;
 
     public MongoDbModelStore(MongoDatabase db) {
         this.db = db;
     }
 
-    private String getFileName(PersistenceSupport persistenceSupport) {
-        return persistenceSupport.getPersistenceKey();
-    }
-
     @Override
     public <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
             ModelType newModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        String fileName = getFileName(persistenceSupport);
+        String fileName = getFilename(persistenceSupport, newModel.getContextSpecificModelMetadata().getContextType());
         String bucketName = getCollectionName(newModel.getContextSpecificModelMetadata().getContextType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try (GridFSDownloadStream inputStream = gridFs.openDownloadStreamByName(fileName)) {
@@ -58,7 +53,8 @@ public class MongoDbModelStore implements ModelStore {
     @Override
     public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
-        String newFileName = getFileName(persistenceSupport);
+        String newFileName = getFilename(persistenceSupport,
+                trainedModel.getContextSpecificModelMetadata().getContextType());
         String bucketName = getCollectionName(trainedModel.getContextSpecificModelMetadata().getContextType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try {

@@ -9,8 +9,10 @@ import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -31,7 +33,7 @@ public class Activator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         logger.info("Registering WindEstimationFactoryService");
-        WindEstimationFactoryServiceImpl service = new WindEstimationFactoryServiceImpl();
+        WindEstimationFactoryServiceImpl service = new WindEstimationFactoryServiceImpl(true, null);
         final ServiceRegistration<WindEstimationFactoryService> serviceRegistration = context
                 .registerService(WindEstimationFactoryService.class, service, null);
         registrations.add(serviceRegistration);
@@ -41,20 +43,20 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(ClearStateTestSupport.class.getName(), service, null));
         final String windEstimationModelDataSourceURL = System
                 .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_URL_PROPERTY_NAME);
-        if (windEstimationModelDataSourceURL != null && !windEstimationModelDataSourceURL.isEmpty()) {
-            waitForRacingEventServiceToObtainDomainFactory(windEstimationModelDataSourceURL, service, context,
-                    serviceRegistration);
-        }
+        waitForRacingEventServiceToObtainDomainFactoryAndPolarService(windEstimationModelDataSourceURL, service,
+                context, serviceRegistration);
     }
 
     /**
-     * Spawns a daemon thread that waits for the domain factory to be registered with the
+     * Spawns a daemon thread that waits for the domain factory and polar service to be registered with the
      * {@link WindEstimationFactoryService}, then unregisters the service from the OSGi registry because it will
      * temporarily become unusable, runs the wind estimation model data import from the given URL and registers the
      * service again, adding the service registration object to the set of {@link #registrations}. The domain factory is
-     * required to resolve boat classes during de-serialization.
+     * required to resolve boat classes during deserialization. The polar service is required to preload all maneuver
+     * classifiers for each existing boat class.
      */
-    private void waitForRacingEventServiceToObtainDomainFactory(final String windEstimationModelDataSourceURL,
+    private void waitForRacingEventServiceToObtainDomainFactoryAndPolarService(
+            final String windEstimationModelDataSourceURL,
             final WindEstimationFactoryService windEstimationFactoryService, final BundleContext context,
             ServiceRegistration<WindEstimationFactoryService> windEstimationModelDataServiceRegistration) {
         final Thread t = new Thread(() -> {
@@ -64,14 +66,18 @@ public class Activator implements BundleActivator {
                 // Note: although the domainFactory parameter isn't used, using runWithDomainFactory ensures that the
                 // domain factory is there
                 windEstimationFactoryService.runWithDomainFactory(domainFactory -> {
-                    // TODO implement client for wind estimation models
+                    // TODO implement import client for wind estimation models
                     // PolarDataClient polarDataClient = new PolarDataClient(windEstimationModelDataSourceURL,
                     // windEstimationFactoryService);
                     // try {
-                    // windEstimationModelDataServiceRegistration.unregister();
+                    windEstimationModelDataServiceRegistration.unregister();
                     // polarDataClient.updatePolarDataRegressions();
-                    // registrations.add(context.registerService(WindEstimationFactoryService.class,
-                    // windEstimationFactoryService, null));
+                    ServiceReference<PolarDataService> polarServiceReference = context
+                            .getServiceReference(PolarDataService.class);
+                    // TODO ensure that polarDataService has been loaded and initialized
+                    PolarDataService polarDataService = context.getService(polarServiceReference);
+                    registrations.add(context.registerService(WindEstimationFactoryService.class,
+                            new WindEstimationFactoryServiceImpl(false, polarDataService), null));
                     // } catch (Exception e) {
                     // logger.log(Level.SEVERE,
                     // "Exception while trying to import wind estimation model data from " +

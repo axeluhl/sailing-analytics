@@ -16,7 +16,8 @@ public interface ModelStore {
 
     Map<String, byte[]> exportAllPersistedModels(PersistenceContextType contextType) throws ModelPersistenceException;
 
-    void importPersistedModels(Map<String, byte[]> exportedPersistedModels, PersistenceContextType contextType) throws ModelPersistenceException;
+    void importPersistedModels(Map<String, byte[]> exportedPersistedModels, PersistenceContextType contextType)
+            throws ModelPersistenceException;
 
     default <T extends PersistableModel<?, ?>> PersistenceSupport checkAndGetPersistenceSupport(T trainedModel)
             throws ModelPersistenceException {

@@ -8,6 +8,8 @@ public interface ModelFactory<InstanceType, T extends ContextSpecificModelMetada
 
     List<ModelType> getAllTrainableModels(T contextSpecificModelMetadata);
 
-    List<T> getAllValidContextSpecificModelMetadataCandidates(T contextSpecificModelMetadataWithMaxFeatures);
+    List<T> getAllValidContextSpecificModelMetadataFeatureSupersets(T contextSpecificModelMetadataWithMaxFeatures);
+    
+    List<T> getAllValidContextSpecificModelMetadata();
 
 }

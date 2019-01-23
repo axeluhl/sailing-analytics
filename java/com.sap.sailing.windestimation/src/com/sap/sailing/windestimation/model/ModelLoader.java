@@ -21,7 +21,7 @@ public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<In
 
     public ModelType loadBestModel(T contextSpecificModelMetadataWithMaxFeatures) {
         List<T> modelMetadataCandidates = modelFactory
-                .getAllValidContextSpecificModelMetadataCandidates(contextSpecificModelMetadataWithMaxFeatures);
+                .getAllValidContextSpecificModelMetadataFeatureSupersets(contextSpecificModelMetadataWithMaxFeatures);
         List<ModelType> loadedModels = new ArrayList<>();
         for (T modelMetadata : modelMetadataCandidates) {
             ModelType loadedModel = loadModel(modelMetadata);

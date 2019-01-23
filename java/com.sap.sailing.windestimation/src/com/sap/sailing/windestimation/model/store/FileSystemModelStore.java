@@ -16,36 +16,21 @@ import com.sap.sailing.windestimation.model.TrainableModel;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
-public class FileSystemModelStore implements ModelStore {
+public class FileSystemModelStore extends AbstractModelStore {
 
-    private static final String CONTEXT_NAME_PREFIX = "modelFor";
     private final String destinationFolder;
-    private static final String FILE_EXT = ".clf";
 
     public FileSystemModelStore(String destinationFolder, PersistenceContextType contextType) {
         this.destinationFolder = destinationFolder;
     }
 
     private File getFileForModel(PersistenceSupport trainedModel, PersistenceContextType contextType) {
-        StringBuilder fileName = new StringBuilder();
-        fileName.append(getContextPrefix(contextType));
-        fileName.append(trainedModel.getPersistenceKey());
-        fileName.append(FILE_EXT);
-        String finalFileName = replaceSystemChars(fileName.toString());
-        return getFileForModel(finalFileName, contextType);
-    }
-
-    private File getFileForModel(String fileName, PersistenceContextType contextType) {
         StringBuilder filePath = new StringBuilder();
         filePath.append(destinationFolder);
         filePath.append(File.separator);
-        filePath.append(fileName);
+        filePath.append(getFilename(trainedModel, contextType));
         String finalFilePath = filePath.toString();
         return new File(finalFilePath);
-    }
-
-    private String replaceSystemChars(String str) {
-        return str.replaceAll("[\\\\\\/\\\"\\:\\|\\<\\>\\*\\?]", "__");
     }
 
     @Override
@@ -106,10 +91,6 @@ public class FileSystemModelStore implements ModelStore {
                 }
             }
         }
-    }
-
-    private String getContextPrefix(PersistenceContextType contextType) {
-        return CONTEXT_NAME_PREFIX + contextType.getContextName() + ".";
     }
 
     @Override

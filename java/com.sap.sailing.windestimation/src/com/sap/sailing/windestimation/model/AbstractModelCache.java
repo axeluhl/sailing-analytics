@@ -10,11 +10,13 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
     private final ModelLoader<InstanceType, T, ModelType> modelLoader;
     private final long preserveLoadedModelsMillis;
     private final ModelStore modelStore;
+    private final ModelFactory<InstanceType, T, ModelType> modelFactory;
 
     public AbstractModelCache(ModelStore modelStore, long preserveLoadedModelsMillis,
             ModelFactory<InstanceType, T, ModelType> modelFactory) {
         this.modelStore = modelStore;
         this.preserveLoadedModelsMillis = preserveLoadedModelsMillis;
+        this.modelFactory = modelFactory;
         this.modelLoader = new ModelLoader<>(modelStore, modelFactory);
         this.modelCache = new ShortTimeAfterLastHitCache<>(preserveLoadedModelsMillis,
                 contextSpecificModelMetadata -> loadModel(contextSpecificModelMetadata));
@@ -58,5 +60,12 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
     }
 
     public abstract T getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures();
+
+    @Override
+    public void preloadAllModels() {
+        for (T modelMetadata : modelFactory.getAllValidContextSpecificModelMetadata()) {
+            getBestModel(modelMetadata);
+        }
+    }
 
 }

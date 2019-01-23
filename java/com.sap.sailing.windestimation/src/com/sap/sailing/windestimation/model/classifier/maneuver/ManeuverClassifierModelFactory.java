@@ -2,9 +2,11 @@ package com.sap.sailing.windestimation.model.classifier.maneuver;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.classifier.ClassifierModelFactory;
@@ -16,6 +18,11 @@ public class ManeuverClassifierModelFactory
 
     public static final ManeuverTypeForClassification[] orderedSupportedTargetValues = {
             ManeuverTypeForClassification.TACK, ManeuverTypeForClassification.JIBE };
+    private final PolarDataService polarService;
+
+    public ManeuverClassifierModelFactory(PolarDataService polarService) {
+        this.polarService = polarService;
+    }
 
     @Override
     public TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> getNewModel(
@@ -28,16 +35,10 @@ public class ManeuverClassifierModelFactory
     @Override
     public List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> getAllTrainableModels(
             ManeuverClassifierModelMetadata contextSpecificModelMetadata) {
+        ManeuverClassifierModelMetadata modelMetadata = createModelMetadata(
+                contextSpecificModelMetadata.getManeuverFeatures(), contextSpecificModelMetadata.getBoatClass());
         List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> classifiers = new ArrayList<>();
-        // classifiers.add(new GradientBoostingManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
-        // classifiers.add(new LDAManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
-        // classifiers.add(new LogisticRegressionManeuverClassifier(maneuverFeatures, boatClass,
-        // supportedManeuverTypes));
-        // classifiers.add(new NaiveBayesManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
-        classifiers.add(new NeuralNetworkClassifier<>(contextSpecificModelMetadata));
-        // classifiers.add(new QDAManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
-        // classifiers.add(new RandomForestManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
-        // classifiers.add(new SVMManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
+        classifiers.add(new NeuralNetworkClassifier<>(modelMetadata));
         List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> suitableClassifiers = classifiers
                 .stream().filter(classifier -> classifier.hasSupportForProvidedFeatures()).collect(Collectors.toList());
         return suitableClassifiers;
@@ -51,7 +52,7 @@ public class ManeuverClassifierModelFactory
     }
 
     @Override
-    public List<ManeuverClassifierModelMetadata> getAllValidContextSpecificModelMetadataCandidates(
+    public List<ManeuverClassifierModelMetadata> getAllValidContextSpecificModelMetadataFeatureSupersets(
             ManeuverClassifierModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
         ManeuverFeatures maneuverFeatures = contextSpecificModelMetadataWithMaxFeatures.getManeuverFeatures();
         BoatClass boatClass = contextSpecificModelMetadataWithMaxFeatures.getBoatClass();
@@ -65,6 +66,21 @@ public class ManeuverClassifierModelFactory
                             boatClass);
                     modelMetadataCandidates.add(modelMetadataWithBoatClass);
                 }
+            }
+        }
+        return modelMetadataCandidates;
+    }
+
+    @Override
+    public List<ManeuverClassifierModelMetadata> getAllValidContextSpecificModelMetadata() {
+        Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
+        List<ManeuverClassifierModelMetadata> modelMetadataCandidates = new ArrayList<>();
+        for (ManeuverFeatures possibleFeatures : ManeuverFeatures.values()) {
+            ManeuverClassifierModelMetadata modelMetadata = createModelMetadata(possibleFeatures, null);
+            modelMetadataCandidates.add(modelMetadata);
+            for (BoatClass boatClass : allBoatClasses) {
+                modelMetadata = createModelMetadata(possibleFeatures, boatClass);
+                modelMetadataCandidates.add(modelMetadata);
             }
         }
         return modelMetadataCandidates;

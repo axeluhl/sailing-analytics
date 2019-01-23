@@ -6,6 +6,8 @@ public interface ModelCache<InstanceType, ModelType extends TrainableModel<Insta
 
     void clearCache();
     
+    void preloadAllModels();
+    
     boolean isReady();
 
 }

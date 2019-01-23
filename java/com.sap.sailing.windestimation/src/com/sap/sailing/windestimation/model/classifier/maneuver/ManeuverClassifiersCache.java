@@ -1,6 +1,7 @@
 package com.sap.sailing.windestimation.model.classifier.maneuver;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.model.classifier.AbstractClassifiersCache;
 import com.sap.sailing.windestimation.model.store.ModelStore;
@@ -10,9 +11,9 @@ public class ManeuverClassifiersCache extends
 
     private final ManeuverFeatures maneuverFeatures;
 
-    public ManeuverClassifiersCache(ModelStore classifierModelStore, long preserveLoadedClassifiersMillis,
-            ManeuverFeatures maxManeuverFeatures) {
-        super(classifierModelStore, preserveLoadedClassifiersMillis, new ManeuverClassifierModelFactory(),
+    public ManeuverClassifiersCache(ModelStore classifierModelStore, PolarDataService polarService,
+            long preserveLoadedClassifiersMillis, ManeuverFeatures maxManeuverFeatures) {
+        super(classifierModelStore, preserveLoadedClassifiersMillis, new ManeuverClassifierModelFactory(polarService),
                 new ManeuverClassificationResultMapper());
         this.maneuverFeatures = maxManeuverFeatures;
     }

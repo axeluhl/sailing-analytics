@@ -10,7 +10,7 @@ public class DurationBasedTwdTransitionRegressorModelFactory extends
         SingleDimensionBasedTwdTransitionRegressorModelFactory<DurationBasedTwdTransitionRegressorModelMetadata> {
 
     @Override
-    public List<DurationBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadataCandidates(
+    public List<DurationBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadataFeatureSupersets(
             DurationBasedTwdTransitionRegressorModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
         List<DurationBasedTwdTransitionRegressorModelMetadata> modelMetadatas = new ArrayList<>();
         modelMetadatas.add(contextSpecificModelMetadataWithMaxFeatures);
@@ -29,6 +29,17 @@ public class DurationBasedTwdTransitionRegressorModelFactory extends
         }
         throw new IllegalStateException(
                 "No DurationValueRange available for duration value of " + secondsPassed + " seconds");
+    }
+
+    @Override
+    public List<DurationBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadata() {
+        List<DurationBasedTwdTransitionRegressorModelMetadata> result = new ArrayList<>();
+        for (DurationValueRange durationValueRange : DurationValueRange.values()) {
+            DurationBasedTwdTransitionRegressorModelMetadata modelMetadata = new DurationBasedTwdTransitionRegressorModelMetadata(
+                    durationValueRange);
+            result.add(modelMetadata);
+        }
+        return result;
     }
 
 }

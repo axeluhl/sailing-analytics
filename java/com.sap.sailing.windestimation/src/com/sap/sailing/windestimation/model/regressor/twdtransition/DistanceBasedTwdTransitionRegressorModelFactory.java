@@ -10,7 +10,7 @@ public class DistanceBasedTwdTransitionRegressorModelFactory extends
         SingleDimensionBasedTwdTransitionRegressorModelFactory<DistanceBasedTwdTransitionRegressorModelMetadata> {
 
     @Override
-    public List<DistanceBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadataCandidates(
+    public List<DistanceBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadataFeatureSupersets(
             DistanceBasedTwdTransitionRegressorModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
         List<DistanceBasedTwdTransitionRegressorModelMetadata> modelMetadatas = new ArrayList<>();
         modelMetadatas.add(contextSpecificModelMetadataWithMaxFeatures);
@@ -29,6 +29,17 @@ public class DistanceBasedTwdTransitionRegressorModelFactory extends
         }
         throw new IllegalStateException(
                 "No DistanceValueRange available for distance value of " + metersPassed + " meters");
+    }
+
+    @Override
+    public List<DistanceBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadata() {
+        List<DistanceBasedTwdTransitionRegressorModelMetadata> result = new ArrayList<>();
+        for (DistanceValueRange distanceValueRange : DistanceValueRange.values()) {
+            DistanceBasedTwdTransitionRegressorModelMetadata modelMetadata = new DistanceBasedTwdTransitionRegressorModelMetadata(
+                    distanceValueRange);
+            result.add(modelMetadata);
+        }
+        return result;
     }
 
 }

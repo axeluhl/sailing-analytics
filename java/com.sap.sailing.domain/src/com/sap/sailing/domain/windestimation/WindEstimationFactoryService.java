@@ -11,4 +11,6 @@ public interface WindEstimationFactoryService {
     void registerDomainFactory(DomainFactory domainFactory);
 
     void runWithDomainFactory(Consumer<DomainFactory> consumer) throws InterruptedException;
+
+    boolean isLoadingState();
 }

@@ -25,22 +25,35 @@ public class TwdTransitionClassifierModelFactory
     @Override
     public List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> getAllTrainableModels(
             TwdTransitionClassifierModelMetadata contextSpecificModelMetadata) {
+        TwdTransitionClassifierModelMetadata modelMetadata = new TwdTransitionClassifierModelMetadata(
+                contextSpecificModelMetadata.getManeuverTypeTransition());
         List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> classifiers = new ArrayList<>();
-        // classifiers.add(new GradientBoostingManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
-        classifiers.add(new NeuralNetworkClassifier<>(contextSpecificModelMetadata));
-        classifiers.add(new LogisticRegressionClassifier<>(contextSpecificModelMetadata));
-        classifiers.add(new NaiveBayesClassifier<>(contextSpecificModelMetadata));
-        classifiers.add(new LDAClassifier<>(contextSpecificModelMetadata));
-        classifiers.add(new QDAClassifier<>(contextSpecificModelMetadata));
+        classifiers.add(new NeuralNetworkClassifier<>(modelMetadata));
+        classifiers.add(new LogisticRegressionClassifier<>(modelMetadata));
+        classifiers.add(new NaiveBayesClassifier<>(modelMetadata));
+        classifiers.add(new LDAClassifier<>(modelMetadata));
+        classifiers.add(new QDAClassifier<>(modelMetadata));
         return classifiers;
     }
 
     @Override
-    public List<TwdTransitionClassifierModelMetadata> getAllValidContextSpecificModelMetadataCandidates(
+    public List<TwdTransitionClassifierModelMetadata> getAllValidContextSpecificModelMetadataFeatureSupersets(
             TwdTransitionClassifierModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
         List<TwdTransitionClassifierModelMetadata> modelMetadataCandidates = new ArrayList<>();
-        modelMetadataCandidates.add(contextSpecificModelMetadataWithMaxFeatures);
+        modelMetadataCandidates.add(new TwdTransitionClassifierModelMetadata(
+                contextSpecificModelMetadataWithMaxFeatures.getManeuverTypeTransition()));
         return modelMetadataCandidates;
+    }
+
+    @Override
+    public List<TwdTransitionClassifierModelMetadata> getAllValidContextSpecificModelMetadata() {
+        List<TwdTransitionClassifierModelMetadata> result = new ArrayList<>();
+        for (ManeuverTypeTransition maneuverTypeTransition : ManeuverTypeTransition.values()) {
+            TwdTransitionClassifierModelMetadata modelMetadata = new TwdTransitionClassifierModelMetadata(
+                    maneuverTypeTransition);
+            result.add(modelMetadata);
+        }
+        return result;
     }
 
 }

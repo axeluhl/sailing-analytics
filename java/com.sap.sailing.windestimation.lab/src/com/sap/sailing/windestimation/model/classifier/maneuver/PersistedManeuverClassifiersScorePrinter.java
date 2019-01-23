@@ -16,9 +16,6 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelFactory;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierModelMetadata;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
@@ -27,7 +24,6 @@ import com.sap.sailing.windestimation.util.LoggingUtil;
 public class PersistedManeuverClassifiersScorePrinter {
 
     private PersistedManeuverClassifiersScorePrinter() {
-
     }
 
     public static void main(String[] args)
@@ -37,11 +33,11 @@ public class PersistedManeuverClassifiersScorePrinter {
         ModelStore classifierModelStore = new MongoDbModelStore(
                 new RegularManeuversForEstimationPersistenceManager().getDb());
         List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> allClassifierModels = new ArrayList<>();
-        ManeuverClassifierModelFactory classifierModelFactory = new ManeuverClassifierModelFactory();
+        ManeuverClassifierModelFactory classifierModelFactory = new ManeuverClassifierModelFactory(polarService);
         LoggingUtil.logInfo("### Loading all boat class classifiers:");
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
-            LabelledManeuverModelMetadata maneuverModelMetadata = new LabelledManeuverModelMetadata(maneuverFeatures,
-                    null, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
+            LabelledManeuverClassifierModelMetadata maneuverModelMetadata = new LabelledManeuverClassifierModelMetadata(
+                    maneuverFeatures, null, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
             List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> classifierModels = classifierModelFactory
                     .getAllTrainableModels(maneuverModelMetadata);
             for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classifierModel : classifierModels) {
@@ -54,7 +50,7 @@ public class PersistedManeuverClassifiersScorePrinter {
                 }
             }
             for (BoatClass boatClass : allBoatClasses) {
-                maneuverModelMetadata = new LabelledManeuverModelMetadata(maneuverFeatures, boatClass,
+                maneuverModelMetadata = new LabelledManeuverClassifierModelMetadata(maneuverFeatures, boatClass,
                         ManeuverClassifierModelFactory.orderedSupportedTargetValues);
                 classifierModels = classifierModelFactory.getAllTrainableModels(maneuverModelMetadata);
                 for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classifierModel : classifierModels) {

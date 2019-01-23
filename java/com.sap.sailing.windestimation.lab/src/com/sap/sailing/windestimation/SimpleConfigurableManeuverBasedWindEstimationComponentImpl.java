@@ -2,9 +2,6 @@ package com.sap.sailing.windestimation;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.ManeuverBasedWindEstimationComponentImpl;
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory;
 import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory.HmmTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
@@ -31,7 +28,7 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
             RacePreprocessingPipeline<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> preprocessingPipeline,
             ManeuverClassificationsAggregatorImplementation aggregatorImplementation) {
         super(preprocessingPipeline,
-                new ManeuverClassifiersCache(modelStore, MODEL_CACHE_KEEP_ALIVE_MILLIS, maneuverFeatures),
+                new ManeuverClassifiersCache(modelStore, polarService, MODEL_CACHE_KEEP_ALIVE_MILLIS, maneuverFeatures),
                 aggregatorImplementation.createNewInstance(polarService, modelStore, MODEL_CACHE_KEEP_ALIVE_MILLIS),
                 new WindTrackCalculatorImpl(new MiddleCourseBasedTwdCalculatorImpl(),
                         maneuverFeatures.isPolarsInformation() ? new PolarsBasedTwsCalculatorImpl(polarService)
@@ -42,7 +39,8 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
             ModelStore modelStore, PolarDataService polarService,
             ManeuverClassificationsAggregatorImplementation aggregatorImplementation) {
         this(maneuverFeatures, modelStore, polarService,
-                new RaceElementsFilteringPreprocessingPipelineImpl(new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
+                new RaceElementsFilteringPreprocessingPipelineImpl(
+                        new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                 aggregatorImplementation);
     }
 
