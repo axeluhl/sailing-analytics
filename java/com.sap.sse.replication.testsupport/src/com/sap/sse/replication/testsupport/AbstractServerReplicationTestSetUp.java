@@ -374,8 +374,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                     logger.info("received STOP request");
                                 }
                             }
-                            pw.close(); // important: close this first, so response is delivered
-                            inputStream.close(); // this may let a client-side read() terminate abnormally with a SocketException
+                            pw.flush(); // ensure response is delivered
                             s.close();
                             logger.info("Request handled successfully.");
                         }
