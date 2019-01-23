@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 import com.sap.sse.common.WithID;
 
-public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>> extends UnsentOperationsToMasterSender, WithID {
+public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>> extends OperationsToMasterSendingQueue, WithID {
     final Logger logger = Logger.getLogger(OperationsToMasterSender.class.getName());
     
     /**
@@ -63,4 +63,11 @@ public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>
      * {@code operationWithResultWithIdWrapper} exactly once after this method has returned.
      */
     void addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper<S, ?> operationWithResultWithIdWrapper);
+
+    /**
+     * If an operation equal to <code>operationWithResultWithIdWrapper</code> has previously been passed to a call to
+     * {@link OperationsToMasterSender#addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper)}, the call returns <code>true</code>
+     * exactly once.
+     */
+    boolean hasSentOperationToMaster(OperationWithResult<S, ?> operation);
 }
