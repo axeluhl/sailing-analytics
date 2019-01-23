@@ -4,7 +4,8 @@ if (!project.hasProperty("xmake")) {
 }
 
 def packageName="com.sap.sailing.android.buoy.positioning.app"
-def verCode=1
+def verCode=63
+def verName=1.4.63
 
 android {
     buildToolsVersion rootProject.ext.buildTools
