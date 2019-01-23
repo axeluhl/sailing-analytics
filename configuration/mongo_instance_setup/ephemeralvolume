@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Script to deploy on an instance that has an ephemeral volume as /dev/nvme0n1 (adjust env var PARTITION if different)
+# Ensures the partition is xfs-formatted, any existing partition contents will be overwritten if formatted otherwise.
+# An existing xfs partition will be left alone.
+
+PARTITION=/dev/nvme0n1
+FSTYPE=$(blkid -p $PARTITION -s TYPE -o value)
+if [ "$FSTYPE" != "xfs" ]; then
+  echo FSTYPE was "$FSTYPE" but should have been xfs. Formatting $PARTITION...
+  mkfs.xfs -f $PARTITION
+else
+  echo FSTYPE was "$FSTYPE" which is just right :-\)
+fi

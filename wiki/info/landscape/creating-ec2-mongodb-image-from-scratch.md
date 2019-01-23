@@ -1,4 +1,4 @@
-# Setting up an EC2 Image for a MongoDB Replica Set from Scratch
+Setting up an EC2 Image for a MongoDB Replica Set from Scratch
 
 ## Image and Basic Packages
 
@@ -88,35 +88,13 @@ replication:
 #snmp:
 ```
 
-Before being able to start the mongod service, more configuration is required. The ephemeral volume needs to be probed for an existing file system:
+To deal with the set-up of the ephemeral volume, there are a number of ``systemd`` units that can be found in the git repository at ``configuration/mongo_instance_setup``. The ``ephemeralvolume.service`` ensures that the volume exists and is formatted with the XFS file system. This service uses the ``/usr/local/bin/ephemeralvolume`` script to do so. After that, the volume is mounted to ``/var/lib/mongo`` using the ``var-lib-mongo.mount`` unit. The ownerships are adjusted after that by the ``chownvarlibmongo.service`` unit to the ``mongod`` user. This is then also the last unit required to run before the ``mongod.service``.
 
-```
-blkid -p /dev/nvme0n1 -s TYPE -o value
-```
-This will output ``xfs`` if the partition contains an XFS file system already. Otherwise, formatting it is required:
-```
-mkfs.xfs /dev/nvme0n1
-```
-Afterwards, the volume can be mounted, and the ownerships can be adjusted so the MongoDB daemon can write to it:
-```
-mount /dev/nvme0n1 /var/lib/mongo
-chown mongod /var/lib/mongo/
-chgrp mongod /var/lib/mongo/
-```
-
-Then execute ``systemctl start mongod.service`` to launch the MongoDB process.
+Then execute ``systemctl enable mongod.service`` to launch the MongoDB process and ensure it is always launched when the instance (re-)boots.
 
 ## MongoDB Replica Set Configuration
 
 Connect to the MongoDB on that instance, then issue the command ``rs.initiate()`` in order to turn the instance into the "seed" of a replica set. You can then, for the time being, ``quit()`` the mongo shell. Re-connecting, e.g., with ``mongo "mongodb://localhost:27017/?replicaSet=live"``, will show the ``PRIMARY`` of the new replica set.
 
 
-TODO: not functional yet; clients don't see the PRIMARY because it wants to re-direct to localhost/127.0.0.1. rs.config() shows the issue:
-
-```
-        "members" : [
-                {
-                        "_id" : 0,
-                        "host" : "localhost:27017",
-                        ...
-```
+TODO: automate the initialization and replica set extension using "Addition Details" in the instance; create a MongoDB script that is executed during start-up; if no replica set exists and no user detail specifies where the primary is, run ``rs.initiate()``. If a replica set already exists, leave things unchanged. If no replica set exists and in a user detail something like ``REPLICA_SET_NAME=...`` and ``REPLICA_SET_PRIMARY=...`` is provided, add the local node as a secondary to the primary / replica set specified.
