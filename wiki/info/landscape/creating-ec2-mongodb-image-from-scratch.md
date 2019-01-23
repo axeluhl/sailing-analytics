@@ -88,14 +88,23 @@ replication:
 #snmp:
 ```
 
-Before being able to start the mongod service, more configuration is required:
+Before being able to start the mongod service, more configuration is required. The ephemeral volume needs to be probed for an existing file system:
 
 ```
+blkid -p /dev/nvme0n1 -s TYPE -o value
+```
+This will output ``xfs`` if the partition contains an XFS file system already. Otherwise, formatting it is required:
+```
+mkfs.xfs /dev/nvme0n1
+```
+Afterwards, the volume can be mounted, and the ownerships can be adjusted so the MongoDB daemon can write to it:
+```
+mount /dev/nvme0n1 /var/lib/mongo
 chown mongod /var/lib/mongo/
 chgrp mongod /var/lib/mongo/
 ```
 
-will change the ownerships of the directory mounted from ephemeral storage accordingly, so the MongoDB daemon can write to it. The execute ``systemctl start mongod.service`` to launch the MongoDB process.
+Then execute ``systemctl start mongod.service`` to launch the MongoDB process.
 
 ## MongoDB Replica Set Configuration
 
