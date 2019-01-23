@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
@@ -43,7 +45,6 @@ import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -689,7 +690,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
         int read = content.read(buf);
         while (read != -1) {
             uuid.append(new String(buf, 0, read));
-            read = content.read(buf);
+            try {
+                read = content.read(buf);
+            } catch (SocketException e) {
+                // the connection may have been closed already; interpret this as the end of the stream
+                read = -1;
+            }
         }
         final String replicaUUID = uuid.toString();
         registerReplicaUuidForMaster(replicaUUID, master);

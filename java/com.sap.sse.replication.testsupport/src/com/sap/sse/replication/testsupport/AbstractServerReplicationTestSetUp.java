@@ -288,7 +288,6 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                         boolean stop = false;
                         while (!stop) {
                             final Socket s = ss.accept();
-//                            String request = new BufferedReader(new InputStreamReader(s.getInputStream())).readLine();
                             final InputStream inputStream = s.getInputStream();
                             String request = readLine(inputStream);
                             logger.info("received request "+request);
@@ -375,8 +374,8 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                     logger.info("received STOP request");
                                 }
                             }
-                            inputStream.close();
-                            pw.close();
+                            pw.close(); // important: close this first, so response is delivered
+                            inputStream.close(); // this may let a client-side read() terminate abnormally with a SocketException
                             s.close();
                             logger.info("Request handled successfully.");
                         }
