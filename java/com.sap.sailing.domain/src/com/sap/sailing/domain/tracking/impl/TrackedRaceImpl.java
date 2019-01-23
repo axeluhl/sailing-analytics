@@ -3606,11 +3606,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             if (windEstimation != null) {
                 windTracks.put(windEstimation.getWindSource(), windEstimation);
+                // TODO get complete maneuver curves and feed them to windEstimation? Before that clear windCache?
             }
             this.windEstimation = windEstimation;
-            // TODO review
-            shortTimeWindCache.clearCache();
-            triggerManeuverCacheRecalculationForAllCompetitors();
         }
     }
 

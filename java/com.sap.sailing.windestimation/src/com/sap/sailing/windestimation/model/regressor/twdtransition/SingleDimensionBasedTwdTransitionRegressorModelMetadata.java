@@ -101,5 +101,5 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
         double x = getDimensionValue(instance);
         return isDimensionValueSupported(x);
     }
-
+    
 }

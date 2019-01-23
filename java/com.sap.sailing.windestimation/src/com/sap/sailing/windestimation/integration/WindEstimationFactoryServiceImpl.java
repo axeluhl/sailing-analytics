@@ -39,10 +39,14 @@ public class WindEstimationFactoryServiceImpl
 
     @Override
     public IncrementalWindEstimationTrack createIncrementalWindEstimationTrack(TrackedRace trackedRace) {
-        return new IncrementalMstHmmWindEstimationForTrackedRace(trackedRace,
-                new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION), trackedRace.getPolarDataService(),
-                trackedRace.getMillisecondsOverWhichToAverageWind(), maneuverClassifiersCache,
-                gaussianBasedTwdTransitionDistributionCache);
+        IncrementalWindEstimationTrack windEstimation = null;
+        if (maneuverClassifiersCache.isReady() && gaussianBasedTwdTransitionDistributionCache.isReady()) {
+            windEstimation = new IncrementalMstHmmWindEstimationForTrackedRace(trackedRace,
+                    new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION), trackedRace.getPolarDataService(),
+                    trackedRace.getMillisecondsOverWhichToAverageWind(), maneuverClassifiersCache,
+                    gaussianBasedTwdTransitionDistributionCache);
+        }
+        return windEstimation;
     }
 
     @SuppressWarnings("unchecked")

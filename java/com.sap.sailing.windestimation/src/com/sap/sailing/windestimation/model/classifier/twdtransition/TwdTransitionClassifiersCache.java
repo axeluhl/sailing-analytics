@@ -21,4 +21,9 @@ public class TwdTransitionClassifiersCache extends
         return twdTrasitionModelMetadata;
     }
 
+    @Override
+    public TwdTransitionClassifierModelMetadata getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
+        return new TwdTransitionClassifierModelMetadata(ManeuverTypeTransition.TACK_TACK);
+    }
+
 }

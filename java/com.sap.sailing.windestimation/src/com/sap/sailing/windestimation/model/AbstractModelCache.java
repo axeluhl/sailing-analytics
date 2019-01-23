@@ -50,4 +50,13 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
         modelCache.clearCache();
     }
 
+    @Override
+    public boolean isReady() {
+        ModelType omnipresentModel = getBestModel(
+                getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures());
+        return omnipresentModel != null;
+    }
+
+    public abstract T getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures();
+
 }

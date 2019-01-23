@@ -38,4 +38,10 @@ public class ManeuverClassifiersCache extends
         return maneuverFeatures;
     }
 
+    @Override
+    public ManeuverClassifierModelMetadata getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
+        return new ManeuverClassifierModelMetadata(new ManeuverFeatures(false, false, false), null,
+                ManeuverClassifierModelFactory.orderedSupportedTargetValues);
+    }
+
 }

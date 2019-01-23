@@ -5,5 +5,7 @@ public interface ModelCache<InstanceType, ModelType extends TrainableModel<Insta
     ModelType getBestModel(InstanceType instance);
 
     void clearCache();
+    
+    boolean isReady();
 
 }
