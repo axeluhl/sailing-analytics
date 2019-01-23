@@ -20,3 +20,5 @@ cd "$DOCKERDIR"
 docker build -t sapsailing:$release .
 echo "Cleaning up..."
 rm start env.sh JavaSE-11.profile Dockerfile
+docker tag sapsailing:$release donaldduck70/sapsailing:$release
+docker push donaldduck70/sapsailing:$release
