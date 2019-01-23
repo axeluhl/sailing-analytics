@@ -1,6 +1,7 @@
 #!/bin/bash
 release=$1
 if [ "$release" = "" ]; then
+  SET_LATEST=1
   INDEX=`mktemp index_XXXX.html`
   echo Tempfile for index.html is $INDEX
   wget -O $INDEX http://releases.sapsailing.com/
@@ -22,3 +23,7 @@ echo "Cleaning up..."
 rm start env.sh JavaSE-11.profile Dockerfile
 docker tag sapsailing:$release donaldduck70/sapsailing:$release
 docker push donaldduck70/sapsailing:$release
+if [ "$SET_LATEST" = "1" ]; then
+  docker tag sapsailing:$release donaldduck70/sapsailing:latest
+  docker push donaldduck70/sapsailing:latest
+fi
