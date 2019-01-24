@@ -170,7 +170,8 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         if (maneuverFeatures.isMarksInformation() && !maneuver.isMarkPassingDataAvailable()) {
             return false;
         }
-        if (boatClassName != null && !boatClassName.equals(maneuver.getBoatClass())) {
+        if (boatClassName != null && maneuver.getBoatClass() != null
+                && !boatClassName.equals(maneuver.getBoatClass().getName())) {
             return false;
         }
         return true;
