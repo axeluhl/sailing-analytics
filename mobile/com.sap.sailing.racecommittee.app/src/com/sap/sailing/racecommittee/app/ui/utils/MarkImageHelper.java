@@ -21,7 +21,8 @@ public abstract class MarkImageHelper {
         MarkImageDescriptor result = defaultCourseMarkDescriptor;
         int highestCompatibilityLevel = -1;
         for (MarkImageDescriptor imageDescriptor : markImageDescriptors) {
-            int compatibilityLevel = imageDescriptor.getCompatibilityLevel(mark.getType(), mark.getColor(), mark.getShape(), mark.getPattern());
+            int compatibilityLevel = imageDescriptor.getCompatibilityLevel(mark.getType(), mark.getColor(),
+                    mark.getShape(), mark.getPattern());
             if (compatibilityLevel > highestCompatibilityLevel) {
                 result = imageDescriptor;
                 highestCompatibilityLevel = compatibilityLevel;
@@ -44,9 +45,10 @@ public abstract class MarkImageHelper {
      *            the color constants defined in {@code res/values/colors.xml}. If not matched, the default constants
      *            {@code buoy_color} and {@code buoy_online} from {@code res/values/colors.xml} are used.
      */
-    protected MarkImageDescriptor createMarkImageDescriptor(Context context, @DrawableRes int drawableId, MarkType type, Color color, String shape,
-        String pattern) {
-        MarkImageDescriptor markIconDescriptor = new MarkImageDescriptor(context, drawableId, type, color, shape, pattern);
+    protected MarkImageDescriptor createMarkImageDescriptor(Context context, @DrawableRes int drawableId, MarkType type,
+            Color color, String shape, String pattern) {
+        MarkImageDescriptor markIconDescriptor = new MarkImageDescriptor(context, drawableId, type, color, shape,
+                pattern);
         markImageDescriptors.add(markIconDescriptor);
         return markIconDescriptor;
     }

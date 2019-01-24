@@ -33,7 +33,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.UnsentOperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class MailServiceImpl implements ReplicableMailService {
@@ -57,10 +57,10 @@ public class MailServiceImpl implements ReplicableMailService {
     /**
      * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
      * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
-     * {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)}
+     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
      * method.
      */
-    private UnsentOperationsToMasterSender unsentOperationForMasterQueue;
+    private OperationsToMasterSendingQueue unsentOperationForMasterQueue;
 
     public MailServiceImpl(Properties mailProperties, MailServiceResolver mailServiceResolver) {
         this.mailProperties = mailProperties;
@@ -257,15 +257,15 @@ public class MailServiceImpl implements ReplicableMailService {
     }
 
     @Override
-    public void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service) {
+    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
         this.unsentOperationForMasterQueue = service;
     }
 
     @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
             OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
         if (unsentOperationForMasterQueue != null) {
-            unsentOperationForMasterQueue.retrySendingLater(operationWithResult, sender);
+            unsentOperationForMasterQueue.scheduleForSending(operationWithResult, sender);
         }
     }
 }

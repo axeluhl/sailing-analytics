@@ -1,6 +1,7 @@
 #!/bin/bash
 release=$1
 if [ "$release" = "" ]; then
+  SET_LATEST=1
   INDEX=`mktemp index_XXXX.html`
   echo Tempfile for index.html is $INDEX
   wget -O $INDEX http://releases.sapsailing.com/
@@ -8,12 +9,21 @@ if [ "$release" = "" ]; then
   rm $INDEX
   echo Latest release is $release
 fi
-GITROOT=`dirname $0`/..
+GITROOT="`dirname $0`/.."
+DOCKERDIR="${GITROOT}/docker"
+DOCKERFILE="$DOCKERDIR/Dockerfile"
 echo "Copying files from GITROOT $GITROOT into Docker workspace"
-cp "$GITROOT/java/target/env.sh" .
-cp "$GITROOT/java/target/start" .
-cp "$GITROOT/java/target/configuration/JavaSE-11.profile" .
-cat Dockerfile.tpl | sed -e "s/RELEASE/${release}/g" >Dockerfile
+cp "$GITROOT/java/target/env.sh" "$DOCKERDIR"
+cp "$GITROOT/java/target/start" "$DOCKERDIR"
+cp "$GITROOT/java/target/configuration/JavaSE-11.profile" "$DOCKERDIR"
+cat ${DOCKERFILE}.tpl | sed -e "s/RELEASE/${release}/g" >${DOCKERFILE}
+cd "$DOCKERDIR"
 docker build -t sapsailing:$release .
 echo "Cleaning up..."
 rm start env.sh JavaSE-11.profile Dockerfile
+docker tag sapsailing:$release donaldduck70/sapsailing:$release
+docker push donaldduck70/sapsailing:$release
+if [ "$SET_LATEST" = "1" ]; then
+  docker tag sapsailing:$release donaldduck70/sapsailing:latest
+  docker push donaldduck70/sapsailing:latest
+fi

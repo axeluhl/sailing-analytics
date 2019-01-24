@@ -8,16 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -28,7 +18,18 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class RaceLogPollingService extends Service implements AppPreferences.PollingActiveChangedListener, RaceLogPollingTask.PollingResultListener {
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
+
+public class RaceLogPollingService extends Service
+        implements AppPreferences.PollingActiveChangedListener, RaceLogPollingTask.PollingResultListener {
 
     private static final String TAG = RaceLogPollingService.class.getName();
 
@@ -64,29 +65,29 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
                 extra = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
             }
             switch (action) {
-                case AppConstants.INTENT_ACTION_POLLING_STOP:
-                    stopSelf();
-                    break;
+            case AppConstants.INTENT_ACTION_POLLING_STOP:
+                stopSelf();
+                break;
 
-                case AppConstants.INTENT_ACTION_POLLING_RACE_ADD:
-                    if (TextUtils.isEmpty(extra)) {
-                        ExLog.i(this, TAG, "INTENT_ACTION_EXTRA was null for " + action);
-                    } else {
-                        registerRace(extra);
-                    }
-                    break;
+            case AppConstants.INTENT_ACTION_POLLING_RACE_ADD:
+                if (TextUtils.isEmpty(extra)) {
+                    ExLog.i(this, TAG, "INTENT_ACTION_EXTRA was null for " + action);
+                } else {
+                    registerRace(extra);
+                }
+                break;
 
-                case AppConstants.INTENT_ACTION_POLLING_RACE_REMOVE:
-                    if (TextUtils.isEmpty(extra)) {
-                        ExLog.i(this, TAG, "INTENT_ACTION_EXTRA was null for " + action);
-                    } else {
-                        unregisterRace(extra);
-                    }
-                    break;
+            case AppConstants.INTENT_ACTION_POLLING_RACE_REMOVE:
+                if (TextUtils.isEmpty(extra)) {
+                    ExLog.i(this, TAG, "INTENT_ACTION_EXTRA was null for " + action);
+                } else {
+                    unregisterRace(extra);
+                }
+                break;
 
-                case AppConstants.INTENT_ACTION_POLLING_POLL:
-                    poll();
-                    break;
+            case AppConstants.INTENT_ACTION_POLLING_POLL:
+                poll();
+                break;
             }
         }
 
@@ -96,7 +97,8 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
     @Override
     public void onDestroy() {
         ExLog.i(this, TAG, "onDestroy");
-
+        stopForeground(true);
+        stopSelf();
         mRaces.clear();
         if (mAppPreferences != null) {
             mAppPreferences.unregisterPollingActiveChangedListener(this);
@@ -104,13 +106,23 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
         if (mAlarm != null && mPendingIntent != null) {
             mAlarm.cancel(mPendingIntent);
         }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        stopForeground(true);
+        stopSelf();
+        ExLog.i(this, TAG, "Race State Service is being removed.");
     }
 
     @Override
     public void onPollingActiveChanged(boolean isActive) {
         if (isActive) {
             scheduleNextPoll();
-            ExLog.i(this, TAG, "Polling has been activated, will start in " + mAppPreferences.getPollingInterval() + " seconds.");
+            ExLog.i(this, TAG,
+                    "Polling has been activated, will start in " + mAppPreferences.getPollingInterval() + " seconds.");
         } else {
             ExLog.i(this, TAG, "Polling has been deactivated, next polling attempt will be aborted.");
         }
@@ -128,7 +140,8 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
     /**
      * calculates for the given race id the poll url and add it to the map
      *
-     * @param raceId race id
+     * @param raceId
+     *            race id
      */
     private void registerRace(String raceId) {
         ExLog.i(this, TAG, "registerRace: " + raceId);
@@ -137,7 +150,8 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
             try {
                 mRaces.put(raceId, createURL(race));
             } catch (MalformedURLException | UnsupportedEncodingException e) {
-                ExLog.e(this, TAG, String.format("Unable to create polling URL for race %s: %s", race.getId(), e.getMessage()));
+                ExLog.e(this, TAG,
+                        String.format("Unable to create polling URL for race %s: %s", race.getId(), e.getMessage()));
             }
             scheduleNextPoll();
         }
@@ -146,7 +160,8 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
     /**
      * Remove the {@link ManagedRace}, so it will no longer be part of the polling
      *
-     * @param raceId race id
+     * @param raceId
+     *            race id
      */
     private void unregisterRace(String raceId) {
         ExLog.i(this, TAG, "unregisterRace: " + raceId);
@@ -159,7 +174,8 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
     /**
      * Find the {@link ManagedRace} for the given race id in the {@link DataStore}
      *
-     * @param raceId race id
+     * @param raceId
+     *            race id
      * @return {@link ManagedRace} if found, else null
      */
     private ManagedRace getManagedRace(String raceId) {
@@ -175,7 +191,7 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
 
     private URL createURL(ManagedRace race) throws MalformedURLException, UnsupportedEncodingException {
         return new URL(MessageSendingService.getRaceLogEventSendAndReceiveUrl(this, race.getRaceGroup().getName(),
-            race.getName(), race.getFleet().getName()));
+                race.getName(), race.getFleet().getName()));
     }
 
     private void poll() {

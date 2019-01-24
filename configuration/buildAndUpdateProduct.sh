@@ -631,68 +631,31 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             exit 1
         fi
         echo "ANDROID_HOME=$ANDROID_HOME"
-        PATH=$PATH:$ANDROID_HOME/tools
+        PATH=$PATH:$ANDROID_HOME/tools/bin
         PATH=$PATH:$ANDROID_HOME/platform-tools
         SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
         if [ \! -x "$SDK_MANAGER" ]; then
             SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
         fi
         
-	# Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
+        BUILD_TOOLS_VERSION=`grep "buildTools = " build.gradle | cut -d "\"" -f 2`
+        echo "BUILD_TOOLS_VERSION=$BUILD_TOOLS_VERSION"
+        TARGET_API_VERSION=`grep "targetSdk = " build.gradle | cut -d "=" -f 2 | sed 's/ //g'`
+        echo "TARGET_API_VERSION=$TARGET_API_VERSION"
+        sdkmanager --update && yes | sdkmanager --licenses
+        sdkmanager "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
+
+        # TODO: make distinction available for gradle builds as well
+        # Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
         # mobile_extra="-P -with-not-android-relevant -P with-mobile -P use-staged-third-party-artifacts -Dmaven.repo.local=${TMP}/temp_maven_repo"
-	# Use the following line for regular builds with no staged Nexus artifacts:
-        mobile_extra="-P -with-not-android-relevant -P with-mobile"
-        
-        if [ $testing -eq 0 ]; then
-            echo "INFO: Skipping tests"
-            mobile_extra="$mobile_extra -Dmaven.test.skip=true -DskipTests=true"
-        else
-            mobile_extra="$mobile_extra -DskipTests=false"
+        # Use the following line for regular builds with no staged Nexus artifacts:
+        # mobile_extra="-P -with-not-android-relevant -P with-mobile"
+
+        ./gradlew build
+        if [[ ${PIPESTATUS[0]} != 0 ]]; then
+            exit 100
         fi
-
-        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
-        echo "RC_APP_VERSION=$RC_APP_VERSION"
-
-        TRACKING_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/AndroidManifest.xml | cut -d "\"" -f 2`
-        echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
-
-        BUOY_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.buoy.positioning/AndroidManifest.xml | cut -d "\"" -f 2`
-        echo "BUOY_APP_VERSION=$BUOY_APP_VERSION"
-        
-        APP_VERSION_PARAMS="-Drc-app-version=$RC_APP_VERSION -Dtracking-app-version=$TRACKING_APP_VERSION -Dbuoy.positioning-app-version=$BUOY_APP_VERSION"
-        extra="$extra $APP_VERSION_PARAMS"
-        mobile_extra="$mobile_extra $APP_VERSION_PARAMS"
-        
-        NOW=$(date +"%s")
-        BUILD_TOOLS=22.0.1
-        TARGET_API=22
-        TEST_API=18
-        ANDROID_ABI=armeabi-v7a
-        AVD_NAME="androidTest-${NOW}"
-        echo "Updating Android SDK..." | tee -a $START_DIR/build.log
-	OLD_JAVA_HOME=$JAVA_HOME
-	if [ -z "$JAVA8_HOME" ]; then
-	  if [ -d /opt/sapjvm_8 ]; then
-	    JAVA8_HOME=/opt/sapjvm_8
-	  else
-	    JAVA8_HOME=$JAVA_HOME
-	  fi
-	fi
-	export JAVA_HOME=$JAVA8_HOME
-        "$SDK_MANAGER" --update $ANDROID_OPTIONS
-        echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..." | tee -a $START_DIR/build.log
-        "$SDK_MANAGER" $ANDROID_OPTIONS "build-tools;${BUILD_TOOLS}"
-        echo "Updating Android SDK (android-${TARGET_API})..." | tee -a $START_DIR/build.log
-        "$SDK_MANAGER" $ANDROID_OPTIONS "platforms;android-${TARGET_API}"
-        echo "Updating Android SDK (extra-android-m2repository)..." | tee -a $START_DIR/build.log
-        "$SDK_MANAGER" $ANDROID_OPTIONS "extras;android;m2repository"
-        echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
-        "$SDK_MANAGER" $ANDROID_OPTIONS "extras;google;m2repository"
-	export JAVA_HOME=$OLD_JAVA_HOME
-
-        echo "Using following command for apps build: mvn $mobile_extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
-        echo "Maven version used: `mvn --version`"
-        mvn $mobile_extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
+        ./gradlew assemble
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi

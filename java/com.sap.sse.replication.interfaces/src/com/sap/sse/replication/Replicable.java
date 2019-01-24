@@ -242,18 +242,10 @@ extends OperationsToMasterSender<S, OperationWithResult<S, ?>>, Replicator<S, O>
     }
     
     /**
-     * If an operation equal to <code>operationWithResultWithIdWrapper</code> has previously been passed to a call to
-     * {@link OperationsToMasterSender#addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper)}, the call returns <code>true</code>
-     * exactly once.
-     */
-    boolean hasSentOperationToMaster(OperationWithResult<S, ?> operation);
-    
-    
-    /**
-     * Injects a service into this replicable that this instance of {@link UnsentOperationsToMasterSender} can use
-     * as a delegate to implement the {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)}
+     * Injects a service into this replicable that this instance of {@link OperationsToMasterSendingQueue} can use
+     * as a delegate to implement the {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
      * method. This replicable may not be able to enqueue operations for re-trying sending to master after
      * an error occurred unless this method has been used to announce the service.
      */
-    void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service);
+    void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service);
 }

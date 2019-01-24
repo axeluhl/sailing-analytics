@@ -1,5 +1,11 @@
 package com.sap.sailing.android.shared.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import com.sap.sailing.android.shared.R;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -9,12 +15,6 @@ import android.content.res.Configuration;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
-
-import com.sap.sailing.android.shared.R;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class AppUtils {
 
@@ -33,7 +33,8 @@ public class AppUtils {
     /**
      * Locks the phone screen to portrait and tablets to landscape
      *
-     * @param activity Activity to lock
+     * @param activity
+     *            Activity to lock
      */
     public static void lockOrientation(Activity activity) {
         if (with(activity).isPhone()) {

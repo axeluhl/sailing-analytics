@@ -83,7 +83,7 @@ import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.UnsentOperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
@@ -173,10 +173,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     /**
      * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
      * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
-     * {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)}
+     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
      * method.
      */
-    private UnsentOperationsToMasterSender unsentOperationsToMasterSender;
+    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
 
     private static Ini shiroConfiguration;
 
@@ -2035,7 +2035,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service) {
+    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
         this.unsentOperationsToMasterSender = service;
     }
     @Override
@@ -2044,10 +2044,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
             OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
         if (unsentOperationsToMasterSender != null) {
-            unsentOperationsToMasterSender.retrySendingLater(operationWithResult, sender);
+            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
         }
     }
 

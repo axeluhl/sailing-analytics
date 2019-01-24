@@ -2,15 +2,17 @@ package com.sap.sailing.racecommittee.app.data.loaders;
 
 import java.util.concurrent.Callable;
 
-import android.content.Context;
-import android.content.Loader;
-import android.os.Bundle;
-
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.content.Loader;
 
 /**
  * Simple wrapper for a {@link DataLoaderCallbacks} creating an {@link ImmediateDataLoader}.
- * @param <T> the result type.
+ * 
+ * @param <T>
+ *            the result type.
  */
 public class ImmediateDataLoaderCallbacks<T> extends DataLoaderCallbacks<T> {
     public ImmediateDataLoaderCallbacks(final Context context, LoadClient<T> clientCallback,

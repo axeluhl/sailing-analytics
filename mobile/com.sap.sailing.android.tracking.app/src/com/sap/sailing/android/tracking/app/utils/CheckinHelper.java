@@ -10,8 +10,8 @@ import android.support.annotation.NonNull;
 public class CheckinHelper {
 
     @NonNull
-    private static JSONObject getBaseCheckinJsom(String deviceUuid, String pushDeviceId, long fromMillis, JSONObject jsonObject)
-        throws JSONException {
+    private static JSONObject getBaseCheckinJsom(String deviceUuid, String pushDeviceId, long fromMillis,
+            JSONObject jsonObject) throws JSONException {
         jsonObject.put(DeviceMappingConstants.JSON_DEVICE_TYPE, "android");
         jsonObject.put(DeviceMappingConstants.JSON_DEVICE_UUID, deviceUuid);
         jsonObject.put(DeviceMappingConstants.JSON_PUSH_DEVICE_ID, pushDeviceId);
@@ -20,8 +20,8 @@ public class CheckinHelper {
     }
 
     @NonNull
-    public static JSONObject getCompetitorCheckinJson(String competitorId, String deviceUuid, String pushDeviceId, long fromMillis)
-            throws JSONException {
+    public static JSONObject getCompetitorCheckinJson(String competitorId, String deviceUuid, String pushDeviceId,
+            long fromMillis) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING, competitorId);
         return getBaseCheckinJsom(deviceUuid, pushDeviceId, fromMillis, jsonObject);
