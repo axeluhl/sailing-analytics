@@ -84,8 +84,6 @@ android {
     packagingOptions {
         exclude "LICENSE.txt"
         exclude ".readme"
-        exclude "pom.properties"
-        exclude "pom.xml"
     }
 }
 

@@ -83,8 +83,6 @@ android {
 
     packagingOptions {
         exclude "LICENSE.txt"
-        exclude "META-INF/maven/com.googlecode.json-simple/json-simple/pom.properties"
-        exclude "META-INF/maven/com.googlecode.json-simple/json-simple/pom.xml"
     }
 }
 
