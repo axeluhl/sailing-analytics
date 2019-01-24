@@ -16,7 +16,13 @@ public class DistanceBasedTwdTransitionRegressorModelMetadata
 
     @Override
     public double getDimensionValue(TwdTransition instance) {
-        return instance.getDistance().getMeters();
+        double meters = instance.getDistance().getMeters();
+        return getPreprocessedDimensionValue(meters);
+    }
+
+    @Override
+    public double getPreprocessedDimensionValue(double meters) {
+        return meters;
     }
 
     public enum DistanceValueRange {

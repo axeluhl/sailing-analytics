@@ -16,7 +16,16 @@ public class DurationBasedTwdTransitionRegressorModelMetadata
 
     @Override
     public double getDimensionValue(TwdTransition instance) {
-        return instance.getDuration().asSeconds();
+        double seconds = instance.getDuration().asSeconds();
+        return getPreprocessedDimensionValue(seconds);
+    }
+
+    @Override
+    public double getPreprocessedDimensionValue(double seconds) {
+        if (getSupportedDimensionValueRange().equals(DurationValueRange.MIDDLE1.getSupportedDimensionValueRange())) {
+            seconds = Math.sqrt(seconds);
+        }
+        return seconds;
     }
 
     public enum DurationValueRange {

@@ -34,7 +34,7 @@ public class TwdTransitionAggregatedStdRegressorTrainer {
             AggregatedSingleDimensionBasedTwdTransition twdTransition = iterator.next();
             double dimensionValue = twdTransition.getDimensionValue();
             if (model.getContextSpecificModelMetadata().isDimensionValueSupportedForTraining(dimensionValue)) {
-                x[0] = dimensionValue;
+                x[0] = model.getContextSpecificModelMetadata().getPreprocessedDimensionValue(dimensionValue);
                 trainerHelper.incrementalModelTraining(x, twdTransition.getZeroMeanStd());
             }
         }
@@ -44,7 +44,7 @@ public class TwdTransitionAggregatedStdRegressorTrainer {
             AggregatedSingleDimensionBasedTwdTransition twdTransition = iterator.next();
             double dimensionValue = twdTransition.getDimensionValue();
             if (model.getContextSpecificModelMetadata().isDimensionValueSupportedForTraining(dimensionValue)) {
-                x[0] = dimensionValue;
+                x[0] = model.getContextSpecificModelMetadata().getPreprocessedDimensionValue(dimensionValue);
                 trainerHelper.incrementRmseCalculation(x, twdTransition.getZeroMeanStd());
             }
         }

@@ -23,6 +23,8 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
     }
 
     public abstract double getDimensionValue(TwdTransition instance);
+    
+    public abstract double getPreprocessedDimensionValue(double dimensionValue);
 
     public SupportedDimensionValueRange getSupportedDimensionValueRange() {
         return supportedDimensionValueRange;

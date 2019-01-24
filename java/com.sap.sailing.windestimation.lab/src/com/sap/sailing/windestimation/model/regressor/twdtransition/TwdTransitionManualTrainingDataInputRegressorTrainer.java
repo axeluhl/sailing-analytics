@@ -28,7 +28,7 @@ public class TwdTransitionManualTrainingDataInputRegressorTrainer {
             double xi = inputOutputPairs[i][0];
             if (model.getContextSpecificModelMetadata().isDimensionValueSupportedForTraining(xi)) {
                 double yi = inputOutputPairs[i][1];
-                modelInput[0] = xi;
+                modelInput[0] = model.getContextSpecificModelMetadata().getPreprocessedDimensionValue(xi);
                 trainerHelper.incrementalModelTraining(modelInput, yi);
             }
         }
@@ -37,7 +37,7 @@ public class TwdTransitionManualTrainingDataInputRegressorTrainer {
             double xi = inputOutputPairs[i][0];
             if (model.getContextSpecificModelMetadata().isDimensionValueSupportedForTraining(xi)) {
                 double yi = inputOutputPairs[i][1];
-                modelInput[0] = xi;
+                modelInput[0] = model.getContextSpecificModelMetadata().getPreprocessedDimensionValue(xi);
                 trainerHelper.incrementRmseCalculation(modelInput, yi);
             }
         }
