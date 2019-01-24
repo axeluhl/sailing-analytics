@@ -96,5 +96,7 @@ Then execute ``systemctl enable mongod.service`` to launch the MongoDB process a
 
 Connect to the MongoDB on that instance, then issue the command ``rs.initiate()`` in order to turn the instance into the "seed" of a replica set. You can then, for the time being, ``quit()`` the mongo shell. Re-connecting, e.g., with ``mongo "mongodb://localhost:27017/?replicaSet=live"``, will show the ``PRIMARY`` of the new replica set.
 
+Connected to the PRIMARY using the ``mongo`` shell, a replica can be added using ``rs.add({host: "hostname:port"}). For additional options see [here](https://docs.mongodb.com/manual/reference/method/rs.add/). To add a hidden replica on ``dbserver.internal.sapsailing.com:10203``, use ``rs.add({host: "dbserver.internal.sapsailing.com:10203", buildIndexes: false, hidden: true, priority: 0})``.
+
 
 TODO: automate the initialization and replica set extension using "Addition Details" in the instance; create a MongoDB script that is executed during start-up; if no replica set exists and no user detail specifies where the primary is, run ``rs.initiate()``. If a replica set already exists, leave things unchanged. If no replica set exists and in a user detail something like ``REPLICA_SET_NAME=...`` and ``REPLICA_SET_PRIMARY=...`` is provided, add the local node as a secondary to the primary / replica set specified.
