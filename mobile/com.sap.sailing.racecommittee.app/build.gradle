@@ -3,10 +3,6 @@ if (!project.hasProperty("xmake")) {
     apply plugin: "com.getkeepsafe.dexcount"
 }
 
-def packageName="com.sap.sailing.racecommittee.app"
-def verCode=63
-def verName=1.4.63
-
 android {
     buildToolsVersion rootProject.ext.buildTools
     compileSdkVersion rootProject.ext.compileSdk
@@ -24,35 +20,22 @@ android {
             outputFileName = new File(outputFileName.replace("-$variant.buildType.name", ""))
         }
         variant.assemble.doLast { assemble ->
-           // Create version file
-           def versionFile = new File(rootProject.ext.destinationFolder, "$packageName" + ".version")
-           versionFile.text = "$packageName" + ".apk=$verCode-$variant.buildType.name"
-           copy {
-               from variant.outputs*.outputFile
-               into rootProject.ext.destinationFolder
-           }
-       }
-    }
-
-    def versionPropertiesFile = file('project.properties')
-    if (versionPropertiesFile.exists()) {
-        def versionProps = new Properties()
-        versionProps.load(new FileInputStream(versionPropertiesFile))
-        verCode = (versionProps['VERSION_CODE'] ?: '0').toInteger()
-        def runTasks = gradle.startParameter.taskNames
-        if ('assemble' in runTasks || 'assembleRelease' in runTasks || 'aR' in runTasks) {
-            verCode = verCode + 1
+            // Create version file
+            def versionFile = new File(rootProject.ext.destinationFolder, "$packageName" + ".version")
+            versionFile.text = "$packageName" + ".apk=$appVersionCode-$variant.buildType.name"
+            copy {
+                from variant.outputs*.outputFile
+                into rootProject.ext.destinationFolder
+            }
         }
-        versionProps['VERSION_CODE'] = verCode.toString()
-        versionProps.store(versionPropertiesFile.newWriter(), null)
     }
 
     defaultConfig {
         applicationId packageName
         minSdkVersion rootProject.ext.minSdk
         targetSdkVersion rootProject.ext.targetSdk
-        versionCode verCode
-        versionName "$verCode - Laser"
+        versionCode appVersionCode.toInteger()
+        versionName "$appVersionCode - Laser"
     }
 
     sourceSets {

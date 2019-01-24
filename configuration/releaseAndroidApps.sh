@@ -1,7 +1,8 @@
 #!/bin/sh
 ANDROID_RELEASE_BRANCH=android-xmake-release
 RELEASE_BRANCH=rel-1.4
-APP_BUILD_GRADLE="mobile/com.sap.sailing.android.tracking.app/build.gradle mobile/com.sap.sailing.android.buoy.positioning.app/build.gradle mobile/com.sap.sailing.racecommittee.app/build.gradle"
+APP_DIRS="mobile/com.sap.sailing.android.tracking.app/ mobile/com.sap.sailing.android.buoy.positioning.app/ mobile/com.sap.sailing.racecommittee.app/"
+APP_GRADLE_PROPERTIES="gradle.properties"
 FILES2SIGN=cfg/files2sign.json
 GIT_REMOTE=origin
 
@@ -13,17 +14,18 @@ OPTION_PERFORM_GIT_OPERATIONS=1
 # Read and update versionCode in build.gradle
 # Based on new versionCode the versionNme will also be updated.
 increment_version_code_and_set_version_name() {
-  BUILD_GRADLE_FILE=$1
-  echo "Incrementing version code and version name for $BUILD_GRADLE_FILE"
+  DIR=$1
+  GRADLE_PROPERTIES_FILE=$DIR$APP_GRADLE_PROPERTIES
+  echo "Incrementing version code and version name for $DIR"
   
-  OLD_VERSION_CODE=`grep 'def verCode=[0-9]*' $BUILD_GRADLE_FILE | sed -e 's/^.*def verCode=\([0-9]*\).*$/\1/'`
+  OLD_VERSION_CODE=`grep 'appVersionCode=[0-9]*' $GRADLE_PROPERTIES_FILE | sed -e 's/^.*appVersionCode=\([0-9]*\).*$/\1/'`
   NEW_VERSION_CODE=$(($OLD_VERSION_CODE + 1))
   NEW_VERSION_NAME=1.4.$NEW_VERSION_CODE
 
-  echo $BUILD_GRADLE_FILE: OLD_VERSION_CODE is $OLD_VERSION_CODE, NEW_VERSION_CODE is $NEW_VERSION_CODE
-  echo $BUILD_GRADLE_FILE: Using NEW_VERSION_NAME=\"$NEW_VERSION_NAME\"
-  sed --in-place -e "s/def verCode=$OLD_VERSION_CODE/def verCode=$NEW_VERSION_CODE/" "$BUILD_GRADLE_FILE"
-  sed --in-place -e "s/def verName=\([^\"]*\)/def verName=$NEW_VERSION_NAME/" "$BUILD_GRADLE_FILE"
+  echo $DIR: OLD_VERSION_CODE is $OLD_VERSION_CODE, NEW_VERSION_CODE is $NEW_VERSION_CODE
+  echo $DIR: Using NEW_VERSION_NAME=\"$NEW_VERSION_NAME\"
+  sed --in-place -e "s/appVersionCode=$OLD_VERSION_CODE/appVersionCode=$NEW_VERSION_CODE/" "$GRADLE_PROPERTIES_FILE"
+  sed --in-place -e "s/appVersionName=\([^\"]*\)/appVersionName=$NEW_VERSION_NAME/" "$GRADLE_PROPERTIES_FILE"
 }
 
 # Update files2sign.json with new updated version name 
@@ -64,12 +66,11 @@ if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
   git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$ANDROID_RELEASE_BRANCH
 fi
 
-
 # Patch the build.gradle files to upgrade the versionCode sequential counter relevant for the PlayStore
 # and the versionName which is what the user sees and which we expect to follow a major.minor version scheme,
 # where this script increments the minor version by one
 if [ "$OPTION_UPDATE_ANDROID_VERSIONS" = "1" ]; then
-  for m in $APP_BUILD_GRADLE; do
+  for m in $APP_DIRS; do
     increment_version_code_and_set_version_name $m
   done
 
@@ -77,7 +78,7 @@ if [ "$OPTION_UPDATE_ANDROID_VERSIONS" = "1" ]; then
 fi
 
 # Now commit the version changes and amend the commit using the change request ID tag:
-git commit -a -m "Upgraded Android apps from version $OLD_POM_VERSION to $NEW_POM_VERSION"
+git commit -a -m "Upgraded Android apps from version $OLD_VERSION_NAME to $NEW_VERSION_NAME"
 git commit --amend -m "`git show -s --pretty=format:%s%n%n%b`
 if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
   git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$RELEASE_BRANCH
