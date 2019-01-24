@@ -65,8 +65,11 @@ public class UserStoreWithPersistenceTest {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
         MongoDatabase db = service.getDB();
+        db.getCollection(CollectionNames.ROLES.name()).drop();
         db.getCollection(CollectionNames.USERS.name()).drop();
         db.getCollection(CollectionNames.USER_GROUPS.name()).drop();
+        db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name()).drop();
+        db.getCollection(CollectionNames.OWNERSHIPS.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         newStore();
