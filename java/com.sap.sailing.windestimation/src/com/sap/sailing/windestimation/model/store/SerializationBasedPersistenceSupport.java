@@ -6,19 +6,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
-import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
 public class SerializationBasedPersistenceSupport implements PersistenceSupport {
 
-    private final PersistableModel<?, ?> model;
-
-    public SerializationBasedPersistenceSupport(PersistableModel<?, ?> model) {
-        this.model = model;
+    @Override
+    public String getId() {
+        return "Serialization";
     }
 
     @Override
-    public String getPersistenceKey() {
+    public String getPersistenceKey(PersistableModel<?, ?> model) {
         StringBuilder key = new StringBuilder();
         key.append(model.getClass().getSimpleName());
         key.append("-");
@@ -27,7 +25,7 @@ public class SerializationBasedPersistenceSupport implements PersistenceSupport 
     }
 
     @Override
-    public void saveToStream(OutputStream output) throws ModelPersistenceException {
+    public void saveToStream(PersistableModel<?, ?> model, OutputStream output) throws ModelPersistenceException {
         try (ObjectOutputStream serializer = new ObjectOutputStream(output)) {
             serializer.writeObject(model);
         } catch (IOException e) {
@@ -37,8 +35,7 @@ public class SerializationBasedPersistenceSupport implements PersistenceSupport 
 
     @Override
     public PersistableModel<?, ?> loadFromStream(InputStream input) throws ModelPersistenceException {
-        try (ObjectInputStream deserializer = DomainFactory.INSTANCE
-                .createObjectInputStreamResolvingAgainstThisFactory(input)) {
+        try (ObjectInputStream deserializer = new ObjectInputStream(input)) {
             PersistableModel<?, ?> loadedModel = (PersistableModel<?, ?>) deserializer.readObject();
             return loadedModel;
         } catch (ClassNotFoundException | IOException e) {

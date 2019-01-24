@@ -13,8 +13,11 @@ public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<In
 
     private final ModelStore modelStore;
     private final ModelFactory<InstanceType, T, ModelType> modelFactory;
+    private ReadableModelCache<InstanceType, T, ModelType> modelCache;
 
-    public ModelLoader(ModelStore modelStore, ModelFactory<InstanceType, T, ModelType> modelFactory) {
+    public ModelLoader(ReadableModelCache<InstanceType, T, ModelType> modelCache, ModelStore modelStore,
+            ModelFactory<InstanceType, T, ModelType> modelFactory) {
+        this.modelCache = modelCache;
         this.modelStore = modelStore;
         this.modelFactory = modelFactory;
     }
@@ -47,15 +50,21 @@ public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<In
 
     public ModelType loadModel(T contextSpecificModelMetadata) {
         ModelType model = modelFactory.getNewModel(contextSpecificModelMetadata);
-        ModelType loadedModel = null;
-        try {
-            loadedModel = modelStore.loadPersistedState(model);
-        } catch (ModelNotFoundException e) {
-            // ignore, because no model might be available for the specified model metadata
-        } catch (ModelPersistenceException e) {
-            throw new ModelLoadingException(e);
+        ModelType loadedModel = modelCache == null ? null : modelCache.getModelFromCache(contextSpecificModelMetadata);
+        if (loadedModel == null && modelStore != null) {
+            try {
+                loadedModel = modelStore.loadPersistedState(model);
+            } catch (ModelNotFoundException e) {
+                // ignore, because no model might be available for the specified model metadata
+            } catch (ModelPersistenceException e) {
+                throw new ModelLoadingException(e);
+            }
         }
         return loadedModel;
+    }
+
+    public interface ReadableModelCache<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
+        ModelType getModelFromCache(T contextSpecificModelMetadata);
     }
 
 }

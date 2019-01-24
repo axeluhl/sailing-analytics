@@ -10,10 +10,10 @@ public abstract class AbstractClassifiersCache<InstanceType, T extends ContextSp
 
     private final ClassificationResultMapper<InstanceType, T, ClassificationResultType> classificationResultMapper;
 
-    public AbstractClassifiersCache(ModelStore classifierModelStore, long preserveLoadedClassifiersMillis,
-            ClassifierModelFactory<InstanceType, T> classifierModelFactory,
+    public AbstractClassifiersCache(ModelStore classifierModelStore, boolean preloadAllModels,
+            long preserveLoadedClassifiersMillis, ClassifierModelFactory<InstanceType, T> classifierModelFactory,
             ClassificationResultMapper<InstanceType, T, ClassificationResultType> classificationResultMapper) {
-        super(classifierModelStore, preserveLoadedClassifiersMillis, classifierModelFactory);
+        super(classifierModelStore, preloadAllModels, preserveLoadedClassifiersMillis, classifierModelFactory);
         this.classificationResultMapper = classificationResultMapper;
     }
 

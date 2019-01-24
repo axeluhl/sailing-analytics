@@ -19,6 +19,7 @@ import com.sap.sailing.windestimation.windinference.WindTrackCalculatorImpl;
 public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
         ManeuverBasedWindEstimationComponentImpl<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> {
 
+    private static final boolean PRELOAD_ALL_MODELS = false;
     private static final int MODEL_CACHE_KEEP_ALIVE_MILLIS = 3600000;
     private static final HmmTransitionProbabilitiesCalculator transitionProbabilitiesCalculatorType = HmmTransitionProbabilitiesCalculator.INTERSECTED;
     private static final boolean propagateIntersectedWindRangeOfHeadupAndBearAway = false;
@@ -28,8 +29,10 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
             RacePreprocessingPipeline<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> preprocessingPipeline,
             ManeuverClassificationsAggregatorImplementation aggregatorImplementation) {
         super(preprocessingPipeline,
-                new ManeuverClassifiersCache(modelStore, polarService, MODEL_CACHE_KEEP_ALIVE_MILLIS, maneuverFeatures),
-                aggregatorImplementation.createNewInstance(polarService, modelStore, MODEL_CACHE_KEEP_ALIVE_MILLIS),
+                new ManeuverClassifiersCache(modelStore, PRELOAD_ALL_MODELS, MODEL_CACHE_KEEP_ALIVE_MILLIS,
+                        maneuverFeatures),
+                aggregatorImplementation.createNewInstance(polarService, modelStore, PRELOAD_ALL_MODELS,
+                        MODEL_CACHE_KEEP_ALIVE_MILLIS),
                 new WindTrackCalculatorImpl(new MiddleCourseBasedTwdCalculatorImpl(),
                         maneuverFeatures.isPolarsInformation() ? new PolarsBasedTwsCalculatorImpl(polarService)
                                 : new DummyBasedTwsCalculatorImpl()));
@@ -53,9 +56,9 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
         HMM, MST_HMM, CLUSTERING, MEAN_OUTLIER, NEIGHBOR_OUTLIER;
 
         ManeuverClassificationsAggregator createNewInstance(PolarDataService polarService, ModelStore modelStore,
-                long modelCacheKeepAliveMillis) {
+                boolean preloadAllModels, long modelCacheKeepAliveMillis) {
             ManeuverClassificationsAggregatorFactory factory = new ManeuverClassificationsAggregatorFactory(
-                    polarService, modelStore, modelCacheKeepAliveMillis);
+                    polarService, modelStore, preloadAllModels, modelCacheKeepAliveMillis);
             switch (this) {
             case HMM:
                 return factory.hmm(transitionProbabilitiesCalculatorType,

@@ -6,9 +6,12 @@ import java.io.OutputStream;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
 public interface PersistenceSupport {
-    String getPersistenceKey();
 
-    void saveToStream(OutputStream output) throws ModelPersistenceException;
+    String getId();
+
+    String getPersistenceKey(PersistableModel<?, ?> model);
+
+    void saveToStream(PersistableModel<?, ?> model, OutputStream output) throws ModelPersistenceException;
 
     PersistableModel<?, ?> loadFromStream(InputStream input) throws ModelPersistenceException;
 }

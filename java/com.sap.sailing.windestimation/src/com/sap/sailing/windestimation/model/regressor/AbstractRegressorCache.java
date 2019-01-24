@@ -7,9 +7,9 @@ import com.sap.sailing.windestimation.model.store.ModelStore;
 public abstract class AbstractRegressorCache<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
         extends AbstractModelCache<InstanceType, T, TrainableRegressorModel<InstanceType, T>> {
 
-    public AbstractRegressorCache(ModelStore modelStore, long preserveLoadedModelsMillis,
+    public AbstractRegressorCache(ModelStore modelStore, boolean preloadAllModels, long preserveLoadedModelsMillis,
             RegressorModelFactory<InstanceType, T> modelFactory) {
-        super(modelStore, preserveLoadedModelsMillis, modelFactory);
+        super(modelStore, preloadAllModels, preserveLoadedModelsMillis, modelFactory);
     }
 
 }

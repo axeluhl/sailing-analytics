@@ -2,8 +2,7 @@ package com.sap.sailing.windestimation.model.regressor;
 
 import com.sap.sailing.windestimation.model.AbstractTrainableModel;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
-import com.sap.sailing.windestimation.model.store.PersistenceSupport;
-import com.sap.sailing.windestimation.model.store.SerializationBasedPersistenceSupport;
+import com.sap.sailing.windestimation.model.store.PersistenceSupportType;
 
 public abstract class AbstractRegressorModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
         extends AbstractTrainableModel<InstanceType, T> implements TrainableRegressorModel<InstanceType, T> {
@@ -15,8 +14,8 @@ public abstract class AbstractRegressorModel<InstanceType, T extends ContextSpec
     }
 
     @Override
-    public PersistenceSupport getPersistenceSupport() {
-        return new SerializationBasedPersistenceSupport(this);
+    public PersistenceSupportType getPersistenceSupportType() {
+        return PersistenceSupportType.SERIALIZATION;
     }
 
 }

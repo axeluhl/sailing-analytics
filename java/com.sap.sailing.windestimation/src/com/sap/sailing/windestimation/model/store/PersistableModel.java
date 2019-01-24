@@ -7,7 +7,7 @@ import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 public interface PersistableModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
         extends Serializable {
 
-    PersistenceSupport getPersistenceSupport();
+    PersistenceSupportType getPersistenceSupportType();
 
     T getContextSpecificModelMetadata();
 }

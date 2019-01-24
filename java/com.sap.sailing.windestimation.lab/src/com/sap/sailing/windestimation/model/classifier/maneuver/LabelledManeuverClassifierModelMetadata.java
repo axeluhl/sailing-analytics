@@ -1,6 +1,5 @@
 package com.sap.sailing.windestimation.model.classifier.maneuver;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
@@ -11,9 +10,9 @@ public class LabelledManeuverClassifierModelMetadata extends ManeuverClassifierM
 
     private static final long serialVersionUID = -7074647974723150632L;
 
-    public LabelledManeuverClassifierModelMetadata(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
+    public LabelledManeuverClassifierModelMetadata(ManeuverFeatures maneuverFeatures, String boatClassName,
             ManeuverTypeForClassification... orderedSupportedTargetValues) {
-        super(maneuverFeatures, boatClass, orderedSupportedTargetValues);
+        super(maneuverFeatures, boatClassName, orderedSupportedTargetValues);
     }
 
     @Override

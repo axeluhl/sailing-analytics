@@ -1,7 +1,11 @@
 package com.sap.sailing.windestimation.model;
 
+import java.util.List;
+
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sailing.windestimation.model.store.PersistableModel;
+import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
 public abstract class AbstractModelCache<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>>
         implements ModelCache<InstanceType, ModelType> {
@@ -11,15 +15,30 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
     private final long preserveLoadedModelsMillis;
     private final ModelStore modelStore;
     private final ModelFactory<InstanceType, T, ModelType> modelFactory;
+    private final boolean preloadAllModels;
 
-    public AbstractModelCache(ModelStore modelStore, long preserveLoadedModelsMillis,
+    public AbstractModelCache(ModelStore modelStore, boolean preloadAllModels, long preserveLoadedModelsMillis,
             ModelFactory<InstanceType, T, ModelType> modelFactory) {
         this.modelStore = modelStore;
+        this.preloadAllModels = preloadAllModels;
         this.preserveLoadedModelsMillis = preserveLoadedModelsMillis;
         this.modelFactory = modelFactory;
-        this.modelLoader = new ModelLoader<>(modelStore, modelFactory);
         this.modelCache = new ShortTimeAfterLastHitCache<>(preserveLoadedModelsMillis,
                 contextSpecificModelMetadata -> loadModel(contextSpecificModelMetadata));
+        this.modelLoader = new ModelLoader<>(modelMetadata -> modelCache.getCachedValue(modelMetadata),
+                preloadAllModels ? null : modelStore, modelFactory);
+        if (preloadAllModels) {
+            preloadAllModels();
+        }
+    }
+
+    private void preloadAllModels() {
+        List<PersistableModel<?, ?>> loadedModels = modelStore.loadAllPersistedModels(getPersistenceContextType());
+        for (PersistableModel<?, ?> persistableModel : loadedModels) {
+            @SuppressWarnings("unchecked")
+            ModelType loadedModel = (ModelType) persistableModel;
+            modelCache.addToCache(loadedModel.getContextSpecificModelMetadata(), loadedModel);
+        }
     }
 
     protected ModelType loadModel(T contextSpecificModelMetadata) {
@@ -43,29 +62,24 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
         return preserveLoadedModelsMillis;
     }
 
-    public ModelStore getModelStore() {
-        return modelStore;
-    }
-
     @Override
     public void clearCache() {
         modelCache.clearCache();
+        if (preloadAllModels) {
+            preloadAllModels();
+        }
     }
 
     @Override
     public boolean isReady() {
         ModelType omnipresentModel = getBestModel(
-                getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures());
+                modelFactory.getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures());
         return omnipresentModel != null;
     }
 
-    public abstract T getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures();
-
     @Override
-    public void preloadAllModels() {
-        for (T modelMetadata : modelFactory.getAllValidContextSpecificModelMetadata()) {
-            getBestModel(modelMetadata);
-        }
+    public PersistenceContextType getPersistenceContextType() {
+        return modelFactory.getPersistenceContextType();
     }
 
 }

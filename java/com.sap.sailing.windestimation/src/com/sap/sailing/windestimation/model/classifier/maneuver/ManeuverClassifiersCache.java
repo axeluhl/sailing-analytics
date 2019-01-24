@@ -1,7 +1,6 @@
 package com.sap.sailing.windestimation.model.classifier.maneuver;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.model.classifier.AbstractClassifiersCache;
 import com.sap.sailing.windestimation.model.store.ModelStore;
@@ -11,10 +10,10 @@ public class ManeuverClassifiersCache extends
 
     private final ManeuverFeatures maneuverFeatures;
 
-    public ManeuverClassifiersCache(ModelStore classifierModelStore, PolarDataService polarService,
+    public ManeuverClassifiersCache(ModelStore classifierModelStore, boolean preloadAllModels,
             long preserveLoadedClassifiersMillis, ManeuverFeatures maxManeuverFeatures) {
-        super(classifierModelStore, preserveLoadedClassifiersMillis, new ManeuverClassifierModelFactory(polarService),
-                new ManeuverClassificationResultMapper());
+        super(classifierModelStore, preloadAllModels, preserveLoadedClassifiersMillis,
+                new ManeuverClassifierModelFactory(), new ManeuverClassificationResultMapper());
         this.maneuverFeatures = maxManeuverFeatures;
     }
 
@@ -23,7 +22,8 @@ public class ManeuverClassifiersCache extends
         ManeuverFeatures maneuverFeatures = determineFinalManeuverFeatures(maneuver);
         BoatClass boatClass = maneuverFeatures.isPolarsInformation() ? maneuver.getBoatClass() : null;
         ManeuverClassifierModelMetadata maneuverModelMetadata = new ManeuverClassifierModelMetadata(maneuverFeatures,
-                boatClass, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
+                boatClass == null ? null : boatClass.getName(),
+                ManeuverClassifierModelFactory.orderedSupportedTargetValues);
         return maneuverModelMetadata;
     }
 
@@ -37,12 +37,6 @@ public class ManeuverClassifiersCache extends
 
     public ManeuverFeatures getManeuverFeatures() {
         return maneuverFeatures;
-    }
-
-    @Override
-    public ManeuverClassifierModelMetadata getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
-        return new ManeuverClassifierModelMetadata(new ManeuverFeatures(false, false, false), null,
-                ManeuverClassifierModelFactory.orderedSupportedTargetValues);
     }
 
 }

@@ -11,11 +11,12 @@ public class GaussianBasedTwdTransitionDistributionCache {
     private final SingleDimensionBasedTwdTransitionRegressorCache<DurationBasedTwdTransitionRegressorModelMetadata> durationBasedTwdTransitionRegressorCache;
     private final SingleDimensionBasedTwdTransitionRegressorCache<DistanceBasedTwdTransitionRegressorModelMetadata> distanceBasedTwdTransitionRegressorCache;
 
-    public GaussianBasedTwdTransitionDistributionCache(ModelStore modelStore, long preserveLoadedModelsMillis) {
+    public GaussianBasedTwdTransitionDistributionCache(ModelStore modelStore, boolean preloadAllModels,
+            long preserveLoadedModelsMillis) {
         durationBasedTwdTransitionRegressorCache = new SingleDimensionBasedTwdTransitionRegressorCache<>(modelStore,
-                preserveLoadedModelsMillis, new DurationBasedTwdTransitionRegressorModelFactory());
+                preloadAllModels, preserveLoadedModelsMillis, new DurationBasedTwdTransitionRegressorModelFactory());
         distanceBasedTwdTransitionRegressorCache = new SingleDimensionBasedTwdTransitionRegressorCache<>(modelStore,
-                preserveLoadedModelsMillis, new DistanceBasedTwdTransitionRegressorModelFactory());
+                preloadAllModels, preserveLoadedModelsMillis, new DistanceBasedTwdTransitionRegressorModelFactory());
     }
 
     public double getCompoundDistance(TwdTransition twdTransition) {
@@ -56,11 +57,6 @@ public class GaussianBasedTwdTransitionDistributionCache {
 
     public boolean isReady() {
         return durationBasedTwdTransitionRegressorCache.isReady() && distanceBasedTwdTransitionRegressorCache.isReady();
-    }
-    
-    public void preloadAllModels() {
-        durationBasedTwdTransitionRegressorCache.preloadAllModels();
-        distanceBasedTwdTransitionRegressorCache.preloadAllModels();
     }
 
 }

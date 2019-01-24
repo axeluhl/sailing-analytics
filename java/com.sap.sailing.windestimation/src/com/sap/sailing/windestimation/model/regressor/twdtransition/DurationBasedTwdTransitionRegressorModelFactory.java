@@ -31,15 +31,4 @@ public class DurationBasedTwdTransitionRegressorModelFactory extends
                 "No DurationValueRange available for duration value of " + secondsPassed + " seconds");
     }
 
-    @Override
-    public List<DurationBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadata() {
-        List<DurationBasedTwdTransitionRegressorModelMetadata> result = new ArrayList<>();
-        for (DurationValueRange durationValueRange : DurationValueRange.values()) {
-            DurationBasedTwdTransitionRegressorModelMetadata modelMetadata = new DurationBasedTwdTransitionRegressorModelMetadata(
-                    durationValueRange);
-            result.add(modelMetadata);
-        }
-        return result;
-    }
-
 }

@@ -118,7 +118,7 @@ public class ShortTimeAfterLastHitCache<K, V> {
         this.cachedValueCleaningCallback = cachedValueCleaningCallback;
     }
 
-    private void add(K key, V value) {
+    public void addToCache(K key, V value) {
         final long timestamp = calculateCurrentTimestamp();
         synchronized (cache) {
             cache.put(key, new ValueWithTimestampSinceLastHit<>(value, timestamp));
@@ -137,14 +137,22 @@ public class ShortTimeAfterLastHitCache<K, V> {
     }
 
     public V getValue(K key) {
+        V value = getCachedValue(key);
+        if (value == null) {
+            value = uncachedValueRetrieverCallback.getUncachedValue(key);
+            if (value != null) {
+                addToCache(key, value);
+            }
+        }
+        return value;
+    }
+
+    public V getCachedValue(K key) {
         ValueWithTimestampSinceLastHit<V> valueWrapper = cache.get(key);
         V value;
         if (valueWrapper == null) {
             misses++;
-            value = uncachedValueRetrieverCallback.getUncachedValue(key);
-            if (value != null) {
-                add(key, value);
-            }
+            value = null;
         } else {
             hits++;
             valueWrapper.setTimestampSinceLastHit(calculateCurrentTimestamp());

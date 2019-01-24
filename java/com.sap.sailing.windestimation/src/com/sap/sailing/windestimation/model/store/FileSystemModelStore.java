@@ -7,12 +7,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.model.TrainableModel;
+import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
@@ -24,11 +27,15 @@ public class FileSystemModelStore extends AbstractModelStore {
         this.destinationFolder = destinationFolder;
     }
 
-    private File getFileForModel(PersistenceSupport trainedModel, PersistenceContextType contextType) {
+    private File getFileForModel(PersistableModel<?, ?> persistableModel) {
+        return getFileForModel(getFilename(persistableModel));
+    }
+
+    private File getFileForModel(String filename) {
         StringBuilder filePath = new StringBuilder();
         filePath.append(destinationFolder);
         filePath.append(File.separator);
-        filePath.append(getFilename(trainedModel, contextType));
+        filePath.append(filename);
         String finalFilePath = filePath.toString();
         return new File(finalFilePath);
     }
@@ -37,8 +44,7 @@ public class FileSystemModelStore extends AbstractModelStore {
     public <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
             ModelType newModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        File modelFile = getFileForModel(persistenceSupport,
-                newModel.getContextSpecificModelMetadata().getContextType());
+        File modelFile = getFileForModel(newModel);
         if (modelFile.exists()) {
             try (FileInputStream input = new FileInputStream(modelFile)) {
                 @SuppressWarnings("unchecked")
@@ -59,18 +65,16 @@ public class FileSystemModelStore extends AbstractModelStore {
     @Override
     public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
-        try (FileOutputStream output = new FileOutputStream(
-                getFileForModel(persistenceSupport, trainedModel.getContextSpecificModelMetadata().getContextType()))) {
-            persistenceSupport.saveToStream(output);
+        try (FileOutputStream output = new FileOutputStream(getFileForModel(trainedModel))) {
+            persistenceSupport.saveToStream(trainedModel, output);
         } catch (IOException e) {
             throw new ModelPersistenceException(e);
         }
     }
 
     public <T extends PersistableModel<?, ?>> void delete(T newModel) throws ModelPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        File modelFile = getFileForModel(persistenceSupport,
-                newModel.getContextSpecificModelMetadata().getContextType());
+        checkAndGetPersistenceSupport(newModel);
+        File modelFile = getFileForModel(newModel);
         try {
             Files.deleteIfExists(modelFile.toPath());
         } catch (IOException e) {
@@ -100,7 +104,7 @@ public class FileSystemModelStore extends AbstractModelStore {
         File folder = new File(destinationFolder);
         for (File file : folder.listFiles()) {
             String fileName = file.getName();
-            if (file.isFile() && fileName.endsWith(FILE_EXT) && fileName.startsWith(getContextPrefix(contextType))) {
+            if (file.isFile() && isFileBelongingToContextType(fileName, contextType)) {
                 byte[] exportedModel;
                 try {
                     exportedModel = Files.readAllBytes(file.toPath());
@@ -126,6 +130,32 @@ public class FileSystemModelStore extends AbstractModelStore {
                 throw new ModelPersistenceException("Could not store model \"" + fileName + "\" on filesystem", e);
             }
         }
+    }
+
+    @Override
+    public List<PersistableModel<?, ?>> loadAllPersistedModels(PersistenceContextType contextType) {
+        List<PersistableModel<?, ?>> loadedModels = new ArrayList<>();
+        File folder = new File(destinationFolder);
+        for (File file : folder.listFiles()) {
+            String fileName = file.getName();
+            if (file.isFile() && isFileBelongingToContextType(fileName, contextType)) {
+                PersistenceSupport persistenceSupport = getPersistenceSupportFromFilename(fileName);
+                if (persistenceSupport == null) {
+                    throw new ModelLoadingException(
+                            "Persistence support could not be determined due to invalid filename pattern: \"" + fileName
+                                    + "\"");
+                }
+                PersistableModel<?, ?> loadedModel;
+                File modelFile = getFileForModel(fileName);
+                try (FileInputStream input = new FileInputStream(modelFile)) {
+                    loadedModel = persistenceSupport.loadFromStream(input);
+                } catch (IOException e) {
+                    throw new ModelLoadingException("Could not read model \"" + fileName + "\" from filesystem", e);
+                }
+                loadedModels.add(loadedModel);
+            }
+        }
+        return loadedModels;
     }
 
 }

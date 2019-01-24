@@ -17,9 +17,9 @@ import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRangeBasedTr
 import com.sap.sailing.windestimation.aggregator.hmm.ManeuverSequenceGraph;
 import com.sap.sailing.windestimation.aggregator.hmm.SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.TwdTransitionClassifierBasedTransitionProbabilitiesCalculator;
+import com.sap.sailing.windestimation.aggregator.msthmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculatorImpl;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraph;
-import com.sap.sailing.windestimation.aggregator.msthmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.outlierremoval.MeanBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.aggregator.outlierremoval.NeighborBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
@@ -36,11 +36,13 @@ public class ManeuverClassificationsAggregatorFactory {
     private final PolarDataService polarDataService;
     private final ModelStore modelStore;
     private final long modelCacheKeepAliveMillis;
+    private final boolean preloadAllModels;
 
     public ManeuverClassificationsAggregatorFactory(PolarDataService polarDataService, ModelStore modelStore,
-            long modelCacheKeepAliveMillis) {
+            boolean preloadAllModels, long modelCacheKeepAliveMillis) {
         this.polarDataService = polarDataService;
         this.modelStore = modelStore;
+        this.preloadAllModels = preloadAllModels;
         this.modelCacheKeepAliveMillis = modelCacheKeepAliveMillis;
     }
 
@@ -59,12 +61,13 @@ public class ManeuverClassificationsAggregatorFactory {
             break;
         case CLASSIFIER:
             transitionProbabilitiesCalculator = new TwdTransitionClassifierBasedTransitionProbabilitiesCalculator(
-                    new TwdTransitionClassifiersCache(modelStore, modelCacheKeepAliveMillis),
+                    new TwdTransitionClassifiersCache(modelStore, preloadAllModels, modelCacheKeepAliveMillis),
                     propagateIntersectedWindRangeOfHeadupAndBearAway);
             break;
         case GAUSSIAN_REGRESSOR:
             transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
-                    new GaussianBasedTwdTransitionDistributionCache(modelStore, modelCacheKeepAliveMillis),
+                    new GaussianBasedTwdTransitionDistributionCache(modelStore, preloadAllModels,
+                            modelCacheKeepAliveMillis),
                     propagateIntersectedWindRangeOfHeadupAndBearAway);
         }
         return new ManeuverSequenceGraph(new BestPathsCalculator(transitionProbabilitiesCalculator));
@@ -120,7 +123,8 @@ public class ManeuverClassificationsAggregatorFactory {
     public ManeuverClassificationsAggregator mstHmm(boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
         return new MstManeuverGraph(
                 new MstBestPathsCalculatorImpl(new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
-                        new GaussianBasedTwdTransitionDistributionCache(modelStore, modelCacheKeepAliveMillis),
+                        new GaussianBasedTwdTransitionDistributionCache(modelStore, preloadAllModels,
+                                modelCacheKeepAliveMillis),
                         propagateIntersectedWindRangeOfHeadupAndBearAway)));
     }
 

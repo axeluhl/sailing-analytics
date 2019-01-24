@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.model.store;
 
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
@@ -21,11 +22,13 @@ public interface ModelStore {
 
     default <T extends PersistableModel<?, ?>> PersistenceSupport checkAndGetPersistenceSupport(T trainedModel)
             throws ModelPersistenceException {
-        PersistenceSupport persistenceSupport = trainedModel.getPersistenceSupport();
+        PersistenceSupport persistenceSupport = trainedModel.getPersistenceSupportType().getPersistenceSupport();
         if (persistenceSupport == null) {
             throw new ModelPersistenceException("Model of type " + trainedModel.getClass().getSimpleName()
                     + " has persistence support: getPersistenceSupport() returned null");
         }
         return persistenceSupport;
     }
+
+    List<PersistableModel<?, ?>> loadAllPersistedModels(PersistenceContextType contextType);
 }

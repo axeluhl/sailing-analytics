@@ -2,7 +2,6 @@ package com.sap.sailing.windestimation.model.classifier.maneuver;
 
 import java.util.Arrays;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.aggregator.hmm.ProbabilityUtil;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
@@ -13,16 +12,16 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
 
     private static final long serialVersionUID = -7074647974723150672L;
     private final ManeuverFeatures maneuverFeatures;
-    private final BoatClass boatClass;
+    private final String boatClassName;
     protected final int[] indexToManeuverTypeOrdinalMapping;
     private final int numberOfSupportedManeuverTypes;
     private final int otherTypes;
 
-    public ManeuverClassifierModelMetadata(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
+    public ManeuverClassifierModelMetadata(ManeuverFeatures maneuverFeatures, String boatClassName,
             ManeuverTypeForClassification... orderedSupportedTargetValues) {
         super(PersistenceContextType.MANEUVER_CLASSIFIER);
         this.maneuverFeatures = maneuverFeatures;
-        this.boatClass = boatClass;
+        this.boatClassName = boatClassName;
         this.indexToManeuverTypeOrdinalMapping = new int[ManeuverTypeForClassification.values().length];
         for (int i = 0; i < indexToManeuverTypeOrdinalMapping.length; i++) {
             indexToManeuverTypeOrdinalMapping[i] = -1;
@@ -46,8 +45,8 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         return maneuverFeatures;
     }
 
-    public BoatClass getBoatClass() {
-        return boatClass;
+    public String getBoatClassName() {
+        return boatClassName;
     }
 
     @Override
@@ -71,7 +70,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((boatClass == null) ? 0 : boatClass.hashCode());
+        result = prime * result + ((boatClassName == null) ? 0 : boatClassName.hashCode());
         result = prime * result + Arrays.hashCode(indexToManeuverTypeOrdinalMapping);
         result = prime * result + ((maneuverFeatures == null) ? 0 : maneuverFeatures.hashCode());
         result = prime * result + numberOfSupportedManeuverTypes;
@@ -85,10 +84,10 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         if (obj == null)
             return false;
         ManeuverClassifierModelMetadata other = (ManeuverClassifierModelMetadata) obj;
-        if (boatClass == null) {
-            if (other.boatClass != null)
+        if (boatClassName == null) {
+            if (other.boatClassName != null)
                 return false;
-        } else if (!boatClass.equals(other.boatClass))
+        } else if (!boatClassName.equals(other.boatClassName))
             return false;
         if (!Arrays.equals(indexToManeuverTypeOrdinalMapping, other.indexToManeuverTypeOrdinalMapping))
             return false;
@@ -104,7 +103,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
 
     @Override
     public String toString() {
-        return "ManeuverClassifierModelMetadata [maneuverFeatures=" + maneuverFeatures + ", boatClass=" + boatClass
+        return "ManeuverClassifierModelMetadata [maneuverFeatures=" + maneuverFeatures + ", boatClass=" + boatClassName
                 + ", indexToManeuverTypeOrdinalMapping=" + Arrays.toString(indexToManeuverTypeOrdinalMapping)
                 + ", numberOfSupportedManeuverTypes=" + numberOfSupportedManeuverTypes + "]";
     }
@@ -171,7 +170,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         if (maneuverFeatures.isMarksInformation() && !maneuver.isMarkPassingDataAvailable()) {
             return false;
         }
-        if (boatClass != null && !boatClass.equals(maneuver.getBoatClass())) {
+        if (boatClassName != null && !boatClassName.equals(maneuver.getBoatClass())) {
             return false;
         }
         return true;
@@ -182,12 +181,10 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
         StringBuilder id = new StringBuilder("ManeuverClassification-");
         id.append(getManeuverFeatures().toString());
         id.append("-");
-        if (getBoatClass() == null) {
+        if (getBoatClassName() == null) {
             id.append("All");
         } else {
-            id.append(getBoatClass().getName());
-            id.append("_");
-            id.append(getBoatClass().typicallyStartsUpwind() ? "startsUpwind" : "startsDownwind");
+            id.append(getBoatClassName());
         }
         return id.toString();
     }

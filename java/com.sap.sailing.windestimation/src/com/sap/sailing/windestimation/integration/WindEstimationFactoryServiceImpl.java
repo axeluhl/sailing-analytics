@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
@@ -29,36 +28,19 @@ public class WindEstimationFactoryServiceImpl
     private static final boolean ENABLE_POLARS_INFORMATION = true;
     private static final long PRESERVE_LOADED_MODELS_MILLIS = Long.MAX_VALUE;
 
-    private static final ModelStore MODEL_STORE = new MongoDbModelStore(MongoDBService.INSTANCE.getDB());
+    public static final ModelStore MODEL_STORE = new MongoDbModelStore(MongoDBService.INSTANCE.getDB());
     private static final ManeuverFeatures MAX_MANEUVER_FEATURES = new ManeuverFeatures(ENABLE_POLARS_INFORMATION,
             ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION);
 
-    private final ManeuverClassifiersCache maneuverClassifiersCache;
+    private final ManeuverClassifiersCache maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE, true,
+            PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
     private final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(
-            MODEL_STORE, PRESERVE_LOADED_MODELS_MILLIS);
-
-    private final boolean loadingState;
-
-    public WindEstimationFactoryServiceImpl(boolean loadingState, PolarDataService polarService) {
-        this.loadingState = loadingState;
-        maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE, polarService,
-                PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
-        if (!loadingState) {
-            maneuverClassifiersCache.preloadAllModels();
-            gaussianBasedTwdTransitionDistributionCache.preloadAllModels();
-        }
-    }
-
-    @Override
-    public boolean isLoadingState() {
-        return loadingState;
-    }
+            MODEL_STORE, true, PRESERVE_LOADED_MODELS_MILLIS);
 
     @Override
     public IncrementalWindEstimationTrack createIncrementalWindEstimationTrack(TrackedRace trackedRace) {
         IncrementalWindEstimationTrack windEstimation = null;
-        if (!loadingState && maneuverClassifiersCache.isReady()
-                && gaussianBasedTwdTransitionDistributionCache.isReady()) {
+        if (maneuverClassifiersCache.isReady() && gaussianBasedTwdTransitionDistributionCache.isReady()) {
             windEstimation = new IncrementalMstHmmWindEstimationForTrackedRace(trackedRace,
                     new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION), trackedRace.getPolarDataService(),
                     trackedRace.getMillisecondsOverWhichToAverageWind(), maneuverClassifiersCache,

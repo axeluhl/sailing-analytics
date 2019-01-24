@@ -46,14 +46,8 @@ public class TwdTransitionClassifierModelFactory
     }
 
     @Override
-    public List<TwdTransitionClassifierModelMetadata> getAllValidContextSpecificModelMetadata() {
-        List<TwdTransitionClassifierModelMetadata> result = new ArrayList<>();
-        for (ManeuverTypeTransition maneuverTypeTransition : ManeuverTypeTransition.values()) {
-            TwdTransitionClassifierModelMetadata modelMetadata = new TwdTransitionClassifierModelMetadata(
-                    maneuverTypeTransition);
-            result.add(modelMetadata);
-        }
-        return result;
+    public TwdTransitionClassifierModelMetadata getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
+        return new TwdTransitionClassifierModelMetadata(ManeuverTypeTransition.TACK_TACK);
     }
 
 }

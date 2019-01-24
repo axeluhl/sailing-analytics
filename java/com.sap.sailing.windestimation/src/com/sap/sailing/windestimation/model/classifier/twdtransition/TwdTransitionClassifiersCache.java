@@ -7,9 +7,10 @@ import com.sap.sailing.windestimation.model.store.ModelStore;
 public class TwdTransitionClassifiersCache extends
         AbstractClassifiersCache<TwdTransition, TwdTransitionClassifierModelMetadata, TwdTransitionClassificationResult> {
 
-    public TwdTransitionClassifiersCache(ModelStore classifierModelStore, long preserveLoadedClassifiersMillis) {
-        super(classifierModelStore, preserveLoadedClassifiersMillis, new TwdTransitionClassifierModelFactory(),
-                new TwdTransitionClassificationResultMapper());
+    public TwdTransitionClassifiersCache(ModelStore classifierModelStore, boolean preloadAllModels,
+            long preserveLoadedClassifiersMillis) {
+        super(classifierModelStore, preloadAllModels, preserveLoadedClassifiersMillis,
+                new TwdTransitionClassifierModelFactory(), new TwdTransitionClassificationResultMapper());
     }
 
     @Override
@@ -19,11 +20,6 @@ public class TwdTransitionClassifiersCache extends
         TwdTransitionClassifierModelMetadata twdTrasitionModelMetadata = new TwdTransitionClassifierModelMetadata(
                 maneuverTypeTransition);
         return twdTrasitionModelMetadata;
-    }
-
-    @Override
-    public TwdTransitionClassifierModelMetadata getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
-        return new TwdTransitionClassifierModelMetadata(ManeuverTypeTransition.TACK_TACK);
     }
 
 }

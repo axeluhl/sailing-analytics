@@ -2,7 +2,9 @@ package com.sap.sailing.windestimation.model.store;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -16,6 +18,7 @@ import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.model.TrainableModel;
+import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
@@ -31,7 +34,7 @@ public class MongoDbModelStore extends AbstractModelStore {
     public <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
             ModelType newModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        String fileName = getFilename(persistenceSupport, newModel.getContextSpecificModelMetadata().getContextType());
+        String fileName = getFilename(newModel);
         String bucketName = getCollectionName(newModel.getContextSpecificModelMetadata().getContextType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try (GridFSDownloadStream inputStream = gridFs.openDownloadStreamByName(fileName)) {
@@ -53,13 +56,12 @@ public class MongoDbModelStore extends AbstractModelStore {
     @Override
     public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
-        String newFileName = getFilename(persistenceSupport,
-                trainedModel.getContextSpecificModelMetadata().getContextType());
+        String newFileName = getFilename(trainedModel);
         String bucketName = getCollectionName(trainedModel.getContextSpecificModelMetadata().getContextType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try {
             try (OutputStream outputStream = gridFs.openUploadStream(newFileName)) {
-                persistenceSupport.saveToStream(outputStream);
+                persistenceSupport.saveToStream(trainedModel, outputStream);
             }
         } catch (Exception e) {
             throw new ModelPersistenceException(e);
@@ -114,6 +116,30 @@ public class MongoDbModelStore extends AbstractModelStore {
                 throw new ModelPersistenceException("Could not store model \"" + fileName + "\" in MongoDB", e);
             }
         }
+    }
+
+    @Override
+    public List<PersistableModel<?, ?>> loadAllPersistedModels(PersistenceContextType contextType) {
+        List<PersistableModel<?, ?>> loadedModels = new ArrayList<>();
+        String bucketName = getCollectionName(contextType);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        for (GridFSFile gridFSFile : gridFs.find()) {
+            String fileName = gridFSFile.getFilename();
+            PersistenceSupport persistenceSupport = getPersistenceSupportFromFilename(fileName);
+            if (persistenceSupport == null) {
+                throw new ModelLoadingException(
+                        "Persistence support could not be determined due to invalid filename pattern: \"" + fileName
+                                + "\"");
+            }
+            PersistableModel<?, ?> loadedModel;
+            try (GridFSDownloadStream downloadStream = gridFs.openDownloadStreamByName(fileName)) {
+                loadedModel = persistenceSupport.loadFromStream(downloadStream);
+            } catch (IOException e) {
+                throw new ModelLoadingException("Could not read model \"" + fileName + "\" from MongoDB", e);
+            }
+            loadedModels.add(loadedModel);
+        }
+        return loadedModels;
     }
 
 }
