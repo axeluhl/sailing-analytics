@@ -15,4 +15,5 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.mongodb,
  org.eclipse.orbit.mongodb;bundle-version="3.2.2",
  com.sap.sse.common
-Export-Package: com.sap.sse.security.persistence
+Export-Package: com.sap.sse.security.persistence,
+ com.sap.sse.security.persistence.impl

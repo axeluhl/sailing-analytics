@@ -50,6 +50,7 @@ public class LoginTest {
         db.getCollection(CollectionNames.ROLES.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
+        db.getCollection(com.sap.sse.security.persistence.impl.CollectionNames.SESSIONS.name()).drop();
         userStore = new UserStoreImpl(DEFAULT_TENANT_NAME);
         userStore.ensureDefaultRolesExist();
         userStore.ensureDefaultTenantExists();
