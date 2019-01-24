@@ -23,7 +23,7 @@ public class FileSystemModelStore extends AbstractModelStore {
 
     private final String destinationFolder;
 
-    public FileSystemModelStore(String destinationFolder, PersistenceContextType contextType) {
+    public FileSystemModelStore(String destinationFolder) {
         this.destinationFolder = destinationFolder;
     }
 
