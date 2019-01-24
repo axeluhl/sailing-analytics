@@ -87,7 +87,7 @@ public class LoginTest {
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition);
         userStore.addRoleForUser("me", testRole);
-        UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
+        UserStoreImpl store2 = createAndLoadUserStore();
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testRole));
     }
 
@@ -98,7 +98,7 @@ public class LoginTest {
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition, userDefaultTenant, meUser);
         userStore.addRoleForUser("me", testRole);
-        UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
+        UserStoreImpl store2 = createAndLoadUserStore();
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testRole));
         Role role2 = store2.getUserByName("me").getRoles().iterator().next();
         assertSame(store2.getUserGroupByName("me-tenant"), role2.getQualifiedForTenant());
@@ -109,10 +109,16 @@ public class LoginTest {
     public void permissionsTest() throws UserManagementException, UserGroupManagementException {
         userStore.createUser("me", "me@sap.com", new UserGroupImpl(UUID.randomUUID(), "me-tenant"));
         userStore.addPermissionForUser("me", new WildcardPermission("a:b:c"));
-        UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
+        UserStoreImpl store2 = createAndLoadUserStore();
         User allUser = userStore.getUserByName(SecurityService.ALL_USERNAME);
         User user = store2.getUserByName("me");
         assertTrue(PermissionChecker.isPermitted(new WildcardPermission("a:b:c"), user, allUser, null, null));
+    }
+
+    private UserStoreImpl createAndLoadUserStore() throws UserGroupManagementException, UserManagementException {
+        final UserStoreImpl store = new UserStoreImpl(DEFAULT_TENANT_NAME);
+        store.loadAndMigrateUsers();
+        return store;
     }
 
 }
