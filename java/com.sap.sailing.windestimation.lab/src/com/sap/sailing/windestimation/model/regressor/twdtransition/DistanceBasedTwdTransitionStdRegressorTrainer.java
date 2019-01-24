@@ -19,8 +19,9 @@ public class DistanceBasedTwdTransitionStdRegressorTrainer
     public static void main(String[] args) throws Exception {
         AggregatedSingleDimensionBasedTwdTransitionPersistenceManager distanceBasedPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
                 AggregatedSingleDimensionType.DISTANCE);
-        MongoDbModelStore mongoDbModelStore = new MongoDbModelStore(distanceBasedPersistenceManager.getDb());
-        mongoDbModelStore.deleteAll(PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR);
+        // ModelStore modelStore = new FileSystemModelStore("trained_models");
+        ModelStore modelStore = new MongoDbModelStore(distanceBasedPersistenceManager.getDb());
+        modelStore.deleteAll(PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR);
         DistanceBasedTwdTransitionRegressorModelFactory distanceBasedTwdTransitionRegressorModelFactory = new DistanceBasedTwdTransitionRegressorModelFactory();
         for (DistanceValueRange distanceValueRange : DistanceValueRange.values()) {
             DistanceBasedTwdTransitionRegressorModelMetadata modelMetadata = new DistanceBasedTwdTransitionRegressorModelMetadata(
@@ -28,7 +29,7 @@ public class DistanceBasedTwdTransitionStdRegressorTrainer
             IncrementalSingleDimensionPolynomialRegressor<TwdTransition, DistanceBasedTwdTransitionRegressorModelMetadata> model = distanceBasedTwdTransitionRegressorModelFactory
                     .getNewModel(modelMetadata);
             DistanceBasedTwdTransitionStdRegressorTrainer trainer = new DistanceBasedTwdTransitionStdRegressorTrainer(
-                    mongoDbModelStore);
+                    modelStore);
             trainer.trainRegressor(model);
         }
     }

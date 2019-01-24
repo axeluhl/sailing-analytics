@@ -90,7 +90,8 @@ public class WindEstimationFactoryServiceImpl
     public void importAllModelsFromModelStore(ModelStore modelStore) throws ModelPersistenceException {
         for (PersistenceContextType contextType : relevantContextTypes) {
             Map<String, byte[]> exportedModels = modelStore.exportAllPersistedModels(contextType);
-            WindEstimationFactoryServiceImpl.MODEL_STORE.importPersistedModels(exportedModels, contextType);
+            MODEL_STORE.deleteAll(contextType);
+            MODEL_STORE.importPersistedModels(exportedModels, contextType);
         }
         clearState();
     }

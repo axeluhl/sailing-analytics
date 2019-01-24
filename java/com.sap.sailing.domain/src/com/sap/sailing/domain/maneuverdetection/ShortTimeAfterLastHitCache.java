@@ -54,10 +54,12 @@ public class ShortTimeAfterLastHitCache<K, V> {
                     }
                 }
             }
-            synchronized (cache) {
-                if (cache.isEmpty()) {
-                    invalidatorHandle.cancel(/* mayInterruptIfRunning */ false);
-                    invalidatorHandle = null;
+            if (isInvalidatorHandleNecessary()) {
+                synchronized (cache) {
+                    if (invalidatorHandle != null && cache.isEmpty()) {
+                        invalidatorHandle.cancel(/* mayInterruptIfRunning */ false);
+                        invalidatorHandle = null;
+                    }
                 }
             }
         }
@@ -76,10 +78,12 @@ public class ShortTimeAfterLastHitCache<K, V> {
         } else {
             cache.clear();
         }
-        synchronized (cache) {
-            if (cache.isEmpty()) {
-                invalidatorHandle.cancel(/* mayInterruptIfRunning */ false);
-                invalidatorHandle = null;
+        if (isInvalidatorHandleNecessary()) {
+            synchronized (cache) {
+                if (invalidatorHandle != null && cache.isEmpty()) {
+                    invalidatorHandle.cancel(/* mayInterruptIfRunning */ false);
+                    invalidatorHandle = null;
+                }
             }
         }
     }
@@ -168,11 +172,15 @@ public class ShortTimeAfterLastHitCache<K, V> {
      * Must be called while owning the {@link #cache} monitor (synchronized)
      */
     private void ensureTimerIsRunning() {
-        if (preserveHowManyMilliseconds != Long.MAX_VALUE && invalidatorHandle == null) {
+        if (isInvalidatorHandleNecessary() && invalidatorHandle == null) {
             invalidatorHandle = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor()
                     .scheduleAtFixedRate(new CacheInvalidator(), /* delay */ preserveHowManyMilliseconds,
                             preserveHowManyMilliseconds, TimeUnit.MILLISECONDS);
         }
+    }
+
+    private boolean isInvalidatorHandleNecessary() {
+        return preserveHowManyMilliseconds != Long.MAX_VALUE;
     }
 
     public interface UncachedValueRetrieverCallback<K, V> {

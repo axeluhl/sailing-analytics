@@ -141,8 +141,8 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
         Position maneuverPosition = track.getEstimatedPosition(maneuver.getTimePoint(), false);
         Double courseChangeInDegreesWithinTurningSectionOfPreviousManeuver = previousManeuver == null ? null
                 : previousManeuver.getMainCurveBoundaries().getDirectionChangeInDegrees();
-        Double courseChangeInDegreesWithinTurningSectionOfNextManeuver = nextManeuver.getMainCurveBoundaries()
-                .getDirectionChangeInDegrees();
+        Double courseChangeInDegreesWithinTurningSectionOfNextManeuver = nextManeuver == null ? null
+                : nextManeuver.getMainCurveBoundaries().getDirectionChangeInDegrees();
         Double targetTackAngleInDegrees = getTargetTackAngleInDegrees(maneuverCurveBoundaries, boatClass);
         Double targetJibeAngleInDegrees = getTargetJibeAngleInDegrees(maneuverCurveBoundaries, boatClass);
         boolean markPassingDataAvailable = maneuver.isMarkPassing()
@@ -249,7 +249,11 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
         List<ManeuverWithProbabilisticTypeClassification> temporaryNodes = new ArrayList<>();
         for (ManeuverDataOfCompetitor maneuverData : maneuverDataPerCompetitor.values()) {
             nonTemporaryNodes.addAll(maneuverData.getNonTemporaryAcceptedManeuverClassificationsToAdd());
-            temporaryNodes.add(maneuverData.getLatestTemporaryAcceptedManeuverClassification());
+            ManeuverWithProbabilisticTypeClassification temporaryNode = maneuverData
+                    .getLatestTemporaryAcceptedManeuverClassification();
+            if (temporaryNode != null) {
+                temporaryNodes.add(temporaryNode);
+            }
             maneuverData.getNonTemporaryAcceptedManeuverClassificationsToAdd().clear();
         }
         Collections.sort(nonTemporaryNodes);

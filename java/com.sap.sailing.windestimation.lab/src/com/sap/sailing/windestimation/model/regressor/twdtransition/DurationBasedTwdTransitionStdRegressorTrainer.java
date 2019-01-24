@@ -20,8 +20,9 @@ public class DurationBasedTwdTransitionStdRegressorTrainer extends TwdTransition
     public static void main(String[] args) throws Exception {
         AggregatedSingleDimensionBasedTwdTransitionPersistenceManager durationBasedPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
                 AggregatedSingleDimensionType.DURATION);
-        MongoDbModelStore mongoDbModelStore = new MongoDbModelStore(durationBasedPersistenceManager.getDb());
-        mongoDbModelStore.deleteAll(PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR);
+        // ModelStore modelStore = new FileSystemModelStore("trained_models");
+        ModelStore modelStore = new MongoDbModelStore(durationBasedPersistenceManager.getDb());
+        modelStore.deleteAll(PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR);
         DurationBasedTwdTransitionRegressorModelFactory durationBasedTwdTransitionRegressorModelFactory = new DurationBasedTwdTransitionRegressorModelFactory();
         for (DurationValueRange durationValueRange : DurationValueRange.values()) {
             DurationBasedTwdTransitionRegressorModelMetadata modelMetadata = new DurationBasedTwdTransitionRegressorModelMetadata(
@@ -29,7 +30,7 @@ public class DurationBasedTwdTransitionStdRegressorTrainer extends TwdTransition
             IncrementalSingleDimensionPolynomialRegressor<TwdTransition, DurationBasedTwdTransitionRegressorModelMetadata> model = durationBasedTwdTransitionRegressorModelFactory
                     .getNewModel(modelMetadata);
             TwdTransitionAggregatedStdRegressorTrainer trainer = new TwdTransitionAggregatedStdRegressorTrainer(
-                    durationBasedPersistenceManager, mongoDbModelStore);
+                    durationBasedPersistenceManager, modelStore);
             trainer.trainRegressor(model);
         }
     }

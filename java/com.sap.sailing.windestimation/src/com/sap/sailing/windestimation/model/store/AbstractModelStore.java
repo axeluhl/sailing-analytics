@@ -44,7 +44,8 @@ public abstract class AbstractModelStore implements ModelStore {
 
     protected PersistenceSupport getPersistenceSupportFromFilename(String filename) {
         for (PersistenceSupportType persistenceSupportType : PersistenceSupportType.values()) {
-            if (filename.startsWith(getPersistenceSupportTypePrefix(persistenceSupportType))) {
+            if (persistenceSupportType != PersistenceSupportType.NONE
+                    && filename.startsWith(getPersistenceSupportTypePrefix(persistenceSupportType))) {
                 return persistenceSupportType.getPersistenceSupport();
             }
         }
@@ -53,7 +54,7 @@ public abstract class AbstractModelStore implements ModelStore {
 
     protected boolean isFileBelongingToContextType(String filename, PersistenceContextType contextType) {
         return filename.endsWith(FILE_EXT)
-                && filename.substring(filename.indexOf(NAME_PART_DELIMITER)).startsWith(getContextPrefix(contextType));
+                && filename.substring(filename.indexOf(NAME_PART_DELIMITER)).startsWith(NAME_PART_DELIMITER + getContextPrefix(contextType));
     }
 
 }

@@ -110,6 +110,7 @@ public class ManeuverClassifierTrainer {
     public static void main(String[] args) throws Exception {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         RegularManeuversForEstimationPersistenceManager persistenceManager = new RegularManeuversForEstimationPersistenceManager();
+        // ModelStore classifierModelStore = new FileSystemModelStore("trained_models");
         ModelStore classifierModelStore = new MongoDbModelStore(persistenceManager.getDb());
         classifierModelStore.deleteAll(PersistenceContextType.MANEUVER_CLASSIFIER);
         ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(persistenceManager,
