@@ -8,9 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Consumer;
 
-import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
@@ -24,7 +22,6 @@ import com.sap.sse.util.ClearStateTestSupport;
 public abstract class AbstractReplicableWithObjectInputStream<S, O extends OperationWithResult<S, ?>>
         implements ReplicableWithObjectInputStream<S, O>, ClearStateTestSupport {
 
-    private DomainFactory domainFactory;
     /**
      * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable. The
      * {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
@@ -101,14 +98,7 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        ObjectInputStream ois;
-        if (domainFactory != null) {
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(is);
-        } else {
-            // TODO ensure that domainfactory is set here. Otherwise there can be issues with duplicate domain objects
-            logger.warning(getId() + " didn't have a domain factory attached. Replication to this service could fail.");
-            ois = new ObjectInputStream(is);
-        }
+        ObjectInputStream ois = new ObjectInputStream(is);
         return ois;
     }
 
@@ -140,25 +130,6 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
     @Override
     public void addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper<S, ?> operation) {
         this.operationsSentToMasterForReplication.add(operation);
-    }
-
-    public void registerDomainFactory(DomainFactory domainFactory) {
-        synchronized (this) {
-            this.domainFactory = domainFactory;
-            this.notifyAll();
-        }
-    }
-
-    public void runWithDomainFactory(Consumer<DomainFactory> consumer) throws InterruptedException {
-        DomainFactory myDomainFactory;
-        synchronized (this) {
-            myDomainFactory = domainFactory;
-            while (myDomainFactory == null) {
-                wait();
-                myDomainFactory = domainFactory;
-            }
-        }
-        consumer.accept(myDomainFactory);
     }
 
 }

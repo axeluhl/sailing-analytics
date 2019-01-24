@@ -3928,7 +3928,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void setWindEstimationFactoryService(WindEstimationFactoryService service) {
         if (this.windEstimationFactoryService == null && service != null) {
             windEstimationFactoryService = service;
-            windEstimationFactoryService.registerDomainFactory(baseDomainFactory);
             setWindEstimationOnAllTrackedRaces(service);
         }
     }
