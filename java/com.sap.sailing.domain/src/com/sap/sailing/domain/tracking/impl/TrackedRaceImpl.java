@@ -576,7 +576,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
         final boolean result;
         if (!applyFilter || takesWindFixWithTimePoint(wind.getTimePoint())) {
-            result = getOrCreateWindTrack(windSource).add(wind);
+            WindTrack windTrack = getOrCreateWindTrack(windSource);
+            result = windTrack.add(wind);
             if (result) {
                 updated(wind.getTimePoint());
                 triggerManeuverCacheRecalculationForAllCompetitors();

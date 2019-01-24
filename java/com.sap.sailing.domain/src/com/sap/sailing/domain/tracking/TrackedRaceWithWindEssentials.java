@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
+import com.sap.sailing.domain.tracking.impl.DummyWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.LegMiddleWindTrackImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -90,12 +91,18 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
                 combinedWindTrack = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
             }
             result = combinedWindTrack;
-        } else if (windSource.getType() == WindSourceType.LEG_MIDDLE && windSource instanceof WindSourceWithAdditionalID) {
+        } else if (windSource.getType() == WindSourceType.LEG_MIDDLE
+                && windSource instanceof WindSourceWithAdditionalID) {
             result = getLegMiddleWindTrack((WindSourceWithAdditionalID) windSource);
         } else {
             synchronized (windTracks) {
                 result = windTracks.get(windSource);
                 if (result == null) {
+                    if (windSource.getType() == WindSourceType.MANEUVER_BASED_ESTIMATION) {
+                        // wind track of wind estimation gets unavailable only in one case: wind estimation was detached
+                        // but it is still running. Hence, return dummy track to complete to finish the run.
+                        return new DummyWindTrackImpl();
+                    }
                     result = createWindTrack(windSource,
                             delayForWindEstimationCacheInvalidation == -1 ? getMillisecondsOverWhichToAverageWind() / 2
                                     : delayForWindEstimationCacheInvalidation);

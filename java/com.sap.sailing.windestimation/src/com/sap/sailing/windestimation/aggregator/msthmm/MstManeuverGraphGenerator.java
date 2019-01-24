@@ -47,7 +47,7 @@ public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<Maneuve
             NodeWithNeighbors<ManeuverWithProbabilisticTypeClassification> parentOfPreviousNode,
             List<MstGraphLevel> leafs) {
         List<NodeWithDistance<ManeuverWithProbabilisticTypeClassification>> childNodes = previousNode.getNeighbors();
-        if (parentOfPreviousNode != null && childNodes.size() == 1) {
+        if (childNodes.size() <= 1 && (childNodes.isEmpty() || parentOfPreviousNode != null)) {
             leafs.add(previousGraphLevel);
         } else {
             for (NodeWithDistance<ManeuverWithProbabilisticTypeClassification> childNodeWithDistance : childNodes) {

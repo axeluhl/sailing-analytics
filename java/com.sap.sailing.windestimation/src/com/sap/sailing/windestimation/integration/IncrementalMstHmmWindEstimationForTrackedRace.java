@@ -43,7 +43,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
     private final IncrementalMstManeuverGraphGenerator mstManeuverGraphGenerator;
     private final MstBestPathsCalculator bestPathsCalculator;
     private final WindTrackCalculator windTrackCalculator;
-    private final Map<Wind, WindWithConfidence<Pair<Position, TimePoint>>> windTrackWithConfidences = new HashMap<>();
+    private final Map<Pair<Position, TimePoint>, WindWithConfidence<Pair<Position, TimePoint>>> windTrackWithConfidences = new HashMap<>();
     private final TrackedRace trackedRace;
     private WindSource windSource;
 
@@ -53,7 +53,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
             GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache) {
         super(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE,
                 WindSourceType.MANEUVER_BASED_ESTIMATION.useSpeed() && polarDataService != null,
-                IncrementalMstHmmWindEstimationForTrackedRace.class.getName());
+                IncrementalMstHmmWindEstimationForTrackedRace.class.getName(), true);
         this.trackedRace = trackedRace;
         this.windSource = windSource;
         DistanceAndDurationAwareWindTransitionProbabilitiesCalculator transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
@@ -76,36 +76,39 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
                 mstManeuverGraphGenerator.add(competitor, newManeuverSpot, trackTimeInfo);
             }
             MstManeuverGraphComponents graphComponents = mstManeuverGraphGenerator.parseGraph();
-            List<GraphLevelInference> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
-            for (GraphLevelInference inference : bestPath) {
-                ManeuverWithEstimatedType maneuverWithEstimatedType = new ManeuverWithEstimatedType(
-                        inference.getGraphLevel().getManeuver(), inference.getGraphNode().getManeuverType(),
-                        inference.getConfidence());
-                maneuversWithEstimatedType.add(maneuverWithEstimatedType);
-            }
-            Collections.sort(maneuversWithEstimatedType);
-            List<WindWithConfidence<Pair<Position, TimePoint>>> newWindTrack = windTrackCalculator
-                    .getWindTrackFromManeuverClassifications(maneuversWithEstimatedType);
-            Map<Wind, WindWithConfidence<Pair<Position, TimePoint>>> newWindTrackMap = new HashMap<>(
-                    newWindTrack.size());
-            for (WindWithConfidence<Pair<Position, TimePoint>> wind : newWindTrack) {
-                newWindTrackMap.put(wind.getObject(), wind);
-            }
-            for (WindWithConfidence<Pair<Position, TimePoint>> previousWind : windTrackWithConfidences.values()) {
-                WindWithConfidence<Pair<Position, TimePoint>> newWind = newWindTrackMap.get(previousWind.getObject());
-                if (newWind == null) {
-                    windTrackWithConfidences.remove(previousWind.getObject());
-                    trackedRace.removeWind(previousWind.getObject(), windSource);
-                } else if (!isWindNearlySame(newWind.getObject(), previousWind.getObject())) {
-                    windTrackWithConfidences.put(newWind.getObject(), newWind);
-                    trackedRace.removeWind(previousWind.getObject(), windSource);
-                    trackedRace.recordWind(newWind.getObject(), windSource, false);
+            if (graphComponents != null) {
+                List<GraphLevelInference> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
+                for (GraphLevelInference inference : bestPath) {
+                    ManeuverWithEstimatedType maneuverWithEstimatedType = new ManeuverWithEstimatedType(
+                            inference.getGraphLevel().getManeuver(), inference.getGraphNode().getManeuverType(),
+                            inference.getConfidence());
+                    maneuversWithEstimatedType.add(maneuverWithEstimatedType);
                 }
-            }
-            for (WindWithConfidence<Pair<Position, TimePoint>> newWind : newWindTrack) {
-                if (!windTrackWithConfidences.containsKey(newWind.getObject())) {
-                    windTrackWithConfidences.put(newWind.getObject(), newWind);
-                    trackedRace.recordWind(newWind.getObject(), windSource, false);
+                Collections.sort(maneuversWithEstimatedType);
+                List<WindWithConfidence<Pair<Position, TimePoint>>> newWindTrack = windTrackCalculator
+                        .getWindTrackFromManeuverClassifications(maneuversWithEstimatedType);
+                Map<Pair<Position, TimePoint>, WindWithConfidence<Pair<Position, TimePoint>>> newWindTrackMap = new HashMap<>(
+                        newWindTrack.size());
+                for (WindWithConfidence<Pair<Position, TimePoint>> wind : newWindTrack) {
+                    newWindTrackMap.put(wind.getRelativeTo(), wind);
+                }
+                for (WindWithConfidence<Pair<Position, TimePoint>> previousWind : windTrackWithConfidences.values()) {
+                    WindWithConfidence<Pair<Position, TimePoint>> newWind = newWindTrackMap
+                            .get(previousWind.getRelativeTo());
+                    if (newWind == null) {
+                        windTrackWithConfidences.remove(previousWind.getRelativeTo());
+                        trackedRace.removeWind(previousWind.getObject(), windSource);
+                    } else if (!isWindNearlySame(newWind.getObject(), previousWind.getObject())) {
+                        windTrackWithConfidences.put(newWind.getRelativeTo(), newWind);
+                        trackedRace.removeWind(previousWind.getObject(), windSource);
+                        trackedRace.recordWind(newWind.getObject(), windSource, false);
+                    }
+                }
+                for (WindWithConfidence<Pair<Position, TimePoint>> newWind : newWindTrack) {
+                    if (!windTrackWithConfidences.containsKey(newWind.getRelativeTo())) {
+                        windTrackWithConfidences.put(newWind.getRelativeTo(), newWind);
+                        trackedRace.recordWind(newWind.getObject(), windSource, false);
+                    }
                 }
             }
         } finally {
@@ -123,7 +126,8 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
 
     @Override
     protected double getConfidenceOfInternalWindFixUnsynchronized(Wind windFix) {
-        WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = windTrackWithConfidences.get(windFix);
+        WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = windTrackWithConfidences
+                .get(new Pair<>(windFix.getPosition(), windFix.getTimePoint()));
         return super.getConfidenceOfInternalWindFixUnsynchronized(windFix) * windWithConfidence.getConfidence();
     }
 
