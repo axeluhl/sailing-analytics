@@ -218,6 +218,8 @@
         <module>com.sap.sailing.feature.p2build</module>
         <module>com.sap.sailing.polars</module>
         <module>com.sap.sailing.windestimation</module>
+		<module>com.sap.sailing.windestimation.lab</module>
+		<module>com.sap.sailing.windestimation.test</module>
         <module>com.sap.sailing.polars.datamining</module>
         <module>com.sap.sailing.polars.datamining.shared</module>
         <module>com.sap.sailing.polars.test</module>
