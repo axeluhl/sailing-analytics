@@ -41,7 +41,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.RenameCollectionOptions;
 import com.mongodb.client.result.DeleteResult;
-import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -1269,7 +1268,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (dbRegatta.containsKey(FieldNames.REGATTA_REGATTA_CONFIGURATION.name())) {
                 try {
                     JSONObject json = Helpers.toJSONObjectSafe(new JSONParser()
-                            .parse(JSON.serialize(dbRegatta.get(FieldNames.REGATTA_REGATTA_CONFIGURATION.name()))));
+                            .parse(((Document) dbRegatta.get(FieldNames.REGATTA_REGATTA_CONFIGURATION.name())).toJson()));
                     configuration = RegattaConfigurationJsonDeserializer.create().deserialize(json);
                 } catch (JsonDeserializationException | ParseException e) {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
@@ -2485,7 +2484,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         MongoCollection<Document> collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {
             for (Document o : collection.find()) {
-                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
+                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson()));
                 DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
                 // ensure that in case there should be multiple competitors with equal IDs in the DB
                 // only one will survive
@@ -2532,7 +2531,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     try {
                         logger.log(Level.INFO, "Bug2822 DB-Migration: Load old competitors with embedded boats from COMPETITORS_BAK.");
                         for (Document o : collection.find()) {
-                            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
+                            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson()));
                             CompetitorWithBoat c = legacyCompetitorWithBoatDeserializer.deserialize(json);
                             // accept only the first instance for any given ID
                             if (!competitorsById.containsKey(c.getId())) {
@@ -2555,7 +2554,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         MongoCollection<Document> collection = database.getCollection(CollectionNames.BOATS.name());
         try {
             for (Document o : collection.find()) {
-                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
+                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson()));
                 DynamicBoat b = boatDeserializer.deserialize(json);
                 result.add(b);
             }
@@ -2607,7 +2606,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DeviceConfiguration configuration = null;
         try {
             JsonDeserializer<DeviceConfiguration> deserializer = DeviceConfigurationJsonDeserializer.create();
-            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(configObject)));
+            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(configObject.toJson()));
             configuration = deserializer.deserialize(json);
         } catch (JsonDeserializationException | ParseException e) {
             logger.log(Level.SEVERE,
