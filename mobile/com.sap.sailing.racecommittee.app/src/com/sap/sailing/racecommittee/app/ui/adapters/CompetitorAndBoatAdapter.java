@@ -25,7 +25,8 @@ public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAnd
     private boolean mCanBoatsOfCompetitorsChangePerRace;
     private CompetitorClick mListener;
 
-    public CompetitorAndBoatAdapter(Context context, List<Map.Entry<Competitor, Boat>> data, boolean canBoatsOfCompetitorsChangePerRace) {
+    public CompetitorAndBoatAdapter(Context context, List<Map.Entry<Competitor, Boat>> data,
+            boolean canBoatsOfCompetitorsChangePerRace) {
         mContext = context;
         mData = data;
         mCanBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;

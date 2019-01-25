@@ -1,9 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.util.Date;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,7 +26,12 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
-public abstract class SendingServiceAwareActivity extends ResilientActivity implements AuthCheckTask.AuthCheckTaskListener {
+import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
+import java.util.Date;
+
+public abstract class SendingServiceAwareActivity extends ResilientActivity
+        implements AuthCheckTask.AuthCheckTaskListener {
 
     private static class MessageSendingServiceConnection implements ServiceConnection, MessageSendingServiceLogger {
 
@@ -123,10 +124,12 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity impl
         int errorCount = this.sendingService.getDelayedIntentsCount();
         if (errorCount > 0) {
             ExLog.i(this, TAG, "updateSendingServiceInformation -> errorCount > 0");
-            menuItemLive.setIcon(BitmapHelper.getTintedDrawable(this, R.drawable.ic_share_white_36dp, ThemeHelper.getColor(this, R.attr.sap_red_1)));
+            menuItemLive.setIcon(BitmapHelper.getTintedDrawable(this, R.drawable.ic_share_white_36dp,
+                    ThemeHelper.getColor(this, R.attr.sap_red_1)));
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
             String statusText = getString(R.string.events_waiting_to_be_sent);
-            sendingServiceStatus = String.format(statusText, errorCount, lastSuccessfulSend == null ? getString(R.string.never) : lastSuccessfulSend);
+            sendingServiceStatus = String.format(statusText, errorCount,
+                    lastSuccessfulSend == null ? getString(R.string.never) : lastSuccessfulSend);
         } else {
             ExLog.i(this, TAG, "updateSendingServiceInformation -> errorCount <= 0");
             menuItemLive.setIcon(R.drawable.ic_share_white_36dp);
@@ -135,8 +138,8 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity impl
     }
 
     /**
-     * @return the resource ID for the options menu, {@code 0} if none.
-     * The menu item displaying the connection status is added automatically.
+     * @return the resource ID for the options menu, {@code 0} if none. The menu item displaying the connection status
+     *         is added automatically.
      */
     protected abstract int getOptionsMenuResId();
 
@@ -161,7 +164,8 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity impl
                     AuthCheckTask task = new AuthCheckTask(this, AppPreferences.on(this).getServerBaseURL(), this);
                     task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 } catch (MalformedURLException e) {
-                    ExLog.e(this, TAG, "Error: Failed to perform check-in due to a MalformedURLException: " + e.getMessage());
+                    ExLog.e(this, TAG,
+                            "Error: Failed to perform check-in due to a MalformedURLException: " + e.getMessage());
                 }
             }
             return true;
@@ -177,8 +181,9 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity impl
     }
 
     private String getLiveIconText() {
-        return getString(R.string.connected_to_wp, PrefUtils.getString(this, R.string.preference_server_url_key,
-                R.string.preference_server_url_default), sendingServiceStatus, (boundSendingService ? "bound" : "unbound"));
+        return getString(R.string.connected_to_wp,
+                PrefUtils.getString(this, R.string.preference_server_url_key, R.string.preference_server_url_default),
+                sendingServiceStatus, (boundSendingService ? "bound" : "unbound"));
     }
 
     @Override
@@ -193,7 +198,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity impl
             if (getSupportActionBar() != null) {
                 context = getSupportActionBar().getThemedContext();
             }
-            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(getString(R.string.sending_exception_title));
             builder.setMessage(getString(R.string.sending_exception_message));
             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

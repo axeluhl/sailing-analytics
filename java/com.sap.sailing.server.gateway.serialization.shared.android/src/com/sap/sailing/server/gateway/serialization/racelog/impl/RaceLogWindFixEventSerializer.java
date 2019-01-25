@@ -31,7 +31,7 @@ public class RaceLogWindFixEventSerializer extends BaseRaceLogEventSerializer {
         RaceLogWindFixEvent event = (RaceLogWindFixEvent) object;
         JSONObject result = super.serialize(event);
         result.put(FIELD_WIND, windSerializer.serialize(event.getWindFix()));
-        result.put(FIELD_MAGNETIC, Boolean.valueOf(event.isMagnetic()));
+        result.put(FIELD_MAGNETIC, event.isMagnetic());
         return result;
     }
 

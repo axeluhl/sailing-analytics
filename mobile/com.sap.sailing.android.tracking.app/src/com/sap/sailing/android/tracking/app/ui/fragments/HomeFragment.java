@@ -1,17 +1,34 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Date;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.annotation.SuppressLint;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ClickableSpan;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.fragments.AbstractHomeFragment;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperFailureListener;
@@ -38,31 +55,13 @@ import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
-import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
-import android.annotation.SuppressLint;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.internal.view.ContextThemeWrapper;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.ClickableSpan;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Date;
 
 public class HomeFragment extends AbstractHomeFragment implements LoaderCallbacks<Cursor> {
 
@@ -135,7 +134,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     }
 
     private void storeCompetitorCheckinData(CompetitorCheckinData checkinData) {
-        if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombinationAvailable(getActivity(), checkinData.checkinDigest)) {
+        if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombinationAvailable(getActivity(),
+                checkinData.checkinDigest)) {
             try {
                 DatabaseHelper.getInstance().storeCompetitorCheckinRow(getActivity(), checkinData);
                 adapter.notifyDataSetChanged();
@@ -150,16 +150,17 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             }
         } else {
             ExLog.w(getActivity(), TAG, "Combination of eventId, leaderboardName and competitorId already exists!");
-            Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG)
+                    .show();
         }
     }
 
     private void storeMarkCheckinData(CheckinData checkinData) {
-        if (DatabaseHelper.getInstance().eventLeaderboardMarkCombinationAvailable(getActivity(), checkinData.checkinDigest)) {
+        if (DatabaseHelper.getInstance().eventLeaderboardMarkCombinationAvailable(getActivity(),
+                checkinData.checkinDigest)) {
             try {
                 if (checkinData instanceof MarkCheckinData) {
-                    DatabaseHelper.getInstance()
-                        .storeMarkCheckinRow(getActivity(), (MarkCheckinData) checkinData);
+                    DatabaseHelper.getInstance().storeMarkCheckinRow(getActivity(), (MarkCheckinData) checkinData);
                 } else {
                     DatabaseHelper.getInstance().storeBoatCheckinRow(getActivity(), (BoatCheckinData) checkinData);
                 }
@@ -175,10 +176,10 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             }
         } else {
             ExLog.w(getActivity(), TAG, "Combination of eventId, leaderboardName and markID already exists!");
-            Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG)
+                    .show();
         }
     }
-
 
     /**
      * Checkin with API.
@@ -193,24 +194,23 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             JSONObject requestObject = null;
             if (checkinData instanceof CompetitorCheckinData) {
                 CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) checkinData;
-                requestObject = CheckinHelper
-                    .getCompetitorCheckinJson(competitorCheckinData.competitorId, competitorCheckinData.deviceUid, "TODO push device ID!!", date
-                        .getTime());
+                requestObject = CheckinHelper.getCompetitorCheckinJson(competitorCheckinData.competitorId,
+                        competitorCheckinData.deviceUid, "TODO push device ID!!", date.getTime());
             } else if (checkinData instanceof MarkCheckinData) {
                 MarkCheckinData markCheckinData = (MarkCheckinData) checkinData;
-                requestObject = CheckinHelper
-                    .getMarkCheckinJson(markCheckinData.getMark().getId().toString(), markCheckinData.deviceUid, "TODO push device ID!!", date
-                        .getTime());
+                requestObject = CheckinHelper.getMarkCheckinJson(markCheckinData.getMark().getId().toString(),
+                        markCheckinData.deviceUid, "TODO push device ID!!", date.getTime());
             } else if (checkinData instanceof BoatCheckinData) {
                 BoatCheckinData boatCheckinData = (BoatCheckinData) checkinData;
-                requestObject = CheckinHelper
-                    .getBoatCheckinJson(boatCheckinData.getBoat().getId().toString(), boatCheckinData.deviceUid, "TODO push device ID!!", date
-                        .getTime());
+                requestObject = CheckinHelper.getBoatCheckinJson(boatCheckinData.getBoat().getId().toString(),
+                        boatCheckinData.deviceUid, "TODO push device ID!!", date.getTime());
             }
-            HttpJsonPostRequest request = new HttpJsonPostRequest(getActivity(), new URL(checkinData.checkinURL), requestObject.toString());
-            NetworkHelper.getInstance(getActivity())
-                .executeHttpJsonRequestAsync(request, new CheckinListener(checkinData.checkinDigest, checkinData.getCheckinType()), new CheckinErrorListener(checkinData.checkinDigest));
-        } catch (JSONException|NullPointerException e) {
+            HttpJsonPostRequest request = new HttpJsonPostRequest(getActivity(), new URL(checkinData.checkinURL),
+                    requestObject.toString());
+            NetworkHelper.getInstance(getActivity()).executeHttpJsonRequestAsync(request,
+                    new CheckinListener(checkinData.checkinDigest, checkinData.getCheckinType()),
+                    new CheckinErrorListener(checkinData.checkinDigest));
+        } catch (JSONException | NullPointerException e) {
             ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
             displayAPIErrorRecommendRetry();
         } catch (MalformedURLException e) {
@@ -233,25 +233,28 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     public void displayUserConfirmationScreen(final BaseCheckinData data) {
         if (data instanceof CompetitorCheckinData) {
             final CompetitorCheckinData checkinData = (CompetitorCheckinData) data;
-            String message1 = getString(R.string.confirm_data_hello_name).replace("{full_name}", checkinData.competitorName);
-            String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}", checkinData.competitorSailId);
+            String message1 = getString(R.string.confirm_data_hello_name).replace("{full_name}",
+                    checkinData.competitorName);
+            String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}",
+                    checkinData.competitorSailId.isEmpty() ? checkinData.competitorName : checkinData.competitorSailId);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage(message1 + "\n\n" + message2);
             builder.setCancelable(true);
-            builder.setPositiveButton(getString(R.string.confirm_data_is_correct), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    clearScannedQRCodeInPrefs();
-                    checkInWithAPIAndDisplayTrackingActivity(checkinData);
-                }
-            }).setNegativeButton(R.string.decline_data_is_incorrect, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    clearScannedQRCodeInPrefs();
-                    dialog.cancel();
-                }
-            });
+            builder.setPositiveButton(getString(R.string.confirm_data_is_correct),
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            clearScannedQRCodeInPrefs();
+                            checkInWithAPIAndDisplayTrackingActivity(checkinData);
+                        }
+                    }).setNegativeButton(R.string.decline_data_is_incorrect, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            clearScannedQRCodeInPrefs();
+                            dialog.cancel();
+                        }
+                    });
             builder.show();
         } else if (data instanceof MarkCheckinData) {
             MarkCheckinData checkinData = (MarkCheckinData) data;
@@ -283,50 +286,54 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
-            case REGATTA_LOADER:
-                String[] projection = new String[] { AnalyticsDatabase.Tables.EVENTS + "." + AnalyticsContract.Event.EVENT_CHECKIN_DIGEST,
+        case REGATTA_LOADER:
+            String[] projection = new String[] {
+                    AnalyticsDatabase.Tables.EVENTS + "." + AnalyticsContract.Event.EVENT_CHECKIN_DIGEST,
                     AnalyticsDatabase.Tables.EVENTS + "." + AnalyticsContract.Event._ID,
                     AnalyticsDatabase.Tables.EVENTS + "." + AnalyticsContract.Event.EVENT_NAME,
                     AnalyticsDatabase.Tables.EVENTS + "." + AnalyticsContract.Event.EVENT_SERVER,
-                    AnalyticsDatabase.Tables.LEADERBOARDS + "." + AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME,
+                    AnalyticsDatabase.Tables.LEADERBOARDS + "."
+                            + AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME,
                     AnalyticsDatabase.Tables.COMPETITORS + "." + AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME,
                     AnalyticsDatabase.Tables.MARKS + "." + AnalyticsContract.Mark.MARK_NAME,
                     AnalyticsDatabase.Tables.CHECKIN_URIS + "." + AnalyticsContract.Checkin.CHECKIN_TYPE,
                     AnalyticsDatabase.Tables.BOATS + "." + AnalyticsContract.Boat.BOAT_NAME,
                     AnalyticsDatabase.Tables.BOATS + "." + AnalyticsContract.Boat.BOAT_COLOR };
-                return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsEventsCompetitorsMarksBoatsJoined.CONTENT_URI, projection, null, null, null);
+            return new CursorLoader(getActivity(),
+                    AnalyticsContract.LeaderboardsEventsCompetitorsMarksBoatsJoined.CONTENT_URI, projection, null, null,
+                    null);
 
-            default:
-                return null;
+        default:
+            return null;
         }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         switch (loader.getId()) {
-            case REGATTA_LOADER:
-                mListView.removeHeaderView(mHeader);
-                if (cursor != null && cursor.getCount() > 0) {
-                    mListView.addHeaderView(mHeader);
-                }
-                adapter.changeCursor(cursor);
-                break;
+        case REGATTA_LOADER:
+            mListView.removeHeaderView(mHeader);
+            if (cursor != null && cursor.getCount() > 0) {
+                mListView.addHeaderView(mHeader);
+            }
+            adapter.changeCursor(cursor);
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         switch (loader.getId()) {
-            case REGATTA_LOADER:
-                mListView.removeHeaderView(mHeader);
-                adapter.changeCursor(null);
-                break;
+        case REGATTA_LOADER:
+            mListView.removeHeaderView(mHeader);
+            adapter.changeCursor(null);
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 
@@ -337,10 +344,11 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     private boolean showDeleteConfirmationDialog(int position) {
         // -1, because there's a header row
         Cursor cursor = (Cursor) adapter.getItem(position - 1);
-        final String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
+        final String checkinDigest = cursor
+                .getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
         final int type = cursor.getInt(cursor.getColumnIndex(AnalyticsContract.Checkin.CHECKIN_TYPE));
         DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AppTheme_AlertDialog));
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setMessage(getString(R.string.confirm_delete_checkin));
         builder.setCancelable(true);
         builder.setNegativeButton(getString(R.string.no), null);
@@ -373,14 +381,16 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
         if (type == CheckinUrlInfo.TYPE_COMPETITOR) {
             CompetitorInfo competitorInfo = DatabaseHelper.getInstance().getCompetitor(getActivity(), checkinDigest);
-            checkoutHelper.checkoutCompetitor((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server, competitorInfo.id,
-                successListener, failureListener);
+            checkoutHelper.checkoutCompetitor((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server,
+                    competitorInfo.id, successListener, failureListener);
         } else if (type == CheckinUrlInfo.TYPE_MARK) {
             MarkInfo markInfo = DatabaseHelper.getInstance().getMarkInfo(getActivity(), checkinDigest);
-            checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server, markInfo.markId, type, successListener, failureListener);
+            checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server,
+                    markInfo.markId, type, successListener, failureListener);
         } else if (type == CheckinUrlInfo.TYPE_BOAT) {
             BoatInfo boatInfo = DatabaseHelper.getInstance().getBoatInfo(getActivity(), checkinDigest);
-            checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server, boatInfo.boatId, type, successListener, failureListener);
+            checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server,
+                    boatInfo.boatId, type, successListener, failureListener);
         }
     }
 
@@ -409,7 +419,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             // -1, because there's a header row
             Cursor cursor = (Cursor) adapter.getItem(position - 1);
 
-            String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
+            String checkinDigest = cursor
+                    .getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
             int type = cursor.getInt(cursor.getColumnIndex(AnalyticsContract.Checkin.CHECKIN_TYPE));
             startRegatta(checkinDigest, type);
         }
@@ -456,17 +467,19 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         @Override
         public void performAction(NetworkHelperError e) {
             if (e.getMessage() != null) {
-                ExLog.e(getActivity(), TAG, e.getMessage().toString());
+                ExLog.e(getActivity(), TAG, e.getMessage());
             } else {
                 ExLog.e(getActivity(), TAG, "Unknown Error");
             }
 
             StartActivity startActivity = (StartActivity) getActivity();
             startActivity.dismissProgressDialog();
-            startActivity.showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
+            startActivity.showErrorPopup(R.string.error,
+                    R.string.error_could_not_complete_operation_on_server_try_again);
 
             DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
-            Toast.makeText(getActivity(), getString(R.string.error_while_receiving_server_data), Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), getString(R.string.error_while_receiving_server_data), Toast.LENGTH_LONG)
+                    .show();
         }
     }
 

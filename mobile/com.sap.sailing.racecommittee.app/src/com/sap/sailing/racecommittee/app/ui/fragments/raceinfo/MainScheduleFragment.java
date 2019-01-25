@@ -3,16 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -39,6 +29,16 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener, SelectionAdapter.ItemClick {
 
@@ -154,7 +154,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     openFragment(StartProcedureFragment.newInstance(START_MODE_PRESETUP));
                 }
             };
-            mItems.add(new SelectionItem(getString(R.string.start_procedure), mRacingProcedure.getType().toString(), null, false, false, runnableProcedure));
+            mItems.add(new SelectionItem(getString(R.string.start_procedure), mRacingProcedure.getType().toString(),
+                    null, false, false, runnableProcedure));
             if (mRacingProcedure instanceof ConfigurableStartModeFlagRacingProcedure) {
                 final ConfigurableStartModeFlagRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 Flags flag = procedure.getStartModeFlag();
@@ -165,7 +166,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     }
                 };
                 Drawable drawable = FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize);
-                mItems.add(new SelectionItem(getString(R.string.start_mode), flag.name(), drawable, false, false, runnableMode));
+                mItems.add(new SelectionItem(getString(R.string.start_mode), flag.name(), drawable, false, false,
+                        runnableMode));
             } else if (mRacingProcedure instanceof GateStartRacingProcedure) {
                 GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 if (procedure != null) {
@@ -175,7 +177,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                             openFragment(GateStartPathFinderFragment.newInstance(START_MODE_PRESETUP));
                         }
                     };
-                    mItems.add(new SelectionItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(), null, false, false, runnablePathfinder));
+                    mItems.add(new SelectionItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(),
+                            null, false, false, runnablePathfinder));
 
                     Runnable runnableTiming = new Runnable() {
                         @Override
@@ -183,12 +186,16 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                             openFragment(GateStartTimingFragment.newInstance(START_MODE_PRESETUP));
                         }
                     };
-                    mItems.add(new SelectionItem(getString(R.string.gate_start_timing), RaceHelper.getGateTiming(getActivity(), procedure, getRace().getRaceGroup()), null, false, false, runnableTiming));
+                    mItems.add(new SelectionItem(getString(R.string.gate_start_timing),
+                            RaceHelper.getGateTiming(getActivity(), procedure, getRace().getRaceGroup()), null, false,
+                            false, runnableTiming));
                 }
             } else if (mRacingProcedure instanceof ESSRacingProcedure) {
                 ESSRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 if (procedure != null) {
-                    boolean checked = getArguments().getBoolean(RACE_GROUP, getRaceState().isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
+                    boolean checked = getArguments().getBoolean(RACE_GROUP,
+                            getRaceState().isAdditionalScoringInformationEnabled(
+                                    AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
                     mItemRaceGroup = new SelectionItem(getString(R.string.race_group), null, null, true, checked, null);
                     mItems.add(mItemRaceGroup);
                 }
@@ -215,7 +222,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
         if (mRaceId != null && mStartTimeDiff != null) {
             ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(mRaceId);
-            mStartTimeString = getString(R.string.minutes_after_long, mStartTimeDiff.asMinutes(), RaceHelper.getShortReverseRaceName(race, " / ", getRace()));
+            mStartTimeString = getString(R.string.minutes_after_long, mStartTimeDiff.asMinutes(),
+                    RaceHelper.getShortReverseRaceName(race, " / ", getRace()));
         }
 
         Runnable runnable = new Runnable() {
@@ -224,7 +232,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 openFragment(StartTimeFragment.newInstance(getArguments()));
             }
         };
-        mItemStartTime = new SelectionItem(getString(R.string.start_time), mStartTimeString, null, false, false, runnable);
+        mItemStartTime = new SelectionItem(getString(R.string.start_time), mStartTimeString, null, false, false,
+                runnable);
         mItems.add(mItemStartTime);
     }
 
@@ -240,12 +249,12 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.start_race:
-                startRace();
-                break;
+        case R.id.start_race:
+            startRace();
+            break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Clicked on " + v);
+        default:
+            ExLog.i(getActivity(), TAG, "Clicked on " + v);
         }
     }
 
@@ -260,7 +269,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         TimePoint now = MillisecondsTimePoint.now();
         getRaceState().setRacingProcedure(now, mRacingProcedure.getType());
         if (mRacingProcedure instanceof ESSRacingProcedure && mItemRaceGroup != null) {
-            getRaceState().setAdditionalScoringInformationEnabled(MillisecondsTimePoint.now(), /*enable*/ mItemRaceGroup.isChecked(),
+            getRaceState().setAdditionalScoringInformationEnabled(MillisecondsTimePoint.now(),
+                    /* enable */ mItemRaceGroup.isChecked(),
                     AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         }
         if (mStartTimeDiff == null && mRaceId == null) {
@@ -289,8 +299,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
             if (getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
                 Wind wind = getRaceState().getWindFix();
-                String sensorData = getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint()), wind.getFrom().getDegrees(), wind
-                    .getKnots());
+                String sensorData = getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint()),
+                        wind.getFrom().getDegrees(), wind.getKnots());
                 mItemStartWind.setValue(sensorData);
             }
 
@@ -343,7 +353,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         public void onStatusChanged(ReadonlyRaceState state) {
             super.onStatusChanged(state);
 
-            openFragment(RaceInfoFragmentChooser.on(state.getRacingProcedure().getType()).choose(getActivity(), getRace()));
+            openFragment(
+                    RaceInfoFragmentChooser.on(state.getRacingProcedure().getType()).choose(getActivity(), getRace()));
         }
     }
 }

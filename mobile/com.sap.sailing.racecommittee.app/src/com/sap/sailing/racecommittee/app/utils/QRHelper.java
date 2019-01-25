@@ -29,17 +29,18 @@ public class QRHelper {
 
     public boolean saveData(String content) {
         try {
-            DeviceConfigurationDetails connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content, new URLDecoder() {
-                @Override
-                public String decode(String encodedURL) {
-                    try {
-                        return java.net.URLDecoder.decode(encodedURL, "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        ExLog.w(mContext, TAG, "Couldn't resolve encoding UTF-8");
-                        return encodedURL;
-                    }
-                }
-            });
+            DeviceConfigurationDetails connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content,
+                    new URLDecoder() {
+                        @Override
+                        public String decode(String encodedURL) {
+                            try {
+                                return java.net.URLDecoder.decode(encodedURL, "UTF-8");
+                            } catch (UnsupportedEncodingException e) {
+                                ExLog.w(mContext, TAG, "Couldn't resolve encoding UTF-8");
+                                return encodedURL;
+                            }
+                        }
+                    });
 
             String identifier = connectionConfiguration.getDeviceIdentifier();
             URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
@@ -53,12 +54,13 @@ public class QRHelper {
                 editor.putString(mContext.getString(R.string.preference_identifier_key), identifier);
                 editor.putString(mContext.getString(R.string.preference_server_url_key), serverUrl);
                 editor.putString(mContext.getString(R.string.preference_access_token_key), accessToken);
-                editor.commit();
+                editor.apply();
 
                 new AutoUpdater(mContext).checkForUpdate(false);
                 return true;
             } else {
-                Toast.makeText(mContext, mContext.getString(R.string.error_scanning_qr_malformed), Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, mContext.getString(R.string.error_scanning_qr_malformed), Toast.LENGTH_LONG)
+                        .show();
             }
         } catch (IllegalArgumentException e) {
             Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_LONG).show();
