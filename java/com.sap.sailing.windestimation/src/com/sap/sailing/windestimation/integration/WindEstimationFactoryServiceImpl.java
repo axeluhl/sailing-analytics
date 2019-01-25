@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.WindSourceType;
@@ -32,26 +34,30 @@ public class WindEstimationFactoryServiceImpl
     public static final ModelStore MODEL_STORE = new MongoDbModelStore(MongoDBService.INSTANCE.getDB());
     private static final ManeuverFeatures MAX_MANEUVER_FEATURES = new ManeuverFeatures(ENABLE_POLARS_INFORMATION,
             ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION);
+    private static final PersistenceContextType[] relevantContextTypes = new PersistenceContextType[] {
+            PersistenceContextType.MANEUVER_CLASSIFIER, PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
+            PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR };
 
     private final ManeuverClassifiersCache maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE, true,
             PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
     private final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(
             MODEL_STORE, true, PRESERVE_LOADED_MODELS_MILLIS);
-
-    private static final PersistenceContextType[] relevantContextTypes = new PersistenceContextType[] {
-            PersistenceContextType.MANEUVER_CLASSIFIER, PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
-            PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR };
+    private final List<WindEstimationModelsChangedListener> modelsChangedListeners = new ArrayList<>();
+    private boolean modelsReady = false;
+    private boolean shutdown = false;
 
     @Override
     public IncrementalWindEstimationTrack createIncrementalWindEstimationTrack(TrackedRace trackedRace) {
-        IncrementalWindEstimationTrack windEstimation = null;
-        if (maneuverClassifiersCache.isReady() && gaussianBasedTwdTransitionDistributionCache.isReady()) {
-            windEstimation = new IncrementalMstHmmWindEstimationForTrackedRace(trackedRace,
-                    new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION), trackedRace.getPolarDataService(),
-                    trackedRace.getMillisecondsOverWhichToAverageWind(), maneuverClassifiersCache,
-                    gaussianBasedTwdTransitionDistributionCache);
-        }
+        IncrementalWindEstimationTrack windEstimation = new IncrementalMstHmmWindEstimationForTrackedRace(trackedRace,
+                new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION), trackedRace.getPolarDataService(),
+                trackedRace.getMillisecondsOverWhichToAverageWind(), maneuverClassifiersCache,
+                gaussianBasedTwdTransitionDistributionCache);
         return windEstimation;
+    }
+
+    @Override
+    public synchronized boolean isReady() {
+        return modelsReady;
     }
 
     @SuppressWarnings("unchecked")
@@ -64,6 +70,33 @@ public class WindEstimationFactoryServiceImpl
 
         }
         clearState();
+    }
+
+    @Override
+    public void addWindEstimationModelsChangedListenerAndReceiveUpdate(WindEstimationModelsChangedListener listener) {
+        boolean modelsReady;
+        synchronized (this) {
+            modelsChangedListeners.add(listener);
+            modelsReady = this.modelsReady;
+        }
+        listener.modelsChangedEvent(modelsReady);
+    }
+
+    @Override
+    public synchronized void removeWindEstimationModelsChangedListener(WindEstimationModelsChangedListener listener) {
+        modelsChangedListeners.remove(listener);
+    }
+
+    @Override
+    public synchronized void removeAllWindEstimationModelsChangedListeners() {
+        modelsChangedListeners.clear();
+    }
+
+    private void notifyModelsChangedListeners(List<WindEstimationModelsChangedListener> modelsChangedListeners,
+            boolean modelsReady) {
+        for (WindEstimationModelsChangedListener listener : modelsChangedListeners) {
+            listener.modelsChangedEvent(modelsReady);
+        }
     }
 
     @Override
@@ -85,6 +118,15 @@ public class WindEstimationFactoryServiceImpl
     public void clearState() {
         maneuverClassifiersCache.clearCache();
         gaussianBasedTwdTransitionDistributionCache.clearCache();
+        List<WindEstimationModelsChangedListener> modelsChangedListeners;
+        boolean modelsReady;
+        synchronized (this) {
+            modelsReady = !shutdown && maneuverClassifiersCache.isReady()
+                    && gaussianBasedTwdTransitionDistributionCache.isReady();
+            modelsChangedListeners = this.modelsChangedListeners;
+            modelsReady = this.modelsReady;
+        }
+        notifyModelsChangedListeners(modelsChangedListeners, modelsReady);
     }
 
     public void importAllModelsFromModelStore(ModelStore modelStore) throws ModelPersistenceException {
@@ -94,6 +136,17 @@ public class WindEstimationFactoryServiceImpl
             MODEL_STORE.importPersistedModels(exportedModels, contextType);
         }
         clearState();
+    }
+
+    public void shutdown() {
+        List<WindEstimationModelsChangedListener> modelsChangedListeners;
+        synchronized (this) {
+            modelsReady = false;
+            shutdown = true;
+            modelsChangedListeners = this.modelsChangedListeners;
+        }
+        notifyModelsChangedListeners(modelsChangedListeners, false);
+        removeAllWindEstimationModelsChangedListeners();
     }
 
 }

@@ -30,6 +30,7 @@ public class Activator implements BundleActivator {
     private static final String WIND_ESTIMATION_MODEL_DATA_SOURCE_FOLDER_PROPERTY_NAME = "windestimation.source.folder";
 
     private final Set<ServiceRegistration<?>> registrations = new HashSet<>();
+    private final WindEstimationFactoryServiceImpl service = new WindEstimationFactoryServiceImpl();
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -46,9 +47,8 @@ public class Activator implements BundleActivator {
         if (windEstimationModelDataSourceURL != null) {
             importWindEstimationModelsFromUrl(windEstimationModelDataSourceURL);
         }
-        WindEstimationFactoryServiceImpl service = new WindEstimationFactoryServiceImpl();
         if (windEstimationModelDataSourceFolder != null) {
-            importWindEstimationModelsFromFolder(service, windEstimationModelDataSourceFolder);
+            importWindEstimationModelsFromFolder(windEstimationModelDataSourceFolder);
         }
         final ServiceRegistration<WindEstimationFactoryService> serviceRegistration = context
                 .registerService(WindEstimationFactoryService.class, service, null);
@@ -59,8 +59,7 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(ClearStateTestSupport.class.getName(), service, null));
     }
 
-    private void importWindEstimationModelsFromFolder(WindEstimationFactoryServiceImpl service,
-            String windEstimationModelDataSourceFolder) {
+    private void importWindEstimationModelsFromFolder(String windEstimationModelDataSourceFolder) {
         FileSystemModelStore modelStore = new FileSystemModelStore(windEstimationModelDataSourceFolder);
         try {
             service.importAllModelsFromModelStore(modelStore);
@@ -88,6 +87,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        service.shutdown();
         logger.info("Unregistering WindEstimationFactoryService");
         for (ServiceRegistration<?> reg : registrations) {
             reg.unregister();

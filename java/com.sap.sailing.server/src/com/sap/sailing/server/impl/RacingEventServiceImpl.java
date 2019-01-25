@@ -1873,6 +1873,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             if (polarDataService != null) {
                 trackedRace.setPolarDataService(polarDataService);
             }
+            if (windEstimationFactoryService != null) {
+                trackedRace.setWindEstimation(
+                        windEstimationFactoryService.createIncrementalWindEstimationTrack(trackedRace));
+            }
         }
     }
     
@@ -3926,7 +3930,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public void setWindEstimationFactoryService(WindEstimationFactoryService service) {
-        if (this.windEstimationFactoryService == null && service != null) {
+        if (windEstimationFactoryService != null || service != null) {
             windEstimationFactoryService = service;
             setWindEstimationOnAllTrackedRaces(service);
         }
@@ -3983,13 +3987,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
     
-    public void unsetWindEstimationFactoryService(WindEstimationFactoryService service) {
-        if (windEstimationFactoryService == service) {
-            windEstimationFactoryService = null;
-            setWindEstimationOnAllTrackedRaces(null);
-        }
-    }
-
     @Override
     public Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint) {
         final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);

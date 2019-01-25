@@ -314,7 +314,9 @@ public class Activator implements BundleActivator {
         @Override
         public WindEstimationFactoryService addingService(ServiceReference<WindEstimationFactoryService> reference) {
             WindEstimationFactoryService service = context.getService(reference);
-            racingEventService.setWindEstimationFactoryService(service);
+            service.addWindEstimationModelsChangedListenerAndReceiveUpdate(windEstimationReady -> {
+                racingEventService.setWindEstimationFactoryService(windEstimationReady ? service : null);
+            });
             return service;
         }
 
@@ -326,7 +328,6 @@ public class Activator implements BundleActivator {
         @Override
         public void removedService(ServiceReference<WindEstimationFactoryService> reference,
                 WindEstimationFactoryService service) {
-            racingEventService.unsetWindEstimationFactoryService(service);
         }
     }
 }

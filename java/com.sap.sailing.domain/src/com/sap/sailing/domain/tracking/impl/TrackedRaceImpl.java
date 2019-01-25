@@ -383,14 +383,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Caches wind requests for a few seconds to accelerate access in live mode
      */
     private transient ShortTimeWindCache shortTimeWindCache;
-    
+
     private transient PolarDataService polarDataService;
-    
-    private transient IncrementalWindEstimationTrack windEstimation;
-    
-    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache = new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
-            /* preserve how many milliseconds */ 10000,
-            competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor, windEstimation));
+
+    private transient volatile IncrementalWindEstimationTrack windEstimation;
+
+    private transient ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache;
 
     /**
      * Tells how ranks are to be assigned to the competitors at any time during the race. For one-design boat classes
@@ -458,6 +456,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Mark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
+        this.maneuverDetectorPerCompetitorCache = createManeuverDetectorCache();
         this.maneuverCache = createManeuverCache();
         this.markTracks = new ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>>();
         int i = 0;
@@ -683,6 +682,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         directionFromStartToNextMarkCache = new ConcurrentHashMap<>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         crossTrackErrorCache.invalidate();
+        maneuverDetectorPerCompetitorCache = createManeuverDetectorCache();
         maneuverCache = createManeuverCache();
         // considering the unlikely possibility that the course and this tracked race's internal structures
         // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
@@ -726,6 +726,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         for (Competitor competitor : getRace().getCompetitors()) {
             getManeuvers(competitor, true);
         }
+    }
+    
+    private ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> createManeuverDetectorCache() {
+        return new ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector>(
+                /* preserve how many milliseconds */ 10000,
+                competitor -> new IncrementalManeuverDetectorImpl(TrackedRaceImpl.this, competitor, windEstimation));
     }
 
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
@@ -3601,10 +3607,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         this.polarDataService = polarDataService;
     }
     
+    @Override
     public void setWindEstimation(IncrementalWindEstimationTrack windEstimation) {
-        if (this.windEstimation != windEstimation) {
-            if (this.windEstimation != null) {
-                windTracks.remove(this.windEstimation.getWindSource());
+        IncrementalWindEstimationTrack previousWindEstimation = this.windEstimation;
+        if (previousWindEstimation != windEstimation) {
+            if (previousWindEstimation != null) {
+                windTracks.remove(previousWindEstimation.getWindSource());
             }
             if (windEstimation != null) {
                 windTracks.put(windEstimation.getWindSource(), windEstimation);
