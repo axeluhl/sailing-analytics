@@ -23,7 +23,7 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
     }
 
     public abstract double getDimensionValue(TwdTransition instance);
-    
+
     public abstract double getPreprocessedDimensionValue(double dimensionValue);
 
     public SupportedDimensionValueRange getSupportedDimensionValueRange() {
@@ -81,13 +81,15 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
     @Override
     public String getId() {
         return dimensionName + "BasedTwdTransitionRegressor" + "From" + supportedDimensionValueRange.getFromInclusive()
-                + "To" + supportedDimensionValueRange.getToExclusive();
+                + "To"
+                + (supportedDimensionValueRange.getToExclusive() >= SupportedDimensionValueRange.MAX_VALUE ? "Maximum"
+                        : supportedDimensionValueRange.getToExclusive());
     }
 
     public boolean isDimensionValueSupported(double dimensionValue) {
         if (supportedDimensionValueRange.getFromInclusive() <= dimensionValue
                 && (supportedDimensionValueRange.getToExclusive() > dimensionValue
-                        || dimensionValue == Double.MAX_VALUE)) {
+                        || dimensionValue >= SupportedDimensionValueRange.MAX_VALUE)) {
             return true;
         }
         return false;
@@ -103,5 +105,5 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
         double x = getDimensionValue(instance);
         return isDimensionValueSupported(x);
     }
-    
+
 }

@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class SupportedDimensionValueRange implements Serializable {
 
     private static final long serialVersionUID = -3288594458162374160L;
+    public static final double MAX_VALUE = 100000000000.0;
     private final double fromInclusive;
     private final double toExclusive;
     private int polynomialDegree;
@@ -74,8 +75,9 @@ public class SupportedDimensionValueRange implements Serializable {
 
     @Override
     public String toString() {
-        return "SupportedDimensionValueRange [fromInclusive=" + fromInclusive + ", toExclusive=" + toExclusive
-                + ", polynomialDegree=" + polynomialDegree + ", withBias=" + withBias + "]";
+        return "SupportedDimensionValueRange [fromInclusive=" + fromInclusive + ", toExclusive="
+                + (toExclusive >= MAX_VALUE ? "Maximum" : toExclusive) + ", polynomialDegree=" + polynomialDegree
+                + ", withBias=" + withBias + "]";
     }
 
 }

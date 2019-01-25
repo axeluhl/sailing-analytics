@@ -30,7 +30,7 @@ public class DurationBasedTwdTransitionRegressorModelMetadata
 
     public enum DurationValueRange {
         BEGINNING(0, 5, 1, false), MIDDLE1(5, 62, 1, true), MIDDLE2(62, 5394, 1, true), REMAINDER(5394,
-                Double.MAX_VALUE, 1, true);
+                SupportedDimensionValueRange.MAX_VALUE, 1, true);
 
         private final SupportedDimensionValueRange supportedDimensionValueRange;
 
