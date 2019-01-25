@@ -26,6 +26,7 @@ public class WindEstimationFactoryServiceImpl
         extends AbstractReplicableWithObjectInputStream<WindEstimationFactoryService, WindEstimationDataOperation<?>>
         implements ReplicableWindEstimationFactoryService {
 
+    private static final boolean PRELOAD_ALL_MODELS = true;
     private static final boolean ENABLE_MARKS_INFORMATION = false;
     private static final boolean ENABLE_SCALED_SPEED = false;
     private static final boolean ENABLE_POLARS_INFORMATION = true;
@@ -38,10 +39,10 @@ public class WindEstimationFactoryServiceImpl
             PersistenceContextType.MANEUVER_CLASSIFIER, PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
             PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR };
 
-    private final ManeuverClassifiersCache maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE, true,
-            PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
+    private final ManeuverClassifiersCache maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE,
+            PRELOAD_ALL_MODELS, PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
     private final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(
-            MODEL_STORE, true, PRESERVE_LOADED_MODELS_MILLIS);
+            MODEL_STORE, PRELOAD_ALL_MODELS, PRESERVE_LOADED_MODELS_MILLIS);
     private final List<WindEstimationModelsChangedListener> modelsChangedListeners = new ArrayList<>();
     private boolean modelsReady = false;
     private boolean shutdown = false;
