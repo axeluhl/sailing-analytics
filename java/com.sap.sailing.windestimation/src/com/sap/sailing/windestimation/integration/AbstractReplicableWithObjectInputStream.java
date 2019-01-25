@@ -13,10 +13,10 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.OperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.UnsentOperationsToMasterSender;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public abstract class AbstractReplicableWithObjectInputStream<S, O extends OperationWithResult<S, ?>>
@@ -27,7 +27,7 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
      * {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
      * {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)} method.
      */
-    private UnsentOperationsToMasterSender unsentOperationsToMasterSender;
+    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
 
     /**
      * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not
@@ -49,15 +49,15 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
     }
 
     @Override
-    public void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service) {
+    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
         this.unsentOperationsToMasterSender = service;
     }
 
     @Override
-    public <S1, O1 extends OperationWithResult<S1, ?>, T> void retrySendingLater(
-            OperationWithResult<S1, T> operationWithResult, OperationsToMasterSender<S1, O1> sender) {
+    public <S1, O1 extends OperationWithResult<S1, ?>, T1> void scheduleForSending(
+            OperationWithResult<S1, T1> operationWithResult, OperationsToMasterSender<S1, O1> sender) {
         if (unsentOperationsToMasterSender != null) {
-            unsentOperationsToMasterSender.retrySendingLater(operationWithResult, sender);
+            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
         }
     }
 
