@@ -124,7 +124,7 @@ public class WindEstimationFactoryServiceImpl
             modelsReady = !shutdown && maneuverClassifiersCache.isReady()
                     && gaussianBasedTwdTransitionDistributionCache.isReady();
             modelsChangedListeners = this.modelsChangedListeners;
-            modelsReady = this.modelsReady;
+            this.modelsReady = modelsReady;
         }
         notifyModelsChangedListeners(modelsChangedListeners, modelsReady);
     }

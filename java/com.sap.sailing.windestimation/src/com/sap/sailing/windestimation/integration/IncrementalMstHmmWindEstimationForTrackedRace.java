@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.integration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -92,23 +93,29 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
                 for (WindWithConfidence<Pair<Position, TimePoint>> wind : newWindTrack) {
                     newWindTrackMap.put(wind.getRelativeTo(), wind);
                 }
-                for (WindWithConfidence<Pair<Position, TimePoint>> previousWind : windTrackWithConfidences.values()) {
+                List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAdd = new ArrayList<>();
+                for (Iterator<WindWithConfidence<Pair<Position, TimePoint>>> previousWindFixesIterator = windTrackWithConfidences
+                        .values().iterator(); previousWindFixesIterator.hasNext();) {
+                    WindWithConfidence<Pair<Position, TimePoint>> previousWind = previousWindFixesIterator.next();
                     WindWithConfidence<Pair<Position, TimePoint>> newWind = newWindTrackMap
                             .get(previousWind.getRelativeTo());
                     if (newWind == null) {
-                        windTrackWithConfidences.remove(previousWind.getRelativeTo());
+                        previousWindFixesIterator.remove();
                         trackedRace.removeWind(previousWind.getObject(), windSource);
                     } else if (!isWindNearlySame(newWind.getObject(), previousWind.getObject())) {
-                        windTrackWithConfidences.put(newWind.getRelativeTo(), newWind);
+                        previousWindFixesIterator.remove();
                         trackedRace.removeWind(previousWind.getObject(), windSource);
-                        trackedRace.recordWind(newWind.getObject(), windSource, false);
+                        windFixesToAdd.add(newWind);
                     }
                 }
                 for (WindWithConfidence<Pair<Position, TimePoint>> newWind : newWindTrack) {
                     if (!windTrackWithConfidences.containsKey(newWind.getRelativeTo())) {
-                        windTrackWithConfidences.put(newWind.getRelativeTo(), newWind);
-                        trackedRace.recordWind(newWind.getObject(), windSource, false);
+                        windFixesToAdd.add(newWind);
                     }
+                }
+                for (WindWithConfidence<Pair<Position, TimePoint>> windFixToAdd : windFixesToAdd) {
+                    windTrackWithConfidences.put(windFixToAdd.getRelativeTo(), windFixToAdd);
+                    trackedRace.recordWind(windFixToAdd.getObject(), windSource, false);
                 }
             }
         } finally {
