@@ -110,7 +110,6 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
                 maneuverData.setLatestTemporaryAcceptedManeuver(newManeuver);
                 ManeuverWithProbabilisticTypeClassification newManeuverClassification = maneuverClassifiersCache
                         .classifyInstance(newManeuverForEstimation);
-                maneuverData.setLatestTemporaryAcceptedManeuver(newManeuver);
                 maneuverData.setLatestTemporaryAcceptedManeuverClassification(newManeuverClassification);
             }
             maneuverData.getAllManeuversAfterLatestNonTemporaryAcceptedManeuver().add(newManeuver);
