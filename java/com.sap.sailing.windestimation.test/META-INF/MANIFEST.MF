@@ -7,5 +7,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.junit;bundle-version="4.8.2"
+Require-Bundle: org.junit;bundle-version="4.8.2",
+ com.sap.sailing.domain.test,
+ com.sap.sailing.domain.tractracadapter,
+ com.tractrac.clientmodule
 Automatic-Module-Name: com.sap.sailing.windestimation.test

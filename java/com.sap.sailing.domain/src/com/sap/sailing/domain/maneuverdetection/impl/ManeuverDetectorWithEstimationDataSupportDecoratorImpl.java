@@ -360,7 +360,8 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
                 .compareTo(curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter()) < 0
                         ? curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore()
                         : curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter();
-        if (polarDataService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass)) {
+        if (polarDataService != null
+                && polarDataService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass)) {
             SpeedWithBearingWithConfidence<Void> closestTackTwa = polarDataService.getClosestTwaTws(ManeuverType.TACK,
                     boatSpeed, curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees(), boatClass);
             SpeedWithBearingWithConfidence<Void> closestJibeTwa = polarDataService.getClosestTwaTws(ManeuverType.JIBE,

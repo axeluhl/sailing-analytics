@@ -39,9 +39,9 @@ public class WindEstimationFactoryServiceImpl
             PersistenceContextType.MANEUVER_CLASSIFIER, PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
             PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR };
 
-    private final ManeuverClassifiersCache maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE,
+    protected final ManeuverClassifiersCache maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE,
             PRELOAD_ALL_MODELS, PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
-    private final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(
+    protected final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(
             MODEL_STORE, PRELOAD_ALL_MODELS, PRESERVE_LOADED_MODELS_MILLIS);
     private final List<WindEstimationModelsChangedListener> modelsChangedListeners = new ArrayList<>();
     private boolean modelsReady = false;

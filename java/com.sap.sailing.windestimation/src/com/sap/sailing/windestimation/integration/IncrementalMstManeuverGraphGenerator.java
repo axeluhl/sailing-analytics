@@ -204,7 +204,7 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
                 .compareTo(curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter()) < 0
                         ? curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore()
                         : curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter();
-        if (polarService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass)) {
+        if (polarService != null && polarService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass)) {
             SpeedWithBearingWithConfidence<Void> closestTackTwa = polarService.getClosestTwaTws(ManeuverType.TACK,
                     boatSpeed, curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees(), boatClass);
             if (closestTackTwa != null) {
@@ -230,7 +230,7 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
                 .compareTo(curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter()) < 0
                         ? curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore()
                         : curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter();
-        if (polarService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass)) {
+        if (polarService != null && polarService.getAllBoatClassesWithPolarSheetsAvailable().contains(boatClass)) {
             SpeedWithBearingWithConfidence<Void> closestJibeTwa = polarService.getClosestTwaTws(ManeuverType.JIBE,
                     boatSpeed, curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees(), boatClass);
             if (closestJibeTwa != null) {
