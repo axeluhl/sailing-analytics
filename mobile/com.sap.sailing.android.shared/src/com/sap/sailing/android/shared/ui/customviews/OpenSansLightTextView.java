@@ -2,10 +2,10 @@ package com.sap.sailing.android.shared.ui.customviews;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
-import android.widget.TextView;
 
-public class OpenSansLightTextView extends TextView {
+public class OpenSansLightTextView extends AppCompatTextView {
 
     public OpenSansLightTextView(Context context) {
         super(context);

@@ -2,6 +2,14 @@ package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
+import com.sap.sailing.android.shared.util.LocationHelper;
+import com.sap.sailing.android.shared.util.TimeUtils;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,14 +20,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.util.LocationHelper;
-import com.sap.sailing.android.shared.util.TimeUtils;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackingTimeFragment extends BaseFragment {
 
@@ -96,24 +96,25 @@ public class TrackingTimeFragment extends BaseFragment {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case TIMER_SET:
-                    final long trackingTimerStarted = prefs.getTrackingTimerStarted();
-                    if (trackingTimerStarted > 0) {
-                        final TimePoint now = MillisecondsTimePoint.now();
-                        if (timer != null) {
-                            timer.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    timer.setText(TimeUtils.formatDurationSince(now.minus(trackingTimerStarted).asMillis()));
-                                }
-                            });
-                        }
+            case TIMER_SET:
+                final long trackingTimerStarted = prefs.getTrackingTimerStarted();
+                if (trackingTimerStarted > 0) {
+                    final TimePoint now = MillisecondsTimePoint.now();
+                    if (timer != null) {
+                        timer.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                timer.setText(
+                                        TimeUtils.formatDurationSince(now.minus(trackingTimerStarted).asMillis()));
+                            }
+                        });
                     }
-                    sendEmptyMessageDelayed(TIMER_SET, TIMER_DELAY);
-                    break;
+                }
+                sendEmptyMessageDelayed(TIMER_SET, TIMER_DELAY);
+                break;
 
-                default:
-                    super.handleMessage(msg);
+            default:
+                super.handleMessage(msg);
             }
         }
     }

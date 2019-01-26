@@ -1,4 +1,5 @@
 package com.sap.sailing.domain.base.configuration.impl;
+
 import java.util.List;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;

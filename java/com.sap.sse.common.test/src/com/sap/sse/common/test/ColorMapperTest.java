@@ -23,7 +23,7 @@ public class ColorMapperTest {
 
     @Before
     public void setUp() {
-        valueRange = new ValueRangeFlexibleBoundaries(-5.0, 5.0, 0.0);
+        valueRange = new ValueRangeFlexibleBoundaries(-5.0, 5.0, 0.0, 0.0);
         colorMapper = new ColorMapper(valueRange, false);
         listener = mock(ColorMapperChangedListener.class);
         colorMapper.addListener(listener);

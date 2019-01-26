@@ -10,12 +10,12 @@ public class MarksDataHandler extends DataHandler<Collection<Mark>> {
     public MarksDataHandler(OnlineDataManager manager) {
         super(manager);
     }
-    
+
     @Override
     public boolean hasCachedResults() {
         return !manager.getDataStore().getMarks().isEmpty();
     }
-    
+
     @Override
     public Collection<Mark> getCachedResults() {
         return manager.getDataStore().getMarks();

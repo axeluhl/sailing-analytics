@@ -54,6 +54,7 @@ public class QRCodeView extends Composite {
             InvitationMode invitationMode) {
         switch (invitationMode) {
         case COMPETITOR:
+        case COMPETITOR_2:
             titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitle(competitor.getName(), leaderboardName));
             subtitleDivUi.setInnerText(
                     StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));

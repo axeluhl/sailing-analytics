@@ -4,15 +4,15 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
+import com.sap.sse.common.Speed;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sse.common.Speed;
 
 public class SpeedFragment extends BaseFragment {
 

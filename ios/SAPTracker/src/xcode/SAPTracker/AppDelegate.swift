@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreData
+import Branch
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -38,14 +39,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         setup()
+        Branch.getInstance().initSession(launchOptions: launchOptions) { (params, error) in
+            guard let data = params as? [String: AnyObject] else { return }
+            if let checkinUrl = data["checkin_url"] as? String {
+                Preferences.newCheckInURL = checkinUrl.removingPercentEncoding
+            }
+        }
         return true
     }
-    
-    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-        Preferences.newCheckInURL = urlStringForDeeplink(url: url)
+
+    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+        let branchQueryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
+        if (branchQueryItems?.first(where: {$0.name == "checkin_url"})) != nil {
+            Branch.getInstance().application(app, open: url, options: options)
+        } else {
+            Preferences.newCheckInURL = urlStringForDeeplink(url: url)
+        }
         return true
     }
-    
+
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([Any]?) -> Void) -> Bool {
+        Branch.getInstance().continue(userActivity)
+        return true
+    }
+
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        Branch.getInstance().handlePushNotification(userInfo)
+    }
+
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
@@ -106,17 +127,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     fileprivate func setupSVProgressHUD() {
         SVProgressHUD.setDefaultMaskType(.clear)
     }
-    
+
     // MARK: - Helper
-    
+
     fileprivate func urlStringForDeeplink(url: URL) -> String {
         var urlString = url.absoluteString
         let appPrefix : String = "comsapsailingtracker://"
-        
+
         // FIXME: - Two prefixes are not allowed
         // Deeplink needs another structure (if possible) because of allowed characters in URL
         // https:// -> http//
-        
+
         urlString = urlString.hasPrefix(appPrefix) ? urlString.substring(from: appPrefix.endIndex) : urlString
         let httpPrefix : String = "http//"
         urlString = urlString.hasPrefix(httpPrefix) ? "http://" + urlString.substring(from: httpPrefix.endIndex) : urlString
@@ -124,5 +145,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         urlString = urlString.hasPrefix(httpsPrefix) ? "https://" + urlString.substring(from: httpsPrefix.endIndex) : urlString
         return urlString
     }
+
     
 }

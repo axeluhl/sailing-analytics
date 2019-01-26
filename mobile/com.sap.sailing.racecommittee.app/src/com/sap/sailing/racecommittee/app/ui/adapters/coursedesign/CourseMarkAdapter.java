@@ -1,5 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
+import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
+
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,14 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
-import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CourseMarkAdapter extends RecyclerView.Adapter<CourseMarkAdapter.ViewHolder> {
 
@@ -25,7 +25,8 @@ public class CourseMarkAdapter extends RecyclerView.Adapter<CourseMarkAdapter.Vi
     private int mType;
     private CourseListDataElementWithIdImpl mElement;
 
-    public CourseMarkAdapter(Context context, ArrayList<Mark> marks, MarkImageHelper imageHelper, int type, CourseListDataElementWithIdImpl element) {
+    public CourseMarkAdapter(Context context, ArrayList<Mark> marks, MarkImageHelper imageHelper, int type,
+            CourseListDataElementWithIdImpl element) {
         mContext = context;
         mMarks = marks;
         mImageHelper = imageHelper;
@@ -63,7 +64,7 @@ public class CourseMarkAdapter extends RecyclerView.Adapter<CourseMarkAdapter.Vi
         void onItemClick(Mark mark, int type, CourseListDataElementWithIdImpl element);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView textView;
         public ImageView imageView;
@@ -71,16 +72,16 @@ public class CourseMarkAdapter extends RecyclerView.Adapter<CourseMarkAdapter.Vi
         public ViewHolder(View itemView) {
             super(itemView);
 
-            itemView.setOnClickListener(this);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mListener != null) {
+                        mListener.onItemClick(mMarks.get(getAdapterPosition()), mType, mElement);
+                    }
+                }
+            });
             textView = (TextView) itemView.findViewById(R.id.cell_text);
             imageView = (ImageView) itemView.findViewById(R.id.cell_image);
-        }
-
-        @Override
-        public void onClick(View v) {
-            if (mListener != null) {
-                mListener.onItemClick(mMarks.get(getAdapterPosition()), mType, mElement);
-            }
         }
     }
 }

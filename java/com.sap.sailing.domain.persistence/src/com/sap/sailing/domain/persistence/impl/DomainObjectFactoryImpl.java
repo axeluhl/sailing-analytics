@@ -1502,7 +1502,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 raceLogEventAndOptionalUpdateInstructions.getB().ifPresent(dbObjectForUpdate->{
                     final Document q = new Document("_id", o.get("_id"));
                     o.put(FieldNames.RACE_LOG_EVENT.name(), dbObjectForUpdate);
-                    raceLog.updateOne(q, o);
+                    raceLog.replaceOne(q, o);
                 });
             } catch (IllegalStateException e) {
                 logger.log(Level.SEVERE, "Couldn't load race log event " + o + ": " + e.getMessage(), e);
