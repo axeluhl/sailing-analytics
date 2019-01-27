@@ -1,7 +1,5 @@
 #!/bin/bash
 
-BUG_ID="$1"
-
 if [ $# -eq 0 ]; then
     echo "$0 [-t -r ] <bugid>"
     echo ""
@@ -19,11 +17,15 @@ while getopts $options option
 do
     case $option in
         t) SKIP_TESTS=1;;
-        b) BUILD_RELEASE=1;;
+        r) BUILD_RELEASE=1;;
         \?) echo "Invalid option"
             exit 4;;
     esac
 done
+
+shift $((OPTIND-1))
+
+BUG_ID="$1"
 
 CONFIGFILE=$(mktemp mylocalconfigXXXX.xml)
 RESPONSE_HEADERS=$(mktemp responseheadersXXXX)
