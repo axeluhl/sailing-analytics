@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -50,9 +51,9 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
     public static Competitor createCompetitor(String competitorName, Serializable id) {
         return new CompetitorImpl(id, competitorName, "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
-                        /* dateOfBirth */ null, "This is famous "+competitorName)),
+                        /* dateOfBirth */ new Date(), "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")),
+                        /* dateOfBirth */new Date(), "This is Rigo, the coach")),
                         /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     }
 
@@ -104,6 +105,7 @@ public class StoreAndLoadCompetitorsTest extends AbstractMongoDBTest {
         assertEquals(flagImageURI1, loadedCompetitor.getFlagImage());
         assertEquals(competitorName1, loadedCompetitor.getName());
         assertEquals(competitorShortName1, loadedCompetitor.getShortName());
+        assertEquals(c.getTeam().getCoach().getDateOfBirth(), loadedCompetitor.getTeam().getCoach().getDateOfBirth());
         
         loadedCompetitor.setName(competitorName2);
         loadedCompetitor.setShortName(competitorShortName2);
