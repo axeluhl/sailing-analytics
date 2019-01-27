@@ -288,8 +288,8 @@ if [[ $OPERATION == "auto-install" ]]; then
 elif [[ $OPERATION == "install-release" ]]; then
     INSTALL_FROM_RELEASE=$PARAM
     if [[ $INSTALL_FROM_RELEASE == "" ]]; then
-        echo "You need to provide the name of a release from http://releases.sapsailing.com/"
-        exit 1
+	INSTALL_FROM_RELEASE=$(wget -O - http://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')
+        echo "You didn't provide a release. Picking latest master build from http://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
     fi
 
     # Honor the no-overrite setting if there is one

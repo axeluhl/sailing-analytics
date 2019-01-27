@@ -2,11 +2,7 @@
 release=$1
 if [ "$release" = "" ]; then
   SET_LATEST=1
-  INDEX=`mktemp index_XXXX.html`
-  echo Tempfile for index.html is $INDEX
-  wget -O $INDEX http://releases.sapsailing.com/
-  release=$(cat $INDEX | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')
-  rm $INDEX
+  release=$(wget -O - http://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')
   echo Latest release is $release
 fi
 GITROOT="`dirname $0`/.."
