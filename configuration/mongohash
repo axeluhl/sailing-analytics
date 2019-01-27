@@ -50,5 +50,5 @@ echo "URI: $URI" >&2
 if [ -z $ALL ]; then
   echo "db.runCommand({dbHash: 1})" | mongo --quiet  "$URI" | grep -v "^$(date +%Y-%m-%d)" | grep md5 | sed -e 's/^.*"md5" : "\(.*\)".*$/\1/'
 else 
-  echo "db.runCommand({dbHash: 1})" | mongo --quiet  "$URI" | grep -v "^$(date +%Y-%m-%d)" | grep md5 | sed -e 's/^.*"md5" : "\(.*\)".*$/\1/'
+  echo "db.runCommand({dbHash: 1})" | mongo --quiet  "$URI" | grep -v "^$(date +%Y-%m-%d)"
 fi
