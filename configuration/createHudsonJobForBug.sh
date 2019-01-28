@@ -42,7 +42,7 @@ if [ "$SKIP_TESTS" = "1" ]; then
   sed -i -e 's|<command>\([^<]*\)build *</command>|<command>\1-t build</command>|' "$CONFIGFILE"
 fi
 if [ "$BUILD_RELEASE" = "1" ]; then
-  sed -i -e 's|<command>\([^<]*\)</command>|<command>\1 \&\& PATH=/usr/local/bin:${PATH} configuration/buildAndUpdateProduct.sh -n bug'$BUG_ID' -w trac@sapsailing.com -u release</command>|' "$CONFIGFILE"
+  sed -i -e 's|<command>\([^<]*\)</command>|<command>\1 \&amp;\&amp; PATH=/usr/local/bin:${PATH} configuration/buildAndUpdateProduct.sh -n bug'$BUG_ID' -w trac@sapsailing.com -u release</command>|' "$CONFIGFILE"
 fi
 sed -i -e '/<branches>$/{
 N
