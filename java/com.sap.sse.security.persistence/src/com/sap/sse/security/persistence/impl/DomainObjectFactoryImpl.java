@@ -74,7 +74,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         }
                     });
                     result.setAttribute(sessionAttributeDocument.getString(FieldNames.SESSION_ATTRIBUTE_NAME.name()), principalCollection);
-                } else {
+                } else if (!(value instanceof Document)) {
                     result.setAttribute(sessionAttributeDocument.getString(FieldNames.SESSION_ATTRIBUTE_NAME.name()), value);
                 }
             }
