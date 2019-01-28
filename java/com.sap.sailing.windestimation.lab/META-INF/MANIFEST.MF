@@ -10,5 +10,7 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.replication.interfaces,
  com.sap.sailing.domain
 Bundle-ClassPath: lib/trove-3.0.3.jar,
+ lib/jcommon-1.0.23.jar,
+ lib/jfreechart-1.0.19.jar,
  .
 Automatic-Module-Name: com.sap.sailing.windestimation.lab
