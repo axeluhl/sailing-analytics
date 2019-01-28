@@ -69,14 +69,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         sessionCollection.replaceOne(key, sessionAsDocument, new UpdateOptions().upsert(true));
     }
     
-    private Document storePrincipalCollection(PrincipalCollection principalCollection) {
-        final Document result = new Document();
+    private List<Document> storePrincipalCollection(PrincipalCollection principalCollection) {
+        final List<Document> result = new ArrayList<>();
         for (final String realmName : principalCollection.getRealmNames()) {
             final List<String> principalNames = new ArrayList<>();
             for (Object o : principalCollection.fromRealm(realmName)) {
                 principalNames.add(o.toString());
             }
-            result.append(realmName, principalNames);
+            final Document realmDocument = new Document().
+                    append(FieldNames.SESSION_PRINCIPAL_REALM_NAME.name(), realmName).
+                    append(FieldNames.SESSION_PRINCIPAL_REALM_VALUE.name(), principalNames);
+            result.add(realmDocument);
         }
         return result;
     }
