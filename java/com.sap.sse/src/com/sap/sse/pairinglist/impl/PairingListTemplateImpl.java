@@ -739,7 +739,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         System.arraycopy(competitorAllocations, 0, temp, 0, competitorAllocations.length);
         Arrays.sort(temp);
         // search for best position to change to with consideration of previous position
-        for (int i = 0; i < (boatChangeFactor > competitorAllocations.length ? competitorAllocations.length : boatChangeFactor); i++) {
+        final int iterations = Math.min(boatChangeFactor, competitorAllocations.length);
+        for (int i = 0; i < iterations; i++) {
             for (int position = 0; position < competitorAllocations.length; position++) {
                 if (temp[i] == competitorAllocations[position] && position == previousPosition) {
                     return position;
