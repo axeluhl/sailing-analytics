@@ -30,7 +30,7 @@ public class GaussianBasedTwdTransitionDistributionCache {
     public double getP(TwdTransition twdTransition) {
         double durationBasedP = getPFromRegressorCache(durationBasedTwdTransitionRegressorCache, twdTransition);
         double distanceBasedP = getPFromRegressorCache(distanceBasedTwdTransitionRegressorCache, twdTransition);
-        return durationBasedP * distanceBasedP;
+        return durationBasedP + distanceBasedP / 2;
     }
 
     private double getPFromRegressorCache(

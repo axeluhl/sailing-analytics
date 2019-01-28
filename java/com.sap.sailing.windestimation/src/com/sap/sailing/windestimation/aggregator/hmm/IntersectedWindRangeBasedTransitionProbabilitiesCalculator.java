@@ -32,12 +32,12 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         double transitionProbabilitySum = 0;
         double transitionProbabilityUntilCurrentNode = -1;
         IntersectedWindRange intersectedWindRangeUntilCurrentNode = null;
+        WindCourseRange previousWindCourseRange = propagateIntersectedWindRangeOfHeadupAndBearAway
+                && (previousNode.getManeuverType() == ManeuverTypeForClassification.BEAR_AWAY
+                        || previousNode.getManeuverType() == ManeuverTypeForClassification.HEAD_UP)
+                                ? previousIntersectedWindRange
+                                : previousNode.getValidWindRange();
         for (GraphNode node : currentLevel.getLevelNodes()) {
-            WindCourseRange previousWindCourseRange = propagateIntersectedWindRangeOfHeadupAndBearAway
-                    && (previousNode.getManeuverType() == ManeuverTypeForClassification.BEAR_AWAY
-                            || previousNode.getManeuverType() == ManeuverTypeForClassification.HEAD_UP)
-                                    ? previousIntersectedWindRange
-                                    : previousNode.getValidWindRange();
             IntersectedWindRange intersectedWindRange = previousWindCourseRange.intersect(node.getValidWindRange(),
                     CombinationModeOnViolation.INTERSECTION);
             TwdTransition twdTransition = constructTwdTransition(durationPassed, distancePassed,

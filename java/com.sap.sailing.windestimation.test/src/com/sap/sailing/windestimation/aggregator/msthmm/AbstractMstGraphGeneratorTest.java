@@ -7,7 +7,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.windestimation.aggregator.msthmm.AbstractMstGraphGenerator;
 import com.sap.sailing.windestimation.aggregator.msthmm.AbstractMstGraphGenerator.NodeWithDistance;
 import com.sap.sailing.windestimation.aggregator.msthmm.AbstractMstGraphGenerator.NodeWithNeighbors;
 import com.sap.sse.common.Util.Pair;
@@ -104,6 +103,20 @@ public class AbstractMstGraphGeneratorTest {
         // 4 (1->6) + 3 (6->5) + 3 (5->4) + 4 (4->3) + 5 (3->2) = 19
     }
 
+    @Test
+    public void testMstGraphGeneratorCloning() {
+        MockedMstGraphGenerator generator = new MockedMstGraphGenerator();
+        generator.addNode(tuple(5, 0));
+        generator.addNode(tuple(5, 10));
+        generator.addNode(tuple(0, 5));
+        generator.addNode(tuple(10, 5));
+        List<NodeWithNeighbors<Tuple>> clonedNodes = generator.getClonedNodes();
+        MockedMstGraphGenerator clonedGenerator = new MockedMstGraphGenerator(clonedNodes);
+        clonedGenerator.addNode(tuple(5, 5));
+        assertMstCorrect(generator, 30);
+        assertMstCorrect(clonedGenerator, 20);
+    }
+
     private void assertMstCorrect(MockedMstGraphGenerator generator, double targetEdgesWeightSum) {
         double calculatedMstWeightSum = getWeightSumOfEdges(generator);
         assertEquals(targetEdgesWeightSum, calculatedMstWeightSum, DOUBLE_TOLERANCE);
@@ -132,6 +145,14 @@ public class AbstractMstGraphGeneratorTest {
     }
 
     private static class MockedMstGraphGenerator extends AbstractMstGraphGenerator<Tuple> {
+
+        public MockedMstGraphGenerator() {
+
+        }
+
+        protected MockedMstGraphGenerator(List<NodeWithNeighbors<Tuple>> nodes) {
+            super(nodes);
+        }
 
         @Override
         protected double getDistanceBetweenObservations(Tuple o1, Tuple o2) {

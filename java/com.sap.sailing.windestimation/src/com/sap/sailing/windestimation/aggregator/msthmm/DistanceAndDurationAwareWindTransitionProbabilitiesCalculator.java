@@ -12,7 +12,9 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
         extends SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
         implements MstGraphNodeTransitionProbabilitiesCalculator {
 
-    private static final double LA_PLACE_TRANSITION_PROBABILITY = 0.0001;
+    // La place is used to prevent the probabilities from being zero
+    // Gaussian probabilities get very small between 30 and 180 deg TWD delta
+    private static final double LA_PLACE_TRANSITION_PROBABILITY = 0.0000000000000001;
     private final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache;
 
     public DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(

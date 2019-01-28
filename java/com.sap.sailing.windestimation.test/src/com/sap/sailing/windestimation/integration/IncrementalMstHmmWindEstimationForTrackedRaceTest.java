@@ -16,7 +16,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +40,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.windestimation.ManeuverBasedWindEstimationComponentImpl;
 import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory;
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory.HmmTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
@@ -71,7 +72,8 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2")); // will result in CEST
         windEstimationFactoryService = new WindEstimationFactoryServiceImpl();
-        modelStore = new ClassPathReadOnlyModelStore("/trained_wind_estimation_models");
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+        modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models");
         windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
     }
 
@@ -122,20 +124,24 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
                 new RaceElementsFilteringPreprocessingPipelineImpl(false,
                         new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                 windEstimationFactoryService.maneuverClassifiersCache,
-                new ManeuverClassificationsAggregatorFactory(null, modelStore, false, Long.MAX_VALUE)
-                        .hmm(HmmTransitionProbabilitiesCalculator.INTERSECTED, true),
+                new ManeuverClassificationsAggregatorFactory(null, modelStore, false, Long.MAX_VALUE).mstHmm(false),
                 new WindTrackCalculatorImpl(new MiddleCourseBasedTwdCalculatorImpl(),
                         new DummyBasedTwsCalculatorImpl()));
         List<WindWithConfidence<Pair<Position, TimePoint>>> windFixes = targetWindEstimation.estimateWindTrack(race);
         List<Wind> targetWindFixes = new ArrayList<>(windFixes.size());
         for (WindWithConfidence<Pair<Position, TimePoint>> windFix : windFixes) {
-            targetWindFixes.add(windFix.getObject());
+            Wind wind = windFix.getObject();
+            targetWindFixes.add(wind);
+            System.out.println("Target: " + wind.getTimePoint() + " " + wind.getPosition() + " "
+                    + Math.round(wind.getFrom().getDegrees()));
         }
         List<Wind> estimatedWindFixes = new ArrayList<>();
         estimatedWindTrackOfTrackedRace.lockForRead();
         try {
             for (Wind wind : estimatedWindTrackOfTrackedRace.getFixes()) {
                 estimatedWindFixes.add(wind);
+                System.out.println("Estimated: " + wind.getTimePoint() + " " + wind.getPosition() + " "
+                        + Math.round(wind.getFrom().getDegrees()));
             }
         } finally {
             estimatedWindTrackOfTrackedRace.unlockAfterRead();
@@ -149,6 +155,33 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         };
         Collections.sort(targetWindFixes, windFixesComparator);
         Collections.sort(estimatedWindFixes, windFixesComparator);
+
+        Map<Pair<Position, TimePoint>, Wind> targetWindFixesMap = new TreeMap<>(
+                new TimePointAndPositionWithToleranceComparator());
+        for (Wind wind : targetWindFixes) {
+            targetWindFixesMap.put(new Pair<>(wind.getPosition(), wind.getTimePoint()), wind);
+        }
+        Map<Pair<Position, TimePoint>, Wind> estimatedWindFixesMap = new TreeMap<>(
+                new TimePointAndPositionWithToleranceComparator());
+        for (Wind wind : estimatedWindFixes) {
+            Pair<Position, TimePoint> relativeTo = new Pair<>(wind.getPosition(), wind.getTimePoint());
+            estimatedWindFixesMap.put(relativeTo, wind);
+            Wind targetWind = targetWindFixesMap.get(relativeTo);
+            if (targetWind == null) {
+                System.out.println("Not present in target: " + wind.getTimePoint() + " " + wind.getPosition());
+            } else if (targetWind.getBearing().getDifferenceTo(wind.getBearing()).abs().getDegrees() > 10) {
+                System.out.println("TWD difference: " + wind.getTimePoint() + " " + wind.getPosition() + " "
+                        + targetWind.getBearing().getDifferenceTo(wind.getBearing()).abs().getDegrees() + " deg");
+            }
+        }
+        for (Wind wind : targetWindFixes) {
+            if (!estimatedWindFixesMap.containsKey(new Pair<>(wind.getPosition(), wind.getTimePoint()))) {
+                System.out.println("Not present in estimated: " + wind.getTimePoint() + " " + wind.getPosition());
+            }
+        }
+
+        assertEquals("Number of estimated fixes is not equal to the number of target wind fixes",
+                targetWindFixes.size(), estimatedWindFixes.size());
         assertEquals(
                 "Different wind tracks estimated by IncrementalMstHmmWindEstimationForTrackedRace and ManeuverBasedWindEstimationComponentImpl",
                 targetWindFixes, estimatedWindFixes);

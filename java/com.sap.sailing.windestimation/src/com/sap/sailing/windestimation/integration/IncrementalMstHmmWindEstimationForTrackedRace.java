@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Position;
@@ -44,7 +45,8 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
     private final IncrementalMstManeuverGraphGenerator mstManeuverGraphGenerator;
     private final MstBestPathsCalculator bestPathsCalculator;
     private final WindTrackCalculator windTrackCalculator;
-    private final Map<Pair<Position, TimePoint>, WindWithConfidence<Pair<Position, TimePoint>>> windTrackWithConfidences = new HashMap<>();
+    private final Map<Pair<Position, TimePoint>, WindWithConfidence<Pair<Position, TimePoint>>> windTrackWithConfidences = new TreeMap<>(
+            new TimePointAndPositionWithToleranceComparator());
     private final TrackedRace trackedRace;
     private WindSource windSource;
 
@@ -54,7 +56,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
             GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache) {
         super(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE,
                 WindSourceType.MANEUVER_BASED_ESTIMATION.useSpeed() && polarDataService != null,
-                IncrementalMstHmmWindEstimationForTrackedRace.class.getName(), true);
+                IncrementalMstHmmWindEstimationForTrackedRace.class.getName(), false);
         this.trackedRace = trackedRace;
         this.windSource = windSource;
         DistanceAndDurationAwareWindTransitionProbabilitiesCalculator transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(

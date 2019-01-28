@@ -125,6 +125,7 @@ public abstract class AbstractMstGraphGenerator<T> {
                         neighborNodeWithDistance.getDistance());
                 clonedNode.addNeighbor(clonedNeighborNodeWithDistance);
             }
+            clonedNodes.add(clonedNode);
         }
         return clonedNodes;
     }

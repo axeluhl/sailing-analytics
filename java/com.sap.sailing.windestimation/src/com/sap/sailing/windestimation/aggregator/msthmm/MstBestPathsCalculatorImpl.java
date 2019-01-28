@@ -178,7 +178,7 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                 currentNodeBestPreviousNodes.add(new Pair<>(previousLevel, bestPreviousNode));
                 finalBestIntersectedWindRange = finalBestIntersectedWindRange == null ? bestIntersectedWindRange
                         : finalBestIntersectedWindRange.intersect(bestIntersectedWindRange,
-                                CombinationModeOnViolation.EXPANSION);
+                                CombinationModeOnViolation.INTERSECTION);
             }
             /* MstBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
                     currentNodeBestPreviousNodes, currentNodeProbabilityFromStart, finalBestIntersectedWindRange);

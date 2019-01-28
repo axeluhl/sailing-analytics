@@ -51,6 +51,9 @@ public interface ManeuverCurveBoundaries {
     default Bearing getMiddleCourse() {
         double middleCourseDeg = (getSpeedWithBearingBefore().getBearing().getDegrees()
                 + getDirectionChangeInDegrees() / 2) % 360;
+        if (middleCourseDeg < 0) {
+            middleCourseDeg += 360;
+        }
         return new DegreeBearingImpl(middleCourseDeg);
     }
 
@@ -74,7 +77,7 @@ public interface ManeuverCurveBoundaries {
      * @return The lowest speed within maneuver curve
      */
     Speed getLowestSpeed();
-    
+
     /**
      * Gets the highest speed sailed within the maneuver curve.
      * 

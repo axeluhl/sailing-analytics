@@ -13,6 +13,8 @@ import smile.sort.QuickSelect;
 public class ManeuverForEstimationTransformer
         implements CompetitorTrackTransformer<ConvertableToManeuverForEstimation, ManeuverForEstimation> {
 
+    public static final int MIN_SECONDS_TO_OTHER_MANEUVER = 4;
+
     public List<ManeuverForEstimation> getManeuversForEstimation(
             List<ConvertableToManeuverForEstimation> convertableManeuvers, BoatClass boatClass) {
         double speedScalingDivisor = getSpeedScalingDivisor(convertableManeuvers);
@@ -79,19 +81,21 @@ public class ManeuverForEstimationTransformer
 
     public boolean isManeuverBoundariesDataClean(ConvertableToManeuverForEstimation maneuver,
             boolean validateManeuverEntering, boolean validateManeuverExiting) {
-        return maneuver.getLongestIntervalBetweenTwoFixes().asSeconds() < 4
+        return maneuver.getLongestIntervalBetweenTwoFixes().asSeconds() <= 4
                 && (!validateManeuverEntering
                         || maneuver.getIntervalBetweenFirstFixOfCurveAndPreviousFix().asSeconds() <= 4)
                 && (!validateManeuverExiting || maneuver.getIntervalBetweenLastFixOfCurveAndNextFix().asSeconds() <= 4)
                 && (!validateManeuverEntering || maneuver.getSpeedWithBearingBefore().getKnots() > 2)
                 && (!validateManeuverExiting || maneuver.getSpeedWithBearingAfter().getKnots() > 2)
                 && (!validateManeuverEntering
-                        || maneuver.getDurationFromPreviousManeuverEndToManeuverStart().asSeconds() >= 4
+                        || maneuver.getDurationFromPreviousManeuverEndToManeuverStart()
+                                .asSeconds() >= MIN_SECONDS_TO_OTHER_MANEUVER
                         || maneuver.getCourseChangeInDegreesWithinTurningSectionOfPreviousManeuver() != null && Math
                                 .abs(maneuver.getCourseChangeInDegreesWithinTurningSectionOfPreviousManeuver()) < Math
                                         .abs(maneuver.getCourseChangeInDegreesWithinTurningSection()) * 0.3)
                 && (!validateManeuverExiting
-                        || maneuver.getDurationFromManeuverEndToNextManeuverStart().asSeconds() >= 4
+                        || maneuver.getDurationFromManeuverEndToNextManeuverStart()
+                                .asSeconds() >= MIN_SECONDS_TO_OTHER_MANEUVER
                         || maneuver.getCourseChangeInDegreesWithinTurningSectionOfNextManeuver() != null && Math
                                 .abs(maneuver.getCourseChangeInDegreesWithinTurningSectionOfNextManeuver()) < Math
                                         .abs(maneuver.getCourseChangeInDegreesWithinTurningSection()) * 0.3);
@@ -109,12 +113,20 @@ public class ManeuverForEstimationTransformer
     }
 
     public ManeuverCategory getManeuverCategory(ConvertableToManeuverForEstimation maneuver) {
-        double absCourseChangeInDegrees = Math.abs(maneuver.getCourseChangeInDegreesWithinTurningSection());
+        return getManeuverCategory(maneuver.getCourseChangeInDegreesWithinTurningSection(), maneuver.isMarkPassing());
+    }
+
+    public boolean isManeuverEligibleForAnalysis(double courseChangeWithinTurningSectionInDegrees) {
+        return getManeuverCategory(courseChangeWithinTurningSectionInDegrees, false) == ManeuverCategory.REGULAR;
+    }
+
+    public ManeuverCategory getManeuverCategory(double courseChangeWithinTurningSectionInDegrees, boolean markPassing) {
+        double absCourseChangeInDegrees = Math.abs(courseChangeWithinTurningSectionInDegrees);
         if (absCourseChangeInDegrees < 30) {
             return ManeuverCategory.SMALL;
         }
         if (absCourseChangeInDegrees <= 120) {
-            return maneuver.isMarkPassing() ? ManeuverCategory.MARK_PASSING : ManeuverCategory.REGULAR;
+            return markPassing ? ManeuverCategory.MARK_PASSING : ManeuverCategory.REGULAR;
         }
         if (absCourseChangeInDegrees <= 150) {
             return ManeuverCategory.WIDE;
