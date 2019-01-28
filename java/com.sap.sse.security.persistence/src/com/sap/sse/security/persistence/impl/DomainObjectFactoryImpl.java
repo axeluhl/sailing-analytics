@@ -61,11 +61,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final Iterable<Document> sessionAttributes = sessionDocument.get(FieldNames.SESSION_ATTRIBUTES.name(), Iterable.class);
             for (final Document sessionAttributeDocument : sessionAttributes) {
                 final Object value = sessionAttributeDocument.get(FieldNames.SESSION_ATTRIBUTE_VALUE.name());
-                if (value instanceof Document) { // assume this encodes a PrincipalCollection
+                if (value instanceof Iterable<?>) { // assume this encodes a PrincipalCollection in the form of a list of Document objects with
+                    // a realm name and a principal list, each:
                     SimplePrincipalCollection principalCollection = new SimplePrincipalCollection();
-                    ((Document) value).forEach((realmName, principalList)->{
-                        for (final Object principal : (Iterable<?>) principalList) {
-                            principalCollection.add(principal, realmName);
+                    ((Iterable<?>) value).forEach(realmDocument->{
+                        if (realmDocument instanceof Document) {
+                            final String realmName = ((Document) realmDocument).getString(FieldNames.SESSION_PRINCIPAL_REALM_NAME.name());
+                            final Iterable<?> principalList = (Iterable<?>) ((Document) realmDocument).get(FieldNames.SESSION_PRINCIPAL_REALM_VALUE.name());
+                            for (final Object principal : (Iterable<?>) principalList) {
+                                principalCollection.add(principal, realmName);
+                            }
                         }
                     });
                     result.setAttribute(sessionAttributeDocument.getString(FieldNames.SESSION_ATTRIBUTE_NAME.name()), principalCollection);
