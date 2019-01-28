@@ -544,7 +544,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             for (int zGroup = 0; zGroup < pairingList.length; zGroup++) {
                 int[][] groupAssignments = new int[competitors / groups][competitors / groups];
                 for (int zPlace = 0; zPlace < (competitors / groups); zPlace++) {
-                    //select single group to optimize
+                    // select single group to optimize
                     System.arraycopy(assignments[pairingList[zGroup][zPlace]], 0, groupAssignments[zPlace], 0,
                             (competitors / groups));
                 }
@@ -553,18 +553,19 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     int prevFlight = (int) (zGroup / groups) - 1;
                     int prevPosition = -1;
                     if (prevFlight >= 0) {
-                        //search for previous position
+                        // search for previous position
                         for (int i = prevFlight * groups; i < prevFlight * groups + groups; i++) {
                             for (int j = 0; j < (competitors / groups); j++) {
                                 if (pairingList[i][j] == pairingList[zGroup][position[0]]) {
                                     prevPosition = j;
+                                    break;
                                 }
                             }
                         }
                     }
                     if (groupAssignments[position[0]][position[1]] > averageAssignments - 1
                             && groupAssignments[position[0]][position[1]] < averageAssignments + 1) {
-                        //no more optimizations possible 
+                        // no more optimizations possible 
                         break;
                     } else {
                         int temp = 0;
