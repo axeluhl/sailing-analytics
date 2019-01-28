@@ -2960,9 +2960,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             LockUtil.unlockAfterWrite(leaderboardGroupsByNameLock);
         }
         mongoObjectFactory.removeLeaderboardGroup(groupName);
-        if (leaderboardGroup != null && leaderboardGroup.getOverallLeaderboard() != null) {
-            removeLeaderboard(leaderboardGroup.getOverallLeaderboard().getName());
-        }
     }
 
     @Override
