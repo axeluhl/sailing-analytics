@@ -51,8 +51,8 @@ public class TestAutoPlay extends AbstractSeleniumTest {
     @Override
     @Before
     public void setUp() {
-        super.setUp();
         clearState(getContextRoot());
+        super.setUp();
     }
 
     private void initTrackingForBmwCupRace(AdminConsolePage adminConsole) {
