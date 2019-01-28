@@ -951,11 +951,15 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            the count of competitors
      * @param flightMultiplier
      *            specifies how often the flights will be cloned
+     * @param boatChangeFactor
+     *            specifies the priority of well distributed assignment of competitors to boats (smallest factor) or
+     *            minimization of boat changes within a {@link PairingList} (highest factor); valid factors are
+     *            {@code 0..competitorsCount/groupsCount}
      * @param callback
      *            returns a {@link PairingListTemplateDTO}
      */
     void calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
-            final int flightMultiplier, final int tolerance, AsyncCallback<PairingListTemplateDTO> callback);
+            final int flightMultiplier, final int boatChangeFactor, AsyncCallback<PairingListTemplateDTO> callback);
 
     /**
      * Creates a {@link PairingListDTO} in which the competitors will be matched to a {@link PairingList} based on the

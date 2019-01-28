@@ -826,13 +826,20 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Returns a calculated {@link PairingListTemplate}, specified by flights, groups and competitors.
      *
-     * @param leaderboardName the name of the leaderboard
-     * @param competitorsCount count of competitor
-     * @param flightMultiplier specifies how often the flights will be cloned
+     * @param leaderboardName
+     *            the name of the leaderboard
+     * @param competitorsCount
+     *            count of competitor
+     * @param flightMultiplier
+     *            specifies how often the flights will be cloned
+     * @param boatChangeFactor
+     *            specifies the priority of well distributed assignment of competitors to boats (smallest factor) or
+     *            minimization of boat changes within a {@link PairingList} (highest factor); valid factors are
+     *            {@code 0..competitorsCount/groupsCount}
      * @return calculated {@link PairingListTemplate}
      */
     PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount,
-            final int competitorsCount, final int flightMultiplier, final int tolerance);
+            final int competitorsCount, final int flightMultiplier, final int boatChangeFactor);
     
     /**
      * Matches the competitors of a leaderboard to the {@link PairingList}

@@ -85,7 +85,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
     }
 
-    // Used to convert a TemplateDTO to PairingListTemplate
+    /**
+     * Used to convert a {@code PairingListeTemplateDTO} to {@link PairingListTemplate}
+     */
     public PairingListTemplateImpl(int[][] template, int competitorsCount, int flightMultiplier, int boatChangeFactor) {
         this.pairingListTemplate = template;
         int groupCount = (int) (competitorsCount / this.pairingListTemplate[0].length);
@@ -690,8 +692,24 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return worstValuePos;
     }
     /**
+     * So far competitors have been allocated to the positions (e.g., boats) in a round such that this results
+     * in a good distribution of competitor-to-position assignments, so that ideally each competitor competes in each
+     * position an equal number of times.<p>
+     * 
+     * There is, however, another criterion to watch for: in-between flights it may be useful if competitors
+     * participating in the last group of the previous flight and the first group of the next flight keep
+     * their position. If the positions are, e.g., boats, this would mean that such a competitor doesn't
+     * need to be shuttled from one boat to another, simplifying logistics between flights.<p>
+     * 
+     * These two criteria (spreading competitors equally across positions vs. letting competitors keep their
+     * position at flight boundaries) contradict each other, obviously. Leaving a competitor in the same
+     * position across two rounds reduces the spread of the competitor-to-position distribution.<p>
+     * 
+     * The {@link #boatChangeFactor} is used to express a balance between these two criteria. It may range between
+     * {@code 0..#competitors/#groups}.<p>
+     * 
      * This method searches for the position a competitor should be changed to, to improve the competitor 
-     * allocations as most as possible. The decision depends on the field <code>boatChangeFactor</code>. 
+     * allocations as much as possible. The decision depends on the field {@link #boatChangeFactor}. 
      * If this value is 0, the method returns the position on which a competitor is too rarely registered 
      * and should be changed to to get a better competitor allocation.
      * 
@@ -702,7 +720,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * position, if not go on with the next position. This is done as often as the tolerance allows it.
      * If no position is found the best position to change to is returned regardless of the position 
      * in the last flight. This is necessary if you would like to minimize boat changes at the expense 
-     * of competitor allocations.    
+     * of competitor allocations.
      * 
      * @param competitorAllocations
      *          array that contains the current competitor allocations for one competitor 
@@ -715,7 +733,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         int[] temp = new int[competitorAllocations.length];
         System.arraycopy(competitorAllocations, 0, temp, 0, competitorAllocations.length);
         Arrays.sort(temp);
-        //search for best position to change to with consideration of previous position
+        // search for best position to change to with consideration of previous position
         for (int i = 0; i < boatChangeFactor; i++) {
             for (int position = 0; position < competitorAllocations.length; position++) {
                 if (temp[i] == competitorAllocations[position] && position == previousPosition) {
@@ -723,7 +741,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 }
             }
         }
-        //search for best position to change to regardless of previous position
+        // search for best position to change to regardless of previous position
         for (int position = 0; position < competitorAllocations.length; position++) {
             if (temp[0] == competitorAllocations[position]) {
                 return position;
@@ -856,8 +874,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return bestPLT;
     }
 
-    protected int getBoatChangesFromPairingList(int[][] pairinglist, int flightcount, int groupcount,
-            int competitorcount) {
+    protected int getBoatChangesFromPairingList(int[][] pairinglist, int flightcount, int groupcount, int competitorcount) {
         int sumOfBoatchanges = 0;
         for (int groupindex = groupcount - 1; groupindex < flightcount * groupcount; groupindex += groupcount) {
             if (groupindex + 1 < pairinglist.length) {
