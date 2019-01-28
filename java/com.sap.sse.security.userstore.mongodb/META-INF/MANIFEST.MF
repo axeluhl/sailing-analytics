@@ -19,7 +19,7 @@ Require-Bundle: com.sap.sse.security,
  com.sap.sse.common,
  com.sap.sse.security.common,
  com.sap.sse.shared.android,
- org.eclipse.orbit.mongodb;bundle-version="3.2.2",
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sse.replication,
  com.sap.sse
 Export-Package: com.sap.sse.security.userstore.mongodb,

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-BUG_ID="$1"
-
 if [ $# -eq 0 ]; then
     echo "$0 [-t -r ] <bugid>"
     echo ""
@@ -19,11 +17,15 @@ while getopts $options option
 do
     case $option in
         t) SKIP_TESTS=1;;
-        b) BUILD_RELEASE=1;;
+        r) BUILD_RELEASE=1;;
         \?) echo "Invalid option"
             exit 4;;
     esac
 done
+
+shift $((OPTIND-1))
+
+BUG_ID="$1"
 
 CONFIGFILE=$(mktemp mylocalconfigXXXX.xml)
 RESPONSE_HEADERS=$(mktemp responseheadersXXXX)
@@ -49,7 +51,7 @@ s|<name>[^<]*</name>|<name>bug'$BUG_ID'</name>|
 }' "$CONFIGFILE"
 curl -D "$RESPONSE_HEADERS" -s -XPOST "$HUDSON_BASE_URL/createItem?name=bug$BUG_ID" -u "$USERNAME:$PASSWORD" --data-binary "@$CONFIGFILE" -H "Content-Type:text/xml" >/dev/null 2>/dev/null
 RESPONSE_CODE=$(cat "$RESPONSE_HEADERS" | head -n 1 | cut -d ' ' -f2 )
-if [[ "$RESPONSE_CODE" =~ "2.." ]]; then
+if [[ "$RESPONSE_CODE" =~ 2.. ]]; then
   echo "Find your new, enabled Hudson job at $HUDSON_BASE_URL/job/bug$BUG_ID/"
 else
   echo "Error. HTTP response code $RESPONSE_CODE. Did the job already exist?"

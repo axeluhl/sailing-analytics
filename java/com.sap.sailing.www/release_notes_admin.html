@@ -42,6 +42,14 @@
                                   available.</li>
                             </ul>
                         </li>
+			<li>Upgraded the MongoDB driver to version 3.6.4. This allows you to specify the new
+			    retryWrites parameter, e.g., as in "mongodb://mongo0.internal.sapsailing.com/mydb?replicaSet=live&retryWrites=true".
+			    This will improve your system's behavior if you run with a MongoDB replica set and have to
+			    assume that at some point the PRIMARY MongoDB system may fail, with the remaining systems
+			    in the replica set voting for a new PRIMARY. Without retryWrites your system will bluntly
+			    fail, but with retryWrites, write operations will be re-tried once, with a timeout usually
+			    enough for the remaining replicas to agree on a new PRIMARY.
+			</li>
                     </ul>
 
                     <h2 class="articleSubheadline">October 2018</h2>

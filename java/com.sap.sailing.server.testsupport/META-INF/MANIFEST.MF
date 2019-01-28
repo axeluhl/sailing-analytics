@@ -34,8 +34,8 @@ Require-Bundle: com.sap.sailing.server,
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.core;bundle-version="1.2.2",
  javax.servlet;bundle-version="3.1.0",
- org.eclipse.orbit.mongodb;bundle-version="3.2.2",
  com.sap.sailing.server.interface,
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sse.security.common
 Automatic-Module-Name: com.sap.sailing.server.testsupport
 Import-Package: com.sap.sse.security.userstore.mongodb,

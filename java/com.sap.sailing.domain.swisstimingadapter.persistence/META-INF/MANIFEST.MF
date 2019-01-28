@@ -13,7 +13,7 @@ Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sse.common,
  com.sap.sailing.domain.persistence,
  com.sap.sse,
- org.eclipse.orbit.mongodb;bundle-version="3.2.2",
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sse.security.common
 Export-Package: com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence.impl;x-friends:="com.sap.sailing.domain.swisstimingadapter.test,com.sap.sailing.mongodb.test"
