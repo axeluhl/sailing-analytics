@@ -29,7 +29,7 @@ import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.UnsentOperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 
 /**
  * Implements {@link ServiceTrackerCustomizer} so that all {@link FileStorageServices} announced in the registry can
@@ -61,10 +61,10 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
     /**
      * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
      * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
-     * {@link UnsentOperationsToMasterSender#retrySendingLater(OperationWithResult, OperationsToMasterSender)}
+     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
      * method.
      */
-    private UnsentOperationsToMasterSender unsentOperationForMasterQueue;
+    private OperationsToMasterSendingQueue unsentOperationForMasterQueue;
 
     public FileStorageManagementServiceImpl(TypeBasedServiceFinder<FileStorageService> serviceFinder,
             FileStorageServicePropertyStore propertyStore) {
@@ -248,15 +248,15 @@ public class FileStorageManagementServiceImpl implements ReplicableFileStorageMa
     }
 
     @Override
-    public void setUnsentOperationToMasterSender(UnsentOperationsToMasterSender service) {
+    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
         this.unsentOperationForMasterQueue = service;
     }
 
     @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void retrySendingLater(
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
             OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
         if (unsentOperationForMasterQueue != null) {
-            unsentOperationForMasterQueue.retrySendingLater(operationWithResult, sender);
+            unsentOperationForMasterQueue.scheduleForSending(operationWithResult, sender);
         }
     }
 }
