@@ -42,7 +42,6 @@ public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO, RoleDef
     @Override
     public void setAccessControlList(AccessControlListDTO accessControlList) {
         this.securityInformation.setAccessControlList(accessControlList);
-        ;
     }
 
     @Override
