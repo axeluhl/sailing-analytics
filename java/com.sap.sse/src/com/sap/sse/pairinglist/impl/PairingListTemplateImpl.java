@@ -691,43 +691,47 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         }
         return worstValuePos;
     }
+    
     /**
-     * So far competitors have been allocated to the positions (e.g., boats) in a round such that this results
-     * in a good distribution of competitor-to-position assignments, so that ideally each competitor competes in each
-     * position an equal number of times.<p>
+     * So far competitors have been allocated to the positions (e.g., boats) in a round such that this results in a good
+     * distribution of competitor-to-position assignments, so that ideally each competitor competes in each position an
+     * equal number of times.
+     * <p>
      * 
      * There is, however, another criterion to watch for: in-between flights it may be useful if competitors
-     * participating in the last group of the previous flight and the first group of the next flight keep
-     * their position. If the positions are, e.g., boats, this would mean that such a competitor doesn't
-     * need to be shuttled from one boat to another, simplifying logistics between flights.<p>
+     * participating in the last group of the previous flight and the first group of the next flight keep their
+     * position. If the positions are, e.g., boats, this would mean that such a competitor doesn't need to be shuttled
+     * from one boat to another, simplifying logistics between flights.
+     * <p>
      * 
-     * These two criteria (spreading competitors equally across positions vs. letting competitors keep their
-     * position at flight boundaries) contradict each other, obviously. Leaving a competitor in the same
-     * position across two rounds reduces the spread of the competitor-to-position distribution.<p>
+     * These two criteria (spreading competitors equally across positions vs. letting competitors keep their position at
+     * flight boundaries) contradict each other, obviously. Leaving a competitor in the same position across two rounds
+     * reduces the spread of the competitor-to-position distribution.
+     * <p>
      * 
      * The {@link #boatChangeFactor} is used to express a balance between these two criteria. It may range between
-     * {@code 0..#competitors/#groups}.<p>
+     * {@code 0..#competitors/#groups}.
+     * <p>
      * 
-     * This method searches for the position a competitor should be changed to, to improve the competitor 
-     * allocations as much as possible. The decision depends on the field {@link #boatChangeFactor}. 
-     * If this value is 0, the method returns the position on which a competitor is too rarely registered 
-     * and should be changed to to get a better competitor allocation.
+     * This method searches for the position a competitor should be changed to, to improve the competitor allocations as
+     * much as possible. The decision depends on the field {@link #boatChangeFactor}. If this value is 0, the method
+     * returns the position on which a competitor is too rarely registered and should be changed to to get a better
+     * competitor allocation.
      * 
-     * If the value is greater than 0, the method can take the allocation in the previous flight into 
-     * consideration. The value represents a kind of tolerance to deviate from the best possible value 
-     * to place the competitor on a position, which he was on in the last group. The method starts at the 
-     * best position and proofs if the competitor on this position in the last group if yes return this 
-     * position, if not go on with the next position. This is done as often as the tolerance allows it.
-     * If no position is found the best position to change to is returned regardless of the position 
-     * in the last flight. This is necessary if you would like to minimize boat changes at the expense 
-     * of competitor allocations.
+     * If the value is greater than 0, the method can take the allocation in the previous flight into consideration. The
+     * value represents a kind of tolerance to deviate from the best possible value to place the competitor on a
+     * position, which he was on in the last group. The method starts at the best position and proofs if the competitor
+     * on this position in the last group if yes return this position, if not go on with the next position. This is done
+     * as often as the tolerance allows it. If no position is found the best position to change to is returned
+     * regardless of the position in the last flight. This is necessary if you would like to minimize boat changes at
+     * the expense of competitor allocations.
      * 
      * @param competitorAllocations
-     *          array that contains the current competitor allocations for one competitor 
+     *            array that contains the current competitor allocations for one group; index is the position (or boat)
+     *            number
      * @param previousPosition
-     *          position of the competitor that need to be changed in the previous group
-     * @return
-     *          position the competitor should be changed to
+     *            position of the competitor that need to be changed in the previous group
+     * @return position the competitor should be changed to
      */           
     private int getBestPositionToChangeTo(int[] competitorAllocations, int previousPosition) {
         int[] temp = new int[competitorAllocations.length];
