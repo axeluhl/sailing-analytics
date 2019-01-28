@@ -31,5 +31,5 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.server.gateway,
  javax.ws.rs,
  com.sap.sailing.server.testsupport,
- org.eclipse.orbit.mongodb;bundle-version="3.2.2"
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Automatic-Module-Name: com.sap.sailing.server.replication.test

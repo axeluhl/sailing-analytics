@@ -107,7 +107,7 @@
          id="org.mongodb.mongo-java-driver"
          download-size="0"
          install-size="0"
-         version="2.13.0.RELEASE"
+         version="3.6.4"
          unpack="false"/>
 
    <plugin
