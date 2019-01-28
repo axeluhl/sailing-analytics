@@ -44,7 +44,7 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
-import com.sap.sailing.windestimation.model.store.ClassPathModelStore;
+import com.sap.sailing.windestimation.model.store.ClassPathReadOnlyModelStore;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
 import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculatorImpl;
@@ -64,20 +64,21 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
 
     protected final SimpleDateFormat dateFormat;
     private final WindEstimationFactoryServiceImpl windEstimationFactoryService;
-    private final ClassPathModelStore modelStore;
+    private final ClassPathReadOnlyModelStore modelStore;
 
     public IncrementalMstHmmWindEstimationForTrackedRaceTest()
             throws MalformedURLException, URISyntaxException, ModelPersistenceException {
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2")); // will result in CEST
         windEstimationFactoryService = new WindEstimationFactoryServiceImpl();
-        modelStore = new ClassPathModelStore("trained_wind_estimation_models");
+        modelStore = new ClassPathReadOnlyModelStore("/trained_wind_estimation_models");
         windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
     }
 
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException,
             ParseException, SubscriberInitializationException, CreateModelException {
+        assertTrue("Wind estimation models are empty", windEstimationFactoryService.isReady());
         super.setUp();
         URI storedUri = new URI("file:///"
                 + new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath().replace('\\', '/'));
@@ -90,7 +91,6 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         getTrackedRace()
                 .setWindEstimation(windEstimationFactoryService.createIncrementalWindEstimationTrack(getTrackedRace()));
         getTrackedRace().waitForManeuverDetectionToFinish();
-        assertTrue(windEstimationFactoryService.isReady());
     }
 
     // TODO bugfix wind estimation

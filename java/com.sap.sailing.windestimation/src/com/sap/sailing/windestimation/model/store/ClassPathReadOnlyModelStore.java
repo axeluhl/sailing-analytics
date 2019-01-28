@@ -17,32 +17,31 @@ import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
-public class ClassPathModelStore extends AbstractModelStore {
+public class ClassPathReadOnlyModelStore extends AbstractModelStore {
 
     private final String destinationFolder;
 
-    public ClassPathModelStore(String destinationFolder) {
+    public ClassPathReadOnlyModelStore(String destinationFolder) {
         this.destinationFolder = destinationFolder;
     }
 
     private List<String> getResourceFiles(String path) throws IOException {
         List<String> filenames = new ArrayList<>();
-
-        try (InputStream in = getResourceAsStream(path);
-                BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-            String resource;
-
-            while ((resource = br.readLine()) != null) {
-                filenames.add(resource);
+        try (InputStream in = getResourceAsStream(path)) {
+            if (in != null) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+                    String resource;
+                    while ((resource = br.readLine()) != null) {
+                        filenames.add(resource);
+                    }
+                }
             }
         }
-
         return filenames;
     }
 
     private InputStream getResourceAsStream(String resource) {
         final InputStream in = getContextClassLoader().getResourceAsStream(resource);
-
         return in == null ? getClass().getResourceAsStream(resource) : in;
     }
 
@@ -88,16 +87,16 @@ public class ClassPathModelStore extends AbstractModelStore {
 
     @Override
     public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
-        // ignore
+        throw new UnsupportedOperationException();
     }
 
     public <T extends PersistableModel<?, ?>> void delete(T newModel) throws ModelPersistenceException {
-        // ignore
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteAll(PersistenceContextType contextType) throws ModelPersistenceException {
-        // ignore
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -127,7 +126,7 @@ public class ClassPathModelStore extends AbstractModelStore {
     @Override
     public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, PersistenceContextType contextType)
             throws ModelPersistenceException {
-        // ignore
+        throw new UnsupportedOperationException();
     }
 
     @Override
