@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import org.apache.shiro.subject.PrincipalCollection;
 import org.junit.Before;
@@ -215,6 +216,28 @@ public class PermissionCheckerTest {
                 testOwnership, acl));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 null, acl));
+    }
+    
+    @Test
+    public void testRoleAssociatedToGroup() {
+        final RoleDefinition roleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "some_role",
+                Arrays.asList(WildcardPermission.builder().withTypes(type1).build()));
+        final Ownership foo = new Ownership(null, userTenant);
+        Supplier<Boolean> permissionCheckGranted = () -> PermissionChecker.isPermitted(WildcardPermission.builder().withTypes(type1)
+                .withActions(DefaultActions.READ).withIds("abc").build(), user, tenants, null, null,
+                foo, null);
+        Supplier<Boolean> permissionCheckNotGranted = () -> PermissionChecker.isPermitted(WildcardPermission.builder().withTypes(type2)
+                .withActions(DefaultActions.READ).withIds("abc").build(), user, tenants, null, null,
+                foo, null);
+        assertFalse(permissionCheckGranted.get());
+        userTenant.put(roleDefinition, false);
+        assertTrue(permissionCheckGranted.get());
+        assertFalse(permissionCheckNotGranted.get());
+        userTenant.remove(roleDefinition);
+        assertFalse(permissionCheckGranted.get());
+        userTenant.put(roleDefinition, true);
+        assertTrue(permissionCheckGranted.get());
+        assertFalse(permissionCheckNotGranted.get());
     }
 
     @Test
