@@ -1,15 +1,28 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import android.app.Activity;
+import android.content.ClipData;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoListAdapter;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
@@ -19,21 +32,12 @@ import com.sap.sailing.racecommittee.app.utils.MailHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class PhotoListFragment extends BaseFragment {
 
@@ -75,6 +79,10 @@ public class PhotoListFragment extends BaseFragment {
                     List<ResolveInfo> activities = manager.queryIntentActivities(intent, 0);
                     if (activities.size() > 0) {
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
+                            intent.setClipData(ClipData.newRawUri("", photoUri));
+                            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        }
                         startActivityForResult(intent, PHOTO_SHOOTING);
                     } else {
                         Toast.makeText(getActivity(), getString(R.string.no_camera), Toast.LENGTH_LONG).show();
@@ -178,7 +186,9 @@ public class PhotoListFragment extends BaseFragment {
         for (File file : files) {
             if (file.getName().endsWith(CameraHelper.MEDIA_TYPE_IMAGE_EXT)
                     || file.getName().endsWith(CameraHelper.MEDIA_TYPE_VIDEO_EXT)) {
-                retValue.add(Uri.fromFile(file));
+                String authority = BuildConfig.APPLICATION_ID + ".fileprovider";
+                Uri contentUri = FileProvider.getUriForFile(requireContext(), authority, file);
+                retValue.add(contentUri);
             }
         }
         Collections.sort(retValue, new Comparator<Uri>() {
