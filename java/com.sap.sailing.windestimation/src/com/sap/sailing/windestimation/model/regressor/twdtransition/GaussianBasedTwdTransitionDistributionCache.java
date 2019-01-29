@@ -1,7 +1,6 @@
 package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
-import com.sap.sailing.windestimation.model.regressor.TrainableRegressorModel;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 
 import smile.stat.distribution.GaussianDistribution;
@@ -28,19 +27,8 @@ public class GaussianBasedTwdTransitionDistributionCache {
     }
 
     public double getP(TwdTransition twdTransition) {
-        double durationBasedP = getPFromRegressorCache(durationBasedTwdTransitionRegressorCache, twdTransition);
-        double distanceBasedP = getPFromRegressorCache(distanceBasedTwdTransitionRegressorCache, twdTransition);
-        return durationBasedP + distanceBasedP / 2;
-    }
-
-    private double getPFromRegressorCache(
-            SingleDimensionBasedTwdTransitionRegressorCache<? extends SingleDimensionBasedTwdTransitionRegressorModelMetadata> regressorCache,
-            TwdTransition twdTransition) {
-        TrainableRegressorModel<TwdTransition, ? extends SingleDimensionBasedTwdTransitionRegressorModelMetadata> regressorModel = regressorCache
-                .getBestModel(twdTransition);
-        double[] x = regressorModel.getContextSpecificModelMetadata().getX(twdTransition);
-        double std = regressorModel.getValue(x);
-        double p = getGaussianP(std, twdTransition.getTwdChange().abs().getDegrees());
+        double stdSum = getCompoundDistance(twdTransition);
+        double p = getGaussianP(stdSum, twdTransition.getTwdChange().abs().getDegrees());
         return p;
     }
 
