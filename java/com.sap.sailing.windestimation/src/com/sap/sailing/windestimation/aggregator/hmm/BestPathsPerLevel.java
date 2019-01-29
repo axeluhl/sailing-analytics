@@ -1,6 +1,6 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
-public class BestPathsPerLevel extends AbstractBestPathsPerLevel {
+public class BestPathsPerLevel extends AbstractBestPathsPerLevel implements Comparable<BestPathsPerLevel> {
 
     private final BestManeuverNodeInfo[] bestPreviousNodeInfosPerManeuverNode;
     private final GraphLevel currentLevel;
@@ -17,7 +17,8 @@ public class BestPathsPerLevel extends AbstractBestPathsPerLevel {
 
     public BestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode currentNode, GraphNode bestPreviousNode,
             double probabilityFromStart, IntersectedWindRange intersectedWindRange) {
-        BestManeuverNodeInfo bestManeuverNodeInfo = new BestManeuverNodeInfo(bestPreviousNode, probabilityFromStart, intersectedWindRange);
+        BestManeuverNodeInfo bestManeuverNodeInfo = new BestManeuverNodeInfo(bestPreviousNode, probabilityFromStart,
+                intersectedWindRange);
         bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()] = bestManeuverNodeInfo;
         return bestManeuverNodeInfo;
     }
@@ -30,6 +31,11 @@ public class BestPathsPerLevel extends AbstractBestPathsPerLevel {
     @Override
     protected BestNodeInfo[] getPreviousNodeInfosPerManeuverNode() {
         return bestPreviousNodeInfosPerManeuverNode;
+    }
+
+    @Override
+    public int compareTo(BestPathsPerLevel o) {
+        return toString().compareTo(o.toString());
     }
 
 }

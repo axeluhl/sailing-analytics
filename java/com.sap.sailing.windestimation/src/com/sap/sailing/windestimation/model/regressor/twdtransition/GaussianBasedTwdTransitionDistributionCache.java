@@ -32,7 +32,7 @@ public class GaussianBasedTwdTransitionDistributionCache {
         return p;
     }
 
-    private double getGaussianP(double std, double x) {
+    public double getGaussianP(double std, double x) {
         GaussianDistribution gaussianDistribution = new GaussianDistribution(0, std);
         double p = gaussianDistribution.p(x);
         return p;

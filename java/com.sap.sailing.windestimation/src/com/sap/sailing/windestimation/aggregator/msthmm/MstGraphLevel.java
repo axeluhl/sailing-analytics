@@ -30,8 +30,7 @@ public class MstGraphLevel extends GraphLevelBase {
 
     public MstGraphLevel addChild(double distanceToParent, ManeuverWithProbabilisticTypeClassification observation,
             GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
-        MstGraphLevel child = new MstGraphLevel(this, distanceToParent, observation,
-                transitionProbabilitiesCalculator);
+        MstGraphLevel child = new MstGraphLevel(this, distanceToParent, observation, transitionProbabilitiesCalculator);
         children.add(child);
         return child;
     }

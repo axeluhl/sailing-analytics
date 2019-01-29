@@ -40,6 +40,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.windestimation.ManeuverBasedWindEstimationComponentImpl;
 import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory;
+import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory.HmmTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
@@ -210,7 +211,8 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
                 new RaceElementsFilteringPreprocessingPipelineImpl(false,
                         new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                 windEstimationFactoryService.maneuverClassifiersCache,
-                new ManeuverClassificationsAggregatorFactory(null, modelStore, false, Long.MAX_VALUE).mstHmm(false),
+                new ManeuverClassificationsAggregatorFactory(null, modelStore, false, Long.MAX_VALUE)
+                        .hmm(HmmTransitionProbabilitiesCalculator.GAUSSIAN_REGRESSOR, false),
                 new WindTrackCalculatorImpl(new MiddleCourseBasedTwdCalculatorImpl(),
                         new DummyBasedTwsCalculatorImpl()));
         List<WindWithConfidence<Pair<Position, TimePoint>>> windFixes = targetWindEstimation.estimateWindTrack(race);

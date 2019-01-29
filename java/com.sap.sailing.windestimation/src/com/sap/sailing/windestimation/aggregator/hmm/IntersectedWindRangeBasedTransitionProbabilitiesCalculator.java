@@ -16,7 +16,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
     private static final double LA_PLACE_TRANSITION_PROBABILITY = 0.001;
     protected static final int MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE = 40;
     private static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 40;
-    private final boolean propagateIntersectedWindRangeOfHeadupAndBearAway;
+    protected final boolean propagateIntersectedWindRangeOfHeadupAndBearAway;
 
     public IntersectedWindRangeBasedTransitionProbabilitiesCalculator(
             boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
@@ -32,13 +32,8 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         double transitionProbabilitySum = 0;
         double transitionProbabilityUntilCurrentNode = -1;
         IntersectedWindRange intersectedWindRangeUntilCurrentNode = null;
-        WindCourseRange previousWindCourseRange = propagateIntersectedWindRangeOfHeadupAndBearAway
-                && (previousNode.getManeuverType() == ManeuverTypeForClassification.BEAR_AWAY
-                        || previousNode.getManeuverType() == ManeuverTypeForClassification.HEAD_UP)
-                                ? previousIntersectedWindRange
-                                : previousNode.getValidWindRange();
         for (GraphNode node : currentLevel.getLevelNodes()) {
-            IntersectedWindRange intersectedWindRange = previousWindCourseRange.intersect(node.getValidWindRange(),
+            IntersectedWindRange intersectedWindRange = previousIntersectedWindRange.intersect(node.getValidWindRange(),
                     CombinationModeOnViolation.INTERSECTION);
             TwdTransition twdTransition = constructTwdTransition(durationPassed, distancePassed,
                     intersectedWindRange.getViolationRange(), previousNode.getManeuverType(), node.getManeuverType());
@@ -46,7 +41,11 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
             transitionProbabilitySum += transitionProbability;
             if (node == currentNode) {
                 transitionProbabilityUntilCurrentNode = transitionProbability;
-                intersectedWindRangeUntilCurrentNode = intersectedWindRange;
+                intersectedWindRangeUntilCurrentNode = propagateIntersectedWindRangeOfHeadupAndBearAway
+                        && (node.getManeuverType() == ManeuverTypeForClassification.BEAR_AWAY
+                                || node.getManeuverType() == ManeuverTypeForClassification.HEAD_UP)
+                                        ? intersectedWindRange
+                                        : node.getValidWindRange().toIntersected();
             }
         }
         if (transitionProbabilityUntilCurrentNode < 0) {
@@ -162,6 +161,10 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
 
     protected Duration getDuration(ManeuverForEstimation fromManeuver, ManeuverForEstimation toManeuver) {
         return fromManeuver.getManeuverTimePoint().until(toManeuver.getManeuverTimePoint()).abs();
+    }
+
+    public boolean isPropagateIntersectedWindRangeOfHeadupAndBearAway() {
+        return propagateIntersectedWindRangeOfHeadupAndBearAway;
     }
 
 }

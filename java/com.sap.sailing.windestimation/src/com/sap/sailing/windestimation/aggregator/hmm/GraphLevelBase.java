@@ -18,13 +18,21 @@ public class GraphLevelBase {
     private final ManeuverForEstimation maneuver;
     private ManeuverWithProbabilisticTypeClassification maneuverClassification;
 
-    private final List<GraphNode> levelNodes = new ArrayList<>();
+    private final List<GraphNode> levelNodes;
 
     public GraphLevelBase(ManeuverWithProbabilisticTypeClassification maneuverClassification,
             GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         this.maneuver = maneuverClassification.getManeuver();
         this.maneuverClassification = maneuverClassification;
+        this.levelNodes = new ArrayList<>();
         initNodes(transitionProbabilitiesCalculator);
+    }
+
+    public GraphLevelBase(ManeuverWithProbabilisticTypeClassification maneuverClassification,
+            List<GraphNode> levelNodes) {
+        this.maneuver = maneuverClassification.getManeuver();
+        this.maneuverClassification = maneuverClassification;
+        this.levelNodes = levelNodes;
     }
 
     private void initNodes(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
@@ -75,6 +83,10 @@ public class GraphLevelBase {
 
     public ManeuverForEstimation getManeuver() {
         return maneuver;
+    }
+    
+    public ManeuverWithProbabilisticTypeClassification getManeuverClassification() {
+        return maneuverClassification;
     }
 
     public List<GraphNode> getLevelNodes() {

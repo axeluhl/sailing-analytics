@@ -2,7 +2,6 @@ package com.sap.sailing.windestimation.aggregator.msthmm;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +84,7 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
          * root.getLevelNodes()) { double probability =
          * bestPathsUntilLevel.getNormalizedProbabilityToNodeFromStart(node); probabilitiesSum += probability; } }
          */
-        List<GraphLevelInference> result = new LinkedList<>();
+        List<GraphLevelInference> result = new ArrayList<>();
         for (GraphNode lastNode : root.getLevelNodes()) {
             double probability = bestPathsUntilLevel.getNormalizedProbabilityToNodeFromStart(lastNode);
             probabilitiesSum += probability;
@@ -159,8 +158,8 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                     IntersectedWindRange previousNodeIntersectedWindRange = bestPathsUntilPreviousLevel
                             .getBestPreviousNodeInfo(previousNode).getIntersectedWindRange();
                     Pair<IntersectedWindRange, Double> newWindRangeAndProbability = transitionProbabilitiesCalculator
-                            .mergeWindRangeAndGetTransitionProbability(previousNode, previousLevel,
-                                    previousNodeIntersectedWindRange, currentNode, currentLevel);
+                            .mergeWindRangeAndGetTransitionProbability(currentNode, currentLevel, new PreviousNodeInfo(
+                                    previousLevel, previousNode, previousNodeIntersectedWindRange));
                     double transitionProbability = newWindRangeAndProbability.getB();
                     // double transitionObservationMultipliedProbability = transitionProbability *
                     // currentNode.getConfidence();
@@ -178,7 +177,7 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                 currentNodeBestPreviousNodes.add(new Pair<>(previousLevel, bestPreviousNode));
                 finalBestIntersectedWindRange = finalBestIntersectedWindRange == null ? bestIntersectedWindRange
                         : finalBestIntersectedWindRange.intersect(bestIntersectedWindRange,
-                                CombinationModeOnViolation.INTERSECTION);
+                                CombinationModeOnViolation.EXPANSION);
             }
             /* MstBestManeuverNodeInfo currentNodeInfo = */bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
                     currentNodeBestPreviousNodes, currentNodeProbabilityFromStart, finalBestIntersectedWindRange);

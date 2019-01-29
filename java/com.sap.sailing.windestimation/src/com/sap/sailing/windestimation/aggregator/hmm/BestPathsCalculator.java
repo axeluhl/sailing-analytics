@@ -121,7 +121,6 @@ public class BestPathsCalculator {
                         bestProbabilityFromStart = probabilityFromStart;
                         bestPreviousNode = previousNode;
                         bestIntersectedWindRange = newWindRangeAndProbability.getA();
-                        ;
                     }
                 }
                 BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,

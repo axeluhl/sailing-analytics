@@ -13,4 +13,6 @@ public interface GraphNodeTransitionProbabilitiesCalculator {
     WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver,
             ManeuverTypeForClassification maneuverType);
 
+    boolean isPropagateIntersectedWindRangeOfHeadupAndBearAway();
+
 }
