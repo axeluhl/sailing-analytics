@@ -116,13 +116,13 @@ public class PermissionChecker {
 
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
-            PermissionState anonymous = checkUserPermissions(permission, allUser, ownership, impliesChecker, true);
+            PermissionState anonymous = checkUserPermissions(permission, allUser, allUserGroupsOfWhichUserIsMember, ownership, impliesChecker, true);
             if (anonymous == PermissionState.GRANTED) {
                 result = anonymous;
             }
         }
         if (result == PermissionState.NONE) {
-            result = checkUserPermissions(permission, user, ownership, impliesChecker, true);
+            result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker, true);
         }
         return result == PermissionState.GRANTED;
     }
@@ -192,8 +192,9 @@ public class PermissionChecker {
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
 
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesChecker, true) != PermissionState.GRANTED
-                    && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser,
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
+                    impliesChecker, true) != PermissionState.GRANTED
+                    && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser),
                             ownership, impliesChecker, true) != PermissionState.GRANTED) {
                 return false;
             }
@@ -280,16 +281,16 @@ public class PermissionChecker {
      * we need to check the permission for any possibly existing object ID.
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean hasUserAnyPermission(
-            WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
+            WildcardPermission permission, Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
+            O ownership) {
         assert permission != null;
         assert allPermissionTypes != null;
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
         
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesAnyChecker,
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker,
                     false) == PermissionState.GRANTED
-                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, ownership, impliesAnyChecker,
+                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser), ownership, impliesAnyChecker,
                             false) == PermissionState.GRANTED) {
                 return true;
             }
@@ -298,9 +299,8 @@ public class PermissionChecker {
     }
     
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> PermissionState checkUserPermissions(
-            WildcardPermission permission, U user,
-            O ownership, WildcardPermissionChecker permissionChecker,
-            boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
+            WildcardPermission permission, U user, Iterable<G> groupsOfWhichUserIsMember, O ownership,
+            WildcardPermissionChecker permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
         PermissionState result = PermissionState.NONE;
         // 2. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
@@ -311,6 +311,27 @@ public class PermissionChecker {
                 }
             }
         }
+        
+        // TODO documentation
+        final boolean ownershipIsGiven = ownership != null
+                && (ownership.getTenantOwner() != null || ownership.getUserOwner() != null);
+        if (ownershipIsGiven) {
+            final G tenantOwner = ownership == null ? null : ownership.getTenantOwner();
+            if (tenantOwner != null) {
+                final boolean userIsMemberOfGroup = Util.contains(groupsOfWhichUserIsMember, tenantOwner);
+                if (isPermissionGrantedByGroup(permission, tenantOwner, userIsMemberOfGroup, permissionChecker)) {
+                    result = PermissionState.GRANTED;
+                }
+            }
+        } else if (!matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
+            for (G groupToCheck : groupsOfWhichUserIsMember) {
+                if (isPermissionGrantedByGroup(permission, groupToCheck, true, permissionChecker)) {
+                    result = PermissionState.GRANTED;
+                    break;
+                }
+            }
+        }
+        
         // 3. check role permissions
         if (result == PermissionState.NONE && user != null) { // an anonymous user does not have any roles
             for (R role : user.getRoles()) {
@@ -322,6 +343,22 @@ public class PermissionChecker {
             }
         }
         return result;
+    }
+    
+    private static <RD extends RoleDefinition, U extends SecurityUser<RD, ?, G>, G extends SecurityUserGroup<RD>> boolean isPermissionGrantedByGroup(
+            WildcardPermission permission, G groupToCheck, boolean userIsMemberOfGroup,
+            WildcardPermissionChecker permissionChecker) {
+        for (Map.Entry<RD, Boolean> entry : groupToCheck.getRoleDefinitionMap().entrySet()) {
+            if (Boolean.TRUE.equals(entry.getValue()) || userIsMemberOfGroup) {
+                final RD roleDefinition = entry.getKey();
+                for (WildcardPermission grantedPermission : roleDefinition.getPermissions()) {
+                    if (permissionChecker.check(grantedPermission, permission)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
     
     /**
