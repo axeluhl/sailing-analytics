@@ -223,12 +223,12 @@ public class PermissionCheckerTest {
         final RoleDefinition roleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "some_role",
                 Arrays.asList(WildcardPermission.builder().withTypes(type1).build()));
         final Ownership foo = new Ownership(null, userTenant);
-        Supplier<Boolean> permissionCheckGranted = () -> PermissionChecker.isPermitted(WildcardPermission.builder().withTypes(type1)
-                .withActions(DefaultActions.READ).withIds("abc").build(), user, tenants, null, null,
-                foo, null);
-        Supplier<Boolean> permissionCheckNotGranted = () -> PermissionChecker.isPermitted(WildcardPermission.builder().withTypes(type2)
-                .withActions(DefaultActions.READ).withIds("abc").build(), user, tenants, null, null,
-                foo, null);
+        Supplier<Boolean> permissionCheckGranted = () -> PermissionChecker.isPermitted(
+                WildcardPermission.builder().withTypes(type1).withActions(DefaultActions.READ).withIds("abc").build(),
+                user, tenants, null, null, foo, null);
+        Supplier<Boolean> permissionCheckNotGranted = () -> PermissionChecker.isPermitted(
+                WildcardPermission.builder().withTypes(type2).withActions(DefaultActions.READ).withIds("abc").build(),
+                user, tenants, null, null, foo, null);
         assertFalse(permissionCheckGranted.get());
         userTenant.put(roleDefinition, false);
         assertTrue(permissionCheckGranted.get());
