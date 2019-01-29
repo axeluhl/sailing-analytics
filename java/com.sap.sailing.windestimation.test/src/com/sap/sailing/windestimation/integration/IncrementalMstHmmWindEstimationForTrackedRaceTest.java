@@ -1,10 +1,10 @@
 package com.sap.sailing.windestimation.integration;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -65,7 +65,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
 
     protected final SimpleDateFormat dateFormat;
     private final WindEstimationFactoryServiceImpl windEstimationFactoryService;
-    private final ClassPathReadOnlyModelStore modelStore;
+    private ClassPathReadOnlyModelStore modelStore;
 
     public IncrementalMstHmmWindEstimationForTrackedRaceTest()
             throws MalformedURLException, URISyntaxException, ModelPersistenceException {
@@ -73,14 +73,70 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2")); // will result in CEST
         windEstimationFactoryService = new WindEstimationFactoryServiceImpl();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models");
+        modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models", getClass().getClassLoader());
         windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
+        if (!windEstimationFactoryService.isReady()) {
+            modelStore = new ClassPathReadOnlyModelStore("/trained_wind_estimation_models",
+                    getClass().getClassLoader());
+            windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
+            System.err.println("bad1");
+            if (!windEstimationFactoryService.isReady()) {
+                System.err.println("bad2");
+                InputStream in = getClass().getResourceAsStream("trained_wind_estimation_models");
+                if (in == null) {
+                    System.err.println("bad3");
+                    in = getClass().getResourceAsStream("/trained_wind_estimation_models");
+                    if (in == null) {
+                        System.err.println("bad4");
+                        in = getClass().getResourceAsStream(
+                                "trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
+                        if (in == null) {
+                            System.err.println("bad5");
+                            in = getClass().getResourceAsStream(
+                                    "/trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
+                            if (in == null) {
+                                System.err.println("very baaad");
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException,
             ParseException, SubscriberInitializationException, CreateModelException {
-        assertTrue("Wind estimation models are empty", windEstimationFactoryService.isReady());
+        modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models", getClass().getClassLoader());
+        windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
+        if (!windEstimationFactoryService.isReady()) {
+            modelStore = new ClassPathReadOnlyModelStore("/trained_wind_estimation_models",
+                    getClass().getClassLoader());
+            windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
+            System.err.println("bad11");
+            if (!windEstimationFactoryService.isReady()) {
+                System.err.println("bad22");
+                InputStream in = getClass().getResourceAsStream("trained_wind_estimation_models");
+                if (in == null) {
+                    System.err.println("bad33");
+                    in = getClass().getResourceAsStream("/trained_wind_estimation_models");
+                    if (in == null) {
+                        System.err.println("bad44");
+                        in = getClass().getResourceAsStream(
+                                "trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
+                        if (in == null) {
+                            System.err.println("bad55");
+                            in = getClass().getResourceAsStream(
+                                    "/trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
+                            if (in == null) {
+                                System.err.println("very baaad6");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // assertTrue("Wind estimation models are empty", windEstimationFactoryService.isReady());
         super.setUp();
         URI storedUri = new URI("file:///"
                 + new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath().replace('\\', '/'));
@@ -97,7 +153,37 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
 
     // TODO bugfix wind estimation
     @Test
-    public void testIncrementalMstHmmWindEstimationForTrackedRace() throws NoWindException {
+    public void testIncrementalMstHmmWindEstimationForTrackedRace() throws NoWindException, ModelPersistenceException {
+        modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models", getClass().getClassLoader());
+        windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
+        if (!windEstimationFactoryService.isReady()) {
+            modelStore = new ClassPathReadOnlyModelStore("/trained_wind_estimation_models",
+                    getClass().getClassLoader());
+            windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
+            System.err.println("bad111");
+            if (!windEstimationFactoryService.isReady()) {
+                System.err.println("bad222");
+                InputStream in = getClass().getResourceAsStream("trained_wind_estimation_models");
+                if (in == null) {
+                    System.err.println("bad333");
+                    in = getClass().getResourceAsStream("/trained_wind_estimation_models");
+                    if (in == null) {
+                        System.err.println("bad444");
+                        in = getClass().getResourceAsStream(
+                                "trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
+                        if (in == null) {
+                            System.err.println("bad555");
+                            in = getClass().getResourceAsStream(
+                                    "/trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
+                            if (in == null) {
+                                System.err.println("very baaad66");
+                                throw new ModelPersistenceException("baaaaad");
+                            }
+                        }
+                    }
+                }
+            }
+        }
         DynamicTrackedRaceImpl trackedRace = getTrackedRace();
         WindTrack estimatedWindTrackOfTrackedRace = trackedRace
                 .getOrCreateWindTrack(new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION));

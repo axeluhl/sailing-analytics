@@ -20,9 +20,11 @@ import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 public class ClassPathReadOnlyModelStore extends AbstractModelStore {
 
     private final String destinationFolder;
+    private final ClassLoader classLoader;
 
-    public ClassPathReadOnlyModelStore(String destinationFolder) {
+    public ClassPathReadOnlyModelStore(String destinationFolder, ClassLoader classLoader) {
         this.destinationFolder = destinationFolder;
+        this.classLoader = classLoader;
     }
 
     private List<String> getResourceFiles(String path) throws IOException {
@@ -41,12 +43,8 @@ public class ClassPathReadOnlyModelStore extends AbstractModelStore {
     }
 
     private InputStream getResourceAsStream(String resource) {
-        final InputStream in = getContextClassLoader().getResourceAsStream(resource);
-        return in == null ? getClass().getResourceAsStream(resource) : in;
-    }
-
-    private ClassLoader getContextClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
+        final InputStream in = classLoader.getResourceAsStream(resource);
+        return in;
     }
 
     private String getFilePath(String filename) {
