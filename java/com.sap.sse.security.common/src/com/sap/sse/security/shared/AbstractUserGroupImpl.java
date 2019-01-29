@@ -36,7 +36,7 @@ public abstract class AbstractUserGroupImpl<U extends UserReference, RD extends 
     }
 
     public void put(final RD roleDefinition, final boolean forAll) {
-        this.roleDefinitionMap.put(null, forAll);
+        this.roleDefinitionMap.put(roleDefinition, forAll);
     }
 
     public void remove(final RD roleDefinition) {
