@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +50,10 @@ public class PermissionChecker {
         }
     };
     
+    private static <U extends SecurityUser<?, ?, G>, G extends SecurityUserGroup<?>> Iterable<G> getGroupsOfUser(U user) {
+        return (Iterable<G>) (user == null ? Collections.<G>emptySet() : user.getUserGroups());
+    }
+    
     /**
      * @param permission
      *            Permission of the form "data_object_type:action:instance_id". The instance id can be omitted when a
@@ -64,8 +69,7 @@ public class PermissionChecker {
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean isPermitted(
             WildcardPermission permission, U user, U allUser,
             O ownership, A acl) {
-        return isPermitted(permission, user, (Iterable<G>) (user == null ? null : user.getUserGroups()), allUser,
-                (Iterable<G>) (allUser == null ? null : allUser.getUserGroups()), ownership, acl);
+        return isPermitted(permission, user, getGroupsOfUser(user), allUser, getGroupsOfUser(allUser), ownership, acl);
     }
 
     /**
