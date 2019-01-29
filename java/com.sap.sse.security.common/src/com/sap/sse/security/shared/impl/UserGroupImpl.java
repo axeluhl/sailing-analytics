@@ -1,6 +1,5 @@
 package com.sap.sse.security.shared.impl;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,10 +32,5 @@ public class UserGroupImpl extends AbstractUserGroupImpl<User, RoleDefinition> i
 
     public static String getTypeRelativeObjectIdentifierAsString(UserGroup userGroup) {
         return userGroup.getId().toString();
-    }
-
-    @Override
-    public Map<RoleDefinition, Boolean> getRoleDefinitionMap() {
-        return Collections.unmodifiableMap(roleDefinitionMap);
     }
 }

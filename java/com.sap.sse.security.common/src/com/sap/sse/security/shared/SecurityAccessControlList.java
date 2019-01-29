@@ -31,7 +31,7 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
  * @author Axel Uhl (d043530)
  *
  */
-public interface SecurityAccessControlList<G extends SecurityUserGroup> extends Serializable {
+public interface SecurityAccessControlList<G extends SecurityUserGroup<?>> extends Serializable {
     /**
      * Checks whether this access control list grants the {@code user} the permission to execute {@code action} on the
      * object to which this ACL pertains.

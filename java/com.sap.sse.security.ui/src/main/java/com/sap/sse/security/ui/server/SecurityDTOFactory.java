@@ -27,6 +27,7 @@ import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -105,7 +106,7 @@ public class SecurityDTOFactory {
             Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup,
             SecurityService securityService) {
         RoleDefinition rdef = role.getRoleDefinition();
-        RoleDefinitionDTO rdefDTO = createRoleDefinitionDTO(rdef, securityService, fromOriginalToStrippedDownUser,
+        StrippedRoleDefinitionDTO rdefDTO = createStrippedRoleDefinitionDTO(rdef,
                 fromOriginalToStrippedDownUserGroup);
         RoleDTO mappedRole = new RoleDTO(rdefDTO,
                 createStrippedUserGroupDTOFromUserGroup(role.getQualifiedForTenant(),
@@ -113,6 +114,12 @@ public class SecurityDTOFactory {
                 createUserDTOFromUser(role.getQualifiedForUser(),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         return mappedRole;
+    }
+    
+    private StrippedRoleDefinitionDTO createStrippedRoleDefinitionDTO(final RoleDefinition roleDefinition,
+            final Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
+        return new StrippedRoleDefinitionDTO(roleDefinition.getId(), roleDefinition.getName(),
+                roleDefinition.getPermissions());
     }
 
     private RoleDefinitionDTO createRoleDefinitionDTO(final RoleDefinition roleDefinition,
@@ -138,14 +145,13 @@ public class SecurityDTOFactory {
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
     }
 
-    private Map<RoleDefinitionDTO, Boolean> createUserGroupRoleDefinitionDTOs(
-            final Map<RoleDefinition, Boolean> roleDefinitions, final SecurityService securityService,
-            final Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
+    private Map<StrippedRoleDefinitionDTO, Boolean> createUserGroupRoleDefinitionDTOs(
+            final Map<RoleDefinition, Boolean> roleDefinitions,
             final Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
-        final Map<RoleDefinitionDTO, Boolean> roleDefinitionDTOs = new HashMap<>();
+        final Map<StrippedRoleDefinitionDTO, Boolean> roleDefinitionDTOs = new HashMap<>();
         for (Entry<RoleDefinition, Boolean> entry : roleDefinitions.entrySet()) {
-            roleDefinitionDTOs.put(createRoleDefinitionDTO(entry.getKey(), securityService,
-                    fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup), entry.getValue());
+            roleDefinitionDTOs.put(createStrippedRoleDefinitionDTO(entry.getKey(),
+                    fromOriginalToStrippedDownUserGroup), entry.getValue());
         }
         return roleDefinitionDTOs;
     }
@@ -198,8 +204,8 @@ public class SecurityDTOFactory {
             result = new UserGroupDTO(userGroup.getId(), userGroup.getName(),
                     createStrippedUsersFromUsers(userGroup.getUsers(), securityService, fromOriginalToStrippedDownUser,
                             fromOriginalToStrippedDownUserGroup),
-                    createUserGroupRoleDefinitionDTOs(userGroup.getRoleDefinitionMap(), securityService,
-                            fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+                    createUserGroupRoleDefinitionDTOs(userGroup.getRoleDefinitionMap(),
+                            fromOriginalToStrippedDownUserGroup));
             SecurityDTOUtil.addSecurityInformation(this, securityService, result, userGroup.getIdentifier(),
                     fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         }
@@ -207,10 +213,10 @@ public class SecurityDTOFactory {
     }
     
     public Iterable<StrippedUserGroupDTO> createStrippedUserGroupDTOFromUserGroups(Iterable<UserGroup> userGroups,
-            Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGrou) {
+            Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
         Collection<StrippedUserGroupDTO> result = new ArrayList<>();
         for (UserGroup userGroup : userGroups) {
-            result.add(createStrippedUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUserGrou));
+            result.add(createStrippedUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUserGroup));
         }
         return result;
     }
@@ -224,7 +230,9 @@ public class SecurityDTOFactory {
             if (fromOriginalToStrippedDownUserGroup.containsKey(userGroup)) {
                 result = fromOriginalToStrippedDownUserGroup.get(userGroup);
             } else {
-                result = new StrippedUserGroupDTO(userGroup.getId(), userGroup.getName());
+                result = new StrippedUserGroupDTO(userGroup.getId(), userGroup.getName(),
+                        createUserGroupRoleDefinitionDTOs(userGroup.getRoleDefinitionMap(),
+                                fromOriginalToStrippedDownUserGroup));
                 fromOriginalToStrippedDownUserGroup.put(userGroup, result);
             }
         }

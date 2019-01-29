@@ -12,7 +12,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
-public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO, RoleDefinitionDTO> implements SecuredDTO {
+public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO, StrippedRoleDefinitionDTO> implements SecuredDTO {
 
     private static final long serialVersionUID = -2217611212963521760L;
 
@@ -25,7 +25,7 @@ public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO, RoleDef
     }
 
     public UserGroupDTO(UUID id, String name, Set<StrippedUserDTO> users,
-            Map<RoleDefinitionDTO, Boolean> roleDefinitionMap) {
+            Map<StrippedRoleDefinitionDTO, Boolean> roleDefinitionMap) {
         super(id, name, users, roleDefinitionMap);
     }
 
@@ -59,10 +59,10 @@ public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO, RoleDef
         return SecuredSecurityTypes.USER_GROUP;
     }
 
-    public Iterable<Pair<RoleDefinitionDTO, Boolean>> getRoleDefinitions() {
-        final Set<Pair<RoleDefinitionDTO, Boolean>> result = new HashSet<>();
-        for (Entry<RoleDefinitionDTO, Boolean> entry : roleDefinitionMap.entrySet()) {
-            result.add(new Pair<RoleDefinitionDTO, Boolean>(entry.getKey(), entry.getValue()));
+    public Iterable<Pair<StrippedRoleDefinitionDTO, Boolean>> getRoleDefinitions() {
+        final Set<Pair<StrippedRoleDefinitionDTO, Boolean>> result = new HashSet<>();
+        for (Entry<StrippedRoleDefinitionDTO, Boolean> entry : roleDefinitionMap.entrySet()) {
+            result.add(new Pair<>(entry.getKey(), entry.getValue()));
         }
         return result;
     }

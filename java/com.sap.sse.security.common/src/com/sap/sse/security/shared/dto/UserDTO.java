@@ -13,7 +13,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
-public class UserDTO extends SecurityUserImpl<RoleDefinitionDTO, RoleDTO, StrippedUserGroupDTO>
+public class UserDTO extends SecurityUserImpl<StrippedRoleDefinitionDTO, RoleDTO, StrippedUserGroupDTO>
         implements Named, Serializable, SecuredDTO {
 
     private static final long serialVersionUID = 7556217539893146187L;

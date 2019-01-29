@@ -13,7 +13,7 @@ import com.sap.sse.security.shared.SecurityUserGroup;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup>
+public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup<?>>
         extends AbstractUserReference implements SecurityUser<RD, R, G> {
     private static final long serialVersionUID = -3639860207453072248L;
 

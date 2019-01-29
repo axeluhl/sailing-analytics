@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.sap.sse.security.shared.dto.RoleDTO;
-import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.impl.Role;
@@ -17,7 +17,7 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
 public class RolesTest {
     @Test
     public void testRoleToString() {
-        final RoleDefinitionDTO roleDefinition = new RoleDefinitionDTO(UUID.randomUUID(), "role", new ArrayList<>());
+        final StrippedRoleDefinitionDTO roleDefinition = new StrippedRoleDefinitionDTO(UUID.randomUUID(), "role", new ArrayList<>());
         final Role role = new Role(roleDefinition);
         final UserGroupImpl tenant = new UserGroupImpl(UUID.randomUUID(), "tenant");
         final StrippedUserGroupDTO tenantDTO = new StrippedUserGroupDTO(UUID.randomUUID(), "tenant");

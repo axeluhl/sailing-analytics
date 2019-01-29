@@ -6,7 +6,7 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUserGroup;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-public interface UserGroup extends SecurityUserGroup, WithQualifiedObjectIdentifier {
+public interface UserGroup extends SecurityUserGroup<RoleDefinition>, WithQualifiedObjectIdentifier {
 
     Iterable<User> getUsers();
 

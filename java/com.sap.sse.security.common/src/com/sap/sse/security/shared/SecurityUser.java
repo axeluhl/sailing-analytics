@@ -11,7 +11,7 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface SecurityUser<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup>
+public interface SecurityUser<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup<?>>
         extends UserReference, WithQualifiedObjectIdentifier {
     /**
      * Returns the "raw" permissions explicitly set for this user. This does not include permissions

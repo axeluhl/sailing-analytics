@@ -1,5 +1,7 @@
 package com.sap.sse.security.shared;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sse.common.NamedWithID;
@@ -12,16 +14,18 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class SecurityUserGroupImpl implements NamedWithID, WithQualifiedObjectIdentifier, SecurityUserGroup {
+public abstract class SecurityUserGroupImpl<RD extends RoleDefinition> implements NamedWithID, WithQualifiedObjectIdentifier, SecurityUserGroup<RD> {
     private static final long serialVersionUID = 1L;
 
     private UUID id;
     private String name;
+    protected Map<RD, Boolean> roleDefinitionMap;
 
-    public SecurityUserGroupImpl(UUID id, String name) {
+    public SecurityUserGroupImpl(UUID id, String name, Map<RD, Boolean> roleDefinitionMap) {
         super();
         this.id = id;
         this.name = name;
+        this.roleDefinitionMap = roleDefinitionMap;
     }
 
     /* (non-Javadoc)
@@ -38,6 +42,11 @@ public abstract class SecurityUserGroupImpl implements NamedWithID, WithQualifie
     @Override
     public UUID getId() {
         return id;
+    }
+
+    @Override
+    public Map<RD, Boolean> getRoleDefinitionMap() {
+        return Collections.unmodifiableMap(roleDefinitionMap);
     }
 
     @Override
@@ -71,7 +80,7 @@ public abstract class SecurityUserGroupImpl implements NamedWithID, WithQualifie
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SecurityUserGroupImpl other = (SecurityUserGroupImpl) obj;
+        SecurityUserGroupImpl<?> other = (SecurityUserGroupImpl<?>) obj;
         if (id == null) {
             if (other.id != null)
                 return false;

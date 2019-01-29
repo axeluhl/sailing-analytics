@@ -8,17 +8,15 @@ import java.util.UUID;
  * A group of users; equality and hash code are based solely on the {@link #getId() ID}.
  */
 public abstract class AbstractUserGroupImpl<U extends UserReference, RD extends RoleDefinition>
-        extends SecurityUserGroupImpl {
+        extends SecurityUserGroupImpl<RD> {
 
     private static final long serialVersionUID = 5449819084645794859L;
 
     private Set<U> users;
-    protected Map<RD, Boolean> roleDefinitionMap;
 
     protected AbstractUserGroupImpl(UUID id, String name, Set<U> users, Map<RD, Boolean> roleDefinitionMap) {
-        super(id, name);
+        super(id, name, roleDefinitionMap);
         this.users = users;
-        this.roleDefinitionMap = roleDefinitionMap;
     }
 
     public Iterable<U> getUsers() {
