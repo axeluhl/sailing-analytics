@@ -90,4 +90,4 @@ echo "After successful merge, launch a customer stage build here: https://xmake-
 echo "When done, create a BCP update ticket. See https://wiki.wdf.sap.corp/wiki/display/NAAS/Mobile+Patch+Releases \(remove the saprole parameter from the URL\)"
 echo "Copy the description of, e.g., https://support.wdf.sap.corp/sap/support/message/1670304244 to start with and adjust versions and commit IDs."
 echo "Make sure you have your Metaman stuff updated, particularly the Release Notes section."
-echo "Then wait for feedback on the release build being ready for smoke testing, do the smoke tests and report back in BCP. That's it :-\)"
+echo "Then wait for feedback on the release build being ready for smoke testing, do the smoke tests and report back in BCP. That\'s it :-\)"
