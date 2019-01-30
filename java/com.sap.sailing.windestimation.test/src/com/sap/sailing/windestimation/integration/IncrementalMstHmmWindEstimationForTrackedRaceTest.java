@@ -1,10 +1,10 @@
 package com.sap.sailing.windestimation.integration;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,7 +40,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.windestimation.ManeuverBasedWindEstimationComponentImpl;
 import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory;
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory.HmmTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
@@ -64,6 +63,16 @@ import com.tractrac.subscription.lib.api.SubscriberInitializationException;
  */
 public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTracTracBasedTest {
 
+    public static final String[] modelFilesNames = {
+            "Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf",
+            "Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom1368.0ToMaximum.clf",
+            "Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom80.0To1368.0.clf",
+            "Serialization.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DurationBasedTwdTransitionRegressorFrom0.0To5.0.clf",
+            "Serialization.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DurationBasedTwdTransitionRegressorFrom5.0To62.0.clf",
+            "Serialization.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DurationBasedTwdTransitionRegressorFrom5394.0ToMaximum.clf",
+            "Serialization.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DurationBasedTwdTransitionRegressorFrom62.0To5394.0.clf",
+            "Serialization.modelForManeuverClassifier.NeuralNetworkClassifier-ManeuverClassification-Basic-All.clf" };
+
     protected final SimpleDateFormat dateFormat;
     private final WindEstimationFactoryServiceImpl windEstimationFactoryService;
     private ClassPathReadOnlyModelStore modelStore;
@@ -73,71 +82,14 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2")); // will result in CEST
         windEstimationFactoryService = new WindEstimationFactoryServiceImpl();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models", getClass().getClassLoader());
+        modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models", getClass().getClassLoader(),
+                modelFilesNames);
         windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
-        if (!windEstimationFactoryService.isReady()) {
-            modelStore = new ClassPathReadOnlyModelStore("/trained_wind_estimation_models",
-                    getClass().getClassLoader());
-            windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
-            System.err.println("bad1");
-            if (!windEstimationFactoryService.isReady()) {
-                System.err.println("bad2");
-                InputStream in = getClass().getResourceAsStream("trained_wind_estimation_models");
-                if (in == null) {
-                    System.err.println("bad3");
-                    in = getClass().getResourceAsStream("/trained_wind_estimation_models");
-                    if (in == null) {
-                        System.err.println("bad4");
-                        in = getClass().getResourceAsStream(
-                                "trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
-                        if (in == null) {
-                            System.err.println("bad5");
-                            in = getClass().getResourceAsStream(
-                                    "/trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
-                            if (in == null) {
-                                System.err.println("very baaad");
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException,
             ParseException, SubscriberInitializationException, CreateModelException {
-        modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models", getClass().getClassLoader());
-        windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
-        if (!windEstimationFactoryService.isReady()) {
-            modelStore = new ClassPathReadOnlyModelStore("/trained_wind_estimation_models",
-                    getClass().getClassLoader());
-            windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
-            System.err.println("bad11");
-            if (!windEstimationFactoryService.isReady()) {
-                System.err.println("bad22");
-                InputStream in = getClass().getResourceAsStream("trained_wind_estimation_models");
-                if (in == null) {
-                    System.err.println("bad33");
-                    in = getClass().getResourceAsStream("/trained_wind_estimation_models");
-                    if (in == null) {
-                        System.err.println("bad44");
-                        in = getClass().getResourceAsStream(
-                                "trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
-                        if (in == null) {
-                            System.err.println("bad55");
-                            in = getClass().getResourceAsStream(
-                                    "/trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
-                            if (in == null) {
-                                System.err.println("very baaad6");
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        // assertTrue("Wind estimation models are empty", windEstimationFactoryService.isReady());
         super.setUp();
         URI storedUri = new URI("file:///"
                 + new File("resources/event_20110609_KielerWoch-505_Race_2.mtb").getCanonicalPath().replace('\\', '/'));
@@ -152,39 +104,9 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         getTrackedRace().waitForManeuverDetectionToFinish();
     }
 
-    // TODO bugfix wind estimation
     @Test
     public void testIncrementalMstHmmWindEstimationForTrackedRace() throws NoWindException, ModelPersistenceException {
-        modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models", getClass().getClassLoader());
-        windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
-        if (!windEstimationFactoryService.isReady()) {
-            modelStore = new ClassPathReadOnlyModelStore("/trained_wind_estimation_models",
-                    getClass().getClassLoader());
-            windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
-            System.err.println("bad111");
-            if (!windEstimationFactoryService.isReady()) {
-                System.err.println("bad222");
-                InputStream in = getClass().getResourceAsStream("trained_wind_estimation_models");
-                if (in == null) {
-                    System.err.println("bad333");
-                    in = getClass().getResourceAsStream("/trained_wind_estimation_models");
-                    if (in == null) {
-                        System.err.println("bad444");
-                        in = getClass().getResourceAsStream(
-                                "trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
-                        if (in == null) {
-                            System.err.println("bad555");
-                            in = getClass().getResourceAsStream(
-                                    "/trained_wind_estimation_models/Serialization.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor-DistanceBasedTwdTransitionRegressorFrom0.0To80.0.clf");
-                            if (in == null) {
-                                System.err.println("very baaad66");
-                                throw new ModelPersistenceException("baaaaad");
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        assertTrue("Wind estimation models are empty", windEstimationFactoryService.isReady());
         DynamicTrackedRaceImpl trackedRace = getTrackedRace();
         WindTrack estimatedWindTrackOfTrackedRace = trackedRace
                 .getOrCreateWindTrack(new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION));
@@ -211,8 +133,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
                 new RaceElementsFilteringPreprocessingPipelineImpl(false,
                         new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
                 windEstimationFactoryService.maneuverClassifiersCache,
-                new ManeuverClassificationsAggregatorFactory(null, modelStore, false, Long.MAX_VALUE)
-                        .hmm(HmmTransitionProbabilitiesCalculator.GAUSSIAN_REGRESSOR, false),
+                new ManeuverClassificationsAggregatorFactory(null, modelStore, false, Long.MAX_VALUE).mstHmm(false),
                 new WindTrackCalculatorImpl(new MiddleCourseBasedTwdCalculatorImpl(),
                         new DummyBasedTwsCalculatorImpl()));
         List<WindWithConfidence<Pair<Position, TimePoint>>> windFixes = targetWindEstimation.estimateWindTrack(race);
@@ -220,16 +141,16 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         for (WindWithConfidence<Pair<Position, TimePoint>> windFix : windFixes) {
             Wind wind = windFix.getObject();
             targetWindFixes.add(wind);
-            System.out.println("Target: " + wind.getTimePoint() + " " + wind.getPosition() + " "
-                    + Math.round(wind.getFrom().getDegrees()));
+            // System.out.println("Target: " + wind.getTimePoint() + " " + wind.getPosition() + " "
+            // + Math.round(wind.getFrom().getDegrees()));
         }
         List<Wind> estimatedWindFixes = new ArrayList<>();
         estimatedWindTrackOfTrackedRace.lockForRead();
         try {
             for (Wind wind : estimatedWindTrackOfTrackedRace.getFixes()) {
                 estimatedWindFixes.add(wind);
-                System.out.println("Estimated: " + wind.getTimePoint() + " " + wind.getPosition() + " "
-                        + Math.round(wind.getFrom().getDegrees()));
+                // System.out.println("Estimated: " + wind.getTimePoint() + " " + wind.getPosition() + " "
+                // + Math.round(wind.getFrom().getDegrees()));
             }
         } finally {
             estimatedWindTrackOfTrackedRace.unlockAfterRead();
@@ -256,23 +177,18 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
             estimatedWindFixesMap.put(relativeTo, wind);
             Wind targetWind = targetWindFixesMap.get(relativeTo);
             if (targetWind == null) {
-                System.out.println("Not present in target: " + wind.getTimePoint() + " " + wind.getPosition());
+                fail("Wind fix not present in target wind fixes set at: " + wind.getTimePoint() + " "
+                        + wind.getPosition());
             } else if (targetWind.getBearing().getDifferenceTo(wind.getBearing()).abs().getDegrees() > 10) {
-                System.out.println("TWD difference: " + wind.getTimePoint() + " " + wind.getPosition() + " "
+                fail("TWD difference with target wind fix: " + wind.getTimePoint() + " " + wind.getPosition() + " "
                         + targetWind.getBearing().getDifferenceTo(wind.getBearing()).abs().getDegrees() + " deg");
             }
         }
         for (Wind wind : targetWindFixes) {
             if (!estimatedWindFixesMap.containsKey(new Pair<>(wind.getPosition(), wind.getTimePoint()))) {
-                System.out.println("Not present in estimated: " + wind.getTimePoint() + " " + wind.getPosition());
+                fail("Target wind fix not present at: " + wind.getTimePoint() + " " + wind.getPosition());
             }
         }
-
-        assertEquals("Number of estimated fixes is not equal to the number of target wind fixes",
-                targetWindFixes.size(), estimatedWindFixes.size());
-        assertEquals(
-                "Different wind tracks estimated by IncrementalMstHmmWindEstimationForTrackedRace and ManeuverBasedWindEstimationComponentImpl",
-                targetWindFixes, estimatedWindFixes);
     }
 
 }

@@ -301,7 +301,7 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore());
         Pair<Duration, SpeedWithBearing> durationAndAvgSpeedWithBearingAfter = calculateDurationAndAvgSpeedWithBearingBetweenTimePoints(
                 maneuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointAfter(),
-                nextManeuverCurve == null ? trackTimeInfo.getTrackEndTimePoint()
+                nextManeuverCurve == null ? trackTimeInfo.getLatestRawFixTimePoint()
                         : nextManeuverCurve.getManeuverCurveWithStableSpeedAndCourseBoundaries().getTimePointBefore());
         Duration intervalBetweenLastFixOfCurveAndNextFix = Duration.NULL;
         GPSFixMoving lastManeuverFix = maneuverDetector.track.getLastFixAtOrBefore(

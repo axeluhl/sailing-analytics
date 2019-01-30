@@ -23,8 +23,8 @@ import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
 import com.sap.sailing.windestimation.aggregator.msthmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculator;
+import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculatorImpl;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
-import com.sap.sailing.windestimation.aggregator.msthmm.MstToSequenceBestPathsCalculatorImpl;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
@@ -63,7 +63,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
                 gaussianBasedTwdTransitionDistributionCache, true);
         this.mstManeuverGraphGenerator = new IncrementalMstManeuverGraphGenerator(trackedRace,
                 transitionProbabilitiesCalculator, maneuverClassifiersCache, polarDataService);
-        this.bestPathsCalculator = new MstToSequenceBestPathsCalculatorImpl(transitionProbabilitiesCalculator);
+        this.bestPathsCalculator = new MstBestPathsCalculatorImpl(transitionProbabilitiesCalculator);
         this.windTrackCalculator = new WindTrackCalculatorImpl(new MiddleCourseBasedTwdCalculatorImpl(),
                 polarDataService == null ? new DummyBasedTwsCalculatorImpl()
                         : new PolarsBasedTwsCalculatorImpl(polarDataService));

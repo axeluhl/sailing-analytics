@@ -18,8 +18,8 @@ import com.sap.sailing.windestimation.aggregator.hmm.ManeuverSequenceGraph;
 import com.sap.sailing.windestimation.aggregator.hmm.SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.hmm.TwdTransitionClassifierBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.msthmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
+import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculatorImpl;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraph;
-import com.sap.sailing.windestimation.aggregator.msthmm.MstToSequenceBestPathsCalculatorImpl;
 import com.sap.sailing.windestimation.aggregator.outlierremoval.MeanBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.aggregator.outlierremoval.NeighborBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
@@ -121,8 +121,8 @@ public class ManeuverClassificationsAggregatorFactory {
     }
 
     public ManeuverClassificationsAggregator mstHmm(boolean propagateIntersectedWindRangeOfHeadupAndBearAway) {
-        return new MstManeuverGraph(new MstToSequenceBestPathsCalculatorImpl(
-                new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
+        return new MstManeuverGraph(
+                new MstBestPathsCalculatorImpl(new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
                         new GaussianBasedTwdTransitionDistributionCache(modelStore, preloadAllModels,
                                 modelCacheKeepAliveMillis),
                         propagateIntersectedWindRangeOfHeadupAndBearAway)));

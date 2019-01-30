@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.TrackTimeInfo;
-import com.sap.sailing.domain.maneuverdetection.impl.ManeuverMainCurveDetailsWithBearingSteps;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -40,10 +39,9 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
     private static final Duration MIN_DURATION_TO_OTHER_MANEUVER = new MillisecondsDurationImpl(
             ManeuverForEstimationTransformer.MIN_SECONDS_TO_OTHER_MANEUVER * 1000L);
 
-    private final Map<Competitor, ManeuverDataOfCompetitor> maneuverDataPerCompetitor = new HashMap<>();
+    protected final Map<Competitor, ManeuverDataOfCompetitor> maneuverDataPerCompetitor = new HashMap<>();
     private final ManeuverClassifiersCache maneuverClassifiersCache;
     private final TrackedRace trackedRace;
-    private int numberOfNonTemporaryManeuvers;
     private final ManeuverForEstimationTransformer maneuverForEstimationTransformer = new ManeuverForEstimationTransformer();
     private final PolarDataService polarService;
 
@@ -123,18 +121,10 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
         if (maneuver1.getTimePoint().equals(maneuver2.getTimePoint())) {
             return true;
         }
-        ManeuverMainCurveDetailsWithBearingSteps turningSection1 = maneuver1.getMainCurveBoundaries();
-        ManeuverMainCurveDetailsWithBearingSteps turningSection2 = maneuver2.getMainCurveBoundaries();
-        TimePoint latestBefore = turningSection1.getTimePointBefore().after(turningSection2.getTimePointBefore())
-                ? turningSection1.getTimePointBefore()
-                : turningSection2.getTimePointBefore();
-        TimePoint earliestAfter = turningSection1.getTimePointAfter().before(turningSection2.getTimePointAfter())
-                ? turningSection1.getTimePointAfter()
-                : turningSection2.getTimePointAfter();
-        return latestBefore.before(earliestAfter);
+        return false;
     }
 
-    private ManeuverForEstimation convertCleanManeuverSpotToManeuverForEstimation(CompleteManeuverCurve maneuver,
+    protected ManeuverForEstimation convertCleanManeuverSpotToManeuverForEstimation(CompleteManeuverCurve maneuver,
             CompleteManeuverCurve previousManeuver, CompleteManeuverCurve nextManeuver, Competitor competitor,
             TrackTimeInfo trackTimeInfo) {
         if (!maneuverForEstimationTransformer
@@ -253,8 +243,7 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
 
     @Override
     public MstManeuverGraphComponents parseGraph() {
-        List<ManeuverWithProbabilisticTypeClassification> nonTemporaryNodes = new ArrayList<>(
-                numberOfNonTemporaryManeuvers);
+        List<ManeuverWithProbabilisticTypeClassification> nonTemporaryNodes = new ArrayList<>();
         List<ManeuverWithProbabilisticTypeClassification> temporaryNodes = new ArrayList<>();
         for (ManeuverDataOfCompetitor maneuverData : maneuverDataPerCompetitor.values()) {
             nonTemporaryNodes.addAll(maneuverData.getNonTemporaryAcceptedManeuverClassificationsToAdd());
@@ -273,39 +262,39 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
             return super.parseGraph();
         }
         // TODO revert changes
-         Collections.sort(temporaryNodes);
-         for (ManeuverWithProbabilisticTypeClassification node : temporaryNodes) {
-         addNode(node);
-         }
-         for (ManeuverDataOfCompetitor maneuverData : maneuverDataPerCompetitor.values()) {
-         CompleteManeuverCurve latestTemporaryAcceptedManeuver = maneuverData.getLatestTemporaryAcceptedManeuver();
-         if (latestTemporaryAcceptedManeuver != null) {
-         maneuverData.getNonTemporaryAcceptedManeuverClassificationsToAdd()
-         .add(maneuverData.getLatestTemporaryAcceptedManeuverClassification());
-         maneuverData.setLatestNonTemporaryAcceptedManeuver(latestTemporaryAcceptedManeuver);
-         for (Iterator<CompleteManeuverCurve> iterator = maneuverData
-         .getAllManeuversAfterLatestNonTemporaryAcceptedManeuver().iterator(); iterator.hasNext();) {
-         CompleteManeuverCurve maneuver = iterator.next();
-         if (!maneuver.getTimePoint().after(latestTemporaryAcceptedManeuver.getTimePoint())) {
-         iterator.remove();
-         }
-         }
-         maneuverData.setLatestTemporaryAcceptedManeuver(null);
-         maneuverData.setLatestTemporaryAcceptedManeuverClassification(null);
-         }
-         }
-         return parseGraph();
+        Collections.sort(temporaryNodes);
+        for (ManeuverWithProbabilisticTypeClassification node : temporaryNodes) {
+            addNode(node);
+        }
+        for (ManeuverDataOfCompetitor maneuverData : maneuverDataPerCompetitor.values()) {
+            CompleteManeuverCurve latestTemporaryAcceptedManeuver = maneuverData.getLatestTemporaryAcceptedManeuver();
+            if (latestTemporaryAcceptedManeuver != null) {
+                maneuverData.getNonTemporaryAcceptedManeuverClassificationsToAdd()
+                        .add(maneuverData.getLatestTemporaryAcceptedManeuverClassification());
+                maneuverData.setLatestNonTemporaryAcceptedManeuver(latestTemporaryAcceptedManeuver);
+                for (Iterator<CompleteManeuverCurve> iterator = maneuverData
+                        .getAllManeuversAfterLatestNonTemporaryAcceptedManeuver().iterator(); iterator.hasNext();) {
+                    CompleteManeuverCurve maneuver = iterator.next();
+                    if (!maneuver.getTimePoint().after(latestTemporaryAcceptedManeuver.getTimePoint())) {
+                        iterator.remove();
+                    }
+                }
+                maneuverData.setLatestTemporaryAcceptedManeuver(null);
+                maneuverData.setLatestTemporaryAcceptedManeuverClassification(null);
+            }
+        }
+        return parseGraph();
 
         // END revert here, uncomment next
-//        MstManeuverGraphGenerator clonedMstGenerator = clone();
-//        Collections.sort(temporaryNodes);
-//        for (ManeuverWithProbabilisticTypeClassification node : temporaryNodes) {
-//            clonedMstGenerator.addNode(node);
-//        }
-//        return clonedMstGenerator.parseGraph();
+        // MstManeuverGraphGenerator clonedMstGenerator = clone();
+        // Collections.sort(temporaryNodes);
+        // for (ManeuverWithProbabilisticTypeClassification node : temporaryNodes) {
+        // clonedMstGenerator.addNode(node);
+        // }
+        // return clonedMstGenerator.parseGraph();
     }
 
-    private static class ManeuverDataOfCompetitor {
+    protected static class ManeuverDataOfCompetitor {
         private CompleteManeuverCurve latestNonTemporaryAcceptedManeuver = null;
         private CompleteManeuverCurve latestTemporaryAcceptedManeuver = null;
         private ManeuverWithProbabilisticTypeClassification latestTemporaryAcceptedManeuverClassification = null;

@@ -1,9 +1,7 @@
 package com.sap.sailing.windestimation.model.store;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,23 +19,33 @@ public class ClassPathReadOnlyModelStore extends AbstractModelStore {
 
     private final String destinationFolder;
     private final ClassLoader classLoader;
+    private final String[] modelFileNames;
 
-    public ClassPathReadOnlyModelStore(String destinationFolder, ClassLoader classLoader) {
+    public ClassPathReadOnlyModelStore(String destinationFolder, ClassLoader classLoader, String[] modelFileNames) {
         this.destinationFolder = destinationFolder;
         this.classLoader = classLoader;
+        this.modelFileNames = modelFileNames;
     }
 
     private List<String> getResourceFiles(String path) throws IOException {
         List<String> filenames = new ArrayList<>();
-        try (InputStream in = getResourceAsStream(path)) {
-            if (in != null) {
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-                    String resource;
-                    while ((resource = br.readLine()) != null) {
-                        filenames.add(resource);
-                    }
-                }
-            }
+
+        // does not work in OSGI environment
+
+        // try (InputStream in = getResourceAsStream(path)) {
+        // if (in != null) {
+        // try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+        // String resource;
+        // while ((resource = br.readLine()) != null) {
+        // filenames.add(resource);
+        // }
+        // }
+        // }
+        // }
+
+        // Thats why use provided modelFileNames
+        for (String fileName : modelFileNames) {
+            filenames.add(fileName);
         }
         return filenames;
     }
