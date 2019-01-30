@@ -4,6 +4,7 @@ RELEASE_BRANCH=rel-1.4
 APP_DIRS="mobile/com.sap.sailing.android.tracking.app/ mobile/com.sap.sailing.android.buoy.positioning.app/ mobile/com.sap.sailing.racecommittee.app/"
 APP_GRADLE_PROPERTIES="gradle.properties"
 FILES2SIGN=cfg/files2sign.json
+VERSIONFILE=cfg/VERSION
 GIT_REMOTE=origin
 
 # proxy can be requested with -x
@@ -76,6 +77,9 @@ if [ "$OPTION_UPDATE_ANDROID_VERSIONS" = "1" ]; then
 
   update_files2sign
 fi
+
+# Update the cfg/VERSION file with the new version
+echo $NEW_VERSION_NAME >"$VERSIONFILE"
 
 # Now commit the version changes and amend the commit using the change request ID tag:
 git commit -a -m "Upgraded Android apps from version $OLD_VERSION_NAME to $NEW_VERSION_NAME"
