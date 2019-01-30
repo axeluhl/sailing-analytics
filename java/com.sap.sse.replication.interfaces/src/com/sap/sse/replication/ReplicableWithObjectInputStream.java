@@ -120,15 +120,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         // if this is a replica and this replicable is not currently in the process of handling replication data (either an operation
         // or the initial load) coming from the master, send the operation back to the master
         if (getMasterDescriptor() != null && !isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()) {
-            try {
-                sendReplicaInitiatedOperationToMaster(castOperation);
-            } catch (IOException e) {
-                logger.log(Level.INFO, "Error sending operation "+operation+" to master "+getMasterDescriptor()+
-                        ". Queueing for later delivery.");
-                // remove the operation that failed to arrive on the master server from those marked as sent to master for now:
-                hasSentOperationToMaster(operation);
-                retrySendingLater(castOperation, this);
-            }
+            scheduleForSending(castOperation, this);
         }
         replicateReplicated(operation); // this anticipates receiving the operation back from master; then, the operation will be ignored;
         // see also addOperationSentToMasterForReplication
@@ -173,7 +165,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
      * Checks whether this replicable is a replica. If yes, the operation is executed locally and sent to the master
      * server for execution. If sending the operation fails with an {@link IOException}, the operation will be enqueued
      * for a later re-try using the
-     * {@link #retrySendingLater(OperationWithResultWithIdWrapper, OperationsToMasterSender)} method. Note that this may
+     * {@link #scheduleForSending(OperationWithResultWithIdWrapper, OperationsToMasterSender)} method. Note that this may
      * also happen while in a resend attempt. Otherwise, {@link #applyReplicated(OperationWithResult)} is invoked which
      * executes and replicates the operation immediately.
      */
@@ -185,20 +177,11 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         }
         final T result = applyReplicated(operation);
         ReplicationMasterDescriptor masterDescriptor = getMasterDescriptor();
-        try {
-            if (masterDescriptor != null) {
-                sendReplicaInitiatedOperationToMaster(operation);
-            }
-        } catch (IOException e) {
-            logger.log(Level.INFO, "Error sending operation "+operation+" to master "+masterDescriptor+
-                    ". Queueing for later delivery.");
-            // remove the operation that failed to arrive on the master server from those marked as sent to master for now:
-            hasSentOperationToMaster(operation);
-            retrySendingLater(operation, this);
-        } finally {
-            if (needToRemoveThreadLocal) {
-                idOfOperationBeingExecuted.remove();
-            }
+        if (masterDescriptor != null) {
+            scheduleForSending(operation, this);
+        }
+        if (needToRemoveThreadLocal) {
+            idOfOperationBeingExecuted.remove();
         }
         return result;
     }
