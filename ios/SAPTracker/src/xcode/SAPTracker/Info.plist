@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>com.sap.sailing.ios.SAPTracker</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -48,10 +48,6 @@
 	</dict>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string></string>
-	<key>branch_app_domain</key>
-	<string>sailinsight-app.sapsailing.com</string>
-	<key>branch_key</key>
-	<string>key_live_ges90RzIjjgM0vg8wbTtYcdmtCeYJMAZ</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
@@ -78,5 +74,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>branch_app_domain</key>
+	<string>sailinsight-app.sapsailing.com</string>
+	<key>branch_key</key>
+	<string>key_live_ges90RzIjjgM0vg8wbTtYcdmtCeYJMAZ</string>
 </dict>
 </plist>
