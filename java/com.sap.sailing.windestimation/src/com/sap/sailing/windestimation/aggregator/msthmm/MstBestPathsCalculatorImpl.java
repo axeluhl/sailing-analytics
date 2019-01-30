@@ -94,7 +94,8 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
             }
         }
         double confidence = maxProbability / probabilitiesSum;
-        GraphLevelInference entry = new GraphLevelInference(root, bestRootNode, confidence);
+        GraphLevelInference entry = new GraphLevelInference(root, bestRootNode,
+                confidence * bestRootNode.getConfidence());
         result.add(entry);
         inferShortestPath(root, bestRootNode, confidence, result, bestPathsPerLevel);
         return result;
@@ -116,7 +117,8 @@ public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
                  * currentLevelInfo.getNormalizedForwardBackwardProbability(currentNode); } else { nodeConfidence =
                  * lastNodeProbability / probabilitiesSum; }
                  */
-                GraphLevelInference entry = new GraphLevelInference(currentLevel, currentNode, confidence);
+                GraphLevelInference entry = new GraphLevelInference(currentLevel, currentNode,
+                        confidence * currentNode.getConfidence());
                 result.add(entry);
                 if (currentLevel.getChildren().size() == 1) {
                     MstBestPathsPerLevel currentLevelInfo = bestPathsPerLevel.get(currentLevel);
