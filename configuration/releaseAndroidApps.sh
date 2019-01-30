@@ -79,7 +79,7 @@ fi
 
 # Now commit the version changes and amend the commit using the change request ID tag:
 git commit -a -m "Upgraded Android apps from version $OLD_VERSION_NAME to $NEW_VERSION_NAME"
-git commit --amend -m "`git show -s --pretty=format:%s%n%n%b`
+git commit --amend -m "`git show -s --pretty=format:%s%n%n%b`"
 if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
   git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$RELEASE_BRANCH
 fi
