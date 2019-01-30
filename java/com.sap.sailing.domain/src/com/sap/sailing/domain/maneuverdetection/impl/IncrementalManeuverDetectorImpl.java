@@ -213,7 +213,9 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                                     maxDurationForDouglasPeuckerFixExtensionInManeuverAnalysisInMillis,
                                     latestRawFixTimePointOfPreviousManeuverDetectionIteration, maneuverSpot))
                     .map(maneuverSpot -> maneuverSpot.getManeuverCurve()).collect(Collectors.toList());
-            windEstimationInteraction.newManeuverSpotsDetected(competitor, filteredManeuverSpots, trackTimeInfo);
+            if(!filteredManeuverSpots.isEmpty()) {
+                windEstimationInteraction.newManeuverSpotsDetected(competitor, filteredManeuverSpots, trackTimeInfo);
+            }
         }
     }
 
@@ -272,7 +274,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                     currentExistingManeuverSpot.getDouglasPeuckerFixes(),
                     currentExistingManeuverSpot.getManeuverSpotDirection(), maneuverCurve, maneuvers,
                     new WindMeasurement(windMeasurement.getTimePoint(), windMeasurement.getPosition(),
-                            wind.getBearing()));
+                            wind == null ? null : wind.getBearing()));
         }
         return maneuverSpotWithTypedManeuvers;
     }

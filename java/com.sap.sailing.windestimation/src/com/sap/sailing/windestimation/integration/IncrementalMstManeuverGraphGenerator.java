@@ -261,37 +261,12 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
         if (temporaryNodes.isEmpty()) {
             return super.parseGraph();
         }
-        // TODO revert changes
+        MstManeuverGraphGenerator clonedMstGenerator = clone();
         Collections.sort(temporaryNodes);
         for (ManeuverWithProbabilisticTypeClassification node : temporaryNodes) {
-            addNode(node);
+            clonedMstGenerator.addNode(node);
         }
-        for (ManeuverDataOfCompetitor maneuverData : maneuverDataPerCompetitor.values()) {
-            CompleteManeuverCurve latestTemporaryAcceptedManeuver = maneuverData.getLatestTemporaryAcceptedManeuver();
-            if (latestTemporaryAcceptedManeuver != null) {
-                maneuverData.getNonTemporaryAcceptedManeuverClassificationsToAdd()
-                        .add(maneuverData.getLatestTemporaryAcceptedManeuverClassification());
-                maneuverData.setLatestNonTemporaryAcceptedManeuver(latestTemporaryAcceptedManeuver);
-                for (Iterator<CompleteManeuverCurve> iterator = maneuverData
-                        .getAllManeuversAfterLatestNonTemporaryAcceptedManeuver().iterator(); iterator.hasNext();) {
-                    CompleteManeuverCurve maneuver = iterator.next();
-                    if (!maneuver.getTimePoint().after(latestTemporaryAcceptedManeuver.getTimePoint())) {
-                        iterator.remove();
-                    }
-                }
-                maneuverData.setLatestTemporaryAcceptedManeuver(null);
-                maneuverData.setLatestTemporaryAcceptedManeuverClassification(null);
-            }
-        }
-        return parseGraph();
-
-        // END revert here, uncomment next
-        // MstManeuverGraphGenerator clonedMstGenerator = clone();
-        // Collections.sort(temporaryNodes);
-        // for (ManeuverWithProbabilisticTypeClassification node : temporaryNodes) {
-        // clonedMstGenerator.addNode(node);
-        // }
-        // return clonedMstGenerator.parseGraph();
+        return clonedMstGenerator.parseGraph();
     }
 
     protected static class ManeuverDataOfCompetitor {
