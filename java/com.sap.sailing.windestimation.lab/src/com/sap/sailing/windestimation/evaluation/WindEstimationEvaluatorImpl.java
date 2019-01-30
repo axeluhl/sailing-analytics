@@ -40,7 +40,7 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
     private final double minAccuracyPerRaceForCorrectEstimation;
     private final boolean evaluationPerCompetitorTrack;
     private final Integer minManeuversPerRace;
-    private final boolean randomCompetitorTrackClipping;
+    private final boolean randomClipping;
     private final Integer fixedNumberOfManeuvers;
 
     public WindEstimationEvaluatorImpl(double maxWindCourseDeviationInDegrees, double maxWindSpeedDeviationInPercent,
@@ -51,7 +51,7 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
         this.minAccuracyPerRaceForCorrectEstimation = minAccuracyPerRaceForCorrectEstimation;
         this.evaluationPerCompetitorTrack = evaluationPerCompetitorTrack;
         this.minManeuversPerRace = minManeuversPerRace;
-        this.randomCompetitorTrackClipping = randomCompetitorTrackClipping;
+        this.randomClipping = randomCompetitorTrackClipping;
         this.fixedNumberOfManeuvers = fixedNumberOfManeuvers;
     }
 
@@ -99,10 +99,10 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
                         && evaluationCase.getRace().getCompetitorTracks().stream()
                                 .mapToInt(competitorTrack -> competitorTrack.getElements().size())
                                 .sum() >= minManeuversPerRace);
-        if (randomCompetitorTrackClipping) {
+        if (randomClipping) {
             RaceWithRandomClippingPreprocessingPipelineImpl<ManeuverForEstimation, ManeuverForEstimation> clippingPipeline = new RaceWithRandomClippingPreprocessingPipelineImpl<>(
                     new DummyRacePreprocessingPipeline<>(), fixedNumberOfManeuvers == null ? 1 : fixedNumberOfManeuvers,
-                    fixedNumberOfManeuvers == null ? Integer.MAX_VALUE : fixedNumberOfManeuvers);
+                    fixedNumberOfManeuvers == null ? Integer.MAX_VALUE : fixedNumberOfManeuvers, evaluationPerCompetitorTrack);
             preprocessingStream = preprocessingStream
                     .map(evaluationCase -> new EvaluationCase<>(evaluationCase.getWindEstimator(),
                             clippingPipeline.preprocessRace(evaluationCase.getRace()),
