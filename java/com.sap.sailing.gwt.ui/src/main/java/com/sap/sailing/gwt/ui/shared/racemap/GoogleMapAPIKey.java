@@ -8,7 +8,4 @@ public class GoogleMapAPIKey {
      * {@link LoadApi#go(Runnable, java.util.ArrayList, boolean, String)} call for our Google Maps API usage.
      */
     public static final String V3_PARAMS = "client=gme-sapglobalmarketing&channel=sapsailing.com";
-    
-    public static final String V3_APIKey = "AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E";
-
 }

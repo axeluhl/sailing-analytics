@@ -37,7 +37,7 @@ public class LoadApi {
   /**
    * Note: If you use 3, it will take the newest stable available. Don't want that. We didn't test with that yet!
    */
-  public final static String API_VERSION = "3.32";
+  public final static String API_VERSION = "3.35";
 
   /**
    * Libraries not loaded by default <br>

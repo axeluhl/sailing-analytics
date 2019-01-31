@@ -842,7 +842,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
             }
         };
-        LoadApi.go(onLoad, loadLibraries, "key="+GoogleMapAPIKey.V3_APIKey);
+        LoadApi.go(onLoad, loadLibraries, GoogleMapAPIKey.V3_PARAMS);
     }
 
     /**

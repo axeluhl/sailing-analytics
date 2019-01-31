@@ -558,7 +558,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
           }
         };
 
-        LoadApi.go(onLoad, loadLibraries, "key="+GoogleMapAPIKey.V3_APIKey);
+        LoadApi.go(onLoad, loadLibraries, GoogleMapAPIKey.V3_PARAMS);
     }
 
     private void initializeOverlays() {
