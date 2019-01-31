@@ -12,6 +12,17 @@ OPTION_PROXY_SETTINGS=
 OPTION_UPDATE_ANDROID_VERSIONS=1
 OPTION_PERFORM_GIT_OPERATIONS=1
 
+usage() {
+  echo "$0 [-m -g -r <git-remote>]"
+  echo ""
+  echo "See more usage details in the sapsailing.com wiki at:"
+  echo "  https://wiki.sapsailing.com/wiki/info/landscape/building-and-deploying#building-deploying-stopping-and-starting-server-instances"
+  echo "-m Disable upgrading the versionCode and versionName"
+  echo "-g Disable the final git push operation to $RELEASE_BRANCH"
+  echo "-r The git remote; defaults to origin"
+  exit 2
+}
+
 # Read and update versionCode in build.gradle
 # Based on new versionCode the versionNme will also be updated.
 increment_version_code_and_set_version_name() {
@@ -45,19 +56,28 @@ update_version_file() {
   echo $NEW_VERSION_NAME > "$VERSION_FILE"
 }
 
-options='mgrx:'
-while getopts $options option
+# Parse the first argument for the help option
+while [ "$1" != "" ]
 do
-    case $option in
-        m) OPTION_UPDATE_ANDROID_VERSIONS=0;;
-        g) OPTION_PERFORM_GIT_OPERATIONS=0;;
-        r) OPTION_GIT_REMOTE=$OPTARG;;
-        x) PROXY_SETTINGS="-s configuration/maven-settings-proxy.xml -Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080";;
-        \?) echo "Invalid option"
-            exit 4;;
-    esac
+  case $1 in
+    -h | --help) usage;;
+    *) break;;
+  esac
 done
-shift $((OPTIND-1))
+
+# Parse the options
+options="mgxr:"
+while getopts "$options" option
+do
+  case $option in
+    m) OPTION_UPDATE_ANDROID_VERSIONS=0;;
+    g) OPTION_PERFORM_GIT_OPERATIONS=0;;
+    g) OPTION_PERFORM_GIT_OPERATIONS=0;;
+    r) GIT_REMOTE=$OPTARG;;
+    \?) exit 4;;
+  esac
+done
+shift $((OPTIND - 1))
 
 # change directory to the git root, assuming this script is in the configuration/ subfolder
 GIT_DIR="`dirname \"$0\"`/.."
