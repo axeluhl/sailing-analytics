@@ -13,7 +13,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:3.2.1"
+        classpath 'com.android.tools.build:gradle:3.3.0'
         classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
         classpath "org.ajoberstar:grgit:2.3.0"
     }
@@ -34,7 +34,7 @@ allprojects {
 
     version = "1.0.0-SNAPSHOT"
 
-    tasks.withType(JavaCompile) { 
+    tasks.withType(JavaCompile) {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
         options.encoding = 'UTF-8'
