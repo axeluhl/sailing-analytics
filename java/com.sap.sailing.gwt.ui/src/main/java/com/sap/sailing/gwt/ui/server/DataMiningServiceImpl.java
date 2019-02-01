@@ -18,7 +18,6 @@ import org.apache.shiro.SecurityUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -51,11 +50,12 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningService;
+import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
-public class DataMiningServiceImpl extends RemoteServiceServlet implements DataMiningService {
+public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implements DataMiningService {
     private static final long serialVersionUID = -7951930891674894528L;
 
     private final BundleContext context;
