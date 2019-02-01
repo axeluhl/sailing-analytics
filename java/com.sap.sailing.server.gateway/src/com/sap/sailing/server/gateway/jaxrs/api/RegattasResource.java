@@ -1394,25 +1394,20 @@ public class RegattasResource extends AbstractSailingServerResource {
                     } else {
                         startTime = trackedRace.getStartOfRace();
                     }
-
                     for (Competitor competitor : competitors) {
                         if (getSecurityService().hasCurrentUserExplictPermissions(competitor,
                                 SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC)) {
                             if (competitorFilter == null || competitor.getId().equals(competitorFilter)) {
-
-                                Iterable<Maneuver> maneuversForCompetitor = trackedRace.getManeuvers(competitor,
-                                        startTime, endTime, false);
+                                Iterable<Maneuver> maneuversForCompetitor = trackedRace.getManeuvers(competitor, startTime, endTime, false);
                                 data.add(new Pair<Competitor, Iterable<Maneuver>>(competitor, maneuversForCompetitor));
                             }
                         }
                     }
-
                     ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(
                             new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
                     JSONObject jsonMarkPassings = serializer.serialize(data);
                     String json = jsonMarkPassings.toJSONString();
-                    return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                            .build();
+                    return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
                 }
             }
         }
