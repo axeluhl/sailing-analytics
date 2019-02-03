@@ -709,8 +709,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     }
                     if (dbScoreCorrectionForCompetitorInRace
                             .containsKey(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
-                        final Double leaderboardCorrectedScore = dbScoreCorrectionForCompetitorInRace
-                                .getDouble(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
+                        final Number dbScoreCorrectionForCompetitorInRaceAsNumber = (Number) dbScoreCorrectionForCompetitorInRace
+                                        .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
+                        final Double leaderboardCorrectedScore = dbScoreCorrectionForCompetitorInRaceAsNumber == null ? null :
+                            dbScoreCorrectionForCompetitorInRaceAsNumber.doubleValue();
                         correctionsToUpdate.correctScoreByID(competitorId, raceColumn, leaderboardCorrectedScore);
                     }
                 }
