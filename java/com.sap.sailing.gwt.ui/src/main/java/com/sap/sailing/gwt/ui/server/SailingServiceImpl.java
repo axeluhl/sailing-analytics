@@ -4941,34 +4941,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     if (!userHasPermissionToChangeServerSelfService) {
                         throw new AuthorizationException("No permission to make the server self service");
                     }
-                    if (!isCurrentlySelfService && Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
-                        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
-                                .get(createObjectOnCurrentServerPermission, allUser);
-                        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
-                                .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                        if (serverConfiguration.isSelfService()) {
-                            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                                    SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
-                                    associationTypeIdentifier.toString(), new Action() {
-                                        @Override
-                                        public void run() throws Exception {
-                                            getSecurityService().addPermissionForUser(allUser.getName(),
-                                                    createObjectOnCurrentServerPermission);
-                                        }
-                                    });
-                        }
-                        if (isCurrentlySelfService && !Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
-                            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
-                                    new ActionWithResult<Void>() {
-                                
-                                @Override
-                                public Void run() throws Exception {
-                                    getSecurityService().removePermissionFromUser(allUser.getName(),
-                                            createObjectOnCurrentServerPermission);
-                                    return null;
-                                }
-                            });
-                        }
+                    TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
+                            .get(createObjectOnCurrentServerPermission, allUser);
+                    QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                            .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                    if (shouldBeSelfService) {
+                        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                                SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
+                                associationTypeIdentifier.toString(), new Action() {
+                                    @Override
+                                    public void run() throws Exception {
+                                        getSecurityService().addPermissionForUser(allUser.getName(),
+                                                createObjectOnCurrentServerPermission);
+                                    }
+                                });
+                    } else {
+                        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                                new ActionWithResult<Void>() {
+                            
+                            @Override
+                            public Void run() throws Exception {
+                                getSecurityService().removePermissionFromUser(allUser.getName(),
+                                        createObjectOnCurrentServerPermission);
+                                return null;
+                            }
+                        });
                     }
                 }
             } else {
@@ -4981,7 +4978,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     .getRoleDefinition(SailingViewerRole.getInstance().getId());
             final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
             if (viewerRole != null && defaultServerTenant != null) {
-                final boolean isCurrentlyPublic = defaultServerTenant.getRoleAssociation(viewerRole);
+                final boolean isCurrentlyPublic = Boolean.TRUE.equals(defaultServerTenant.getRoleAssociation(viewerRole));
                 final boolean shouldBePublic = serverConfiguration.isPublic();
                 if (isCurrentlyPublic != shouldBePublic) {
                     // value changed
