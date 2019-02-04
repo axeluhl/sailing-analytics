@@ -28,6 +28,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 public class UserGroupManagementPanel extends DockPanel {
     private final UserGroupListDataProvider userGroupListDataProvider;
     private UserGroupDetailPanel userGroupDetailPanel;
+    private UserGroupRoleDefinitionPanel userGroupRoleDefinitionPanel;
 
     private final UserGroupTableWrapper userGroupTableWrapper;
 
@@ -53,7 +54,8 @@ public class UserGroupManagementPanel extends DockPanel {
         west.add(scrollPanel);
 
         // create Details Panel
-        final HorizontalPanel listsWrapper = createUserGroupDetailsPanel(stringMessages, userManagementService);
+        final HorizontalPanel listsWrapper = createUserGroupDetailsPanel(stringMessages, userManagementService,
+                userService, additionalPermissions, errorReporter, tableResources);
         west.add(listsWrapper);
 
         add(west, DockPanel.WEST);
@@ -90,21 +92,37 @@ public class UserGroupManagementPanel extends DockPanel {
         return buttonPanel;
     }
 
-    /** Creates the UserGroupDetailsPanel which contains details about the selected user group */
+    /** Creates the UserGroupDetailsPanel which contains details about the selected user group 
+     * @param userService 
+     * @param additionalPermissions 
+     * @param errorReporter 
+     * @param tableResources */
     private HorizontalPanel createUserGroupDetailsPanel(final StringMessages stringMessages,
-            final UserManagementServiceAsync userManagementService) {
+            final UserManagementServiceAsync userManagementService, UserService userService, Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter, CellTableWithCheckboxResources tableResources) {
         final TextBox userFilterBox = new TextBox();
         userFilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
         userGroupDetailPanel = new UserGroupDetailPanel(userFilterBox, userGroupTableWrapper.getSelectionModel(),
                 userGroupListDataProvider, userManagementService, stringMessages);
+
+        
+        userGroupRoleDefinitionPanel = new UserGroupRoleDefinitionPanel(userService,
+                stringMessages, additionalPermissions, errorReporter, tableResources,
+                userGroupTableWrapper.getSelectionModel(), userGroupListDataProvider);
 
         final VerticalPanel userListWrapper = new VerticalPanel();
         userListWrapper.add(userFilterBox);
         userListWrapper.add(userGroupDetailPanel);
         final CaptionPanel userListCaption = new CaptionPanel(stringMessages.users());
         userListCaption.add(userListWrapper);
+
+        final VerticalPanel roleWrapper = new VerticalPanel();
+        roleWrapper.add(userGroupRoleDefinitionPanel);
+        final CaptionPanel roleCaption = new CaptionPanel(stringMessages.roles());
+        roleCaption.add(roleWrapper);
+
         final HorizontalPanel listsWrapper = new HorizontalPanel();
         listsWrapper.add(userListCaption);
+        listsWrapper.add(roleCaption);
         listsWrapper.setVisible(false);
         userGroupTableWrapper.getSelectionModel().addSelectionChangeHandler(
                 h -> listsWrapper.setVisible(userGroupTableWrapper.getSelectionModel().getSelectedObject() != null));
@@ -116,5 +134,6 @@ public class UserGroupManagementPanel extends DockPanel {
         userGroupTableWrapper.refreshUserList(null);
         userGroupListDataProvider.updateDisplays();
         userGroupDetailPanel.updateLists();
+        userGroupRoleDefinitionPanel.updateUserGroups();
     }
 }
