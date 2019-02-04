@@ -65,6 +65,11 @@ public abstract class SecurityUserGroupImpl<RD extends RoleDefinition> implement
     }
 
     @Override
+    public String toString() {
+        return "SecurityUserGroupImpl [id=" + id + ", name=" + name + ", roleDefinitionMap=" + roleDefinitionMap + "]";
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

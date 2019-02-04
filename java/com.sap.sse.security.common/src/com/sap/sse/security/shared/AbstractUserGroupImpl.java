@@ -42,4 +42,10 @@ public abstract class AbstractUserGroupImpl<U extends UserReference, RD extends 
     public void remove(final RD roleDefinition) {
         this.roleDefinitionMap.remove(roleDefinition);
     }
+
+    @Override
+    public String toString() {
+        return "AbstractUserGroupImpl [users=" + users + ", getName()=" + getName() + ", getId()=" + getId()
+                + ", getRoleDefinitionMap()=" + getRoleDefinitionMap() + "]";
+    }
 }
