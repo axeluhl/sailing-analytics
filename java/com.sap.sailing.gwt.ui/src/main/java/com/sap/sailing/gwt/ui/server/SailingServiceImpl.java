@@ -4923,77 +4923,84 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
         getService().apply(new UpdateServerConfiguration(
                 new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
-        final User allUser = getSecurityService().getAllUser();
-        if (allUser != null) {
-            final TypeRelativeObjectIdentifier typeRelativeServerObjectIdentifier = new TypeRelativeObjectIdentifier(ServerInfo.getName());
-            final QualifiedObjectIdentifier qualifiedServerObjectIdentifier = SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(typeRelativeServerObjectIdentifier);
-            final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
-                    .getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT, typeRelativeServerObjectIdentifier);
-            boolean isCurrentlyPublic = Util.contains(allUser.getPermissions(), createObjectOnCurrentServerPermission);
-            boolean shouldBePublic = Boolean.TRUE.equals(serverConfiguration.isSelfService());
-            if (isCurrentlyPublic != shouldBePublic) {
-                OwnershipAnnotation serverOwnership = getSecurityService().getOwnership(qualifiedServerObjectIdentifier);
-                boolean userHasPermissionToChangeServerSelfService = getSecurityService().hasCurrentUserMetaPermission(
-                        createObjectOnCurrentServerPermission,
-                        serverOwnership == null ? null : serverOwnership.getAnnotation());
-                if (!userHasPermissionToChangeServerSelfService) {
-                    throw new AuthorizationException("No permission to make the server self service");
-                }
-                if (!isCurrentlyPublic && Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
-                    TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
-                            .get(createObjectOnCurrentServerPermission, allUser);
-                    QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
-                            .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                    if (serverConfiguration.isSelfService()) {
-                        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                                SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
-                                associationTypeIdentifier.toString(), new Action() {
-                                    @Override
-                                    public void run() throws Exception {
-                                        getSecurityService().addPermissionForUser(allUser.getName(),
-                                                createObjectOnCurrentServerPermission);
-                                    }
-                                });
+        if (serverConfiguration.isSelfService() != null) {
+            final User allUser = getSecurityService().getAllUser();
+            if (allUser != null) {
+                final TypeRelativeObjectIdentifier typeRelativeServerObjectIdentifier = new TypeRelativeObjectIdentifier(ServerInfo.getName());
+                final QualifiedObjectIdentifier qualifiedServerObjectIdentifier = SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(typeRelativeServerObjectIdentifier);
+                final WildcardPermission createObjectOnCurrentServerPermission = qualifiedServerObjectIdentifier
+                        .getPermission(ServerActions.CREATE_OBJECT);
+                final boolean isCurrentlySelfService = Util.contains(allUser.getPermissions(), createObjectOnCurrentServerPermission);
+                final boolean shouldBeSelfService = serverConfiguration.isSelfService();
+                if (isCurrentlySelfService != shouldBeSelfService) {
+                    // value changed
+                    OwnershipAnnotation serverOwnership = getSecurityService().getOwnership(qualifiedServerObjectIdentifier);
+                    boolean userHasPermissionToChangeServerSelfService = getSecurityService().hasCurrentUserMetaPermission(
+                            createObjectOnCurrentServerPermission,
+                            serverOwnership == null ? null : serverOwnership.getAnnotation());
+                    if (!userHasPermissionToChangeServerSelfService) {
+                        throw new AuthorizationException("No permission to make the server self service");
                     }
-                    if (isCurrentlyPublic && !Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
-                        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
-                                new ActionWithResult<Void>() {
-                            
-                            @Override
-                            public Void run() throws Exception {
-                                getSecurityService().removePermissionFromUser(allUser.getName(),
-                                        createObjectOnCurrentServerPermission);
-                                return null;
-                            }
-                        });
+                    if (!isCurrentlySelfService && Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
+                        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
+                                .get(createObjectOnCurrentServerPermission, allUser);
+                        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                                .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                        if (serverConfiguration.isSelfService()) {
+                            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                                    SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
+                                    associationTypeIdentifier.toString(), new Action() {
+                                        @Override
+                                        public void run() throws Exception {
+                                            getSecurityService().addPermissionForUser(allUser.getName(),
+                                                    createObjectOnCurrentServerPermission);
+                                        }
+                                    });
+                        }
+                        if (isCurrentlySelfService && !Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
+                            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                                    new ActionWithResult<Void>() {
+                                
+                                @Override
+                                public Void run() throws Exception {
+                                    getSecurityService().removePermissionFromUser(allUser.getName(),
+                                            createObjectOnCurrentServerPermission);
+                                    return null;
+                                }
+                            });
+                        }
                     }
                 }
+            } else {
+                throw new IllegalArgumentException("<all> user does not exist");
             }
-        } else {
-            throw new IllegalArgumentException("<all> user does not exist");
         }
         
-        final RoleDefinition viewerRole = getSecurityService()
-                .getRoleDefinition(SailingViewerRole.getInstance().getId());
-        final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
-        if (viewerRole != null && defaultServerTenant != null) {
-            if (!Util.equalsWithNull(serverConfiguration.isPublic(), defaultServerTenant.getRoleAssociation(viewerRole))) {
-                // value changed
-                if (getSecurityService().hasCurrentUserUpdatePermission(defaultServerTenant)
-                        && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
-                                viewerRole, new Ownership(null, defaultServerTenant))) {
-                    if (Boolean.TRUE.equals(serverConfiguration.isPublic())) {
-                        getSecurityService().putRoleDefinitionToUserGroup(defaultServerTenant, viewerRole, true);
+        if (serverConfiguration.isPublic() != null) {
+            final RoleDefinition viewerRole = getSecurityService()
+                    .getRoleDefinition(SailingViewerRole.getInstance().getId());
+            final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+            if (viewerRole != null && defaultServerTenant != null) {
+                final boolean isCurrentlyPublic = defaultServerTenant.getRoleAssociation(viewerRole);
+                final boolean shouldBePublic = serverConfiguration.isPublic();
+                if (isCurrentlyPublic != shouldBePublic) {
+                    // value changed
+                    if (getSecurityService().hasCurrentUserUpdatePermission(defaultServerTenant)
+                            && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                                    viewerRole, new Ownership(null, defaultServerTenant))) {
+                        if (serverConfiguration.isPublic()) {
+                            getSecurityService().putRoleDefinitionToUserGroup(defaultServerTenant, viewerRole, true);
+                        } else {
+                            getSecurityService().removeRoleDefintionFromUserGroup(defaultServerTenant, viewerRole);
+                        }
                     } else {
-                        getSecurityService().removeRoleDefintionFromUserGroup(defaultServerTenant, viewerRole);
+                        throw new AuthorizationException("No permission to make the server public");
                     }
-                } else {
-                    throw new AuthorizationException("No permission to make the server public");
                 }
+            } else {
+                throw new IllegalArgumentException(
+                        SailingViewerRole.getInstance().getName() + " role or default server tenant does not exist");
             }
-        } else {
-            throw new IllegalArgumentException(
-                    SailingViewerRole.getInstance().getName() + " role or default server tenant does not exist");
         }
     }
 
