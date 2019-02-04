@@ -67,7 +67,6 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -2660,9 +2659,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
-        DouglasPeucker<Competitor, GPSFixMoving> douglasPeucker = new DouglasPeucker<Competitor, GPSFixMoving>(
-                getTrack(competitor));
-        return douglasPeucker.approximate(maxDistance, from, to);
+        return new CourseChangeBasedTrackApproximation(getTrack(competitor), getBoatOfCompetitor(competitor).getBoatClass()).approximate(from, to);
+        // The old DouglasPeucker-based code:
+//        DouglasPeucker<Competitor, GPSFixMoving> douglasPeucker = new DouglasPeucker<Competitor, GPSFixMoving>(
+//                track);
+//        return douglasPeucker.approximate(maxDistance, from, to);
     }
 
     protected void triggerManeuverCacheRecalculationForAllCompetitors() {

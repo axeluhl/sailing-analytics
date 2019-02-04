@@ -24,7 +24,6 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -569,10 +568,13 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     Wind getDirectionFromStartToNextMark(TimePoint at);
 
     /**
-     * Uses a {@link DouglasPeucker Douglas-Peucker} algorithm to approximate this track's fixes starting at time
-     * <code>from</code> until time point <code>to</code> such that the maximum distance between the track's fixes and
-     * the approximation is at most <code>maxDistance</code>. The approximation's fixes are original fixes from
-     * the competitor's {@link GPSFixTrack track}.
+     * Traverses the competitor's {@link GPSFixTrack track} between {@code from} and {@code to} (both inclusive) and
+     * returns those fixes where significant changes in the course over ground (COG) are observed, indicating a possibly
+     * relevant maneuver. The {@link SpeedWithBearing#getBearing() COG} change is calculated over a time window the size
+     * of the typical maneuver duration, but at least covering two fixes in order to also cover the case of low sampling
+     * rates. If in any such window the COG change exceeds the threshold, the window is extended as far as the COG
+     * change grows, then from the extended window the fix with the highest COG change to its successor is returned. The
+     * next window analysis will start after the end of the current window, avoiding duplicates in the result.
      */
     Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
