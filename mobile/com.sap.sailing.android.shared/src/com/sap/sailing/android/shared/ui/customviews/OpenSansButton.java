@@ -1,13 +1,11 @@
 package com.sap.sailing.android.shared.ui.customviews;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Typeface;
-import android.os.Build;
+import android.support.v7.widget.AppCompatButton;
 import android.util.AttributeSet;
-import android.widget.Button;
 
-public class OpenSansButton extends Button {
+public class OpenSansButton extends AppCompatButton {
 
     public OpenSansButton(Context context) {
         super(context);
@@ -21,12 +19,6 @@ public class OpenSansButton extends Button {
 
     public OpenSansButton(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public OpenSansButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
 

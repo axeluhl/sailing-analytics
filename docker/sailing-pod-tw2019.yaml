@@ -7,7 +7,7 @@ metadata:
 spec:
   containers:
   - name: sailing
-    image: donaldduck70/sapsailing:build-201901041254
+    image: donaldduck70/sapsailing:latest
     imagePullPolicy: Always
     ports:
     - containerPort: 8888
@@ -28,6 +28,12 @@ spec:
       httpGet:
         path: /
         port: http-port
+      initialDelaySeconds: 10
+      periodSeconds: 30
+    readinessProbe:
+      exec:
+        command:
+        - ./status
       initialDelaySeconds: 10
       periodSeconds: 30
   imagePullSecrets:

@@ -12,6 +12,7 @@ echo "TELNET_PORT: $TELNET_PORT"
 echo "MONGODB_HOST: $MONGODB_HOST"
 echo "MONGODB_PORT: $MONGODB_PORT"
 echo "MONGODB_NAME: $MONGODB_NAME"
+echo "MONGODB_URI: $MONGODB_URI"
 echo "EXPEDITION_PORT: $EXPEDITION_PORT"
 echo "REPLICATION_HOST: $REPLICATION_HOST"
 echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
@@ -26,15 +27,19 @@ echo "JAVA_HOME: $JAVA_HOME"
 echo "INSTANCE_ID: $INSTANCE_ID"
 echo ""
 
-if [[ `uname` != "Darwin" ]]; then
-    TELNET_ACTIVE=`netstat -tlnp 2>/dev/null | grep ":$SERVER_PORT"`
-else
-    TELNET_ACTIVE=`netstat -an 2>/dev/null | grep ".$SERVER_PORT"`
-fi
+RACING_EVENT_SERVICE_AVAILABLE=$(curl http://127.0.0.1:$SERVER_PORT/sailingserver/api/v1/status 2>/dev/null | jq .available)
+REPLICATION_AVAILABLE=$(curl http://127.0.0.1:$SERVER_PORT/replication/replication?action=STATUS 2>/dev/null | jq .available)
+INDEX_HTML_STATUS=$(curl -I http://127.0.0.1:8888/index.html 2>/dev/null | head -n 1 | cut -d ' ' -f 2)
 
-if [[ $TELNET_ACTIVE != "" ]]; then
-    echo "Server $SERVER_NAME is running on $SERVER_PORT (or some other daemon)"
+echo "RACING_EVENT_SERVICE_AVAILABLE: $RACING_EVENT_SERVICE_AVAILABLE"
+echo "REPLICATION_AVAILABLE: $REPLICATION_AVAILABLE"
+echo "INDEX_HTML_STATUS: $INDEX_HTML_STATUS"
+
+if [[ $RACING_EVENT_SERVICE_AVAILABLE == "true" && $REPLICATION_AVAILABLE == "true" && $INDEX_HTML_STATUS =~ 2.. ]]; then
+    echo "Server $SERVER_NAME is available on $SERVER_PORT"
+    exit 0
 else
-    echo "Server $SERVER_NAME is not running."
+    echo "Server $SERVER_NAME is not available."
+    exit 1
 fi
 

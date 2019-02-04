@@ -18,7 +18,7 @@
             android:layout_centerVertical="true"
             android:orientation="vertical">
 
-            <TextView
+            <com.sap.sailing.racecommittee.app.ui.views.RaceTimeView
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -146,13 +146,13 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/race_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="middle"
-                android:maxLines="1"
-                android:textAppearance="?attr/textNormal"
-                tools:text="Race 3" />
+                    android:id="@+id/race_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:singleLine="true"
+                    android:textAppearance="?attr/textNormal"
+                    tools:text="Race 3" />
 
             <TextView
                 android:id="@+id/depends_on"

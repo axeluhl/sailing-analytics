@@ -1,6 +1,7 @@
 package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -14,6 +15,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.SubjectThreadState;
+import org.apache.shiro.util.ThreadContext;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -79,8 +81,9 @@ public class TaggingServiceTest {
     private static SubjectThreadState threadState;
 
     @BeforeClass
-    public static void setUpClass()
+    public synchronized static void setUpClass()
             throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException {
+        logger.info("current thread: "+Thread.currentThread());
         MongoDBService.INSTANCE.getDB().drop();
         // setup racing service and racelog
         racingService = new RacingEventServiceImpl();
@@ -108,6 +111,7 @@ public class TaggingServiceTest {
         }
         // create & login user
         securityService.createSimpleUser(username, email, password, fullName, company, null);
+        ThreadContext.unbindSubject(); // ensure that a new subject is created that knows the current security manager
         subject = SecurityUtils.getSubject();
         subject.login(new UsernamePasswordToken(username, password));
         threadState = new SubjectThreadState(subject);
@@ -116,7 +120,8 @@ public class TaggingServiceTest {
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public synchronized static void tearDownClass() {
+        logger.info("current thread: "+Thread.currentThread());
         try {
             subject.logout();
             securityService.deleteUser(username);
@@ -128,33 +133,42 @@ public class TaggingServiceTest {
 
     @Before
     public void resetEnvironment() {
-        // setup the Shiro SubjectThreadState to ensure that the tagging service can check whether a subject is logged in
-        threadState.bind();
-        securityService.addPermissionForUser(username, editLeaderboardPermission);
-        securityService.unsetPreference(username,
-                serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
-        final RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
-        if (raceLog != null) {
-            for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
-                try {
-                    raceLog.revokeEvent(event.getAuthor(), event);
-                } catch (NotRevokableException e) {
-                    logger.warning(
-                            "Could not clean up test setup for TaggingServiceTest as public tag could not be removed!");
+        logger.info("current thread: "+Thread.currentThread());
+        synchronized (TaggingServiceTest.class) {
+            // setup the Shiro SubjectThreadState to ensure that the tagging service can check whether a subject is logged in
+            threadState.bind();
+            assertSame(securityService.getSecurityManager(), ThreadContext.getSecurityManager());
+            assertSame(subject, SecurityUtils.getSubject());
+            assertEquals(username, subject.getPrincipal());
+            securityService.addPermissionForUser(username, editLeaderboardPermission);
+            securityService.unsetPreference(username,
+                    serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
+            final RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
+            if (raceLog != null) {
+                for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
+                    try {
+                        raceLog.revokeEvent(event.getAuthor(), event);
+                    } catch (NotRevokableException e) {
+                        logger.warning(
+                                "Could not clean up test setup for TaggingServiceTest as public tag could not be removed!");
+                    }
                 }
             }
-        }
-        try {
-            List<TagDTO> tags = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false);
-            logger.info("Tags after environment reset: " + tags.toString());
-        } catch (Exception e) {
-            logger.severe("Could not reset test environment");
+            try {
+                List<TagDTO> tags = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false);
+                logger.info("Tags after environment reset: " + tags.toString());
+            } catch (Exception e) {
+                logger.severe("Could not reset test environment");
+            }
         }
     }
 
     @After
     public void restoreEnvironment() {
-        threadState.restore();
+        logger.info("current thread: "+Thread.currentThread());
+        synchronized (TaggingServiceTest.class) {
+            threadState.restore();
+        }
     }
     
     @Test

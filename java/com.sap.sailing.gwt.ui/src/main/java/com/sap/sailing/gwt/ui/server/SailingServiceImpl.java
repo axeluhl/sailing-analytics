@@ -351,6 +351,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
+import com.sap.sailing.domain.tracking.MailInvitationType;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -651,6 +652,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private static final int LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE = 100;
     
     private static final int LEADERBOARD_DIFFERENCE_CACHE_SIZE = 50;
+
+    private static final String MAILTYPE_PROPERTY = "com.sap.sailing.domain.tracking.MailInvitationType";
 
     private ResourceBundleStringMessages serverStringMessages;
 
@@ -3626,8 +3629,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final TimeRange timeRange = competitorTimeRanges.get(competitorDTO);
                     final TimePoint from = timeRange.from(), to = timeRange.to();
                     final RunnableFuture<List<ManeuverDTO>> future = new FutureTask<>(() -> {
-                        final Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, from, to,
-                                /* waitForLatest */ true);
+                        // We're on a web server request thread. Try not to take too long for this,
+                        // so don't wait for the latest results unless the cache doesn't have a valid
+                        // result yet:
+                        Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, from, to, /* waitForLatest */ false);
+                        if (maneuvers == null) {
+                            maneuvers = trackedRace.getManeuvers(competitor, from, to, /* waitForLatest */ true);
+                        }
                         return createManeuverDTOsForCompetitor(maneuvers, trackedRace, competitor);
                     });
                     executor.execute(future);
@@ -6028,7 +6036,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO) throws NotFoundException {
+            List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO, int priority) throws NotFoundException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         String courseName = "Course of " + raceColumnName;
         if (!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
@@ -6051,7 +6059,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new RuntimeException(e);
         }
         RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
-                getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
+                new LogEventAuthorImpl(getService().getServerAuthor().getName(), priority),
+                raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);
     }
     
@@ -6126,13 +6135,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void copyCourseToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
-            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) throws NotFoundException {
+            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples, int priority) throws NotFoundException {
         RaceLog fromRaceLog = getRaceLog(fromTriple);
         Set<RaceLog> toRaceLogs = new HashSet<>();
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
             toRaceLogs.add(getRaceLog(toTriple));
         }
-        getRaceLogTrackingAdapter().copyCourse(fromRaceLog, toRaceLogs, baseDomainFactory, getService());
+        getRaceLogTrackingAdapter().copyCourse(fromRaceLog, toRaceLogs, baseDomainFactory, getService(), priority);
     }
     
     @Override
@@ -6724,9 +6733,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (CompetitorDTO c : competitorDtos) {
             competitors.add(getCompetitor(c));
         }
+        MailInvitationType type = MailInvitationType
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
-                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName));
+                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
     }
     
     @Override
@@ -6735,8 +6746,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
-                emails, iOSAppUrl, androidAppUrl, getLocale(localeInfoName));
+        MailInvitationType type = MailInvitationType
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+        getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash, emails,
+                iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
     }
 
     @Override

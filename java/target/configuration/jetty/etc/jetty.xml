@@ -31,7 +31,7 @@
     <Arg name="threadpool">
       <New id="threadpool" class="org.eclipse.jetty.util.thread.QueuedThreadPool">
         <Arg name="minThreads" type="int">10</Arg>
-        <Arg name="maxThreads" type="int">64</Arg>
+        <Arg name="maxThreads" type="int">250</Arg>
         <Arg name="idleTimeout" type="int">25000</Arg>
         <Set name="detailedDump">false</Set>
       </New>

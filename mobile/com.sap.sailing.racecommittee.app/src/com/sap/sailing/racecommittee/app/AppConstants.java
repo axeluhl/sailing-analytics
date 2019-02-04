@@ -2,7 +2,7 @@ package com.sap.sailing.racecommittee.app;
 
 public class AppConstants {
 
-    //TODO replace it later with BuildConfig.APPLICATION_ID (Eclipse didn't know it)
+    // TODO replace it later with BuildConfig.APPLICATION_ID (Eclipse didn't know it)
     private final static String PACKAGE_NAME = "com.sap.sailing.racecommittee.app";
 
     // Intent extra fields
@@ -27,7 +27,8 @@ public class AppConstants {
     public final static String INTENT_ACTION_CLEANUP_RACES = INTENT_ACTION + ".cleanupRaces";
     public final static String INTENT_ACTION_ALARM_ACTION = INTENT_ACTION + ".alarmAction";
     public final static String INTENT_ACTION_RELOAD_RACES = INTENT_ACTION + ".reloadRaces";
-    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = INTENT_ACTION + ".startProcedureSpecificAction";
+    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = INTENT_ACTION
+            + ".startProcedureSpecificAction";
 
     public final static String INTENT_ACTION_POLLING_STOP = ".stopPolling";
     public final static String INTENT_ACTION_POLLING_RACE_ADD = ".addRace";

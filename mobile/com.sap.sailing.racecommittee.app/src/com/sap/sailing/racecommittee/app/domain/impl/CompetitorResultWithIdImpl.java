@@ -10,7 +10,7 @@ import com.sap.sse.common.TimePoint;
 
 public class CompetitorResultWithIdImpl extends CompetitorResultImpl {
     private static final long serialVersionUID = 4373611281142932067L;
-    
+
     private long mId;
     private Boat mBoat;
 
@@ -21,9 +21,10 @@ public class CompetitorResultWithIdImpl extends CompetitorResultImpl {
     }
 
     public CompetitorResultWithIdImpl(long id, Boat boat, Serializable competitorId, String competitorDisplayName,
-                                      int oneBasedRank, MaxPointsReason maxPointsReason, Double score,
-            TimePoint finishingTime, String comment, MergeState mergeState) {
-        super(competitorId, competitorDisplayName, oneBasedRank, maxPointsReason, score, finishingTime, comment, mergeState);
+            int oneBasedRank, MaxPointsReason maxPointsReason, Double score, TimePoint finishingTime, String comment,
+            MergeState mergeState) {
+        super(competitorId, competitorDisplayName, oneBasedRank, maxPointsReason, score, finishingTime, comment,
+                mergeState);
 
         mId = id;
         mBoat = boat;

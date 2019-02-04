@@ -1,15 +1,31 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
-
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
+import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -47,30 +63,14 @@ import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Button;
-import android.widget.Toast;
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
 
-public class LoginActivity extends BaseActivity
-        implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
+public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
+        PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
 
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
@@ -101,18 +101,18 @@ public class LoginActivity extends BaseActivity
 
             final Serializable eventId = selectEvent(event);
 
-            //FIXME: its weird to have this button setup in here
+            // FIXME: its weird to have this button setup in here
             setupSignInButton();
 
-            //prepare views after the event selection
+            // prepare views after the event selection
 
-            //close all currently open list views
+            // close all currently open list views
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
             addCourseAreaListFragment(eventId);
 
-            //send intent to open the course area selection list
+            // send intent to open the course area selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_AREA);
             BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
@@ -133,7 +133,7 @@ public class LoginActivity extends BaseActivity
                 loginListViews.closeAll();
             }
             addAreaPositionListFragment();
-            //send intent to open the position selection list
+            // send intent to open the position selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSITION);
             BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
@@ -150,7 +150,8 @@ public class LoginActivity extends BaseActivity
             sign_in.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
+                    ExLog.i(LoginActivity.this, TAG,
+                            "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
                     login();
                 }
             });
@@ -175,7 +176,7 @@ public class LoginActivity extends BaseActivity
     private Serializable selectEvent(EventBase event) {
         final Serializable eventId = event.getId();
         eventName = event.getName();
-        //TODO: explicitly set the header text of the fragment to this name
+        // TODO: explicitly set the header text of the fragment to this name
         selectEvent(eventId);
         loginListViews.getEventContainer().setHeaderText(eventName);
         return eventId;
@@ -236,7 +237,7 @@ public class LoginActivity extends BaseActivity
         resetPosition();
         updateSignInButtonState();
         if (getFragmentManager().findFragmentByTag(AreaPositionListFragmentTag) == null) {
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.position_fragment, positionFragment, AreaPositionListFragmentTag);
             transaction.commitAllowingStateLoss();
         }
@@ -245,14 +246,14 @@ public class LoginActivity extends BaseActivity
     private void addCourseAreaListFragment(Serializable eventId) {
         resetCourseArea();
         updateSignInButtonState();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.area_fragment, CourseAreaListFragment.newInstance(eventId), CourseAreaListFragmentTag);
         transaction.commitAllowingStateLoss();
     }
 
     private void addEventListFragment() {
         resetEvent();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.event_fragment, EventListFragment.newInstance());
         transaction.commitAllowingStateLoss();
     }
@@ -293,7 +294,7 @@ public class LoginActivity extends BaseActivity
 
         String action = getIntent().getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.app_name);
             if (QRHelper.with(this).saveData(getIntent().getData().toString())) {
                 builder.setMessage(getString(R.string.server_deeplink_message, preferences.getServerBaseURL()));
@@ -326,7 +327,7 @@ public class LoginActivity extends BaseActivity
 
         // setup the login list views fragment
         loginListViews = new LoginListViews();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.login_listview, loginListViews);
         transaction.commitAllowingStateLoss();
 
@@ -335,7 +336,7 @@ public class LoginActivity extends BaseActivity
         backdrop = findViewById(R.id.login_view_backdrop);
 
         if (!EulaHelper.with(this).isEulaAccepted()) {
-            EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
+            EulaHelper.with(this).showEulaDialog(null);
         }
 
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
@@ -347,13 +348,12 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onPositionSelected(LoginType type) {
 
-        //FIXME: this is some kind of exception handling
-        /*if (mSelectedCourseAreaUUID == null) {
-            String toastText = getString(R.string.selected_course_area_lost);
-            Toast.makeText(LoginActivity.this, toastText, Toast.LENGTH_LONG).show();
-            ExLog.e(LoginActivity.this, TAG, "Course area reference was not set - cannot start racing activity.");
-            return;
-        }*/
+        // FIXME: this is some kind of exception handling
+        /*
+         * if (mSelectedCourseAreaUUID == null) { String toastText = getString(R.string.selected_course_area_lost);
+         * Toast.makeText(LoginActivity.this, toastText, Toast.LENGTH_LONG).show(); ExLog.e(LoginActivity.this, TAG,
+         * "Course area reference was not set - cannot start racing activity."); return; }
+         */
 
         selectPosition(type);
         // prepare views after position selected
@@ -382,12 +382,9 @@ public class LoginActivity extends BaseActivity
 
         BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
 
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
-
-        if (!BuildConfig.DEBUG) {
-            if (resultCode != ConnectionResult.SUCCESS) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1).show();
-            }
+        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext());
+        if (!BuildConfig.DEBUG && resultCode != ConnectionResult.SUCCESS) {
+            GoogleApiAvailability.getInstance().getErrorDialog(this, resultCode, 1).show();
         }
     }
 
@@ -406,42 +403,47 @@ public class LoginActivity extends BaseActivity
     private void setupDataManager() {
         showProgressSpinner();
 
-        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
-                .getDeviceIdentifier());
+        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
+                AppPreferences.on(getApplicationContext()).getDeviceIdentifier());
 
-        LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
+        LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier,
+                new LoadClient<DeviceConfiguration>() {
 
-            @Override
-            public void onLoadFailed(Exception reason) {
-                dismissProgressSpinner();
+                    @Override
+                    public void onLoadFailed(Exception reason) {
+                        dismissProgressSpinner();
 
-                preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
-                if (reason instanceof FileNotFoundException) {
-                    Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
-                    ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
-                } else {
-                    Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
-                    ExLog.ex(LoginActivity.this, TAG, reason);
-                }
+                        preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
+                        if (reason instanceof FileNotFoundException) {
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found),
+                                    Toast.LENGTH_LONG).show();
+                            ExLog.w(LoginActivity.this, TAG, String.format(
+                                    "There seems to be no configuration for this device: %s", reason.toString()));
+                        } else {
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed),
+                                    Toast.LENGTH_LONG).show();
+                            ExLog.ex(LoginActivity.this, TAG, reason);
+                        }
 
-                slideUpBackdropDelayed();
-            }
+                        slideUpBackdropDelayed();
+                    }
 
-            @Override
-            public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                dismissProgressSpinner();
+                    @Override
+                    public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
+                        dismissProgressSpinner();
 
-                // this is our 'global' configuration, let's store it in app preferences
-                PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
+                        // this is our 'global' configuration, let's store it in app preferences
+                        PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
 
-                Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
-                slideUpBackdropDelayed();
-            }
-        });
+                        Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded),
+                                Toast.LENGTH_LONG).show();
+                        slideUpBackdropDelayed();
+                    }
+                });
 
         if (!preferences.isOfflineMode()) {
             // reload the configuration if needed...
-            getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
+            getSupportLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
             dismissProgressSpinner();
             slideUpBackdropDelayed();
@@ -494,7 +496,8 @@ public class LoginActivity extends BaseActivity
         int upperRoom = backdrop.getHeight() + (backdrop.getHeight() / 5);
         View subTitle = ViewHelper.get(backdrop, R.id.backdrop_login);
         if (subTitle != null) {
-            upperRoom = backdrop.getHeight() - subTitle.getHeight() - getResources().getDimensionPixelSize(R.dimen.default_padding_half);
+            upperRoom = backdrop.getHeight() - subTitle.getHeight()
+                    - getResources().getDimensionPixelSize(R.dimen.default_padding_half);
         }
         ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -upperRoom);
         ValueAnimator heightAnimation = ValueAnimator.ofInt(0, upperRoom);
@@ -533,7 +536,8 @@ public class LoginActivity extends BaseActivity
     /**
      * Reset the data (reload from server)
      *
-     * @param force Reload data, even if the backdrop is moved up
+     * @param force
+     *            Reload data, even if the backdrop is moved up
      */
     private void resetData(boolean force) {
         if (!force && backdrop.getY() != 0) {
@@ -544,7 +548,7 @@ public class LoginActivity extends BaseActivity
 
         addEventListFragment();
 
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.area_fragment, new Fragment());
         transaction.replace(R.id.position_fragment, new Fragment());
         transaction.commit();
@@ -580,7 +584,8 @@ public class LoginActivity extends BaseActivity
         @Override
         public void onAnimationEnd(Animator animation) {
             if (submit != null) {
-                submit.animate().alpha(1f).setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+                submit.animate().alpha(1f)
+                        .setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
             }
         }
 

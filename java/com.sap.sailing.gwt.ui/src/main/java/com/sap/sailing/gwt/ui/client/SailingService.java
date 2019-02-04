@@ -559,9 +559,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     /**
      * Adds the course definition to the racelog, while trying to reuse existing marks, controlpoints and waypoints
      * from the previous course definition in the racelog.
+     * @param priority TODO
      * @throws NotFoundException 
      */
-    void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName, List<Util.Pair<ControlPointDTO, PassingInstruction>> course) throws NotFoundException;
+    void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName, List<Util.Pair<ControlPointDTO, PassingInstruction>> course, int priority) throws NotFoundException;
 
     /**
      * Adds public tag as {@link RaceLogTagEvent} to {@link RaceLog} and private tag to
@@ -791,12 +792,13 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             Set<Triple<String, String, String>> toTriples) throws NotFoundException;
 
     /**
+     * @param priority TODO
      * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
      * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
      * @throws NotFoundException 
      */
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
-            Set<Triple<String, String, String>> toTriples) throws NotFoundException;
+            Set<Triple<String, String, String>> toTriples, int priority) throws NotFoundException;
 
     /**
      * Get the competitors registered for a certain race. This automatically checks, whether competitors are registered 
