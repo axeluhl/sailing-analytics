@@ -38,8 +38,10 @@ public class UnsentOperationsSenderJob implements OperationsToMasterSendingQueue
     private boolean scheduled;
     
     /**
-     * Something between {@link Duration#NULL} and {@link #MAX_WAIT_TIME_BETWEEN_ATTEMPTS}, indicating
-     * the time to wait before trying the next re-send.
+     * Something greater than {@link Duration#NULL} and less than or equal to {@link #MAX_WAIT_TIME_BETWEEN_ATTEMPTS},
+     * indicating the time to wait before trying the next re-send. {@link Duration#NULL} means that the next message
+     * added to the queue will be handled immediately and synchronously, and only if sending fails, a background task
+     * will be scheduled for later sending, then with a positive wait duration.
      */
     private Duration nextWaitDuration;
 
@@ -53,11 +55,28 @@ public class UnsentOperationsSenderJob implements OperationsToMasterSendingQueue
     }
 
     @Override
-    public synchronized <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
             OperationWithResult<S, T> operationWithResult,
             OperationsToMasterSender<S, O> sender) {
-        queue.addLast(new Pair<>(operationWithResult, sender));
-        ensureScheduled();
+        final boolean runSynchronously;
+        synchronized (this) {
+            queue.addLast(new Pair<>(operationWithResult, sender));
+            runSynchronously = !scheduled;
+            if (!scheduled) {
+                // try to send immediately; setting scheduled to true will cause subsequent operation
+                // submissions to be picked up by that run() call as long as they arrive before the run()
+                // method resets scheduled to false and returns.
+                scheduled = true;
+            }
+        }
+        // This way, calling the run() method happens outside of the synchronized block above, and
+        // so other threads may insert operations into the queue while the run() method is trying
+        // to send, which will then be picked up by any
+        // synchronous call to run() triggered in the next block:
+        if (runSynchronously) {
+            // In case of a send error, the run() method will itself re-schedule
+            run();
+        }
     }
 
     /**
@@ -84,7 +103,7 @@ public class UnsentOperationsSenderJob implements OperationsToMasterSendingQueue
             } else {
                 sendOk = false;
             }
-            synchronized (this) { // FIXME synchronization too coarse-grained
+            synchronized (this) {
                 if (sendOk) {
                     resetWaitDuration();
                     queue.removeFirst();

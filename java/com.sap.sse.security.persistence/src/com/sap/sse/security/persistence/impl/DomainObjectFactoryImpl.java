@@ -42,7 +42,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 Util.addToValueSet(sessionsByCacheName, cacheName, session);
             }
         });
-        expiredSessionIds.forEach(id->sessionsCollection.deleteOne(new Document(FieldNames.SESSION_ID.name(), id)));
+        final Document filter = new Document("$in", Util.map(expiredSessionIds, id->id.toString()));
+        sessionsCollection.deleteMany(new Document(FieldNames.SESSION_ID.name(), filter));
         return sessionsByCacheName;
     }
 

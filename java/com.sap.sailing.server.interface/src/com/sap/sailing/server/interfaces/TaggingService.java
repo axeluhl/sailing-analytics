@@ -176,8 +176,8 @@ public interface TaggingService {
      * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
      *         <b>never null</b>!
      * @param searchSince
-     *            tags will only be returned if they got created after this {@link Timepoint time point}. Set this value
-     *            to <code>null</code> to return all found tags independant of their creation date.
+     *            tags will only be returned if they got created after this {@link TimePoint time point}. Set this value
+     *            to <code>null</code> to return all found tags independent of their creation date.
      * @param returnRevokedTags
      *            if set to <code>true</code> only valid tags will be returned, if set to <code>false</code> revoked
      *            tags will be returned also
