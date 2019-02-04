@@ -10,6 +10,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.ReplicationStatus;
 
 @Path("/v1/status")
 public class StatusResource extends AbstractSailingServerResource {
@@ -20,10 +22,13 @@ public class StatusResource extends AbstractSailingServerResource {
         final RacingEventService service = getService();
         result.put("numberofracestorestore", service.getNumberOfTrackedRacesToRestore());
         result.put("numberofracesrestored", service.getNumberOfTrackedRacesRestored());
-        result.put("isreplica", service.getMasterDescriptor() != null);
-        result.put("initialloadrunning", service.isCurrentlyFillingFromInitialLoad());
+        final ReplicationService replicationService = getReplicationService();
+        final ReplicationStatus replicationStatus = replicationService == null ? null : replicationService.getStatus();
+        if (replicationStatus != null) {
+            result.put("replication", replicationStatus.toJSONObject());
+        }
         result.put("available", service.getNumberOfTrackedRacesRestored() >= service.getNumberOfTrackedRacesToRestore() &&
-                (service.getMasterDescriptor() == null || !service.isCurrentlyFillingFromInitialLoad()));
+                (replicationStatus == null || replicationStatus.isAvailable()));
         return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 }
