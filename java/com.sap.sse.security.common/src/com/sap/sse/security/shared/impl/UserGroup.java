@@ -22,4 +22,12 @@ public interface UserGroup extends SecurityUserGroup<RoleDefinition>, WithQualif
 
     void remove(RoleDefinition roleDefinition);
 
+    boolean isRoleAssociated(RoleDefinition roleDefinition);
+
+    /**
+     * Returns {@code true}/{@code false} if the given RoleDefinition is associated to this UserGroup, {@code null}
+     * otherwise.
+     */
+    Boolean getRoleAssociation(RoleDefinition roleDefinition);
+
 }

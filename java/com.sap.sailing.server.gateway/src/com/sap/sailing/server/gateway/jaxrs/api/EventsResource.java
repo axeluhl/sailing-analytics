@@ -95,12 +95,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
-import com.sap.sse.security.shared.impl.Role;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
@@ -485,7 +480,6 @@ public class EventsResource extends AbstractSailingServerResource {
             }
         };
         
-        
         try {
             if (competitorRegistrationType == CompetitorRegistrationType.OPEN_UNMODERATED) {
                 UUID newTenantId = UUID.randomUUID();
@@ -495,15 +489,7 @@ public class EventsResource extends AbstractSailingServerResource {
                         getSecurityService().getDefaultTenantForCurrentUser());
                 RoleDefinition roleDef = getSecurityService()
                         .getRoleDefinition(SailingViewerRole.getInstance().getId());
-                Role groupViewer = new Role(roleDef, ownerGroup, null);
-                getSecurityService().addRoleForUser(getSecurityService().getAllUser(), groupViewer);
-                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(groupViewer,
-                        getSecurityService().getAllUser());
-                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
-                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                User currentUser = getSecurityService().getCurrentUser();
-                UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
-                getSecurityService().setOwnership(qualifiedTypeIdentifier, currentUser, tenant);
+                getSecurityService().putRoleDefinitionToUserGroup(ownerGroup, roleDef, true);
 
                 getSecurityService().addUserToUserGroup(ownerGroup, getCurrentUser());
                 return getSecurityService().doWithTemporaryDefaultTenant(ownerGroup, doCreationAction);

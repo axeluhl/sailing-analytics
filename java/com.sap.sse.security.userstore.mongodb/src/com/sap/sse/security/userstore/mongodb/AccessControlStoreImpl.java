@@ -54,6 +54,16 @@ public class AccessControlStoreImpl implements AccessControlStore {
      */
     private final transient MongoObjectFactory mongoObjectFactory;
 
+    /**
+     * Won't be serialized and remains <code>null</code> on the de-serializing end.
+     */
+    private final transient DomainObjectFactory domainObjectFactory;
+
+    /**
+     * Won't be serialized and remains <code>null</code> on the de-serializing end.
+     */
+    private final transient UserStore userStore;
+
     public AccessControlStoreImpl(UserStore userStore) {
         this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
@@ -69,6 +79,12 @@ public class AccessControlStoreImpl implements AccessControlStore {
         lockForManagementMappings = new NamedReentrantReadWriteLock("ownershipLock", true);
 
         this.mongoObjectFactory = mongoObjectFactory;
+        this.domainObjectFactory = domainObjectFactory;
+        this.userStore = userStore;
+    }
+    
+    @Override
+    public void loadACLsAndOwnerships() {
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
 
             @Override
@@ -83,7 +99,6 @@ public class AccessControlStoreImpl implements AccessControlStore {
                 }
             }
         });
-
     }
 
     private void internalAddACL(AccessControlListAnnotation acl) {

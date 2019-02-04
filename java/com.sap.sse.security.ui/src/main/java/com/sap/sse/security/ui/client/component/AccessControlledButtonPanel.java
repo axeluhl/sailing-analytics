@@ -11,6 +11,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -116,6 +117,13 @@ public class AccessControlledButtonPanel extends Composite {
      */
     public void updateVisibility() {
         buttonToPermissions.forEach(visibilityUpdater);
+    }
+
+    /**
+     * Inserts a widget (e.g. a text box) into the button bar at a give index
+     */
+    public void insertWidgetAtPosition(Widget widget, int index) {
+        this.panel.insert(widget, index);
     }
 
 }

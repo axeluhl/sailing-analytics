@@ -26,8 +26,11 @@ import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
@@ -43,10 +46,19 @@ public class LocalServerManagementPanel extends SimplePanel {
     private CheckBox isStandaloneServerCheckbox, isPublicServerCheckbox, isSelfServiceServerCheckbox;
 
     private ServerInfoDTO currentServerInfo;
+    private final UserService userService;
+    
+    private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
+        @Override
+        public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+            updateServerInfo(userService.getServerInfo());
+        }
+    };
 
     public LocalServerManagementPanel(final SailingServiceAsync sailingService, final UserService userService,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
+        this.userService = userService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
 
@@ -58,13 +70,24 @@ public class LocalServerManagementPanel extends SimplePanel {
         mainPanel.add(createServerInfoUI());
         mainPanel.add(createServerConfigurationUI());
 
-        refreshServerInfo();
         refreshServerConfiguration();
+    }
+    
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        userService.addUserStatusEventHandler(userStatusEventHandler, true);
+    }
+    
+    @Override
+    protected void onUnload() {
+        super.onUnload();
+        userService.removeUserStatusEventHandler(userStatusEventHandler);
     }
     
     private AccessControlledButtonPanel createServerActionsUi(final UserService userService) {
         final HasPermissions type = SecuredSecurityTypes.SERVER;
-        final Consumer<ServerInfoDTO> updateCallback = event -> refreshServerInfo();
+        final Consumer<ServerInfoDTO> updateCallback = event -> userService.updateUser(false);
         final EditOwnershipDialog.DialogConfig<ServerInfoDTO> configOwner = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, updateCallback, stringMessages);
         final EditACLDialog.DialogConfig<ServerInfoDTO> configACL = EditACLDialog
@@ -101,7 +124,6 @@ public class LocalServerManagementPanel extends SimplePanel {
 
     private void serverConfigurationChanged() {
         final Boolean publicServer = isPublicServerCheckbox.isEnabled() ? isPublicServerCheckbox.getValue() : null;
-        // FIXME self service not yet supported
         final Boolean selfServiceServer = isSelfServiceServerCheckbox.isEnabled()
                 ? isSelfServiceServerCheckbox.getValue()
                 : null;
@@ -124,44 +146,33 @@ public class LocalServerManagementPanel extends SimplePanel {
         });
     }
 
-    private void refreshServerInfo() {
-        sailingService.getServerInfo(new RefreshAsyncCallback<>(serverInfo -> {
-            LocalServerManagementPanel.this.currentServerInfo = serverInfo;
-            LocalServerManagementPanel.this.updateServerInfo(serverInfo);
-            LocalServerManagementPanel.this.buttonPanel.updateVisibility();
-        }));
-    }
-
     private void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
     }
     
-    private void updateServerInfo(ServerInfoDTO result) {
-        serverNameInfo.setText(result.getName());
-        buildVersionInfo.setText(result.getBuildVersion() != null ? result.getBuildVersion() : "Unknown");
-        final OwnershipDTO ownership = result.getOwnership();
+    private void updateServerInfo(ServerInfoDTO serverInfo) {
+        LocalServerManagementPanel.this.currentServerInfo = serverInfo;
+        LocalServerManagementPanel.this.buttonPanel.updateVisibility();
+        serverNameInfo.setText(serverInfo.getName());
+        buildVersionInfo.setText(serverInfo.getBuildVersion() != null ? serverInfo.getBuildVersion() : "Unknown");
+        final OwnershipDTO ownership = serverInfo.getOwnership();
         final boolean hasGroupOwner = ownership != null && ownership.getTenantOwner() != null;
         final boolean hasUserOwner = ownership != null && ownership.getUserOwner() != null;
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
         userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
+        
+        // Update changeability
+        isSelfServiceServerCheckbox.setEnabled(userService.hasCurrentUserMetaPermission(serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT), serverInfo.getOwnership()));
+        // TODO update isPublicServerCheckbox -> default server tenant is currently not available in the UI
+        isPublicServerCheckbox.setEnabled(true);
     }
     
     private void updateServerConfiguration(ServerConfigurationDTO result) {
         isStandaloneServerCheckbox.setValue(result.isStandaloneServer(), false);
         isStandaloneServerCheckbox.setEnabled(true);
-        if (result.isPublic() != null) {
-            isPublicServerCheckbox.setEnabled(true);
-            isPublicServerCheckbox.setValue(result.isPublic(), false);
-        } else {
-            isPublicServerCheckbox.setEnabled(false);
-        }
-        if (result.isSelfService() != null) {
-            // isSelfServiceServerCheckbox.setEnabled(true);
-            isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
-        } else {
-            isSelfServiceServerCheckbox.setEnabled(false);
-        }
-
+        
+        isPublicServerCheckbox.setValue(result.isPublic(), false);
+        isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
     }
 
     private class RefreshAsyncCallback<T> implements AsyncCallback<T> {

@@ -1,7 +1,8 @@
 package com.sap.sse.security.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 
 public class SuccessInfo implements IsSerializable {
@@ -12,12 +13,12 @@ public class SuccessInfo implements IsSerializable {
     
     private boolean successful;
     private String message;
-    private Pair<UserDTO, UserDTO> userDTO;
+    private Triple<UserDTO, UserDTO, ServerInfoDTO> userDTO;
     private String redirectURL;
     
     SuccessInfo() {} // for serializtion only
     
-    public SuccessInfo(boolean successful, String message, String redirectURL, Pair<UserDTO, UserDTO> userDTO) {
+    public SuccessInfo(boolean successful, String message, String redirectURL, Triple<UserDTO, UserDTO, ServerInfoDTO> userDTO) {
         super();
         this.successful = successful;
         this.message = message;
@@ -33,7 +34,7 @@ public class SuccessInfo implements IsSerializable {
         return message;
     }
 
-    public Pair<UserDTO, UserDTO> getUserDTO() {
+    public Triple<UserDTO, UserDTO, ServerInfoDTO> getUserDTO() {
         return userDTO;
     }
 

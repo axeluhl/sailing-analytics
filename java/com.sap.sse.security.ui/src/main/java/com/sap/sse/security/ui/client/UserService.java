@@ -12,12 +12,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.StorageEvent;
 import com.sap.sse.gwt.client.StorageEvent.Handler;
@@ -28,10 +29,12 @@ import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -89,6 +92,8 @@ public class UserService {
 
     private UserDTO anonymousUser;
     
+    private ServerInfoDTO serverInfo;
+    
     private final Set<HasPermissions> allKnownHasPermissions;
 
     public UserService(UserManagementServiceAsync userManagementService) {
@@ -139,9 +144,9 @@ public class UserService {
      */
     public void updateUser(final boolean notifyOtherInstances) {
         userManagementService.getCurrentUser(
-                new MarkedAsyncCallback<Pair<UserDTO, UserDTO>>(new AsyncCallback<Pair<UserDTO, UserDTO>>() {
+                new MarkedAsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>(new AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>() {
             @Override
-                    public void onSuccess(Pair<UserDTO, UserDTO> result) {
+                    public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
                 setCurrentUser(result, notifyOtherInstances);
             }
 
@@ -179,14 +184,14 @@ public class UserService {
         final String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
         logger.info("Verifying " + authProviderName + " user ...");
         userManagementService.verifySocialUser(ClientUtils.getCredential(),
-                new MarkedAsyncCallback<Pair<UserDTO, UserDTO>>(new AsyncCallback<Pair<UserDTO, UserDTO>>() {
+                new MarkedAsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>(new AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure(caught);
             }
 
             @Override
-                    public void onSuccess(Pair<UserDTO, UserDTO> result) {
+                    public void onSuccess(Triple<UserDTO, UserDTO, ServerInfoDTO> result) {
                 setCurrentUser(result, /* notifyOtherInstances */ true);
                         logger.info(authProviderName + " user '" + result.getA().getName() + "' is verified!\n");
                         callback.onSuccess(result.getA());
@@ -219,7 +224,7 @@ public class UserService {
         return currentUser;
     }
 
-    private void setCurrentUser(Pair<UserDTO, UserDTO> resultAndAnomynous, final boolean notifyOtherInstances) {
+    private void setCurrentUser(Triple<UserDTO, UserDTO, ServerInfoDTO> resultAndAnomynous, final boolean notifyOtherInstances) {
         if (resultAndAnomynous.getA() == null) {
             currentUser = null;
         } else {
@@ -228,6 +233,7 @@ public class UserService {
             currentUser = resultAndAnomynous.getA();
         }
         anonymousUser = resultAndAnomynous.getB();
+        serverInfo = resultAndAnomynous.getC();
 
         preAuthenticated = (!userInitiallyLoaded && currentUser != null);
         userInitiallyLoaded = true;
@@ -436,15 +442,29 @@ public class UserService {
         return PermissionChecker.checkMetaPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
     }
-    
+
+    public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+            final RoleDefinitionDTO roleDefinition, final OwnershipDTO qualificationForGrantedPermissions) {
+        boolean result = true;
+        for (WildcardPermission permissionToCheck : roleDefinition.getPermissions()) {
+            if (!hasCurrentUserMetaPermission(permissionToCheck, qualificationForGrantedPermissions)) {
+                result = false;
+                break;
+            }
+        }
+        return result;
+    }
+
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
         return PermissionChecker.hasUserAnyPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
     }
     
     public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
-        // TODO: Additional check required
-        // return hasPermission(SecuredSecurityTypes.SERVER.getPermissionForObjects(ServerActions.CREATE_OBJECT, oid));
+        if (serverInfo != null
+                && !hasPermission(serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT))) {
+            return false;
+        }
         final WildcardPermission createPermission = type.getPermission(DefaultActions.CREATE);
         final OwnershipDTO ownershipOfNewlyCreatedObject = new OwnershipDTO(currentUser == null ? null : currentUser.asStrippedUser(), getCurrentTenant());
         return this.hasCurrentUserAnyPermission(createPermission, ownershipOfNewlyCreatedObject);
@@ -453,5 +473,9 @@ public class UserService {
     public boolean hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions type) {
         final WildcardPermission createPermission = type.getPermission(DefaultActions.DELETE);
         return this.hasCurrentUserAnyPermission(createPermission, null);
+    }
+    
+    public ServerInfoDTO getServerInfo() {
+        return serverInfo;
     }
 }

@@ -145,7 +145,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Document dbRoleDef = new Document();
             dbRoleDef.put(FieldNames.UserGroup.ROLE_DEFINITION_MAP_ROLE_ID.name(), entry.getKey().getId());
             dbRoleDef.put(FieldNames.UserGroup.ROLE_DEFINITION_MAP_FOR_ALL.name(), entry.getValue());
-            dbRoleDefinitionMap.add(dbRoleDefinitionMap);
+            dbRoleDefinitionMap.add(dbRoleDef);
         }
         dbUserGroup.put(FieldNames.UserGroup.ROLE_DEFINITION_MAP.name(), dbRoleDefinitionMap);
 

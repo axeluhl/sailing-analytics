@@ -1394,6 +1394,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     } else {
                         startTime = trackedRace.getStartOfRace();
                     }
+
                     for (Competitor competitor : competitors) {
                         if (getSecurityService().hasCurrentUserExplictPermissions(competitor,
                                 SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC)) {
@@ -1403,6 +1404,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             }
                         }
                     }
+
                     ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(
                             new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
                     JSONObject jsonMarkPassings = serializer.serialize(data);

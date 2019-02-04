@@ -444,4 +444,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * default ones)
      */
     void initialize();
+
+    boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(RoleDefinition roleDefinition,
+            Ownership qualificationForGrantedPermissions);
 }

@@ -310,6 +310,9 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup> 
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("UserImpl [");
+        builder.append("getName()=");
+        builder.append(getName());
+        builder.append(", ");
         if (defaultTenantForServer != null) {
             builder.append("defaultTenantForServer=[");
             for (Entry<String, UserGroup> entry : defaultTenantForServer.entrySet()) {

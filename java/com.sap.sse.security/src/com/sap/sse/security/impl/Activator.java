@@ -13,6 +13,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.sap.sse.ServerInfo;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.AccessControlStore;
@@ -179,12 +180,14 @@ public class Activator implements BundleActivator {
                     userStore.ensureDefaultRolesExist();
                     // actually load the users and migrate them if required
                     userStore.loadAndMigrateUsers();
+                    // loading ACLs and Ownerships requires users and UserGroups to be correctly loaded
+                    accessControlStore.loadACLsAndOwnerships();
                     // create security service, it will also create a default admin user if no users exist
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
                     // check if we already have an ownership for the server, create if it is missing
                     QualifiedObjectIdentifier expectedServerOwner = SecuredSecurityTypes.SERVER
                             .getQualifiedObjectIdentifier(
-                                    new TypeRelativeObjectIdentifier(userStore.getDefaultTenant().getName()));
+                                    new TypeRelativeObjectIdentifier(ServerInfo.getName()));
                     securityService.setOwnershipIfNotSet(expectedServerOwner, null, userStore.getDefaultTenant());
                 } catch (InterruptedException | UserGroupManagementException | UserManagementException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);

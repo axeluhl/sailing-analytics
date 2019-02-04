@@ -27,10 +27,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.Credential;
@@ -110,6 +111,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         final User allUser = getSecurityService().getAllUser();
         return allUser == null ? null
                 : securityDTOFactory.createUserDTOFromUser(allUser, getSecurityService());
+    }
+    
+    private ServerInfoDTO getServerInfo() {
+        ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, result.getIdentifier());
+        return result;
     }
 
     @Override
@@ -385,7 +392,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.UPDATE, userGroup))) {
             final RoleDefinition roleDefinition = getSecurityService()
                     .getRoleDefinition(UUID.fromString(roleDefinitionIdAsString));
-            getSecurityService().putRoleDefinitionToUserGroup(userGroup, roleDefinition, forAll);
+            if (roleDefinition != null) {
+                if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(roleDefinition,
+                        new Ownership(null, userGroup))) {
+                    throw new UnauthorizedException("Not permitted to add role definition to group");
+                }
+                getSecurityService().putRoleDefinitionToUserGroup(userGroup, roleDefinition, forAll);
+            }
         } else {
             throw new UnauthorizedException("Not permitted to add role definition to group");
         }
@@ -399,7 +412,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.DELETE, userGroup))) {
             final RoleDefinition roleDefinition = getSecurityService()
                     .getRoleDefinition(UUID.fromString(roleDefinitionIdAsString));
-            getSecurityService().removeRoleDefintionFromUserGroup(userGroup, roleDefinition);
+            if (roleDefinition != null) {
+                if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(roleDefinition,
+                        new Ownership(null, userGroup))) {
+                    throw new UnauthorizedException("Not permitted to remove role definition from group");
+                }
+                getSecurityService().removeRoleDefintionFromUserGroup(userGroup, roleDefinition);
+            }
         } else {
             throw new UnauthorizedException("Not permitted to remove role definition from group");
         }
@@ -418,15 +437,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public Pair<UserDTO, UserDTO> getCurrentUser() throws UnauthorizedException {
+    public Triple<UserDTO, UserDTO, ServerInfoDTO> getCurrentUser() throws UnauthorizedException {
         logger.fine("Request: " + getThreadLocalRequest().getRequestURL());
         User user = getSecurityService().getCurrentUser();
         if (user == null) {
-            return new Pair<UserDTO, UserDTO>(null, getAllUser());
+            return new Triple<>(null, getAllUser(), getServerInfo());
         }
         getSecurityService().checkCurrentUserReadPermission(user);
-        return new Pair<UserDTO, UserDTO>(securityDTOFactory.createUserDTOFromUser(user, getSecurityService()),
-                getAllUser());
+        return new Triple<>(securityDTOFactory.createUserDTOFromUser(user, getSecurityService()),
+                getAllUser(), getServerInfo());
     }
 
     @Override
@@ -436,7 +455,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             UserDTO user = securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username),
                     getSecurityService());
             return new SuccessInfo(true, "Success. Redirecting to " + redirectURL, redirectURL,
-                    new Pair<UserDTO, UserDTO>(user, getAllUser()));
+                    new Triple<>(user, getAllUser(), getServerInfo()));
         } catch (UserManagementException | AuthenticationException e) {
             return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
         }
@@ -604,13 +623,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     /* redirectURL */null, null);
         }
         for (Role roleToAdd : rolesToAdd) {
-            for (WildcardPermission permissionOfRoleToAdd : roleToAdd.getPermissions()) {
-                if (!getSecurityService().hasCurrentUserMetaPermission(permissionOfRoleToAdd,
-                        roleToAdd.getQualificationAsOwnership())) {
-                    return new SuccessInfo(false,
-                            "Not permitted to grant role " + roleToAdd.getName() + " for user " + username,
-                            /* redirectURL */null, null);
-                }
+            if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                    roleToAdd.getRoleDefinition(), roleToAdd.getQualificationAsOwnership())) {
+                return new SuccessInfo(false,
+                        "Not permitted to grant role " + roleToAdd.getName() + " for user " + username,
+                        /* redirectURL */null, null);
             }
         }
         for (Role roleToRemove : roleDefinitionsToRemove) {
@@ -642,7 +659,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 + username;
         logger.info(message);
         final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
-        return new SuccessInfo(true, message, /* redirectURL */null, new Pair<UserDTO, UserDTO>(userDTO, getAllUser()));
+        return new SuccessInfo(true, message, /* redirectURL */null, new Triple<>(userDTO, getAllUser(), getServerInfo()));
     }
     
     private Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername) throws UserManagementException {
@@ -728,7 +745,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             final String message = "Set roles " + permissions + " for user " + username;
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
             return new SuccessInfo(true, message, /* redirectURL */null,
-                    new Pair<UserDTO, UserDTO>(userDTO, getAllUser()));
+                    new Triple<>(userDTO, getAllUser(), getServerInfo()));
         }
     }
 
@@ -817,7 +834,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public Pair<UserDTO, UserDTO> verifySocialUser(CredentialDTO credentialDTO) {
+    public Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credentialDTO) {
         User user = null;
         try {
             user = getSecurityService().verifySocialUser(createCredentialFromDTO(credentialDTO));
@@ -825,7 +842,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             e.printStackTrace();
         }
         final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
-        return new Pair<UserDTO, UserDTO>(userDTO, getAllUser());
+        return new Triple<>(userDTO, getAllUser(), getServerInfo());
     }
 
     private HttpSession getHttpSession() {

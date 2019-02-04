@@ -12,6 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.apache.shiro.authz.AuthorizationException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -19,6 +20,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
@@ -101,11 +103,15 @@ public class UserGroupsResource extends AbstractSailingServerResource {
             @QueryParam("forAll") Boolean forAll) throws ParseException, JsonDeserializationException {
         Response response = null;
         UserGroup userGroup = getService().getSecurityService().getUserGroup(userGroupId);
-        RoleDefinition roleDefinitions = getSecurityService().getRoleDefinition(roleId);
-        if (userGroup != null && roleDefinitions != null) {
+        RoleDefinition roleDefinition = getSecurityService().getRoleDefinition(roleId);
+        if (userGroup != null && roleDefinition != null) {
             getSecurityService().checkCurrentUserUpdatePermission(userGroup);
-            getSecurityService().checkCurrentUserReadPermission(roleDefinitions);
-            getSecurityService().putRoleDefinitionToUserGroup(userGroup, roleDefinitions, forAll);
+            getSecurityService().checkCurrentUserReadPermission(roleDefinition);
+            if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(roleDefinition,
+                    new Ownership(null, userGroup))) {
+                throw new AuthorizationException("Not permitted to add role definition to group");
+            }
+            getSecurityService().putRoleDefinitionToUserGroup(userGroup, roleDefinition, forAll);
             response = Response.ok().build();
         } else {
             response = Response.status(401).build();
