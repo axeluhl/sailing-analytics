@@ -9,6 +9,7 @@ if [ -z "$1" ]; then
   echo " -d DATABASE	the name of the database to use; mandatory, if no URI is specified"
   echo " -h HOST	the host to use, default $HOST"
   echo " -r REPLICA_SET	the name of the replica set; no default, assuming connecting to PRIMARY"
+  echo " -a		show all hashes of all collections in the database specified, not just the DB hash"
   echo
   echo "Prints the dbHash(...) output to stdout and the URI used to stderr."
   echo "Example: $0 \"mongodb://localhost:10203/49er?replicaSet=live\""
@@ -20,10 +21,11 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-options='p:d:h:r:'
+options='p:d:h:r:a'
 while getopts $options option
 do
     case $option in
+	a) ALL=1;;
 	p) PORT=$OPTARG;;
 	d) DB=$OPTARG;;
 	h) HOST=$OPTARG;;
@@ -45,4 +47,8 @@ if [ -z "$URI" ]; then
   fi
 fi
 echo "URI: $URI" >&2
-echo "db.runCommand({dbHash: 1})" | mongo --quiet  "$URI" | grep -v "^$(date +%Y-%m-%d)" | grep md5 | sed -e 's/^.*"md5" : "\(.*\)".*$/\1/'
+if [ -z $ALL ]; then
+  echo "db.runCommand({dbHash: 1})" | mongo --quiet  "$URI" | grep -v "^$(date +%Y-%m-%d)" | grep md5 | sed -e 's/^.*"md5" : "\(.*\)".*$/\1/'
+else 
+  echo "db.runCommand({dbHash: 1})" | mongo --quiet  "$URI" | grep -v "^$(date +%Y-%m-%d)"
+fi

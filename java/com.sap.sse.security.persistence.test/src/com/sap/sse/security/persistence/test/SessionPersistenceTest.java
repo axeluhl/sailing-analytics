@@ -44,12 +44,12 @@ public class SessionPersistenceTest {
         final String attr1Value = "a1Value";
         final String attr2Key = "a2";
         final boolean attr2Value = true;
-        final String realm1Name = "realm1";
-        final String realm1Principal1Name = "r1p1";
-        final String realm1Principal2Name = "r1p2";
-        final String realm2Name = "realm2";
-        final String realm2Principal1Name = "r2p1";
-        final String realm2Principal2Name = "r2p2";
+        final String realm1Name = "rea lm1 ..,;";
+        final String realm1Principal1Name = "r1.p1";
+        final String realm1Principal2Name = "r1/\",,p2";
+        final String realm2Name = "realm2,.\\\"'";
+        final String realm2Principal1Name = "r2\\p1";
+        final String realm2Principal2Name = "r2.'_p2";
         final String principalAttribute = "org.apache.shiro.subject.support.DefaultSubjectContext_PRINCIPALS_SESSION_KEY";
         final SimplePrincipalCollection principalCollection = new SimplePrincipalCollection();
         principalCollection.add(realm1Principal1Name, realm1Name);

@@ -121,4 +121,10 @@ public interface ReplicationService {
      *         
      */
     boolean isReplicationStarting();
+    
+    /**
+     * Provides a compound overview of this service and the {@link Replicable}s it manages.
+     * This can be used in compound server availability checks, for example.
+     */
+    ReplicationStatus getStatus();
 }
