@@ -604,6 +604,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -4924,36 +4925,48 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
         final User allUser = getSecurityService().getAllUser();
         if (allUser != null) {
+            final TypeRelativeObjectIdentifier typeRelativeServerObjectIdentifier = new TypeRelativeObjectIdentifier(ServerInfo.getName());
+            final QualifiedObjectIdentifier qualifiedServerObjectIdentifier = SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(typeRelativeServerObjectIdentifier);
             final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
-                    .getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName()));
+                    .getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT, typeRelativeServerObjectIdentifier);
             boolean isCurrentlyPublic = Util.contains(allUser.getPermissions(), createObjectOnCurrentServerPermission);
-            if (!isCurrentlyPublic && Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
-                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
-                        .get(createObjectOnCurrentServerPermission, allUser);
-                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
-                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                if (serverConfiguration.isSelfService()) {
-                    getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                            SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
-                            associationTypeIdentifier.toString(), new Action() {
-                                @Override
-                                public void run() throws Exception {
-                                    getSecurityService().addPermissionForUser(allUser.getName(),
-                                            createObjectOnCurrentServerPermission);
-                                }
-                            });
-            }
-            if (isCurrentlyPublic && !Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
-                    getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
-                            new ActionWithResult<Void>() {
-
-                                @Override
-                                public Void run() throws Exception {
-                                    getSecurityService().removePermissionFromUser(allUser.getName(),
-                                            createObjectOnCurrentServerPermission);
-                                    return null;
-                                }
-                            });
+            boolean shouldBePublic = Boolean.TRUE.equals(serverConfiguration.isSelfService());
+            if (isCurrentlyPublic != shouldBePublic) {
+                OwnershipAnnotation serverOwnership = getSecurityService().getOwnership(qualifiedServerObjectIdentifier);
+                boolean userHasPermissionToChangeServerSelfService = getSecurityService().hasCurrentUserMetaPermission(
+                        createObjectOnCurrentServerPermission,
+                        serverOwnership == null ? null : serverOwnership.getAnnotation());
+                if (!userHasPermissionToChangeServerSelfService) {
+                    throw new AuthorizationException("No permission to make the server self service");
+                }
+                if (!isCurrentlyPublic && Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
+                    TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
+                            .get(createObjectOnCurrentServerPermission, allUser);
+                    QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                            .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                    if (serverConfiguration.isSelfService()) {
+                        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                                SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
+                                associationTypeIdentifier.toString(), new Action() {
+                                    @Override
+                                    public void run() throws Exception {
+                                        getSecurityService().addPermissionForUser(allUser.getName(),
+                                                createObjectOnCurrentServerPermission);
+                                    }
+                                });
+                    }
+                    if (isCurrentlyPublic && !Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
+                        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                                new ActionWithResult<Void>() {
+                            
+                            @Override
+                            public Void run() throws Exception {
+                                getSecurityService().removePermissionFromUser(allUser.getName(),
+                                        createObjectOnCurrentServerPermission);
+                                return null;
+                            }
+                        });
+                    }
                 }
             }
         } else {
