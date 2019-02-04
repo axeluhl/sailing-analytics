@@ -35,11 +35,6 @@ public class MultiColorPolyline {
         
         clickMapHandler = new LinkedList<ClickMapHandler>();
         mouseOverMapHandler = new LinkedList<MouseOverMapHandler>();
-        log("Constructor");
-    }
-    
-    private void log(String msg) {
-        GWT.log(this.hashCode() + " " + msg);
     }
     
     public MultiColorPolylineColorMode getColorMode() {
@@ -97,14 +92,6 @@ public class MultiColorPolyline {
             break;
         }
     }
-    /*public void setPath(List<GPSFixDTO> path) {
-        polylines.clear();
-        fixes = path; //TODO Force specific impl?
-        //polylines.ensureCapacity(fixes.size() - 1);
-        for (int i = 0; i < fixes.size() - 2; i++) {
-            polylines.add(createPolyline(i));
-        }
-    }*/
     
     public void insertAt(int index, LatLng position) {
         switch (colorMode) {
@@ -146,24 +133,6 @@ public class MultiColorPolyline {
             break;
         }
     }
-    /*public void insertAt(int index, GPSFixDTO fix) {
-        fixes.add(index, fix);
-        // Split what was until now a single Polyline into two that incorporate the new fix
-        if (fixes.size() >= 2) {
-            // Polylines can only be created between two fixes
-            if (index == 0) {
-                // We only need to prepend a single Polyline
-                polylines.add(0, createPolyline(0));
-            } else if (index == fixes.size() - 1) {
-                // We only need to append a single Polyline
-                polylines.add(createPolyline(index - 1));
-            } else {
-                // We need to split an existing Polyline into two
-                polylines.get(index - 1).getPath().setAt(1, coordinateSystem.toLatLng(fix.position));
-                polylines.add(index, createPolyline(index));
-            }
-        }
-    }*/
     
     public LatLng removeAt(int index) {
         switch (colorMode) {
@@ -194,23 +163,6 @@ public class MultiColorPolyline {
         }
         return null;
     }
-    /*public GPSFixDTO removeAt(int index) {
-        GPSFixDTO fix = fixes.remove(index);
-        // The two Polylines meeting in fix need to be combined
-        if (index == 0) {
-            // Remove the Polyline connecting the first to the second fix
-            polylines.remove(0);
-        } else if (index == fixes.size()) { // The last fix has already been removed
-            // Remove the Polyline connecting the last two fixes
-            polylines.remove(index - 1);
-        } else {
-            // Remove the Polyline starting from fix
-            polylines.remove(index);
-            // and update the preceding Polyline to end at what is now fixes.get(index)
-            polylines.get(index - 1).getPath().setAt(1, coordinateSystem.toLatLng(fixes.get(index).position));
-        }
-        return fix;
-    }*/
     
     public void setAt(int index, LatLng position) {
         switch (colorMode) {
@@ -228,17 +180,6 @@ public class MultiColorPolyline {
             }
         }
     }
-    /*public void setAt(int index, GPSFixDTO fix) {
-        fixes.set(index, fix);
-        if (index == 0) {
-            polylines.get(index).getPath().setAt(0, coordinateSystem.toLatLng(fix.position));
-        } else if (index == fixes.size() - 1) {
-            polylines.get(index - 1).getPath().setAt(1, coordinateSystem.toLatLng(fix.position));
-        } else {
-            polylines.get(index - 1).getPath().setAt(1, coordinateSystem.toLatLng(fix.position));
-            polylines.get(index).getPath().setAt(0, coordinateSystem.toLatLng(fix.position));
-        }
-    }*/
     
     public void setMap(MapWidget map) {
         this.map = map;
@@ -262,7 +203,6 @@ public class MultiColorPolyline {
             case 1:
                 return polylines.get(0).getPath().getLength();
             default:
-                log(Integer.toString(1 + polylines.size()));
                 return 1 + polylines.size();
             }
         }
