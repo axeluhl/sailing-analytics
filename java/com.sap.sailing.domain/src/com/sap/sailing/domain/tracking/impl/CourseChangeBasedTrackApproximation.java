@@ -78,8 +78,9 @@ public class CourseChangeBasedTrackApproximation {
                     result = getManeuverCandidate(window, courseChangeInDegreesForFixesInWindow, totalCourseChangeInWindowInDegrees);
                     if (result != null) {
                         // TODO a fix with significant course change was found in the window; reset
+                    } else {
+                        removeFirst();
                     }
-                    removeFirst();
                 } else {
                     result = null;
                 }
