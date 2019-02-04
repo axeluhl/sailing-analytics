@@ -112,8 +112,8 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
                                 @Override
                                 public void onSuccess(Void result) {
                                     selectedObject.put(role, false);
-                                    roleDefinitionTableWrapper.refreshRoleList();
                                     suggestRole.setValue("");
+                                    updateUserGroups();
                                 }
                             });
                 }
@@ -154,6 +154,7 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
 
     /** Updates the UserGroups. */
     public void updateUserGroups() {
+        updateOracle();
         roleDefinitionTableWrapper.refreshRoleList();
     }
 
