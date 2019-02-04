@@ -34,6 +34,7 @@ import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -460,8 +461,10 @@ public class UserService {
     }
     
     public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
-        // TODO: Additional check required
-        // return hasPermission(SecuredSecurityTypes.SERVER.getPermissionForObjects(ServerActions.CREATE_OBJECT, oid));
+        if (serverInfo != null
+                && !hasPermission(serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT))) {
+            return false;
+        }
         final WildcardPermission createPermission = type.getPermission(DefaultActions.CREATE);
         final OwnershipDTO ownershipOfNewlyCreatedObject = new OwnershipDTO(currentUser == null ? null : currentUser.asStrippedUser(), getCurrentTenant());
         return this.hasCurrentUserAnyPermission(createPermission, ownershipOfNewlyCreatedObject);
