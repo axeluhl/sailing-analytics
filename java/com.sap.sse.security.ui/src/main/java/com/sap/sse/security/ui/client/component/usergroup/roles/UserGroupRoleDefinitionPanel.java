@@ -81,7 +81,6 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
     private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages,
             final UserManagementServiceAsync userManagementService) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
-        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> updateUserGroups());
         buttonPanel.addCreateAction(stringMessages.addRole(), () -> {
             final UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
             if (selectedObject != null) {
@@ -99,8 +98,10 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
 
                                 @Override
                                 public void onSuccess(Void result) {
+                                    selectedObject.put(new StrippedRoleDefinitionDTO(role.getId(), role.getName(),
+                                            role.getPermissions()), false);
                                     roleDefinitionTableWrapper.refreshRoleList();
-                                    // TODO maybe add role to list + refresh without backend call
+                                    suggestRole.setValue("");
                                 }
                             });
                 }
@@ -112,20 +113,25 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
             if (selectedRole == null) {
                 Window.alert(stringMessages.youHaveToSelectAUserGroup());
             } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(selectedRole.getA().getName()))) {
-                userManagementService.removeRoleDefintionFromUserGroup(
-                        userGroupSelectionModel.getSelectedObject().getId().toString(),
-                        selectedRole.getA().getId().toString(), new AsyncCallback<Void>() {
+                UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
+                if (selectedObject != null) {
+                    userManagementService.removeRoleDefintionFromUserGroup(selectedObject.getId().toString(),
+                            selectedRole.getA().getId().toString(), new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.couldNotDeleteRole(selectedRole.getA().getName()));
-                            }
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    Window.alert(stringMessages.couldNotDeleteRole(selectedRole.getA().getName()));
+                                }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                updateUserGroups();
-                            }
-                        });
+                                @Override
+                                public void onSuccess(Void result) {
+                                    selectedObject.remove(selectedRole.getA());
+                                    updateUserGroups();
+                                }
+                            });
+                } else {
+                    Window.alert(stringMessages.pleaseSelect());
+                }
             }
         });
 

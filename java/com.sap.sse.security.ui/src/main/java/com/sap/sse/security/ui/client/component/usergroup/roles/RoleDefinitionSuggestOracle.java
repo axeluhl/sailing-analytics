@@ -31,7 +31,7 @@ public class RoleDefinitionSuggestOracle extends AbstractListSuggestOracle<RoleD
         if (this.getSelectableValues() == null) {
             throw new NullPointerException("Role definitions are not loaded yet or could not be loaded.");
         }
-        // FIXME make sure this.getSelectableValues is already set
+
         for (RoleDefinitionDTO role : this.getSelectableValues()) {
             if (role.getName().equals(value)) {
                 return role;

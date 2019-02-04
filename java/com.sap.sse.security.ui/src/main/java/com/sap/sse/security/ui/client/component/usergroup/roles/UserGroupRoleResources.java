@@ -18,4 +18,3 @@ public interface UserGroupRoleResources extends ClientBundle {
         String roleDefinitionSuggest();
     }
 }
-

@@ -72,12 +72,12 @@ public class RoleDefinitionTableWrapper extends
 
         final ImagesBarColumn<Pair<StrippedRoleDefinitionDTO, Boolean>, ImagesBarCell> actionColumn = new ImagesBarColumn<Pair<StrippedRoleDefinitionDTO, Boolean>, ImagesBarCell>(
                 new RoleDefinitionImagesBarCell(stringMessages));
-        actionColumn.setFieldUpdater((i, object, v) -> {
+        actionColumn.setFieldUpdater((i, selectedRole, v) -> {
             UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
             if (selectedObject != null) {
-                if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(object.getA().getName()))) {
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(selectedRole.getA().getName()))) {
                     userService.getUserManagementService().removeRoleDefintionFromUserGroup(
-                            selectedObject.getId().toString(), object.getA().getId().toString(),
+                            selectedObject.getId().toString(), selectedRole.getA().getId().toString(),
                             new AsyncCallback<Void>() {
 
                                 @Override
@@ -87,6 +87,7 @@ public class RoleDefinitionTableWrapper extends
 
                                 @Override
                                 public void onSuccess(Void result) {
+                                    selectedObject.remove(selectedRole.getA());
                                     refresher.run();
                                 }
                             });
@@ -142,7 +143,6 @@ public class RoleDefinitionTableWrapper extends
                                 public void onSuccess(Void result) {
                                     selectedObject.put(rolePair.getA(), value);
                                     refreshRoleList();
-                                    // TODO: refresh
                                 }
                             });
                 }
