@@ -731,6 +731,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             Util.addAll(newCandidates, filteredCandidates);
             // list of organized Candidates ready for analyzing
             final int deleteCnt[] = new int[1];
+            /*
             Collections.sort(filteredCandidates, TimedComparator.INSTANCE);
             final int innerDelCnt[] = new int[1];
             final Candidate lastCan[] = new Candidate[1];
@@ -755,18 +756,24 @@ public class CandidateChooserImpl implements CandidateChooser {
                 } else {
                     lastCan[0] = distCan;
                 }
-            });
+            });*/
 //                logger.finest("count of entries in "+ waypointAndCandidateSet.getKey() + " is: "+ wpCnt + " (toDelete:" + innerDelCnt + ")");
             logger.finest(" would delete: " + deleteCnt[0]);
             logger.warning("before: " + size + " after candidate filtering: " + filteredCandidates.size() + " for " + competitor.getName());
         }
         LockUtil.lockForWrite(perCompetitorLocks.get(competitor));
         try {
-            for (Candidate can : filteredCandidates) {
+            //for (Candidate can : filteredCandidates) {
+            for (Candidate can : newCandidates) {
                 candidates.get(competitor).add(can);
             }
             // TODO here would be a good place to apply candidate filtering; let createNewEdges consider only those candidates passing the filter
-            createNewEdges(competitor, newCandidates);
+            if (candidates.get(competitor).size() > 5000) {
+                // emergency stop of edge creating
+                logger.severe("Candidate count exceded allowed count with " + candidates.get(competitor).size() + " candidates, edge creation stopped for competitor:" + competitor);
+            } else {
+                createNewEdges(competitor, newCandidates);
+            }
         } finally {
             LockUtil.unlockAfterWrite(perCompetitorLocks.get(competitor));
         }
