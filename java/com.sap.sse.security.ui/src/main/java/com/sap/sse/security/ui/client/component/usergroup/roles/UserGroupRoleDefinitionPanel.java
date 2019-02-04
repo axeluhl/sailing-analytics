@@ -1,7 +1,8 @@
-package com.sap.sse.security.ui.client.component;
+package com.sap.sse.security.ui.client.component.usergroup.roles;
 
 import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.USER_GROUP;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -26,6 +27,8 @@ import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
+import com.sap.sse.security.ui.client.component.UserGroupListDataProvider;
 import com.sap.sse.security.ui.client.component.UserGroupListDataProvider.UserGroupListDataProviderChangeHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -38,6 +41,8 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
 
     private final SuggestBox suggestRole;
 
+    private final UserGroupRoleResources userGroupRoleResources = GWT.create(UserGroupRoleResources.class);
+
     public UserGroupRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
             CellTableWithCheckboxResources tableResources,
@@ -47,11 +52,13 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         final VerticalPanel west = new VerticalPanel();
 
-        suggestRole = new SuggestBox(new RoleDefinitionSuggestOracle(userManagementService));
+        suggestRole = new SuggestBox(new RoleDefinitionSuggestOracle(userManagementService, stringMessages));
+        userGroupRoleResources.css().ensureInjected();
+        suggestRole.addStyleName(userGroupRoleResources.css().roleDefinitionSuggest());
+        suggestRole.getElement().setPropertyString("placeholder", stringMessages.enterRoleName());
 
         // create button bar
         west.add(createButtonPanel(userService, stringMessages, userManagementService));
-        west.add(suggestRole);
 
         // create UserGroup Table
         userGroupListDataProvider.addChangeHandler(this);
@@ -121,6 +128,9 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
                         });
             }
         });
+
+        buttonPanel.insertWidgetAtPosition(suggestRole, 1);
+
         return buttonPanel;
     }
 

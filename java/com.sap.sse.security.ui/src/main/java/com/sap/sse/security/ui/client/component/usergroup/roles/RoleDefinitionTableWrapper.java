@@ -1,7 +1,4 @@
-package com.sap.sse.security.ui.client.component;
-
-import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
-import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
+package com.sap.sse.security.ui.client.component.usergroup.roles;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,26 +18,31 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
- * A wrapper for a CellTable displaying an overview over the existing UserGroups. It shows the User-Group name, the
- * group and user each user group is owned by and options to delete the group, change the ownership or edit the
- * associated ACL.
+ * A wrapper for a CellTable displaying the role definitions associated with the selected user group. It shows the Role
+ * Name and whether the role is enabled for all users. There is also an options to delete the group.
  */
 public class RoleDefinitionTableWrapper extends
         TableWrapper<Pair<StrippedRoleDefinitionDTO, Boolean>, RefreshableSingleSelectionModel<Pair<StrippedRoleDefinitionDTO, Boolean>>, StringMessages, CellTableWithCheckboxResources> {
 
     private final LabeledAbstractFilterablePanel<Pair<StrippedRoleDefinitionDTO, Boolean>> filterField;
     private final SingleSelectionModel<UserGroupDTO> userGroupSelectionModel;
+
+    static class SecuredDTOToPairAMapper<T extends SecuredDTO> {
+
+    }
 
     public RoleDefinitionTableWrapper(UserService userService, Iterable<HasPermissions> additionalPermissions,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean enablePager,
@@ -68,26 +70,32 @@ public class RoleDefinitionTableWrapper extends
         final TextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>> userGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>>(
                 dto -> dto.getA().getName(), userColumnListHandler);
 
-        final AccessControlledActionsColumn<RoleDefinitionDTO, DefaultActionsImagesBarCell> actionColumn = new AccessControlledActionsColumn<>(
-                new DefaultActionsImagesBarCell(stringMessages), userService);
-        actionColumn.addAction(ACTION_DELETE, DELETE, role -> {
-            if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(role.getName()))) {
-                userService.getUserManagementService().removeRoleDefintionFromUserGroup(
-                        userGroupSelectionModel.getSelectedObject().getId().toString(), role.getId().toString(),
-                        new AsyncCallback<Void>() {
+        final ImagesBarColumn<Pair<StrippedRoleDefinitionDTO, Boolean>, ImagesBarCell> actionColumn = new ImagesBarColumn<Pair<StrippedRoleDefinitionDTO, Boolean>, ImagesBarCell>(
+                new RoleDefinitionImagesBarCell(stringMessages));
+        actionColumn.setFieldUpdater((i, object, v) -> {
+            UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
+            if (selectedObject != null) {
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(object.getA().getName()))) {
+                    userService.getUserManagementService().removeRoleDefintionFromUserGroup(
+                            selectedObject.getId().toString(), object.getA().getId().toString(),
+                            new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                // TODO Auto-generated method stub
-                            }
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    Window.alert(stringMessages.couldNotDeleteRole(selectedObject.getName()));
+                                }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                refresher.run();
-                            }
-                        });
+                                @Override
+                                public void onSuccess(Void result) {
+                                    refresher.run();
+                                }
+                            });
+                }
+            } else {
+                Window.alert(stringMessages.pleaseSelect());
             }
         });
+
         filterField = new LabeledAbstractFilterablePanel<Pair<StrippedRoleDefinitionDTO, Boolean>>(
                 new Label(stringMessages.filterRoles()), new ArrayList<Pair<StrippedRoleDefinitionDTO, Boolean>>(),
                 dataProvider) {
@@ -118,20 +126,21 @@ public class RoleDefinitionTableWrapper extends
         };
         checkboxColumn.setFieldUpdater(new FieldUpdater<Pair<StrippedRoleDefinitionDTO, Boolean>, Boolean>() {
             @Override
-            public void update(int index, Pair<StrippedRoleDefinitionDTO, Boolean> object, Boolean value) {
+            public void update(int index, Pair<StrippedRoleDefinitionDTO, Boolean> rolePair, Boolean value) {
                 UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
                 if (selectedObject != null) {
                     userService.getUserManagementService().putRoleDefintionToUserGroup(
-                            selectedObject.getId().toString(), object.getA().getId().toString(), value,
+                            selectedObject.getId().toString(), rolePair.getA().getId().toString(), value,
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    // TODO Auto-generated method stub
+                                    Window.alert(stringMessages.couldNotAddRoleToGroup(rolePair.getA().getName(),
+                                            selectedObject.getName()));
                                 }
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    selectedObject.put(object.getA(), value);
+                                    selectedObject.put(rolePair.getA(), value);
                                     refreshRoleList();
                                     // TODO: refresh
                                 }
@@ -140,7 +149,7 @@ public class RoleDefinitionTableWrapper extends
             }
         });
         table.addColumn(checkboxColumn, stringMessages.enableRoleForAllUsers());
-        // TODO: add remove X in action column
+        table.addColumn(actionColumn);
         table.ensureDebugId("RoleDefinitionDTOTable");
     }
 

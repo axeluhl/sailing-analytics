@@ -1,16 +1,19 @@
-package com.sap.sse.security.ui.client.component;
+package com.sap.sse.security.ui.client.component.usergroup.roles;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.gwt.client.suggestion.AbstractListSuggestOracle;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class RoleDefinitionSuggestOracle extends AbstractListSuggestOracle<RoleDefinitionDTO> {
 
-    public RoleDefinitionSuggestOracle(UserManagementServiceAsync userManagementService) {
+    public RoleDefinitionSuggestOracle(final UserManagementServiceAsync userManagementService,
+            final StringMessages stringMessages) {
         userManagementService.getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinitionDTO>>() {
             @Override
             public void onSuccess(ArrayList<RoleDefinitionDTO> result) {
@@ -19,12 +22,15 @@ public class RoleDefinitionSuggestOracle extends AbstractListSuggestOracle<RoleD
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO
+                Window.alert(stringMessages.couldNotLoadRoles());
             }
         });
     }
 
-    public RoleDefinitionDTO fromString(String value) {
+    public RoleDefinitionDTO fromString(final String value) {
+        if (this.getSelectableValues() == null) {
+            throw new NullPointerException("Role definitions are not loaded yet or could not be loaded.");
+        }
         // FIXME make sure this.getSelectableValues is already set
         for (RoleDefinitionDTO role : this.getSelectableValues()) {
             if (role.getName().equals(value)) {

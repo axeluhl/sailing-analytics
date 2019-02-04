@@ -18,6 +18,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.usergroup.roles.UserGroupRoleDefinitionPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
