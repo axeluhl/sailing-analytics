@@ -124,7 +124,6 @@ public class LocalServerManagementPanel extends SimplePanel {
 
     private void serverConfigurationChanged() {
         final Boolean publicServer = isPublicServerCheckbox.isEnabled() ? isPublicServerCheckbox.getValue() : null;
-        // FIXME self service not yet supported
         final Boolean selfServiceServer = isSelfServiceServerCheckbox.isEnabled()
                 ? isSelfServiceServerCheckbox.getValue()
                 : null;
