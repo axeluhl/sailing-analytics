@@ -45,6 +45,7 @@ import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.ReplicationStatus;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -839,5 +840,31 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     @Override
     public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
         unsentOperationsSenderJob.scheduleForSending(operationWithResult, sender);
+    }
+
+    @Override
+    public synchronized ReplicationStatus getStatus() {
+        final ReplicationReceiver replicationReceiver = getReplicator();
+        final boolean isReplicationStarting = isReplicationStarting();
+        final boolean isReplica = isReplicationStarting || replicationReceiver != null;
+        final boolean suspended = replicationReceiver == null ? false : replicationReceiver.isSuspended();
+        final boolean stopped = replicationReceiver == null ? false : replicationReceiver.isBeingStopped();
+        long messageQueueLength;
+        if (replicationReceiver == null) {
+            messageQueueLength = 0;
+        } else {
+            try {
+                messageQueueLength = replicationReceiver.getMessageQueueSize();
+            } catch (IllegalAccessException e) {
+                logger.warning("Unable to access replication message queue size: "+e.getMessage()+". Reporting as -1");
+                messageQueueLength = -1;
+            }
+        }
+        final Map<String, Integer> operationQueueLengths = replicationReceiver == null ? new HashMap<>() : replicationReceiver.getOperationQueueSizes();
+        final Map<String, Boolean> isInitialLoadRunning = new HashMap<>();
+        for (final Replicable<?, ?> replicable : getAllReplicables()) {
+            isInitialLoadRunning.put(replicable.getId().toString(), replicable.isCurrentlyFillingFromInitialLoad());
+        }
+        return new ReplicationStatusImpl(isReplica, isReplicationStarting, suspended, stopped, messageQueueLength, isInitialLoadRunning, operationQueueLengths);
     }
 }

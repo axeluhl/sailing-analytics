@@ -123,50 +123,64 @@ public class Activator implements BundleActivator {
         final OSGiReplicableTracker replicablesProvider = new OSGiReplicableTracker(bundleContext);
         serverReplicationMasterService = new ReplicationServiceImpl(
                 exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
+        String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);
+        final boolean autoReplicationRequested = replicateOnStart != null && !replicateOnStart.isEmpty();
+        if (autoReplicationRequested) {
+            // set before registering the service; clients discovering it therefore cannot accidentally
+            // discover it before this flag has been set.
+            serverReplicationMasterService.setReplicationStarting(true);
+        }
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
         logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName+" on host "+exchangeHost);
-        checkIfAutomaticReplicationShouldStart(serverReplicationMasterService, exchangeName, replicablesProvider);
+        if (autoReplicationRequested) {
+            triggerAutomaticReplication(serverReplicationMasterService, replicateOnStart, exchangeName, replicablesProvider);
+        }
     }
     
-    private void checkIfAutomaticReplicationShouldStart(ReplicationService serverReplicationMasterService, String masterExchangeName, final ReplicablesProvider replicablesProvider) {
-        String replicateOnStart = System.getProperty(PROPERTY_NAME_REPLICATE_ON_START);
-        if (replicateOnStart != null && !replicateOnStart.isEmpty()) {
-            serverReplicationMasterService.setReplicationStarting(true);
-            final String[] replicableIdsAsStrings = replicateOnStart.split(",");
-            new Thread("ServiceTracker waiting for Replicables "+Arrays.toString(replicableIdsAsStrings)) {
-                @Override
-                public void run() {
-                    logger.info("Waiting for Replicables " + Arrays.toString(replicableIdsAsStrings) +
-                            " before firing up replication automatically...");
-                    final List<Replicable<?, ?>> replicables = new ArrayList<>();
-                    for (String replicableIdAsString : replicableIdsAsStrings) {
-                        Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */true);
-                        logger.info("Obtained Replicable " + replicableIdAsString);
-                        replicables.add(replicable);
-                    }
-                    logger.info("Configuration requested automatic replication for replicables "+
-                            Arrays.toString(replicableIdsAsStrings)+". Starting it up...");
-                    String replicateFromExchangeName = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME);
-                    if (replicateFromExchangeName == null) {
-                        replicateFromExchangeName = masterExchangeName;
-                    }
-                    ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
-                            System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST),
-                            replicateFromExchangeName,
-                            Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT).trim()), 
-                            serverReplicationMasterService.getServerIdentifier().toString(), 
-                            System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
-                            Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()), replicables);
-                    try {
-                        serverReplicationMasterService.startToReplicateFrom(master);
-                        serverReplicationMasterService.setReplicationStarting(false);
-                        logger.info("Automatic replication has been started.");
-                    } catch (ClassNotFoundException | IOException | InterruptedException e) {
-                        logger.log(Level.SEVERE, "Error with automatic replication from "+master, e);
-                    }
+    /**
+     * Assumes that automatic replication was requested and that the {@code serverReplicationMasterService} has already been
+     * marked as {@link ReplicationService#setReplicationStarting(boolean) setReplicationStarting(true)}. When replication
+     * has been requested from all replicables, {@link ReplicationService#setReplicationStarting(boolean) setReplicationStarting(false)}
+     * will be called by this method to indicate that the start-up sequence for the service has completed; now clients may need
+     * to wait for the individual replicables to finish their initial load.
+     */
+    private void triggerAutomaticReplication(ReplicationService serverReplicationMasterService, String replicateOnStart, String masterExchangeName, final ReplicablesProvider replicablesProvider) {
+        assert replicateOnStart != null && !replicateOnStart.isEmpty();
+        serverReplicationMasterService.setReplicationStarting(true);
+        final String[] replicableIdsAsStrings = replicateOnStart.split(",");
+        new Thread("ServiceTracker waiting for Replicables "+Arrays.toString(replicableIdsAsStrings)) {
+            @Override
+            public void run() {
+                logger.info("Waiting for Replicables " + Arrays.toString(replicableIdsAsStrings) +
+                        " before firing up replication automatically...");
+                final List<Replicable<?, ?>> replicables = new ArrayList<>();
+                for (String replicableIdAsString : replicableIdsAsStrings) {
+                    Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */true);
+                    logger.info("Obtained Replicable " + replicableIdAsString);
+                    replicables.add(replicable);
                 }
-            }.start();
-        }
+                logger.info("Configuration requested automatic replication for replicables "+
+                        Arrays.toString(replicableIdsAsStrings)+". Starting it up...");
+                String replicateFromExchangeName = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME);
+                if (replicateFromExchangeName == null) {
+                    replicateFromExchangeName = masterExchangeName;
+                }
+                ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
+                        System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST),
+                        replicateFromExchangeName,
+                        Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT).trim()), 
+                        serverReplicationMasterService.getServerIdentifier().toString(), 
+                        System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
+                        Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()), replicables);
+                try {
+                    serverReplicationMasterService.startToReplicateFrom(master);
+                    serverReplicationMasterService.setReplicationStarting(false);
+                    logger.info("Automatic replication has been started.");
+                } catch (ClassNotFoundException | IOException | InterruptedException e) {
+                    logger.log(Level.SEVERE, "Error with automatic replication from "+master, e);
+                }
+            }
+        }.start();
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
