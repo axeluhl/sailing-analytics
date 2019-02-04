@@ -22,7 +22,6 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -75,6 +74,20 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
         west.add(scrollPanel);
 
         add(west);
+
+        this.userGroupSelectionModel.addSelectionChangeHandler(e -> updateOracle());
+    }
+
+    /**
+     * Updates the SuggestOracle associated with {@link #suggestRole}. This method should be called after the selection
+     * has changed.
+     */
+    private void updateOracle() {
+        UserGroupDTO selectedObject = this.userGroupSelectionModel.getSelectedObject();
+        if (selectedObject != null) {
+            ((RoleDefinitionSuggestOracle) suggestRole.getSuggestOracle())
+                    .resetAndRemoveExistingRoles(selectedObject.getRoleDefinitionMap().keySet());
+        }
     }
 
     /** Creates the button bar with add/remove/refresh buttons. */
@@ -84,7 +97,7 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
         buttonPanel.addCreateAction(stringMessages.addRole(), () -> {
             final UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
             if (selectedObject != null) {
-                RoleDefinitionDTO role = ((RoleDefinitionSuggestOracle) suggestRole.getSuggestOracle())
+                StrippedRoleDefinitionDTO role = ((RoleDefinitionSuggestOracle) suggestRole.getSuggestOracle())
                         .fromString(suggestRole.getValue());
                 if (role != null) {
                     userManagementService.putRoleDefintionToUserGroup(selectedObject.getId().toString(),
@@ -98,8 +111,7 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    selectedObject.put(new StrippedRoleDefinitionDTO(role.getId(), role.getName(),
-                                            role.getPermissions()), false);
+                                    selectedObject.put(role, false);
                                     roleDefinitionTableWrapper.refreshRoleList();
                                     suggestRole.setValue("");
                                 }
