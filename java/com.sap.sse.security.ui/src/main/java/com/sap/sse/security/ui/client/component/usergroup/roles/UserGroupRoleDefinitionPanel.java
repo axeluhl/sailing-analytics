@@ -90,7 +90,7 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
         }
     }
 
-    /** Creates the button bar with add/remove/refresh buttons. */
+    /** Creates the button bar with add/remove/refresh buttons and the SuggestBox. */
     private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages,
             final UserManagementServiceAsync userManagementService) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);

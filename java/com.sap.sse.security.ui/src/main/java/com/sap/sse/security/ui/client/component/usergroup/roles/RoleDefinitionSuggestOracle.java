@@ -13,10 +13,12 @@ import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-/** Suggest oracle for use in {@link UserGroupRoleDefinitionPanel} which oracles the role names */
+/**
+ * Suggest oracle for use in {@link UserGroupRoleDefinitionPanel} which oracles the role names.
+ */
 public class RoleDefinitionSuggestOracle extends AbstractListSuggestOracle<StrippedRoleDefinitionDTO> {
 
-    private Collection<StrippedRoleDefinitionDTO> allRoles = new ArrayList<>();
+    private final Collection<StrippedRoleDefinitionDTO> allRoles = new ArrayList<>();
 
     public RoleDefinitionSuggestOracle(final UserManagementServiceAsync userManagementService,
             final StringMessages stringMessages) {
@@ -36,19 +38,26 @@ public class RoleDefinitionSuggestOracle extends AbstractListSuggestOracle<Strip
         });
     }
 
-    public StrippedRoleDefinitionDTO fromString(final String value) {
+    /**
+     * @returns a {@link StrippedRoleDefinitionDTO}-object from the current selectable values of this oracle, which is
+     *          associated with the role name.
+     */
+    public StrippedRoleDefinitionDTO fromString(final String roleName) {
         if (this.getSelectableValues() == null) {
             throw new NullPointerException("Role definitions are not loaded yet or could not be loaded.");
         }
 
         for (StrippedRoleDefinitionDTO role : this.getSelectableValues()) {
-            if (role.getName().equals(value)) {
+            if (role.getName().equals(roleName)) {
                 return role;
             }
         }
         return null;
     }
 
+    /**
+     * Clears the oracle suggestions, adds all existing roles and finally removes the existing roles from the oracle.
+     */
     public void resetAndRemoveExistingRoles(Iterable<StrippedRoleDefinitionDTO> existingRoles) {
         ArrayList<StrippedRoleDefinitionDTO> roles = new ArrayList<>(allRoles);
         Util.removeAll(existingRoles, roles);

@@ -97,6 +97,7 @@ public class RoleDefinitionTableWrapper extends
             }
         });
 
+        // filter field configuration
         filterField = new LabeledAbstractFilterablePanel<Pair<StrippedRoleDefinitionDTO, Boolean>>(
                 new Label(stringMessages.filterRoles()), new ArrayList<Pair<StrippedRoleDefinitionDTO, Boolean>>(),
                 dataProvider) {
@@ -115,6 +116,8 @@ public class RoleDefinitionTableWrapper extends
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
 
         mainPanel.insert(filterField, 0);
+
+        // setup table
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.roleName());
 
