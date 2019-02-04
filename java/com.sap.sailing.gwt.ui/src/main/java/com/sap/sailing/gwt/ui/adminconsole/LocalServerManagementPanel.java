@@ -26,8 +26,10 @@ import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
@@ -43,10 +45,19 @@ public class LocalServerManagementPanel extends SimplePanel {
     private CheckBox isStandaloneServerCheckbox, isPublicServerCheckbox, isSelfServiceServerCheckbox;
 
     private ServerInfoDTO currentServerInfo;
+    private final UserService userService;
+    
+    private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
+        @Override
+        public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+            updateServerInfo(userService.getServerInfo());
+        }
+    };
 
     public LocalServerManagementPanel(final SailingServiceAsync sailingService, final UserService userService,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
+        this.userService = userService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
 
@@ -58,8 +69,19 @@ public class LocalServerManagementPanel extends SimplePanel {
         mainPanel.add(createServerInfoUI());
         mainPanel.add(createServerConfigurationUI());
 
-        refreshServerInfo();
         refreshServerConfiguration();
+    }
+    
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        userService.addUserStatusEventHandler(userStatusEventHandler, true);
+    }
+    
+    @Override
+    protected void onUnload() {
+        super.onUnload();
+        userService.removeUserStatusEventHandler(userStatusEventHandler);
     }
     
     private AccessControlledButtonPanel createServerActionsUi(final UserService userService) {
@@ -123,23 +145,21 @@ public class LocalServerManagementPanel extends SimplePanel {
             }
         });
     }
-
+    
     private void refreshServerInfo() {
-        sailingService.getServerInfo(new RefreshAsyncCallback<>(serverInfo -> {
-            LocalServerManagementPanel.this.currentServerInfo = serverInfo;
-            LocalServerManagementPanel.this.updateServerInfo(serverInfo);
-            LocalServerManagementPanel.this.buttonPanel.updateVisibility();
-        }));
-    }
+         sailingService.getServerInfo(new RefreshAsyncCallback<>(this::updateServerInfo));
+     }
 
     private void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
     }
     
-    private void updateServerInfo(ServerInfoDTO result) {
-        serverNameInfo.setText(result.getName());
-        buildVersionInfo.setText(result.getBuildVersion() != null ? result.getBuildVersion() : "Unknown");
-        final OwnershipDTO ownership = result.getOwnership();
+    private void updateServerInfo(ServerInfoDTO serverInfo) {
+        LocalServerManagementPanel.this.currentServerInfo = serverInfo;
+        LocalServerManagementPanel.this.buttonPanel.updateVisibility();
+        serverNameInfo.setText(serverInfo.getName());
+        buildVersionInfo.setText(serverInfo.getBuildVersion() != null ? serverInfo.getBuildVersion() : "Unknown");
+        final OwnershipDTO ownership = serverInfo.getOwnership();
         final boolean hasGroupOwner = ownership != null && ownership.getTenantOwner() != null;
         final boolean hasUserOwner = ownership != null && ownership.getUserOwner() != null;
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
