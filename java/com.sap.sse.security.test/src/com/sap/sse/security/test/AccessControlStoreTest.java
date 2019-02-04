@@ -57,6 +57,8 @@ public class AccessControlStoreTest {
         db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name()).drop();
         db.getCollection(CollectionNames.OWNERSHIPS.name()).drop();
         db.getCollection(CollectionNames.ROLES.name()).drop();
+        db.getCollection(CollectionNames.USER_GROUPS.name()).drop();
+        db.getCollection(CollectionNames.USERS.name()).drop();
         newStores();
         
         UserGroup adminTenant = new UserGroupImpl(UUID.randomUUID(), "admin-tenant");
@@ -69,10 +71,14 @@ public class AccessControlStoreTest {
     private void newStores() {
         try {
             userStore = new UserStoreImpl(DEFAULT_TENANT_NAME);
+            userStore.loadAndMigrateUsers();
+            userStore.ensureDefaultRolesExist();
+            userStore.ensureDefaultTenantExists();
         } catch (UserGroupManagementException | UserManagementException e) {
             throw new RuntimeException(e);
         }
         accessControlStore = new AccessControlStoreImpl(userStore);
+        accessControlStore.loadACLsAndOwnerships();
     }
 
     @Test
