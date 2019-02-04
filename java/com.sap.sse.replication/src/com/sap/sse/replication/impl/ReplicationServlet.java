@@ -9,7 +9,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,8 +28,8 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
-import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.ReplicationStatus;
 import com.sap.sse.util.impl.CountingOutputStream;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -182,41 +181,42 @@ public class ReplicationServlet extends AbstractHttpServlet {
     private void reportStatus(HttpServletResponse resp) throws IllegalAccessException, IOException {
         final JSONObject result = new JSONObject();
         final JSONArray replicablesJSON = new JSONArray();
-        synchronized (getReplicationService()) {
-            final ReplicationReceiver replicationReceiver = getReplicationService().getReplicator();
-            final boolean isReplicationStarting = getReplicationService().isReplicationStarting();
-            final boolean isReplica = isReplicationStarting || replicationReceiver != null;
-            result.put("replica", isReplica);
-            result.put("replicationstarting", isReplicationStarting);
-            result.put("suspended", replicationReceiver == null ? false : replicationReceiver.isSuspended());
-            result.put("stopped", replicationReceiver == null ? false : replicationReceiver.isBeingStopped());
-            result.put("messagequeuelength", replicationReceiver == null ? 0 : replicationReceiver.getMessageQueueSize());
-            final JSONArray operationQueueLengths = new JSONArray();
-            result.put("operationqueuelengths", operationQueueLengths);
-            int totalOperationQueueLengths = 0;
-            if (replicationReceiver != null) {
-                for (final Entry<String, Integer> queueLength : replicationReceiver.getOperationQueueSizes().entrySet()) {
-                    final JSONObject queueLengthJSON = new JSONObject();
-                    queueLengthJSON.put("id", queueLength.getKey());
-                    queueLengthJSON.put("length", queueLength.getValue());
-                    totalOperationQueueLengths += queueLength.getValue();
-                    operationQueueLengths.add(queueLengthJSON);
-                }
+        final ReplicationStatus status = getReplicationService().getStatus();
+        result.put("replica", status.isReplica());
+        result.put("replicationstarting", status.isReplicationStarting());
+        result.put("suspended", status.isSuspended());
+        result.put("stopped", status.isStopped());
+        result.put("messagequeuelength", status.getMessageQueueLength());
+        final JSONArray operationQueueLengths = new JSONArray();
+        result.put("operationqueuelengths", operationQueueLengths);
+        for (final String replicableIdAsString : status.getReplicableIdsAsStrings()) {
+            Integer queueLength = status.getOperationQueueLengthsByReplicableIdAsString(replicableIdAsString);
+            if (queueLength != null) {
+                final JSONObject queueLengthJSON = new JSONObject();
+                queueLengthJSON.put("id", replicableIdAsString);
+                queueLengthJSON.put("length", queueLength);
+                operationQueueLengths.add(queueLengthJSON);
             }
-            result.put("totaloperationqueuelength", totalOperationQueueLengths);
-            boolean initialLoadRunning = false;
-            for (final Replicable<?, ?> replicable : getReplicationService().getAllReplicables()) {
+        }
+        result.put("totaloperationqueuelength", status.getTotalOperationQueueLength());
+        for (final String replicableIdAsString : status.getReplicableIdsAsStrings()) {
+            Boolean initialLoadRunning = status.isInitialLoadRunning(replicableIdAsString);
+            if (initialLoadRunning != null) {
                 final JSONObject replicableJSON = new JSONObject();
-                replicableJSON.put("id", replicable.getId());
-                replicableJSON.put("initialloadrunning", replicable.isCurrentlyFillingFromInitialLoad());
-                initialLoadRunning = initialLoadRunning || replicable.isCurrentlyFillingFromInitialLoad();
+                replicableJSON.put("id", replicableIdAsString);
+                replicableJSON.put("initialloadrunning", initialLoadRunning);
                 replicablesJSON.add(replicableJSON);
             }
-            result.put("replicables", replicablesJSON);
-            result.put("available", !isReplica || (!isReplicationStarting && !initialLoadRunning));
         }
+        result.put("replicables", replicablesJSON);
+        result.put("available", status.isAvailable());
         resp.setContentType("application/json;charset=UTF-8");
         resp.getWriter().print(result.toJSONString());
+        if (status.isAvailable()) {
+            resp.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        }
     }
 
     /**

@@ -69,9 +69,9 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
         }
         V result = cache.put(key, value);
         final String myName = name;
-        securityService.replicate(s->
-            s.getCacheManager().getCache(myName).put(key, value));
         if (store && value instanceof Session) {
+            securityService.replicate(s->
+            s.getCacheManager().getCache(myName).put(key, value));
             securityService.storeSession(getName(), (Session) value);
         }
         return result;

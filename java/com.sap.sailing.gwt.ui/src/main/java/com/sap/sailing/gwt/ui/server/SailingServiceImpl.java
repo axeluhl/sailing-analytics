@@ -3618,8 +3618,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final TimeRange timeRange = competitorTimeRanges.get(competitorDTO);
                     final TimePoint from = timeRange.from(), to = timeRange.to();
                     final RunnableFuture<List<ManeuverDTO>> future = new FutureTask<>(() -> {
-                        final Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, from, to,
-                                /* waitForLatest */ true);
+                        // We're on a web server request thread. Try not to take too long for this,
+                        // so don't wait for the latest results unless the cache doesn't have a valid
+                        // result yet:
+                        Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, from, to, /* waitForLatest */ false);
+                        if (maneuvers == null) {
+                            maneuvers = trackedRace.getManeuvers(competitor, from, to, /* waitForLatest */ true);
+                        }
                         return createManeuverDTOsForCompetitor(maneuvers, trackedRace, competitor);
                     });
                     executor.execute(future);
