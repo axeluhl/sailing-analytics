@@ -18,6 +18,7 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.DateParser;
 import com.sun.jersey.api.core.ResourceContext;
 
@@ -53,6 +54,12 @@ public abstract class AbstractSailingServerResource {
     protected SecurityService getSecurityService() {
         @SuppressWarnings("unchecked")
         ServiceTracker<SecurityService, SecurityService> tracker = (ServiceTracker<SecurityService, SecurityService>) servletContext.getAttribute(RestServletContainer.SECURITY_SERVICE_TRACKER_NAME);
+        return tracker.getService(); 
+    }
+    
+    public ReplicationService getReplicationService() {
+        @SuppressWarnings("unchecked")
+        ServiceTracker<ReplicationService, ReplicationService> tracker = (ServiceTracker<ReplicationService, ReplicationService>) servletContext.getAttribute(RestServletContainer.REPLICATION_SERVICE_TRACKER_NAME);
         return tracker.getService(); 
     }
     
