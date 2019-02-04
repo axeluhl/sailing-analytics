@@ -27,10 +27,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.Credential;
@@ -110,6 +111,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         final User allUser = getSecurityService().getAllUser();
         return allUser == null ? null
                 : securityDTOFactory.createUserDTOFromUser(allUser, getSecurityService());
+    }
+    
+    private ServerInfoDTO getServerInfo() {
+        return new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion());
     }
 
     @Override
@@ -430,15 +435,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public Pair<UserDTO, UserDTO> getCurrentUser() throws UnauthorizedException {
+    public Triple<UserDTO, UserDTO, ServerInfoDTO> getCurrentUser() throws UnauthorizedException {
         logger.fine("Request: " + getThreadLocalRequest().getRequestURL());
         User user = getSecurityService().getCurrentUser();
         if (user == null) {
-            return new Pair<UserDTO, UserDTO>(null, getAllUser());
+            return new Triple<>(null, getAllUser(), getServerInfo());
         }
         getSecurityService().checkCurrentUserReadPermission(user);
-        return new Pair<UserDTO, UserDTO>(securityDTOFactory.createUserDTOFromUser(user, getSecurityService()),
-                getAllUser());
+        return new Triple<>(securityDTOFactory.createUserDTOFromUser(user, getSecurityService()),
+                getAllUser(), getServerInfo());
     }
 
     @Override
@@ -448,7 +453,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             UserDTO user = securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username),
                     getSecurityService());
             return new SuccessInfo(true, "Success. Redirecting to " + redirectURL, redirectURL,
-                    new Pair<UserDTO, UserDTO>(user, getAllUser()));
+                    new Triple<>(user, getAllUser(), getServerInfo()));
         } catch (UserManagementException | AuthenticationException e) {
             return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
         }
@@ -652,7 +657,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 + username;
         logger.info(message);
         final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
-        return new SuccessInfo(true, message, /* redirectURL */null, new Pair<UserDTO, UserDTO>(userDTO, getAllUser()));
+        return new SuccessInfo(true, message, /* redirectURL */null, new Triple<>(userDTO, getAllUser(), getServerInfo()));
     }
     
     private Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername) throws UserManagementException {
@@ -738,7 +743,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             final String message = "Set roles " + permissions + " for user " + username;
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
             return new SuccessInfo(true, message, /* redirectURL */null,
-                    new Pair<UserDTO, UserDTO>(userDTO, getAllUser()));
+                    new Triple<>(userDTO, getAllUser(), getServerInfo()));
         }
     }
 
@@ -827,7 +832,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public Pair<UserDTO, UserDTO> verifySocialUser(CredentialDTO credentialDTO) {
+    public Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credentialDTO) {
         User user = null;
         try {
             user = getSecurityService().verifySocialUser(createCredentialFromDTO(credentialDTO));
@@ -835,7 +840,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             e.printStackTrace();
         }
         final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
-        return new Pair<UserDTO, UserDTO>(userDTO, getAllUser());
+        return new Triple<>(userDTO, getAllUser(), getServerInfo());
     }
 
     private HttpSession getHttpSession() {
