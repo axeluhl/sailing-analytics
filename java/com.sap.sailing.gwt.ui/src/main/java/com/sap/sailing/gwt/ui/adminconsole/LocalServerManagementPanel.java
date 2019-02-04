@@ -28,6 +28,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -160,24 +161,18 @@ public class LocalServerManagementPanel extends SimplePanel {
         final boolean hasUserOwner = ownership != null && ownership.getUserOwner() != null;
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
         userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
+        
+        // Update changeability
+        isSelfServiceServerCheckbox.setEnabled(userService.hasCurrentUserMetaPermission(serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT), serverInfo.getOwnership()));
+        // TODO update isPublicServerCheckbox -> default server tenant is currently not available in the UI
     }
     
     private void updateServerConfiguration(ServerConfigurationDTO result) {
         isStandaloneServerCheckbox.setValue(result.isStandaloneServer(), false);
         isStandaloneServerCheckbox.setEnabled(true);
-        if (result.isPublic() != null) {
-            isPublicServerCheckbox.setEnabled(true);
-            isPublicServerCheckbox.setValue(result.isPublic(), false);
-        } else {
-            isPublicServerCheckbox.setEnabled(false);
-        }
-        if (result.isSelfService() != null) {
-            // isSelfServiceServerCheckbox.setEnabled(true);
-            isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
-        } else {
-            isSelfServiceServerCheckbox.setEnabled(false);
-        }
-
+        
+        isPublicServerCheckbox.setValue(result.isPublic(), false);
+        isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
     }
 
     private class RefreshAsyncCallback<T> implements AsyncCallback<T> {
