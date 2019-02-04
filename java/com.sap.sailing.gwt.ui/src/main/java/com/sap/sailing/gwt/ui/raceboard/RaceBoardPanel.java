@@ -244,7 +244,8 @@ public class RaceBoardPanel
         raceMap = new RaceMap(this, componentContext, raceMapLifecycle, defaultRaceMapSettings, sailingService, asyncActionsExecutor,
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
-                raceMapResources, /* showHeaderPanel */ true, quickRanksDTOProvider, this::showInWindChart) {
+                raceMapResources, /* showHeaderPanel */ true, quickRanksDTOProvider, this::showInWindChart,
+                leaderboardName, leaderboardGroupName) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override

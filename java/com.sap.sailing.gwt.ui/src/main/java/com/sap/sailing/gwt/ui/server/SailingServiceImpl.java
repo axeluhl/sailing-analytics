@@ -1858,7 +1858,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
-            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType) throws NoWindException {
+            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
+            String leaderboardName, String leaderboardGroupName) throws NoWindException {
         final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         // if md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID is null, Arrays.equals will return false, and the
@@ -1878,7 +1879,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             estimatedDuration = null;
         }
         final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
-                fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate, null);
+                fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate, detailType, leaderboardName, leaderboardGroupName);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
         final QuickRanksDTO quickRanks = getQuickRanks(raceIdentifier, date);
@@ -1907,7 +1908,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public CompactBoatPositionsDTO getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate) throws NoWindException {
-        return new CompactBoatPositionsDTO(getBoatPositionsInternal(raceIdentifier, fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate, null));
+        return new CompactBoatPositionsDTO(getBoatPositionsInternal(raceIdentifier, fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate, null, null, null));
     }
 
     /**
@@ -1934,7 +1935,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     private Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate, DetailType detailType)
+            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName)
             throws NoWindException {
         Map<Pair<Leg, TimePoint>, LegType> legTypeCache = new HashMap<>();
         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
@@ -2017,7 +2018,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             Double detailValue = null;
                             if (detailType != null) {
                                 try {
-                                    detailValue = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, fix.getTimePoint(), /*leaderboardGroupName*/"", /*leaderboardName*/"", null); //TODO leaderboard + cache
+                                    detailValue = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, fix.getTimePoint(), leaderboardGroupName, leaderboardName, null); //TODO cache
                                 } catch (NoWindException nwe) {
                                     detailValue = null;
                                 }

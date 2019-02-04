@@ -20,12 +20,15 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
     private final byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID;
     private Date timeForEstimation;
     private boolean targetEstimationRequired;
-    private DetailType detailType;
+    private final DetailType detailType;
+    private final String leaderboardName;
+    private final String leaderboardGroupName;
     
     public GetRaceMapDataAction(SailingServiceAsync sailingService, Map<String, CompetitorDTO> competitorsByIdAsString,
             RegattaAndRaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
             Map<CompetitorDTO, Date> to, boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date timeForEstimation, boolean targetEstimationRequired, DetailType detailType) {
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date timeForEstimation,
+            boolean targetEstimationRequired, DetailType detailType, String leaderboardName, String leaderboardGroupName) {
         super(sailingService, raceIdentifier, from, to, extrapolate);
         this.competitorsByIdAsString = competitorsByIdAsString;
         this.timeForEstimation = timeForEstimation;
@@ -34,6 +37,8 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
         this.simulationLegIdentifier = simulationLegIdentifier;
         this.md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID = md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID;
         this.detailType = detailType;
+        this.leaderboardName = leaderboardName;
+        this.leaderboardGroupName = leaderboardGroupName;
     }
     
     @Override
@@ -48,6 +53,7 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
         }
         getSailingService().getRaceMapData(getRaceIdentifier(), date, fromByCompetitorIdAsString, toByCompetitorIdAsString, isExtrapolate(), simulationLegIdentifier,
                 md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,timeForEstimation,targetEstimationRequired, detailType,
+                leaderboardName, leaderboardGroupName,
                 new AsyncCallback<CompactRaceMapDataDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {

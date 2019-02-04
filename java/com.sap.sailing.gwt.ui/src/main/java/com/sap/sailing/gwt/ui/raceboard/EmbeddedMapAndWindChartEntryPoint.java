@@ -212,7 +212,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages()), raceMapSettings,
                 getSailingService(), asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, new RaceCompetitorSet(competitorSelection), getStringMessages(), selectedRaceIdentifier,
-                raceMapResources, /* showHeaderPanel */ false, new DefaultQuickRanksDTOProvider()) {
+                raceMapResources, /* showHeaderPanel */ false, new DefaultQuickRanksDTOProvider(), /*leaderboardName*/"", /*leaderboardGroupName*/"") { //TODO missing values
             @Override
             protected void showAdditionalControls(MapWidget map) {
                 backToLivePlayButton.removeFromParent();

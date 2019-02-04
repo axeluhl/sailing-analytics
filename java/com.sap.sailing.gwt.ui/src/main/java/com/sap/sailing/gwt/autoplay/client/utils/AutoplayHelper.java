@@ -295,7 +295,7 @@ public class AutoplayHelper {
         RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
                 asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
                 new RaceCompetitorSet(competitorSelectionProvider), StringMessages.INSTANCE, currentLiveRace,
-                raceMapResources, false, provider);
+                raceMapResources, false, provider, /*leaderboardName*/"", /*leaderboardGroupName*/""); //TODO Get missing values
         raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
                 serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         raceboardTimer.setPlayMode(PlayModes.Live);

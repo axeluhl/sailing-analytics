@@ -107,6 +107,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.Competitor
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
@@ -437,6 +438,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private ManagedInfoWindow managedInfoWindow;
     
     private final ManeuverMarkersAndLossIndicators maneuverMarkersAndLossIndicators;
+    
+    /**
+     * Needed to get some metrics from {@link SailingServiceImpl.getCompetitorRaceDataEntry}.
+     */
+    private final String leaderboardName;
+    private final String leaderboardGroupName;
 
     private final MultiHashSet<Date> remoteCallsInExecution = new MultiHashSet<>();
     private final MultiHashSet<Date> remoteCallsToSkipInExecution = new MultiHashSet<>();
@@ -509,18 +516,19 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
             RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
-            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
+            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider,
+            String leaderboardName, String leaderboardGroupName) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, visible -> {});
+                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
             RaceMapSettings raceMapSettings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
-            StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
-            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider) {
+            StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel,
+            QuickRanksDTOProvider quickRanksDTOProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName) {
         super(parent, context);
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
         this.showHeaderPanel = showHeaderPanel;
@@ -534,6 +542,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.timer = timer;
         this.isSimulationEnabled = true;
         this.showWindChartForProvider = showWindChartForProvider;
+        this.leaderboardName = leaderboardName;
+        this.leaderboardGroupName = leaderboardGroupName;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -1149,7 +1159,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
             race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
-                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(), newTime, settings.isShowEstimatedDuration(), detailType),
+                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(),
+                    newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName),
             GET_RACE_MAP_DATA_CATEGORY,
                 getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
                         ++boatPositionRequestIDCounter, isRedraw));
