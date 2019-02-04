@@ -1,12 +1,8 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.util.List;
-import java.util.Random;
-
+import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
-import com.sap.sse.common.ColorMapper;
-import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 
 public class MultiColorPolylineOptions {
     private boolean clickable = true;
@@ -15,61 +11,40 @@ public class MultiColorPolylineOptions {
     private boolean geodesic  = true;
     private boolean visible   = true;
     
-    private int strokeWeight;
-    private double strokeOpacity;
+    private int strokeWeight = 1;
+    private double strokeOpacity = 1.0;
     
-    private int zIndex;
+    private int zIndex = 0;
     
-    private ColorMapper colorMapper;
+    private MultiColorPolylineColorProvider colorProvider;
     
-    public MultiColorPolylineOptions(ValueRangeFlexibleBoundaries valueRange) {
-        colorMapper = new ColorMapper(valueRange, false);
+    public MultiColorPolylineOptions() {}
+    public MultiColorPolylineOptions(MultiColorPolylineColorProvider colorProvider) {
+        this.colorProvider = colorProvider;
     }
-    public MultiColorPolylineOptions(PolylineOptions options, ValueRangeFlexibleBoundaries valueRange) {
+    public MultiColorPolylineOptions(PolylineOptions options, MultiColorPolylineColorProvider colorProvider) {
         clickable = options.getClickable();
         geodesic = options.getGeodesic();
         visible = options.getVisible();
         strokeWeight = options.getStrokeWeight();
         strokeOpacity = options.getStrokeOpacity();
         zIndex = options.getZindex();
-        colorMapper = new ColorMapper(valueRange, false);
+        this.colorProvider = colorProvider;
     }
     
-    public void applyTo(Polyline line) {
-        PolylineOptions opt = PolylineOptions.newInstance();
-        opt.setStrokeColor(colorMapper.getColor(new Random().nextInt(101))); //TODO
-        opt.setClickable(clickable);
-        opt.setGeodesic(geodesic);
-        opt.setVisible(visible);
-        opt.setStrokeWeight(strokeWeight);
-        opt.setStrokeOpacity(strokeOpacity);
-        opt.setZindex(zIndex);
-        line.setOptions(opt);
-        line.setEditable(editable);
-    }
-    public void applyTo(List<Polyline> lines) {
-        for (Polyline line : lines) {
-            applyTo(line);
-        }
-    }
     
-    public Polyline newPolylineInstance(double value) {
-        return newPolylineInstance(colorMapper.getColor(value));
+    public Polyline newPolylineInstance(LatLng position) {
+        return newPolylineInstance(colorProvider.getColor(position));
     }
     public Polyline newPolylineInstance(String strokeColor) {
-        PolylineOptions opt = PolylineOptions.newInstance();
-        opt.setStrokeColor(strokeColor);
-        opt.setClickable(clickable);
-        opt.setGeodesic(geodesic);
-        opt.setVisible(visible);
-        opt.setZindex(zIndex);
-        Polyline line = Polyline.newInstance(opt);
+        Polyline line = Polyline.newInstance(newPolylineOptionsInstance(strokeColor));
         line.setEditable(editable);
         return line;
     }
     
-    public PolylineOptions toPolylineOptions() {
+    public PolylineOptions newPolylineOptionsInstance(String strokeColor) {
         PolylineOptions opt = PolylineOptions.newInstance();
+        opt.setStrokeColor(strokeColor);
         opt.setClickable(clickable);
         opt.setGeodesic(geodesic);
         opt.setVisible(visible);
@@ -79,12 +54,11 @@ public class MultiColorPolylineOptions {
         return opt;
     }
     
-    public ColorMapper getColorMapper() {
-        return this.colorMapper;
+    public MultiColorPolylineColorProvider getColorProvider() {
+        return colorProvider;
     }
-    public void setColorMapper(ColorMapper colorMapper) {
-        this.colorMapper = colorMapper;
-        //TODO Update polylines
+    public void setColorProvider(MultiColorPolylineColorProvider colorProvider) {
+        this.colorProvider = colorProvider;
     }
     
     public boolean getClickable() {
@@ -122,5 +96,17 @@ public class MultiColorPolylineOptions {
     }
     public void setZIndex(int zIndex) {
         this.zIndex = zIndex;
+    }
+    public int getStrokeWeight() {
+        return strokeWeight;
+    }
+    public void setStrokeWeight(int strokeWeight) {
+        this.strokeWeight = strokeWeight;
+    }
+    public double getStrokeOpacity() {
+        return strokeOpacity;
+    }
+    public void setStrokeOpacity(double strokeOpacity) {
+        this.strokeOpacity = strokeOpacity;
     }
 }

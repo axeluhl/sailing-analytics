@@ -413,7 +413,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date timeToGetTheEstimatedDurationFor,
-            boolean estimatedDurationRequired, AsyncCallback<CompactRaceMapDataDTO> callback);
+            boolean estimatedDurationRequired, DetailType detailType, AsyncCallback<CompactRaceMapDataDTO> callback);
 
     void getBoatPositions(RegattaAndRaceIdentifier raceIdentifier, Map<String, Date> fromPerCompetitorIdAsString,
             Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate,

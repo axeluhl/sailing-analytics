@@ -3,8 +3,6 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import java.util.List;
 
 import com.google.gwt.maps.client.base.LatLng;
-import com.google.gwt.maps.client.overlays.Polyline;
-import com.google.gwt.maps.client.overlays.PolylineOptions;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
 
@@ -15,7 +13,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
  *
  */
 public interface TailFactory {
-    Polyline createTail(CompetitorDTO competitor, List<LatLng> points);
+    MultiColorPolyline createTail(CompetitorDTO competitor, List<LatLng> points);
     
-    PolylineOptions createTailStyle(CompetitorDTO competitor, DisplayMode displayMode);
+    MultiColorPolylineOptions createTailStyle(CompetitorDTO competitor, DisplayMode displayMode);
 }

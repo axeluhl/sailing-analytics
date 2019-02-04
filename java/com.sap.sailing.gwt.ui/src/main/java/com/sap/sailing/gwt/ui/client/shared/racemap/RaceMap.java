@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -70,6 +71,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -1033,7 +1035,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 .computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
         // Request map data update, possibly in two calls; see method details
         callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(fromAndToAndOverlap,
-                raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw);
+                raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw, DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         // draw the wind into the map, get the combined wind
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
@@ -1115,7 +1117,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(
             final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap,
             RegattaAndRaceIdentifier race, final Date newTime, final long transitionTimeInMillis,
-            final Iterable<CompetitorDTO> competitorsToShow, boolean isRedraw) {
+            final Iterable<CompetitorDTO> competitorsToShow, boolean isRedraw, DetailType detailType) {
         final Map<CompetitorDTO, Date> fromTimesForQuickCall = new HashMap<>();
         final Map<CompetitorDTO, Date> toTimesForQuickCall = new HashMap<>();
         final Map<CompetitorDTO, Date> fromTimesForNonOverlappingTailsCall = new HashMap<>();
@@ -1147,7 +1149,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
             race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
-                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(), newTime, settings.isShowEstimatedDuration()),
+                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(), newTime, settings.isShowEstimatedDuration(), detailType),
             GET_RACE_MAP_DATA_CATEGORY,
                 getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
                         ++boatPositionRequestIDCounter, isRedraw));
@@ -1570,7 +1572,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (!updateTailsOnly) {
                             competitorDTOsOfUnusedTails.remove(competitorDTO);
                         }
-                        PolylineOptions newOptions = createTailStyle(competitorDTO, displayHighlighted(competitorDTO));
+                        MultiColorPolylineOptions newOptions = createTailStyle(competitorDTO, displayHighlighted(competitorDTO));
                         fixesAndTails.getTail(competitorDTO).setOptions(newOptions);
                     }
                     boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, newTime,
@@ -2603,9 +2605,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
-            Polyline tail = fixesAndTails.getTail(oneOfAllCompetitors);
+            MultiColorPolyline tail = fixesAndTails.getTail(oneOfAllCompetitors);
             if (tail != null) {
-                PolylineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
+                MultiColorPolylineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
                 tail.setOptions(newOptions);
             }
         }
@@ -2809,14 +2811,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             LatLngBounds newBounds = null;
             Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors(racemap) ? racemap.competitorSelection.getSelectedCompetitors() : racemap.getCompetitorsToShow();
             for (CompetitorDTO competitor : competitors) {
-                Polyline tail = racemap.fixesAndTails.getTail(competitor);
+                MultiColorPolyline tail = racemap.fixesAndTails.getTail(competitor);
                 LatLngBounds bounds = null;
                 // TODO: Find a replacement for missing Polyline function getBounds() from v2
                 // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3; 
                 // optionally, consider providing a bounds cache with two sorted sets that organize the LatLng objects for O(1) bounds calculation and logarithmic add, ideally O(1) remove
-                if (tail != null && tail.getPath().getLength() >= 1) {
+                if (tail != null && tail.getLength() >= 1) {
                     bounds = BoundsUtil.getAsBounds(tail.getPath().get(0));
-                    for (int i = 1; i < tail.getPath().getLength(); i++) {
+                    for (int i = 1; i < tail.getLength(); i++) {
                         bounds = bounds.extend(tail.getPath().get(i));
                     }
                 }
@@ -2926,40 +2928,43 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     @Override
-    public PolylineOptions createTailStyle(CompetitorDTO competitor, DisplayMode displayMode) {
-        PolylineOptions options = PolylineOptions.newInstance();
+    public MultiColorPolylineOptions createTailStyle(CompetitorDTO competitor, DisplayMode displayMode) {
+        MultiColorPolylineOptions options = new MultiColorPolylineOptions();
         options.setClickable(true);
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
 
         switch(displayMode){
         case DEFAULT:
-            options.setStrokeColor(competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
+            //options.setColorProvider((p) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
+            Random r = new Random();
+            options.setColorProvider((p) -> new RGBColor(r.nextInt(256), r.nextInt(256), r.nextInt(256)).getAsHtml());
             options.setStrokeWeight(1);
             break;
         case SELECTED:
-            options.setStrokeColor(competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
+            options.setColorProvider((p) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
             options.setStrokeWeight(2);
             break;
         case NOT_SELECTED:
-            options.setStrokeColor(LOWLIGHTED_TAIL_COLOR.getAsHtml());
+            options.setColorProvider((p) -> LOWLIGHTED_TAIL_COLOR.getAsHtml());
             options.setStrokeOpacity(LOWLIGHTED_TAIL_OPACITY);
             break;
         }
 
-        options.setZindex(RaceMapOverlaysZIndexes.BOATTAILS_ZINDEX);
+        options.setZIndex(RaceMapOverlaysZIndexes.BOATTAILS_ZINDEX);
         return options;
     }
     
     @Override
-    public Polyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
+    public MultiColorPolyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
         final BoatDTO boat = competitorSelection.getBoat(competitor);
-        PolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
-        Polyline result = Polyline.newInstance(options);
+        MultiColorPolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
+        MultiColorPolyline result = new MultiColorPolyline(options);
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
+        //result.setPath(pointsAsArray);
         result.setPath(pointsAsArray);
         result.setMap(map);
-        Hoverline resultHoverline = new Hoverline(result, options, this);
+        //Hoverline resultHoverline = new Hoverline(result, options, this);
         final ClickMapHandler clickHandler = new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
@@ -2967,19 +2972,19 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         };
         result.addClickHandler(clickHandler);
-        resultHoverline.addClickHandler(clickHandler);
+        //resultHoverline.addClickHandler(clickHandler);
         result.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
                 map.setTitle(boat.getSailId() + ", " + competitor.getName());
             }
         });
-        resultHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
+        /*resultHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
             @Override
             public void onEvent(MouseOutMapEvent event) {
                 map.setTitle("");
             }
-        });
+        });*/
         return result;
     }
 

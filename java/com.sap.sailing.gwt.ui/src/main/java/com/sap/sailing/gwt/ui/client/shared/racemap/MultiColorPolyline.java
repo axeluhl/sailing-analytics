@@ -1,118 +1,152 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
-import com.google.gwt.maps.client.overlays.PolylineOptions;
-import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
-import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
-import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 
 /**
- * A Polyline with multi color support. The line's individual segments are each made of a {@link Polyline} which can have a different color than the other segments.
- * A segment is created in between two adjacent {@link GPSFixDTO}s stored in {@link #fixes}.
  * 
  * @author Tim Hessenmüller (D062243)
  */
 public class MultiColorPolyline {
+    private MultiColorPolylineColorMode colorMode = MultiColorPolylineColorMode.POLYCHROMATIC;
     private MultiColorPolylineOptions options;
-    private CoordinateSystem coordinateSystem;
     
-    /**
-     * Contains {@link GPSFixDTO}s marking the start and/or end of individual {@link Polyline}s stored in {@link #polylines}.
-     */
-    private List<GPSFixDTO> fixes; //TODO Decide on what list impl to use
-    
-    // Contains data points at which new polylines might be created
-    private CompetitorRaceDataDTO data;
-    
-    /**
-     * Stores the individual segments which together make up a multi color {@link Polyline} following the positions in {@link #fixes}.
-     * There will always be one {@link Polyline} less than there are {@link GPSFixDTO}s in {@link #fixes} (except when both are empty).
-     * The nth {@link Polyline} will connect the n and n+1 {@link GPSFixDTO}s.
-     */
     private List<Polyline> polylines;
     
     private MapWidget map;
     private List<ClickMapHandler> clickMapHandler;
     private List<MouseOverMapHandler> mouseOverMapHandler;
     
-    public MultiColorPolyline(CoordinateSystem coordinateSystem) {
-        options = new MultiColorPolylineOptions(new ValueRangeFlexibleBoundaries(0, 100, 0.5));
-        fixes = new LinkedList<GPSFixDTO>();
+    public MultiColorPolyline(MultiColorPolylineColorProvider colorProvider) {
+        this(new MultiColorPolylineOptions(colorProvider));
+    }
+    public MultiColorPolyline(MultiColorPolylineOptions options) {
+        this.options = options;
         polylines = new ArrayList<Polyline>(); //TODO impl?
-        this.coordinateSystem = coordinateSystem;
         
         clickMapHandler = new LinkedList<ClickMapHandler>();
         mouseOverMapHandler = new LinkedList<MouseOverMapHandler>();
+        log("Constructor");
     }
     
+    private void log(String msg) {
+        GWT.log(this.hashCode() + " " + msg);
+    }
     
-    public MultiColorPolylineOptions getOptions() {
+    public MultiColorPolylineColorMode getColorMode() {
+        return colorMode;
+    }
+    
+    public void setColorMode(MultiColorPolylineColorMode colorMode) {
+        if (this.colorMode != colorMode) {
+            MVCArray<LatLng> path = MVCArray.newInstance(getPath().toArray(new LatLng[0]));
+            this.colorMode = colorMode;
+            setPath(path);
+        }
+    }
+    
+    /*public MultiColorPolylineOptions getOptions() {
         return options;
-    }
-    
-    public void setOptions(PolylineOptions options) {
-        //TODO valueRange
-        this.options = new MultiColorPolylineOptions(options, new ValueRangeFlexibleBoundaries(0, 100, 0.5));
-        this.options.applyTo(polylines);
-    }
+    }*/
     public void setOptions(MultiColorPolylineOptions options) {
         this.options = options;
-        this.options.applyTo(polylines);
+        for (Polyline line : polylines) {
+            String color = options.getColorProvider().getColor(line.getPath().get(0));
+            line.setOptions(options.newPolylineOptionsInstance(color));
+        }
     }
     
-    private Polyline createPolyline(int start) {
-        //TODO Color
-        Polyline line;
-        if (data != null) {
-            Date time = new Date((fixes.get(start).timepoint.getTime() + fixes.get(start + 1).timepoint.getTime()) / 2);
-            line = options.newPolylineInstance(interpolateData(time));
-        } else {
-            line = options.newPolylineInstance(options.getColorMapper().getColor(new Random().nextInt(101)));
+    
+    
+    public List<LatLng> getPath() {
+        int cap = getLength();
+        List<LatLng> path = new ArrayList<>(cap);
+        if (cap > 0) {
+            path.add(polylines.get(0).getPath().get(0));
+            for (Polyline line : polylines) {
+                for (int i = 1; i < line.getPath().getLength(); i++) {
+                    path.add(line.getPath().get(i));
+                }
+            }
         }
-        MVCArray<LatLng> path = MVCArray.newInstance();
-        for (GPSFixDTO fix : fixes.subList(start, start + 2)) { // subList(inclusive, exclusive)
-            path.push(coordinateSystem.toLatLng(fix.position));
-        }
-        line.setPath(path);
-        if (map != null) {
-            line.setMap(map);
-        }
-        for (ClickMapHandler h : clickMapHandler) {
-            line.addClickHandler(h);
-        }
-        for (MouseOverMapHandler h : mouseOverMapHandler) {
-            line.addMouseOverHandler(h);
-        }
-        return line;
+        return path;
     }
     
-    public List<GPSFixDTO> getPath() {
-        return fixes;
+    public void setPath(MVCArray<LatLng> path) {
+        polylines.clear(); //TODO maybe not?
+        switch (colorMode) {
+        case MONOCHROMATIC:
+            polylines.add(createPolyline(path));
+            break;
+        case POLYCHROMATIC:
+            for (int i = 0; i < path.getLength() - 1; i++) {
+                MVCArray<LatLng> subPath = MVCArray.newInstance();
+                subPath.push(path.get(i));
+                subPath.push(path.get(i + 1));
+                polylines.add(createPolyline(subPath));
+            }
+            break;
+        }
     }
-    
-    public void setPath(List<GPSFixDTO> path) {
+    /*public void setPath(List<GPSFixDTO> path) {
         polylines.clear();
         fixes = path; //TODO Force specific impl?
         //polylines.ensureCapacity(fixes.size() - 1);
         for (int i = 0; i < fixes.size() - 2; i++) {
             polylines.add(createPolyline(i));
         }
-    }
+    }*/
     
-    public void insertAt(int index, GPSFixDTO fix) {
+    public void insertAt(int index, LatLng position) {
+        switch (colorMode) {
+        case MONOCHROMATIC:
+            if (polylines.isEmpty()) {
+                polylines.add(createPolyline(MVCArray.newInstance()));   
+            }
+            polylines.get(0).getPath().insertAt(index, position);
+            break;
+        case POLYCHROMATIC:
+            if (index == 0) {
+                // Prepend a new Polyline
+                MVCArray<LatLng> path = MVCArray.newInstance();
+                path.push(position);
+                if (!polylines.isEmpty()) {
+                    path.push(polylines.get(0).getPath().get(0));
+                }
+                polylines.add(0, createPolyline(path));
+            } else if (index == getLength()) {
+                if (index == 1 && polylines.get(0).getPath().getLength() == 1) {
+                    // Finish first polyline
+                    polylines.get(0).getPath().push(position);
+                } else {
+                    // Append a new Polyline
+                    MVCArray<LatLng> path = MVCArray.newInstance();
+                    path.push(polylines.get(index - 2).getPath().get(1));
+                    path.push(position);
+                    polylines.add(index - 1, createPolyline(path));
+                }
+            } else {
+                // Split an existing Polyline into two
+                LatLng end = polylines.get(index - 1).getPath().get(1);
+                polylines.get(index - 1).getPath().setAt(1, position);
+                MVCArray<LatLng> path = MVCArray.newInstance();
+                path.push(position);
+                path.push(end);
+                polylines.add(index, createPolyline(path));
+            }
+            break;
+        }
+    }
+    /*public void insertAt(int index, GPSFixDTO fix) {
         fixes.add(index, fix);
         // Split what was until now a single Polyline into two that incorporate the new fix
         if (fixes.size() >= 2) {
@@ -129,9 +163,38 @@ public class MultiColorPolyline {
                 polylines.add(index, createPolyline(index));
             }
         }
-    }
+    }*/
     
-    public GPSFixDTO removeAt(int index) {
+    public LatLng removeAt(int index) {
+        switch (colorMode) {
+        case MONOCHROMATIC:
+            return polylines.get(0).getPath().removeAt(index);
+        case POLYCHROMATIC: //TODO Not working
+            LatLng removed;
+            if (index == 0) {
+                // Remove the Polyline connecting the first to the second fix
+                removed = polylines.get(0).getPath().get(0);
+                polylines.get(0).setMap(null);
+                polylines.remove(0);
+            } else if (index == getLength() - 1) {
+                // Remove the Polyline connecting the last two fixes
+                removed = polylines.get(index - 1).getPath().get(1);
+                polylines.get(index - 1).setMap(null);
+                polylines.remove(index - 1);
+            } else {
+                // Remove the Polyline ending at fix
+                removed = polylines.get(index - 1).getPath().get(1);
+                LatLng start = polylines.get(index - 1).getPath().get(0);
+                polylines.get(index - 1).setMap(null);
+                polylines.remove(index - 1);
+                // and update the following Polyline to fill the gap
+                polylines.get(index - 1).getPath().setAt(0, start);
+            }
+            return removed;
+        }
+        return null;
+    }
+    /*public GPSFixDTO removeAt(int index) {
         GPSFixDTO fix = fixes.remove(index);
         // The two Polylines meeting in fix need to be combined
         if (index == 0) {
@@ -147,9 +210,25 @@ public class MultiColorPolyline {
             polylines.get(index - 1).getPath().setAt(1, coordinateSystem.toLatLng(fixes.get(index).position));
         }
         return fix;
-    }
+    }*/
     
-    public void setAt(int index, GPSFixDTO fix) {
+    public void setAt(int index, LatLng position) {
+        switch (colorMode) {
+        case MONOCHROMATIC:
+            polylines.get(0).getPath().setAt(index, position);
+            break;
+        case POLYCHROMATIC:
+            if (index == 0) {
+                polylines.get(0).getPath().setAt(0, position);
+            } else if (index == getLength() - 1) {
+                polylines.get(index - 1).getPath().setAt(1, position);
+            } else {
+                polylines.get(index - 1).getPath().setAt(1, position);
+                polylines.get(index).getPath().setAt(0, position);
+            }
+        }
+    }
+    /*public void setAt(int index, GPSFixDTO fix) {
         fixes.set(index, fix);
         if (index == 0) {
             polylines.get(index).getPath().setAt(0, coordinateSystem.toLatLng(fix.position));
@@ -159,31 +238,50 @@ public class MultiColorPolyline {
             polylines.get(index - 1).getPath().setAt(1, coordinateSystem.toLatLng(fix.position));
             polylines.get(index).getPath().setAt(0, coordinateSystem.toLatLng(fix.position));
         }
-    }
+    }*/
     
     public void setMap(MapWidget map) {
         this.map = map;
-        for (Polyline line : polylines) {
-            line.setMap(map);
+        for (int i = 0; i < polylines.size(); i++) {
+            polylines.get(i).setMap(map);
         }
     }
     
-    private double interpolateData(Date time) {
-        Iterator<Pair<Date, Double>> iter = data.getRaceData().iterator();
-        //TODO Binary search? Map? Mostly called when a new Polyline gets created so guess its for the newest data?
-        Pair<Date, Double> current = null;
-        Pair<Date, Double> previous = null;
-        while (iter.hasNext()) {
-            current = iter.next();
-            if (current.getA().after(time)) {
-                break;
+    public void clear() {
+        polylines.clear();
+    }
+    
+    public int getLength() {
+        switch (colorMode) {
+        case MONOCHROMATIC:
+            return polylines.isEmpty() ? 0 : polylines.get(0).getPath().getLength();
+        case POLYCHROMATIC:
+            switch (polylines.size()) {
+            case 0:
+                return 0;
+            case 1:
+                return polylines.get(0).getPath().getLength();
+            default:
+                log(Integer.toString(1 + polylines.size()));
+                return 1 + polylines.size();
             }
-            previous = current;
         }
-        if (current == null) return 0.0;
-        if (previous == null) return current.getB();
-        double perc = Math.abs(time.getTime() - previous.getA().getTime() / (double) (current.getA().getTime() - previous.getA().getTime()));
-        return (previous.getB() * (1.0 - perc)) + (current.getB() * perc);
+        return -1;
+    }
+    
+    private Polyline createPolyline(MVCArray<LatLng> path) {
+        Polyline line = options.newPolylineInstance(path.get(0)); //TODO Get color from different point?
+        line.setPath(path);
+        if (map != null) {
+            line.setMap(map);
+        }
+        for (ClickMapHandler h : clickMapHandler) {
+            line.addClickHandler(h);
+        }
+        for (MouseOverMapHandler h : mouseOverMapHandler) {
+            line.addMouseOverHandler(h);
+        }
+        return line;
     }
     
     public void addClickHandler(ClickMapHandler handler) {
