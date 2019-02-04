@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
@@ -31,7 +30,7 @@ public class MultiColorPolyline {
     }
     public MultiColorPolyline(MultiColorPolylineOptions options) {
         this.options = options;
-        polylines = new ArrayList<Polyline>(); //TODO impl?
+        polylines = new ArrayList<Polyline>();
         
         clickMapHandler = new LinkedList<ClickMapHandler>();
         mouseOverMapHandler = new LinkedList<MouseOverMapHandler>();
@@ -54,9 +53,9 @@ public class MultiColorPolyline {
     }*/
     public void setOptions(MultiColorPolylineOptions options) {
         this.options = options;
-        for (Polyline line : polylines) {
-            String color = options.getColorProvider().getColor(line.getPath().get(0));
-            line.setOptions(options.newPolylineOptionsInstance(color));
+        for (int i = 0; i < polylines.size(); i++) {
+            String color = options.getColorProvider().getColor(i);
+            polylines.get(i).setOptions(options.newPolylineOptionsInstance(color));
         }
     }
     
@@ -77,17 +76,17 @@ public class MultiColorPolyline {
     }
     
     public void setPath(MVCArray<LatLng> path) {
-        polylines.clear(); //TODO maybe not?
+        polylines.clear();
         switch (colorMode) {
         case MONOCHROMATIC:
-            polylines.add(createPolyline(path));
+            polylines.add(createPolyline(path, 0));
             break;
         case POLYCHROMATIC:
             for (int i = 0; i < path.getLength() - 1; i++) {
                 MVCArray<LatLng> subPath = MVCArray.newInstance();
                 subPath.push(path.get(i));
                 subPath.push(path.get(i + 1));
-                polylines.add(createPolyline(subPath));
+                polylines.add(createPolyline(subPath, i));
             }
             break;
         }
@@ -97,7 +96,7 @@ public class MultiColorPolyline {
         switch (colorMode) {
         case MONOCHROMATIC:
             if (polylines.isEmpty()) {
-                polylines.add(createPolyline(MVCArray.newInstance()));   
+                polylines.add(createPolyline(MVCArray.newInstance(), 0));   
             }
             polylines.get(0).getPath().insertAt(index, position);
             break;
@@ -109,7 +108,7 @@ public class MultiColorPolyline {
                 if (!polylines.isEmpty()) {
                     path.push(polylines.get(0).getPath().get(0));
                 }
-                polylines.add(0, createPolyline(path));
+                polylines.add(0, createPolyline(path, index));
             } else if (index == getLength()) {
                 if (index == 1 && polylines.get(0).getPath().getLength() == 1) {
                     // Finish first polyline
@@ -119,7 +118,7 @@ public class MultiColorPolyline {
                     MVCArray<LatLng> path = MVCArray.newInstance();
                     path.push(polylines.get(index - 2).getPath().get(1));
                     path.push(position);
-                    polylines.add(index - 1, createPolyline(path));
+                    polylines.add(index - 1, createPolyline(path, index));
                 }
             } else {
                 // Split an existing Polyline into two
@@ -128,7 +127,7 @@ public class MultiColorPolyline {
                 MVCArray<LatLng> path = MVCArray.newInstance();
                 path.push(position);
                 path.push(end);
-                polylines.add(index, createPolyline(path));
+                polylines.add(index, createPolyline(path, index));
             }
             break;
         }
@@ -138,7 +137,7 @@ public class MultiColorPolyline {
         switch (colorMode) {
         case MONOCHROMATIC:
             return polylines.get(0).getPath().removeAt(index);
-        case POLYCHROMATIC: //TODO Not working
+        case POLYCHROMATIC:
             LatLng removed;
             if (index == 0) {
                 // Remove the Polyline connecting the first to the second fix
@@ -209,8 +208,8 @@ public class MultiColorPolyline {
         return -1;
     }
     
-    private Polyline createPolyline(MVCArray<LatLng> path) {
-        Polyline line = options.newPolylineInstance(path.get(0)); //TODO Get color from different point?
+    private Polyline createPolyline(MVCArray<LatLng> path, int colorIndex) {
+        Polyline line = options.newPolylineInstance(colorIndex);
         line.setPath(path);
         if (map != null) {
             line.setMap(map);

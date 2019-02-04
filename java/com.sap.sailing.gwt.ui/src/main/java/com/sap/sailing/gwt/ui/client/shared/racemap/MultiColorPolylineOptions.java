@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
 
@@ -33,8 +32,8 @@ public class MultiColorPolylineOptions {
     }
     
     
-    public Polyline newPolylineInstance(LatLng position) {
-        return newPolylineInstance(colorProvider.getColor(position));
+    public Polyline newPolylineInstance(int index) {
+        return newPolylineInstance(colorProvider.getColor(index));
     }
     public Polyline newPolylineInstance(String strokeColor) {
         Polyline line = Polyline.newInstance(newPolylineOptionsInstance(strokeColor));
