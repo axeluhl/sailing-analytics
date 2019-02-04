@@ -208,8 +208,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         lockForRead();
         try {
             final NavigableSet<FixType> tailSet = getInternalFixes().tailSet(getDummyFix(timePoint), /* inclusive */ true);
-            for (final Iterator<FixType> i=tailSet.iterator(); i.hasNext(); ) {
-                final FixType next = i.next();
+            for (final FixType next : tailSet) {
                 if (fixAcceptancePredicate == null || fixAcceptancePredicate.isAcceptFix(next)) {
                     return next;
                 }

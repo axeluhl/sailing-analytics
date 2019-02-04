@@ -1,13 +1,13 @@
 package com.sap.sailing.android.shared.ui.activities;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+
 import android.content.Intent;
 import android.view.MenuItem;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-
 public class ResilientActivity extends LoggableActivity {
     private static final String TAG = ResilientActivity.class.getName();
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -18,7 +18,7 @@ public class ResilientActivity extends LoggableActivity {
             return super.onOptionsItemSelected(item);
         }
     }
-    
+
     protected boolean onHomeClicked() {
         return false;
     }
@@ -26,7 +26,7 @@ public class ResilientActivity extends LoggableActivity {
     protected void fadeActivity(Class<?> activity, boolean newTopTask) {
         Intent intent = new Intent(getBaseContext(), activity);
         if (newTopTask) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
         fadeActivity(intent);

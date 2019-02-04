@@ -87,4 +87,6 @@
     <string name="time_ago" translatable="false">%1$dh %2$02d\' %3$02d\"</string>
     <string name="date_short" translatable="false">yyyy-MM-dd</string>
 
+    <string name="service_info" translatable="false">Sending Message Service</string>
+
 </resources>

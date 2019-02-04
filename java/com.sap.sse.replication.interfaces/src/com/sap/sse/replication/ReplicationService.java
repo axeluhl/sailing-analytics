@@ -99,4 +99,32 @@ public interface ReplicationService {
     Iterable<Replicable<?, ?>> getAllReplicables();
 
     ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname, String exchangeName, int servletPort, int jmsPort, String jmsQueueName, Iterable<Replicable<?, ?>> replicables);
+
+    /**
+     * @return a replication receiver that is responsible for receiving replicated operations from a message queue and
+     *         for dispatching those operations to their respective {@link Replicable}s; or {@code null} in case
+     *         currently no replication is active. Note, though, that this service may already be aware that it will
+     *         start replicating any time soon but hasn't actually done so. This can be seen from
+     *         {@link #isReplicationStarting()}. Therefore, a reasonable availability / health check shall check the
+     *         result of this method, the result of {@link #isReplicationStarting()} as well as the
+     *         {@link Replicable#isCurrentlyFillingFromInitialLoad()} results.
+     */
+    ReplicationReceiver getReplicator();
+
+    void setReplicationStarting(boolean b);
+
+    /**
+     * @return {@code true} if replication is starting; during this phase it is clear that the replicables managed by
+     *         this service instance are about to be {@link Replicable#clearReplicaState() cleared} and to be initialized
+     *         with an {@link Replicable#initiallyFillFrom(java.io.InputStream) initial load} obtained from the master
+     *         instance. However, this initial load process may not yet have started and hence the {@link #getReplicator} method
+     *         
+     */
+    boolean isReplicationStarting();
+    
+    /**
+     * Provides a compound overview of this service and the {@link Replicable}s it manages.
+     * This can be used in compound server availability checks, for example.
+     */
+    ReplicationStatus getStatus();
 }

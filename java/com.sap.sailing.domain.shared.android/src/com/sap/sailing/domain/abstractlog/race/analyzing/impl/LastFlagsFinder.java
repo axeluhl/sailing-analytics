@@ -87,7 +87,7 @@ public class LastFlagsFinder extends RaceLogAnalyzer<List<RaceLogFlagEvent>> {
             public int compare(RaceLogFlagEvent left, RaceLogFlagEvent right) {
                 int result = Util.compareToWithNull(right.getLogicalTimePoint(), left.getLogicalTimePoint(), /* nullIsLess */ false);
                 if (result == 0) {
-                    result = Boolean.valueOf(right.isDisplayed()).compareTo(left.isDisplayed());
+                    result = Boolean.compare(right.isDisplayed(), left.isDisplayed());
                     if (result == 0) {
                         result = right.getId().toString().compareTo(left.getId().toString());
                     }

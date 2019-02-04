@@ -3,10 +3,10 @@ package com.sap.sailing.racecommittee.app.utils;
 import java.util.HashSet;
 import java.util.Set;
 
-import android.os.Handler;
-
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.os.Handler;
 
 /**
  * Reports a tick every second as a singleton

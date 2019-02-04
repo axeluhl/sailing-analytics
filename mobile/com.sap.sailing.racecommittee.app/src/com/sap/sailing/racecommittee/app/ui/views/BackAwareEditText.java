@@ -1,11 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
-import android.widget.EditText;
 
-public class BackAwareEditText extends EditText {
+public class BackAwareEditText extends AppCompatEditText {
     private InputDownPressedListener mInputDownPressedListener;
 
     public BackAwareEditText(Context context) {
