@@ -180,6 +180,8 @@ public class Activator implements BundleActivator {
                     userStore.ensureDefaultRolesExist();
                     // actually load the users and migrate them if required
                     userStore.loadAndMigrateUsers();
+                    // loading ACLs and Ownerships requires users and UserGroups to be correctly loaded
+                    accessControlStore.loadACLsAndOwnerships();
                     // create security service, it will also create a default admin user if no users exist
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
                     // check if we already have an ownership for the server, create if it is missing

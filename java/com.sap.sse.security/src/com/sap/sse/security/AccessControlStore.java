@@ -66,4 +66,6 @@ public interface AccessControlStore extends Named {
      * references to it that are held internally. It will not modify the given argument!
      */
     void removeAllOwnershipsFor(User user);
+
+    void loadACLsAndOwnerships();
 }
