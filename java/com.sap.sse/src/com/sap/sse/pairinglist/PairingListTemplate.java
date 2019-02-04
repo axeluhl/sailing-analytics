@@ -31,7 +31,7 @@ public interface PairingListTemplate {
      * 
      * @return double, stated as the standard deviation.
      */
-    double getAssignmentQuality();
+    double getBoatAssignmentsQuality();
     
     /**
      * This value represents the number of boat changes needed in the whole competition.

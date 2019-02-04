@@ -22,7 +22,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     
     private final Random random = new Random();
     private final int[][] pairingListTemplate;
-    private final double standardDev, assignmentQuality;
+    private final double standardDev, boatAssignmentsQuality;
     private final int flightMultiplier, boatChangeFactor, boatchanges;
     private final int dummies;
     private final ExecutorService executorService = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
@@ -68,7 +68,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             this.standardDev = this.calcStandardDev(
                     incrementAssociations(this.pairingListTemplate, new int[pairingFrameProvider.getCompetitorsCount()
                             + dummies][pairingFrameProvider.getCompetitorsCount() + dummies]));
-            this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(this.pairingListTemplate,
+            this.boatAssignmentsQuality = this.calcStandardDev(getBoatAssignments(this.pairingListTemplate,
                     new int[pairingFrameProvider.getCompetitorsCount()
                             + dummies][(pairingFrameProvider.getCompetitorsCount() + dummies)
                                     / pairingFrameProvider.getGroupsCount()]));
@@ -109,7 +109,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         }
         this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
                 new int[competitorsCount + this.dummies][competitorsCount + this.dummies]));
-        this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(template,
+        this.boatAssignmentsQuality = this.calcStandardDev(getBoatAssignments(template,
                 new int[competitorsCount + this.dummies][(competitorsCount + this.dummies) / groupCount]));
         this.boatchanges = this.getBoatChangesFromPairingList(template, template.length / groupCount, groupCount, competitorsCount);
         this.resetDummies(this.pairingListTemplate, competitorsCount + this.dummies);
@@ -124,8 +124,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     @Override
-    public double getAssignmentQuality() {
-        return this.assignmentQuality;
+    public double getBoatAssignmentsQuality() {
+        return this.boatAssignmentsQuality;
     }
 
     @Override
@@ -514,7 +514,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      *            int array on which the assignment will be written
      * @return matrix that represents the assignment associations
      */
-    protected int[][] getAssignmentAssociations(int[][] pairingList, int[][] associations) {
+    protected int[][] getBoatAssignments(int[][] pairingList, int[][] associations) {
         for (int[] group : pairingList) {
             for (int i = 0; i < pairingList[0].length; i++) {
                 associations[group[i]][i] += 1;
@@ -538,7 +538,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      *            count of competitors
      */
     private void improveCompetitorAllocations(int[][] pairingList, int flights, int groups, int competitors) {
-        int[][] assignments = this.getAssignmentAssociations(pairingList, new int[competitors][competitors / groups]);
+        int[][] assignments = this.getBoatAssignments(pairingList, new int[competitors][competitors / groups]);
         double averageAssignments = flights / (competitors / groups);
         for (int iteration = 0; iteration < 10; iteration++) {
             for (int zGroup = 0; zGroup < pairingList.length; zGroup++) {
@@ -573,7 +573,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         temp = pairingList[zGroup][bestPosition];
                         pairingList[zGroup][bestPosition] = pairingList[zGroup][position[0]];
                         pairingList[zGroup][position[0]] = temp;
-                        assignments = getAssignmentAssociations(pairingList, new int[competitors][competitors / groups]);
+                        assignments = getBoatAssignments(pairingList, new int[competitors][competitors / groups]);
                         for (int x = 0; x < (competitors / groups); x++) {
                             System.arraycopy(assignments[pairingList[zGroup][x]], 0, groupAssignments[x], 0, (competitors / groups));
                         }

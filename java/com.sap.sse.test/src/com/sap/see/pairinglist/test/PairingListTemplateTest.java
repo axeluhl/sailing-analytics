@@ -117,10 +117,10 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
     @Test
     public void assignmentTest() {
         this.createPairingListTemplate(15, 3, 18);
-        System.out.println(this.calcStandardDev(this.getAssignmentAssociations(this.getPairingListTemplate(), new int[18][6])));
+        System.out.println(this.calcStandardDev(this.getBoatAssignments(this.getPairingListTemplate(), new int[18][6])));
         
         this.createPairingListTemplate(10, 3, 30);
-        System.out.println(this.calcStandardDev(this.getAssignmentAssociations(this.getPairingListTemplate(), new int[18][6])));
+        System.out.println(this.calcStandardDev(this.getBoatAssignments(this.getPairingListTemplate(), new int[18][6])));
     }
 
     @Test
