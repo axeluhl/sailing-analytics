@@ -33,4 +33,14 @@ public class UserGroupImpl extends AbstractUserGroupImpl<User, RoleDefinition> i
     public static String getTypeRelativeObjectIdentifierAsString(UserGroup userGroup) {
         return userGroup.getId().toString();
     }
+
+    @Override
+    public boolean isRoleAssociated(RoleDefinition roleDefinition) {
+        return roleDefinitionMap.containsKey(roleDefinition);
+    }
+
+    @Override
+    public Boolean getRoleAssociation(RoleDefinition roleDefinition) {
+        return roleDefinitionMap.get(roleDefinition);
+    }
 }

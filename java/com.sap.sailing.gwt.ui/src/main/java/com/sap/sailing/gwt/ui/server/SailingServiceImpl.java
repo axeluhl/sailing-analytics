@@ -609,8 +609,8 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
-import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
@@ -4922,84 +4922,63 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
         getService().apply(new UpdateServerConfiguration(
                 new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
-        if (serverConfiguration.isPublic() != null || serverConfiguration.isSelfService() != null) {
-            final User allUser = getSecurityService().getAllUser();
-            if (allUser != null) {
-                final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
-                        .getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName()));
-                if (serverConfiguration.isSelfService() != null) {
-                    TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
-                            .get(createObjectOnCurrentServerPermission, allUser);
-                    QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
-                            .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                    if (serverConfiguration.isSelfService()) {
-                        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                                SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
-                                associationTypeIdentifier.toString(), new Action() {
+        final User allUser = getSecurityService().getAllUser();
+        if (allUser != null) {
+            final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
+                    .getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName()));
+            if (serverConfiguration.isSelfService() != null) {
+                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
+                        .get(createObjectOnCurrentServerPermission, allUser);
+                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                if (serverConfiguration.isSelfService()) {
+                    getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                            SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
+                            associationTypeIdentifier.toString(), new Action() {
+                                @Override
+                                public void run() throws Exception {
+                                    getSecurityService().addPermissionForUser(allUser.getName(),
+                                            createObjectOnCurrentServerPermission);
+                                }
+                            });
+                } else {
+                    getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                            new ActionWithResult<Void>() {
 
-                                    @Override
-                                    public void run() throws Exception {
-                                        getSecurityService().addPermissionForUser(allUser.getName(),
-                                                createObjectOnCurrentServerPermission);
-                                    }
-                                });
-
-                    } else {
-                        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
-                                new ActionWithResult<Void>() {
-
-                                    @Override
-                                    public Void run() throws Exception {
-                                        getSecurityService().removePermissionFromUser(allUser.getName(),
-                                                createObjectOnCurrentServerPermission);
-                                        return null;
-                                    }
-                                });
-
-                    }
+                                @Override
+                                public Void run() throws Exception {
+                                    getSecurityService().removePermissionFromUser(allUser.getName(),
+                                            createObjectOnCurrentServerPermission);
+                                    return null;
+                                }
+                            });
                 }
-                if (serverConfiguration.isPublic() != null) {
-                    final RoleDefinition viewerRole = getSecurityService()
-                            .getRoleDefinition(SailingViewerRole.getInstance().getId());
-                    final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
-                    if (viewerRole != null && defaultServerTenant != null) {
-                        // role ownership handling left out on purpose, as else the all user could remove the public
-                        // role from itself!
-                        final Role publicAccessForServerRole = new Role(viewerRole, defaultServerTenant, null);
-                        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(
-                                publicAccessForServerRole,
-                                allUser);
-                        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
-                                .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                        if (serverConfiguration.isPublic()) {
-                            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                                    SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
-                                    associationTypeIdentifier.toString(), new Action() {
-
-                                        @Override
-                                        public void run() throws Exception {
-                                            getSecurityService().addRoleForUser(allUser, publicAccessForServerRole);
-                                        }
-                                    });
-                        } else {
-                            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
-                                    qualifiedTypeIdentifier, new ActionWithResult<Void>() {
-
-                                        @Override
-                                        public Void run() throws Exception {
-                                            getSecurityService().removeRoleFromUser(allUser, publicAccessForServerRole);
-                                            return null;
-                                        }
-                                    });
-                        }
-                    } else {
-                        throw new IllegalArgumentException("Viewerrole or defaultServerTenant is not existing");
-                    }
-
-                }
-            } else {
-                throw new IllegalArgumentException("Alluser is not exiting");
             }
+        } else {
+            throw new IllegalArgumentException("<all> user does not exist");
+        }
+        
+        final RoleDefinition viewerRole = getSecurityService()
+                .getRoleDefinition(SailingViewerRole.getInstance().getId());
+        final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+        if (viewerRole != null && defaultServerTenant != null) {
+            if (!Util.equalsWithNull(serverConfiguration.isPublic(), defaultServerTenant.getRoleAssociation(viewerRole))) {
+                // value changed
+                if (getSecurityService().hasCurrentUserUpdatePermission(defaultServerTenant)
+                        && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                                viewerRole, new Ownership(null, defaultServerTenant))) {
+                    if (Boolean.TRUE.equals(serverConfiguration.isPublic())) {
+                        getSecurityService().putRoleDefinitionToUserGroup(defaultServerTenant, viewerRole, true);
+                    } else {
+                        getSecurityService().removeRoleDefintionFromUserGroup(defaultServerTenant, viewerRole);
+                    }
+                } else {
+                    throw new AuthorizationException("No permission to make the server public");
+                }
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    SailingViewerRole.getInstance().getName() + " role or default server tenant does not exist");
         }
     }
 
@@ -8860,12 +8839,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private Boolean isPublicServer() {
         final Boolean result;
-        final User allUser = getSecurityService().getAllUser();
         final RoleDefinition viewerRole = getSecurityService()
                 .getRoleDefinition(SailingViewerRole.getInstance().getId());
         final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
-        if (allUser != null && viewerRole != null && defaultServerTenant != null) {
-            result = allUser.hasRole(new Role(viewerRole, defaultServerTenant, null));
+        if (viewerRole != null && defaultServerTenant != null) {
+            result = defaultServerTenant.getRoleAssociation(viewerRole);
         } else {
             result = null;
         }
