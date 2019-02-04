@@ -86,7 +86,7 @@ public class LocalServerManagementPanel extends SimplePanel {
     
     private AccessControlledButtonPanel createServerActionsUi(final UserService userService) {
         final HasPermissions type = SecuredSecurityTypes.SERVER;
-        final Consumer<ServerInfoDTO> updateCallback = event -> refreshServerInfo();
+        final Consumer<ServerInfoDTO> updateCallback = event -> userService.updateUser(false);
         final EditOwnershipDialog.DialogConfig<ServerInfoDTO> configOwner = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, updateCallback, stringMessages);
         final EditACLDialog.DialogConfig<ServerInfoDTO> configACL = EditACLDialog
@@ -145,10 +145,6 @@ public class LocalServerManagementPanel extends SimplePanel {
             }
         });
     }
-    
-    private void refreshServerInfo() {
-         sailingService.getServerInfo(new RefreshAsyncCallback<>(this::updateServerInfo));
-     }
 
     private void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
