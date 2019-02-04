@@ -385,7 +385,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.UPDATE, userGroup))) {
             final RoleDefinition roleDefinition = getSecurityService()
                     .getRoleDefinition(UUID.fromString(roleDefinitionIdAsString));
-            getSecurityService().putRoleDefinitionToUserGroup(userGroup, roleDefinition, forAll);
+            if (roleDefinition != null) {
+                if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(roleDefinition,
+                        new Ownership(null, userGroup))) {
+                    throw new UnauthorizedException("Not permitted to add role definition to group");
+                }
+                getSecurityService().putRoleDefinitionToUserGroup(userGroup, roleDefinition, forAll);
+            }
         } else {
             throw new UnauthorizedException("Not permitted to add role definition to group");
         }
@@ -399,7 +405,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.DELETE, userGroup))) {
             final RoleDefinition roleDefinition = getSecurityService()
                     .getRoleDefinition(UUID.fromString(roleDefinitionIdAsString));
-            getSecurityService().removeRoleDefintionFromUserGroup(userGroup, roleDefinition);
+            if (roleDefinition != null) {
+                if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(roleDefinition,
+                        new Ownership(null, userGroup))) {
+                    throw new UnauthorizedException("Not permitted to remove role definition from group");
+                }
+                getSecurityService().removeRoleDefintionFromUserGroup(userGroup, roleDefinition);
+            }
         } else {
             throw new UnauthorizedException("Not permitted to remove role definition from group");
         }
@@ -604,13 +616,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     /* redirectURL */null, null);
         }
         for (Role roleToAdd : rolesToAdd) {
-            for (WildcardPermission permissionOfRoleToAdd : roleToAdd.getPermissions()) {
-                if (!getSecurityService().hasCurrentUserMetaPermission(permissionOfRoleToAdd,
-                        roleToAdd.getQualificationAsOwnership())) {
-                    return new SuccessInfo(false,
-                            "Not permitted to grant role " + roleToAdd.getName() + " for user " + username,
-                            /* redirectURL */null, null);
-                }
+            if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                    roleToAdd.getRoleDefinition(), roleToAdd.getQualificationAsOwnership())) {
+                return new SuccessInfo(false,
+                        "Not permitted to grant role " + roleToAdd.getName() + " for user " + username,
+                        /* redirectURL */null, null);
             }
         }
         for (Role roleToRemove : roleDefinitionsToRemove) {

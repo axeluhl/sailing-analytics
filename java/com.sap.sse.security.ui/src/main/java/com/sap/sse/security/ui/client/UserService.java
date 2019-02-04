@@ -28,6 +28,7 @@ import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.Ownership;
@@ -436,7 +437,19 @@ public class UserService {
         return PermissionChecker.checkMetaPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
     }
-    
+
+    public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+            final RoleDefinitionDTO roleDefinition, final OwnershipDTO qualificationForGrantedPermissions) {
+        boolean result = true;
+        for (WildcardPermission permissionToCheck : roleDefinition.getPermissions()) {
+            if (!hasCurrentUserMetaPermission(permissionToCheck, qualificationForGrantedPermissions)) {
+                result = false;
+                break;
+            }
+        }
+        return result;
+    }
+
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
         return PermissionChecker.hasUserAnyPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);

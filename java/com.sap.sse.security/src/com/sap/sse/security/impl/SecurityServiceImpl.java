@@ -1758,6 +1758,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership);
         }
     }
+    
+    @Override
+    public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(final RoleDefinition roleDefinition, final Ownership qualificationForGrantedPermissions) {
+        boolean result = true;
+        for (WildcardPermission permissionToCheck : roleDefinition.getPermissions()) {
+            if (!hasCurrentUserMetaPermission(permissionToCheck, qualificationForGrantedPermissions)) {
+                result = false;
+                break;
+            }
+        }
+        return result;
+    }
 
     // ----------------- Replication -------------
     @Override
