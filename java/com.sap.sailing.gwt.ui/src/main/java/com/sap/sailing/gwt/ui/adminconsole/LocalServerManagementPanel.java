@@ -164,6 +164,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         // Update changeability
         isSelfServiceServerCheckbox.setEnabled(userService.hasCurrentUserMetaPermission(serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT), serverInfo.getOwnership()));
         // TODO update isPublicServerCheckbox -> default server tenant is currently not available in the UI
+        isPublicServerCheckbox.setEnabled(true);
     }
     
     private void updateServerConfiguration(ServerConfigurationDTO result) {
