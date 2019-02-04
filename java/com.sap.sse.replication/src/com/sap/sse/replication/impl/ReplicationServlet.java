@@ -212,6 +212,11 @@ public class ReplicationServlet extends AbstractHttpServlet {
         result.put("available", status.isAvailable());
         resp.setContentType("application/json;charset=UTF-8");
         resp.getWriter().print(result.toJSONString());
+        if (status.isAvailable()) {
+            resp.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        }
     }
 
     /**
