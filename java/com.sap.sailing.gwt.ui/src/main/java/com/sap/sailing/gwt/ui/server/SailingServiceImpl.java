@@ -4926,7 +4926,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (allUser != null) {
             final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
                     .getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName()));
-            if (serverConfiguration.isSelfService() != null) {
+            boolean isCurrentlyPublic = Util.contains(allUser.getPermissions(), createObjectOnCurrentServerPermission);
+            if (!isCurrentlyPublic && Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
                 TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
                         .get(createObjectOnCurrentServerPermission, allUser);
                 QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
@@ -4941,7 +4942,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                             createObjectOnCurrentServerPermission);
                                 }
                             });
-                } else {
+            }
+            if (isCurrentlyPublic && !Boolean.TRUE.equals(serverConfiguration.isSelfService())) {
                     getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
                             new ActionWithResult<Void>() {
 
