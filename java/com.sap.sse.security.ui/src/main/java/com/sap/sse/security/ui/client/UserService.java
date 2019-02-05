@@ -24,12 +24,14 @@ import com.sap.sse.gwt.client.StorageEvent;
 import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.Ownership;
@@ -397,6 +399,21 @@ public class UserService {
         return hasPermission(permission, /* ownership */ null, /* acl */ null);
     }
     
+    /**
+     * Checks whether the user has the permission to the given action for the given object.
+     */
+    public boolean hasPermission(SecuredDTO securedDTO, Action action) {
+        return hasPermission(securedDTO.getIdentifier().getPermission(action), securedDTO.getOwnership(),
+                securedDTO.getAccessControlList());
+    }
+
+    /**
+     * Checks whether the user has the permission to the given action for the ServerInfoDTO.
+     */
+    public boolean hasServerPermission(Action action) {
+        return hasPermission(this.serverInfo, action);
+    }
+
     public boolean hasPermission(WildcardPermission permission, OwnershipDTO ownership) {
         return hasPermission(permission, ownership, /* acl */ null);
     }
