@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType.StatisticType;
@@ -30,6 +29,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedS
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 
 /** displays a single statistic table which contains all {@link SailorProfileStatsiticEntry} objects */
@@ -90,7 +90,7 @@ public class SailorProfileStatisticTable extends Composite {
             contentContainerStatistic.add(lblEmpty);
         }
         if (type.getAggregationType() == StatisticType.AVERAGE
-                && userService.hasPermission(SecuredDomainType.DATA_MINING.getStringPermission())) {
+                && userService.hasServerPermission(ServerActions.DATA_MINING)) {
             addDataminingButton(statistic);
         }
     }

@@ -155,7 +155,7 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         DataMiningQueryForSailorProfilesPersistor.removeDMQueriesFromLocalStorage();
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
             SailorProfileStatisticTable table = new SailorProfileStatisticTable(flagImageResolver, type, i18n,
-                    userService, presenter);
+                    userService);
             accordionStatisticsUi.addWidget(table);
             if (accordionStatisticsUi.isExpanded()) {
                 updateStatistic(entry, type, table);
