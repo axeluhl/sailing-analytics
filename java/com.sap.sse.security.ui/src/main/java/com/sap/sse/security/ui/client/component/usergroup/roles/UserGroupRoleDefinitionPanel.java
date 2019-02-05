@@ -147,7 +147,7 @@ public class UserGroupRoleDefinitionPanel extends HorizontalPanel
             }
         });
 
-        buttonPanel.insertWidgetAtPosition(suggestRole, 1);
+        buttonPanel.insertWidgetAtPosition(suggestRole, 0);
 
         return buttonPanel;
     }

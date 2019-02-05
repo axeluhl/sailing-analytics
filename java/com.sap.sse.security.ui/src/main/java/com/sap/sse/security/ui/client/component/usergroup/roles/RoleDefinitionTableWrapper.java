@@ -145,7 +145,6 @@ public class RoleDefinitionTableWrapper extends
                                 @Override
                                 public void onSuccess(Void result) {
                                     selectedObject.put(rolePair.getA(), value);
-                                    refreshRoleList();
                                 }
                             });
                 }
