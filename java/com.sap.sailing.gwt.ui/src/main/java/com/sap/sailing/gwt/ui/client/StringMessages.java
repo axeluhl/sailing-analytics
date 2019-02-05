@@ -2227,4 +2227,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String migrateBoats();
     String migrateHierarchyToGroupOwner();
     String serverIsPublicButTenantIsNot();
+    String serverIsPublicButTenantIsNotAndCouldBeChanged();
 }

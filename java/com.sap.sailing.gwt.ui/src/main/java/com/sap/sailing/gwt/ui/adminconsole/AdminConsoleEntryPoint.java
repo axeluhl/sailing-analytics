@@ -46,6 +46,7 @@ import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
@@ -105,9 +106,37 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                     StrippedUserGroupDTO currentTenant = getUserService().getCurrentTenant();
                     StrippedUserGroupDTO serverTenant = result.getServerDefaultTenant();
                     if (!serverTenant.equals(currentTenant)) {
-                        Window.alert(getStringMessages().serverIsPublicButTenantIsNot());
+                        if (getUserService().getCurrentUser().getUserGroups().contains(serverTenant)) {
+                            // The current user is in server tenant group and so his default tenant could be changed.
+                            if (Window.confirm(getStringMessages().serverIsPublicButTenantIsNotAndCouldBeChanged())) {
+                                // change the default tenant
+                                changeDefaultTenantForCurrentUser(serverTenant);
+                            }
+                        } else {
+                            // The current user is not in the server tenant group so his default tenant cannot be
+                            // changed.
+                            Window.alert(getStringMessages().serverIsPublicButTenantIsNot());
+                        }
                     }
                 }
+            }
+
+            /** Changes the default tenant for the current user. */
+            private void changeDefaultTenantForCurrentUser(final StrippedUserGroupDTO serverTenant) {
+                final UserDTO user = getUserService().getCurrentUser();
+                getUserService().getUserManagementService().updateUserProperties(user.getName(), user.getFullName(),
+                        user.getCompany(), user.getLocale(), serverTenant.getId().toString(),
+                        new AsyncCallback<UserDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(UserDTO result) {
+                                user.setDefaultTenantForCurrentServer(serverTenant);
+                            }
+                        });
             }
         });
     }
