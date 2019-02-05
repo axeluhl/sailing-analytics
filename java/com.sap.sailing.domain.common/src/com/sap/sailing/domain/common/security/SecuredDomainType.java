@@ -36,7 +36,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
     // AdminConsole permissions
     public static final HasPermissions MANAGE_MARK_PASSINGS = new SecuredDomainType("MANAGE_MARK_PASSINGS");
     public static final HasPermissions MANAGE_MARK_POSITIONS = new SecuredDomainType("MANAGE_MARK_POSITIONS");
-    public static final HasPermissions CAN_REPLAY_DURING_LIVE_RACES = new SecuredDomainType("CAN_REPLAY_DURING_LIVE_RACES");
     public static final HasPermissions DETAIL_TIMER = new SecuredDomainType("DETAIL_TIMER"); // TODO this is not a valid "HasPermission" instance; it's more an operation the user may be granted on objects of the TimePanel type
     
     public static final HasPermissions EVENT = new SecuredDomainType("EVENT");
@@ -47,8 +46,20 @@ public class SecuredDomainType extends HasPermissionsImpl {
 
     public static final HasPermissions LEADERBOARD_GROUP = new SecuredDomainType("LEADERBOARD_GROUP");
 
-    public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE");
+    public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE",
+            TrackedRaceActions.ALL_ACTIONS);
     
+    public static enum TrackedRaceActions implements Action {
+        CAN_REPLAY_DURING_LIVE_RACES;
+
+        private static final Action[] ALL_ACTIONS = new Action[] { CAN_REPLAY_DURING_LIVE_RACES, DefaultActions.READ,
+                DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,
+                DefaultActions.CHANGE_ACL };
+
+        public static final Action[] MUTATION_ACTIONS = new Action[] { DefaultActions.CREATE, DefaultActions.UPDATE,
+                DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL };
+    }
+
     public static enum CompetitorAndBoatActions implements Action {
         READ_PUBLIC;
         

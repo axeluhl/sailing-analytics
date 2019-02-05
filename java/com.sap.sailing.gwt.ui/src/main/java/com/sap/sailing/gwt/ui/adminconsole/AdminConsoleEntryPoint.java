@@ -192,7 +192,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             public void refreshAfterBecomingVisible() {
                 fillRegattas();
             }
-        }, getStringMessages().trackedRaces(), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.MUTATION_ACTIONS));
+                }, getStringMessages().trackedRaces(),
+                SecuredDomainType.TRACKED_RACE.getPermission(SecuredDomainType.TrackedRaceActions.MUTATION_ACTIONS));
         regattasDisplayers.add(trackedRacesManagementPanel);
 
         final CompetitorPanel competitorPanel = new CompetitorPanel(getSailingService(), getUserService(), getStringMessages(), this);
