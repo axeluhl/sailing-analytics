@@ -37,7 +37,7 @@ public class MongoDbModelStore extends AbstractModelStore {
         String fileName = getFilename(newModel);
         String bucketName = getCollectionName(newModel.getContextSpecificModelMetadata().getContextType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
-        try (GridFSDownloadStream inputStream = gridFs.openDownloadStreamByName(fileName)) {
+        try (GridFSDownloadStream inputStream = gridFs.openDownloadStream(fileName)) {
             ContextSpecificModelMetadata<?> requestedModelMetadata = newModel.getContextSpecificModelMetadata();
             @SuppressWarnings("unchecked")
             ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(inputStream);
@@ -90,7 +90,7 @@ public class MongoDbModelStore extends AbstractModelStore {
         for (GridFSFile gridFSFile : gridFs.find()) {
             String fileName = gridFSFile.getFilename();
             byte[] exportedModel;
-            try (GridFSDownloadStream downloadStream = gridFs.openDownloadStreamByName(fileName)) {
+            try (GridFSDownloadStream downloadStream = gridFs.openDownloadStream(fileName)) {
                 exportedModel = IOUtils.toByteArray(downloadStream);
             } catch (IOException e) {
                 throw new ModelPersistenceException("Could not read model \"" + fileName + "\" from MongoDB", e);
@@ -132,7 +132,7 @@ public class MongoDbModelStore extends AbstractModelStore {
                                 + "\"");
             }
             PersistableModel<?, ?> loadedModel;
-            try (GridFSDownloadStream downloadStream = gridFs.openDownloadStreamByName(fileName)) {
+            try (GridFSDownloadStream downloadStream = gridFs.openDownloadStream(fileName)) {
                 loadedModel = persistenceSupport.loadFromStream(downloadStream);
             } catch (IOException e) {
                 throw new ModelLoadingException("Could not read model \"" + fileName + "\" from MongoDB", e);

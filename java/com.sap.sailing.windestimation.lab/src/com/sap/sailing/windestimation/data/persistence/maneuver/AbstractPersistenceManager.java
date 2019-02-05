@@ -16,7 +16,6 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.util.JSON;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.util.LoggingUtil;
@@ -72,7 +71,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     }
 
     public long countElements(String query) {
-        Document dbQuery = query == null ? null : (Document) JSON.parse(query);
+        Document dbQuery = query == null ? null : Document.parse(query);
         return countElements(dbQuery);
     }
 
@@ -229,7 +228,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         @Override
         public PersistedElementsIterator<T> limit(long limit) {
             this.limit = limit;
-            if(numberOfElements > limit) {
+            if (numberOfElements > limit) {
                 numberOfElements = limit;
             }
             return this;
