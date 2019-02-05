@@ -45,11 +45,20 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     private final Random random = new Random();
     private final int[][] pairingListTemplate;
     private final double standardDev, boatAssignmentsQuality;
-    private final int flightMultiplier, boatChangeFactor, boatchanges;
+    private final int flightMultiplier;
+    
+    /**
+     * A tolerance threshold specifying how much deviation between the best (minimum) allocation count and the
+     * allocation count of the boat used in previous flight is considered acceptable. Example: If the best boat
+     * has been used only once and the boat used in the previous flight has already been used three times, this
+     * number has to be greater than (3-1)=2 to allow the competitor to be allocated the same boat as in the
+     * previous flight.
+     */
+    private final int boatChangeFactor;
+    private final int boatchanges;
     private final int dummies;
     private final ExecutorService executorService = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
     private final int iterations;
-    private final int COMPETITOR_ALLOCATION_ITERATIONS = 10;
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider) {
         // setting iterations to default of 100.000
@@ -548,66 +557,94 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
     /**
      * Switches competitors inside a group to improve competitor allocations. Method does not change the order of groups
-     * or flights. The standard deviation of team associations will not be influenced by this method. After executing
-     * the method the assignment should be well distributed. While finding a good distribution, the
-     * {@link #boatChangeFactor} controls how much boat assignment quality to sacrifice in favor of the next step, aming
-     * to reduce the number of boat changes.
+     * or flights. The standard deviation of team associations will not be influenced by this method.<p>
+     * 
+     * As the allocations are defined, they are counted. A competitor will be allocated to a boat ideally based on
+     * minimum count so far. However, if a tolerance for reducing the number of boat changes has been allowed for,
+     * less than optimal boats can be selected, given the count deviates less than the tolerance from the optimum.
+     * The tolerance is defined by {@link #boatChangeFactor}.
      * 
      * @param pairingList
      *            current pairing list, improved in place by this method
-     * @param flights
+     * @param numberOflights
      *            count of flights
-     * @param groups
+     * @param numberOfGroups
      *            count of groups
-     * @param competitors
+     * @param numberOfCompetitors
      *            count of competitors
      */
-    private void improveCompetitorAllocations(int[][] pairingList, int flights, int groups, int competitors) {
+    private void improveCompetitorAllocations(int[][] pairingList, int numberOflights, int numberOfGroups, int numberOfCompetitors) {
+        final int numberOfBoats = numberOfCompetitors / numberOfGroups;
         // 1. Index: competitors, 2. Index: boats; Values represent the number of assignment of a competitor to a boat
-        int[][] assignments = this.getBoatAssignments(pairingList, new int[competitors][competitors / groups]);
-        final int numberOfBoats = competitors / groups;
-        double averageAssignments = flights / numberOfBoats;
-        for (int iteration = 0; iteration < COMPETITOR_ALLOCATION_ITERATIONS; iteration++) {
-            for (int raceIndex = 0; raceIndex < pairingList.length; raceIndex++) {
-                int[][] groupAssignments = new int[numberOfBoats][numberOfBoats];
-                final int prevFlight = (int) (raceIndex / groups) - 1;
-                for (int competitorSlotIndex = 0; competitorSlotIndex < numberOfBoats; competitorSlotIndex++) {
-                    // select single group to optimize
-                    System.arraycopy(assignments[pairingList[raceIndex][competitorSlotIndex]], 0, groupAssignments[competitorSlotIndex], 0,
-                            numberOfBoats);
+        int[][] boatAllocationCount = new int[numberOfCompetitors][numberOfBoats];
+        for (int raceIndex = 0; raceIndex < pairingList.length; raceIndex++) {
+            final int currentFlightIndex = raceIndex / numberOfGroups;
+            final int previousFlight = currentFlightIndex - 1;
+            // records the competitor index at the boat index to which the competitor shall be assigned in the current race
+            int[] targetAssignmentsForOriginalCompetitorSlots = new int[numberOfBoats];
+            for (int i=0; i<numberOfBoats; i++) {
+                targetAssignmentsForOriginalCompetitorSlots[i] = -1; // -1 means boat is still available
+            }
+            for (int competitorSlotIndex = 0; competitorSlotIndex < numberOfBoats; competitorSlotIndex++) {
+                int competitorIndex = pairingList[raceIndex][competitorSlotIndex];
+                int[] allocationCountPerBoatForCurrentCompetitor = boatAllocationCount[competitorIndex];
+                int minimumAllocationCount = Integer.MAX_VALUE;
+                int minimiumAvailableAllocationCount = Integer.MAX_VALUE;
+                int boatIndexOfAvailableBoatWithMinimumAllocationCount = -1;
+                for (int boatIndex=0; boatIndex<numberOfBoats; boatIndex++) {
+                    if (allocationCountPerBoatForCurrentCompetitor[boatIndex] < minimumAllocationCount) {
+                        minimumAllocationCount = allocationCountPerBoatForCurrentCompetitor[boatIndex];
+                    }
+                    // check separately for the minimum among the *available* boats:
+                    if (targetAssignmentsForOriginalCompetitorSlots[boatIndex] == -1 && allocationCountPerBoatForCurrentCompetitor[boatIndex] < minimiumAvailableAllocationCount) {
+                        boatIndexOfAvailableBoatWithMinimumAllocationCount = boatIndex;
+                        minimiumAvailableAllocationCount = allocationCountPerBoatForCurrentCompetitor[boatIndex];
+                    }
                 }
-                for (int competitorSlotIndex = 0; competitorSlotIndex < competitors * 50; competitorSlotIndex++) {
-                    int[] competitorSlotIndexAndBoatIndex = findWorstValuePosition(groupAssignments, (int) averageAssignments);
-                    int prevPosition = -1;
-                    if (prevFlight >= 0) {
-                        // search for previous position
-                        for (int raceInPreviousFlightIndex = prevFlight * groups; raceInPreviousFlightIndex < prevFlight * groups + groups; raceInPreviousFlightIndex++) {
-                            for (int boatIndex = 0; boatIndex < numberOfBoats; boatIndex++) {
-                                if (pairingList[raceInPreviousFlightIndex][boatIndex] == pairingList[raceIndex][competitorSlotIndexAndBoatIndex[0]]) {
-                                    prevPosition = boatIndex;
-                                    break;
-                                }
-                            }
+                assert boatIndexOfAvailableBoatWithMinimumAllocationCount != -1;
+                if (currentFlightIndex > 0) {
+                    int boatIndexOfCurrentCompetitorInPreviousFlight = getBoatIndexInFlight(pairingList, numberOfGroups, competitorIndex, previousFlight);
+                    // check whether the boat that the competitor was allocated for the previous flight is still available in this flight:
+                    if (targetAssignmentsForOriginalCompetitorSlots[boatIndexOfCurrentCompetitorInPreviousFlight] == -1) {
+                        // find out how much worse it would be compared to selecting the boat with the minimum allocation count
+                        // if we placed the current competitor onto the same boat as in the previous flight:
+                        int allocationCountDeviationForBoatOfPreviousFlight = allocationCountPerBoatForCurrentCompetitor[boatIndexOfCurrentCompetitorInPreviousFlight] -
+                                minimumAllocationCount;
+                        if (allocationCountDeviationForBoatOfPreviousFlight < boatChangeFactor) {
+                            targetAssignmentsForOriginalCompetitorSlots[boatIndexOfCurrentCompetitorInPreviousFlight] = competitorIndex;
+                        } else {
+                            // it would be too expensive boat-allocation-distribution-wise to place the current competitor onto the
+                            // boat used in the previous flight; allocate the competitor to the first available boat that has the
+                            // least allocation count for that competitor so far:
+                            targetAssignmentsForOriginalCompetitorSlots[boatIndexOfAvailableBoatWithMinimumAllocationCount] = competitorIndex;
                         }
-                    }
-                    if (groupAssignments[competitorSlotIndexAndBoatIndex[0]][competitorSlotIndexAndBoatIndex[1]] > averageAssignments - 1
-                            && groupAssignments[competitorSlotIndexAndBoatIndex[0]][competitorSlotIndexAndBoatIndex[1]] < averageAssignments + 1) {
-                        // no more optimizations possible 
-                        break;
                     } else {
-                        int temp = 0;
-                        int bestPosition = getBestPositionToChangeTo(groupAssignments[competitorSlotIndexAndBoatIndex[0]], prevPosition);
-                        temp = pairingList[raceIndex][bestPosition];
-                        pairingList[raceIndex][bestPosition] = pairingList[raceIndex][competitorSlotIndexAndBoatIndex[0]];
-                        pairingList[raceIndex][competitorSlotIndexAndBoatIndex[0]] = temp;
-                        assignments = getBoatAssignments(pairingList, new int[competitors][competitors / groups]);
-                        for (int x = 0; x < numberOfBoats; x++) {
-                            System.arraycopy(assignments[pairingList[raceIndex][x]], 0, groupAssignments[x], 0, numberOfBoats);
-                        }
+                        // the boat used in the previous flight by the current competitor is not available anymore in this flight;
+                        // assign to the least used boat available:
+                        targetAssignmentsForOriginalCompetitorSlots[boatIndexOfAvailableBoatWithMinimumAllocationCount] = competitorIndex;
                     }
+                } else { // we're in the first flight (index 0), so we cannot consider any boat allocation of any previous flight
+                    targetAssignmentsForOriginalCompetitorSlots[boatIndexOfAvailableBoatWithMinimumAllocationCount] = competitorIndex;
+                }
+            }
+            // now targetAssignmentsForOriginalCompetitorSlots holds the desired assignments for the current race;
+            // adjust pairing list and update boatAllocationCount:
+            for (int competitorSlotIndex = 0; competitorSlotIndex < numberOfBoats; competitorSlotIndex++) {
+                pairingList[raceIndex][competitorSlotIndex] = targetAssignmentsForOriginalCompetitorSlots[competitorSlotIndex];
+                boatAllocationCount[targetAssignmentsForOriginalCompetitorSlots[competitorSlotIndex]][competitorSlotIndex]++;
+            }
+        }
+    }
+
+    private int getBoatIndexInFlight(int[][] pairingList, int numberOfGroups, int competitorIndex, int previousFlight) {
+        for (int raceIndex=previousFlight*numberOfGroups; raceIndex<previousFlight*numberOfGroups+numberOfGroups; raceIndex++) {
+            for (int boatIndex=0; boatIndex<pairingList[raceIndex].length; boatIndex++) {
+                if (competitorIndex == pairingList[raceIndex][boatIndex]) {
+                    return boatIndex;
                 }
             }
         }
+        throw new IllegalStateException("Previous flight "+previousFlight+" unexpectedly did not contain competitor "+competitorIndex);
     }
 
     /**
@@ -648,7 +685,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 pairingList[flightIndex * numberOfGroupsPerFlight] = pairingList[flightIndex * numberOfGroupsPerFlight + bestMatchesIndexInCurrentFlight];
                 pairingList[flightIndex * numberOfGroupsPerFlight + bestMatchesIndexInCurrentFlight] = temp;
             }
-            if (bestMatchesIndexInPreviousFlight < numberOfGroupsPerFlight - 1) {
+            if (bestMatchesIndexInPreviousFlight > 0 && bestMatchesIndexInPreviousFlight < numberOfGroupsPerFlight - 1) {
                 int[] temp = pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + numberOfGroupsPerFlight - 1];
                 pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + numberOfGroupsPerFlight - 1] = pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + bestMatchesIndexInPreviousFlight];
                 pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + bestMatchesIndexInPreviousFlight] = temp;
@@ -693,102 +730,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             }
         }
         return result;
-    }
-
-    /**
-     * There is an neededAssigments value created in <code> improveCompetitorAllocations</code>. This value represents
-     * the number of times a competitor has to be on one boat to get the best possible competitor allocation. In this
-     * method this value is used to find the competitor which assignment is the worst. That means the number of
-     * assignments to one special boat is far to low or far to high. This can be calculated by: absolute value of given
-     * assignment - needed assignment.
-     * 
-     * @param groupAssignments
-     *            1. Index: competitor slot in group, 2. Index: boats; Values represent the number of assignment of a
-     *            competitor to a boat
-     * @param neededAssigments
-     *            reference value
-     * @return int array with 2 indices that represent competitor slot and boat index of the worst value in the two
-     *         dimensional array groupAssignments
-     */
-    private int[] findWorstValuePosition(int[][] groupAssignments, int neededAssigments) {
-        int[] worstDeviationPos = new int[2];
-        int worstDeviation = 0;
-        //search the hole groupAssignments array for worst value 
-        for (int competitorSlotIndex = 0; competitorSlotIndex < groupAssignments.length; competitorSlotIndex++) {
-            for (int boatIndex = 0; boatIndex < groupAssignments[0].length; boatIndex++) {
-                if (groupAssignments[competitorSlotIndex][boatIndex] >= 0) {
-                    if (Math.abs(groupAssignments[competitorSlotIndex][boatIndex]-neededAssigments) > worstDeviation) {
-                        worstDeviationPos[0] = competitorSlotIndex;
-                        worstDeviationPos[1] = boatIndex;
-                        worstDeviation = Math.abs(groupAssignments[competitorSlotIndex][boatIndex]-neededAssigments);
-                    }
-                }
-            }
-        }
-        return worstDeviationPos;
-    }
-    
-    /**
-     * So far competitors have been allocated to the positions (e.g., boats) in a round such that this results in a good
-     * distribution of competitor-to-position assignments, so that ideally each competitor competes in each position an
-     * equal number of times.
-     * <p>
-     * 
-     * There is, however, another criterion to watch for: in-between flights it may be useful if competitors
-     * participating in the last group of the previous flight and the first group of the next flight keep their
-     * position. If the positions are, e.g., boats, this would mean that such a competitor doesn't need to be shuttled
-     * from one boat to another, simplifying logistics between flights.
-     * <p>
-     * 
-     * These two criteria (spreading competitors equally across positions vs. letting competitors keep their position at
-     * flight boundaries) contradict each other, obviously. Leaving a competitor in the same position across two rounds
-     * reduces the spread of the competitor-to-position distribution.
-     * <p>
-     * 
-     * The {@link #boatChangeFactor} is used to express a balance between these two criteria. It may range between
-     * {@code 0..#competitors/#groups}.
-     * <p>
-     * 
-     * This method searches for the position a competitor should be changed to, to improve the competitor allocations as
-     * much as possible. The decision depends on the field {@link #boatChangeFactor}. If this value is 0, the method
-     * returns the position on which a competitor is too rarely registered and should be changed to to get a better
-     * competitor allocation.
-     * 
-     * If the value is greater than 0, the method can take the allocation in the previous flight into consideration. The
-     * value represents a kind of tolerance to deviate from the best possible value to place the competitor on a
-     * position, which he was on in the last group. The method starts at the best position and proofs if the competitor
-     * on this position in the last group if yes return this position, if not go on with the next position. This is done
-     * as often as the tolerance allows it. If no position is found the best position to change to is returned
-     * regardless of the position in the last flight. This is necessary if you would like to minimize boat changes at
-     * the expense of competitor allocations.
-     * 
-     * @param competitorAllocations
-     *            array that contains the current competitor allocations for one group; index is the position (or boat)
-     *            number
-     * @param previousPosition
-     *            position of the competitor that need to be changed in the previous group
-     * @return position the competitor should be changed to
-     */           
-    private int getBestPositionToChangeTo(int[] competitorAllocations, int previousPosition) {
-        int[] temp = new int[competitorAllocations.length];
-        System.arraycopy(competitorAllocations, 0, temp, 0, competitorAllocations.length);
-        Arrays.sort(temp);
-        // search for best position to change to with consideration of previous position
-        final int iterations = Math.min(boatChangeFactor, competitorAllocations.length);
-        for (int i = 0; i < iterations; i++) {
-            for (int position = 0; position < competitorAllocations.length; position++) {
-                if (temp[i] == competitorAllocations[position] && position == previousPosition) {
-                    return position;
-                }
-            }
-        }
-        // search for best position to change to regardless of previous position
-        for (int position = 0; position < competitorAllocations.length; position++) {
-            if (temp[0] == competitorAllocations[position]) {
-                return position;
-            }
-        }
-        return -1;
     }
 
     /**

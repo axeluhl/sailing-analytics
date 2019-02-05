@@ -39,10 +39,8 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
 
     public PairingListCreationSetupDialog(StrippedLeaderboardDTO leaderboardDTO, StringMessages stringMessages,
             DialogCallback<PairingListTemplateDTO> callback) {
-
         super(leaderboardDTO, stringMessages.pairingList(), stringMessages,
                 new PairingListParameterValidator(stringMessages), callback);
-
         this.competitorCountTextBox = createIntegerBox(leaderboardDTO.competitorsCount, 2);
         this.competitorCountTextBox.addValueChangeHandler(evt -> {
             updateBoatChangeFactorSelection(leaderboardDTO.getRaceList().get(0).getFleets().size());
@@ -133,14 +131,19 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         } else {
             dto.setFlightMultiplier(1);
         }
-        List<String> selectedFlightNames = new ArrayList<>();
-        for (CheckBox box : getCheckedSelectedCheckBoxes()) {
-            selectedFlightNames.addAll(getRaceColumnNamesFromSeriesName(box.getText(), leaderboardDTO.getRaceList()));
-        }
+        List<String> selectedFlightNames = getSelectedFlightNames();
         dto.setSelectedFlightNames(selectedFlightNames);
         dto.setFlightCount(selectedFlightNames.size());
         dto.setTolerance(Integer.parseInt(boatChangeFactorListBox.getSelectedValue()));
         return dto;
+    }
+
+    private List<String> getSelectedFlightNames() {
+        List<String> selectedFlightNames = new ArrayList<>();
+        for (CheckBox box : getCheckedSelectedCheckBoxes()) {
+            selectedFlightNames.addAll(getRaceColumnNamesFromSeriesName(box.getText(), leaderboardDTO.getRaceList()));
+        }
+        return selectedFlightNames;
     }
 
     public void setDefaultCompetitorCount(final int competitorCount) {
@@ -165,15 +168,14 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
                 }
             }
         } else {
-            if (Util.size(getCheckedSelectedCheckBoxes()) > 0) {
-
-            } else {
+            if (Util.size(getCheckedSelectedCheckBoxes()) <= 0) {
                 enableOrDisableAllSelectedSeriesCheckBoxes(true, false);
             }
             if (Util.size(getCheckedSelectedCheckBoxes()) < 2) {
                 flightMultiplierCheckBox.setEnabled(true);
             }
         }
+        updateBoatChangeFactorSelection(getSelectedFlightNames().size());
     }
 
     private Iterable<String> getSeriesNamesFromAllRaces(final Iterable<RaceColumnDTO> raceColumns) {
@@ -252,9 +254,9 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         }
     }
     
-    private void updateBoatChangeFactorSelection(final int fleetCount) {
+    private void updateBoatChangeFactorSelection(final int flightCount) {
         this.boatChangeFactorListBox.clear();
-        IntStream.range(0, (getCompetitorCountInput() / fleetCount) + 1).forEach(i -> {
+        IntStream.range(0, (getCompetitorCountInput() / flightCount) + 1).forEach(i -> {
             this.boatChangeFactorListBox.addItem(String.valueOf(i));
         });
     }
