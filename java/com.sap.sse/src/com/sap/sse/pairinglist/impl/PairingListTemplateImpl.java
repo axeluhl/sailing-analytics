@@ -17,6 +17,28 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.util.ThreadPoolUtil;
 
+/**
+ * Three pass algorithm to construct a good pairing list. The main goal is to assign competitors to groups within
+ * flights and to boats within the group. The following criteria are relevant:
+ * <ol>
+ * <li>Competing against a randomized set of competitors, such that one competitor meets all other competitors with
+ * appproximately equal frequency</li>
+ * <li>Competing on the different boats with approximately equal frequency</li>
+ * <li>Avoiding "unnecessary" boat changes at flight boundaries</li>
+ * </ol>
+ * Trying to meet these partially contradictory goals happens in three passes:
+ * <ol>
+ * <li>In the first pass, the assignments of competitors to races/groups/flights is computed.</li>
+ * <li>The assignment of competitors to boats is calculated such that the assignment frequencies are approximately
+ * balanced. A parameter controls how much boat assignment quality to sacrifice in favor of the next step, aming to
+ * reduce the number of boat changes.</li>
+ * <li>Find a good order of groups in a flight that reduces the number of boat changes at flight boundaries.</li>
+ * </ol>
+ * 
+ * 
+ * @author Robin Kuck
+ *
+ */
 public class PairingListTemplateImpl implements PairingListTemplate {
     private static final Logger logger = Logger.getLogger(PairingListTemplateImpl.class.getName());
     
@@ -27,6 +49,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     private final int dummies;
     private final ExecutorService executorService = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
     private final int iterations;
+    private final int COMPETITOR_ALLOCATION_ITERATIONS = 10;
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider) {
         // setting iterations to default of 100.000
@@ -526,7 +549,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     /**
      * Switches competitors inside a group to improve competitor allocations. Method does not change the order of groups
      * or flights. The standard deviation of team associations will not be influenced by this method. After executing
-     * the method the assignment should be well distributed.
+     * the method the assignment should be well distributed. While finding a good distribution, the
+     * {@link #boatChangeFactor} controls how much boat assignment quality to sacrifice in favor of the next step, aming
+     * to reduce the number of boat changes.
      * 
      * @param pairingList
      *            current pairing list, improved in place by this method
@@ -538,44 +563,46 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      *            count of competitors
      */
     private void improveCompetitorAllocations(int[][] pairingList, int flights, int groups, int competitors) {
+        // 1. Index: competitors, 2. Index: boats; Values represent the number of assignment of a competitor to a boat
         int[][] assignments = this.getBoatAssignments(pairingList, new int[competitors][competitors / groups]);
-        double averageAssignments = flights / (competitors / groups);
-        for (int iteration = 0; iteration < 10; iteration++) {
-            for (int zGroup = 0; zGroup < pairingList.length; zGroup++) {
-                int[][] groupAssignments = new int[competitors / groups][competitors / groups];
-                for (int zPlace = 0; zPlace < (competitors / groups); zPlace++) {
+        final int numberOfBoats = competitors / groups;
+        double averageAssignments = flights / numberOfBoats;
+        for (int iteration = 0; iteration < COMPETITOR_ALLOCATION_ITERATIONS; iteration++) {
+            for (int raceIndex = 0; raceIndex < pairingList.length; raceIndex++) {
+                int[][] groupAssignments = new int[numberOfBoats][numberOfBoats];
+                final int prevFlight = (int) (raceIndex / groups) - 1;
+                for (int competitorSlotIndex = 0; competitorSlotIndex < numberOfBoats; competitorSlotIndex++) {
                     // select single group to optimize
-                    System.arraycopy(assignments[pairingList[zGroup][zPlace]], 0, groupAssignments[zPlace], 0,
-                            (competitors / groups));
+                    System.arraycopy(assignments[pairingList[raceIndex][competitorSlotIndex]], 0, groupAssignments[competitorSlotIndex], 0,
+                            numberOfBoats);
                 }
-                for (int zPlace = 0; zPlace < competitors * 50; zPlace++) {
-                    int[] position = findWorstValuePosition(groupAssignments, (int) averageAssignments);
-                    int prevFlight = (int) (zGroup / groups) - 1;
+                for (int competitorSlotIndex = 0; competitorSlotIndex < competitors * 50; competitorSlotIndex++) {
+                    int[] competitorSlotIndexAndBoatIndex = findWorstValuePosition(groupAssignments, (int) averageAssignments);
                     int prevPosition = -1;
                     if (prevFlight >= 0) {
                         // search for previous position
-                        for (int i = prevFlight * groups; i < prevFlight * groups + groups; i++) {
-                            for (int j = 0; j < (competitors / groups); j++) {
-                                if (pairingList[i][j] == pairingList[zGroup][position[0]]) {
-                                    prevPosition = j;
+                        for (int raceInPreviousFlightIndex = prevFlight * groups; raceInPreviousFlightIndex < prevFlight * groups + groups; raceInPreviousFlightIndex++) {
+                            for (int boatIndex = 0; boatIndex < numberOfBoats; boatIndex++) {
+                                if (pairingList[raceInPreviousFlightIndex][boatIndex] == pairingList[raceIndex][competitorSlotIndexAndBoatIndex[0]]) {
+                                    prevPosition = boatIndex;
                                     break;
                                 }
                             }
                         }
                     }
-                    if (groupAssignments[position[0]][position[1]] > averageAssignments - 1
-                            && groupAssignments[position[0]][position[1]] < averageAssignments + 1) {
+                    if (groupAssignments[competitorSlotIndexAndBoatIndex[0]][competitorSlotIndexAndBoatIndex[1]] > averageAssignments - 1
+                            && groupAssignments[competitorSlotIndexAndBoatIndex[0]][competitorSlotIndexAndBoatIndex[1]] < averageAssignments + 1) {
                         // no more optimizations possible 
                         break;
                     } else {
                         int temp = 0;
-                        int bestPosition = getBestPositionToChangeTo(groupAssignments[position[0]], prevPosition);
-                        temp = pairingList[zGroup][bestPosition];
-                        pairingList[zGroup][bestPosition] = pairingList[zGroup][position[0]];
-                        pairingList[zGroup][position[0]] = temp;
+                        int bestPosition = getBestPositionToChangeTo(groupAssignments[competitorSlotIndexAndBoatIndex[0]], prevPosition);
+                        temp = pairingList[raceIndex][bestPosition];
+                        pairingList[raceIndex][bestPosition] = pairingList[raceIndex][competitorSlotIndexAndBoatIndex[0]];
+                        pairingList[raceIndex][competitorSlotIndexAndBoatIndex[0]] = temp;
                         assignments = getBoatAssignments(pairingList, new int[competitors][competitors / groups]);
-                        for (int x = 0; x < (competitors / groups); x++) {
-                            System.arraycopy(assignments[pairingList[zGroup][x]], 0, groupAssignments[x], 0, (competitors / groups));
+                        for (int x = 0; x < numberOfBoats; x++) {
+                            System.arraycopy(assignments[pairingList[raceIndex][x]], 0, groupAssignments[x], 0, numberOfBoats);
                         }
                     }
                 }
@@ -584,8 +611,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     /**
-     * Improves the Assignment changes between two flights by switching the groups inside a flight. Competitors and
-     * there assignment will not be changed.
+     * Improves the Assignment changes between two flights by switching the groups inside two flights that are behind
+     * each other. Competitors and their assignment will not be changed.
      * 
      * @param pairingList
      *            complete pairingListTemplate which needs to be improved and which is modified in place by this method
@@ -597,29 +624,35 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * @return the improved pairingListTemplate
      */
     private void improveAssignmentChanges(int[][] pairingList, int flights, int groups, int competitors) {
-        int boatChanges[] = new int[flights - 1];
-        for (int i = 1; i < flights; i++) {
-            int[] groupPrev = pairingList[i * pairingList.length / flights - 1];
-            int[] groupNext = new int[pairingList[0].length];
-            int bestMatchesIndex = -1;
+        final int numberOfGroupsPerFlight = pairingList.length / flights;
+        for (int flightIndex = 1; flightIndex < flights; flightIndex++) {
+            // last group of previous flight
+            int bestMatchesIndexInCurrentFlight = -1;
+            int bestMatchesIndexInPreviousFlight = -1;
             int bestMatch = 0;
-            for (int j = 0; j < pairingList.length / flights; j++) {
-                System.arraycopy(pairingList[i * pairingList.length / flights + j], 0, groupNext, 0, groupNext.length);
-                int currentMatch = this.getMatches(groupPrev, groupNext);
-                if (currentMatch > bestMatch) {
-                    bestMatch = currentMatch;
-                    bestMatchesIndex = j;
+            for (int groupIndexInPreviousFlight = 1; groupIndexInPreviousFlight < numberOfGroupsPerFlight; groupIndexInPreviousFlight++) {
+                int[] groupPrev = pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + groupIndexInPreviousFlight];
+                for (int groupIndexInCurrentFlight = 0; groupIndexInCurrentFlight < numberOfGroupsPerFlight; groupIndexInCurrentFlight++) {
+                    int[] candidateForFirstGroupInCurrentFlight = pairingList[flightIndex * numberOfGroupsPerFlight + groupIndexInCurrentFlight];
+                    int currentMatch = this.getMatches(groupPrev, candidateForFirstGroupInCurrentFlight);
+                    if (currentMatch > bestMatch) {
+                        bestMatch = currentMatch;
+                        bestMatchesIndexInCurrentFlight = groupIndexInCurrentFlight;
+                        bestMatchesIndexInPreviousFlight = groupIndexInPreviousFlight;
+                    }
                 }
             }
-            if (bestMatchesIndex > 0) {
-                int[] temp = new int[pairingList[0].length];
-                System.arraycopy(pairingList[i * pairingList.length / flights], 0, temp, 0, temp.length);
-                System.arraycopy(pairingList[i * pairingList.length / flights + bestMatchesIndex], 0,
-                        pairingList[i * pairingList.length / flights], 0, groupNext.length);
-                System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0,
-                        temp.length);
+            // no need to swap if best match is already in first position of flight
+            if (bestMatchesIndexInCurrentFlight > 0) {
+                int[] temp = pairingList[flightIndex * numberOfGroupsPerFlight];
+                pairingList[flightIndex * numberOfGroupsPerFlight] = pairingList[flightIndex * numberOfGroupsPerFlight + bestMatchesIndexInCurrentFlight];
+                pairingList[flightIndex * numberOfGroupsPerFlight + bestMatchesIndexInCurrentFlight] = temp;
             }
-            boatChanges[i - 1] = groupNext.length - bestMatch;
+            if (bestMatchesIndexInPreviousFlight < numberOfGroupsPerFlight - 1) {
+                int[] temp = pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + numberOfGroupsPerFlight - 1];
+                pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + numberOfGroupsPerFlight - 1] = pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + bestMatchesIndexInPreviousFlight];
+                pairingList[(flightIndex - 1) * numberOfGroupsPerFlight + bestMatchesIndexInPreviousFlight] = temp;
+            }
         }
     }
 
@@ -663,34 +696,36 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     }
 
     /**
-     * There is an neededAssigments value created in <code> improveCompetitorAllocations</code>. This value 
-     * represents the number of times a competitor has to be on one boat to get the best possible competitor 
-     * allocation. In this method this value is used to find the competitor which assignment is the worst. 
-     * That means the number of assignments to one special boat is far to low or far to high. This can be 
-     * calculated by: absolute value of given assignment - needed assignment.
-     *        
+     * There is an neededAssigments value created in <code> improveCompetitorAllocations</code>. This value represents
+     * the number of times a competitor has to be on one boat to get the best possible competitor allocation. In this
+     * method this value is used to find the competitor which assignment is the worst. That means the number of
+     * assignments to one special boat is far to low or far to high. This can be calculated by: absolute value of given
+     * assignment - needed assignment.
+     * 
      * @param groupAssignments
-     *            array that contains the values
+     *            1. Index: competitor slot in group, 2. Index: boats; Values represent the number of assignment of a
+     *            competitor to a boat
      * @param neededAssigments
      *            reference value
-     * @return int array with 2 indices that represent row and column of the worst value in the two dimensional array groupAssignments
+     * @return int array with 2 indices that represent competitor slot and boat index of the worst value in the two
+     *         dimensional array groupAssignments
      */
     private int[] findWorstValuePosition(int[][] groupAssignments, int neededAssigments) {
-        int[] worstValuePos = new int[2];
-        int worstValue = 0;
+        int[] worstDeviationPos = new int[2];
+        int worstDeviation = 0;
         //search the hole groupAssignments array for worst value 
-        for (int i = 0; i < groupAssignments.length; i++) {
-            for (int z = 0; z < groupAssignments[0].length; z++) {
-                if (groupAssignments[i][z] >= 0) {
-                    if (Math.abs(groupAssignments[i][z]-neededAssigments) > worstValue) {
-                        worstValuePos[0] = i;
-                        worstValuePos[1] = z;
-                        worstValue = Math.abs(groupAssignments[i][z]-neededAssigments);
+        for (int competitorSlotIndex = 0; competitorSlotIndex < groupAssignments.length; competitorSlotIndex++) {
+            for (int boatIndex = 0; boatIndex < groupAssignments[0].length; boatIndex++) {
+                if (groupAssignments[competitorSlotIndex][boatIndex] >= 0) {
+                    if (Math.abs(groupAssignments[competitorSlotIndex][boatIndex]-neededAssigments) > worstDeviation) {
+                        worstDeviationPos[0] = competitorSlotIndex;
+                        worstDeviationPos[1] = boatIndex;
+                        worstDeviation = Math.abs(groupAssignments[competitorSlotIndex][boatIndex]-neededAssigments);
                     }
                 }
             }
         }
-        return worstValuePos;
+        return worstDeviationPos;
     }
     
     /**
