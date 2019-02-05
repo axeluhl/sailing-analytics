@@ -66,7 +66,8 @@ public class CourseChangeBasedTrackApproximation {
             this.absoluteMaximumTotalCourseChangeFromBeginningOfWindowInDegrees = 0;
             this.indexOfMaximumTotalCourseChange = -1;
             this.windowDuration = Duration.NULL;
-            this.maximumWindowLength = boatClass.getApproximateManeuverDuration();
+            // use twice the maneuver duration to also catch slowly-executed gybes
+            this.maximumWindowLength = boatClass.getApproximateManeuverDuration().times(2);
             this.maneuverAngleInDegreesThreshold = boatClass.getManeuverDegreeAngleThreshold();
             this.totalCourseChangeFromBeginningOfWindow = new ArrayList<>(((int) maximumWindowLength.divide(track.getAverageIntervalBetweenRawFixes()))+10);
         }

@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.impl.CourseChangeBasedTrackApproximation;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -40,19 +41,23 @@ public class CourseChangeBasedTrackApproximationTest {
         for (int i=0; i<20; i++) {
             track.add(next = travel(next, 1000 /*ms*/, 5 /* knots */, 0 /*deg COG*/));
         }
+        final TimePoint startOfTurn = next.getTimePoint();
         // now turn to port over three fixes:
         track.add(next = travel(next, 1000, 4, 340));
         next = travel(next, 1000, 3, 290);
-        GPSFixMoving fastestTurningFix = next;
         track.add(next);
         track.add(next = travel(next, 1000, 3, 270));
+        final TimePoint endOfTurn = next.getTimePoint();
         for (int i=0; i<20; i++) {
             track.add(next = travel(next, 1000 /*ms*/, 5 /* knots */, 270 /*deg COG*/));
         }
         
         Iterable<GPSFixMoving> candidates = approximation.approximate(start.getTimePoint(), next.getTimePoint());
-        assertEquals(1, Util.size(candidates));
-        assertEquals(candidates.iterator().next(), fastestTurningFix);
+        assertTrue(Util.size(candidates) >= 1);
+        for (final GPSFixMoving candidate : candidates) {
+            assertTrue(!candidate.getTimePoint().before(startOfTurn) &&
+                    !candidate.getTimePoint().after(endOfTurn));
+        }
     }
 
     private GPSFixMoving fix(long timepoint, double lat, double lon, double speedInKnots, double cogDeg) {
