@@ -42,9 +42,6 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         super(leaderboardDTO, stringMessages.pairingList(), stringMessages,
                 new PairingListParameterValidator(stringMessages), callback);
         this.competitorCountTextBox = createIntegerBox(leaderboardDTO.competitorsCount, 2);
-        this.competitorCountTextBox.addValueChangeHandler(evt -> {
-            updateBoatChangeFactorSelection(leaderboardDTO.getRaceList().get(0).getFleets().size());
-        });
         this.competitorCountTextBox.ensureDebugId("CompetitorCountBox");
         this.flightMultiplierTextBox = createIntegerBox(1, 2);
         this.flightMultiplierTextBox.setEnabled(false);
@@ -55,8 +52,6 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         this.ensureDebugId("PairingListCreationSetupDialog");
         this.boatChangeFactorListBox = new ListBox();
         this.boatChangeFactorListBox.setVisibleItemCount(1);
-        updateBoatChangeFactorSelection(leaderboardDTO.getRaceList().get(0).getFleets().size());
-
         this.flightMultiplierCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -256,9 +251,13 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
     
     private void updateBoatChangeFactorSelection(final int flightCount) {
         this.boatChangeFactorListBox.clear();
-        IntStream.range(0, (getCompetitorCountInput() / flightCount) + 1).forEach(i -> {
-            this.boatChangeFactorListBox.addItem(String.valueOf(i));
-        });
+        if (flightCount == 0) {
+            this.boatChangeFactorListBox.addItem("0");
+        } else {
+            IntStream.range(0, flightCount).forEach(i -> {
+                this.boatChangeFactorListBox.addItem(String.valueOf(i));
+            });
+        }
     }
     
     private int getCompetitorCountInput() {
