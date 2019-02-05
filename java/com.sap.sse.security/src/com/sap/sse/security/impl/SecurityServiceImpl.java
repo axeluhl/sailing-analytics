@@ -317,7 +317,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 apply(s -> s.internalSetOwnership(allUser.getIdentifier(),
                         ALL_USERNAME, null, ALL_USERNAME));
 
-                // The permission to create new users is initially added but not recreated on server start if the admin removed in in the meanwhile.
+                // The permission to create new users is initially added but not recreated on server start if the admin removed it in the meanwhile.
                 // This allows servers to be configured to not permit self-registration of new users but only users being managed by an admin user.
                 addPermissionForUser(ALL_USERNAME,
                         SecuredSecurityTypes.USER.getPermission(DefaultActions.CREATE));
