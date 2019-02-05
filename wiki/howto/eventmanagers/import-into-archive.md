@@ -27,3 +27,9 @@ Use Event-ARCHIVE-SSL-Redirect wcs2019-miami.sapsailing.com "f393a743-dd49-450f-
 - Log on to the MongoDB server hosting the archive DB: ``ssh -A root@54.76.64.42``
 - Go to the MongoDB directory where scripts for migrating a live DB to the archive exist: ``cd /var/lib/mongodb``
 - For your event with a database named ``my-wonderful-event`` run the command ``./archiveDb.sh my-wonderful-event``. This will copy the DB contents of database ``my-wonderful-event`` from the live DB replica set to the archive DB, compute the hashes of both, compare them and if equal remove the original DB on the live replica set as well as the ``my-wonderful-event-replica`` database that usually exists next to it.
+- Should you have created additional databases on the live replica set in the context of the event that you don't need anymore or would like to migrate to the archive server, proceed as described above (migration) or as follows (deletion): Use a ``mongo`` shell client and connect to any of the replica set's members, e.g., using ``mongo "mongodb://localhost:10203/?replicaSet=live"``. Then use the following command sequence to get rid of a database, such as ``my-wonderful-event-tablettraining``:
+```
+live:PRIMARY> use my-wonderful-event-tablettraining
+switched to db my-wonderful-event-tablettraining
+live:PRIMARY> db.dropDatabase()
+```
