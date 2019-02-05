@@ -25,6 +25,10 @@ public class FileSystemModelStore extends AbstractModelStore {
 
     public FileSystemModelStore(String destinationFolder) {
         this.destinationFolder = destinationFolder;
+        File folder = new File(destinationFolder);
+        if(!folder.exists()) {
+            folder.mkdir();
+        }
     }
 
     private File getFileForModel(PersistableModel<?, ?> persistableModel) {

@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.data.importer;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -136,8 +137,16 @@ public class ManeuverAndWindImporter {
     private void importRegatta(String regattaName, ImportStatistics importStatistics)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         String encodedRegattaName = encodeUrlPathPart(regattaName);
+        // TODO The encoding of some regattas does not work well
         HttpGet getRegatta = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName);
-        JSONObject regattaJson = (JSONObject) getJsonFromResponse(createNewHttpClient().execute(getRegatta));
+        JSONObject regattaJson = null;
+        try {
+            regattaJson = (JSONObject) getJsonFromResponse(createNewHttpClient().execute(getRegatta));
+        } catch (Exception e) {
+            importStatistics.errors += 1;
+            LoggingUtil.logInfo("Error while processing regatta: " + regattaName);
+            return;
+        }
         for (Object seriesJson : (JSONArray) regattaJson.get("series")) {
             JSONObject trackedRaces = (JSONObject) ((JSONObject) seriesJson).get("trackedRaces");
             JSONArray fleets = (JSONArray) trackedRaces.get("fleets");
@@ -154,7 +163,6 @@ public class ManeuverAndWindImporter {
                         try {
                             importRace(regattaName, trackedRaceName, importStatistics);
                         } catch (Exception e) {
-                            e.printStackTrace();
                             importStatistics.errors += 1;
                             LoggingUtil
                                     .logInfo("Error while processing race nr. " + i + ": \"" + trackedRaceName + "\"");
@@ -166,7 +174,7 @@ public class ManeuverAndWindImporter {
         }
     }
 
-    private String encodeUrlPathPart(String urlPathPart) throws URISyntaxException {
+    private String encodeUrlPathPart(String urlPathPart) throws URISyntaxException, UnsupportedEncodingException {
         URI uri = new URI("http", "a.com", "/" + urlPathPart, null, null);
         String encodedUrlPath = uri.toString().substring("http://a.com/".length());
         String encodedUrlPathPart = encodedUrlPath.replaceAll("\\/", "__");

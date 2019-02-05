@@ -1,12 +1,10 @@
 package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
-import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager;
-import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager.AggregatedSingleDimensionType;
 import com.sap.sailing.windestimation.model.regressor.IncrementalSingleDimensionPolynomialRegressor;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelMetadata.DistanceValueRange;
+import com.sap.sailing.windestimation.model.store.FileSystemModelStore;
 import com.sap.sailing.windestimation.model.store.ModelStore;
-import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
 public class DistanceBasedTwdTransitionStdRegressorTrainer
@@ -17,10 +15,11 @@ public class DistanceBasedTwdTransitionStdRegressorTrainer
     }
 
     public static void main(String[] args) throws Exception {
-        AggregatedSingleDimensionBasedTwdTransitionPersistenceManager distanceBasedPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
-                AggregatedSingleDimensionType.DISTANCE);
-        // ModelStore modelStore = new FileSystemModelStore("trained_models");
-        ModelStore modelStore = new MongoDbModelStore(distanceBasedPersistenceManager.getDb());
+        ModelStore modelStore = new FileSystemModelStore("trained_wind_estimation_models");
+        // AggregatedSingleDimensionBasedTwdTransitionPersistenceManager distanceBasedPersistenceManager = new
+        // AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
+        // AggregatedSingleDimensionType.DISTANCE);
+        // ModelStore modelStore = new MongoDbModelStore(distanceBasedPersistenceManager.getDb());
         modelStore.deleteAll(PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR);
         DistanceBasedTwdTransitionRegressorModelFactory distanceBasedTwdTransitionRegressorModelFactory = new DistanceBasedTwdTransitionRegressorModelFactory();
         for (DistanceValueRange distanceValueRange : DistanceValueRange.values()) {

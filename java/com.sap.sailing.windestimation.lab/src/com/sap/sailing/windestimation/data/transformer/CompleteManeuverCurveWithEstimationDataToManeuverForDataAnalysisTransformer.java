@@ -57,8 +57,8 @@ public class CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTra
         }
         Double courseChangeInDegreesWithinTurningSectionOfPreviousManeuver = previousManeuver == null ? null
                 : previousManeuver.getMainCurve().getDirectionChangeInDegrees();
-        Double courseChangeInDegreesWithinTurningSectionOfNextManeuver = nextManeuver.getMainCurve()
-                .getDirectionChangeInDegrees();
+        Double courseChangeInDegreesWithinTurningSectionOfNextManeuver = nextManeuver == null ? null
+                : nextManeuver.getMainCurve().getDirectionChangeInDegrees();
         ManeuverForEstimation maneuverForEstimation = internalTransformer
                 .getManeuverForEstimation(
                         new ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData(maneuver,

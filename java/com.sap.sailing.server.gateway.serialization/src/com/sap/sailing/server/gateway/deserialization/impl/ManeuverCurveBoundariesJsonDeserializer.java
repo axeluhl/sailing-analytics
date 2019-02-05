@@ -36,7 +36,8 @@ public class ManeuverCurveBoundariesJsonDeserializer implements JsonDeserializer
                 new KnotSpeedWithBearingImpl(speedBeforeInKnots, new DegreeBearingImpl(cogBefore)),
                 new KnotSpeedWithBearingImpl(speedAfterInKnots, new DegreeBearingImpl(cogAfter)),
                 directionChangeInDegrees, new KnotSpeedImpl(lowestSpeedInKnots),
-                new KnotSpeedImpl(highestSpeedInKnots));
+                //TODO remove null check after master merge of this branch
+                highestSpeedInKnots == null ? null : new KnotSpeedImpl(highestSpeedInKnots));
     }
 
 }
