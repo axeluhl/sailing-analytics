@@ -108,6 +108,8 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         super(stringMessages.ownership(), stringMessages.editObjectOwnership(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator(stringMessages), callback);
         this.userManagementService = userManagementService;
+        resolvedUser = ownership.getUserOwner();
+        resolvedUserGroup = ownership.getTenantOwner();
         this.usernameBox = createTextBox(
                 ownership == null || ownership.getUserOwner() == null ? "" : ownership.getUserOwner().getName(),
                 /* visibleLength */ 20);
@@ -132,39 +134,45 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     }
 
     private void resolveUserGroup() {
-        resolvedUserGroup = null;
-        resolvingUserGroupName = true;
-        userManagementService.getStrippedUserGroupByName(groupnameBox.getText(), new AsyncCallback<StrippedUserGroupDTO>() {
-            @Override
-            public void onSuccess(StrippedUserGroupDTO result) {
-                resolvedUserGroup = result;
-                resolvingUserGroupName = false;
-                validateAndUpdate();
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.errorObtainingUserGroup(caught.getMessage()), NotificationType.ERROR);
-            }
-        });
+        if (resolvedUserGroup == null || !groupnameBox.getText().equals(resolvedUserGroup.getName())) {
+            resolvedUserGroup = null;
+            resolvingUserGroupName = true;
+            userManagementService.getStrippedUserGroupByName(groupnameBox.getText(),
+                    new AsyncCallback<StrippedUserGroupDTO>() {
+                        @Override
+                        public void onSuccess(StrippedUserGroupDTO result) {
+                            resolvedUserGroup = result;
+                            resolvingUserGroupName = false;
+                            validateAndUpdate();
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Notification.notify(stringMessages.errorObtainingUserGroup(caught.getMessage()),
+                                    NotificationType.ERROR);
+                        }
+                    });
+        }
     }
 
     private void resolveUser() {
-        resolvedUser = null;
-        resolvingUsername = true;
-        userManagementService.getUserByName(usernameBox.getText(), new AsyncCallback<UserDTO>() {
-            @Override
-            public void onSuccess(UserDTO result) {
-                resolvedUser = result == null ? null : result.asStrippedUser();
-                resolvingUsername = false;
-                validateAndUpdate();
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.errorObtainingUser(caught.getMessage()), NotificationType.ERROR);
-            }
-        });
+        if (resolvedUser == null || !usernameBox.getText().equals(resolvedUser.getName())) {
+            resolvedUser = null;
+            resolvingUsername = true;
+            userManagementService.getUserByName(usernameBox.getText(), new AsyncCallback<UserDTO>() {
+                @Override
+                public void onSuccess(UserDTO result) {
+                    resolvedUser = result == null ? null : result.asStrippedUser();
+                    resolvingUsername = false;
+                    validateAndUpdate();
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.errorObtainingUser(caught.getMessage()), NotificationType.ERROR);
+                }
+            });
+        }
     }
 
     @Override
