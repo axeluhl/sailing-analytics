@@ -29,7 +29,7 @@ The details of the training process for each model category are described in the
 ## Prerequisites
 To complete the training process successfully, you need to make sure that you have the following stuff:
 * A complete onboarding setup for SAP Sailing Analytics development
-* MongoDB is up and running (same MongoDB instance as required in onboarding howto)
+* MongoDB (**3.4 or higher!**) is up and running (same MongoDB instance as required in onboarding howto)
 * At least 100 GB free space on the partition, where MongoDB is operating
 * At least 16 GB RAM (for in-memory preprocessing of wind data for regressors)
 * Installed graphical MongoDB client such as MongoDB Compass (Community version)
@@ -40,10 +40,8 @@ The following steps import all the data required from sapsailing.com into the lo
 2. Run *com.sap.sailing.windestimation.data.importer.PolarDataImporter*
 
 ## Maneuver classifiers training
-1. Run *com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierTrainer*
+1. Run *com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierTrainer*. Within the this step, the maneuver data is preprocessed and all maneuver classifiers are trained for each supported context
 2. Optionally run *com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierScoring* to print the performance of the trained classifiers and to verify maneuver classification scoring
-
-Within this single step, the maneuver data is preprocessed and all maneuver classifiers are trained for each supported context.
 
 ## Duration-based TWD delta standard deviation regressor
 
