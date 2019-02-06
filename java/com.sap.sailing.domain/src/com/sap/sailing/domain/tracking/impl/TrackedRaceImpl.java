@@ -2660,10 +2660,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
         return new CourseChangeBasedTrackApproximation(getTrack(competitor), getBoatOfCompetitor(competitor).getBoatClass()).approximate(from, to);
-        // The old DouglasPeucker-based code:
-//        DouglasPeucker<Competitor, GPSFixMoving> douglasPeucker = new DouglasPeucker<Competitor, GPSFixMoving>(
-//                track);
-//        return douglasPeucker.approximate(maxDistance, from, to);
     }
 
     protected void triggerManeuverCacheRecalculationForAllCompetitors() {
