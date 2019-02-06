@@ -208,25 +208,29 @@ public class CourseChangeBasedTrackApproximation {
     public Iterable<GPSFixMoving> approximate(TimePoint from, TimePoint to) {
         final List<GPSFixMoving> result = new ArrayList<>();
         final FixWindow window = new FixWindow();
+        final Iterator<GPSFixMoving> fixIterator;
         track.lockForRead();
         try {
-            // TODO try to keep locking intervals as short as possible
-            final Iterator<GPSFixMoving> fixIterator = track.getFixesIterator(from, /* inclusive */ true);
-            GPSFixMoving next;
-            do {
-                if (fixIterator.hasNext()) {
-                    next = fixIterator.next();
-                    final GPSFixMoving maneuverCandidate = window.add(next);
-                    if (maneuverCandidate != null) {
-                        result.add(maneuverCandidate);
-                    }
-                } else {
-                    next = null;
-                }
-            } while (next != null && !next.getTimePoint().after(to));
+            // The track really has an ArrayListNavigableSet as its basis. Even for out-of-order delivery,
+            // the iterator is simply an int index into the underlying array. We're safe for our purposes
+            // here, even if a fix is inserted or removed while we iterate, so release the lock after
+            // having obtained the iterator.
+            fixIterator = track.getFixesIterator(from, /* inclusive */ true);
         } finally {
             track.unlockAfterRead();
         }
+        GPSFixMoving next;
+        do {
+            if (fixIterator.hasNext()) {
+                next = fixIterator.next();
+                final GPSFixMoving maneuverCandidate = window.add(next);
+                if (maneuverCandidate != null) {
+                    result.add(maneuverCandidate);
+                }
+            } else {
+                next = null;
+            }
+        } while (next != null && !next.getTimePoint().after(to));
         final GPSFixMoving lastManeuverCandidate = window.tryToExtractManeuverCandidate();
         if (lastManeuverCandidate != null) {
             result.add(lastManeuverCandidate);
