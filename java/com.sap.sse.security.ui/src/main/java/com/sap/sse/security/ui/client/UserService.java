@@ -403,8 +403,11 @@ public class UserService {
      * Checks whether the user has the permission to the given action for the given object.
      */
     public boolean hasPermission(SecuredDTO securedDTO, Action action) {
-        return hasPermission(securedDTO.getIdentifier().getPermission(action), securedDTO.getOwnership(),
-                securedDTO.getAccessControlList());
+        if (securedDTO == null) {
+            return false;
+        }
+        return PermissionChecker.isPermitted(securedDTO.getIdentifier().getPermission(action), currentUser,
+                anonymousUser, securedDTO.getOwnership(), securedDTO.getAccessControlList());
     }
 
     /**
@@ -478,8 +481,7 @@ public class UserService {
     }
     
     public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
-        if (serverInfo != null
-                && !hasPermission(serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT))) {
+        if (!hasServerPermission(ServerActions.CREATE_OBJECT)) {
             return false;
         }
         final WildcardPermission createPermission = type.getPermission(DefaultActions.CREATE);
