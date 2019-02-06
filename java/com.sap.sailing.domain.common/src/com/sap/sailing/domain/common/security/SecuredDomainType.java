@@ -85,13 +85,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
 
     public static final HasPermissions REPLICATOR = new SecuredDomainType("REPLICATOR", ReplicatorActions.values());
 
-    /**
-     * This permission is used to check READ-permission on different things. For that the object type to determine the
-     * permission strings is String (e.g. servername, DataRetrieverChainDefinitionDTO.name, RetrieverChainDefinition.
-     * name, QueryIdentifier, ...)
-     */
-    public static final HasPermissions DATA_MINING = new SecuredDomainType("DATA_MINING");
-
     public static final HasPermissions RACE_MANAGER_APP_DEVICE_CONFIGURATION = new SecuredDomainType(
             "RACE_MANAGER_APP_DEVICE_CONFIGURATION");
 

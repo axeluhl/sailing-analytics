@@ -992,7 +992,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         securityService.assumeOwnershipMigrated(SecuredDomainType.RESULT_IMPORT_URL.getName());
         securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_POSITIONS.getName());
         securityService.assumeOwnershipMigrated(SecuredDomainType.DETAIL_TIMER.getName());
-        securityService.assumeOwnershipMigrated(SecuredDomainType.DATA_MINING.getName());
         securityService.assumeOwnershipMigrated(SecuredDomainType.REPLICATOR.getName());
 
         for (Event event : getAllEvents()) {

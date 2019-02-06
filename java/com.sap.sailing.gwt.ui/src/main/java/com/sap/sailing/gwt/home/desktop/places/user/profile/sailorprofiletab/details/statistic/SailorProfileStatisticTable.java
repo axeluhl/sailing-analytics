@@ -14,13 +14,11 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
@@ -30,8 +28,6 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.ShowAndEditSailorProfile;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView.Presenter;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
@@ -44,10 +40,9 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.celltable.SortedCellTable;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -88,15 +83,12 @@ public class SailorProfileStatisticTable extends Composite {
 
     private UserService userService;
 
-    private Presenter presenter;
-
     public SailorProfileStatisticTable(FlagImageResolver flagImageResolver, SailorProfileNumericStatisticType type,
-            StringMessages stringMessages, UserService userService, EditSailorProfileDetailsView.Presenter presenter) {
+            StringMessages stringMessages, UserService userService) {
         this.userService = userService;
         this.flagImageResolver = flagImageResolver;
         this.type = type;
         this.stringMessages = stringMessages;
-        this.presenter = presenter;
 
         SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -139,22 +131,10 @@ public class SailorProfileStatisticTable extends Composite {
             dataMiningUrl = navigationTarget.apply(data.get(0));
             anchor.setHref(dataMiningUrl);
         }
-        presenter.getServerInfo(new AsyncCallback<ServerInfoDTO>() {
 
-            @Override
-            public void onSuccess(ServerInfoDTO serverInfo) {
-                if (!userService.hasPermission(
-                        SecuredDomainType.DATA_MINING.getPermissionForObject(DefaultActions.READ,
-                                serverInfo))) {
-                    anchor.setVisible(false);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log(caught.getMessage(), caught);
-            }
-        });
+        if (!userService.hasServerPermission(ServerActions.DATA_MINING)) {
+            anchor.setVisible(false);
+        }
         sailorProfilesTable.setList(data);
     }
 
@@ -196,8 +176,8 @@ public class SailorProfileStatisticTable extends Composite {
             // navigation target is set from outside
         }
 
-        if (userService.hasPermission(SecuredDomainType.DATA_MINING.getStringPermission())
-                || !isAverage) {
+
+        if (userService.hasServerPermission(ServerActions.DATA_MINING) || !isAverage) {
             addButtonStyle(actualValueColumn);
             addButtonStyle(clubNameColumn);
             addButtonStyle(competitorColumn);

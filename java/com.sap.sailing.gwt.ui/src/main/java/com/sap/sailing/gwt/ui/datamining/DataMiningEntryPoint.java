@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -44,7 +43,8 @@ import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
@@ -77,7 +77,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                 genericSailingAuthentication);
         authorizedContentDecorator.setPermissionToCheck(
-                SecuredDomainType.DATA_MINING.getPermissionForObject(DefaultActions.READ, serverInfo));
+                serverInfo.getIdentifier().getPermission(SecuredSecurityTypes.ServerActions.DATA_MINING));
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
 
             private QueryDefinitionProviderWithControls queryDefinitionProvider;
@@ -108,8 +108,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
                         queryDefinitionProvider, resultsPresenter);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
-                if (getUserService().hasAllPermissions(SecuredDomainType.DATA_MINING
-                        .getPermissionsForTypeRelativeIdentifier(DefaultActions.READ_AND_WRITE_ACTIONS, serverInfo.getTypeRelativeObjectIdentifier()))) {
+                if (getUserService().hasServerPermission(ServerActions.DATA_MINING)) {
                     StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
                             queryDefinitionProvider, dataMiningService, queryRunner);
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
