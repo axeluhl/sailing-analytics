@@ -368,6 +368,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             com.sap.sse.security.shared.HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer);
 
+    /**
+     * Filters objects with any of the given permissions for the current user.
+     */
+    <T extends WithQualifiedObjectIdentifier> void filterObjectsWithAnyPermissionForCurrentUser(
+            HasPermissions permittedObject, com.sap.sse.security.shared.HasPermissions.Action[] actions,
+            Iterable<T> objectsToFilter, Consumer<T> filteredObjectsConsumer);
+
     <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
             Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper);
 
@@ -375,11 +382,23 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Function<T, R> filteredObjectsMapper);
 
+    /**
+     * Maps and filters by any of the given permissions for the current user.
+     */
+    <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByAnyExplicitPermissionForCurrentUser(
+            HasPermissions permittedObject, HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
+            Function<T, R> filteredObjectsMapper);
+
     boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
 
     boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 
     boolean hasCurrentUserExplictPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+
+    /**
+     * @return true, if any of the given actions is permitted
+     */
+    boolean hasCurrentUserAnyExplictPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
 
     void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
 
@@ -390,6 +409,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void checkCurrentUserDeletePermission(QualifiedObjectIdentifier object);
 
     void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+
+    /**
+     * Checks if the current user has permission any of the given actions.
+     */
+    void checkCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
 
     /**
      * Since there are some HasPermission objects, that have no Ownership, this method is used to explicitly mention

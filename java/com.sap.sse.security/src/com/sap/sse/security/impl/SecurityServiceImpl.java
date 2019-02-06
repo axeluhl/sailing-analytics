@@ -81,9 +81,9 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.OperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
@@ -1708,6 +1708,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         });
     }
 
+    /** Filters the objects with any of the given permissions for the current user */
+    @Override
+    public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithAnyPermissionForCurrentUser(
+            HasPermissions permittedObject, HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
+            Consumer<T> filteredObjectsConsumer) {
+        objectsToFilter.forEach(objectToCheck -> {
+            boolean isPermitted = actions.length > 0;
+            for (int i = 0; i < actions.length; i++) {
+                if (SecurityUtils.getSubject()
+                        .isPermitted(permittedObject.getStringPermissionForObject(actions[i], objectToCheck))) {
+                    isPermitted = true;
+                    break;
+                }
+            }
+            if (isPermitted) {
+                filteredObjectsConsumer.accept(objectToCheck);
+            }
+        });
+    }
+
     @Override
     public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
             Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper) {
@@ -1723,6 +1743,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Function<T, R> filteredObjectsMapper) {
         final List<R> result = new ArrayList<>();
         filterObjectsWithPermissionForCurrentUser(permittedObject, actions, objectsToFilter,
+                filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
+        return result;
+    }
+
+    @Override
+    public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByAnyExplicitPermissionForCurrentUser(
+            HasPermissions permittedObject, HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
+            Function<T, R> filteredObjectsMapper) {
+        final List<R> result = new ArrayList<>();
+        filterObjectsWithAnyPermissionForCurrentUser(permittedObject, actions, objectsToFilter,
                 filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
         return result;
     }
@@ -1932,6 +1962,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return isPermitted;
     }
 
+    public boolean hasCurrentUserAnyExplictPermissions(WithQualifiedObjectIdentifier object,
+            HasPermissions.Action... actions) {
+        boolean result = false;
+        for (com.sap.sse.security.shared.HasPermissions.Action action : actions) {
+            if (hasCurrentUserExplictPermissions(object, action)) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
     @Override
     public void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
         if (object == null) {
@@ -1968,6 +2010,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         for (int i = 0; i < actions.length; i++) {
             SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(actions[i], object));
+        }
+    }
+
+    @Override
+    public void checkCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object,
+            HasPermissions.Action... actions) {
+        if (object == null || actions.length == 0) {
+            throw new AuthorizationException();
+        }
+
+        boolean isPermitted = false;
+        for (int i = 0; i < actions.length; i++) {
+            if (SecurityUtils.getSubject()
+                    .isPermitted(object.getType().getStringPermissionForObject(actions[i], object))) {
+                isPermitted = true;
+                break;
+            }
+        }
+        if (!isPermitted) {
+            throw new AuthorizationException();
         }
     }
 
