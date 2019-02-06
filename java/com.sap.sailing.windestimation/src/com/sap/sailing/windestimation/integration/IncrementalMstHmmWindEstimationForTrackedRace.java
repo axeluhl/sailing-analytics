@@ -36,6 +36,18 @@ import com.sap.sailing.windestimation.windinference.WindTrackCalculatorImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * Implementation of wind estimator which is meant to be assigned to a tracked race instance to provide a wind track
+ * with estimated wind. Under the hood, it makes use of Minimum Spanning Tree based HMM which aggregates the maneuver
+ * type classifications results such that a plausible wind track comes out. It operates incrementally, which means that
+ * it maintains a state which is specific to the tracked race it is assigned to. The state is updated with each
+ * {@link #newManeuverSpotsDetected(Competitor, Iterable, TrackTimeInfo)} call. The incremental state is managed in
+ * {@link #mstManeuverGraphGenerator} which is responsible for incremental Minimum Spanning Tree computation for
+ * provided maneuvers.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
         implements IncrementalWindEstimationTrack {
 

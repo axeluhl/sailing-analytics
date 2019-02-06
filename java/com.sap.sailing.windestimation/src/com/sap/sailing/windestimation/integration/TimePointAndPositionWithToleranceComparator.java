@@ -6,6 +6,13 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * Comparator which compares a pair composed of a position and time point. The special feature of this comparator is
+ * that it takes inaccuracy of double values when comparing longitude and latitude by introducing a tolerance threshold.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class TimePointAndPositionWithToleranceComparator implements Comparator<Pair<Position, TimePoint>> {
 
     private static final double DOUBLE_TOLERANCE = 0.0000001;

@@ -1131,8 +1131,21 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
 
     void removeWind(Wind wind, WindSource windSource);
 
+    /**
+     * Gets polar service which is currently set in this tracked race instance.
+     * @see #setPolarDataService(PolarDataService)
+     */
     PolarDataService getPolarDataService();
 
+    /**
+     * Sets wind estimation for this tracked race instance. The previous wind estimation with its wind source and wind
+     * track are completely removed from this tracked race instance. If not {@code null}, the wind estimation is set and
+     * configured accordingly so that it gets supplied by maneuver detector with new maneuvers in order to produce a
+     * wind track with estimated wind. An appropriate wind source of type
+     * {@link WindSourceType#MANEUVER_BASED_ESTIMATION} with corresponding wind track is added to the tracked race. If
+     * {@code null}, the wind estimation will be disabled for the tracked race. After the call of this method, maneuver
+     * cache and wind cache will be reset and its recalculation will be triggered.
+     */
     void setWindEstimation(IncrementalWindEstimationTrack windEstimation);
 
 }

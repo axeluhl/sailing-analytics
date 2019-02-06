@@ -34,6 +34,11 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenerator {
 
     private static final Duration MIN_DURATION_TO_OTHER_MANEUVER = new MillisecondsDurationImpl(
