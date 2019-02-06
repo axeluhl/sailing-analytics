@@ -63,6 +63,8 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static enum CompetitorAndBoatActions implements Action {
         READ_PUBLIC;
         
+        public static final Action[] READ_AND_READ_PUBLIC_ACTIONS = new Action[] { READ_PUBLIC, DefaultActions.READ };
+
         private static final Action[] ALL_ACTIONS = new Action[] { READ_PUBLIC, DefaultActions.READ,
                 DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,
                 DefaultActions.CHANGE_ACL };

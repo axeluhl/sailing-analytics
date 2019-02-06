@@ -83,8 +83,8 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
         result.put(WIND_QUALITY, windQuality);
         result.put(BYCOMPETITOR, byCompetitorJson);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            if (securityService.hasCurrentUserExplictPermissions(competitor,
-                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC)) {
+            if (securityService.hasCurrentUserAnyExplictPermissions(competitor,
+                    SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                 ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
                 TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
                 if (trackTimeInfo != null) {
