@@ -86,35 +86,41 @@ public class CourseChangeBasedTrackApproximation {
          */
         public GPSFixMoving add(GPSFixMoving next) {
             final GPSFixMoving result;
+            final SpeedWithBearing nextSpeed = next.isEstimatedSpeedCached() ? next.getCachedEstimatedSpeed() : track.getEstimatedSpeed(next.getTimePoint());
             final GPSFixMoving previous = window.peekLast();
-            this.window.add(next);
-            if (previous != null) {
-                // shortcut estimated COG calculation by checking the fix's cache; if cached, this avoids a
-                // rather expensive ceil/floor search on the track; resort to track.getEstimatedSpeed if not cached
-                final SpeedWithBearing previousSpeed = previous.isEstimatedSpeedCached() ? previous.getCachedEstimatedSpeed() : track.getEstimatedSpeed(previous.getTimePoint());
-                final SpeedWithBearing nextSpeed = next.isEstimatedSpeedCached() ? next.getCachedEstimatedSpeed() : track.getEstimatedSpeed(next.getTimePoint());
-                final double courseChangeBetweenPreviousAndNextInDegrees = previousSpeed.getBearing().getDifferenceTo(nextSpeed.getBearing()).getDegrees();
-                windowDuration = windowDuration.plus(previous.getTimePoint().until(next.getTimePoint()));
-                if (totalCourseChangeFromBeginningOfWindow.isEmpty()) {
-                    totalCourseChangeFromBeginningOfWindow.add(courseChangeBetweenPreviousAndNextInDegrees);
-                    absoluteMaximumTotalCourseChangeFromBeginningOfWindowInDegrees = Math.abs(courseChangeBetweenPreviousAndNextInDegrees);
-                    indexOfMaximumTotalCourseChange = 0;
-                } else {
-                    final double totalCourseChangeFromBeginningOfWindowForCurrentFix = totalCourseChangeFromBeginningOfWindow.get(totalCourseChangeFromBeginningOfWindow.size()-1)
-                            + courseChangeBetweenPreviousAndNextInDegrees;
-                    totalCourseChangeFromBeginningOfWindow.add(totalCourseChangeFromBeginningOfWindowForCurrentFix);
-                    if (Math.abs(totalCourseChangeFromBeginningOfWindowForCurrentFix) > absoluteMaximumTotalCourseChangeFromBeginningOfWindowInDegrees) {
-                        absoluteMaximumTotalCourseChangeFromBeginningOfWindowInDegrees = Math.abs(totalCourseChangeFromBeginningOfWindowForCurrentFix);
-                        indexOfMaximumTotalCourseChange = totalCourseChangeFromBeginningOfWindow.size()-1;
+            if (nextSpeed != null) {
+                this.window.add(next);
+                if (previous != null) {
+                    // shortcut estimated COG calculation by checking the fix's cache; if cached, this avoids a
+                    // rather expensive ceil/floor search on the track; resort to track.getEstimatedSpeed if not cached
+                    final SpeedWithBearing previousSpeed = previous.isEstimatedSpeedCached() ? previous.getCachedEstimatedSpeed() : track.getEstimatedSpeed(previous.getTimePoint());
+                    assert previousSpeed != null; // we wouldn't have added the fix in the previous run if it hadn't had a valid speed
+                    final double courseChangeBetweenPreviousAndNextInDegrees = previousSpeed.getBearing().getDifferenceTo(nextSpeed.getBearing()).getDegrees();
+                    windowDuration = windowDuration.plus(previous.getTimePoint().until(next.getTimePoint()));
+                    if (totalCourseChangeFromBeginningOfWindow.isEmpty()) {
+                        totalCourseChangeFromBeginningOfWindow.add(courseChangeBetweenPreviousAndNextInDegrees);
+                        absoluteMaximumTotalCourseChangeFromBeginningOfWindowInDegrees = Math.abs(courseChangeBetweenPreviousAndNextInDegrees);
+                        indexOfMaximumTotalCourseChange = 0;
+                    } else {
+                        final double totalCourseChangeFromBeginningOfWindowForCurrentFix = totalCourseChangeFromBeginningOfWindow.get(totalCourseChangeFromBeginningOfWindow.size()-1)
+                                + courseChangeBetweenPreviousAndNextInDegrees;
+                        totalCourseChangeFromBeginningOfWindow.add(totalCourseChangeFromBeginningOfWindowForCurrentFix);
+                        if (Math.abs(totalCourseChangeFromBeginningOfWindowForCurrentFix) > absoluteMaximumTotalCourseChangeFromBeginningOfWindowInDegrees) {
+                            absoluteMaximumTotalCourseChangeFromBeginningOfWindowInDegrees = Math.abs(totalCourseChangeFromBeginningOfWindowForCurrentFix);
+                            indexOfMaximumTotalCourseChange = totalCourseChangeFromBeginningOfWindow.size()-1;
+                        }
                     }
-                }
-                if (windowDuration.compareTo(maximumWindowLength) > 0) {
-                    result = tryToExtractManeuverCandidate();
-                } else {
+                    if (windowDuration.compareTo(maximumWindowLength) > 0) {
+                        result = tryToExtractManeuverCandidate();
+                    } else {
+                        result = null;
+                    }
+                    assert window.isEmpty() && totalCourseChangeFromBeginningOfWindow.isEmpty() || window.size() == totalCourseChangeFromBeginningOfWindow.size()+1;
+                } else { // the window was empty so far; we added the next fix, but no maneuver can yet be identified in lack of a course change
                     result = null;
                 }
-                assert window.isEmpty() && totalCourseChangeFromBeginningOfWindow.isEmpty() || window.size() == totalCourseChangeFromBeginningOfWindow.size()+1;
             } else {
+                // nextSpeed == null; unable to determine COG for next fix, so fix was not added, therefore no new maneuver
                 result = null;
             }
             return result; 
@@ -186,12 +192,30 @@ public class CourseChangeBasedTrackApproximation {
         /**
          * If the {@link #absoluteMaximumTotalCourseChangeFromBeginningOfWindowInDegrees} is greater than or equal to
          * the {@link #maneuverAngleInDegreesThreshold}, the fix representing the maneuver candidate best is returned.
+         * For this, this method selects the fix that has the greatest turn rate from its predecessor towards the
+         * direction represented by the signum of the
+         * {@link #absoluteMaximumTotalCourseChangeFromBeginningOfWindowInDegrees}. Turn rate is defined as angle change
+         * per time.
+         * <p>
          * The {@link #window} is left unchanged.
          */
         private GPSFixMoving getManeuverCandidate() {
             final GPSFixMoving result;
             if (absoluteMaximumTotalCourseChangeFromBeginningOfWindowInDegrees >= maneuverAngleInDegreesThreshold) {
-                result = window.get(indexOfMaximumTotalCourseChange+1); // the index at i is for window[i]..window[i+1], so return window[i+1]
+                final double signumOfMaximumAbsoluteCourseChange = Math.signum(this.totalCourseChangeFromBeginningOfWindow.get(indexOfMaximumTotalCourseChange));
+                double previousTotalCourseChange = 0;
+                double maximumAbsoluteCourseChangeInCorrectDirection = -1;
+                int indexOfMaximumAbsoluteCourseChangeInCorrectDirection = -1;
+                for (int i=0; i<=indexOfMaximumTotalCourseChange; i++) {
+                    final double currentTotalCourseChange = totalCourseChangeFromBeginningOfWindow.get(i);
+                    final double courseChange = currentTotalCourseChange-previousTotalCourseChange;
+                    if (courseChange*signumOfMaximumAbsoluteCourseChange > maximumAbsoluteCourseChangeInCorrectDirection) {
+                        maximumAbsoluteCourseChangeInCorrectDirection = courseChange*signumOfMaximumAbsoluteCourseChange;
+                        indexOfMaximumAbsoluteCourseChangeInCorrectDirection = i;
+                    }
+                    previousTotalCourseChange = currentTotalCourseChange;
+                }
+                result = window.get(indexOfMaximumAbsoluteCourseChangeInCorrectDirection); // pick the fix introducing, not finishing, the highest turn rate
             } else {
                 result = null;
             }
@@ -211,26 +235,22 @@ public class CourseChangeBasedTrackApproximation {
         final Iterator<GPSFixMoving> fixIterator;
         track.lockForRead();
         try {
-            // The track really has an ArrayListNavigableSet as its basis. Even for out-of-order delivery,
-            // the iterator is simply an int index into the underlying array. We're safe for our purposes
-            // here, even if a fix is inserted or removed while we iterate, so release the lock after
-            // having obtained the iterator.
             fixIterator = track.getFixesIterator(from, /* inclusive */ true);
+            GPSFixMoving next;
+            do {
+                if (fixIterator.hasNext()) {
+                    next = fixIterator.next();
+                    final GPSFixMoving maneuverCandidate = window.add(next);
+                    if (maneuverCandidate != null) {
+                        result.add(maneuverCandidate);
+                    }
+                } else {
+                    next = null;
+                }
+            } while (next != null && !next.getTimePoint().after(to));
         } finally {
             track.unlockAfterRead();
         }
-        GPSFixMoving next;
-        do {
-            if (fixIterator.hasNext()) {
-                next = fixIterator.next();
-                final GPSFixMoving maneuverCandidate = window.add(next);
-                if (maneuverCandidate != null) {
-                    result.add(maneuverCandidate);
-                }
-            } else {
-                next = null;
-            }
-        } while (next != null && !next.getTimePoint().after(to));
         final GPSFixMoving lastManeuverCandidate = window.tryToExtractManeuverCandidate();
         if (lastManeuverCandidate != null) {
             result.add(lastManeuverCandidate);
