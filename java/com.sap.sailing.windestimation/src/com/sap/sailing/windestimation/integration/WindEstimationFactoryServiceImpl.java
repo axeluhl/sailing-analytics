@@ -17,6 +17,7 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifi
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
+import com.sap.sailing.windestimation.model.store.InMemoryModelStore;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
@@ -32,20 +33,26 @@ public class WindEstimationFactoryServiceImpl
     private static final boolean ENABLE_POLARS_INFORMATION = true;
     private static final long PRESERVE_LOADED_MODELS_MILLIS = Long.MAX_VALUE;
 
-    public static final ModelStore MODEL_STORE = new MongoDbModelStore(MongoDBService.INSTANCE.getDB());
     private static final ManeuverFeatures MAX_MANEUVER_FEATURES = new ManeuverFeatures(ENABLE_POLARS_INFORMATION,
             ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION);
     private static final PersistenceContextType[] relevantContextTypes = new PersistenceContextType[] {
             PersistenceContextType.MANEUVER_CLASSIFIER, PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
             PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR };
 
-    protected final ManeuverClassifiersCache maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE,
-            PRELOAD_ALL_MODELS, PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
-    protected final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(
-            MODEL_STORE, PRELOAD_ALL_MODELS, PRESERVE_LOADED_MODELS_MILLIS);
+    public final ModelStore MODEL_STORE;
+    protected final ManeuverClassifiersCache maneuverClassifiersCache;
+    protected final GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache;
     private final List<WindEstimationModelsChangedListener> modelsChangedListeners = new ArrayList<>();
     private boolean modelsReady = false;
     private boolean shutdown = false;
+
+    public WindEstimationFactoryServiceImpl(boolean replica) {
+        MODEL_STORE = replica ? new InMemoryModelStore() : new MongoDbModelStore(MongoDBService.INSTANCE.getDB());
+        maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE, PRELOAD_ALL_MODELS,
+                PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
+        gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(MODEL_STORE,
+                PRELOAD_ALL_MODELS, PRESERVE_LOADED_MODELS_MILLIS);
+    }
 
     @Override
     public IncrementalWindEstimationTrack createIncrementalWindEstimationTrack(TrackedRace trackedRace) {
@@ -68,7 +75,6 @@ public class WindEstimationFactoryServiceImpl
         for (PersistenceContextType contextType : relevantContextTypes) {
             Map<String, byte[]> exportedModels = (Map<String, byte[]>) is.readObject();
             MODEL_STORE.importPersistedModels(exportedModels, contextType);
-
         }
         clearState();
     }
@@ -108,6 +114,10 @@ public class WindEstimationFactoryServiceImpl
         }
     }
 
+    /**
+     * Deletes all persisted models in {@link #MODEL_STORE} and clears/reloads all caches with machine learning models.
+     */
+    @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
         for (PersistenceContextType contextType : relevantContextTypes) {
             MODEL_STORE.deleteAll(contextType);
@@ -115,6 +125,10 @@ public class WindEstimationFactoryServiceImpl
         clearState();
     }
 
+    /**
+     * Clears/Reloads all caches with machine learning models. Notifies ready state change listeners about the new ready
+     * state of this wind estimation instance.
+     */
     @Override
     public void clearState() {
         maneuverClassifiersCache.clearCache();
@@ -130,6 +144,9 @@ public class WindEstimationFactoryServiceImpl
         notifyModelsChangedListeners(modelsChangedListeners, modelsReady);
     }
 
+    /**
+     * Imports all the models which are available in the provided model store.
+     */
     public void importAllModelsFromModelStore(ModelStore modelStore) throws ModelPersistenceException {
         for (PersistenceContextType contextType : relevantContextTypes) {
             Map<String, byte[]> exportedModels = modelStore.exportAllPersistedModels(contextType);
@@ -139,6 +156,10 @@ public class WindEstimationFactoryServiceImpl
         clearState();
     }
 
+    /**
+     * Shuts down the wind estimation by calling all ready state change listeners with {@code modelReadyState=false} and
+     * removing all the attached listeners afterwards. This instance will never be ready again for wind estimation.
+     */
     public void shutdown() {
         List<WindEstimationModelsChangedListener> modelsChangedListeners;
         synchronized (this) {

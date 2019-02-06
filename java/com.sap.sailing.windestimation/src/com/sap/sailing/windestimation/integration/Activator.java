@@ -30,11 +30,14 @@ public class Activator implements BundleActivator {
     private static final String WIND_ESTIMATION_MODEL_DATA_SOURCE_FOLDER_PROPERTY_NAME = "windestimation.source.folder";
 
     private final Set<ServiceRegistration<?>> registrations = new HashSet<>();
-    private final WindEstimationFactoryServiceImpl service = new WindEstimationFactoryServiceImpl();
+    private WindEstimationFactoryServiceImpl service;
 
     @Override
     public void start(BundleContext context) throws Exception {
         logger.info("Registering WindEstimationFactoryService");
+        //FIXME determine whether this is a replica or not
+        boolean replica = false;
+        service = new WindEstimationFactoryServiceImpl(replica);
         final String windEstimationModelDataSourceURL = System
                 .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_URL_PROPERTY_NAME);
         final String windEstimationModelDataSourceFolder = System
