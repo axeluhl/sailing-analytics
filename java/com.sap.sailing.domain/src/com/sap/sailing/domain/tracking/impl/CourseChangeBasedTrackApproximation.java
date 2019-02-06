@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sse.common.Duration;
@@ -88,7 +89,11 @@ public class CourseChangeBasedTrackApproximation {
             final GPSFixMoving previous = window.peekLast();
             this.window.add(next);
             if (previous != null) {
-                final double courseChangeBetweenPreviousAndNextInDegrees = previous.getSpeed().getBearing().getDifferenceTo(next.getSpeed().getBearing()).getDegrees();
+                // shortcut estimated COG calculation by checking the fix's cache; if cached, this avoids a
+                // rather expensive ceil/floor search on the track; resort to track.getEstimatedSpeed if not cached
+                final SpeedWithBearing previousSpeed = previous.isEstimatedSpeedCached() ? previous.getCachedEstimatedSpeed() : track.getEstimatedSpeed(previous.getTimePoint());
+                final SpeedWithBearing nextSpeed = next.isEstimatedSpeedCached() ? next.getCachedEstimatedSpeed() : track.getEstimatedSpeed(next.getTimePoint());
+                final double courseChangeBetweenPreviousAndNextInDegrees = previousSpeed.getBearing().getDifferenceTo(nextSpeed.getBearing()).getDegrees();
                 windowDuration = windowDuration.plus(previous.getTimePoint().until(next.getTimePoint()));
                 if (totalCourseChangeFromBeginningOfWindow.isEmpty()) {
                     totalCourseChangeFromBeginningOfWindow.add(courseChangeBetweenPreviousAndNextInDegrees);
