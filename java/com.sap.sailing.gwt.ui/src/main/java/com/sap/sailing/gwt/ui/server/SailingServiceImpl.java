@@ -64,6 +64,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -581,7 +582,6 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
@@ -2715,8 +2715,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
             String fleetName, RegattaAndRaceIdentifier raceIdentifier) {
-        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-        Object principal = SessionUtils.getPrincipal();
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        Object principal = subject.getPrincipal();
         if (principal != null) {
             logger.info(String.format("%s linked race column %s %s (%s) with tracked race %s.", principal.toString(),
                     leaderboardName, raceColumnName, fleetName, raceIdentifier.getRaceName()));
