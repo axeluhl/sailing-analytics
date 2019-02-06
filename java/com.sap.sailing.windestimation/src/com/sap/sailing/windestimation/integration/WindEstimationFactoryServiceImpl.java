@@ -19,9 +19,7 @@ import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
 import com.sap.sailing.windestimation.model.store.InMemoryModelStore;
 import com.sap.sailing.windestimation.model.store.ModelStore;
-import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
-import com.sap.sse.mongodb.MongoDBService;
 
 public class WindEstimationFactoryServiceImpl
         extends AbstractReplicableWithObjectInputStream<WindEstimationFactoryService, WindEstimationDataOperation<?>>
@@ -46,8 +44,8 @@ public class WindEstimationFactoryServiceImpl
     private boolean modelsReady = false;
     private boolean shutdown = false;
 
-    public WindEstimationFactoryServiceImpl(boolean replica) {
-        MODEL_STORE = replica ? new InMemoryModelStore() : new MongoDbModelStore(MongoDBService.INSTANCE.getDB());
+    public WindEstimationFactoryServiceImpl() {
+        MODEL_STORE = new InMemoryModelStore();
         maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE, PRELOAD_ALL_MODELS,
                 PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
         gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(MODEL_STORE,

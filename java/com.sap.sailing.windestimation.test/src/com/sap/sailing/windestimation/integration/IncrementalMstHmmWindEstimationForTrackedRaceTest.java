@@ -81,7 +81,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
             throws MalformedURLException, URISyntaxException, ModelPersistenceException {
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2")); // will result in CEST
-        windEstimationFactoryService = new WindEstimationFactoryServiceImpl(false);
+        windEstimationFactoryService = new WindEstimationFactoryServiceImpl();
         modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models", getClass().getClassLoader(),
                 modelFilesNames);
         windEstimationFactoryService.importAllModelsFromModelStore(modelStore);

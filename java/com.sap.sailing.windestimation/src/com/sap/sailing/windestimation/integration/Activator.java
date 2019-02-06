@@ -14,6 +14,8 @@ import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.store.FileSystemModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
+import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.util.ClearStateTestSupport;
 
@@ -35,9 +37,7 @@ public class Activator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         logger.info("Registering WindEstimationFactoryService");
-        //FIXME determine whether this is a replica or not
-        boolean replica = false;
-        service = new WindEstimationFactoryServiceImpl(replica);
+        service = new WindEstimationFactoryServiceImpl();
         final String windEstimationModelDataSourceURL = System
                 .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_URL_PROPERTY_NAME);
         final String windEstimationModelDataSourceFolder = System
@@ -49,9 +49,10 @@ public class Activator implements BundleActivator {
         }
         if (windEstimationModelDataSourceURL != null) {
             importWindEstimationModelsFromUrl(windEstimationModelDataSourceURL);
-        }
-        if (windEstimationModelDataSourceFolder != null) {
+        } else if (windEstimationModelDataSourceFolder != null) {
             importWindEstimationModelsFromFolder(windEstimationModelDataSourceFolder);
+        } else {
+            importWindEstimationModelsFromMongoDb();
         }
         final ServiceRegistration<WindEstimationFactoryService> serviceRegistration = context
                 .registerService(WindEstimationFactoryService.class, service, null);
@@ -60,6 +61,15 @@ public class Activator implements BundleActivator {
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, service.getId().toString());
         registrations.add(context.registerService(Replicable.class.getName(), service, replicableServiceProperties));
         registrations.add(context.registerService(ClearStateTestSupport.class.getName(), service, null));
+    }
+
+    private void importWindEstimationModelsFromMongoDb() {
+        MongoDbModelStore modelStore = new MongoDbModelStore(MongoDBService.INSTANCE.getDB());
+        try {
+            service.importAllModelsFromModelStore(modelStore);
+        } catch (ModelPersistenceException e) {
+            throw new ModelLoadingException("Could not import wind estimation models from MongoDB", e);
+        }
     }
 
     private void importWindEstimationModelsFromFolder(String windEstimationModelDataSourceFolder) {
