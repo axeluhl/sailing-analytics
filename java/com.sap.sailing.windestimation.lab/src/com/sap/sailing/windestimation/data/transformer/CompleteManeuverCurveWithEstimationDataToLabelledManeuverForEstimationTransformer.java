@@ -4,20 +4,21 @@ import java.util.List;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 
-public class CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer
-        implements CompetitorTrackTransformer<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> {
+public class CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer
+        implements CompetitorTrackTransformer<CompleteManeuverCurveWithEstimationData, LabelledManeuverForEstimation> {
 
-    private final ManeuverForEstimationTransformer internalTransformer = new ManeuverForEstimationTransformer();
+    private final LabelledManeuverForEstimationTransformer internalTransformer = new LabelledManeuverForEstimationTransformer();
 
     @Override
-    public List<ManeuverForEstimation> transformElements(
+    public List<LabelledManeuverForEstimation> transformElements(
             CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithElementsToTransform) {
         List<ConvertableToLabelledManeuverForEstimation> convertableManeuvers = ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData
                 .getConvertableManeuvers(competitorTrackWithElementsToTransform.getElements());
         return internalTransformer.getManeuversForEstimation(convertableManeuvers,
-                competitorTrackWithElementsToTransform.getBoatClass());
+                competitorTrackWithElementsToTransform.getBoatClass(),
+                competitorTrackWithElementsToTransform.getRegattaName());
     }
 
 }

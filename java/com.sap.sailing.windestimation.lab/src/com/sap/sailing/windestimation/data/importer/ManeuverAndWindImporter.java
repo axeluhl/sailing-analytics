@@ -41,10 +41,10 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuver
 import com.sap.sailing.windestimation.data.persistence.twdtransition.RaceWithWindSourcesPersistenceManager;
 import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
 import com.sap.sailing.windestimation.data.serialization.ManeuverForDataAnalysisJsonSerializer;
-import com.sap.sailing.windestimation.data.serialization.ManeuverForEstimationJsonSerializer;
+import com.sap.sailing.windestimation.data.serialization.LabelledManeuverForEstimationJsonSerializer;
 import com.sap.sailing.windestimation.data.transformer.CompetitorTrackTransformer;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer;
-import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer;
+import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 /**
@@ -59,16 +59,16 @@ public class ManeuverAndWindImporter {
     public static final String REST_API_RACES_PATH = "/races";
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
     public static final String REST_API_WIND_DATA_PATH = "/highQualityWindFixes";
-    private final String startFromRegattaName = "TW 2015 J80";
-    private final String startFromRegattaRace = "R2 J 80 Up-Down";
+    private final String startFromRegattaName = null;
+    private final String startFromRegattaRace = null;
     private final RaceWithCompleteManeuverCurvePersistenceManager completeManeuverCurvePersistanceManager;
     private final RaceWithManeuverForDataAnalysisPersistenceManager maneuverForDataAnalysisPersistenceManager;
     private final RaceWithManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager;
     private final RaceWithWindSourcesPersistenceManager raceWithWindSourcesPersistenceManager;
     private final CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer maneuverForDataAnalysisTransformer;
-    private final CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer maneuverForEstimationTransformer;
+    private final CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer maneuverForEstimationTransformer;
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
-    private final ManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
+    private final LabelledManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
     private boolean skipRace;
 
     public ManeuverAndWindImporter() throws UnknownHostException {
@@ -77,9 +77,9 @@ public class ManeuverAndWindImporter {
         this.maneuverForEstimationPersistenceManager = new RaceWithManeuverForEstimationPersistenceManager();
         this.raceWithWindSourcesPersistenceManager = new RaceWithWindSourcesPersistenceManager();
         this.maneuverForDataAnalysisTransformer = new CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer();
-        this.maneuverForEstimationTransformer = new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer();
+        this.maneuverForEstimationTransformer = new CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer();
         this.maneuverForDataAnalysisJsonSerializer = new ManeuverForDataAnalysisJsonSerializer();
-        this.maneuverForEstimationJsonSerializer = new ManeuverForEstimationJsonSerializer();
+        this.maneuverForEstimationJsonSerializer = new LabelledManeuverForEstimationJsonSerializer();
     }
 
     public HttpClient createNewHttpClient() {
@@ -102,6 +102,7 @@ public class ManeuverAndWindImporter {
         if (!skipRace) {
             completeManeuverCurvePersistanceManager.dropCollection();
             maneuverForDataAnalysisPersistenceManager.dropCollection();
+            maneuverForEstimationPersistenceManager.dropCollection();
             raceWithWindSourcesPersistenceManager.dropCollection();
         }
         LoggingUtil.logInfo("Fetching all existing regatta names");
@@ -128,7 +129,8 @@ public class ManeuverAndWindImporter {
                 + importStatistics.racesCount + " races\n\t" + importStatistics.competitorTracksCount
                 + " competitor tracks\n\t" + importStatistics.maneuversCount
                 + " complete maneuver curves with estimation data\n\t" + importStatistics.racesWithHighQualityWindData
-                + " races with high quality wind data\n\t" + importStatistics.errors
+                + " races with high quality wind data\n\t" + importStatistics.ignoredRegattas
+                + " ignored regatta due to error\n\t" + importStatistics.ingoredRaces
                 + " ingored races due to error\n--------------------------------------------\nTime passed: "
                 + duration.toHours() + "h " + (duration.toMinutes() - duration.toHours() * 60) + "m "
                 + (duration.get(ChronoUnit.SECONDS) % 60) + "s");
@@ -137,13 +139,13 @@ public class ManeuverAndWindImporter {
     private void importRegatta(String regattaName, ImportStatistics importStatistics)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         String encodedRegattaName = encodeUrlPathPart(regattaName);
-        // TODO The encoding of some regattas does not work well
+        // TODO The encoding of some regatta names with special characters does not work well
         HttpGet getRegatta = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName);
         JSONObject regattaJson = null;
         try {
-            regattaJson = (JSONObject) getJsonFromResponse(createNewHttpClient().execute(getRegatta));
+            regattaJson = (JSONObject) getHttpResponseAsJson(regattaName, null, getRegatta);
         } catch (Exception e) {
-            importStatistics.errors += 1;
+            importStatistics.ignoredRegattas += 1;
             LoggingUtil.logInfo("Error while processing regatta: " + regattaName);
             return;
         }
@@ -163,7 +165,7 @@ public class ManeuverAndWindImporter {
                         try {
                             importRace(regattaName, trackedRaceName, importStatistics);
                         } catch (Exception e) {
-                            importStatistics.errors += 1;
+                            importStatistics.ingoredRaces += 1;
                             LoggingUtil
                                     .logInfo("Error while processing race nr. " + i + ": \"" + trackedRaceName + "\"");
                         }
@@ -197,9 +199,9 @@ public class ManeuverAndWindImporter {
                 + "/" + encodedRaceName;
         HttpGet getEstimationData = new HttpGet(urlPath + REST_API_ESTIMATION_DATA_PATH);
         HttpGet getWindData = new HttpGet(urlPath + REST_API_WIND_DATA_PATH);
-        JSONObject resultJson = getHttpResponseAsJson(trackedRaceName, getEstimationData);
+        JSONObject resultJson = getHttpResponseAsJson(regattaName, trackedRaceName, getEstimationData);
         parseManeuverData(regattaName, trackedRaceName, importStatistics, resultJson);
-        resultJson = getHttpResponseAsJson(trackedRaceName, getWindData);
+        resultJson = getHttpResponseAsJson(regattaName, trackedRaceName, getWindData);
         parseWindData(regattaName, trackedRaceName, importStatistics, resultJson);
     }
 
@@ -276,8 +278,8 @@ public class ManeuverAndWindImporter {
         importStatistics.maneuversCount += maneuversCount;
     }
 
-    private JSONObject getHttpResponseAsJson(String trackedRaceName, HttpGet getEstimationData)
-            throws InterruptedException, Exception {
+    private JSONObject getHttpResponseAsJson(String trackedRegattaName, String trackedRaceName,
+            HttpGet getEstimationData) throws InterruptedException, Exception {
         HttpResponse httpResponse = null;
         Exception lastException = null;
         for (int i = 1; i <= 10; i++) {
@@ -287,8 +289,13 @@ public class ManeuverAndWindImporter {
             } catch (Exception e) {
                 Thread.sleep(10000);
                 lastException = e;
-                LoggingUtil.logInfo("Connection error (" + i + "/10) while processing race : \"" + trackedRaceName
-                        + "\", retrying...");
+                if (trackedRaceName == null) {
+                    LoggingUtil.logInfo("Connection error (" + i + "/10) while querying races of regatta \""
+                            + trackedRegattaName + "\", retrying...");
+                } else {
+                    LoggingUtil.logInfo("Connection error (" + i + "/10) while processing race \"" + trackedRaceName
+                            + "\" of regatta \"" + trackedRegattaName + "\", retrying...");
+                }
             }
         }
         if (httpResponse == null) {
@@ -346,7 +353,8 @@ public class ManeuverAndWindImporter {
         private int racesCount = 0;
         private int competitorTracksCount = 0;
         private int maneuversCount = 0;
-        private int errors = 0;
+        private int ignoredRegattas = 0;
+        private int ingoredRaces = 0;
         private int racesWithHighQualityWindData = 0;
     }
 

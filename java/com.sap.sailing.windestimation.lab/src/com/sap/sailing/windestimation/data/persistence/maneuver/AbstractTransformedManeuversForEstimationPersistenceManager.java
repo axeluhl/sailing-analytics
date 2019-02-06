@@ -3,13 +3,11 @@ package com.sap.sailing.windestimation.data.persistence.maneuver;
 import java.net.UnknownHostException;
 
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractTransformedManeuversPersistenceManager;
-import com.sap.sailing.windestimation.data.persistence.maneuver.PersistenceManager;
-import com.sap.sailing.windestimation.data.serialization.ManeuverForEstimationJsonDeserializer;
+import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
+import com.sap.sailing.windestimation.data.serialization.LabelledManeuverForEstimationJsonDeserializer;
 
 public abstract class AbstractTransformedManeuversForEstimationPersistenceManager
-        extends AbstractTransformedManeuversPersistenceManager<ManeuverForEstimation> {
+        extends AbstractTransformedManeuversPersistenceManager<LabelledManeuverForEstimation> {
 
     public AbstractTransformedManeuversForEstimationPersistenceManager(
             PersistenceManager<?>... dependencyToOtherPersistenceManagers) throws UnknownHostException {
@@ -17,8 +15,8 @@ public abstract class AbstractTransformedManeuversForEstimationPersistenceManage
     }
 
     @Override
-    protected JsonDeserializer<ManeuverForEstimation> getNewJsonDeserializer() {
-        return new ManeuverForEstimationJsonDeserializer();
+    protected JsonDeserializer<LabelledManeuverForEstimation> getNewJsonDeserializer() {
+        return new LabelledManeuverForEstimationJsonDeserializer();
     }
 
 }

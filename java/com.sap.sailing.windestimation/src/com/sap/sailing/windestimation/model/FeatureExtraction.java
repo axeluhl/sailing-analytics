@@ -6,7 +6,7 @@ public interface FeatureExtraction<InstanceType> {
 
     double[] getX(InstanceType instance);
 
-    default double[][] getXMatrix(List<InstanceType> instances) {
+    default double[][] getXMatrix(List<? extends InstanceType> instances) {
         double[][] inputMatrix = new double[instances.size()][];
         int i = 0;
         for (InstanceType instance : instances) {

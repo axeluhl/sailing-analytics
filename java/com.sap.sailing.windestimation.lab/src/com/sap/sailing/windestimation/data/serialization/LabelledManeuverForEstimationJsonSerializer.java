@@ -6,9 +6,8 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedBoatClassJsonSerializer;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
-public class ManeuverForEstimationJsonSerializer implements JsonSerializer<ManeuverForEstimation> {
+public class LabelledManeuverForEstimationJsonSerializer implements JsonSerializer<LabelledManeuverForEstimation> {
 
     public static final String TIMEPOINT = "unixTime";
     public static final String POSITION_LATITUDE = "posLat";
@@ -41,7 +40,7 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
     private final BoatClassJsonSerializer boatClassSerializer = new DetailedBoatClassJsonSerializer();
 
     @Override
-    public JSONObject serialize(ManeuverForEstimation maneuver) {
+    public JSONObject serialize(LabelledManeuverForEstimation maneuver) {
         JSONObject json = new JSONObject();
         json.put(TIMEPOINT, maneuver.getManeuverTimePoint().asMillis());
         json.put(POSITION_LATITUDE, maneuver.getManeuverPosition().getLatDeg());
@@ -66,14 +65,10 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
         json.put(MARK_PASSING, maneuver.isMarkPassing());
         json.put(BOAT_CLASS, boatClassSerializer.serialize(maneuver.getBoatClass()));
         json.put(MARK_PASSING_DATA_AVAILABLE, maneuver.isMarkPassingDataAvailable());
-        if (maneuver instanceof LabelledManeuverForEstimation) {
-            LabelledManeuverForEstimation labelledManeuver = (LabelledManeuverForEstimation) maneuver;
-            json.put(MANEUVER_TYPE,
-                    labelledManeuver.getManeuverType() == null ? null : labelledManeuver.getManeuverType().name());
-            json.put(WIND_SPEED, labelledManeuver.getWind().getKnots());
-            json.put(WIND_COURSE, labelledManeuver.getWind().getBearing().getDegrees());
-            json.put(REGATTA_NAME, labelledManeuver.getRegattaName());
-        }
+        json.put(MANEUVER_TYPE, maneuver.getManeuverType() == null ? null : maneuver.getManeuverType().name());
+        json.put(WIND_SPEED, maneuver.getWind().getKnots());
+        json.put(WIND_COURSE, maneuver.getWind().getBearing().getDegrees());
+        json.put(REGATTA_NAME, maneuver.getRegattaName());
         return json;
     }
 

@@ -16,7 +16,7 @@ public class ManeuverForEstimationTransformer
     public static final int MIN_SECONDS_TO_OTHER_MANEUVER = 4;
 
     public List<ManeuverForEstimation> getManeuversForEstimation(
-            List<ConvertableToManeuverForEstimation> convertableManeuvers, BoatClass boatClass) {
+            List<? extends ConvertableToManeuverForEstimation> convertableManeuvers, BoatClass boatClass) {
         double speedScalingDivisor = getSpeedScalingDivisor(convertableManeuvers);
         List<ManeuverForEstimation> maneuversForEstimation = new ArrayList<>();
         for (ConvertableToManeuverForEstimation maneuver : convertableManeuvers) {

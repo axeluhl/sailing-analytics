@@ -18,8 +18,6 @@ import com.sap.sailing.windestimation.data.WindQuality;
  */
 public interface RaceWithEstimationDataPersistenceManager<T> extends PersistenceManager<RaceWithEstimationData<T>> {
 
-    void dropDb();
-
     void addRace(String regattaName, String trackedRaceName, WindQuality windQuality,
             List<JSONObject> competitorTracks);
 

@@ -36,8 +36,9 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
     }
 
     @Override
-    public void dropDb() {
-        getDb().getCollection(getCollectionName()).drop();
+    public void dropCollection() {
+        getCollection().drop();
+        getDb().getCollection(getCompetitorTracksCollectionName()).drop();
     }
 
     public abstract CompetitorTrackWithEstimationDataJsonDeserializer<T> getNewCompetitorTrackWithEstimationDataJsonDeserializer();

@@ -155,9 +155,9 @@ public class ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWith
         return maneuver.getManeuverTypeForCompleteManeuverCurve();
     }
 
-    public static List<ConvertableToManeuverForEstimation> getConvertableManeuvers(
+    public static List<ConvertableToLabelledManeuverForEstimation> getConvertableManeuvers(
             List<CompleteManeuverCurveWithEstimationData> maneuvers) {
-        List<ConvertableToManeuverForEstimation> convertableManeuvers = new ArrayList<>(maneuvers.size());
+        List<ConvertableToLabelledManeuverForEstimation> convertableManeuvers = new ArrayList<>(maneuvers.size());
         CompleteManeuverCurveWithEstimationData previousManeuver = null;
         CompleteManeuverCurveWithEstimationData currentManeuver = null;
         for (CompleteManeuverCurveWithEstimationData nextManeuver : maneuvers) {

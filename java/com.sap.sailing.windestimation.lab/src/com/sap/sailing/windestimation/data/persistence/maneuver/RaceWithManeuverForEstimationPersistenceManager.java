@@ -4,9 +4,9 @@ import java.net.UnknownHostException;
 
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
-import com.sap.sailing.windestimation.data.serialization.ManeuverForEstimationJsonDeserializer;
+import com.sap.sailing.windestimation.data.serialization.LabelledManeuverForEstimationJsonDeserializer;
 
 /**
  * 
@@ -14,7 +14,7 @@ import com.sap.sailing.windestimation.data.serialization.ManeuverForEstimationJs
  *
  */
 public class RaceWithManeuverForEstimationPersistenceManager
-        extends AbstractRaceWithEstimationDataPersistenceManager<ManeuverForEstimation> {
+        extends AbstractRaceWithEstimationDataPersistenceManager<LabelledManeuverForEstimation> {
 
     public static final String COLLECTION_NAME = "racesWithManeuversForEstimation";
 
@@ -27,8 +27,8 @@ public class RaceWithManeuverForEstimationPersistenceManager
     }
 
     @Override
-    public CompetitorTrackWithEstimationDataJsonDeserializer<ManeuverForEstimation> getNewCompetitorTrackWithEstimationDataJsonDeserializer() {
-        ManeuverForEstimationJsonDeserializer maneuverForEstimationJsonDeserializer = new ManeuverForEstimationJsonDeserializer();
+    public CompetitorTrackWithEstimationDataJsonDeserializer<LabelledManeuverForEstimation> getNewCompetitorTrackWithEstimationDataJsonDeserializer() {
+        LabelledManeuverForEstimationJsonDeserializer maneuverForEstimationJsonDeserializer = new LabelledManeuverForEstimationJsonDeserializer();
         BoatClassJsonDeserializer boatClassDeserializer = new BoatClassJsonDeserializer(DomainFactory.INSTANCE);
         return new CompetitorTrackWithEstimationDataJsonDeserializer<>(boatClassDeserializer,
                 maneuverForEstimationJsonDeserializer);

@@ -28,13 +28,14 @@ import com.sap.sse.common.Util.Pair;
 public class ManeuverClassifierTrainer {
     private static final int MIN_MANEUVERS_COUNT = 500;
 
-    private final TransformedManeuversPersistenceManager<ManeuverForEstimation> persistenceManager;
-    private List<ManeuverForEstimation> allManeuvers;
-    private Map<Pair<String, ManeuverFeatures>, List<ManeuverForEstimation>> maneuversPerBoatClass = new HashMap<>();
+    private final TransformedManeuversPersistenceManager<LabelledManeuverForEstimation> persistenceManager;
+    private List<LabelledManeuverForEstimation> allManeuvers;
+    private Map<Pair<String, ManeuverFeatures>, List<LabelledManeuverForEstimation>> maneuversPerBoatClass = new HashMap<>();
 
     private final ModelStore classifierModelStore;
 
-    public ManeuverClassifierTrainer(TransformedManeuversPersistenceManager<ManeuverForEstimation> persistenceManager,
+    public ManeuverClassifierTrainer(
+            TransformedManeuversPersistenceManager<LabelledManeuverForEstimation> persistenceManager,
             ModelStore classifierModelStore) {
         this.persistenceManager = persistenceManager;
         this.classifierModelStore = classifierModelStore;
@@ -44,16 +45,16 @@ public class ManeuverClassifierTrainer {
             TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classifierModel,
             LabelExtraction<ManeuverForEstimation> labelExtraction) throws Exception {
         ManeuverClassifierModelMetadata modelMetadata = classifierModel.getContextSpecificModelMetadata();
-        List<ManeuverForEstimation> maneuvers = getSuitableManeuvers(modelMetadata);
+        List<LabelledManeuverForEstimation> maneuvers = getSuitableManeuvers(modelMetadata);
         LoggingUtil.logInfo("Using " + maneuvers.size() + " maneuvers");
         if (maneuvers.size() < MIN_MANEUVERS_COUNT) {
             LoggingUtil.logInfo("Not enough maneuver data for training. Training aborted!");
         } else {
             LoggingUtil.logInfo("Splitting training and test data...");
-            List<ManeuverForEstimation> trainManeuvers = new ArrayList<>();
-            List<ManeuverForEstimation> testManeuvers = new ArrayList<>();
-            for (ManeuverForEstimation maneuver : maneuvers) {
-                if (((LabelledManeuverForEstimation) maneuver).getRegattaName().contains("2018")) {
+            List<LabelledManeuverForEstimation> trainManeuvers = new ArrayList<>();
+            List<LabelledManeuverForEstimation> testManeuvers = new ArrayList<>();
+            for (LabelledManeuverForEstimation maneuver : maneuvers) {
+                if (maneuver.getRegattaName().contains("2018")) {
                     testManeuvers.add(maneuver);
                 } else {
                     trainManeuvers.add(maneuver);
@@ -85,12 +86,12 @@ public class ManeuverClassifierTrainer {
         }
     }
 
-    private List<ManeuverForEstimation> getSuitableManeuvers(ManeuverClassifierModelMetadata modelMetadata)
+    private List<LabelledManeuverForEstimation> getSuitableManeuvers(ManeuverClassifierModelMetadata modelMetadata)
             throws JsonDeserializationException, ParseException {
         String boatClassName = modelMetadata.getBoatClassName();
         ManeuverFeatures maneuverFeatures = modelMetadata.getManeuverFeatures();
         Pair<String, ManeuverFeatures> key = new Pair<>(boatClassName, maneuverFeatures);
-        List<ManeuverForEstimation> maneuvers = maneuversPerBoatClass.get(key);
+        List<LabelledManeuverForEstimation> maneuvers = maneuversPerBoatClass.get(key);
         if (maneuvers == null) {
             if (allManeuvers == null) {
                 LoggingUtil.logInfo("Connecting to MongoDB");
@@ -110,8 +111,8 @@ public class ManeuverClassifierTrainer {
     public static void main(String[] args) throws Exception {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         RegularManeuversForEstimationPersistenceManager persistenceManager = new RegularManeuversForEstimationPersistenceManager();
-         ModelStore classifierModelStore = new FileSystemModelStore("trained_wind_estimation_models");
-//        ModelStore classifierModelStore = new MongoDbModelStore(persistenceManager.getDb());
+        ModelStore classifierModelStore = new FileSystemModelStore("trained_wind_estimation_models");
+        // ModelStore classifierModelStore = new MongoDbModelStore(persistenceManager.getDb());
         classifierModelStore.deleteAll(PersistenceContextType.MANEUVER_CLASSIFIER);
         ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(persistenceManager,
                 classifierModelStore);

@@ -6,7 +6,7 @@ public interface LabelExtraction<InstanceType> {
 
     int getY(InstanceType instance);
 
-    default int[] getYVector(List<InstanceType> instances) {
+    default int[] getYVector(List<? extends InstanceType> instances) {
         int[] output = new int[instances.size()];
         int i = 0;
         for (InstanceType instance : instances) {

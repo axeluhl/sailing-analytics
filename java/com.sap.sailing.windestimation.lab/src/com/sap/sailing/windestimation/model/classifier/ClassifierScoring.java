@@ -34,7 +34,7 @@ public class ClassifierScoring<InstanceType, T extends ContextSpecificModelMetad
         return printScoring(confusionMatrix);
     }
 
-    public String printScoring(List<InstanceType> instances, LabelExtraction<InstanceType> labelExtraction) {
+    public String printScoring(List<? extends InstanceType> instances, LabelExtraction<InstanceType> labelExtraction) {
         T modelMetadata = trainedClassifier.getContextSpecificModelMetadata();
         double[][] x = new double[instances.size()][];
         int[] y = labelExtraction.getYVector(instances);
