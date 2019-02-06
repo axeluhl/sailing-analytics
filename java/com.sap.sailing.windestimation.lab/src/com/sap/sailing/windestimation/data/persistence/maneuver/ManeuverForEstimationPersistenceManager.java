@@ -5,28 +5,29 @@ import java.net.UnknownHostException;
 public class ManeuverForEstimationPersistenceManager
         extends AbstractTransformedManeuversForEstimationPersistenceManager {
 
+    public static final String COLLECTION_NAME = "maneuversForEstimation";
+
     public ManeuverForEstimationPersistenceManager() throws UnknownHostException {
         super();
     }
 
     @Override
     public String getCollectionName() {
-        return "maneuversForEstimation";
+        return COLLECTION_NAME;
     }
 
     @Override
     protected String getMongoDbEvalStringForTransformation() {
-        return "db.getCollection('racesWithManeuversForEstimation').aggregate([\r\n" + 
-                "{$unwind: '$competitorTracks'},\r\n" + 
+        return "db.getCollection('" + RaceWithManeuverForEstimationPersistenceManager.COLLECTION_NAME + "." + AbstractRaceWithEstimationDataPersistenceManager.COMPETITOR_TRACKS_COLLECTION_NAME_EXTENSION + "').aggregate([\r\n" + 
                 "{$match: {\r\n" + 
-                "    'competitorTracks.clean': true\r\n" + 
+                "    'clean': true\r\n" + 
                 "}},\r\n" + 
                 "{$project: {\r\n" + 
-                "    elements: '$competitorTracks.elements'\r\n" + 
+                "    elements: '$elements'\r\n" + 
                 "}},\r\n" + 
                 "{$unwind: '$elements'},\r\n" + 
                 "{$replaceRoot: {newRoot : '$elements'}},\r\n" + 
-                "{$out: 'maneuversForEstimation'}\r\n" + 
+                "{$out: '" + COLLECTION_NAME + "'}\r\n" + 
                 "])";
     }
 

@@ -30,7 +30,7 @@ import com.sap.sailing.windestimation.data.serialization.RaceWithEstimationDataD
 public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extends
         AbstractPersistenceManager<RaceWithEstimationData<T>> implements RaceWithEstimationDataPersistenceManager<T> {
 
-    private static final String competitorTracksCollectioName = "competitorTracks";
+    public static final String COMPETITOR_TRACKS_COLLECTION_NAME_EXTENSION = "competitorTracks";
 
     public AbstractRaceWithEstimationDataPersistenceManager() throws UnknownHostException {
     }
@@ -94,7 +94,7 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
     }
 
     protected String getCompetitorTracksCollectionName() {
-        return getCollectionName() + "." + competitorTracksCollectioName;
+        return getCollectionName() + "." + COMPETITOR_TRACKS_COLLECTION_NAME_EXTENSION;
     }
 
     public Iterator<CompetitorTrackWithEstimationData<T>> getCompetitorTrackIterator(String query) {

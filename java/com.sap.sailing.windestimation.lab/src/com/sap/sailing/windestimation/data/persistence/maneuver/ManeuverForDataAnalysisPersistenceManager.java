@@ -5,18 +5,21 @@ import java.net.UnknownHostException;
 public class ManeuverForDataAnalysisPersistenceManager
         extends AbstractTransformedManeuversForDataAnalysisPersistenceManager {
 
+    public static final String COLLECTION_NAME = "maneuversForDataAnalysis";
+
     public ManeuverForDataAnalysisPersistenceManager() throws UnknownHostException {
         super();
     }
 
     @Override
     public String getCollectionName() {
-        return "maneuversForDataAnalysis";
+        return COLLECTION_NAME;
     }
 
+    //TODO repair if required
     @Override
     protected String getMongoDbEvalStringForTransformation() {
-        return "db.getCollection('racesWithManeuversForDataAnalysis').aggregate([\r\n"
+        return "db.getCollection('" + RaceWithManeuverForDataAnalysisPersistenceManager.COLLECTION_NAME + "." + AbstractRaceWithEstimationDataPersistenceManager.COMPETITOR_TRACKS_COLLECTION_NAME_EXTENSION + "').aggregate([\r\n"
                 + "{$addFields: {\"competitorTracks.elements.regattaName\": '$regattaName'}},\r\n"
                 + "{$addFields: {\"competitorTracks.elements.windQuality\": '$windQuality'}},\r\n"
                 + "{$addFields: {\"competitorTracks.trackId\": {$concat: ['$regattaName', ' - ', '$trackedRaceName']}}},\r\n"
@@ -38,7 +41,7 @@ public class ManeuverForDataAnalysisPersistenceManager
                 + "        {'competitorTracks.avgTrackSpeedInKnots': {\r\n" + "            $gt: 1.0\r\n"
                 + "        }}\r\n" + "    ]\r\n" + "}},\r\n" + "{$project: {\r\n"
                 + "    elements: '$competitorTracks.elements'\r\n" + "}},\r\n" + "{$unwind: '$elements'},\r\n"
-                + "{$replaceRoot: {newRoot : '$elements'}},\r\n" + "{$out: 'maneuversForDataAnalysis'}\r\n" + "])\r\n";
+                + "{$replaceRoot: {newRoot : '$elements'}},\r\n" + "{$out: '" + COLLECTION_NAME + "'}\r\n" + "])\r\n";
     }
 
 }

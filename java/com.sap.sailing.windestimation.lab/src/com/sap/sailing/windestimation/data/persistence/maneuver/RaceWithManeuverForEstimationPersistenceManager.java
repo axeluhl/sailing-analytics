@@ -16,12 +16,14 @@ import com.sap.sailing.windestimation.data.serialization.ManeuverForEstimationJs
 public class RaceWithManeuverForEstimationPersistenceManager
         extends AbstractRaceWithEstimationDataPersistenceManager<ManeuverForEstimation> {
 
+    public static final String COLLECTION_NAME = "racesWithManeuversForEstimation";
+
     public RaceWithManeuverForEstimationPersistenceManager() throws UnknownHostException {
     }
 
     @Override
     public String getCollectionName() {
-        return "racesWithManeuversForEstimation";
+        return COLLECTION_NAME;
     }
 
     @Override

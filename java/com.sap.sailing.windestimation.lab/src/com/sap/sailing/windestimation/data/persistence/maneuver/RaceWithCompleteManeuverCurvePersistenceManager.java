@@ -20,12 +20,14 @@ import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEsti
 public class RaceWithCompleteManeuverCurvePersistenceManager
         extends AbstractRaceWithEstimationDataPersistenceManager<CompleteManeuverCurveWithEstimationData> {
 
+    public static final String COLLECTION_NAME = "racesWithCompleteManeuvers";
+
     public RaceWithCompleteManeuverCurvePersistenceManager() throws UnknownHostException {
     }
 
     @Override
     public String getCollectionName() {
-        return "racesWithCompleteManeuvers";
+        return COLLECTION_NAME;
     }
 
     @Override

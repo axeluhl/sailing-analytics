@@ -59,8 +59,8 @@ public class ManeuverAndWindImporter {
     public static final String REST_API_RACES_PATH = "/races";
     public static final String REST_API_ESTIMATION_DATA_PATH = "/completeManeuverCurvesWithEstimationData";
     public static final String REST_API_WIND_DATA_PATH = "/highQualityWindFixes";
-    private final String startFromRegattaName = null;
-    private final String startFromRegattaRace = null;
+    private final String startFromRegattaName = "TW 2015 J80";
+    private final String startFromRegattaRace = "R2 J 80 Up-Down";
     private final RaceWithCompleteManeuverCurvePersistenceManager completeManeuverCurvePersistanceManager;
     private final RaceWithManeuverForDataAnalysisPersistenceManager maneuverForDataAnalysisPersistenceManager;
     private final RaceWithManeuverForEstimationPersistenceManager maneuverForEstimationPersistenceManager;

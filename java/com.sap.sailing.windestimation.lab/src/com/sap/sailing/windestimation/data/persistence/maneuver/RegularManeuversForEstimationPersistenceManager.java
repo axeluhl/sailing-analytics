@@ -5,18 +5,20 @@ import java.net.UnknownHostException;
 public class RegularManeuversForEstimationPersistenceManager
         extends AbstractTransformedManeuversForEstimationPersistenceManager {
 
+    public static final String COLLECTION_NAME = "regularManeuversForEstimation";
+
     public RegularManeuversForEstimationPersistenceManager() throws UnknownHostException {
         super(new ManeuverForEstimationPersistenceManager());
     }
 
     @Override
     public String getCollectionName() {
-        return "regularManeuversForEstimation";
+        return COLLECTION_NAME;
     }
 
     @Override
     protected String getMongoDbEvalStringForTransformation() {
-        return "db.getCollection('maneuversForEstimation').aggregate([\r\n" + 
+        return "db.getCollection('" + ManeuverForEstimationPersistenceManager.COLLECTION_NAME + "').aggregate([\r\n" + 
                 "{$match: {\r\n" + 
                 "    $and: [\r\n" + 
                 "                {$or: [\r\n" + 
@@ -38,7 +40,7 @@ public class RegularManeuversForEstimationPersistenceManager
                 "        }}\r\n" + 
                 "    ]\r\n" + 
                 "}},\r\n" + 
-                "{$out: 'regularManeuversForEstimation'}\r\n" + 
+                "{$out: '" + COLLECTION_NAME + "'}\r\n" + 
                 "])";
     }
 

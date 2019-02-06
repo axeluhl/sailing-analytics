@@ -16,12 +16,14 @@ import com.sap.sailing.windestimation.data.serialization.ManeuverForDataAnalysis
 public class RaceWithManeuverForDataAnalysisPersistenceManager
         extends AbstractRaceWithEstimationDataPersistenceManager<ManeuverForDataAnalysis> {
 
+    public static final String COLLECTION_NAME = "racesWithManeuversForDataAnalysis";
+
     public RaceWithManeuverForDataAnalysisPersistenceManager() throws UnknownHostException {
     }
 
     @Override
     public String getCollectionName() {
-        return "racesWithManeuversForDataAnalysis";
+        return COLLECTION_NAME;
     }
 
     @Override
