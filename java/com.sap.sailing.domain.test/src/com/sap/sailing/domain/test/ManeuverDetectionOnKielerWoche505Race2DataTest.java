@@ -101,6 +101,9 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
         c.set(2011, 6-1, 23, 16, 20, 1);
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        // The following used to be required to be recognized as a Gybe. However, the maneuver
+        // angle reported after full maneuver analysis is only -14deg which is below the current
+        // threshold for general gybing angles.
         c.set(2011, 6-1, 23, 16, 22, 25);
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 5000);
     }
