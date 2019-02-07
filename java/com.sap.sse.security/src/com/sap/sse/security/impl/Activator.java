@@ -2,6 +2,8 @@ package com.sap.sse.security.impl;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,7 +38,7 @@ public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
     
     private static BundleContext context;
-    private static SecurityService securityService;
+    private static CompletableFuture<SecurityService> securityService = new CompletableFuture<>();
     private ServiceRegistration<?> registration;
     
     /**
@@ -63,7 +65,7 @@ public class Activator implements BundleActivator {
     }
     
     public static void setSecurityService(SecurityService securityService) {
-        Activator.securityService = securityService;
+        Activator.securityService.complete(securityService);
     }
     
     public static BundleContext getContext() {
@@ -71,7 +73,12 @@ public class Activator implements BundleActivator {
     }
     
     public static SecurityService getSecurityService() {
-        return securityService;
+        try {
+            return securityService.get();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.log(Level.SEVERE, "Failure to get SecurityService", e);
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -101,7 +108,7 @@ public class Activator implements BundleActivator {
      * reinitialize them in the same fashion an empty server will do.
      */
     protected void clearState() throws InterruptedException, UserGroupManagementException, UserManagementException {
-        CacheManager cm = securityService.getCacheManager();
+        CacheManager cm = getSecurityService().getCacheManager();
         if (cm instanceof ReplicatingCacheManager) {
             ((ReplicatingCacheManager) cm).clear();
         }
@@ -113,21 +120,24 @@ public class Activator implements BundleActivator {
         createRoleDefinitionsFromPrototypes(context, userStore);
         userStore.ensureDefaultRolesExist();
         userStore.ensureDefaultTenantExists();
-        securityService.initialize();
+        getSecurityService().initialize();
     }
 
     private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore userStore, AccessControlStore accessControlStore) {
         final ServiceTracker<HasPermissionsProvider, HasPermissionsProvider> hasPermissionsProviderTracker = new ServiceTracker<>(
                 bundleContext, HasPermissionsProvider.class, /* customizer */ null);
         hasPermissionsProviderTracker.open();
-        securityService = new SecurityServiceImpl(ServiceTrackerFactory.createAndOpen(context, MailService.class),
-                userStore, accessControlStore, new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), /* setAsActivatorSecurityService */ true);
-        securityService.initialize();
-        registration = context.registerService(SecurityService.class.getName(), securityService, null);
+        SecurityServiceImpl initialSecurityService = new SecurityServiceImpl(
+                ServiceTrackerFactory.createAndOpen(context, MailService.class), userStore, accessControlStore,
+                new OSGIHasPermissionsProvider(hasPermissionsProviderTracker));
+        initialSecurityService.initialize();
+        securityService.complete(initialSecurityService);
+        registration = context.registerService(SecurityService.class.getName(), initialSecurityService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
-        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, securityService.getId().toString());
-        context.registerService(Replicable.class.getName(), securityService, replicableServiceProperties);
-        context.registerService(ClearStateTestSupport.class.getName(), securityService, null);
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
+                initialSecurityService.getId().toString());
+        context.registerService(Replicable.class.getName(), initialSecurityService, replicableServiceProperties);
+        context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
     
@@ -188,7 +198,7 @@ public class Activator implements BundleActivator {
                     QualifiedObjectIdentifier expectedServerOwner = SecuredSecurityTypes.SERVER
                             .getQualifiedObjectIdentifier(
                                     new TypeRelativeObjectIdentifier(ServerInfo.getName()));
-                    securityService.setOwnershipIfNotSet(expectedServerOwner, null, userStore.getDefaultTenant());
+                    getSecurityService().setOwnershipIfNotSet(expectedServerOwner, null, userStore.getDefaultTenant());
                 } catch (InterruptedException | UserGroupManagementException | UserManagementException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }

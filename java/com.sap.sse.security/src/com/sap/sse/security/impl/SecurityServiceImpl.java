@@ -195,7 +195,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      *            must not be <code>null</code>
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore) {
-        this(mailServiceTracker, userStore, accessControlStore, null, /* setAsActivatorTestSecurityService */ false);
+        this(mailServiceTracker, userStore, accessControlStore, null);
     }
     
     /**
@@ -207,11 +207,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      *            replication.
      * 
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, boolean setAsActivatorSecurityService) {
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
+            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider) {
         logger.info("Initializing Security Service with user store " + userStore);
-        if (setAsActivatorSecurityService) {
-            Activator.setSecurityService(this);
-        }
         operationsSentToMasterForReplication = new HashSet<>();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = userStore;
@@ -245,7 +243,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final ReplicatingCacheManager result = new ReplicatingCacheManager();
         for (Entry<String, Set<Session>> cacheNameAndSessions : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSessionsByCacheName().entrySet()) {
             final String cacheName = cacheNameAndSessions.getKey();
-            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName);
+            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName,
+                    this);
             for (final Session session : cacheNameAndSessions.getValue()) {
                 cache.put(session.getId(), session, /* store */ false);
                 count++;

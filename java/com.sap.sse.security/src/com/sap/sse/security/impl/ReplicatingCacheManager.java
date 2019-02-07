@@ -34,6 +34,22 @@ public class ReplicatingCacheManager implements CacheManager, Serializable {
         this.caches = new ConcurrentHashMap<>();
     }
     
+    /**
+     * This is helper, that can create ReplicatingCaches, before the securityService has fully loaded and is published
+     */
+    public <K, V> Cache<K, V> getCache(String name, ReplicableSecurityService securityService) throws CacheException {
+        if (securityService == null) {
+            throw new IllegalArgumentException("SecurityService is null");
+        }
+        @SuppressWarnings("unchecked")
+        ReplicatingCache<K, V> cache = (ReplicatingCache<K, V>) this.caches.get(name);
+        if (cache == null) {
+            cache = new ReplicatingCache<K, V>(securityService, name);
+            caches.put(name, cache);
+        }
+        return cache;
+    }
+
     @Override
     public <K, V> Cache<K, V> getCache(String name) throws CacheException {
         final ReplicableSecurityService securityService = (ReplicableSecurityService) Activator.getSecurityService();
