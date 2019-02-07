@@ -43,7 +43,6 @@ import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
@@ -76,8 +75,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                 genericSailingAuthentication);
-        authorizedContentDecorator.setPermissionToCheck(
-                serverInfo.getIdentifier().getPermission(SecuredSecurityTypes.ServerActions.DATA_MINING));
+        authorizedContentDecorator.setPermissionToCheck(serverInfo, ServerActions.DATA_MINING);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
 
             private QueryDefinitionProviderWithControls queryDefinitionProvider;

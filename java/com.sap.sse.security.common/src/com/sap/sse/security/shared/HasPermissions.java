@@ -120,7 +120,6 @@ public interface HasPermissions {
         public static final Action[] MUTATION_ACTIONS = new Action[] { CREATE, UPDATE, DELETE, CHANGE_OWNERSHIP,
                 CHANGE_ACL };
         
-        public static final Action[] READ_AND_WRITE_ACTIONS = new Action[] { CREATE, READ, UPDATE, DELETE };
         /**
          * Returns all {@link DefaultActions} plus the {@code actions} passed, combined in one new array
          */

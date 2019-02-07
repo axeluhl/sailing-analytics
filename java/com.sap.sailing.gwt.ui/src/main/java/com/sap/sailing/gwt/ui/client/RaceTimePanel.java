@@ -83,7 +83,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode,
             final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         super(parent, context, timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible,
-                forcePaddingRightToAlignToCharts, userService);
+                forcePaddingRightToAlignToCharts, userService, raceDTO);
         this.raceDTO = raceDTO;
         this.componentLifecycle = componentLifecycle;
         this.userService = userService;
