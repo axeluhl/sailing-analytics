@@ -7,10 +7,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -55,14 +56,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * timer to be set to a reasonable value.
      */
     private final Set<RaceTimesInfoProviderListener> listeners;
-    
+
+    private final RaceWithCompetitorsAndBoatsDTO raceDTO;
+
     private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
         @Override
         public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-            RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = userService.hasPermission(
-                    selectedRace.getIdentifier()
-                            .getPermission(SecuredDomainType.TrackedRaceActions.CAN_REPLAY_DURING_LIVE_RACES),
-                    /* TODO race ownership */ null, /* TODO race acl */ null);
+            RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = userService.hasPermission(raceDTO,
+                    TrackedRaceActions.CAN_REPLAY_DURING_LIVE_RACES);
         }
     };
 
@@ -79,9 +80,11 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             UserService userService,
             Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
-            RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
+            RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode,
+            final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         super(parent, context, timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible,
                 forcePaddingRightToAlignToCharts, userService);
+        this.raceDTO = raceDTO;
         this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;

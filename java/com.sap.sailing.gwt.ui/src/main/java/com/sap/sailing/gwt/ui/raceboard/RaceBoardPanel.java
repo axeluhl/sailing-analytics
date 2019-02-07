@@ -208,7 +208,7 @@ public class RaceBoardPanel
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel,
             Iterable<DetailType> availableDetailTypes, StrippedLeaderboardDTOWithSecurity leaderboardDTO,
-            RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -364,7 +364,7 @@ public class RaceBoardPanel
                 timeRangeWithZoomModel,
                 stringMessages, raceTimesInfoProvider, getPerspectiveSettings().isCanReplayDuringLiveRaces(),
                 showChartMarkEditMediaButtonsAndVideo, selectedRaceIdentifier,
-                getPerspectiveSettings().getInitialDurationAfterRaceStartInReplay());
+                getPerspectiveSettings().getInitialDurationAfterRaceStartInReplay(), raceDTO);
         racetimePanel.updateSettings(raceTimePanelSettings);
         timeRangeWithZoomModel.addTimeZoomChangeListener(racetimePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(racetimePanel);
@@ -394,7 +394,7 @@ public class RaceBoardPanel
             String leaderboardGroupName, UUID event,
             FlowPanel mainPanel, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap,
             UserService userService, boolean showChartMarkEditMediaButtonsAndVideo,
-            StrippedLeaderboardDTOWithSecurity leaderboard, RaceWithCompetitorsAndBoatsDTO raceDTO) {
+            StrippedLeaderboardDTOWithSecurity leaderboard, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         MediaPlayerLifecycle mediaPlayerLifecycle = getPerspectiveLifecycle().getMediaPlayerLifecycle();
         MediaPlayerSettings mediaPlayerSettings = settings
                 .findSettingsByComponentId(mediaPlayerLifecycle.getComponentId());
@@ -431,7 +431,7 @@ public class RaceBoardPanel
         }
         maneuverTablePanel = new ManeuverTablePanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 selectedRaceIdentifier, stringMessages, competitorSelectionProvider, errorReporter, timer,
-                maneuverTableSettings, timeRangeWithZoomModel, new ClassicLeaderboardStyle(), userService);
+                maneuverTableSettings, timeRangeWithZoomModel, new ClassicLeaderboardStyle(), userService, raceDTO);
         maneuverTablePanel.getEntryWidget().setTitle(stringMessages.maneuverTable());
         if (showChartMarkEditMediaButtonsAndVideo) {
             componentsForSideBySideViewer.add(maneuverTablePanel);

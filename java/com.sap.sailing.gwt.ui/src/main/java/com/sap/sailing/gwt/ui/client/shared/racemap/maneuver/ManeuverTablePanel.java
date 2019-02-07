@@ -31,7 +31,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.ui.actions.GetManeuversForCompetitorsAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel.LeaderBoardStyle;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.InvertibleComparator;
 import com.sap.sse.common.SortingOrder;
@@ -93,13 +94,13 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             final RaceCompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter,
             final Timer timer, final ManeuverTableSettings initialSettings,
             final TimeRangeWithZoomModel timeRangeWithZoomProvider, final LeaderBoardStyle style,
-            final UserService userService) {
+            final UserService userService, final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         super(parent, context);
         final UserStatusEventHandler userStatusChangeHandler = new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                hasCanReplayDuringLiveRacesPermission = userService.hasPermission(raceIdentifier.getIdentifier()
-                        .getPermission(SecuredDomainType.TrackedRaceActions.CAN_REPLAY_DURING_LIVE_RACES));
+                hasCanReplayDuringLiveRacesPermission = userService.hasPermission(raceDTO,
+                        TrackedRaceActions.CAN_REPLAY_DURING_LIVE_RACES);
             }
         };
         userService.addUserStatusEventHandler(userStatusChangeHandler);
