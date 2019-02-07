@@ -1046,8 +1046,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         LockUtil.lockForWrite(regattasByNameLock);
         try {
             for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
-                logger.info("putting regatta " + regatta.getName() + " (" + regatta.hashCode()
-                        + ") into regattasByName");
+                logger.info(
+                        "putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
+                if (regatta.getRegistrationLinkSecret() == null) {
+                    logger.info("Added missing RegistrationLinkSecret to " + regatta + " and stored to database");
+                    regatta.setRegistrationLinkSecret(UUID.randomUUID().toString());
+                    mongoObjectFactory.storeRegatta(regatta);
+                }
                 regattasByName.put(regatta.getName(), regatta);
                 regatta.addRegattaListener(this);
                 onRegattaLikeAdded(regatta);
@@ -1847,7 +1852,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         replicate(new AddSpecificRegatta(regatta.getName(),
                 regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(),
                 regatta.canBoatsOfCompetitorsChangePerRace(), regatta.getCompetitorRegistrationType(),
-                /* registrationLinkSecret */ null, regatta.getStartDate(), regatta.getEndDate(), regatta.getId(),
+                /* registrationLinkSecret */ regatta.getRegistrationLinkSecret(), regatta.getStartDate(),
+                regatta.getEndDate(), regatta.getId(),
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
                 regatta.getScoringScheme(), courseAreaId, regatta.getBuoyZoneRadiusInHullLengths(),
                 regatta.useStartTimeInference(), regatta.isControlTrackingFromStartAndFinishTimes(),
