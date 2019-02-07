@@ -11,7 +11,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 
 import org.junit.Before;
@@ -71,7 +70,7 @@ public class TackThatLookedABitLikePenaltyCircleAtTravemuenderWoche2014Test exte
      */
     @Test
     public void testTackForTruswellAndPascoe() throws ParseException, NoWindException {
-        assertTack("Truswell/Pascoe", "07/25/2014-13:08:00", "07/25/2014-13:09:00", "07/25/2014-13:08:10");
+        assertTack("Truswell/Pascoe", "07/25/2014-13:08:00", "07/25/2014-13:09:00", "07/25/2014-13:08:05");
     }
 
     private void assertTack(String competitorName, final String from, final String to,
