@@ -89,6 +89,7 @@ import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -204,7 +205,8 @@ public class RaceBoardPanel
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
-            boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel, Iterable<DetailType> availableDetailTypes) {
+            boolean showChartMarkEditMediaButtonsAndVideo, boolean showHeaderPanel,
+            Iterable<DetailType> availableDetailTypes, StrippedLeaderboardDTOWithSecurity leaderboardDTO) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
@@ -322,7 +324,7 @@ public class RaceBoardPanel
             }
         }
         taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer,
-                raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle);
+                raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle, leaderboardDTO);
         addChildComponent(taggingPanel);
         taggingPanel.setVisible(showTaggingPanel);
         
@@ -341,7 +343,8 @@ public class RaceBoardPanel
         leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         createOneScreenView(lifecycle, settings, leaderboardName, leaderboardGroupName, eventId, mainPanel,
                 isScreenLargeEnoughToInitiallyDisplayLeaderboard,
-                raceMap, userService, showChartMarkEditMediaButtonsAndVideo); // initializes the raceMap field
+                raceMap, userService, showChartMarkEditMediaButtonsAndVideo, leaderboardDTO); // initializes the raceMap
+                                                                                              // field
         leaderboardPanel.addLeaderboardUpdateListener(this);
         
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
@@ -387,7 +390,8 @@ public class RaceBoardPanel
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, String leaderboardName,
             String leaderboardGroupName, UUID event,
             FlowPanel mainPanel, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap,
-            UserService userService, boolean showChartMarkEditMediaButtonsAndVideo) {
+            UserService userService, boolean showChartMarkEditMediaButtonsAndVideo,
+            StrippedLeaderboardDTOWithSecurity leaderboard) {
         MediaPlayerLifecycle mediaPlayerLifecycle = getPerspectiveLifecycle().getMediaPlayerLifecycle();
         MediaPlayerSettings mediaPlayerSettings = settings
                 .findSettingsByComponentId(mediaPlayerLifecycle.getComponentId());
@@ -411,7 +415,7 @@ public class RaceBoardPanel
             competitorChart.setVisible(false);
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);
             new SliceRaceHandler(sailingService, userService, errorReporter, competitorChart, selectedRaceIdentifier,
-                    leaderboardGroupName, leaderboardName, event);
+                    leaderboardGroupName, leaderboardName, event, leaderboard);
             componentsForSideBySideViewer.add(competitorChart);
             windChart = new WindChart(this, getComponentContext(), windChartLifecycle, sailingService,
                     selectedRaceIdentifier, timer,

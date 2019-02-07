@@ -1944,7 +1944,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             leaderboardGroupName, raceDTO.getRaceIdentifier());
                     Iterable<DetailType> availableDetailTypesForLeaderboard = getAvailableDetailTypesForLeaderboard(
                             leaderboardName, raceDTO.getRaceIdentifier());
-                    StrippedLeaderboardDTO leaderboardDTO = createStrippedLeaderboardDTO(leaderboard, false, false);
+                    StrippedLeaderboardDTOWithSecurity leaderboardDTO = createStrippedLeaderboardDTOWithSecurity(
+                            leaderboard, false,
+                            false);
                     result = new RaceboardDataDTO(raceDTO, isValidLeaderboardGroup, isValidEvent,
                             detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO);
                 }

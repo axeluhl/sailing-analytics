@@ -25,13 +25,13 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -46,7 +46,6 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -125,9 +124,12 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     private boolean preventTimeJumpAtSelectionChangeForOnce = false;
 
+    private StrippedLeaderboardDTOWithSecurity leaderboardDTO;
+
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
-            RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight) {
+            RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight,
+            StrippedLeaderboardDTOWithSecurity leaderboardDTO) {
         super(parent, context);
 
         this.stringMessages = stringMessages;
@@ -137,6 +139,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.timePointToHighlight = timePointToHighlight;
         this.tagToHighlight = tagToHighlight;
+        this.leaderboardDTO = leaderboardDTO;
 
         style = TaggingPanelResources.INSTANCE.style();
         style.ensureInjected();
@@ -629,9 +632,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected boolean hasPermissionToModifyPublicTags() {
         boolean hasPermission = false;
-        if (leaderboardName != null
-                && userService.hasPermission(SecuredDomainType.LEADERBOARD.getPermissionForTypeRelativeIdentifier(
-                        DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(leaderboardName)))) {
+        if (leaderboardName != null && userService.hasPermission(leaderboardDTO, DefaultActions.UPDATE)) {
             hasPermission = true;
         }
         return hasPermission;

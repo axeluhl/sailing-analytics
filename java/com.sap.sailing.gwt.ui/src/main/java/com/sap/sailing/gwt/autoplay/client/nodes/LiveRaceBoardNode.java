@@ -78,7 +78,8 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace(), cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(),
                         /** leaderboardGroupName */
                         null, /** eventId */
-                        null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true, false, Arrays.asList(DetailType.values()));
+                        null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true, false,
+                        Arrays.asList(DetailType.values()), result.getLeaderboard());
                 setPlaceToGo(new LiveRaceWithRaceboardPlace(raceboardPerspective));
                 firePlaceChangeAndStartTimer();
 

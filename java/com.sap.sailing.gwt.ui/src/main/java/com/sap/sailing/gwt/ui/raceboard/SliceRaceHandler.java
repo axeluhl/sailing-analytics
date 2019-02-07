@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.ChartZoomChangedEvent;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.race.TrackedRaceCreationResultDialog;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -69,12 +70,15 @@ public class SliceRaceHandler {
     
     private boolean canSlice = false;
 
+    private final StrippedLeaderboardDTOWithSecurity leaderboardDTO;
+
     /**
      * Registers this handler as a zoom event handler on the {@code competitorRaceChart}.
      */
     public SliceRaceHandler(SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
-            final String leaderboardGroupName, String leaderboardName, UUID eventId) {
+            final String leaderboardGroupName, String leaderboardName, UUID eventId,
+            StrippedLeaderboardDTOWithSecurity leaderboardDTO) {
         this.sailingService = sailingService;
         this.userService = userService;
         this.errorReporter = errorReporter;
@@ -82,6 +86,7 @@ public class SliceRaceHandler {
         this.leaderboardGroupName = leaderboardGroupName;
         this.leaderboardName = leaderboardName;
         this.eventId = eventId;
+        this.leaderboardDTO = leaderboardDTO;
         styles.ensureInjected();
         sliceButtonUi = new Button();
         sliceButtonUi.setStyleName(styles.sliceButtonBackgroundImage());
@@ -124,11 +129,9 @@ public class SliceRaceHandler {
     }
 
     private boolean allowsEditing() {
-        return userService.hasPermission(
-                SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
-                        new TypeRelativeObjectIdentifier(selectedRaceIdentifier.getRegattaName())))
-                && userService.hasPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(
-                        DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(leaderboardName)));
+        return userService.hasPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifier(
+                DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(selectedRaceIdentifier.getRegattaName())))
+                && userService.hasPermission(leaderboardDTO, DefaultActions.UPDATE);
     }
 
     private void doSlice() {

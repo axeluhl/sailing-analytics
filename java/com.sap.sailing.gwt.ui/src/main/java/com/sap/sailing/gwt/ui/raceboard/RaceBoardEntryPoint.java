@@ -154,7 +154,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
-                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes);
+                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes,
+                raceboardData.getLeaderboard());
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
 
         if (raceBoardMode != null) {
