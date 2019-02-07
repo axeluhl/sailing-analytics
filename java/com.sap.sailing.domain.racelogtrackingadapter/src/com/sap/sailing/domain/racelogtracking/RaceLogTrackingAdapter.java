@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -42,7 +43,8 @@ public interface RaceLogTrackingAdapter {
      * <li>Is a {@link RaceLogStartTrackingEvent} present in the racelog? If not, add one</li>
      * </ul>
      */
-    RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
+    RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard,
+            RaceColumn raceColumn, Fleet fleet, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
             RaceTrackingHandler raceTrackingHandler)
             throws NotDenotedForRaceLogTrackingException, Exception;
 
@@ -96,7 +98,7 @@ public interface RaceLogTrackingAdapter {
      * 
      * @throws MailException
      */
-    void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
+    void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard, Regatta regatta,
             String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, String iOSAppUrl, String androidAppUrl,
             Locale locale, MailInvitationType type) throws MailException;
 
@@ -106,7 +108,8 @@ public interface RaceLogTrackingAdapter {
      * @param appUrl
      * @throws MailException
      */
-    void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
+    void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, Regatta regatta,
+            String serverUrlWithoutTrailingSlash,
             String emails, String iOSAppUrl, String androidAppUrl, Locale locale, MailInvitationType type)
             throws MailException;
 

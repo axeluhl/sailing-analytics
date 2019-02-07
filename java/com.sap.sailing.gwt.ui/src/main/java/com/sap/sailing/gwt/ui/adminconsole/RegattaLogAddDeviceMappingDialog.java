@@ -51,9 +51,11 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
     protected final ItemToMapToDeviceSelectionPanel itemSelectionPanel;
     protected final SailingServiceAsync sailingService;
     protected Grid entryGrid;
+    private String regattaRegisterSecret;
 
     public RegattaLogAddDeviceMappingDialog(SailingServiceAsync sailingService, final UserService userService, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, String leaderboardName, DialogCallback<DeviceMappingDTO> callback,
+            final StringMessages stringMessages, String leaderboardName, String regattaRegisterSecret,
+            DialogCallback<DeviceMappingDTO> callback,
             final DeviceMappingDTO mapping) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
                 stringMessages.add(), stringMessages.cancel(), new DataEntryDialog.Validator<DeviceMappingDTO>() {
@@ -85,7 +87,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                 }, true, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
-
+        this.regattaRegisterSecret = regattaRegisterSecret;
         from = createDateTimeBox(new Date(), Accuracy.SECONDS);
         from.setValue(null);
         to = createDateTimeBox(new Date(), Accuracy.SECONDS);
@@ -214,7 +216,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                 }
                 String eventIdAsString = events.getValue().id.toString();
                 return DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash, eventIdAsString,
-                        leaderboardName, mappedItemType, mappedItemId, GwtUrlHelper.INSTANCE);
+                        leaderboardName, mappedItemType, mappedItemId, regattaRegisterSecret, GwtUrlHelper.INSTANCE);
             }
         });
     }

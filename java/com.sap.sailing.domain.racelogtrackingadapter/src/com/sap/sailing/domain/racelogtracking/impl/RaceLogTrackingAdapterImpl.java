@@ -288,7 +288,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     @Override
-    public void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
+    public void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard, Regatta regatta,
             String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, String legacyIOSAppUrl, String legacyAndroidAppUrl,
             Locale locale, MailInvitationType type) throws MailException {
         final StringBuilder occuredExceptions = new StringBuilder();
@@ -299,7 +299,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                     final String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(
                             serverUrlWithoutTrailingSlash, event.getId().toString(), leaderboard.getName(),
                             DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING, competitor.getId().toString(),
-                            NonGwtUrlHelper.INSTANCE);
+                            regatta.getRegistrationLinkSecret(), NonGwtUrlHelper.INSTANCE);
                     RaceLogTrackingInvitationMailBuilder mail = getMailBuilder(type, locale);
                     mail.withSubject(competitor.getName())
                             .addEventLogo(event)
@@ -320,14 +320,15 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     @Override
-    public void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
-            String emails, String legacyIOSAppUrl, String legacyAndroidAppUrl, Locale locale, MailInvitationType type)
-            throws MailException {
+    public void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, Regatta regatta,
+            String serverUrlWithoutTrailingSlash, String emails, String legacyIOSAppUrl, String legacyAndroidAppUrl,
+            Locale locale, MailInvitationType type) throws MailException {
         final StringBuilder occuredExceptions = new StringBuilder();
         final String[] emailArray = emails.split(",");
         // http://<host>/buoy-tender/checkin?event_id=<event-id>&leaderboard_name=<leaderboard-name>
         final String url = DeviceMappingConstants.getBuoyTenderInvitationUrl(serverUrlWithoutTrailingSlash,
-                leaderboard.getName(), event.getId().toString(), NonGwtUrlHelper.INSTANCE);
+                leaderboard.getName(), event.getId().toString(), regatta.getRegistrationLinkSecret(),
+                NonGwtUrlHelper.INSTANCE);
         for (String toAddress : emailArray) {
             try {
                 final String buoyTender = RaceLogTrackingI18n.buoyTender(locale);

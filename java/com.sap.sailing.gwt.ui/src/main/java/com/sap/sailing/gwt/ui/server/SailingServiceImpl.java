@@ -7344,7 +7344,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         MailInvitationType type = MailInvitationType
                 .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
+        Regatta regatta = getService().getRegattaByName(leaderboardName);
+        getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, regatta,
+                serverUrlWithoutTrailingSlash,
                 competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
     }
     
@@ -7354,9 +7356,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        Regatta regatta = getService().getRegattaByName(leaderboardName);
         MailInvitationType type = MailInvitationType
                 .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
-        getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash, emails,
+        getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, regatta, serverUrlWithoutTrailingSlash,
+                emails,
                 iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
     }
 
@@ -8898,5 +8902,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             createOwnershipUpdater(migrateGroupOwnerForHierarchyDTO)
                     .updateGroupOwnershipForLeaderboardGroupHierarchy(leaderboardGroup);
         }
+    }
+
+    @Override
+    public String getSecretForRegattaByName(String regattaName) {
+        String result = "";
+        Regatta regatta = getService().getRegattaByName(regattaName);
+        if (regatta != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(regatta);
+            result = regatta.getRegistrationLinkSecret();
+        }
+        return result;
     }
 }

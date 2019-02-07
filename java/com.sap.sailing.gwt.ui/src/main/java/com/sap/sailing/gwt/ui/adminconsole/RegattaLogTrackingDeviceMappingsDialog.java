@@ -76,14 +76,18 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     private Date latest;
     private Date earliest;
     private Chart chart;
+
+    private String regattaRegistrationSecret;
     
     public RegattaLogTrackingDeviceMappingsDialog(final SailingServiceAsync sailingService, final UserService userService,
-            final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName, DialogCallback<Void> callback) {
+            final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName,
+            final String regattaRegistrationSecret, DialogCallback<Void> callback) {
         super(stringMessages.mapDevices(), /*message*/ null, stringMessages.ok(), stringMessages.cancel(), /*validator*/ null, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.userService = userService;
         this.errorReporter = errorReporter;
+        this.regattaRegistrationSecret = regattaRegistrationSecret;
         this.leaderboardName = leaderboardName;
         this.busyIndicator = new SimpleBusyIndicator();
         refresh();
@@ -299,7 +303,8 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     }
 
     private void showAddMappingDialog(DeviceMappingDTO mapping) {
-        new RegattaLogAddDeviceMappingDialog(sailingService, userService, errorReporter, stringMessages, leaderboardName,
+        new RegattaLogAddDeviceMappingDialog(sailingService, userService, errorReporter, stringMessages,
+                leaderboardName, regattaRegistrationSecret,
                 new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
                     @Override
                     public void ok(final DeviceMappingDTO mapping) {
