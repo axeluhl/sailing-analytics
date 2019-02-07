@@ -10,6 +10,7 @@ import java.util.Set;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
 
 /**
  * The {@link PermissionChecker} is an implementation of the permission checking algorithm also described in <a href=
@@ -298,6 +299,18 @@ public class PermissionChecker {
         return false;
     }
     
+    /**
+     * @param permissionChecker
+     *            The permissionChecker is the one that checks if one permission implies another permission. This means,
+     *            it just calls {@link WildcardPermission#implies(WildcardPermission)} in most cases. In case of an any
+     *            check this needs to call {@link WildcardPermission#impliesAny(WildcardPermission)).
+     * @param matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven
+     *            If {@code false} and no ownership is given, all associated {@link Role Roles} of an user are checked.
+     *            For a normal permission check, this needs to be {@code true}, because Qualified {@link Roles Roles}
+     *            can not grant unqualified permissions. In case of an any check it is necessary to include all
+     *            qualified roles of an user, because even a qualified {@link Role} may grant any of the included
+     *            permissions. in this case, the parameter is intended to be {@code false}.
+     */
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> PermissionState checkUserPermissions(
             WildcardPermission permission, U user, Iterable<G> groupsOfWhichUserIsMember, O ownership,
             WildcardPermissionChecker permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
@@ -376,6 +389,16 @@ public class PermissionChecker {
      *            "tw2016" tenant)
      * @param ownership
      *            Ownership of the data object for which the {@code permission} is requested
+     * @param permissionChecker
+     *            The permissionChecker is the one that checks if one permission implies another permission. This means,
+     *            it just calls {@link WildcardPermission#implies(WildcardPermission)} in most cases. In case of an any
+     *            check this needs to call {@link WildcardPermission#impliesAny(WildcardPermission)).
+     * @param matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven
+     *            If {@code false} and no ownership is given, all associated {@link Role Roles} of an user are checked.
+     *            For a normal permission check, this needs to be {@code true}, because Qualified {@link Roles Roles}
+     *            can not grant unqualified permissions. In case of an any check it is necessary to include all
+     *            qualified roles of an user, because even a qualified {@link Role} may grant any of the included
+     *            permissions.
      */
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean implies(
             R role, WildcardPermission permission, O ownership,
