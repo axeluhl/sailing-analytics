@@ -133,7 +133,6 @@ public class CandidateChooserImpl implements CandidateChooser {
     private Map<Competitor, Map<Candidate, Set<Edge>>> allEdges = new HashMap<>();
     
     private Map<Competitor, Set<Candidate>> candidates = new HashMap<>();
-    private Map<Competitor, Set<Candidate>> candidatesFiltered = new HashMap<>();
     private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
     private ConcurrentHashMap<Competitor, Integer> suppressedPassings = new ConcurrentHashMap<>();
     
@@ -729,6 +728,10 @@ public class CandidateChooserImpl implements CandidateChooser {
     private void addCandidates(final Competitor competitor, final Iterable<Candidate> newCandidates) {
         // bug 4221 - filter candidates
         
+        // --------- BLOCK 1 ----------- 
+        // from TG only
+        // filtered by waypoints
+        /**/
         List<Candidate> filteredCandidates = new ArrayList<Candidate>();
         int sizeBefore = Util.size(newCandidates);
 
@@ -736,23 +739,6 @@ public class CandidateChooserImpl implements CandidateChooser {
             Hashtable<Waypoint, ArrayList<Candidate>> organizedList = new Hashtable<Waypoint, ArrayList<Candidate>>();
             logger.finest("candidate count before candidate filtering: " + sizeBefore);
             
-            // add all existing candidates (not filtered)
-            for (Candidate can : candidates.get(competitor)) {
-                Waypoint wp = can.getWaypoint();
-
-                filteredCandidates.add(can);
-                if (!(can instanceof DistanceCandidateImpl)) {
-                    // not for XTE Candidates (yet)
-                } else {
-                    // filtering for Distance Candidates
-                    ArrayList<Candidate> canWpList = organizedList.get(wp);
-                    if (null == canWpList) {
-                        canWpList = new ArrayList<Candidate>();
-                        organizedList.put(wp, canWpList);
-                    }
-                    canWpList.add(can);
-                }
-            }
             // add all new candidates
             for (Candidate can : newCandidates) {
                 Waypoint wp = can.getWaypoint();
@@ -815,19 +801,25 @@ public class CandidateChooserImpl implements CandidateChooser {
 
 //        }
                 
+        /**/
+        //------ ENDE BLOCK 1 ---------------
+        
+        //------ BLOCK 2 ---------------
+        //
+        // there can be candidates for different waypoints, therefore not working this way
         /*
         List<Candidate> filteredCandidates = new ArrayList<>();
         int size = Util.size(newCandidates);
         
         if (size > 0) { //2) {
             logger.finest("candidate count before candidate filtering: " + size);
-            / *
+            
             Util.addAll(newCandidates, filteredCandidates);
             // list of organized Candidates ready for analyzing
             final int deleteCnt[] = new int[1];
             
-            //Collections.sort(filteredCandidates, TimedComparator.INSTANCE);
-            /*
+            Collections.sort(filteredCandidates, TimedComparator.INSTANCE);
+            
             final int innerDelCnt[] = new int[1];
             final Candidate lastCan[] = new Candidate[1];
             filteredCandidates.stream().filter(c->c instanceof DistanceCandidateImpl).forEach(distCan->{
@@ -851,23 +843,20 @@ public class CandidateChooserImpl implements CandidateChooser {
                 } else {
                     lastCan[0] = distCan;
                 }
-            });* /
+            });
 //                logger.finest("count of entries in "+ waypointAndCandidateSet.getKey() + " is: "+ wpCnt + " (toDelete:" + innerDelCnt + ")");
             
-/*            
-            Util.addAll(candidates.get(competitor), filteredCandidates);
-            Util.addAll(newCandidates, filteredCandidates);
-            filteredCandidates = getFilteredCandidates( competitor, filteredCandidates);
-* /
             //logger.finest(" would delete: " + deleteCnt[0]);
-            logger.warning("before: " + size + " after candidate filtering: " + filteredCandidates.size() + " for " + competitor.getName());
+            logger.warning("before: " + sizeBefore + " after candidate filtering: " + filteredCandidates.size() + " for " + competitor.getName());
         }
-    */
+        //------ END BLOCK 2 ---------------
+        */
+
         LockUtil.lockForWrite(perCompetitorLocks.get(competitor));
         try {
             
             // add new non filtered candidates
-            for (Candidate can : newCandidates) {
+            for (Candidate can : filteredCandidates) {
                 candidates.get(competitor).add(can);
             }
             
@@ -876,21 +865,8 @@ public class CandidateChooserImpl implements CandidateChooser {
             // new arriving candidates require a complete new calculation
             // - filtering candidates
             // - create edges
-            for (Candidate can : filteredCandidates) {
-                if (null != candidatesFiltered.get(competitor)) {
-                    candidatesFiltered.get(competitor).add(can);
-                }
-            }
             
-            if (null != candidatesFiltered.get(competitor)) {
-                if ( candidatesFiltered.get(competitor).size() > 1000) {
-                    // emergency stop of edge creating
-                    logger.severe("Candidate count exceded allowed count with " + candidatesFiltered.get(competitor).size() + " candidates, edge creation stopped for competitor:" + competitor);
-                } else {
-//                    allEdges.get(competitor).remove(key);
-                    createNewEdges(competitor, candidatesFiltered.get(competitor));
-                }
-            }
+            createNewEdges(competitor, filteredCandidates);
         } finally {
             LockUtil.unlockAfterWrite(perCompetitorLocks.get(competitor));
         }
