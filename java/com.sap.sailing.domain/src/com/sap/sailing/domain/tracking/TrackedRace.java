@@ -575,6 +575,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * rates. If in any such window the COG change exceeds the threshold, the window is extended as far as the COG
      * change grows, then from the extended window the fix with the highest COG change to its successor is returned. The
      * next window analysis will start after the end of the current window, avoiding duplicates in the result.
+     * <p>
+     * 
+     * If the precondition that the {@code competitor} must be {@link RaceDefinition#getCompetitors() part of} the
+     * {@link #getRace() race} isn't met, a {@code NullPointerException} will result.
      */
     Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 

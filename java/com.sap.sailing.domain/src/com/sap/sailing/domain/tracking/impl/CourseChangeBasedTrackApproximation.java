@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -24,7 +25,8 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (D043530)
  *
  */
-public class CourseChangeBasedTrackApproximation {
+public class CourseChangeBasedTrackApproximation implements Serializable {
+    private static final long serialVersionUID = -258129016229111573L;
     private final GPSFixTrack<Competitor, GPSFixMoving> track;
     private final BoatClass boatClass;
     
@@ -37,7 +39,9 @@ public class CourseChangeBasedTrackApproximation {
      * @author Axel Uhl (D043530)
      *
      */
-    private class FixWindow {
+    private class FixWindow implements Serializable {
+        private static final long serialVersionUID = -6386675214043449110L;
+
         private final LinkedList<GPSFixMoving> window;
         
         /**
