@@ -89,6 +89,10 @@ public class RaceStateService extends Service {
     }
 
     private Notification setupNotification(String customContent) {
+        // Starting in Android 8.0 (API level 26), all notifications must be assigned to a channel
+        CharSequence name = getText(R.string.service_info);
+        NotificationHelper.createNotificationChannel(this, NotificationHelper.getNotificationChannelId(), name);
+
         Intent launcherIntent = new Intent(this, LoginActivity.class);
         launcherIntent.setAction(Intent.ACTION_MAIN);
         launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -96,7 +100,7 @@ public class RaceStateService extends Service {
         CharSequence title = getText(R.string.service_info);
         String content = customContent != null ? customContent : getString(R.string.service_text_no_races);
         int color = getResources().getColor(R.color.constant_sap_blue_1);
-        return NotificationHelper.getNotification(this, title, content, contentIntent, color);
+        return NotificationHelper.getNotification(this, NotificationHelper.getNotificationChannelId(), title, content, contentIntent, color);
     }
 
     @Override
@@ -120,8 +124,17 @@ public class RaceStateService extends Service {
     @Override
     public void onDestroy() {
         unregisterAllRaces();
-        stopForeground(false);
+        stopForeground(true);
         super.onDestroy();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        unregisterAllRaces();
+        stopForeground(true);
+        stopSelf();
+        ExLog.i(this, TAG, "Race State Service is being removed.");
     }
 
     private void unregisterAllRaces() {
@@ -140,7 +153,7 @@ public class RaceStateService extends Service {
         registeredStateEventSchedulers.clear();
 
         for (List<Pair<PendingIntent, RaceStateEvents>> intents : managedIntents.values()) {
-            for (Pair<PendingIntent,RaceStateEvents> intentPair : intents) {
+            for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
                 alarmManager.cancel(intentPair.first);
             }
         }
@@ -173,7 +186,7 @@ public class RaceStateService extends Service {
 
     private void unregisterRace(@Nullable String raceId) {
         ManagedRace raceToUnregister = null;
-        for (ManagedRace race: registeredStateEventSchedulers.keySet()) {
+        for (ManagedRace race : registeredStateEventSchedulers.keySet()) {
             if (race.getId().equals(raceId)) {
                 raceToUnregister = race;
             }
@@ -190,32 +203,33 @@ public class RaceStateService extends Service {
 
         if (action != null) {
             switch (action) {
-                case AppConstants.INTENT_ACTION_CLEAR_RACES:
-                    handleClearRaces();
+            case AppConstants.INTENT_ACTION_CLEAR_RACES:
+                handleClearRaces();
+                break;
+
+            case AppConstants.INTENT_ACTION_CLEANUP_RACES:
+                handleCleanupRaces();
+                break;
+
+            default:
+                String id = intent.getStringExtra(AppConstants.INTENT_EXTRA_RACE_ID);
+                ManagedRace race = dataManager.getDataStore().getRace(id);
+                if (race == null) {
+                    ExLog.w(this, TAG, "No race for id " + id);
+                    return;
+                }
+
+                switch (action) {
+                case AppConstants.INTENT_ACTION_ALARM_ACTION:
+                    long timePoint = intent.getLongExtra(AppConstants.INTENT_EXTRA_TIMEPOINT_MILLIS, 0);
+                    String eventName = intent.getStringExtra(AppConstants.INTENT_EXTRA_EVENTNAME);
+                    RaceStateEvent event = new RaceStateEventImpl(new MillisecondsTimePoint(timePoint),
+                            RaceStateEvents.valueOf(eventName));
+                    ExLog.i(this, TAG, String.format("Processing %s", event.toString()));
+                    race.getState().processStateEvent(event);
+                    clearAlarmByName(race, event.getEventName());
                     break;
-
-                case AppConstants.INTENT_ACTION_CLEANUP_RACES:
-                    handleCleanupRaces();
-                    break;
-
-                default:
-                    String id = intent.getStringExtra(AppConstants.INTENT_EXTRA_RACE_ID);
-                    ManagedRace race = dataManager.getDataStore().getRace(id);
-                    if (race == null) {
-                        ExLog.w(this, TAG, "No race for id " + id);
-                        return;
-                    }
-
-                    switch (action) {
-                        case AppConstants.INTENT_ACTION_ALARM_ACTION:
-                            long timePoint = intent.getLongExtra(AppConstants.INTENT_EXTRA_TIMEPOINT_MILLIS, 0);
-                            String eventName = intent.getStringExtra(AppConstants.INTENT_EXTRA_EVENTNAME);
-                            RaceStateEvent event = new RaceStateEventImpl(new MillisecondsTimePoint(timePoint), RaceStateEvents.valueOf(eventName));
-                            ExLog.i(this, TAG, String.format("Processing %s", event.toString()));
-                            race.getState().processStateEvent(event);
-                            clearAlarmByName(race, event.getEventName());
-                            break;
-                    }
+                }
             }
         }
     }
@@ -285,7 +299,8 @@ public class RaceStateService extends Service {
             managedIntents.put(race.getId(), new ArrayList<Pair<PendingIntent, RaceStateEvents>>());
 
             // Register on event additions...
-            JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer());
+            JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer
+                    .create(new CompetitorJsonSerializer());
             RaceEventSender sender = new RaceEventSender(this, eventSerializer, race);
             RaceLogChangedVisitor logListener = new RaceLogChangedVisitor(sender);
             state.getRaceLog().addListener(logListener);

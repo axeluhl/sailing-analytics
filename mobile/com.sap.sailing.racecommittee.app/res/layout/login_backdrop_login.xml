@@ -19,7 +19,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/side_padding"
-            android:src="@drawable/ic_create_light"/>
+            android:src="@drawable/ic_create"/>
 
         <TextView
             android:id="@+id/server_url_label"

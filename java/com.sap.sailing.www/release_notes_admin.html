@@ -27,6 +27,29 @@
                             The new default priority now is 1. It used to be 0 which caused problems
                             because the Race Manager app's highest (logically) priority is 1 which
                             never took priority over the AdminConsole-provided prio-0 events.</li>
+                        <li>User sessions are now stored durably in the database so that they can be
+                            restored in case of a server re-start. Users therefore will no longer need
+                            to sign in again only because a server was re-started.</li>
+                        <li>New availability checks have been implemented. Two new REST endpoints are provided:
+                            <ul>
+                              <li>/sailingserver/api/v1/status reports the availability of the "Sailing" application</li>
+                              <li>/replication/replication?action=STATUS reports the availability of the replication module,
+                                  providing details about each replication-capable component and queue lengths</li>
+                              <li>the "status" script in the server's working directory, next to the "start" and "stop"
+                                  script, now provides output based on the status checks above, plus a check for a 2XX
+                                  response code for /index.html. The exit code for the "status" script is now 1 in case
+                                  of an error / lack of availability, and 0 if all checks passed and server looks
+                                  available.</li>
+                            </ul>
+                        </li>
+			<li>Upgraded the MongoDB driver to version 3.6.4. This allows you to specify the new
+			    retryWrites parameter, e.g., as in "mongodb://mongo0.internal.sapsailing.com/mydb?replicaSet=live&retryWrites=true".
+			    This will improve your system's behavior if you run with a MongoDB replica set and have to
+			    assume that at some point the PRIMARY MongoDB system may fail, with the remaining systems
+			    in the replica set voting for a new PRIMARY. Without retryWrites your system will bluntly
+			    fail, but with retryWrites, write operations will be re-tried once, with a timeout usually
+			    enough for the remaining replicas to agree on a new PRIMARY.
+			</li>
                     </ul>
 
                     <h2 class="articleSubheadline">October 2018</h2>

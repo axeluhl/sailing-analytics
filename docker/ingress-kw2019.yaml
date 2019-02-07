@@ -8,7 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/app-root: /gwt/AdminConsole.html
 spec:
   rules:
-  - host: kw2019-master.ingress.fooz2kz8j4.test001.shoot.canary.k8s-hana.ondemand.com
+  - host: kw2019-master.k8s.sapsailing.com
     http:
       paths:
       - backend:
@@ -24,7 +24,7 @@ metadata:
     nginx.ingress.kubernetes.io/app-root: /gwt/Home.html#/event/:eventId=8e951308-7cd9-4549-a12d-6da665185726
 spec:
   rules:
-  - host: kw2019.ingress.fooz2kz8j4.test001.shoot.canary.k8s-hana.ondemand.com
+  - host: kw2019.k8s.sapsailing.com
     http:
       paths:
       - backend:

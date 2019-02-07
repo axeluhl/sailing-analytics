@@ -1,12 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.util.Date;
-
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.EulaHelper;
-import com.sap.sailing.android.shared.util.LicenseHelper;
-import com.sap.sailing.racecommittee.app.R;
-
 import android.content.pm.PackageInfo;
 import android.text.format.DateFormat;
 import android.view.View;
@@ -14,6 +7,14 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.LicenseHelper;
+import com.sap.sailing.racecommittee.app.R;
+
+import java.util.Date;
+
 import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.model.Notices;
 
@@ -39,7 +40,9 @@ public class SystemInformationActivityHelper {
         if (activity.boundSendingService) {
             Date lastSuccessfulSend = activity.sendingService.getLastSuccessfulSend();
             String never = activity.getString(R.string.never);
-            statusView.setText(activity.getString(R.string.events_waiting_to_be_sent, activity.sendingService.getDelayedIntentsCount(), lastSuccessfulSend == null ? never : lastSuccessfulSend));
+            statusView.setText(activity.getString(R.string.events_waiting_to_be_sent,
+                    activity.sendingService.getDelayedIntentsCount(),
+                    lastSuccessfulSend == null ? never : lastSuccessfulSend));
 
             Iterable<String> delayedIntentsContent = activity.sendingService.getDelayedIntentsContent();
             StringBuilder waitingEvents = new StringBuilder();
@@ -102,8 +105,8 @@ public class SystemInformationActivityHelper {
             installView.setText(activity.getString(R.string.generic_error));
         } else {
             Date installDate = new Date(info.lastUpdateTime);
-            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate), DateFormat
-                .getTimeFormat(activity).format(installDate)));
+            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate),
+                    DateFormat.getTimeFormat(activity).format(installDate)));
         }
     }
 
@@ -128,12 +131,10 @@ public class SystemInformationActivityHelper {
         Notices notices = new Notices();
         LicenseHelper licenseHelper = new LicenseHelper();
         notices.addNotice(licenseHelper.getAndroidSupportNotice(activity));
-        notices.addNotice(licenseHelper.getAdvancedRecyclerViewNotice(activity));
         notices.addNotice(licenseHelper.getJsonSimpleNotice());
         notices.addNotice(licenseHelper.getDialogNotice(activity));
         LicensesDialog.Builder builder = new LicensesDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.license_information));
-        builder.setThemeResourceId(R.style.AppTheme_AlertDialog);
         builder.setNotices(notices);
         builder.build().show();
     }

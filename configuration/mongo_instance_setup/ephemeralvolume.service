@@ -1,0 +1,11 @@
+[Unit]
+Description=Ensures /dev/nvme0n1 is XFS-formatted
+Requires=-.mount
+After=-.mount
+
+[Install]
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/ephemeralvolume

@@ -1,17 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import android.annotation.TargetApi;
-import android.app.Fragment;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
-import android.view.Window;
-import android.view.WindowManager;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -19,6 +7,19 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.MainPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
 import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
+
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 
 public class PreferenceActivity extends AppCompatActivity {
 
@@ -91,7 +92,7 @@ public class PreferenceActivity extends AppCompatActivity {
         if (fragment == null) {
             fragment = MainPreferenceFragment.newInstance();
         }
-        getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -107,7 +108,7 @@ public class PreferenceActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(getResources().getColor(R.color.settings_navbar));
+            window.setStatusBarColor(ContextCompat.getColor(this, R.color.settings_navbar));
         }
     }
 

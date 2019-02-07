@@ -44,7 +44,7 @@
             android:id="@+id/competitor_position"
             android:layout_width="@dimen/competitor_edit_width"
             android:layout_height="wrap_content"
-            android:background="@drawable/spinner_background_light"
+            android:background="@drawable/spinner_background"
             android:spinnerMode="dropdown" />
     </LinearLayout>
 
@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/side_padding"
             android:layout_marginTop="@dimen/side_padding"
-            android:background="@drawable/spinner_background_light"
+            android:background="@drawable/spinner_background"
             android:spinnerMode="dropdown" />
     </LinearLayout>
 

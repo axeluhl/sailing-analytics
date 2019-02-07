@@ -7,7 +7,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sse.mongodb,
- org.eclipse.orbit.mongodb;bundle-version="3.2.2"
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Export-Package: com.sap.sailing.domain.igtimiadapter.persistence
 Import-Package: org.osgi.framework
 Bundle-Activator: com.sap.sailing.domain.igtimiadapter.persistence.impl.Activator

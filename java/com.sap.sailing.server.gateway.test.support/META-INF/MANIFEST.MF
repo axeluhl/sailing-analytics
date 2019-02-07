@@ -12,7 +12,7 @@ Require-Bundle: javax.servlet;bundle-version="3.1.0",
  com.sap.sse.mongodb;bundle-version="1.0.0",
  com.sap.sse.common,
  com.sap.sse,
- org.eclipse.orbit.mongodb;bundle-version="3.2.2"
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver/test-support
 Import-Package: org.osgi.framework,
