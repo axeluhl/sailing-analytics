@@ -5,13 +5,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bson.Document;
 
 import com.mongodb.BasicDBList;
+import com.mongodb.DuplicateKeyException;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -31,11 +35,30 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
-
+    private static final Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase db;
+    final MongoCollection<org.bson.Document> settingCollection;
+
 
     public MongoObjectFactoryImpl(MongoDatabase db) {
         this.db = db;
+        settingCollection = db.getCollection(CollectionNames.PREFERENCES.name());
+        for (Document index : settingCollection.listIndexes()) {
+            final Object key = index.get("key");
+            if (key instanceof Document) {
+                final Document keyDocument = (Document) key;
+                if (keyDocument.size() == 1 && keyDocument.containsKey(FieldNames.Preferences.USERNAME.name()) && !index.getBoolean("unique", false)) {
+                    settingCollection.dropIndex(index.getString("name"));
+                    break;
+                }
+    }
+        }
+        try {
+            settingCollection.createIndex(new Document(FieldNames.Preferences.USERNAME.name(), 1), new IndexOptions().name("uniquebyusername").unique(true));
+        } catch (DuplicateKeyException e) {
+            logger.log(Level.SEVERE, "There are duplicate keys in the "+CollectionNames.PREFERENCES.name()+
+                    " collection. Unique index cannot be created. Consider cleaning up.", e);
+        }
     }
 
     @Override
@@ -243,8 +266,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storePreferences(String username, Map<String, String> userMap) {
-        MongoCollection<org.bson.Document> settingCollection = db.getCollection(CollectionNames.PREFERENCES.name());
-        settingCollection.createIndex(new Document(FieldNames.Preferences.USERNAME.name(), 1));
         BasicDBList dbSettings = new BasicDBList();
         for (Entry<String, String> e : userMap.entrySet()) {
             Document entry = new Document();

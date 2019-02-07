@@ -95,7 +95,7 @@
 	</servlet-mapping>
 
 	<servlet>
-		<display-name>Media Service</display-name>
+            <display-name>Media Service</display-name>
 	    <servlet-name>MediaService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.MediaServiceImpl</servlet-class>
 	</servlet>
@@ -105,7 +105,7 @@
 	</servlet-mapping>
 
 	<servlet>
-		<display-name>Simulator Service</display-name>
+	    <display-name>Simulator Service</display-name>
 	    <servlet-name>SimulatorService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.SimulatorServiceImpl</servlet-class>
 	</servlet>
@@ -115,7 +115,7 @@
 	</servlet-mapping>
 
 	<servlet>
-		<display-name>Data Mining Service</display-name>
+	    <display-name>Data Mining Service</display-name>
 	    <servlet-name>DataMiningService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.DataMiningServiceImpl</servlet-class>
 	</servlet>

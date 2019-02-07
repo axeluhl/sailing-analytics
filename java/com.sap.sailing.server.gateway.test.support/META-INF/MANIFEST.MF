@@ -6,13 +6,17 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: javax.servlet;bundle-version="3.1.0",
- com.sap.sailing.domain;bundle-version="1.0.0",
- com.sap.sailing.domain.common;bundle-version="1.0.0",
- com.sap.sailing.server;bundle-version="1.0.0",
- com.sap.sse.mongodb;bundle-version="1.0.0",
+ com.sap.sailing.domain,
+ com.sap.sailing.domain.common,
+ com.sap.sailing.server,
+ com.sap.sse.mongodb,
  com.sap.sse.common,
  com.sap.sse,
- org.mongodb.mongo-java-driver;bundle-version="3.6.4"
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4",
+ org.apache.shiro.core;bundle-version="1.2.2",
+ org.apache.shiro.ehcache;bundle-version="1.2.3",
+ org.apache.shiro.web;bundle-version="1.2.2",
+ com.sap.sse.security
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver/test-support
 Import-Package: org.osgi.framework,
