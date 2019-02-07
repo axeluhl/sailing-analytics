@@ -267,7 +267,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             public void refreshAfterBecomingVisible() {
                 getWidget().onShow();
             }
-        }, getStringMessages().mediaPanel()); // no permissions required; we show those media the user may read
+        }, getStringMessages().mediaPanel(),
+                SecuredDomainType.MEDIA_TRACK.getPermission(DefaultActions.MUTATION_ACTIONS));
 
         /* RACE COMMITTEE APP */
         final HorizontalTabLayoutPanel raceCommitteeTabPanel = panel.addVerticalTab(getStringMessages().raceCommitteeApp(), "RaceCommiteeAppPanel");
