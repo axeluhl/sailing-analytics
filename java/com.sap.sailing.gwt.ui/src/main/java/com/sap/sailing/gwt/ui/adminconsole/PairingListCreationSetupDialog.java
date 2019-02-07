@@ -254,17 +254,9 @@ public class PairingListCreationSetupDialog extends AbstractPairingListCreationS
         if (flightCount == 0) {
             this.boatChangeFactorListBox.addItem("0");
         } else {
-            IntStream.range(0, flightCount).forEach(i -> {
+            IntStream.range(0, flightCount + 1).forEach(i -> {
                 this.boatChangeFactorListBox.addItem(String.valueOf(i));
             });
-        }
-    }
-    
-    private int getCompetitorCountInput() {
-        try {
-            return Integer.parseInt(competitorCountTextBox.getText());
-        } catch (NumberFormatException e) {
-            return 0;
         }
     }
 
