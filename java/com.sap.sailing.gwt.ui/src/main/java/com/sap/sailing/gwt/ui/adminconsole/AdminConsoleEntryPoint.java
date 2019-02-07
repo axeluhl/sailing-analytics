@@ -256,7 +256,9 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
 
         WindPanel windPanel = new WindPanel(getSailingService(), getUserService(), asyncActionsExecutor, this, this, getStringMessages());
-        panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanel), getStringMessages().wind()); // no permissions required; we show those wind the user may read
+        panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanel),
+                getStringMessages().wind(),
+                SecuredDomainType.TRACKED_RACE.getPermission(TrackedRaceActions.MUTATION_ACTIONS));
         regattasDisplayers.add(windPanel);
 
         final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaService, this, getStringMessages());
