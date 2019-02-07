@@ -304,12 +304,15 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         final SmartphoneTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new SmartphoneTrackingEventManagementPanel(
                 getSailingService(), getUserService(), this, this, this, getStringMessages());
         raceLogTrackingEventManagementPanel.ensureDebugId("SmartphoneTrackingPanel");
-        panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SmartphoneTrackingEventManagementPanel>(raceLogTrackingEventManagementPanel) {
-            @Override
-            public void refreshAfterBecomingVisible() {
-                fillLeaderboards();
-            }
-        }, getStringMessages().smartphoneTracking()); // no permissions required; we show those Smartphone connector stuff the user may read
+        panel.addToTabPanel(connectorsTabPanel,
+                new DefaultRefreshableAdminConsolePanel<SmartphoneTrackingEventManagementPanel>(
+                        raceLogTrackingEventManagementPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        fillLeaderboards();
+                    }
+                }, getStringMessages().smartphoneTracking(),
+                SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.MUTATION_ACTIONS));
         regattasDisplayers.add(raceLogTrackingEventManagementPanel);
         leaderboardsDisplayers.add(raceLogTrackingEventManagementPanel);
 
