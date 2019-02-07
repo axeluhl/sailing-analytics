@@ -250,7 +250,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         panel.addToTabPanel(racesTabPanel,
                 new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanel),
                 getStringMessages().courseLayout(),
-                SecuredDomainType.TRACKED_RACE.getPermission(TrackedRaceActions.MUTATION_ACTIONS));
+                SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
         regattasDisplayers.add(raceCourseManagementPanel);
 
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
@@ -258,7 +258,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         WindPanel windPanel = new WindPanel(getSailingService(), getUserService(), asyncActionsExecutor, this, this, getStringMessages());
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanel),
                 getStringMessages().wind(),
-                SecuredDomainType.TRACKED_RACE.getPermission(TrackedRaceActions.MUTATION_ACTIONS));
+                SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
         regattasDisplayers.add(windPanel);
 
         final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaService, this, getStringMessages());
@@ -312,7 +312,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                         fillLeaderboards();
                     }
                 }, getStringMessages().smartphoneTracking(),
-                SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.MUTATION_ACTIONS));
+                SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.UPDATE, DefaultActions.DELETE));
         regattasDisplayers.add(raceLogTrackingEventManagementPanel);
         leaderboardsDisplayers.add(raceLogTrackingEventManagementPanel);
 
