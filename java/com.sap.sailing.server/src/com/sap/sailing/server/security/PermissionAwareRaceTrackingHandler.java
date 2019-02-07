@@ -63,7 +63,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
                         });
             });
         } finally {
-            subjectThreadState.clear();
+            subjectThreadState.restore();
         }
     }
 
