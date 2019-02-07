@@ -41,7 +41,7 @@ public class CourseChangeBasedTrackApproximationTest {
         for (int i=0; i<20; i++) {
             track.add(next = travel(next, 1000 /*ms*/, 5 /* knots */, 0 /*deg COG*/));
         }
-        final TimePoint startOfTurn = next.getTimePoint();
+        final TimePoint startOfTurn = next.getTimePoint().minus(1000); // the turn will be considered started at the previous fix
         // now turn to port over three fixes:
         track.add(next = travel(next, 1000, 4, 340));
         next = travel(next, 1000, 3, 290);
