@@ -121,22 +121,13 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         competitorRegistrationTypeListBox.ensureDebugId("CompetitorRegistrationTypeListBox");
         EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(stringMessages), t.name()));
         competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
-        competitorRegistrationTypeListBox.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                if (CompetitorRegistrationType.valueOf(competitorRegistrationTypeListBox.getSelectedValue()).isOpen()) {
-                    registrationLinkWithQRCodeOpenButton.setEnabled(true);
-                    registrationLinkWithQRCode.setSecret(RandomString.createRandomSecret(20));
-                } else {
-                    registrationLinkWithQRCodeOpenButton.setEnabled(false);
-                    registrationLinkWithQRCode.setSecret(null);
-                }
-            }
-        });
 
         registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
-        registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
+        if (regatta.registrationLinkSecret == null) {
+            registrationLinkWithQRCode.setSecret(RandomString.createRandomSecret(20));
+        } else {
+            registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
+        }
         registrationLinkWithQRCodeOpenButton = new Button(stringMessages.registrationLinkConfig(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -157,7 +148,6 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
             }
         });
         registrationLinkWithQRCodeOpenButton.ensureDebugId("RegistrationLinkWithQRCodeOpenButton");
-        registrationLinkWithQRCodeOpenButton.setEnabled(regatta.competitorRegistrationType.isOpen());
     }
 
     /**
