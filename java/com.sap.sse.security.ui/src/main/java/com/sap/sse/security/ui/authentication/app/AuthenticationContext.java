@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.authentication.app;
 
-import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 
 /**
@@ -39,5 +40,5 @@ public interface AuthenticationContext {
      */
     String getUserSubtitle();
     
-    boolean hasPermission(WildcardPermission permission);
+    boolean hasPermission(SecuredDTO securedDTO, Action action);
 }

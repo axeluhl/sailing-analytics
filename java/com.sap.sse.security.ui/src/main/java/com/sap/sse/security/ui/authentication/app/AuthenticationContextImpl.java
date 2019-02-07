@@ -2,9 +2,11 @@ package com.sap.sse.security.ui.authentication.app;
 
 import java.util.ArrayList;
 
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccountDTO;
 import com.sap.sse.security.shared.dto.RoleDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -66,7 +68,7 @@ public class AuthenticationContextImpl implements AuthenticationContext {
         return currentUser.getName();
     }
     
-    public boolean hasPermission(WildcardPermission permission) {
-        return userService.hasPermission(permission);
+    public boolean hasPermission(SecuredDTO securedDTO, Action action) {
+        return userService.hasPermission(securedDTO, action);
     }
 }

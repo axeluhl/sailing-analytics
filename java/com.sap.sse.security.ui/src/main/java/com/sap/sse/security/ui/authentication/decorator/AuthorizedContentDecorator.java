@@ -8,7 +8,8 @@ import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -23,7 +24,8 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
     private Widget content;
     private WidgetFactory contentWidgetFactory;
     private final NotLoggedInView notLoggedInView;
-    private WildcardPermission permissionToCheck;
+    private SecuredDTO securedDTO;
+    private Action action;
 
     public AuthorizedContentDecorator(NotLoggedInPresenter presenter, NotLoggedInView notLoggedInView) {
         this.notLoggedInView = notLoggedInView;
@@ -104,8 +106,8 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
     }
 
     private boolean isPermitted(AuthenticationContext userManagementContext) {
-        return permissionToCheck == null
-                || userManagementContext.hasPermission(permissionToCheck);
+        // secured dto + action are both null implies that there is no permission to check
+        return (securedDTO == null && action == null) || userManagementContext.hasPermission(securedDTO, action);
     }
 
     /**
@@ -113,7 +115,8 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
      * 
      * @param permissionToCheck the permission to check
      */
-    public void setPermissionToCheck(WildcardPermission permissionToCheck) {
-        this.permissionToCheck = permissionToCheck;
+    public void setPermissionToCheck(SecuredDTO securedDTO, Action action) {
+        this.securedDTO = securedDTO;
+        this.action = action;
     }
 }
