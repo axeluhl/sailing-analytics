@@ -1911,6 +1911,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
                     }
                     raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName();
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, raceDTO.getIdentifier());
 
                     Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
                     LeaderboardGroup leaderboardGroup = leaderboardGroupName != null

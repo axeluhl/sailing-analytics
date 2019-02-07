@@ -64,11 +64,11 @@ public class MediaSynchControl implements EditFlag {
         this.mediaService = mediaService;
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
+        this.userservice = userservice;
         MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack();
         isEditingAllowed = hasRightToEdit(videoTrack);
         backupVideoTrack = new MediaTrack(videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration,
                 videoTrack.mimeType, videoTrack.assignedRaces);
-        this.userservice = userservice;
         mainPanel = new FlowPanel();
         mainPanel.addStyleName("main-panel");
         editPanel = new FlowPanel();

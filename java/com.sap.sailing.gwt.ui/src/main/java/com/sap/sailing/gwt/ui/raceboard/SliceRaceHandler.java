@@ -13,12 +13,12 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartZoomChangedEvent;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.race.TrackedRaceCreationResultDialog;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.TimeRange;
@@ -27,7 +27,6 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 
@@ -72,13 +71,15 @@ public class SliceRaceHandler {
 
     private final StrippedLeaderboardDTOWithSecurity leaderboardDTO;
 
+    private RaceWithCompetitorsAndBoatsDTO raceDTO;
+
     /**
      * Registers this handler as a zoom event handler on the {@code competitorRaceChart}.
      */
     public SliceRaceHandler(SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
             final String leaderboardGroupName, String leaderboardName, UUID eventId,
-            StrippedLeaderboardDTOWithSecurity leaderboardDTO) {
+            StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO) {
         this.sailingService = sailingService;
         this.userService = userService;
         this.errorReporter = errorReporter;
@@ -87,6 +88,7 @@ public class SliceRaceHandler {
         this.leaderboardName = leaderboardName;
         this.eventId = eventId;
         this.leaderboardDTO = leaderboardDTO;
+        this.raceDTO = raceDTO;
         styles.ensureInjected();
         sliceButtonUi = new Button();
         sliceButtonUi.setStyleName(styles.sliceButtonBackgroundImage());
@@ -129,8 +131,7 @@ public class SliceRaceHandler {
     }
 
     private boolean allowsEditing() {
-        return userService.hasPermission(SecuredDomainType.REGATTA.getStringPermissionForTypeRelativeIdentifier(
-                DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(selectedRaceIdentifier.getRegattaName())))
+        return userService.hasPermission(raceDTO, DefaultActions.UPDATE)
                 && userService.hasPermission(leaderboardDTO, DefaultActions.UPDATE);
     }
 
