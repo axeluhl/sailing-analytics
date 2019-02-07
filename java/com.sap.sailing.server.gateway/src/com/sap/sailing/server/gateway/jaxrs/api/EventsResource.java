@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -104,6 +105,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 
 @Path("/v1/events")
 public class EventsResource extends AbstractSailingServerResource {
+    private static final Logger logger = Logger.getLogger(EventsResource.class.getName());
     private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     
@@ -170,6 +172,8 @@ public class EventsResource extends AbstractSailingServerResource {
             }
             if (eventAndLeaderboardGroupAndLeaderboard.getC() != null) {
                 jsonResponse.put("regatta", eventAndLeaderboardGroupAndLeaderboard.getC().getRegatta().getName());
+                jsonResponse.put("registrationSecret",
+                        eventAndLeaderboardGroupAndLeaderboard.getC().getRegatta().getRegistrationLinkSecret());
                 jsonResponse.put("leaderboard", eventAndLeaderboardGroupAndLeaderboard.getC().getName());
             }
             response = ok(jsonResponse.toJSONString(), MediaType.APPLICATION_JSON);
@@ -354,6 +358,9 @@ public class EventsResource extends AbstractSailingServerResource {
         if (regattaNameParam == null) {
             throw new IllegalArgumentException(ExceptionManager.parameterRequiredMsg("regattaName"));
         }
+        if (competitorRegistrationSecret == null) {
+            throw new IllegalArgumentException(ExceptionManager.parameterRequiredMsg("competitorRegistrationSecret"));
+        }
         if (boatClassNameParam == null) {
             throw new IllegalArgumentException(ExceptionManager.parameterRequiredMsg("boatClassName"));
         }
@@ -458,11 +465,18 @@ public class EventsResource extends AbstractSailingServerResource {
                 }
                 final RegattaLeaderboard leaderboard;
                 if (createRegatta) {
+                    String localCompetitorRegistrationSecret = competitorRegistrationSecret;
+                    if (localCompetitorRegistrationSecret == null) {
+                        localCompetitorRegistrationSecret = UUID.randomUUID().toString();
+                        logger.warning(
+                                "Got request that created a new Regatta without a registrationSecret, generated a new one");
+                    }
                     leaderboard = validateAndCreateRegatta(event.getName(), boatClassName,
                             /* scoringSchemeParam */ null, courseArea.getId(), /* buoyZoneRadiusInHullLengthsParam */ null,
                             /* useStartTimeInterferenceParam */ null, /* controlTrackingFromStartAndFinishTimesParam */ null,
                             /* rankingMetricParam */ null, /* leaderboardDiscardThresholdsParam */ null,
-                            numberOfRacesParam, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, competitorRegistrationSecret);
+                            numberOfRacesParam, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
+                            localCompetitorRegistrationSecret);
                     if (leaderboardGroup != null) {
                         getService().apply(new UpdateLeaderboardGroup(leaderboardGroup.getName(), leaderboardGroup.getName(),
                                 leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),

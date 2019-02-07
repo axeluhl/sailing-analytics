@@ -60,7 +60,7 @@ consumption of this service simple.</p>
 			<div>numberofraces tells how many races shall be created in the default series; by default the series remains empty</div>
             <div>canBoatsOfCompetitorsChangePerRace If true, boats and competitors can change per race, also it is necessary to register them in this case for each race!</div>
             <div>competitorRegistrationType defines the registration type for competitor self registration to the regatta. Allowed values are CLOSED (no self registration) or OPEN_UNMODERATED (self registration for competitors is allowed)</div>
-            <div>secret a string that is used to verify competitor self registrations</div>
+            <div>secret a string that is used to verify competitor self registrations, if not given the server will generate one</div>
 		</td>
 	</tr>
 	<tr>
@@ -79,6 +79,7 @@ consumption of this service simple.</p>
 			"leaderboardgroupid":99859e24-2fe0-4c4e-bcbb-2df272a26c2c,
 			"regatta":"Session admin 24-08-2017 16:46:40",
 			"leaderboard":"Session admin 24-08-2017 16:46:40"
+            "secret":"123456789-fd82-45f6-a0a3-2920eb3307cb",
 		}
 		</pre></td>
 	</tr>
