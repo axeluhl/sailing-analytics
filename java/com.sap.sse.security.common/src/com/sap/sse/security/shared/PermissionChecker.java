@@ -117,13 +117,15 @@ public class PermissionChecker {
 
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
-            PermissionState anonymous = checkUserPermissions(permission, allUser, allUserGroupsOfWhichUserIsMember, ownership, impliesChecker, true);
+            PermissionState anonymous = checkUserPermissions(permission, allUser, allUserGroupsOfWhichUserIsMember,
+                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
             if (anonymous == PermissionState.GRANTED) {
                 result = anonymous;
             }
         }
         if (result == PermissionState.NONE) {
-            result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker, true);
+            result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker,
+                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
         }
         return result == PermissionState.GRANTED;
     }
@@ -194,9 +196,9 @@ public class PermissionChecker {
 
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
-                    impliesChecker, true) != PermissionState.GRANTED
+                    impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED
                     && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser),
-                            ownership, impliesChecker, true) != PermissionState.GRANTED) {
+                            ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED) {
                 return false;
             }
         }
@@ -290,9 +292,9 @@ public class PermissionChecker {
         
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker,
-                    false) == PermissionState.GRANTED
+                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false) == PermissionState.GRANTED
                     || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser), ownership, impliesAnyChecker,
-                            false) == PermissionState.GRANTED) {
+                            /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false) == PermissionState.GRANTED) {
                 return true;
             }
         }
