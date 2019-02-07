@@ -632,7 +632,8 @@ public class ExpeditionAllInOneImporter {
         final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(seriesCreationParameters);
         regatta = service.apply(new AddSpecificRegatta(regattaNameAndleaderboardName, boatClassName,
                 /* can boats of competitors change */ false, CompetitorRegistrationType.CLOSED,
-                /* registrationLinkSecret */ null, /* start date */ null, /* end date */ null, UUID.randomUUID(),
+                /* registrationLinkSecret */ UUID.randomUUID().toString(), /* start date */ null, /* end date */ null,
+                UUID.randomUUID(),
                 regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true, false,
                 rankingMetric));
         this.ensureBoatClassDetermination(regatta);

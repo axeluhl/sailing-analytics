@@ -173,7 +173,8 @@ public class SearchServiceTest {
                 /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false, /* maximumNumberOfDiscards */ null));
         pfingstbusch29er = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "29er"),
                 "29er", /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
-                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
+                UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), kielAlpha.getId(), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
@@ -185,7 +186,8 @@ public class SearchServiceTest {
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
         pfingstbusch470 = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "470"), "470",
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
-                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
+                UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), kielBravo.getId(), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
@@ -213,7 +215,8 @@ public class SearchServiceTest {
         flensburg.addCourseArea(flensburgStandard);
         aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC",
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
-                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
+                UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), flensburgStandard.getId(), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
