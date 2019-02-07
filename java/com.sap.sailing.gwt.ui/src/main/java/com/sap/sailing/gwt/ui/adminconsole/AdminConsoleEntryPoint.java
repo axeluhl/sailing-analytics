@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.security.SecuredDomainType.CompetitorAndBoatActions;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -216,13 +217,14 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         final TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(
                 getSailingService(), getUserService(), this, this, getStringMessages());
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
-        panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<TrackedRacesManagementPanel>(trackedRacesManagementPanel) {
-            @Override
-            public void refreshAfterBecomingVisible() {
-                fillRegattas();
-            }
+        panel.addToTabPanel(racesTabPanel,
+                new DefaultRefreshableAdminConsolePanel<TrackedRacesManagementPanel>(trackedRacesManagementPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        fillRegattas();
+                    }
                 }, getStringMessages().trackedRaces(),
-                SecuredDomainType.TRACKED_RACE.getPermission(SecuredDomainType.TrackedRaceActions.MUTATION_ACTIONS));
+                SecuredDomainType.TRACKED_RACE.getPermission(TrackedRaceActions.MUTATION_ACTIONS));
         regattasDisplayers.add(trackedRacesManagementPanel);
 
         final CompetitorPanel competitorPanel = new CompetitorPanel(getSailingService(), getUserService(), getStringMessages(), this);
@@ -232,7 +234,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             public void refreshAfterBecomingVisible() {
                 getWidget().refreshCompetitorList();
             }
-        }, getStringMessages().competitors(), SecuredDomainType.COMPETITOR.getPermission(CompetitorAndBoatActions.MUTATION_ACTIONS));
+        }, getStringMessages().competitors(),
+                SecuredDomainType.COMPETITOR.getPermission(CompetitorAndBoatActions.MUTATION_ACTIONS));
 
         final BoatPanel boatPanel = new BoatPanel(getSailingService(), getUserService(), getStringMessages(), this);
         boatPanel.ensureDebugId("BoatPanel");
@@ -244,7 +247,10 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         }, getStringMessages().boats(), SecuredDomainType.BOAT.getPermission(CompetitorAndBoatActions.MUTATION_ACTIONS));
 
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(getSailingService(), this, this, getStringMessages());
-        panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanel), getStringMessages().courseLayout());
+        panel.addToTabPanel(racesTabPanel,
+                new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanel),
+                getStringMessages().courseLayout(),
+                SecuredDomainType.TRACKED_RACE.getPermission(TrackedRaceActions.MUTATION_ACTIONS));
         regattasDisplayers.add(raceCourseManagementPanel);
 
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
