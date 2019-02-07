@@ -36,7 +36,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
     // AdminConsole permissions
     public static final HasPermissions MANAGE_MARK_PASSINGS = new SecuredDomainType("MANAGE_MARK_PASSINGS");
     public static final HasPermissions MANAGE_MARK_POSITIONS = new SecuredDomainType("MANAGE_MARK_POSITIONS");
-    public static final HasPermissions DETAIL_TIMER = new SecuredDomainType("DETAIL_TIMER"); // TODO this is not a valid "HasPermission" instance; it's more an operation the user may be granted on objects of the TimePanel type
     
     public static final HasPermissions EVENT = new SecuredDomainType("EVENT");
 
@@ -50,7 +49,7 @@ public class SecuredDomainType extends HasPermissionsImpl {
             TrackedRaceActions.ALL_ACTIONS);
     
     public static enum TrackedRaceActions implements Action {
-        CAN_REPLAY_DURING_LIVE_RACES;
+        CAN_REPLAY_DURING_LIVE_RACES, DETAIL_TIMER;
 
         private static final Action[] ALL_ACTIONS = new Action[] { CAN_REPLAY_DURING_LIVE_RACES, DefaultActions.READ,
                 DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,

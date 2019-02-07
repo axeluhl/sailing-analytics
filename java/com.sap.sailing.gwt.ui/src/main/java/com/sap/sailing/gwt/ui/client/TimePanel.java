@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.TimePanelCssResources.TimePanelCss;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -86,6 +87,8 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     private final FlowPanel playControlPanel;
     private final FlowPanel timePanelInnerWrapper;
 
+    private final RaceWithCompetitorsAndBoatsDTO raceDTO;
+
     /** 
      * the minimum time the slider extends its time when the end of the slider is reached
      */
@@ -107,8 +110,10 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     public TimePanel(Component<?> parent, ComponentContext<?> context, Timer timer,
             TimeRangeWithZoomProvider timeRangeProvider,
             StringMessages stringMessages,
-            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts, UserService userService) {
+            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts, UserService userService,
+            final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         super(parent, context);
+        this.raceDTO = raceDTO;
         this.userService = userService;
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
@@ -619,7 +624,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
 
     @Override
     public SettingsDialogComponent<T> getSettingsDialogComponent(T settings) {
-        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages, userService);
+        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages, userService, raceDTO);
     }
 
     @Override

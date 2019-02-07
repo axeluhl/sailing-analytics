@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -22,10 +23,14 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings> imple
     private static String STYLE_INPUT = "settingsDialogValue";
     private static String STYLE_BOXPANEL = "boxPanel";
 
-    public TimePanelSettingsDialogComponent(T settings, StringMessages stringMessages, UserService userService) {
+    private final RaceWithCompetitorsAndBoatsDTO raceDTO;
+
+    public TimePanelSettingsDialogComponent(T settings, StringMessages stringMessages, UserService userService,
+            RaceWithCompetitorsAndBoatsDTO raceDTO) {
         this.stringMessages = stringMessages;
         initialSettings = settings;
         this.userService = userService;
+        this.raceDTO = raceDTO;
     }
 
     protected StringMessages getStringMessages() {
@@ -61,7 +66,7 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings> imple
             @Override
             public String getErrorMessage(TimePanelSettings valueToValidate) {
                 String errorMessage = null;
-                if (userService.hasPermission(SecuredDomainType.DETAIL_TIMER.getName())) {
+                if (userService.hasPermission(raceDTO, SecuredDomainType.TrackedRaceActions.DETAIL_TIMER)) {
                     if (valueToValidate.getRefreshInterval() < 50) {
                         errorMessage = stringMessages.refreshIntervalMustBeGreaterThanXSeconds("0.05");
                     }

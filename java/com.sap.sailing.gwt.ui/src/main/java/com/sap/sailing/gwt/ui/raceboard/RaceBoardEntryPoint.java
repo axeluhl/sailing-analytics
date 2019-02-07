@@ -109,7 +109,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
         final RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(
                 raceboardData.getLeaderboard(), StringMessages.INSTANCE,
                 raceboardData.getDetailTypesForCompetitorChart(), getUserService(),
-                raceboardData.getAvailableDetailTypesForLeaderboard());
+                raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardData.getRace());
         RaceBoardComponentContext componentContext = new RaceBoardComponentContext(lifeCycle, getUserService(),
                 storageDefinition);
 
