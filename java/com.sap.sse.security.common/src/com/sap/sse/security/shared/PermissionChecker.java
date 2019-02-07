@@ -316,7 +316,7 @@ public class PermissionChecker {
         final boolean ownershipIsGiven = ownership != null
                 && (ownership.getTenantOwner() != null || ownership.getUserOwner() != null);
         if (ownershipIsGiven) {
-            final G tenantOwner = ownership == null ? null : ownership.getTenantOwner();
+            final G tenantOwner = ownership.getTenantOwner();
             if (tenantOwner != null) {
                 final boolean userIsMemberOfGroup = Util.contains(groupsOfWhichUserIsMember, tenantOwner);
                 if (isPermissionGrantedByGroup(permission, tenantOwner, userIsMemberOfGroup, permissionChecker)) {
