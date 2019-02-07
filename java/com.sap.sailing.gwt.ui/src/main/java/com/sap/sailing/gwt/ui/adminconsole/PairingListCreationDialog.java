@@ -68,34 +68,39 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         cSVExportAnchor.getElement().setAttribute("href", "data:text/plain;charset=utf-8,"
                 + getCSVFromPairingListTemplate(this.template.getPairingListTemplate()));
         cSVExportAnchor.getElement().setAttribute("download", "pairingListTemplate.csv");
-        if (template.getCompetitorCount() != leaderboardDTO.competitorsCount) {
-            this.disableApplyToRacelogsAndPrintPreview();
-        }
         pairingListGrid = new Grid(this.template.getPairingListTemplate().length,
                 this.template.getPairingListTemplate()[0].length);
         pairingListTemplateScrollPanel = new ScrollPanel(pairingListGrid);
-        sailingService.getPairingListFromTemplate(this.leaderboardDTO.getName(), this.template.getFlightMultiplier(),
-                this.template.getSelectedFlightNames(), this.template, new AsyncCallback<PairingListDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        PairingListCreationDialog.this.errorReporter.reportError(
-                                stringMessages.errorCreatingPairingList(caught.getMessage()), /* silent */ true);
-                        pairingListDTO = null;
-                        applyToRacelogButton.setEnabled(false);
-                        printPreViewButton.setEnabled(false);
-                        initTemplatePanel();
-                    }
+        if (template.getCompetitorCount() == leaderboardDTO.competitorsCount
+                && template.getCompetitorCount() <= (template.getFlightCount() * template.getGroupCount())) {
+            sailingService.getPairingListFromTemplate(this.leaderboardDTO.getName(),
+                    this.template.getFlightMultiplier(), this.template.getSelectedFlightNames(), this.template,
+                    new AsyncCallback<PairingListDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            PairingListCreationDialog.this.errorReporter.reportError(
+                                    stringMessages.errorCreatingPairingList(caught.getMessage()), /* silent */ true);
+                            pairingListDTO = null;
+                            applyToRacelogButton.setEnabled(false);
+                            printPreViewButton.setEnabled(false);
+                            initTemplatePanel();
+                        }
 
-                    @Override
-                    public void onSuccess(PairingListDTO result) {
-                        pairingListDTO = result;
-                        //Sort boats and template columns
-                        final List<BoatDTO> oldBoatPositions = new ArrayList<>(pairingListDTO.getBoats());
-                        Collections.sort(pairingListDTO.getBoats(), getBoatsComparator());
-                        PairingListCreationDialog.this.swapTemplateColumns(pairingListDTO.getBoats(), oldBoatPositions);
-                        initTemplatePanel();
-                    }
-                });
+                        @Override
+                        public void onSuccess(PairingListDTO result) {
+                            pairingListDTO = result;
+                            // Sort boats and template columns
+                            final List<BoatDTO> oldBoatPositions = new ArrayList<>(pairingListDTO.getBoats());
+                            Collections.sort(pairingListDTO.getBoats(), getBoatsComparator());
+                            PairingListCreationDialog.this.swapTemplateColumns(pairingListDTO.getBoats(),
+                                    oldBoatPositions);
+                            initTemplatePanel();
+                        }
+                    });
+        } else {
+            this.disableApplyToRacelogsAndPrintPreview();
+            this.initTemplatePanel();
+        }
     }
 
     @Override
