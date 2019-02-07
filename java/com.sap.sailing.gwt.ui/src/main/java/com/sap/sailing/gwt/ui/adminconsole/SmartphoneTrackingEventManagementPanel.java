@@ -56,8 +56,8 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -246,16 +246,28 @@ public class SmartphoneTrackingEventManagementPanel
                         Notification.notify(stringMessages.canNotRegisterBoats(), NotificationType.ERROR);
                     }
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
-                    new RegattaLogTrackingDeviceMappingsDialog(sailingService, userService, stringMessages, errorReporter,
-                            leaderboardName, new DialogCallback<Void>() {
-                                @Override
-                                public void ok(Void editedObject) {
-                                }
+                    sailingService.getSecretForRegattaByName(leaderboardName, new AsyncCallback<String>() {
 
-                                @Override
-                                public void cancel() {
-                                }
-                            }).show();
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // if this happens, the user did apparently not have sufficient rights.
+                            Notification.notify(stringMessages.youDontHaveRequiredPermission(), NotificationType.ERROR);
+                        }
+
+                        @Override
+                        public void onSuccess(String secret) {
+                            new RegattaLogTrackingDeviceMappingsDialog(sailingService, userService, stringMessages,
+                                    errorReporter, leaderboardName, secret, new DialogCallback<Void>() {
+                                        @Override
+                                        public void ok(Void editedObject) {
+                                        }
+
+                                        @Override
+                                        public void cancel() {
+                                        }
+                                    }).show();
+                        }
+                    });
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_INVITE_BUOY_TENDERS.equals(value)) {
                     openChooseEventDialogAndSendMails(leaderboardName);
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_SHOW_REGATTA_LOG.equals(value)) {
