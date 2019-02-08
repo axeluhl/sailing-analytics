@@ -1505,7 +1505,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void removeRaceLog(RaceLogIdentifier identifier) {
         Document query = new Document();
         storeRaceLogIdentifier(identifier, query);
-        getRaceLogCollection().deleteOne(query);
+        getRaceLogCollection().deleteMany(query);
     }
     
     @Override
