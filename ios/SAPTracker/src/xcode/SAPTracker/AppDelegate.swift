@@ -8,7 +8,7 @@
 
 import UIKit
 import CoreData
-import Branch
+// Branch.io Version: 0.25.11
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
