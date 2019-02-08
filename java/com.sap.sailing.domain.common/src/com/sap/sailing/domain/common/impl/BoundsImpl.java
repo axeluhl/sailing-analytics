@@ -2,6 +2,7 @@ package com.sap.sailing.domain.common.impl;
 
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sse.common.Distance;
 
 public class BoundsImpl implements Bounds {
     private final Position sw;
@@ -167,6 +168,11 @@ public class BoundsImpl implements Bounds {
     public boolean isEmpty() {
         return getSouthWest().getLatDeg() >= getNorthEast().getLatDeg() ||
                getSouthWest().getLngDeg() == getNorthEast().getLngDeg();
+    }
+    
+    @Override
+    public Distance getDiameter() {
+        return getNorthWest().getDistance(getSouthEast());
     }
 
     @Override
