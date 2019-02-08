@@ -72,7 +72,7 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
         assertTwoPenalties("Dharmender SINGH",    "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:52:01", "06/21/2014-12:52:10");
         // note the typo in Tobias's name; this is how we get it from TracTrac...
         assertTwoPenalties("Tolbias SCHADEWALDT", "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:10", "06/21/2014-12:47:19");
-        assertTwoPenalties("Maxim NIKOLAEV",      "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:37", "06/21/2014-12:49:");
+        assertTwoPenalties("Maxim NIKOLAEV",      "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:37", "06/21/2014-12:49:52");
     }
 
     private void assertTwoPenalties(String competitorName, final String from, final String to,
