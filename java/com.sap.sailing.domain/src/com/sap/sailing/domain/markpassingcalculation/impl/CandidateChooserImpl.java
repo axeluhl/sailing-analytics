@@ -209,31 +209,6 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
     }
     
-    @Override
-    public String logMarkpassingDistribution() {
-        StringBuilder sb = new StringBuilder();
-        for (Competitor c : currentMarkPasses.keySet()) {
-            int xteCnt = 0;
-            int distCnt = 0;
-            Map<Waypoint, MarkPassing> currentCompPasses = currentMarkPasses.get(c);
-            for( Waypoint wpi : currentCompPasses.keySet()) {
-                MarkPassingImpl mp = (MarkPassingImpl)currentCompPasses.get(wpi);
-                if (mp.getCandidate() instanceof XTECandidateImpl) {
-                    xteCnt++;
-                } else {
-                    if (mp.getCandidate() instanceof DistanceCandidateImpl) {
-                        distCnt++;
-                    } else {
-                       sb.append("unknown candidate type\n"); 
-                    }                    
-                }
-            }
-            sb.append("markpasses count:" + currentCompPasses.size() + ", xte:" + xteCnt + ", dist:" + distCnt + " for " + c);
-            sb.append('\n');
-        }
-        return sb.toString();
-    }
-    
     private NamedReentrantReadWriteLock createCompetitorLock(Competitor c) {
         return new NamedReentrantReadWriteLock("Competitor lock for "+c+" in candidate chooser "+this, /* fair */ false);
     }
@@ -551,7 +526,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                 List<MarkPassing> newMarkPassings = new ArrayList<>();
                 for (Candidate can : mostLikelyCandidates) {
                     if (can != start && can != end) {
-                        MarkPassingImpl newMarkPassing = new MarkPassingImpl(can.getTimePoint(), can.getWaypoint(), c, can);
+                        MarkPassingImpl newMarkPassing = new MarkPassingImpl(can.getTimePoint(), can.getWaypoint(), c);
                         currentPasses.put(newMarkPassing.getWaypoint(), newMarkPassing);
                         newMarkPassings.add(newMarkPassing);
                     }

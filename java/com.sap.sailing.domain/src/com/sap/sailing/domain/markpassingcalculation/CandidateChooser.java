@@ -33,6 +33,4 @@ public interface CandidateChooser {
      * the caller holds the {@link Course}'s read lock.
      */
     void updateEndProxyNodeWaypointIndex();
-
-    String logMarkpassingDistribution();
 }

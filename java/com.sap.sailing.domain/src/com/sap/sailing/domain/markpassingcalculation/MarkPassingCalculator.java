@@ -335,7 +335,6 @@ public class MarkPassingCalculator {
             } finally {
                 logger.fine("MarkPassingCalculator Listen thread terminating for race "+raceName);
             }
-            logger.finest(()->chooser.logMarkpassingDistribution());
         }
 
         private void updateManuallySetMarkPassings(List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,

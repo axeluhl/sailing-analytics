@@ -99,7 +99,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
 
     @Override
     public MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor) {
-        return new MarkPassingImpl(timePoint, waypoint, competitor, null);
+        return new MarkPassingImpl(timePoint, waypoint, competitor);
     }
 
     @Override
