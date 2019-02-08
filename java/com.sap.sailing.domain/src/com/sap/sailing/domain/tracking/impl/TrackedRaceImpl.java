@@ -67,7 +67,6 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -297,6 +296,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private transient SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> maneuverCache;
     
+    /**
+     * The values of this map are used by the {@link #approximate(Competitor, Distance, TimePoint, TimePoint)} method and
+     * maintain state to accelerate the {@link #approximate(Competitor, Distance, TimePoint, TimePoint)} method, also in
+     * live scenarios when the contents of the competitors' {@link #tracks} changes dynamically.
+     */
+    private final Map<Competitor, CourseChangeBasedTrackApproximation> maneuverApproximators;
+    
     private transient ConcurrentMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     protected transient MarkPassingCalculator markPassingCalculator;
@@ -482,13 +488,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } finally {
             race.getCourse().unlockAfterRead();
         }
-        markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
-        tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
+        markPassingsForCompetitor = new HashMap<>();
+        tracks = new HashMap<>();
+        maneuverApproximators = new HashMap<>();
         for (Competitor competitor : race.getCompetitors()) {
-            markPassingsForCompetitor.put(competitor, new ConcurrentSkipListSet<MarkPassing>(
-                    MarkPassingByTimeComparator.INSTANCE));
-            tracks.put(competitor, new DynamicGPSFixMovingTrackImpl<Competitor>(competitor,
-                    millisecondsOverWhichToAverageSpeed));
+            markPassingsForCompetitor.put(competitor, new ConcurrentSkipListSet<MarkPassing>(MarkPassingByTimeComparator.INSTANCE));
+            final DynamicGPSFixMovingTrackImpl<Competitor> track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, millisecondsOverWhichToAverageSpeed);
+            tracks.put(competitor, track);
+            maneuverApproximators.put(competitor, new CourseChangeBasedTrackApproximation(track, race.getBoatOfCompetitor(competitor).getBoatClass()));
         }
         markPassingsForWaypoint = new ConcurrentHashMap<Waypoint, NavigableSet<MarkPassing>>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
@@ -2660,9 +2667,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
-        DouglasPeucker<Competitor, GPSFixMoving> douglasPeucker = new DouglasPeucker<Competitor, GPSFixMoving>(
-                getTrack(competitor));
-        return douglasPeucker.approximate(maxDistance, from, to);
+        return maneuverApproximators.get(competitor).approximate(from, to);
     }
 
     protected void triggerManeuverCacheRecalculationForAllCompetitors() {

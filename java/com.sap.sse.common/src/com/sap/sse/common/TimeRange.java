@@ -43,6 +43,8 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     boolean includes(TimePoint timePoint);
     
+    boolean includes(Timed timed);
+
     /**
      * @return {@code true} if and only if at least one {@link TimePoint} exists that is {@link #includes(TimePoint) included} in
      * both, {@code this} and the {@code other} time range. This in particular means that an {@link #isEmpty() empty}
