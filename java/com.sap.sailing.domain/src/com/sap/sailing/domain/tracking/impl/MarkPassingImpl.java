@@ -42,4 +42,5 @@ public class MarkPassingImpl implements MarkPassing {
     public MarkPassing getOriginal() {
         return this;
     }
+
 }
