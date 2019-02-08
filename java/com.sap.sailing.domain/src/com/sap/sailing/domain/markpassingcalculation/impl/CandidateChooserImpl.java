@@ -2,6 +2,7 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -284,10 +285,9 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
             }
             if (startTimeUpdated) {
-                List<Candidate> startList = new ArrayList<>();
-                startList.add(start);
-                for (Competitor com : candidates.keySet()) {
-                    removeCandidates(com, startList);
+                Collection<Candidate> startList = Collections.singleton(start);
+                for (Competitor competitor : candidates.keySet()) {
+                    removeCandidates(competitor, startList);
                 }
                 start.setTimePoint(raceStartTime);
                 for (Competitor com : allEdges.keySet()) {
@@ -324,10 +324,10 @@ public class CandidateChooserImpl implements CandidateChooser {
                 if (!fixed.add(fixedCan)) {
                     Candidate old = fixed.ceiling(fixedCan);
                     fixed.remove(old);
-                    removeCandidates(c, Arrays.asList(old));
+                    removeCandidates(c, Collections.singleton(old));
                     fixed.add(fixedCan);
                 }
-                addCandidates(c, Arrays.asList(fixedCan));
+                addCandidates(c, Collections.singleton(fixedCan));
                 findShortestPath(c);
             }
         } finally {
@@ -764,7 +764,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             for (Candidate can : newCandidates) {
                 candidates.get(c).add(can);
             }
-            updateFilteredCandidatesAndAdjustGraph(c);
+            updateFilteredCandidatesAndAdjustGraph(c, newCandidates, /* removedCandidates */ Collections.emptySet());
         } finally {
             LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
@@ -778,8 +778,8 @@ public class CandidateChooserImpl implements CandidateChooser {
      * candidates no longer passing the filter or no longer existing, and by adding edges for candidates that have now
      * become available as filtered candidates and that weren't before.
      */
-    private void updateFilteredCandidatesAndAdjustGraph(Competitor c) {
-        Pair<Set<Candidate>, Set<Candidate>> filteredCandidatesAddedAndRemoved = updateFilteredCandidates(c);
+    private void updateFilteredCandidatesAndAdjustGraph(Competitor c, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
+        Pair<Set<Candidate>, Set<Candidate>> filteredCandidatesAddedAndRemoved = updateFilteredCandidates(c, newCandidates, removedCandidates);
         final Map<Candidate, Set<Edge>> competitorEdges = allEdges.get(c);
         for (final Candidate candidateRemoved : filteredCandidatesAddedAndRemoved.getB()) {
             logger.finest(()->"Removing all edges containing " + candidateRemoved + "of "+ c);
@@ -795,10 +795,18 @@ public class CandidateChooserImpl implements CandidateChooser {
      * 
      * @param c
      *            the competitor whose candidates to filter
+     * @param newCandidates
+     *            the candidates that were added to the {@link #candidates candidates(c)} collection; some of these may
+     *            already have been in the collection, so the parameter actually describes a superset of the candidates
+     *            added
+     * @param removedCandidates
+     *            the candidates that were removed from the {@link #candidates candidates(c)} collection; some of these may
+     *            already have been missing from the collection, so the parameter actually describes a superset of the candidates
+     *            removed
      * @return a pair whose first element holds the set of candidates that now pass the filter and didn't before, and
      *         whose second element holds the set of candidates that did pass the filter before but don't anymore
      */
-    private Pair<Set<Candidate>, Set<Candidate>> updateFilteredCandidates(Competitor c) {
+    private Pair<Set<Candidate>, Set<Candidate>> updateFilteredCandidates(Competitor c, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
         // TODO naive implementation: add all candidates to the filtered set; this as a first step that shall leave the behavior unchanged (a filter letting all elements pass)
         final Set<Candidate> competitorCandidates = candidates.get(c);
         final Set<Candidate> candidatesThatNowPassTheFilter = competitorCandidates; // TODO add filtering step here in updateFilteredCandidates
@@ -830,7 +838,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             for (Candidate can : wrongCandidates) {
                 candidates.get(c).remove(can);
             }
-            updateFilteredCandidatesAndAdjustGraph(c);
+            updateFilteredCandidatesAndAdjustGraph(c, /* newCandidates */ Collections.emptySet(), wrongCandidates);
         } finally {
             LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
