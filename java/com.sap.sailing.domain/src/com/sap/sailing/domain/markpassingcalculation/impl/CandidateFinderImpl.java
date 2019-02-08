@@ -610,9 +610,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
             }
         }
+        // affectedFixes now contains all fixes whose "candidate status" may have changed due to the fix insertion
         lastIterationFix = null;
         lastIterationAfterFix = null;
         firstFixAfterIterator = null;
+        // for all affected fixes check whether they are a distance candidate now; this requires checking left and right
+        // of all affected fixes. Note the difference with the left/right-looking above: there, it was used to determine
+        // all fixes whose candidate status may have changed. Here we look left/right for each affected fix to ultimately
+        // determine whether or not they are a candidate.
         for (GPSFixMoving fix : affectedFixes) {
             Position p = null;
             GPSFixMoving fixBefore;
