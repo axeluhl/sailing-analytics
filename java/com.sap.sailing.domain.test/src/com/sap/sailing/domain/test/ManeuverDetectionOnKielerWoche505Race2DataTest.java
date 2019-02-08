@@ -92,15 +92,15 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
         Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"));
         c.clear();
         c.set(2011, 6-1, 23, 16, 5, 47);
-        assertManeuver(maneuvers, ManeuverType.TACK, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
-        c.set(2011, 6-1, 23, 16, 8, 33);
-        assertManeuver(maneuvers, ManeuverType.TACK, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        assertManeuver(maneuvers, ManeuverType.TACK, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 5000);
+        c.set(2011, 6-1, 23, 16, 8, 38);
+        assertManeuver(maneuvers, ManeuverType.TACK, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 5000);
         c.set(2011, 6-1, 23, 16, 11, 03);
-        assertManeuver(maneuvers, ManeuverType.TACK, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        assertManeuver(maneuvers, ManeuverType.TACK, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 5000);
         c.set(2011, 6-1, 23, 16, 16, 13);
-        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 5000);
         c.set(2011, 6-1, 23, 16, 20, 1);
-        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 5000);
         // The following used to be required to be recognized as a Gybe. However, the maneuver
         // angle reported after full maneuver analysis is only -14deg which is below the current
         // threshold for general gybing angles.
