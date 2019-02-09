@@ -65,6 +65,8 @@ Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0",
+ javax.ws.rs;version="1.1.1",
+ javax.ws.rs.core;version="1.1.1",
  org.apache.http.client;version="[4.2.5,4.3.0)",
  org.json.simple,
  org.json.simple.parser,
