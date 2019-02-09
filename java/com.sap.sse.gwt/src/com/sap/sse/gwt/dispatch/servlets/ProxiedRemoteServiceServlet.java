@@ -10,6 +10,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RPCRequest;
@@ -136,7 +138,16 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
         final Duration processingDuration = startOfProcessing.until(endOfProcessing);
         final Duration serializationDuration = endOfProcessing.until(afterResultSerialization);
         final Duration totalDuration = startOfProcessing.until(afterResultSerialization);
-        logger.log(Level.WARNING, "GWT RPC Request "+request.getMethod()+" with parameters "+Arrays.toString(request.getParameters())+" on "+this+
+        final String username;
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject != null) {
+            username = subject.getPrincipal() == null ? null : subject.getPrincipal().toString();
+        } else {
+            username = null;
+        }
+        logger.log(Level.WARNING, "GWT RPC Request "+request.getMethod()+
+                " by user "+username+
+                " with parameters "+Arrays.toString(request.getParameters())+" on "+this+
                 " took "+processingDuration+" to process, "+serializationDuration+" to serialize the response, so "+
                 totalDuration+" in total.");
     }

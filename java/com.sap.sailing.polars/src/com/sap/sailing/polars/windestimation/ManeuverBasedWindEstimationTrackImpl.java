@@ -193,8 +193,8 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             this.position = maneuver.getPosition();
             this.maneuverAngleDeg = maneuver.getDirectionChangeInDegrees();
             this.speedAtManeuverStart = maneuver.getSpeedWithBearingBefore();
-            this.middleManeuverCourse = maneuver.getSpeedWithBearingBefore().getBearing()
-                    .middle(maneuver.getSpeedWithBearingAfter().getBearing());
+            this.middleManeuverCourse = maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingBefore().getBearing()
+                    .middle(maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getSpeedWithBearingAfter().getBearing());
             this.maneuverLossDistanceLost = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getProjectedDistanceLost();
             @SuppressWarnings("unchecked")
             Pair<Double, SpeedWithBearingWithConfidence<Void>>[] myLikelihoodAndTWSBasedOnSpeedAndAngleCache = (Pair<Double, SpeedWithBearingWithConfidence<Void>>[]) new Pair<?, ?>[ManeuverType
@@ -390,7 +390,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         final Map<Maneuver, CompetitorAndBoat> maneuvers = getAllManeuvers(waitForLatest);
         // cluster into eight clusters by middle COG first, then aggregate tack likelihoods for each, and jibe
         // likelihoods for opposite cluster
-        final int numberOfClusters = 16;
+        final int numberOfClusters = 12;
         KMeansMappingClusterer<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> clusterer = new KMeansMappingClusterer<>(
                 numberOfClusters, getManeuverClassifications(maneuvers),
                 (mc) -> mc.getScalableMiddleManeuverCourseAndManeuverAngleDeg(), // maps maneuver classification to

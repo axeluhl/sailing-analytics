@@ -372,11 +372,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty
      * list of leaderboards.<br/>
-     * 
-     * @param displayName
-     *            TODO
-     * @param displayGroupsInReverseOrder
-     *            TODO
      */
     void createLeaderboardGroup(String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
