@@ -835,7 +835,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param boatChangeFactor
      *            specifies the priority of well distributed assignment of competitors to boats (smallest factor) or
      *            minimization of boat changes within a {@link PairingList} (highest factor); valid factors are
-     *            {@code 0..competitorsCount/groupsCount}
+     *            {@code 0..numberOfFlights}
      * @return calculated {@link PairingListTemplate}
      */
     PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount,

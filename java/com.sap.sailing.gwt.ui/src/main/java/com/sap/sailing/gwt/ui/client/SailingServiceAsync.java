@@ -949,7 +949,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param boatChangeFactor
      *            specifies the priority of well distributed assignment of competitors to boats (smallest factor) or
      *            minimization of boat changes within a {@link PairingList} (highest factor); valid factors are
-     *            {@code 0..competitorsCount/groupsCount}
+     *            {@code 0..numberOfFlights}
      * @param callback
      *            returns a {@link PairingListTemplateDTO}
      */
