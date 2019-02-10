@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
+ 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -880,7 +880,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      *             is thrown if the leaderboard is not found by name
      */
     PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
-            final int flightMultiplier)
+            final int flightMultiplier, final int tolerance)
             throws NotFoundException, IllegalArgumentException;
 
     PairingListDTO getPairingListFromTemplate(String leaderboardName, int flightMultiplier,
