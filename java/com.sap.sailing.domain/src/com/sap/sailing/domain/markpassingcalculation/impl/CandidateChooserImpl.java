@@ -177,7 +177,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * mark in the course. All of them need to pass the filter, and not only a single one. Other candidates
      * from the time window whose probability is discernably less should be filtered.
      */
-    private final Map<Competitor, Set<Candidate>> candidates;
+    private final Map<Competitor, NavigableSet<Candidate>> candidates;
     
     /**
      * Those candidates from {@link #candidates} that have passed the filter logic and are added to the {@link #allEdges graph}.
@@ -185,7 +185,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * candidates must be added to and removed from the graph after changes have been applied to {@link #candidates} and
      * the filter rules have been re-applied.
      */
-    private final Map<Competitor, Set<Candidate>> filteredCandidates;
+    private final Map<Competitor, NavigableSet<Candidate>> filteredCandidates;
     
     private final Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
     private final ConcurrentHashMap<Competitor, Integer> suppressedPassings = new ConcurrentHashMap<>();
@@ -230,8 +230,8 @@ public class CandidateChooserImpl implements CandidateChooser {
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
             perCompetitorLocks.put(c, createCompetitorLock(c));
-            candidates.put(c, Collections.synchronizedSet(new TreeSet<Candidate>()));
-            filteredCandidates.put(c, Collections.synchronizedSet(new TreeSet<Candidate>()));
+            candidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>()));
+            filteredCandidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>()));
             final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
             currentMarkPasses.put(c, currentMarkPassesForCompetitor);
             // in case the tracked race already has mark passings, e.g., from another mark passing calculator,
@@ -808,9 +808,9 @@ public class CandidateChooserImpl implements CandidateChooser {
      */
     private Pair<Set<Candidate>, Set<Candidate>> updateFilteredCandidates(Competitor c, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
         // TODO naive implementation: add all candidates to the filtered set; this as a first step that shall leave the behavior unchanged (a filter letting all elements pass)
-        final Set<Candidate> competitorCandidates = candidates.get(c);
-        final Set<Candidate> candidatesThatNowPassTheFilter = competitorCandidates; // TODO add filtering step here in updateFilteredCandidates
-        final Set<Candidate> filteredCandidatesForCompetitor = filteredCandidates.get(c);
+        final NavigableSet<Candidate> competitorCandidates = candidates.get(c);
+        final Set<Candidate> candidatesThatNowPassTheFilter = filterCandidates(competitorCandidates, newCandidates, removedCandidates);
+        final NavigableSet<Candidate> filteredCandidatesForCompetitor = filteredCandidates.get(c);
         final Set<Candidate> candidatesAddedToFiltered = new HashSet<>();
         final Set<Candidate> candidatesRemovedFromFiltered = new HashSet<>(filteredCandidatesForCompetitor);
         candidatesRemovedFromFiltered.removeAll(candidatesThatNowPassTheFilter);
@@ -821,6 +821,70 @@ public class CandidateChooserImpl implements CandidateChooser {
             }
         }
         return new Pair<>(candidatesAddedToFiltered, candidatesRemovedFromFiltered);
+    }
+
+    /**
+     * A two-pass algorithm. In the first pass, clusters of {@link DistanceCandidateImpl distance candidates} in close
+     * time-wise proximity (see {@link #CANDIDATE_FILTER_TIME_WINDOW}) are sorted by their probability. Only the group
+     * with the highest probability is selected, assuming that multiple occurrences of the same mark in multiple
+     * waypoints leads to very similar if not equal probabilities. This way, candidates for marks further away don't
+     * depend on the overall minimum probability, but the relative ranking leads to a quick elimination of unlikely
+     * candidates.
+     * <p>
+     * 
+     * During the second pass, clusters of candidates are considered where the track between the first and the last
+     * candidate of the cluster does not leave a small bounding box. This suggests that the tracker was not actively
+     * sailing during this period, and only the first and the last candidate of the cluster will pass the filter.
+     * <p>
+     * 
+     * @param newCandidates
+     *            to allow for incremental updates of filter results, this parameter tells the candidates that have been
+     *            added to {@code competitorCandidates}
+     * @param removedCandidates
+     *            to allow for incremental updates of filter results, this parameter tells the candidates that have been
+     *            removed from {@code competitorCandidates}
+     * @return all candidates from {@code competitorCandidates} that pass the filter criteria
+     */
+    private Set<Candidate> filterCandidates(NavigableSet<Candidate> competitorCandidates, Iterable<Candidate> newCandidates,
+            Iterable<Candidate> removedCandidates) {
+        final NavigableSet<Candidate> mostProbableCandidatesPerCluster = getMostProbableCandidatesPerCluster(competitorCandidates, newCandidates, removedCandidates); // pass 1
+        final Set<Candidate> candidatesOnTheMove = getCandidatesReallyOnTheMove(mostProbableCandidatesPerCluster);
+        return candidatesOnTheMove;
+    }
+    
+    /**
+     * Finds the contiguous (by definition of {@link #CANDIDATE_FILTER_TIME_WINDOW}) sequences of candidates
+     * adjacent to those candidates added / removed. 
+     */
+    private NavigableSet<Candidate> getMostProbableCandidatesPerCluster(NavigableSet<Candidate> competitorCandidates,
+            Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
+
+        return competitorCandidates; // TODO implement getMostProbableCandidatesPerCluster
+    }
+    
+    /**
+     * Starting at {@code startFrom}, looks into earlier and later candidates in the {@code candidates} set and adds all
+     * candidates that continue to be no more than {@link #CANDIDATE_FILTER_TIME_WINDOW} away from their adjacent
+     * candidate. This way, in the resulting set, the time difference between any two adjacent fixes is no more than
+     * {@link #CANDIDATE_FILTER_TIME_WINDOW}. The result will always at least contain {@code startFrom}.
+     */
+    private NavigableSet<Candidate> getTimeWiseContiguousDistanceCandidates(NavigableSet<Candidate> candidates, Candidate startFrom) {
+        final NavigableSet<Candidate> result = new TreeSet<>();
+        result.add(startFrom);
+        for (final Candidate previous : candidates.descendingSet().tailSet(startFrom)) {
+            if (previous.getTimePoint().until(startFrom.getTimePoint()).compareTo(CANDIDATE_FILTER_TIME_WINDOW) <= 0)
+        }
+        while (next != null && next.getTimePoint().until(startFrom.getTimePoint()).compareTo(CANDIDATE_FILTER_TIME_WINDOW) <= 0) {
+            if (next instanceof DistanceCandidateImpl) {
+                result.add(next);
+                next = 
+            }
+        }
+        return result;
+    }
+
+    private Set<Candidate> getCandidatesReallyOnTheMove(NavigableSet<Candidate> mostProbableCandidatesPerCluster) {
+        return mostProbableCandidatesPerCluster; // TODO implement getCandidatesReallyOnTheMove
     }
 
     /**
