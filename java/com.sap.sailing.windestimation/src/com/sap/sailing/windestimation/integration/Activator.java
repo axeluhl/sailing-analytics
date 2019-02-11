@@ -14,7 +14,9 @@ import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
+import com.sap.sse.mongodb.AlreadyRegisteredException;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -37,6 +39,7 @@ public class Activator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         logger.info("Registering WindEstimationFactoryService");
+        registerIncorporatedMongoDbCollectionsExclusively();
         service = new WindEstimationFactoryServiceImpl();
         final String windEstimationModelDataSourceURL = System
                 .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_URL_PROPERTY_NAME);
@@ -61,6 +64,16 @@ public class Activator implements BundleActivator {
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, service.getId().toString());
         registrations.add(context.registerService(Replicable.class.getName(), service, replicableServiceProperties));
         registrations.add(context.registerService(ClearStateTestSupport.class.getName(), service, null));
+    }
+
+    private void registerIncorporatedMongoDbCollectionsExclusively() throws AlreadyRegisteredException {
+        MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        for (ModelDomainType domainType : ModelDomainType.values()) {
+            String collectionName = MongoDbModelStoreImpl.getCollectionName(domainType);
+            mongoDBService.registerExclusively(MongoDbModelStoreImpl.class, collectionName);
+            mongoDBService.registerExclusively(MongoDbModelStoreImpl.class, collectionName + ".files");
+            mongoDBService.registerExclusively(MongoDbModelStoreImpl.class, collectionName + ".chunks");
+        }
     }
 
     private void importWindEstimationModelsFromMongoDb() {
