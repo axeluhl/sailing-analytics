@@ -512,6 +512,6 @@ public class MarkPassingCalculator {
     
     @Override
     public String toString() {
-        return getClass().getName()+" for "+race;
+        return getClass().getName()+" for "+race+" with chooser "+chooser;
     }
 }

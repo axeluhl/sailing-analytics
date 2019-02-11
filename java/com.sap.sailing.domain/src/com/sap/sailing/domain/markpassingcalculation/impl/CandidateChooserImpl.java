@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
@@ -859,7 +860,11 @@ public class CandidateChooserImpl implements CandidateChooser {
      */
     private Pair<Set<Candidate>, Set<Candidate>> updateFilteredCandidates(Competitor competitor, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
         final NavigableSet<Candidate> competitorCandidates = candidates.get(competitor);
-        return filterCandidates(competitor, competitorCandidates, newCandidates, removedCandidates);
+        final Pair<Set<Candidate>, Set<Candidate>> result = filterCandidates(competitor, competitorCandidates, newCandidates, removedCandidates);
+        final NavigableSet<Candidate> filteredCompetitorCandidates = filteredCandidates.get(competitor);
+        filteredCompetitorCandidates.addAll(result.getA());
+        filteredCompetitorCandidates.removeAll(result.getB());
+        return result;
     }
 
     /**
@@ -1159,6 +1164,27 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
             }
         }
+    }
+    
+    @Override
+    public String toString() {
+        final StringBuilder result = new StringBuilder();
+        result.append(getClass().getSimpleName());
+        result.append(" for race ");
+        result.append(race.getRace().getName());
+        result.append(". Filtered vs. original candidate ratio: ");
+        long original = 0;
+        long filtered = 0;
+        for (final Entry<Competitor, NavigableSet<Candidate>> competitorAndCandidate : candidates.entrySet()) {
+            original += competitorAndCandidate.getValue().size();
+            filtered += filteredCandidates.get(competitorAndCandidate.getKey()).size();
+        }
+        result.append(filtered);
+        result.append("/");
+        result.append(original);
+        result.append("=");
+        result.append((double) filtered/(double) original);
+        return result.toString();
     }
 
     private static class CandidateWithSettableTime extends CandidateImpl {
