@@ -538,7 +538,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
         getSecurityService().updateUserProperties(username, fullName, company,
                 getLocaleFromLocaleName(localeName));
-        getSecurityService().setDefaultTenantForCurrentServerForUser(username, defaultTenant);
+        getSecurityService().setDefaultTenantForCurrentServerForUser(username, UUID.fromString(defaultTenant));
         return securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username),
                 getSecurityService());
     }
