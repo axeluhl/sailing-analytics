@@ -83,7 +83,7 @@ public class LoginTest {
 
     @Test
     public void rolesTest() throws UserManagementException, UserGroupManagementException {
-        userStore.createUser("me", "me@sap.com", new UserGroupImpl(UUID.randomUUID(), "me-tenant"));
+        userStore.createUser("me", "me@sap.com");
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition);
         userStore.addRoleForUser("me", testRole);
@@ -94,7 +94,7 @@ public class LoginTest {
     @Test
     public void roleWithQualifiersTest() throws UserManagementException, UserGroupManagementException {
         UserGroupImpl userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
-        User meUser = userStore.createUser("me", "me@sap.com", userDefaultTenant);
+        User meUser = userStore.createUser("me", "me@sap.com");
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition, userDefaultTenant, meUser);
         userStore.addRoleForUser("me", testRole);
@@ -107,7 +107,7 @@ public class LoginTest {
 
     @Test
     public void permissionsTest() throws UserManagementException, UserGroupManagementException {
-        userStore.createUser("me", "me@sap.com", new UserGroupImpl(UUID.randomUUID(), "me-tenant"));
+        userStore.createUser("me", "me@sap.com");
         userStore.addPermissionForUser("me", new WildcardPermission("a:b:c"));
         UserStoreImpl store2 = createAndLoadUserStore();
         User allUser = userStore.getUserByName(SecurityService.ALL_USERNAME);

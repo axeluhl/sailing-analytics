@@ -2,8 +2,8 @@ package com.sap.sse.security.test;
 
 import java.io.Serializable;
 import java.net.UnknownHostException;
-import java.util.UUID;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,8 +15,6 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
-
-import org.junit.Assert;
 
 public class UserPreferenceObjectAndConverterTest {
     
@@ -116,7 +114,7 @@ public class UserPreferenceObjectAndConverterTest {
      */
     @Test
     public void deleteUserWithPreferenceObjectTest() throws UserManagementException, UserGroupManagementException {
-        store.createUser(user1, email, store.createUserGroup(UUID.randomUUID(), user1+"-tenant"));
+        store.createUser(user1, email);
         store.registerPreferenceConverter(prefKey1, prefConverter);
         store.setPreferenceObject(user1, prefKey1, pref1);
         store.deleteUser(user1);
@@ -125,7 +123,7 @@ public class UserPreferenceObjectAndConverterTest {
     
     @Test
     public void removeConverterTest() throws UserManagementException, UserGroupManagementException {
-        store.createUser(user1, email, store.createUserGroup(UUID.randomUUID(), user1+"-tenant"));
+        store.createUser(user1, email);
         store.registerPreferenceConverter(prefKey1, prefConverter);
         store.setPreference(user1, prefKey1, serializedPref1);
         store.removePreferenceConverter(prefKey1);

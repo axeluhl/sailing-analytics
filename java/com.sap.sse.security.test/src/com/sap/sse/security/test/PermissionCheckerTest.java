@@ -79,7 +79,7 @@ public class PermissionCheckerTest {
             userStore.deleteUser("jonas");
         }
         userTenant = userStore.createUserGroup(userTenantId, "jonas-tenant");
-        user = userStore.createUser("jonas", "jonas@dann.io", userTenant);
+        user = userStore.createUser("jonas", "jonas@dann.io");
         userTenant.add(user);
         ownership = new Ownership(user, userTenant);
         adminTenant.add(adminUser);

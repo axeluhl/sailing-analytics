@@ -91,7 +91,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testCreateUser() throws UserManagementException {
-        store.createUser(username, email, defaultTenant);
+        store.createUser(username, email);
         assertNotNull(store.getUserByName(username));
         assertNotNull(store.getUserByEmail(email));
 
@@ -102,7 +102,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testMasterdataIsSaved() throws UserManagementException {
-        store.createUser(username, email, defaultTenant);
+        store.createUser(username, email);
         store.updateUser(new UserImpl(username, email, fullName, company, Locale.GERMAN, false, null, null,
                 defaultTenantForServers, Collections.emptySet(), /* userGroupProvider */ null));
         newStore();
@@ -119,7 +119,7 @@ public class UserStoreWithPersistenceTest {
      */
     @Test
     public void testDeleteUser() throws UserManagementException {
-        store.createUser(username, email, defaultTenant);
+        store.createUser(username, email);
         store.deleteUser(username);
         assertNull(store.getUserByName(username));
         assertNull(store.getUserByEmail(email));
@@ -131,7 +131,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testSetPreferences() throws UserManagementException {
-        store.createUser(username, email, defaultTenant);
+        store.createUser(username, email);
         store.setPreference(username, prefKey, prefValue);
         assertEquals(prefValue, store.getPreference(username, prefKey));
         newStore();
@@ -140,7 +140,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testUnsetPreferences() throws UserManagementException {
-        store.createUser(username, email, defaultTenant);
+        store.createUser(username, email);
         store.setPreference(username, prefKey, prefValue);
         store.unsetPreference(username, prefKey);
         assertNull(store.getPreference(username, prefKey));
@@ -153,7 +153,7 @@ public class UserStoreWithPersistenceTest {
      */
     @Test
     public void testDeleteUserWithPreferences() throws UserManagementException {
-        store.createUser(username, email, defaultTenant);
+        store.createUser(username, email);
         store.setPreference(username, prefKey, prefValue);
         store.deleteUser(username);
         assertNull(store.getPreference(username, prefKey));
@@ -164,7 +164,7 @@ public class UserStoreWithPersistenceTest {
     @Test
     public void testCreateUserGroup() throws UserGroupManagementException, UserManagementException {
         store.deleteUserGroup(defaultTenant);
-        final User user = store.createUser(username, email, defaultTenant);
+        final User user = store.createUser(username, email);
         final UserGroupImpl group = store.createUserGroup(userGroupId, userGroupName);
         group.add(user);
         store.updateUserGroup(group);
@@ -192,7 +192,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testTenantUsers() throws UserManagementException, UserGroupManagementException {
-        final User user = store.createUser(username, email, defaultTenant);
+        final User user = store.createUser(username, email);
         defaultTenant.add(user);
         store.updateUserGroup(defaultTenant);
         user.getDefaultTenantMap().put(serverName, defaultTenant);
@@ -214,7 +214,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testUserGroups() throws UserManagementException, UserGroupManagementException {
-        final User user = store.createUser(username, email, defaultTenant);
+        final User user = store.createUser(username, email);
         final String GROUP_NAME = "group";
         final UserGroupImpl group = store.createUserGroup(UUID.randomUUID(), GROUP_NAME);
         group.add(user);
@@ -238,7 +238,7 @@ public class UserStoreWithPersistenceTest {
     @Test
     public void testGetExistingQualificationsForRoleDefinition()
             throws UserManagementException, UserGroupManagementException {
-        User user = store.createUser("def", "d@test.de", store.createUserGroup(UUID.randomUUID(), "def-tentant"));
+        User user = store.createUser("def", "d@test.de");
         RoleDefinitionImpl roleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "My-Test-Role");
         store.createRoleDefinition(roleDefinition.getId(), roleDefinition.getName(), new ArrayList<>());
         UserGroupImpl userGroup = store.createUserGroup(UUID.randomUUID(), "Test-Usergroup");

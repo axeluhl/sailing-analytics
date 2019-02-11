@@ -61,7 +61,7 @@ public interface UserStore extends UserGroupProvider, Named {
     
     User getUserByAccessToken(String accessToken);
 
-    User createUser(String name, String email, UserGroup defaultTenant, Account... accounts)
+    User createUser(String name, String email, Account... accounts)
             throws UserManagementException;
 
     void updateUser(User user);

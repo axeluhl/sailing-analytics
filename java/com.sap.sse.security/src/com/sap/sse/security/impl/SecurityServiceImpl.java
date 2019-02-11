@@ -310,7 +310,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             
             if (store.getUserByName(SecurityService.ALL_USERNAME) == null) {
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
-                User allUser = createUserInternal(SecurityService.ALL_USERNAME, null, getDefaultTenant());
+                User allUser = createUserInternal(SecurityService.ALL_USERNAME, null);
 
                 // <all> user is explicitly not owned by itself because this would enable anybody to modify this user
                 setOwnership(allUser.getIdentifier(), null, getDefaultTenant());
@@ -803,11 +803,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-        final User result = createUserInternal(username, email, tenant, upa);
+        final User result = createUserInternal(username, email, upa);
         // ownership is handled by caller
         addRoleForUser(result,
                 new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToUserGroup(tenant, result);
+        setDefaultTenantForCurrentServerForUser(username, tenant.getId());
         
         // the new user becomes its owner to ensure the user role is correctly working
         // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
@@ -837,9 +838,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return result;
     }
 
-    private User createUserInternal(String username, String email, UserGroup defaultTenant, Account... accounts)
+    private User createUserInternal(String username, String email, Account... accounts)
             throws UserManagementException {
-        final User result = store.createUser(username, email, defaultTenant, accounts); // TODO: get the principal
+        final User result = store.createUser(username, email, accounts); // TODO: get the principal
                                                                                             // as owner
         // now the user creation needs to be replicated so that when replicating role addition and group assignment
         // the replica will be able to resolve the user correctly
@@ -1182,9 +1183,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (store.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        UserGroup tenant = createUserGroup(UUID.randomUUID(), getDefaultTenantNameForUsername(name));
-        User result = store.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), tenant,
+        User result = store.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()),
                 socialUserAccount);
+        UserGroup tenant = getOrCreateTenantForUser(result);
         accessControlStore.setOwnership(tenant.getIdentifier(), result, tenant, tenant.getName());
         addUserToUserGroup(tenant, result);
         return result;

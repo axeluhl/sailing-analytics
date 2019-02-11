@@ -191,7 +191,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     @Test
     public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException, UserGroupManagementException {
-        store.createUser(user1, mail, store.createUserGroup(UUID.randomUUID(), user1+"-tenant"));
+        store.createUser(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -238,7 +238,7 @@ public class PreferenceObjectBasedNotificationSetTest {
      */
     @Test
     public void deleteUserWithMappingTest() throws UserManagementException, UserGroupManagementException {
-        store.createUser(user1, mail, store.createUserGroup(UUID.randomUUID(), user1+"-tenant"));
+        store.createUser(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -250,7 +250,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     @Test
     public void removePreferenceConverterTest() throws UserManagementException, UserGroupManagementException {
-        store.createUser(user1, mail, store.createUserGroup(UUID.randomUUID(), user1+"-tenant"));
+        store.createUser(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -272,7 +272,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         UserGroup defaultTenantForSingleServer = store.createUserGroup(UUID.randomUUID(), username + "-tenant");
         Map<String, UserGroup> defaultTenantForServer = new ConcurrentHashMap<>();
         defaultTenantForServer.put(serverName, defaultTenantForSingleServer);
-        store.createUser(username, email, defaultTenantForSingleServer);
+        store.createUser(username, email);
         store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenantForServer,
                 Collections.emptySet(), /* userGroupProvider */ null));
     }

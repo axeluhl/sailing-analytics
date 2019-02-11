@@ -109,7 +109,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         UserStore userStore = new UserStoreImpl("defaultTenant");
         userStore.clear();
         UserGroup defaultTenant = userStore.createUserGroup(UUID.randomUUID(), "admin-tenant");
-        User user = userStore.createUser("admin", "", defaultTenant);
+        User user = userStore.createUser("admin", "");
         defaultTenant.add(user);
         userStore.updateUserGroup(defaultTenant);
         user.getDefaultTenantMap().put("testserver", defaultTenant);

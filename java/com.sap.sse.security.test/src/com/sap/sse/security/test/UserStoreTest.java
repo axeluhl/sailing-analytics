@@ -3,8 +3,6 @@ package com.sap.sse.security.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.util.UUID;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,7 +18,6 @@ public class UserStoreTest {
     private final String accessToken = "ak";
     private final String prefKey = "pk";
     private final String prefValue = "pv";
-    private final String defaulttenantname = username+"-tenant";
     
     public UserStoreTest() throws UserGroupManagementException, UserManagementException {
         userStore = new UserStoreImpl(null, null, "TestDefaultTenant");
@@ -28,7 +25,7 @@ public class UserStoreTest {
     
     @Before
     public void setUp() throws UserManagementException, UserGroupManagementException {
-        userStore.createUser(username, email, userStore.createUserGroup(UUID.randomUUID(), defaulttenantname));
+        userStore.createUser(username, email);
         userStore.setAccessToken(username, accessToken);
         userStore.setPreference(username, prefKey, prefValue);
     }

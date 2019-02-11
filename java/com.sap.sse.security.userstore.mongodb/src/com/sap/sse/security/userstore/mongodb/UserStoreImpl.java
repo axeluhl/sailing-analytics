@@ -668,13 +668,12 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public User createUser(String name, String email, UserGroup defaultTenant, Account... accounts)
+    public User createUser(String name, String email, Account... accounts)
             throws UserManagementException {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
-        tenantsForServer.put(ServerInfo.getName(), defaultTenant);
         User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
         logger.info("Creating user: " + user + " with e-mail " + email);
         if (mongoObjectFactory != null) {
