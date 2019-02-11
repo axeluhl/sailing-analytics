@@ -230,7 +230,9 @@ public class CandidateChooserImpl implements CandidateChooser {
      * The {@link #start} and {@link #end} proxy candidates may have {@code null} time points and hence
      * would cause trouble with a regular {@link TimedComparator}. Therefore, this specialized comparator
      * considers the {@link #start} candidate less than all others, the {@link #end} candidate greater
-     * than all others, and all other candidates are compared using a regular {@link TimedComparator}.
+     * than all others, and all other candidates are compared using a regular {@link TimedComparator},
+     * but if time points are equal, disambiguation follows this order of precedence: waypoint index,
+     * probability, candidate class (XTE before distance).
      * 
      * @author Axel Uhl (D043530)
      *
@@ -240,7 +242,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         
         @Override
         public int compare(Candidate o1, Candidate o2) {
-            final int result;
+            int result;
             if (o1 == o2) {
                 result = 0;
             } else if (o1 == start || o2 == end) {
@@ -249,6 +251,15 @@ public class CandidateChooserImpl implements CandidateChooser {
                 result = 1;
             } else {
                 result = timedComparator.compare(o1, o2);
+                if (result == 0) {
+                    result = Integer.compare(o1.getOneBasedIndexOfWaypoint(), o2.getOneBasedIndexOfWaypoint());
+                    if (result == 0) {
+                        result = Double.compare(o1.getProbability(), o2.getProbability());
+                        if (result == 0) {
+                            result = o2.getClass().getSimpleName().compareTo(o1.getClass().getSimpleName());
+                        }
+                    }
+                }
             }
             return result;
         }
