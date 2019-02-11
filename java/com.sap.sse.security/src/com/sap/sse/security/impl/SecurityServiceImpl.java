@@ -785,20 +785,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             logger.warning("User "+username+" already exists");
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
-        final UserGroup tenant;
         if (username == null || username.length() < 3) {
             throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
         } else if (password == null || password.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
-        if (store.getUserGroupByName(defaultTenantNameForUsername) != null) {
-            logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
-            tenant = store.getUserGroupByName(defaultTenantNameForUsername);
-        } else {
-            logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
-            tenant = createUserGroup(UUID.randomUUID(), defaultTenantNameForUsername);
-        }
+        
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
@@ -807,14 +799,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         // ownership is handled by caller
         addRoleForUser(result,
                 new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
-        addUserToUserGroup(tenant, result);
+        
+        final UserGroup tenant = getOrCreateTenantForUser(result);
         setDefaultTenantForCurrentServerForUser(username, tenant.getId());
         
         // the new user becomes its owner to ensure the user role is correctly working
         // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
         accessControlStore.setOwnership(result.getIdentifier(), result, userOwner, username);
-        // the new user becomes the owning user of its own specific tenant which initially only contains the new user
-        accessControlStore.setOwnership(tenant.getIdentifier(), result, tenant, tenant.getName());
         
         result.setFullName(fullName);
         result.setCompany(company);
@@ -836,6 +827,27 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }.start();
         }
         return result;
+    }
+    
+    private UserGroup getOrCreateTenantForUser(User user) throws UserGroupManagementException {
+        final String username = user.getName();
+        final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
+        final UserGroup tenant;
+        if (store.getUserGroupByName(defaultTenantNameForUsername) != null) {
+            logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
+            tenant = store.getUserGroupByName(defaultTenantNameForUsername);
+        } else {
+            logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
+            tenant = createTenantForUser(defaultTenantNameForUsername, user);
+        }
+        return tenant;
+    }
+    
+    private UserGroup createTenantForUser(String defaultTenantNameForUsername, User user) throws UserGroupManagementException {
+        final UserGroup tenant = createUserGroup(UUID.randomUUID(), defaultTenantNameForUsername);
+        addUserToUserGroup(tenant, user);
+        setOwnership(tenant.getIdentifier(), user, tenant);
+        return tenant;
     }
 
     private User createUserInternal(String username, String email, Account... accounts)
