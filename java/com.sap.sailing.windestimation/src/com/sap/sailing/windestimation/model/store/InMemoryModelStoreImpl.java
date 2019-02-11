@@ -18,23 +18,22 @@ import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
-public class InMemoryModelStore extends AbstractModelStore {
+public class InMemoryModelStoreImpl extends AbstractModelStoreImpl {
 
     private final Map<String, byte[]> serializedModels = new ConcurrentHashMap<>();
 
     @Override
-    public <InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
+    public <InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadModel(
             ModelType newModel) throws ModelPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        byte[] serializedModel = serializedModels.get(getFilename(newModel));
+        ModelSerializationStrategy persistenceSupport = checkAndGetPersistenceSupport(newModel);
+        byte[] serializedModel = serializedModels.get(getPersistenceKey(newModel));
         if (serializedModel != null) {
             try (InputStream input = new ByteArrayInputStream(serializedModel)) {
                 @SuppressWarnings("unchecked")
-                ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(input);
+                ModelType loadedModel = (ModelType) persistenceSupport.deserializeFromStream(input);
                 if (!newModel.getModelContext().equals(loadedModel.getModelContext())) {
-                    throw new ModelPersistenceException(
-                            "The configuration of the loaded model is: " + loadedModel.getModelContext()
-                                    + ". \nExpected: " + newModel.getModelContext());
+                    throw new ModelPersistenceException("The configuration of the loaded model is: "
+                            + loadedModel.getModelContext() + ". \nExpected: " + newModel.getModelContext());
                 }
                 return loadedModel;
             } catch (IOException e) {
@@ -45,12 +44,12 @@ public class InMemoryModelStore extends AbstractModelStore {
     }
 
     @Override
-    public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
+    public void persistModel(PersistableModel<?, ?> trainedModel) throws ModelPersistenceException {
+        ModelSerializationStrategy persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            persistenceSupport.saveToStream(trainedModel, output);
+            persistenceSupport.serializeToStream(trainedModel, output);
             byte[] serializedModel = output.toByteArray();
-            serializedModels.put(getFilename(trainedModel), serializedModel);
+            serializedModels.put(getPersistenceKey(trainedModel), serializedModel);
         } catch (IOException e) {
             throw new ModelPersistenceException(e);
         }
@@ -58,25 +57,25 @@ public class InMemoryModelStore extends AbstractModelStore {
 
     public <T extends PersistableModel<?, ?>> void delete(T newModel) throws ModelPersistenceException {
         checkAndGetPersistenceSupport(newModel);
-        serializedModels.remove(getFilename(newModel));
+        serializedModels.remove(getPersistenceKey(newModel));
     }
 
     @Override
-    public void deleteAll(PersistenceContextType contextType) {
+    public void deleteAll(ModelDomainType contextType) {
         for (Iterator<String> iterator = serializedModels.keySet().iterator(); iterator.hasNext();) {
             String filename = iterator.next();
-            if (filename.endsWith(FILE_EXT) && filename.startsWith(getContextPrefix(contextType))) {
+            if (filename.endsWith(FILE_EXT) && filename.startsWith(getPersistenceKeyPartOfModelDomain(contextType))) {
                 iterator.remove();
             }
         }
     }
 
     @Override
-    public Map<String, byte[]> exportAllPersistedModels(PersistenceContextType contextType) {
+    public Map<String, byte[]> exportAllPersistedModels(ModelDomainType contextType) {
         Map<String, byte[]> exportedModels = new HashMap<>();
         for (Entry<String, byte[]> entry : serializedModels.entrySet()) {
             String fileName = entry.getKey();
-            if (isFileBelongingToContextType(fileName, contextType)) {
+            if (isPersistenceKeyBelongingToModelDomain(fileName, contextType)) {
                 exportedModels.put(fileName, entry.getValue());
             }
         }
@@ -84,7 +83,7 @@ public class InMemoryModelStore extends AbstractModelStore {
     }
 
     @Override
-    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, PersistenceContextType contextType) {
+    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, ModelDomainType contextType) {
         for (Entry<String, byte[]> entry : exportedPersistedModels.entrySet()) {
             String fileName = entry.getKey();
             byte[] exportedModel = entry.getValue();
@@ -93,12 +92,12 @@ public class InMemoryModelStore extends AbstractModelStore {
     }
 
     @Override
-    public List<PersistableModel<?, ?>> loadAllPersistedModels(PersistenceContextType contextType) {
+    public List<PersistableModel<?, ?>> loadAllPersistedModels(ModelDomainType contextType) {
         List<PersistableModel<?, ?>> loadedModels = new ArrayList<>();
         for (Entry<String, byte[]> entry : serializedModels.entrySet()) {
             String fileName = entry.getKey();
-            if (isFileBelongingToContextType(fileName, contextType)) {
-                PersistenceSupport persistenceSupport = getPersistenceSupportFromFilename(fileName);
+            if (isPersistenceKeyBelongingToModelDomain(fileName, contextType)) {
+                ModelSerializationStrategy persistenceSupport = getModelSerializationStrategyFromPersistenceKey(fileName);
                 if (persistenceSupport == null) {
                     throw new ModelLoadingException(
                             "Persistence support could not be determined due to invalid filename pattern: \"" + fileName
@@ -106,7 +105,7 @@ public class InMemoryModelStore extends AbstractModelStore {
                 }
                 PersistableModel<?, ?> loadedModel;
                 try (InputStream input = new ByteArrayInputStream(entry.getValue())) {
-                    loadedModel = persistenceSupport.loadFromStream(input);
+                    loadedModel = persistenceSupport.deserializeFromStream(input);
                 } catch (IOException e) {
                     throw new ModelLoadingException(
                             "Could not read model \"" + fileName + "\" from its serialized in-memory state", e);

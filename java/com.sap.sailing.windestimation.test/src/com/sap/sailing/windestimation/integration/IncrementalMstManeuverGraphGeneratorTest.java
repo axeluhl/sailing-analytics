@@ -37,7 +37,7 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifi
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
-import com.sap.sailing.windestimation.model.store.ClassPathReadOnlyModelStore;
+import com.sap.sailing.windestimation.model.store.ClassPathReadOnlyModelStoreImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -52,13 +52,13 @@ import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 public class IncrementalMstManeuverGraphGeneratorTest extends OnlineTracTracBasedTest {
 
     protected final SimpleDateFormat dateFormat;
-    private ClassPathReadOnlyModelStore modelStore;
+    private ClassPathReadOnlyModelStoreImpl modelStore;
 
     public IncrementalMstManeuverGraphGeneratorTest()
             throws MalformedURLException, URISyntaxException, ModelPersistenceException {
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2")); // will result in CEST
-        modelStore = new ClassPathReadOnlyModelStore("trained_wind_estimation_models", getClass().getClassLoader(),
+        modelStore = new ClassPathReadOnlyModelStoreImpl("trained_wind_estimation_models", getClass().getClassLoader(),
                 IncrementalMstHmmWindEstimationForTrackedRaceTest.modelFilesNames);
     }
 

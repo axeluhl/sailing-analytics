@@ -42,7 +42,7 @@ public class PolarsFittingBasedWindEstimationComponentImpl<InputType>
 
     @Override
     public List<WindWithConfidence<Pair<Position, TimePoint>>> estimateWindTrack(InputType input) {
-        RaceWithEstimationData<ManeuverForEstimation> race = preprocessingPipeline.preprocessRace(input);
+        RaceWithEstimationData<ManeuverForEstimation> race = preprocessingPipeline.preprocessInput(input);
         return estimateWindTrackAfterPreprocessing(race);
     }
 

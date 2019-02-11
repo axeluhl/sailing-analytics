@@ -6,8 +6,8 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedS
 import com.sap.sailing.windestimation.model.regressor.IncrementalSingleDimensionPolynomialRegressor;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
 import com.sap.sailing.windestimation.model.store.ModelStore;
-import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 public class DurationBasedTwdTransitionStdRegressorTrainer extends TwdTransitionAggregatedStdRegressorTrainer {
 
@@ -21,8 +21,8 @@ public class DurationBasedTwdTransitionStdRegressorTrainer extends TwdTransition
         AggregatedSingleDimensionBasedTwdTransitionPersistenceManager durationBasedPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
                 AggregatedSingleDimensionType.DURATION);
         // ModelStore modelStore = new FileSystemModelStore("trained_models");
-        ModelStore modelStore = new MongoDbModelStore(durationBasedPersistenceManager.getDb());
-        modelStore.deleteAll(PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR);
+        ModelStore modelStore = new MongoDbModelStoreImpl(durationBasedPersistenceManager.getDb());
+        modelStore.deleteAll(ModelDomainType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR);
         DurationBasedTwdTransitionRegressorModelFactory durationBasedTwdTransitionRegressorModelFactory = new DurationBasedTwdTransitionRegressorModelFactory();
         for (DurationValueRange durationValueRange : DurationValueRange.values()) {
             DurationBasedTwdTransitionRegressorModelContext modelContext = new DurationBasedTwdTransitionRegressorModelContext(

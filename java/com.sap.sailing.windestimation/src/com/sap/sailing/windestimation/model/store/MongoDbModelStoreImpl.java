@@ -22,27 +22,26 @@ import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
-public class MongoDbModelStore extends AbstractModelStore {
+public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
 
     private final MongoDatabase db;
 
-    public MongoDbModelStore(MongoDatabase db) {
+    public MongoDbModelStoreImpl(MongoDatabase db) {
         this.db = db;
     }
 
     @Override
-    public <InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
+    public <InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadModel(
             ModelType newModel) throws ModelPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        String fileName = getFilename(newModel);
+        ModelSerializationStrategy persistenceSupport = checkAndGetPersistenceSupport(newModel);
+        String fileName = getPersistenceKey(newModel);
         String bucketName = getCollectionName(newModel.getModelContext().getContextType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try (GridFSDownloadStream inputStream = gridFs.openDownloadStream(fileName)) {
             ModelContext<?> requestedModelContext = newModel.getModelContext();
             @SuppressWarnings("unchecked")
-            ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(inputStream);
-            ModelContext<InstanceType> loadedModelContext = loadedModel
-                    .getModelContext();
+            ModelType loadedModel = (ModelType) persistenceSupport.deserializeFromStream(inputStream);
+            ModelContext<InstanceType> loadedModelContext = loadedModel.getModelContext();
             verifyRequestedModelContextIsLoaded(requestedModelContext, loadedModelContext);
             return loadedModel;
         } catch (MongoException e) {
@@ -51,14 +50,14 @@ public class MongoDbModelStore extends AbstractModelStore {
     }
 
     @Override
-    public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
-        String newFileName = getFilename(trainedModel);
+    public void persistModel(PersistableModel<?, ?> trainedModel) throws ModelPersistenceException {
+        ModelSerializationStrategy persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
+        String newFileName = getPersistenceKey(trainedModel);
         String bucketName = getCollectionName(trainedModel.getModelContext().getContextType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try {
             try (OutputStream outputStream = gridFs.openUploadStream(newFileName)) {
-                persistenceSupport.saveToStream(trainedModel, outputStream);
+                persistenceSupport.serializeToStream(trainedModel, outputStream);
             }
         } catch (Exception e) {
             throw new ModelPersistenceException(e);
@@ -66,7 +65,7 @@ public class MongoDbModelStore extends AbstractModelStore {
     }
 
     @Override
-    public void deleteAll(PersistenceContextType contextType) throws ModelPersistenceException {
+    public void deleteAll(ModelDomainType contextType) throws ModelPersistenceException {
         try {
             GridFSBuckets.create(db, getCollectionName(contextType)).drop();
         } catch (Exception e) {
@@ -74,13 +73,12 @@ public class MongoDbModelStore extends AbstractModelStore {
         }
     }
 
-    private String getCollectionName(PersistenceContextType contextType) {
-        return CONTEXT_NAME_PREFIX + contextType.getContextName();
+    public static String getCollectionName(ModelDomainType contextType) {
+        return CONTEXT_NAME_PREFIX + contextType.getDomainName();
     }
 
     @Override
-    public Map<String, byte[]> exportAllPersistedModels(PersistenceContextType contextType)
-            throws ModelPersistenceException {
+    public Map<String, byte[]> exportAllPersistedModels(ModelDomainType contextType) throws ModelPersistenceException {
         Map<String, byte[]> exportedModels = new HashMap<>();
         String bucketName = getCollectionName(contextType);
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
@@ -98,7 +96,7 @@ public class MongoDbModelStore extends AbstractModelStore {
     }
 
     @Override
-    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, PersistenceContextType contextType)
+    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, ModelDomainType contextType)
             throws ModelPersistenceException {
         String bucketName = getCollectionName(contextType);
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
@@ -116,13 +114,13 @@ public class MongoDbModelStore extends AbstractModelStore {
     }
 
     @Override
-    public List<PersistableModel<?, ?>> loadAllPersistedModels(PersistenceContextType contextType) {
+    public List<PersistableModel<?, ?>> loadAllPersistedModels(ModelDomainType contextType) {
         List<PersistableModel<?, ?>> loadedModels = new ArrayList<>();
         String bucketName = getCollectionName(contextType);
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         for (GridFSFile gridFSFile : gridFs.find()) {
             String fileName = gridFSFile.getFilename();
-            PersistenceSupport persistenceSupport = getPersistenceSupportFromFilename(fileName);
+            ModelSerializationStrategy persistenceSupport = getModelSerializationStrategyFromPersistenceKey(fileName);
             if (persistenceSupport == null) {
                 throw new ModelLoadingException(
                         "Persistence support could not be determined due to invalid filename pattern: \"" + fileName
@@ -130,7 +128,7 @@ public class MongoDbModelStore extends AbstractModelStore {
             }
             PersistableModel<?, ?> loadedModel;
             try (GridFSDownloadStream downloadStream = gridFs.openDownloadStream(fileName)) {
-                loadedModel = persistenceSupport.loadFromStream(downloadStream);
+                loadedModel = persistenceSupport.deserializeFromStream(downloadStream);
             } catch (IOException e) {
                 throw new ModelLoadingException("Could not read model \"" + fileName + "\" from MongoDB", e);
             }

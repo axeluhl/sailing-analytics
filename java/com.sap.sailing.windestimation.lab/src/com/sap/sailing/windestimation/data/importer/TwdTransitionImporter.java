@@ -66,7 +66,7 @@ public class TwdTransitionImporter {
             DummyManeuverClassifier maneuverClassifier,
             RaceElementsFilteringPreprocessingPipelineImpl preprocessingPipeline,
             RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> race) {
-        RaceWithEstimationData<ManeuverForEstimation> preprocessedRace = preprocessingPipeline.preprocessRace(race);
+        RaceWithEstimationData<ManeuverForEstimation> preprocessedRace = preprocessingPipeline.preprocessInput(race);
         List<CompetitorTrackWithEstimationData<ManeuverWithProbabilisticTypeClassification>> competitorTracks = preprocessedRace
                 .getCompetitorTracks().stream().map(competitorTrack -> {
                     List<ManeuverWithProbabilisticTypeClassification> maneuverClassifications = competitorTrack

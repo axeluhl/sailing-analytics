@@ -6,6 +6,12 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 
+/**
+ * Determines TWS by matching SOG before and SOG after maneuver with boat class polars.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class PolarsBasedTwsCalculatorImpl implements TwsFromManeuverCalculator {
 
     private final PolarsFittingWindEstimation polarsFittingWindEstimation;
@@ -18,5 +24,5 @@ public class PolarsBasedTwsCalculatorImpl implements TwsFromManeuverCalculator {
     public Speed getWindSpeed(ManeuverForEstimation maneuver, Bearing windCourse) {
         return polarsFittingWindEstimation.getWindSpeed(maneuver, windCourse);
     }
-    
+
 }

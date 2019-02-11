@@ -17,6 +17,13 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * Uses provided {@link #twdCalculator} and {@link #twsCalculator} to derive wind fixes. TWS of all wind fixes is set to
+ * the median TWS which is determined by {@link #twsCalculator} for each maneuver.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class WindTrackCalculatorImpl implements WindTrackCalculator {
 
     private final TwdFromManeuverCalculator twdCalculator;
@@ -39,8 +46,8 @@ public class WindTrackCalculatorImpl implements WindTrackCalculator {
                 Speed avgWindSpeed = twsCalculator.getWindSpeed(maneuver, windCourse);
                 Wind wind = new WindImpl(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint(),
                         new KnotSpeedWithBearingImpl(avgWindSpeed.getKnots(), windCourse));
-                windFixes.add(new WindWithConfidenceImpl<>(wind, maneuverWithEstimatedType.getConfidence(), new Pair<>(wind.getPosition(), wind.getTimePoint()),
-                        avgWindSpeed.getKnots() > 0));
+                windFixes.add(new WindWithConfidenceImpl<>(wind, maneuverWithEstimatedType.getConfidence(),
+                        new Pair<>(wind.getPosition(), wind.getTimePoint()), avgWindSpeed.getKnots() > 0));
             }
         }
         windFixes = WindUtil.getWindFixesWithMedianTws(windFixes);

@@ -10,11 +10,21 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.transformer.CompetitorTrackTransformer;
 
+/**
+ * Race pre-processing pipeline which converts {@link CompleteManeuverCurveWithEstimationData} elements of the race to
+ * {@link ManeuverForEstimation}. Additionally, it introduces filtering logic to sort out irregular maneuvers and
+ * maneuvers with bad GPS quality. Moreover, it also incorporates optional filtering logic for competitor tracks to sort
+ * out competitor tracks which have not completed the race for reasons, e.g. due to standing still, or being sunk during
+ * the race.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class RaceElementsFilteringPreprocessingPipelineImpl
         implements RacePreprocessingPipeline<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> {
 
     private final CompetitorTrackTransformer<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> maneuverForEstimationTransformer;
-    private final CompetitorTrackFilteringImpl<CompleteManeuverCurveWithEstimationData> competitorTrackFiltering = new CompetitorTrackFilteringImpl<>();
+    private final CompetitorTrackFilteringImpl competitorTrackFiltering = new CompetitorTrackFilteringImpl();
     private final ManeuverFilteringImpl maneuverFiltering = new ManeuverFilteringImpl();
     private final boolean enableCompetitorTrackFiltering;
 
@@ -30,7 +40,7 @@ public class RaceElementsFilteringPreprocessingPipelineImpl
     }
 
     @Override
-    public RaceWithEstimationData<ManeuverForEstimation> preprocessRace(
+    public RaceWithEstimationData<ManeuverForEstimation> preprocessInput(
             RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> race) {
         Stream<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> stream = race
                 .getCompetitorTracks().stream();

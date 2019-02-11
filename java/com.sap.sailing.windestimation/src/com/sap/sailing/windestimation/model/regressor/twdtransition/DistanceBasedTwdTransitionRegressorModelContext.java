@@ -1,7 +1,7 @@
 package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 /**
  * Context definition
@@ -15,7 +15,7 @@ public class DistanceBasedTwdTransitionRegressorModelContext
     private static final long serialVersionUID = 4324543543l;
 
     public DistanceBasedTwdTransitionRegressorModelContext(DistanceValueRange distanceValueRange) {
-        super(DIMENSION_NAME, PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR,
+        super(DIMENSION_NAME, ModelDomainType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR,
                 distanceValueRange.getSupportedDimensionValueRange());
     }
 

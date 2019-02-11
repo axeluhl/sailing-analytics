@@ -16,7 +16,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
-import com.sap.sailing.windestimation.model.store.FileSystemModelStore;
+import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
@@ -29,7 +29,7 @@ public class PersistedManeuverClassifiersScorePrinter {
             throws MalformedURLException, ClassNotFoundException, IOException, InterruptedException {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
-        ModelStore classifierModelStore = new FileSystemModelStore("trained_wind_estimation_models");
+        ModelStore classifierModelStore = new FileSystemModelStoreImpl("trained_wind_estimation_models");
         // ModelStore classifierModelStore = new MongoDbModelStore(
         // new RegularManeuversForEstimationPersistenceManager().getDb());
         List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> allClassifierModels = new ArrayList<>();
@@ -42,7 +42,7 @@ public class PersistedManeuverClassifiersScorePrinter {
                     .getAllTrainableModels(modelContext);
             for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : classifierModels) {
                 try {
-                    classifierModel = classifierModelStore.loadPersistedState(classifierModel);
+                    classifierModel = classifierModelStore.loadModel(classifierModel);
                     if (classifierModel != null) {
                         allClassifierModels.add(classifierModel);
                     }
@@ -55,7 +55,7 @@ public class PersistedManeuverClassifiersScorePrinter {
                 classifierModels = classifierModelFactory.getAllTrainableModels(modelContext);
                 for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : classifierModels) {
                     try {
-                        classifierModel = classifierModelStore.loadPersistedState(classifierModel);
+                        classifierModel = classifierModelStore.loadModel(classifierModel);
                         if (classifierModel != null) {
                             allClassifierModels.add(classifierModel);
                         }

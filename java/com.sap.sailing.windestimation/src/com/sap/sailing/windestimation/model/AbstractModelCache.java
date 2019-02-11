@@ -5,7 +5,7 @@ import java.util.List;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.PersistableModel;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 public abstract class AbstractModelCache<InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>>
         implements ModelCache<InstanceType, ModelType> {
@@ -78,7 +78,7 @@ public abstract class AbstractModelCache<InstanceType, T extends ModelContext<In
     }
 
     @Override
-    public PersistenceContextType getPersistenceContextType() {
+    public ModelDomainType getPersistenceContextType() {
         return modelFactory.getPersistenceContextType();
     }
 

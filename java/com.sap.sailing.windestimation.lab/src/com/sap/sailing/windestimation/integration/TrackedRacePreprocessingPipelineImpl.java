@@ -47,14 +47,14 @@ public class TrackedRacePreprocessingPipelineImpl
     }
 
     @Override
-    public RaceWithEstimationData<ManeuverForEstimation> preprocessRace(TrackedRace element) {
+    public RaceWithEstimationData<ManeuverForEstimation> preprocessInput(TrackedRace element) {
         List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> competitorTracks = getCompetitorTracksWithManeuverEstimationData(
                 element);
         RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> race = new RaceWithEstimationData<>(
                 element.getTrackedRegatta().getRegatta().getName(), element.getRace().getName(), WindQuality.LOW,
                 competitorTracks);
         RaceWithEstimationData<ManeuverForEstimation> preprocessedRace = raceElementsFilteringPreprocessingPipeline
-                .preprocessRace(race);
+                .preprocessInput(race);
         return preprocessedRace;
     }
 

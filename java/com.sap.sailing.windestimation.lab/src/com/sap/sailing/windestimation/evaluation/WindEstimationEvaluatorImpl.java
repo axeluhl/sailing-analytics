@@ -21,7 +21,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
-import com.sap.sailing.windestimation.preprocessing.DummyRacePreprocessingPipeline;
+import com.sap.sailing.windestimation.preprocessing.DummyRacePreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.preprocessing.RaceWithRandomClippingPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.Bearing;
@@ -83,7 +83,7 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
             WindEstimationComponentWithInternals<RaceWithEstimationData<T>> windEstimator = (WindEstimationComponentWithInternals<RaceWithEstimationData<T>>) windEstimatorFactory
                     .createNewEstimatorInstance();
             RaceWithEstimationData<ManeuverForEstimation> preprocessedRace = windEstimator.getPreprocessingPipeline()
-                    .preprocessRace(race);
+                    .preprocessInput(race);
             WindTrack targetWindTrack = new WindTrackImpl(1000, false, "targetWindTrack");
             for (CompetitorTrackWithEstimationData<T> competitorTrackWithEstimationData : race.getCompetitorTracks()) {
                 List<Wind> targetWindFixes = targetWindFixesExtractor
@@ -101,11 +101,11 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimationEvaluator<T
                                 .sum() >= minManeuversPerRace);
         if (randomClipping) {
             RaceWithRandomClippingPreprocessingPipelineImpl<ManeuverForEstimation, ManeuverForEstimation> clippingPipeline = new RaceWithRandomClippingPreprocessingPipelineImpl<>(
-                    new DummyRacePreprocessingPipeline<>(), fixedNumberOfManeuvers == null ? 1 : fixedNumberOfManeuvers,
+                    new DummyRacePreprocessingPipelineImpl<>(), fixedNumberOfManeuvers == null ? 1 : fixedNumberOfManeuvers,
                     fixedNumberOfManeuvers == null ? Integer.MAX_VALUE : fixedNumberOfManeuvers, evaluationPerCompetitorTrack);
             preprocessingStream = preprocessingStream
                     .map(evaluationCase -> new EvaluationCase<>(evaluationCase.getWindEstimator(),
-                            clippingPipeline.preprocessRace(evaluationCase.getRace()),
+                            clippingPipeline.preprocessInput(evaluationCase.getRace()),
                             evaluationCase.getTargetWindTrack()));
         } else if (fixedNumberOfManeuvers != null) {
             throw new IllegalArgumentException(

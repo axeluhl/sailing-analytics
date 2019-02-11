@@ -1,7 +1,7 @@
 package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 public class DurationBasedTwdTransitionRegressorModelContext
         extends SingleDimensionBasedTwdTransitionRegressorModelContext {
@@ -10,7 +10,7 @@ public class DurationBasedTwdTransitionRegressorModelContext
     private static final long serialVersionUID = 4324543543l;
 
     public DurationBasedTwdTransitionRegressorModelContext(DurationValueRange durationValueRange) {
-        super(DIMENSION_NAME, PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
+        super(DIMENSION_NAME, ModelDomainType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
                 durationValueRange.getSupportedDimensionValueRange());
     }
 

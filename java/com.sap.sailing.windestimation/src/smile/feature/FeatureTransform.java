@@ -27,8 +27,8 @@ import smile.data.NumericAttribute;
  *
  * @author Haifeng Li
  */
-//TODO Create issue for serialization support of stateful scalers
-public abstract class FeatureTransform implements Serializable {
+//FIXME Delete this code duplication when SMILE 1.5.3 releases
+public abstract class FeatureTransform implements Serializable { //original class is not Serializable
     private static final long serialVersionUID = 2850195351096099649L;
     /**
      * If false, try to avoid a copy and do inplace transformation instead.

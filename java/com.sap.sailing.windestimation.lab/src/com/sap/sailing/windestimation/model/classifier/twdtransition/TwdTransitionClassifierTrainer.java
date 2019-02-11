@@ -8,8 +8,8 @@ import com.sap.sailing.windestimation.data.serialization.TwdTransitionJsonSerial
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.store.ModelStore;
-import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class TwdTransitionClassifierTrainer {
@@ -107,14 +107,14 @@ public class TwdTransitionClassifierTrainer {
         double trainScore = classifierScoring.getLastAvgF1Score();
         LoggingUtil.logInfo("Persisting trained classifier...");
         classifierModel.setTrainingStats(trainScore, trainScore, numberOfTrainingInstances);
-        classifierModelStore.persistState(classifierModel);
+        classifierModelStore.persistModel(classifierModel);
         LoggingUtil.logInfo("Classifier persisted successfully. Finished!");
     }
 
     public static void main(String[] args) throws Exception {
         TwdTransitionPersistenceManager persistenceManager = new TwdTransitionPersistenceManager();
-        ModelStore classifierModelStore = new MongoDbModelStore(persistenceManager.getDb());
-        classifierModelStore.deleteAll(PersistenceContextType.TWD_TRANSITION_CLASSIFIER);
+        ModelStore classifierModelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
+        classifierModelStore.deleteAll(ModelDomainType.TWD_TRANSITION_CLASSIFIER);
         TwdTransitionClassifierTrainer classifierTrainer = new TwdTransitionClassifierTrainer(persistenceManager,
                 classifierModelStore);
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();

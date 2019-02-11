@@ -2,15 +2,15 @@ package com.sap.sailing.windestimation.model;
 
 import java.io.Serializable;
 
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 public abstract class ModelContext<InstanceType>
         implements Serializable, FeatureExtraction<InstanceType> {
 
     private static final long serialVersionUID = 5069029031816423989L;
-    private final PersistenceContextType contextType;
+    private final ModelDomainType contextType;
 
-    public ModelContext(PersistenceContextType contextType) {
+    public ModelContext(ModelDomainType contextType) {
         this.contextType = contextType;
     }
 
@@ -27,7 +27,7 @@ public abstract class ModelContext<InstanceType>
 
     public abstract String getId();
 
-    public PersistenceContextType getContextType() {
+    public ModelDomainType getContextType() {
         return contextType;
     }
 

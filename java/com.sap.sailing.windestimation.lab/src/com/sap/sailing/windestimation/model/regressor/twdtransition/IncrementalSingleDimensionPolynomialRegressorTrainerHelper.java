@@ -30,7 +30,7 @@ public class IncrementalSingleDimensionPolynomialRegressorTrainerHelper {
         LoggingUtil.logInfo("Number of training instances: " + numberOfTrainingInstances);
         LoggingUtil.logInfo("Number of test instances: " + numberOfTestInstances);
         LoggingUtil.logInfo("Persisting trained regressor...");
-        regressorModelStore.persistState(model);
+        regressorModelStore.persistModel(model);
         LoggingUtil.logInfo("Regressor persisted successfully. Finished!");
     }
 

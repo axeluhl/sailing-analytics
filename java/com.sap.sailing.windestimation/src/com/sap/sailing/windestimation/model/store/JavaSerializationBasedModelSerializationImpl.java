@@ -8,24 +8,16 @@ import java.io.OutputStream;
 
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
-public class SerializationBasedPersistenceSupport implements PersistenceSupport {
+/**
+ * Serialization strategy which makes use of default Java serialization/deserialization.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
+public class JavaSerializationBasedModelSerializationImpl implements ModelSerializationStrategy {
 
     @Override
-    public String getId() {
-        return "Serialization";
-    }
-
-    @Override
-    public String getPersistenceKey(PersistableModel<?, ?> model) {
-        StringBuilder key = new StringBuilder();
-        key.append(model.getClass().getSimpleName());
-        key.append("-");
-        key.append(model.getModelContext().getId());
-        return key.toString();
-    }
-
-    @Override
-    public void saveToStream(PersistableModel<?, ?> model, OutputStream output) throws ModelPersistenceException {
+    public void serializeToStream(PersistableModel<?, ?> model, OutputStream output) throws ModelPersistenceException {
         try (ObjectOutputStream serializer = new ObjectOutputStream(output)) {
             serializer.writeObject(model);
         } catch (IOException e) {
@@ -34,7 +26,7 @@ public class SerializationBasedPersistenceSupport implements PersistenceSupport 
     }
 
     @Override
-    public PersistableModel<?, ?> loadFromStream(InputStream input) throws ModelPersistenceException {
+    public PersistableModel<?, ?> deserializeFromStream(InputStream input) throws ModelPersistenceException {
         try (ObjectInputStream deserializer = new ObjectInputStream(input)) {
             PersistableModel<?, ?> loadedModel = (PersistableModel<?, ?>) deserializer.readObject();
             return loadedModel;

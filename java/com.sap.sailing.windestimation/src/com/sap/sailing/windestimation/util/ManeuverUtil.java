@@ -5,6 +5,12 @@ import java.util.List;
 
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
 
+/**
+ * Util class for diverse adjustments of lists with maneuvers
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverUtil {
 
     private ManeuverUtil() {

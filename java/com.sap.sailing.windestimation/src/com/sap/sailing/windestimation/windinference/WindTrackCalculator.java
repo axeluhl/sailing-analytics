@@ -8,6 +8,12 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEsti
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * Converts maneuver classifications to wind fixes.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public interface WindTrackCalculator {
 
     List<WindWithConfidence<Pair<Position, TimePoint>>> getWindTrackFromManeuverClassifications(

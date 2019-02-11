@@ -34,8 +34,8 @@ public class RaceWithRandomClippingPreprocessingPipelineImpl<FromElements, ToEle
     }
 
     @Override
-    public RaceWithEstimationData<ToElements> preprocessRace(RaceWithEstimationData<FromElements> race) {
-        RaceWithEstimationData<ToElements> preprocessedRace = preprocessingPipeline.preprocessRace(race);
+    public RaceWithEstimationData<ToElements> preprocessInput(RaceWithEstimationData<FromElements> race) {
+        RaceWithEstimationData<ToElements> preprocessedRace = preprocessingPipeline.preprocessInput(race);
         RaceWithEstimationData<ToElements> newRace;
         if (evaluationPerCompetitorTrack) {
             newRace = getRaceWithRandomClippingPerCompetitorTrack(preprocessedRace);

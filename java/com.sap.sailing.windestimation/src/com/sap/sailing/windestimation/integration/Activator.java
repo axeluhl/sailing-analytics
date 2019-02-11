@@ -13,8 +13,8 @@ import org.osgi.framework.ServiceRegistration;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
-import com.sap.sailing.windestimation.model.store.FileSystemModelStore;
-import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
+import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -64,7 +64,7 @@ public class Activator implements BundleActivator {
     }
 
     private void importWindEstimationModelsFromMongoDb() {
-        MongoDbModelStore modelStore = new MongoDbModelStore(MongoDBService.INSTANCE.getDB());
+        MongoDbModelStoreImpl modelStore = new MongoDbModelStoreImpl(MongoDBService.INSTANCE.getDB());
         try {
             service.importAllModelsFromModelStore(modelStore);
         } catch (ModelPersistenceException e) {
@@ -73,7 +73,7 @@ public class Activator implements BundleActivator {
     }
 
     private void importWindEstimationModelsFromFolder(String windEstimationModelDataSourceFolder) {
-        FileSystemModelStore modelStore = new FileSystemModelStore(windEstimationModelDataSourceFolder);
+        FileSystemModelStoreImpl modelStore = new FileSystemModelStoreImpl(windEstimationModelDataSourceFolder);
         try {
             service.importAllModelsFromModelStore(modelStore);
         } catch (ModelPersistenceException e) {

@@ -1,6 +1,6 @@
 package com.sap.sailing.windestimation.model;
 
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 public interface ModelCache<InstanceType, ModelType extends TrainableModel<InstanceType, ?>> {
 
@@ -10,6 +10,6 @@ public interface ModelCache<InstanceType, ModelType extends TrainableModel<Insta
 
     boolean isReady();
 
-    PersistenceContextType getPersistenceContextType();
+    ModelDomainType getPersistenceContextType();
 
 }

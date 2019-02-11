@@ -15,6 +15,12 @@ import com.sap.sse.common.Util.Pair;
 
 import smile.sort.QuickSelect;
 
+/**
+ * Util class for diverse adjustments of lists with wind fixes
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class WindUtil {
 
     private WindUtil() {

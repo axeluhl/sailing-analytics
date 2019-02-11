@@ -17,9 +17,9 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifi
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
-import com.sap.sailing.windestimation.model.store.InMemoryModelStore;
+import com.sap.sailing.windestimation.model.store.InMemoryModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelStore;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 public class WindEstimationFactoryServiceImpl
         extends AbstractReplicableWithObjectInputStream<WindEstimationFactoryService, WindEstimationDataOperation<?>>
@@ -33,9 +33,9 @@ public class WindEstimationFactoryServiceImpl
 
     private static final ManeuverFeatures MAX_MANEUVER_FEATURES = new ManeuverFeatures(ENABLE_POLARS_INFORMATION,
             ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION);
-    private static final PersistenceContextType[] relevantContextTypes = new PersistenceContextType[] {
-            PersistenceContextType.MANEUVER_CLASSIFIER, PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
-            PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR };
+    private static final ModelDomainType[] relevantContextTypes = new ModelDomainType[] {
+            ModelDomainType.MANEUVER_CLASSIFIER, ModelDomainType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
+            ModelDomainType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR };
 
     public final ModelStore MODEL_STORE;
     protected final ManeuverClassifiersCache maneuverClassifiersCache;
@@ -45,7 +45,7 @@ public class WindEstimationFactoryServiceImpl
     private boolean shutdown = false;
 
     public WindEstimationFactoryServiceImpl() {
-        MODEL_STORE = new InMemoryModelStore();
+        MODEL_STORE = new InMemoryModelStoreImpl();
         maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE, PRELOAD_ALL_MODELS,
                 PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
         gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(MODEL_STORE,
@@ -70,7 +70,7 @@ public class WindEstimationFactoryServiceImpl
     @Override
     public void initiallyFillFromInternal(ObjectInputStream is)
             throws IOException, ClassNotFoundException, InterruptedException {
-        for (PersistenceContextType contextType : relevantContextTypes) {
+        for (ModelDomainType contextType : relevantContextTypes) {
             Map<String, byte[]> exportedModels = (Map<String, byte[]>) is.readObject();
             MODEL_STORE.importPersistedModels(exportedModels, contextType);
         }
@@ -106,7 +106,7 @@ public class WindEstimationFactoryServiceImpl
 
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
-        for (PersistenceContextType contextType : relevantContextTypes) {
+        for (ModelDomainType contextType : relevantContextTypes) {
             Map<String, byte[]> exportedModels = MODEL_STORE.exportAllPersistedModels(contextType);
             objectOutputStream.writeObject(exportedModels);
         }
@@ -117,7 +117,7 @@ public class WindEstimationFactoryServiceImpl
      */
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
-        for (PersistenceContextType contextType : relevantContextTypes) {
+        for (ModelDomainType contextType : relevantContextTypes) {
             MODEL_STORE.deleteAll(contextType);
         }
         clearState();
@@ -146,7 +146,7 @@ public class WindEstimationFactoryServiceImpl
      * Imports all the models which are available in the provided model store.
      */
     public void importAllModelsFromModelStore(ModelStore modelStore) throws ModelPersistenceException {
-        for (PersistenceContextType contextType : relevantContextTypes) {
+        for (ModelDomainType contextType : relevantContextTypes) {
             Map<String, byte[]> exportedModels = modelStore.exportAllPersistedModels(contextType);
             MODEL_STORE.deleteAll(contextType);
             MODEL_STORE.importPersistedModels(exportedModels, contextType);

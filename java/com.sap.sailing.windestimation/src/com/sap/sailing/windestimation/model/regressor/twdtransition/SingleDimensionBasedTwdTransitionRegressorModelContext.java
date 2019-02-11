@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.ModelContext;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 public abstract class SingleDimensionBasedTwdTransitionRegressorModelContext
         extends ModelContext<TwdTransition> {
@@ -12,7 +12,7 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelContext
     private final SupportedDimensionValueRange supportedDimensionValueRange;
 
     public SingleDimensionBasedTwdTransitionRegressorModelContext(String dimensionName,
-            PersistenceContextType persistenceContextType, SupportedDimensionValueRange supportedDimensionValueRange) {
+            ModelDomainType persistenceContextType, SupportedDimensionValueRange supportedDimensionValueRange) {
         super(persistenceContextType);
         this.dimensionName = dimensionName;
         this.supportedDimensionValueRange = supportedDimensionValueRange;

@@ -3,7 +3,7 @@ package com.sap.sailing.windestimation.model.classifier.smile;
 import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.classifier.AbstractClassificationModel;
 import com.sap.sailing.windestimation.model.classifier.PreprocessingConfig;
-import com.sap.sailing.windestimation.model.store.PersistenceSupportType;
+import com.sap.sailing.windestimation.model.store.ModelSerializationStrategyType;
 
 import smile.classification.SoftClassifier;
 import smile.feature.Standardizer;
@@ -70,8 +70,8 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends M
     }
 
     @Override
-    public PersistenceSupportType getPersistenceSupportType() {
-        return PersistenceSupportType.SERIALIZATION;
+    public ModelSerializationStrategyType getPersistenceSupportType() {
+        return ModelSerializationStrategyType.SERIALIZATION;
     }
 
 }

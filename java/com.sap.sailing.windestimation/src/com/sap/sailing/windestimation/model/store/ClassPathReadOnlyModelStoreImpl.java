@@ -15,13 +15,20 @@ import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
-public class ClassPathReadOnlyModelStore extends AbstractModelStore {
+/**
+ * {@link ModelStore} implementation which reads its models from classpath. Write-operations are unsupported and will
+ * quit with {@link UnsupportedOperationException}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
+public class ClassPathReadOnlyModelStoreImpl extends AbstractModelStoreImpl {
 
     private final String destinationFolder;
     private final ClassLoader classLoader;
     private final String[] modelFileNames;
 
-    public ClassPathReadOnlyModelStore(String destinationFolder, ClassLoader classLoader, String[] modelFileNames) {
+    public ClassPathReadOnlyModelStoreImpl(String destinationFolder, ClassLoader classLoader, String[] modelFileNames) {
         this.destinationFolder = destinationFolder;
         this.classLoader = classLoader;
         this.modelFileNames = modelFileNames;
@@ -63,20 +70,19 @@ public class ClassPathReadOnlyModelStore extends AbstractModelStore {
     }
 
     @Override
-    public <InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
+    public <InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadModel(
             ModelType newModel) throws ModelPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
-        String fileName = getFilename(newModel);
+        ModelSerializationStrategy persistenceSupport = checkAndGetPersistenceSupport(newModel);
+        String fileName = getPersistenceKey(newModel);
         String filePath = getFilePath(fileName);
         InputStream input = getResourceAsStream(filePath);
         if (input != null) {
             try {
                 @SuppressWarnings("unchecked")
-                ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(input);
+                ModelType loadedModel = (ModelType) persistenceSupport.deserializeFromStream(input);
                 if (!newModel.getModelContext().equals(loadedModel.getModelContext())) {
-                    throw new ModelPersistenceException(
-                            "The configuration of the loaded model is: " + loadedModel.getModelContext()
-                                    + ". \nExpected: " + newModel.getModelContext());
+                    throw new ModelPersistenceException("The configuration of the loaded model is: "
+                            + loadedModel.getModelContext() + ". \nExpected: " + newModel.getModelContext());
                 }
                 return loadedModel;
             } catch (IOException e) {
@@ -92,7 +98,7 @@ public class ClassPathReadOnlyModelStore extends AbstractModelStore {
     }
 
     @Override
-    public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
+    public void persistModel(PersistableModel<?, ?> trainedModel) throws ModelPersistenceException {
         throw new UnsupportedOperationException();
     }
 
@@ -101,17 +107,16 @@ public class ClassPathReadOnlyModelStore extends AbstractModelStore {
     }
 
     @Override
-    public void deleteAll(PersistenceContextType contextType) throws ModelPersistenceException {
+    public void deleteAll(ModelDomainType contextType) throws ModelPersistenceException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Map<String, byte[]> exportAllPersistedModels(PersistenceContextType contextType)
-            throws ModelPersistenceException {
+    public Map<String, byte[]> exportAllPersistedModels(ModelDomainType contextType) throws ModelPersistenceException {
         Map<String, byte[]> exportedModels = new HashMap<>();
         try {
             for (String fileName : getResourceFiles(destinationFolder)) {
-                if (isFileBelongingToContextType(fileName, contextType)) {
+                if (isPersistenceKeyBelongingToModelDomain(fileName, contextType)) {
                     String filePath = getFilePath(fileName);
                     byte[] exportedModel;
                     try (InputStream inputStream = getResourceAsStream(filePath)) {
@@ -130,20 +135,21 @@ public class ClassPathReadOnlyModelStore extends AbstractModelStore {
     }
 
     @Override
-    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, PersistenceContextType contextType)
+    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, ModelDomainType contextType)
             throws ModelPersistenceException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<PersistableModel<?, ?>> loadAllPersistedModels(PersistenceContextType contextType) {
+    public List<PersistableModel<?, ?>> loadAllPersistedModels(ModelDomainType contextType) {
         List<PersistableModel<?, ?>> loadedModels = new ArrayList<>();
         try {
             for (String fileName : getResourceFiles(destinationFolder)) {
-                if (isFileBelongingToContextType(fileName, contextType)) {
+                if (isPersistenceKeyBelongingToModelDomain(fileName, contextType)) {
                     String filePath = getFilePath(fileName);
                     try (InputStream inputStream = getResourceAsStream(filePath)) {
-                        PersistenceSupport persistenceSupport = getPersistenceSupportFromFilename(fileName);
+                        ModelSerializationStrategy persistenceSupport = getModelSerializationStrategyFromPersistenceKey(
+                                fileName);
                         if (persistenceSupport == null) {
                             throw new ModelLoadingException(
                                     "Persistence support could not be determined due to invalid filename pattern: \""
@@ -151,7 +157,7 @@ public class ClassPathReadOnlyModelStore extends AbstractModelStore {
                         }
                         PersistableModel<?, ?> loadedModel;
                         try (InputStream input = getResourceAsStream(filePath)) {
-                            loadedModel = persistenceSupport.loadFromStream(input);
+                            loadedModel = persistenceSupport.deserializeFromStream(input);
                         } catch (Exception e) {
                             throw new ModelLoadingException("Could not read model \"" + fileName + "\" from filesystem",
                                     e);

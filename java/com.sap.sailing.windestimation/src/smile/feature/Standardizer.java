@@ -26,8 +26,8 @@ import smile.math.Math;
  *
  * @author Haifeng Li
  */
-//TODO Create issue for serialization support of stateful scalers
-public class Standardizer extends FeatureTransform {
+//FIXME Delete this code duplication when SMILE 1.5.3 releases
+public class Standardizer extends FeatureTransform {  //original class is not Serializable
     private static final long serialVersionUID = -1827727325811477822L;
     /**
      * Mean or median.

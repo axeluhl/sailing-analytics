@@ -3,9 +3,9 @@ package com.sap.sailing.windestimation.model.regressor.twdtransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.regressor.IncrementalSingleDimensionPolynomialRegressor;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
-import com.sap.sailing.windestimation.model.store.FileSystemModelStore;
+import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelStore;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 /**
  * Trains TWD delta standard deviation by considering the distance passed between two measurements.
@@ -21,12 +21,12 @@ public class DistanceBasedTwdTransitionStdRegressorTrainer
     }
 
     public static void main(String[] args) throws Exception {
-        ModelStore modelStore = new FileSystemModelStore("trained_wind_estimation_models");
+        ModelStore modelStore = new FileSystemModelStoreImpl("trained_wind_estimation_models");
         // AggregatedSingleDimensionBasedTwdTransitionPersistenceManager distanceBasedPersistenceManager = new
         // AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
         // AggregatedSingleDimensionType.DISTANCE);
         // ModelStore modelStore = new MongoDbModelStore(distanceBasedPersistenceManager.getDb());
-        modelStore.deleteAll(PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR);
+        modelStore.deleteAll(ModelDomainType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR);
         DistanceBasedTwdTransitionRegressorModelFactory distanceBasedTwdTransitionRegressorModelFactory = new DistanceBasedTwdTransitionRegressorModelFactory();
         for (DistanceValueRange distanceValueRange : DistanceValueRange.values()) {
             DistanceBasedTwdTransitionRegressorModelContext modelContext = new DistanceBasedTwdTransitionRegressorModelContext(

@@ -14,7 +14,7 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransiti
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.store.ModelStore;
-import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class PersistedTwdTransitionClassifiersScorePrinter {
@@ -24,7 +24,7 @@ public class PersistedTwdTransitionClassifiersScorePrinter {
 
     public static void main(String[] args)
             throws MalformedURLException, ClassNotFoundException, IOException, InterruptedException {
-        ModelStore classifierModelStore = new MongoDbModelStore(new TwdTransitionPersistenceManager().getDb());
+        ModelStore classifierModelStore = new MongoDbModelStoreImpl(new TwdTransitionPersistenceManager().getDb());
         List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext>> allClassifierModels = new ArrayList<>();
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();
         LoggingUtil.logInfo("### Loading classifiers:");
@@ -35,7 +35,7 @@ public class PersistedTwdTransitionClassifiersScorePrinter {
                     .getAllTrainableModels(modelContext);
             for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext> classifierModel : classifierModels) {
                 try {
-                    classifierModel = classifierModelStore.loadPersistedState(classifierModel);
+                    classifierModel = classifierModelStore.loadModel(classifierModel);
                     if (classifierModel != null) {
                         allClassifierModels.add(classifierModel);
                     }

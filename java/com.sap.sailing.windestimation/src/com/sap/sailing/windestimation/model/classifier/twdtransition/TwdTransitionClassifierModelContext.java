@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.ModelContext;
-import com.sap.sailing.windestimation.model.store.PersistenceContextType;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 public class TwdTransitionClassifierModelContext extends ModelContext<TwdTransition> {
 
@@ -10,7 +10,7 @@ public class TwdTransitionClassifierModelContext extends ModelContext<TwdTransit
     private final ManeuverTypeTransition maneuverTypeTransition;
 
     public TwdTransitionClassifierModelContext(ManeuverTypeTransition maneuverTypeTransition) {
-        super(PersistenceContextType.TWD_TRANSITION_CLASSIFIER);
+        super(ModelDomainType.TWD_TRANSITION_CLASSIFIER);
         this.maneuverTypeTransition = maneuverTypeTransition;
     }
 

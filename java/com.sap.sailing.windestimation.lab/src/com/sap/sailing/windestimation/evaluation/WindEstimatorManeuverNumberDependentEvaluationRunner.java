@@ -13,7 +13,7 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithComplete
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.store.ModelStore;
-import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class WindEstimatorManeuverNumberDependentEvaluationRunner {
@@ -38,7 +38,7 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
         LoggingUtil.logInfo("Loading polar data");
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         LoggingUtil.logInfo("Wind estimator evaluation started...");
-        ModelStore classifierModelStore = new MongoDbModelStore(persistenceManager.getDb());
+        ModelStore classifierModelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
         WindEstimatorFactories estimatorFactories = new WindEstimatorFactories(polarService,
                 new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION),
                 classifierModelStore);

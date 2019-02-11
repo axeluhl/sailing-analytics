@@ -52,7 +52,7 @@ public class ModelLoader<InstanceType, T extends ModelContext<InstanceType>, Mod
         ModelType loadedModel = modelCache == null ? null : modelCache.getModelFromCache(modelContext);
         if (loadedModel == null && modelStore != null) {
             try {
-                loadedModel = modelStore.loadPersistedState(model);
+                loadedModel = modelStore.loadModel(model);
             } catch (ModelNotFoundException e) {
                 // ignore, because no model might be available for the specified model context
             } catch (ModelPersistenceException e) {
