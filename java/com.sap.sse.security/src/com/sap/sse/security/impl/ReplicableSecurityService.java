@@ -92,4 +92,6 @@ public interface ReplicableSecurityService extends SecurityService {
 
     void removeAllSessions(String cacheName);
 
+    Void internalSetDefaultTenantForServerForUser(String username, UUID defaultTenantId, String serverName);
+
 }

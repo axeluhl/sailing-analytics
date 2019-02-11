@@ -451,7 +451,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     boolean hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(RoleDefinition role,
             Iterable<WildcardPermission> permissionsToCheck);
 
-    void setDefaultTenantForCurrentServerForUser(String username, String defaultTenant);
+    void setDefaultTenantForCurrentServerForUser(String username, UUID defaultTenantId);
     
     void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback);
 
