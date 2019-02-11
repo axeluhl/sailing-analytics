@@ -1912,7 +1912,27 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         migrateOwnership(identifier.getIdentifier(), userOwnerToSet, identifier.getName());
     }
     
-    public void migrateOwnership(final QualifiedObjectIdentifier identifier, User userOwnerToSet, final String displayName) {
+    @Override
+    public void migratePermission(final User user, final WildcardPermission permissionToMigrate, final com.sap.sse.common.Util.Function<WildcardPermission, WildcardPermission> permissionReplacement) {
+        final WildcardPermission replacementPermissionOrNull = permissionReplacement.get(permissionToMigrate);
+        final WildcardPermission effectivePermission;
+        if (replacementPermissionOrNull != null) {
+            // replacing legacy permission with a replacement
+            String username = user.getName();
+            removePermissionFromUser(username, permissionToMigrate);
+            addPermissionForUser(username, replacementPermissionOrNull);
+            effectivePermission = replacementPermissionOrNull;
+        } else {
+            effectivePermission = permissionToMigrate;
+        }
+        final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(effectivePermission,
+                user);
+        final QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                .getQualifiedObjectIdentifier(associationTypeIdentifier);
+        migrateOwnership(associationQualifiedIdentifier, associationQualifiedIdentifier.toString());
+    }
+    
+    private void migrateOwnership(final QualifiedObjectIdentifier identifier, User userOwnerToSet, final String displayName) {
         final OwnershipAnnotation owner = this.getOwnership(identifier);
         final UserGroup defaultTenant = this.getDefaultTenant();
         // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
