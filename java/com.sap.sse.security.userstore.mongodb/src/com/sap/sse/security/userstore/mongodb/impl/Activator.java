@@ -9,6 +9,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Util.Function;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.PreferenceConverterRegistrationManager;
@@ -21,6 +22,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
@@ -68,7 +70,7 @@ public class Activator implements BundleActivator {
                     final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
 
                     for (User user : userStore.getUsers()) {
-                        securityService.migrateOwnership(user);
+                        securityService.migrateOwnership(user, user);
                     }
                     for (UserGroup group : userStore.getUserGroups()) {
                         securityService.migrateOwnership(group);
@@ -84,6 +86,13 @@ public class Activator implements BundleActivator {
                             securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier.toString());
                         }
                         for (WildcardPermission permission : user.getPermissions()) {
+                            securityService.migratePermission(user, permission, new Function<WildcardPermission, WildcardPermission>() {
+                                // TODO replace with method reference when we can use Java 8 here
+                                @Override
+                                public WildcardPermission get(WildcardPermission wp) {
+                                    return getPermissionReplacement(wp);
+                                }
+                            });
                             TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
                                     .get(permission, user);
                             QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
@@ -100,6 +109,16 @@ public class Activator implements BundleActivator {
                 }
             }
         }.start();
+    }
+    
+    public WildcardPermission getPermissionReplacement(WildcardPermission permission) {
+        final WildcardPermission replacement;
+        if ("data_mining".equalsIgnoreCase(permission.toString())) {
+            replacement = SecuredSecurityTypes.SERVER.getPermission(ServerActions.DATA_MINING);
+        } else {
+            replacement = null;
+        }
+        return replacement;
     }
 
     /*

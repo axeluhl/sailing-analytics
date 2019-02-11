@@ -425,6 +425,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void migrateOwnership(QualifiedObjectIdentifier object, String displayName);
 
+    void migrateOwnership(WithQualifiedObjectIdentifier identifier, User userOwnerToSet);
+
+    void migratePermission(User user, WildcardPermission permissionToMigrate,
+            com.sap.sse.common.Util.Function<WildcardPermission, WildcardPermission> permissionReplacement);
+
     void checkMigration(Iterable<HasPermissions> allInstances);
 
     <T extends WithQualifiedObjectIdentifier> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
