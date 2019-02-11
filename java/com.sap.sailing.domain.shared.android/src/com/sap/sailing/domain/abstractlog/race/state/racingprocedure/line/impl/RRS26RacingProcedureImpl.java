@@ -64,7 +64,7 @@ public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingPro
 
     @Override
     public Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
-        return Arrays.asList(
+        return Arrays.<RaceStateEvent>asList(
                 new RaceStateEventImpl(startTime.minus(startPhaseClassUpInterval), RaceStateEvents.RRS26_CLASS_UP),
                 new RaceStateEventImpl(startTime.minus(startPhaseStartModeUpInterval), RaceStateEvents.RRS26_STARTMODE_UP),
                 new RaceStateEventImpl(startTime.minus(startPhaseStartModeDownInterval), RaceStateEvents.RRS26_STARTMODE_DOWN),
@@ -133,7 +133,7 @@ public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingPro
                         null);
             } else {
                 TimePoint recallRemoved = getIndividualRecallRemovalTime();
-                return new FlagPoleState(Collections.emptyList(), recallRemoved == null ? startTime : recallRemoved);
+                return new FlagPoleState(Collections.<FlagPole>emptyList(), recallRemoved == null ? startTime : recallRemoved);
             }
         }
     }

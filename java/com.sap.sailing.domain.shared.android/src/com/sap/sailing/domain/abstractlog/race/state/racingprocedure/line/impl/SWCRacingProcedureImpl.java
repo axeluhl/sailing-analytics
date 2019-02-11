@@ -69,7 +69,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
 
     @Override
     public Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
-        return Arrays.asList(
+        return Arrays.<RaceStateEvent>asList(
                 new RaceStateEventImpl(startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL), RaceStateEvents.SWC_CLASS_AND_STARTMODE_UP),
                 new RaceStateEventImpl(startTime.minus(FIVE_MINUTES_FLAG_UP_INTERVAL), RaceStateEvents.SWC_FIVE_UP),
                 new RaceStateEventImpl(startTime.minus(FOUR_MINUTES_FLAG_UP_INTERVAL), RaceStateEvents.SWC_FOUR_UP),
@@ -170,7 +170,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
                         null);
             } else {
                 TimePoint recallRemoved = getIndividualRecallRemovalTime();
-                return new FlagPoleState(Collections.emptyList(), recallRemoved == null ? startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL) : recallRemoved);
+                return new FlagPoleState(Collections.<FlagPole>emptyList(), recallRemoved == null ? startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL) : recallRemoved);
             }
         }
     }
