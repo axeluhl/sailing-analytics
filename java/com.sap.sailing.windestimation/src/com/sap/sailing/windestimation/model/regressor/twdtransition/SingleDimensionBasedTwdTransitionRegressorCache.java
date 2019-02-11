@@ -4,7 +4,7 @@ import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.regressor.AbstractRegressorCache;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 
-public class SingleDimensionBasedTwdTransitionRegressorCache<T extends SingleDimensionBasedTwdTransitionRegressorModelMetadata>
+public class SingleDimensionBasedTwdTransitionRegressorCache<T extends SingleDimensionBasedTwdTransitionRegressorModelContext>
         extends AbstractRegressorCache<TwdTransition, T> {
 
     private final SingleDimensionBasedTwdTransitionRegressorModelFactory<T> modelFactory;
@@ -16,8 +16,8 @@ public class SingleDimensionBasedTwdTransitionRegressorCache<T extends SingleDim
     }
 
     @Override
-    public T getContextSpecificModelMetadata(TwdTransition twdTransition) {
-        return modelFactory.createNewModelMetadata(twdTransition);
+    public T getModelContext(TwdTransition twdTransition) {
+        return modelFactory.createNewModelContext(twdTransition);
     }
 
 }

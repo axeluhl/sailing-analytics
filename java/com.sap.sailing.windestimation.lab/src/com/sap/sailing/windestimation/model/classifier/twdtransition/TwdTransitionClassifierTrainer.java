@@ -42,12 +42,12 @@ public class TwdTransitionClassifierTrainer {
     }
 
     public void trainClassifier(
-            TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel,
+            TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext> classifierModel,
             LabelExtraction<TwdTransition> labelExtraction) throws Exception {
-        TwdTransitionClassifierModelMetadata modelMetadata = classifierModel.getContextSpecificModelMetadata();
+        TwdTransitionClassifierModelContext modelContext = classifierModel.getModelContext();
         LoggingUtil.logInfo("Querying dataset...");
         String query = "Invalid query";
-        switch (modelMetadata.getManeuverTypeTransition()) {
+        switch (modelContext.getManeuverTypeTransition()) {
         case TACK_TACK:
             query = getAndClauseForQuery(ManeuverTypeForClassification.TACK, ManeuverTypeForClassification.TACK);
             break;
@@ -94,7 +94,7 @@ public class TwdTransitionClassifierTrainer {
         LoggingUtil.logInfo("Converting dataset to array...");
         while (iterator.hasNext()) {
             TwdTransition twdTransition = iterator.next();
-            x[i][0] = modelMetadata.getXAsSingleValue(twdTransition);
+            x[i][0] = modelContext.getXAsSingleValue(twdTransition);
             y[i] = labelExtraction.getY(twdTransition);
             i++;
         }
@@ -119,13 +119,13 @@ public class TwdTransitionClassifierTrainer {
                 classifierModelStore);
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();
         for (ManeuverTypeTransition maneuverTypeTransition : ManeuverTypeTransition.values()) {
-            LabelledTwdTransitionClassifierModelMetadata labelledModelMetadata = new LabelledTwdTransitionClassifierModelMetadata(
+            LabelledTwdTransitionClassifierModelContext modelContext = new LabelledTwdTransitionClassifierModelContext(
                     maneuverTypeTransition);
             LoggingUtil.logInfo("## ManeuverTypeTransition: " + maneuverTypeTransition);
-            for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> model : classifierModelFactory
-                    .getAllTrainableModels(labelledModelMetadata)) {
+            for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext> model : classifierModelFactory
+                    .getAllTrainableModels(modelContext)) {
                 LoggingUtil.logInfo("## Classifier: " + model.getClass().getName());
-                classifierTrainer.trainClassifier(model, labelledModelMetadata);
+                classifierTrainer.trainClassifier(model, modelContext);
             }
         }
     }

@@ -32,15 +32,15 @@ public class PersistedManeuverClassifiersScorePrinter {
         ModelStore classifierModelStore = new FileSystemModelStore("trained_wind_estimation_models");
         // ModelStore classifierModelStore = new MongoDbModelStore(
         // new RegularManeuversForEstimationPersistenceManager().getDb());
-        List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> allClassifierModels = new ArrayList<>();
+        List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> allClassifierModels = new ArrayList<>();
         ManeuverClassifierModelFactory classifierModelFactory = new ManeuverClassifierModelFactory();
         LoggingUtil.logInfo("### Loading all boat class classifiers:");
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
-            LabelledManeuverClassifierModelMetadata maneuverModelMetadata = new LabelledManeuverClassifierModelMetadata(
+            LabelledManeuverClassifierModelContext modelContext = new LabelledManeuverClassifierModelContext(
                     maneuverFeatures, null, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
-            List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> classifierModels = classifierModelFactory
-                    .getAllTrainableModels(maneuverModelMetadata);
-            for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classifierModel : classifierModels) {
+            List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> classifierModels = classifierModelFactory
+                    .getAllTrainableModels(modelContext);
+            for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : classifierModels) {
                 try {
                     classifierModel = classifierModelStore.loadPersistedState(classifierModel);
                     if (classifierModel != null) {
@@ -50,10 +50,10 @@ public class PersistedManeuverClassifiersScorePrinter {
                 }
             }
             for (BoatClass boatClass : allBoatClasses) {
-                maneuverModelMetadata = new LabelledManeuverClassifierModelMetadata(maneuverFeatures,
+                modelContext = new LabelledManeuverClassifierModelContext(maneuverFeatures,
                         boatClass.getName(), ManeuverClassifierModelFactory.orderedSupportedTargetValues);
-                classifierModels = classifierModelFactory.getAllTrainableModels(maneuverModelMetadata);
-                for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classifierModel : classifierModels) {
+                classifierModels = classifierModelFactory.getAllTrainableModels(modelContext);
+                for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : classifierModels) {
                     try {
                         classifierModel = classifierModelStore.loadPersistedState(classifierModel);
                         if (classifierModel != null) {
@@ -66,10 +66,10 @@ public class PersistedManeuverClassifiersScorePrinter {
         }
         StringBuilder str = new StringBuilder("Classifier name \t| Maneuver features \t| Boat class \t| Test score");
         Collections.sort(allClassifierModels, (a, b) -> Double.compare(a.getTestScore(), b.getTestScore()));
-        for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classifierModel : allClassifierModels) {
-            ManeuverClassifierModelMetadata modelMetadata = classifierModel.getContextSpecificModelMetadata();
+        for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : allClassifierModels) {
+            ManeuverClassifierModelContext modelContext = classifierModel.getModelContext();
             str.append("\r\n" + classifierModel.getClass().getSimpleName() + ": \t| "
-                    + modelMetadata.getManeuverFeatures() + " \t| " + modelMetadata.getBoatClassName() + " \t| "
+                    + modelContext.getManeuverFeatures() + " \t| " + modelContext.getBoatClassName() + " \t| "
                     + String.format(" %.03f", classifierModel.getTestScore()));
         }
         String outputStr = str.toString();

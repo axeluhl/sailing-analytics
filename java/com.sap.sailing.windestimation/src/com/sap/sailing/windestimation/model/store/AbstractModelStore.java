@@ -1,5 +1,8 @@
 package com.sap.sailing.windestimation.model.store;
 
+import com.sap.sailing.windestimation.model.ModelContext;
+import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
+
 public abstract class AbstractModelStore implements ModelStore {
 
     private static final String NAME_PART_DELIMITER = ".";
@@ -20,7 +23,7 @@ public abstract class AbstractModelStore implements ModelStore {
     protected String getFilename(PersistableModel<?, ?> persistableModel) {
         StringBuilder fileName = new StringBuilder();
         fileName.append(getPersistenceSupportTypePrefix(persistableModel.getPersistenceSupportType()));
-        PersistenceContextType contextType = persistableModel.getContextSpecificModelMetadata().getContextType();
+        PersistenceContextType contextType = persistableModel.getModelContext().getContextType();
         fileName.append(getContextPrefix(contextType));
         String persistenceKey = persistableModel.getPersistenceSupportType().getPersistenceSupport()
                 .getPersistenceKey(persistableModel);
@@ -55,6 +58,14 @@ public abstract class AbstractModelStore implements ModelStore {
     protected boolean isFileBelongingToContextType(String filename, PersistenceContextType contextType) {
         return filename.endsWith(FILE_EXT)
                 && filename.substring(filename.indexOf(NAME_PART_DELIMITER)).startsWith(NAME_PART_DELIMITER + getContextPrefix(contextType));
+    }
+
+    protected <InstanceType> void verifyRequestedModelContextIsLoaded(ModelContext<?> requestedModelContext,
+            ModelContext<InstanceType> loadedModelContext) throws ModelPersistenceException {
+        if (!requestedModelContext.equals(loadedModelContext)) {
+            throw new ModelPersistenceException("The configuration of the loaded model is: " + loadedModelContext
+                    + ". \nExpected: " + requestedModelContext);
+        }
     }
 
 }

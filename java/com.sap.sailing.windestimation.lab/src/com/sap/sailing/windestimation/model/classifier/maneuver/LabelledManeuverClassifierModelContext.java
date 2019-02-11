@@ -5,12 +5,12 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 
-public class LabelledManeuverClassifierModelMetadata extends ManeuverClassifierModelMetadata
+public class LabelledManeuverClassifierModelContext extends ManeuverClassifierModelContext
         implements LabelExtraction<ManeuverForEstimation> {
 
     private static final long serialVersionUID = -7074647974723150632L;
 
-    public LabelledManeuverClassifierModelMetadata(ManeuverFeatures maneuverFeatures, String boatClassName,
+    public LabelledManeuverClassifierModelContext(ManeuverFeatures maneuverFeatures, String boatClassName,
             ManeuverTypeForClassification... orderedSupportedTargetValues) {
         super(maneuverFeatures, boatClassName, orderedSupportedTargetValues);
     }

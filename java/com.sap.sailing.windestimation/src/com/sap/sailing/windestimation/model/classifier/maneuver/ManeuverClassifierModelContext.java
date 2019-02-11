@@ -5,10 +5,10 @@ import java.util.Arrays;
 import com.sap.sailing.windestimation.aggregator.hmm.ProbabilityUtil;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
-public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadata<ManeuverForEstimation> {
+public class ManeuverClassifierModelContext extends ModelContext<ManeuverForEstimation> {
 
     private static final long serialVersionUID = -7074647974723150672L;
     private final ManeuverFeatures maneuverFeatures;
@@ -17,7 +17,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
     private final int numberOfSupportedManeuverTypes;
     private final int otherTypes;
 
-    public ManeuverClassifierModelMetadata(ManeuverFeatures maneuverFeatures, String boatClassName,
+    public ManeuverClassifierModelContext(ManeuverFeatures maneuverFeatures, String boatClassName,
             ManeuverTypeForClassification... orderedSupportedTargetValues) {
         super(PersistenceContextType.MANEUVER_CLASSIFIER);
         this.maneuverFeatures = maneuverFeatures;
@@ -83,7 +83,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
             return true;
         if (obj == null)
             return false;
-        ManeuverClassifierModelMetadata other = (ManeuverClassifierModelMetadata) obj;
+        ManeuverClassifierModelContext other = (ManeuverClassifierModelContext) obj;
         if (boatClassName == null) {
             if (other.boatClassName != null)
                 return false;
@@ -103,7 +103,7 @@ public class ManeuverClassifierModelMetadata extends ContextSpecificModelMetadat
 
     @Override
     public String toString() {
-        return "ManeuverClassifierModelMetadata [maneuverFeatures=" + maneuverFeatures + ", boatClass=" + boatClassName
+        return "ManeuverClassifierModelContext [maneuverFeatures=" + maneuverFeatures + ", boatClass=" + boatClassName
                 + ", indexToManeuverTypeOrdinalMapping=" + Arrays.toString(indexToManeuverTypeOrdinalMapping)
                 + ", numberOfSupportedManeuverTypes=" + numberOfSupportedManeuverTypes + "]";
     }

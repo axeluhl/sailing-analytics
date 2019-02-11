@@ -1,6 +1,6 @@
 package com.sap.sailing.windestimation.model.classifier.smile;
 
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.classifier.AbstractClassificationModel;
 import com.sap.sailing.windestimation.model.classifier.PreprocessingConfig;
 import com.sap.sailing.windestimation.model.store.PersistenceSupportType;
@@ -9,7 +9,7 @@ import smile.classification.SoftClassifier;
 import smile.feature.Standardizer;
 import smile.projection.PCA;
 
-public abstract class AbstractSmileClassificationModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+public abstract class AbstractSmileClassificationModel<InstanceType, T extends ModelContext<InstanceType>>
         extends AbstractClassificationModel<InstanceType, T> {
 
     private static final long serialVersionUID = 1037686504611915506L;
@@ -18,8 +18,8 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends C
     private PCA pca = null;
     protected SoftClassifier<double[]> internalModel = null;
 
-    public AbstractSmileClassificationModel(PreprocessingConfig preprocessingConfig, T contextSpecificModelMetadata) {
-        super(preprocessingConfig, contextSpecificModelMetadata);
+    public AbstractSmileClassificationModel(PreprocessingConfig preprocessingConfig, T modelContext) {
+        super(preprocessingConfig, modelContext);
     }
 
     @Override
@@ -51,7 +51,7 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends C
     @Override
     public double[] classifyWithProbabilities(double[] x) {
         x = preprocessX(x);
-        double[] likelihoods = new double[getContextSpecificModelMetadata().getNumberOfPossibleTargetValues()];
+        double[] likelihoods = new double[getModelContext().getNumberOfPossibleTargetValues()];
         internalModel.predict(x, likelihoods);
         return likelihoods;
     }

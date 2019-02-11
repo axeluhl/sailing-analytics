@@ -7,8 +7,8 @@ import smile.stat.distribution.GaussianDistribution;
 
 public class GaussianBasedTwdTransitionDistributionCache {
 
-    private final SingleDimensionBasedTwdTransitionRegressorCache<DurationBasedTwdTransitionRegressorModelMetadata> durationBasedTwdTransitionRegressorCache;
-    private final SingleDimensionBasedTwdTransitionRegressorCache<DistanceBasedTwdTransitionRegressorModelMetadata> distanceBasedTwdTransitionRegressorCache;
+    private final SingleDimensionBasedTwdTransitionRegressorCache<DurationBasedTwdTransitionRegressorModelContext> durationBasedTwdTransitionRegressorCache;
+    private final SingleDimensionBasedTwdTransitionRegressorCache<DistanceBasedTwdTransitionRegressorModelContext> distanceBasedTwdTransitionRegressorCache;
 
     public GaussianBasedTwdTransitionDistributionCache(ModelStore modelStore, boolean preloadAllModels,
             long preserveLoadedModelsMillis) {

@@ -7,7 +7,7 @@ import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.PersistableModel;
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
-public abstract class AbstractModelCache<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>>
+public abstract class AbstractModelCache<InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>>
         implements ModelCache<InstanceType, ModelType> {
 
     private final ShortTimeAfterLastHitCache<T, ModelType> modelCache;
@@ -24,8 +24,8 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
         this.preserveLoadedModelsMillis = preserveLoadedModelsMillis;
         this.modelFactory = modelFactory;
         this.modelCache = new ShortTimeAfterLastHitCache<>(preserveLoadedModelsMillis,
-                contextSpecificModelMetadata -> loadModel(contextSpecificModelMetadata));
-        this.modelLoader = new ModelLoader<>(modelMetadata -> modelCache.getCachedValue(modelMetadata), modelStore,
+                modelContext -> loadModel(modelContext));
+        this.modelLoader = new ModelLoader<>(modelContext -> modelCache.getCachedValue(modelContext), modelStore,
                 modelFactory);
         if (preloadAllModels) {
             preloadAllModels();
@@ -37,26 +37,26 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
         for (PersistableModel<?, ?> persistableModel : loadedModels) {
             @SuppressWarnings("unchecked")
             ModelType loadedModel = (ModelType) persistableModel;
-            modelCache.addToCache(loadedModel.getContextSpecificModelMetadata(), loadedModel);
+            modelCache.addToCache(loadedModel.getModelContext(), loadedModel);
         }
     }
 
-    protected ModelType loadModel(T contextSpecificModelMetadata) {
-        ModelType bestModel = modelLoader.loadBestModel(contextSpecificModelMetadata);
+    protected ModelType loadModel(T modelContext) {
+        ModelType bestModel = modelLoader.loadBestModel(modelContext);
         return bestModel;
     }
 
-    public ModelType getBestModel(T contextSpecificModelMetadata) {
-        return modelCache.getValue(contextSpecificModelMetadata);
+    public ModelType getBestModel(T modelContext) {
+        return modelCache.getValue(modelContext);
     }
 
     public ModelType getBestModel(InstanceType instance) {
-        T modelMetadata = getContextSpecificModelMetadata(instance);
-        ModelType bestModel = getBestModel(modelMetadata);
+        T modelContext = getModelContext(instance);
+        ModelType bestModel = getBestModel(modelContext);
         return bestModel;
     }
 
-    public abstract T getContextSpecificModelMetadata(InstanceType instance);
+    public abstract T getModelContext(InstanceType instance);
 
     public long getPreserveLoadedModelsMillis() {
         return preserveLoadedModelsMillis;
@@ -73,7 +73,7 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
     @Override
     public boolean isReady() {
         ModelType omnipresentModel = getBestModel(
-                modelFactory.getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures());
+                modelFactory.getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures());
         return omnipresentModel != null;
     }
 

@@ -21,7 +21,7 @@ public class TwdTransitionAggregatedStdRegressorTrainer {
     }
 
     public void trainRegressor(
-            IncrementalSingleDimensionPolynomialRegressor<TwdTransition, ? extends SingleDimensionBasedTwdTransitionRegressorModelMetadata> model)
+            IncrementalSingleDimensionPolynomialRegressor<TwdTransition, ? extends SingleDimensionBasedTwdTransitionRegressorModelContext> model)
             throws Exception {
         IncrementalSingleDimensionPolynomialRegressorTrainerHelper trainerHelper = new IncrementalSingleDimensionPolynomialRegressorTrainerHelper(
                 regressorModelStore, model);
@@ -29,12 +29,12 @@ public class TwdTransitionAggregatedStdRegressorTrainer {
                 .getIterator();
         double[] x = new double[1];
         LoggingUtil
-                .logInfo("########## Training of " + model.getContextSpecificModelMetadata().getId() + " started...");
+                .logInfo("########## Training of " + model.getModelContext().getId() + " started...");
         while (iterator.hasNext()) {
             AggregatedSingleDimensionBasedTwdTransition twdTransition = iterator.next();
             double dimensionValue = twdTransition.getDimensionValue();
-            if (model.getContextSpecificModelMetadata().isDimensionValueSupportedForTraining(dimensionValue)) {
-                x[0] = model.getContextSpecificModelMetadata().getPreprocessedDimensionValue(dimensionValue);
+            if (model.getModelContext().isDimensionValueSupportedForTraining(dimensionValue)) {
+                x[0] = model.getModelContext().getPreprocessedDimensionValue(dimensionValue);
                 trainerHelper.incrementalModelTraining(x, twdTransition.getZeroMeanStd());
             }
         }
@@ -43,8 +43,8 @@ public class TwdTransitionAggregatedStdRegressorTrainer {
         while (iterator.hasNext()) {
             AggregatedSingleDimensionBasedTwdTransition twdTransition = iterator.next();
             double dimensionValue = twdTransition.getDimensionValue();
-            if (model.getContextSpecificModelMetadata().isDimensionValueSupportedForTraining(dimensionValue)) {
-                x[0] = model.getContextSpecificModelMetadata().getPreprocessedDimensionValue(dimensionValue);
+            if (model.getModelContext().isDimensionValueSupportedForTraining(dimensionValue)) {
+                x[0] = model.getModelContext().getPreprocessedDimensionValue(dimensionValue);
                 trainerHelper.incrementRmseCalculation(x, twdTransition.getZeroMeanStd());
             }
         }

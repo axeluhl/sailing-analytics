@@ -1,19 +1,19 @@
 package com.sap.sailing.windestimation.model.classifier.smile;
 
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.classifier.PreprocessingConfig.PreprocessingConfigBuilder;
 
 import smile.classification.SVM;
 import smile.classification.SVM.Multiclass;
 import smile.math.kernel.GaussianKernel;
 
-public class SVMClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+public class SVMClassifier<InstanceType, T extends ModelContext<InstanceType>>
         extends AbstractSmileClassificationModel<InstanceType, T> {
 
     private static final long serialVersionUID = -3364152319152090775L;
 
-    public SVMClassifier(T contextSpecificModelMetadata) {
-        super(new PreprocessingConfigBuilder().scaling().build(), contextSpecificModelMetadata);
+    public SVMClassifier(T modelContext) {
+        super(new PreprocessingConfigBuilder().scaling().build(), modelContext);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class SVMClassifier<InstanceType, T extends ContextSpecificModelMetadata<
         double gamma = 1.0 / featuresCount;
         double sigma = Math.sqrt(0.5 / gamma);
         SVM<double[]> svm = new SVM<>(new GaussianKernel(sigma), 10.0,
-                getContextSpecificModelMetadata().getNumberOfPossibleTargetValues(), Multiclass.ONE_VS_ALL);
+                getModelContext().getNumberOfPossibleTargetValues(), Multiclass.ONE_VS_ALL);
         svm.learn(x, y);
         svm.finish();
         svm.trainPlattScaling(x, y);
@@ -31,7 +31,7 @@ public class SVMClassifier<InstanceType, T extends ContextSpecificModelMetadata<
 
     @Override
     public boolean hasSupportForProvidedFeatures() {
-        // return getModelMetadata().getBoatClass() != null;
+        // return getModelContext().getBoatClass() != null;
         return true;
     }
 

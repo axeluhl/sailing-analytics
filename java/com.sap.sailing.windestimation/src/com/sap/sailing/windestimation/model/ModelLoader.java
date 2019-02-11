@@ -9,7 +9,7 @@ import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 
-public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
+public class ModelLoader<InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
 
     private final ModelStore modelStore;
     private final ModelFactory<InstanceType, T, ModelType> modelFactory;
@@ -22,12 +22,11 @@ public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<In
         this.modelFactory = modelFactory;
     }
 
-    public ModelType loadBestModel(T contextSpecificModelMetadataWithMaxFeatures) {
-        List<T> modelMetadataCandidates = modelFactory
-                .getAllValidContextSpecificModelMetadataFeatureSupersets(contextSpecificModelMetadataWithMaxFeatures);
+    public ModelType loadBestModel(T modelContextWithMaxFeatures) {
+        List<T> modelContextCandidates = modelFactory.getAllValidModelContexts(modelContextWithMaxFeatures);
         List<ModelType> loadedModels = new ArrayList<>();
-        for (T modelMetadata : modelMetadataCandidates) {
-            ModelType loadedModel = loadModel(modelMetadata);
+        for (T modelContext : modelContextCandidates) {
+            ModelType loadedModel = loadModel(modelContext);
             if (loadedModel != null && loadedModel.hasSupportForProvidedFeatures()) {
                 loadedModels.add(loadedModel);
             }
@@ -48,14 +47,14 @@ public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<In
         return bestModel;
     }
 
-    public ModelType loadModel(T contextSpecificModelMetadata) {
-        ModelType model = modelFactory.getNewModel(contextSpecificModelMetadata);
-        ModelType loadedModel = modelCache == null ? null : modelCache.getModelFromCache(contextSpecificModelMetadata);
+    public ModelType loadModel(T modelContext) {
+        ModelType model = modelFactory.getNewModel(modelContext);
+        ModelType loadedModel = modelCache == null ? null : modelCache.getModelFromCache(modelContext);
         if (loadedModel == null && modelStore != null) {
             try {
                 loadedModel = modelStore.loadPersistedState(model);
             } catch (ModelNotFoundException e) {
-                // ignore, because no model might be available for the specified model metadata
+                // ignore, because no model might be available for the specified model context
             } catch (ModelPersistenceException e) {
                 throw new ModelLoadingException(e);
             }
@@ -63,8 +62,8 @@ public class ModelLoader<InstanceType, T extends ContextSpecificModelMetadata<In
         return loadedModel;
     }
 
-    public interface ReadableModelCache<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
-        ModelType getModelFromCache(T contextSpecificModelMetadata);
+    public interface ReadableModelCache<InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
+        ModelType getModelFromCache(T modelContext);
     }
 
 }

@@ -16,7 +16,7 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSFile;
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.TrainableModel;
 import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
@@ -31,25 +31,22 @@ public class MongoDbModelStore extends AbstractModelStore {
     }
 
     @Override
-    public <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
+    public <InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
             ModelType newModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getFilename(newModel);
-        String bucketName = getCollectionName(newModel.getContextSpecificModelMetadata().getContextType());
+        String bucketName = getCollectionName(newModel.getModelContext().getContextType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try (GridFSDownloadStream inputStream = gridFs.openDownloadStream(fileName)) {
-            ContextSpecificModelMetadata<?> requestedModelMetadata = newModel.getContextSpecificModelMetadata();
+            ModelContext<?> requestedModelContext = newModel.getModelContext();
             @SuppressWarnings("unchecked")
             ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(inputStream);
-            ContextSpecificModelMetadata<InstanceType> loadedModelMetadata = loadedModel
-                    .getContextSpecificModelMetadata();
-            if (!requestedModelMetadata.equals(loadedModelMetadata)) {
-                throw new ModelPersistenceException("The configuration of the loaded model is: " + loadedModelMetadata
-                        + ". \nExpected: " + requestedModelMetadata);
-            }
+            ModelContext<InstanceType> loadedModelContext = loadedModel
+                    .getModelContext();
+            verifyRequestedModelContextIsLoaded(requestedModelContext, loadedModelContext);
             return loadedModel;
         } catch (MongoException e) {
-            throw new ModelNotFoundException(newModel.getContextSpecificModelMetadata(), e);
+            throw new ModelNotFoundException(newModel.getModelContext(), e);
         }
     }
 
@@ -57,7 +54,7 @@ public class MongoDbModelStore extends AbstractModelStore {
     public <T extends PersistableModel<?, ?>> void persistState(T trainedModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         String newFileName = getFilename(trainedModel);
-        String bucketName = getCollectionName(trainedModel.getContextSpecificModelMetadata().getContextType());
+        String bucketName = getCollectionName(trainedModel.getModelContext().getContextType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try {
             try (OutputStream outputStream = gridFs.openUploadStream(newFileName)) {

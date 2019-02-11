@@ -20,7 +20,7 @@ public class SerializationBasedPersistenceSupport implements PersistenceSupport 
         StringBuilder key = new StringBuilder();
         key.append(model.getClass().getSimpleName());
         key.append("-");
-        key.append(model.getContextSpecificModelMetadata().getId());
+        key.append(model.getModelContext().getId());
         return key.toString();
     }
 

@@ -6,19 +6,19 @@ import com.sap.sailing.windestimation.model.classifier.ClassifierScoring;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 
 public class ManeuverClassifierScoring
-        extends ClassifierScoring<ManeuverForEstimation, ManeuverClassifierModelMetadata> {
+        extends ClassifierScoring<ManeuverForEstimation, ManeuverClassifierModelContext> {
 
     public ManeuverClassifierScoring(
-            TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> trainedClassifierModel) {
+            TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> trainedClassifierModel) {
         super(trainedClassifierModel, i -> {
-            ManeuverClassifierModelMetadata modelMetadata = trainedClassifierModel.getContextSpecificModelMetadata();
-            ManeuverTypeForClassification maneuverType = trainedClassifierModel.getContextSpecificModelMetadata()
+            ManeuverClassifierModelContext modelContext = trainedClassifierModel.getModelContext();
+            ManeuverTypeForClassification maneuverType = trainedClassifierModel.getModelContext()
                     .getManeuverTypeByMappingIndex(i);
-            if (modelMetadata.getOtherTypes() <= 1) {
+            if (modelContext.getOtherTypes() <= 1) {
                 return maneuverType.toString();
             }
             int otherTypesBeginFromOrdinal = ManeuverTypeForClassification.values().length
-                    - modelMetadata.getOtherTypes();
+                    - modelContext.getOtherTypes();
             if (maneuverType.ordinal() < otherTypesBeginFromOrdinal) {
                 return maneuverType.toString();
             }

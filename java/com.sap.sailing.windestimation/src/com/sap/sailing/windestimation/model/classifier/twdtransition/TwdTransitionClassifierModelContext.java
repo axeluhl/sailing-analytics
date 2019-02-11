@@ -1,15 +1,15 @@
 package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
-public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMetadata<TwdTransition> {
+public class TwdTransitionClassifierModelContext extends ModelContext<TwdTransition> {
 
     private static final long serialVersionUID = 819528288811779220L;
     private final ManeuverTypeTransition maneuverTypeTransition;
 
-    public TwdTransitionClassifierModelMetadata(ManeuverTypeTransition maneuverTypeTransition) {
+    public TwdTransitionClassifierModelContext(ManeuverTypeTransition maneuverTypeTransition) {
         super(PersistenceContextType.TWD_TRANSITION_CLASSIFIER);
         this.maneuverTypeTransition = maneuverTypeTransition;
     }
@@ -50,7 +50,7 @@ public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMe
             return false;
         if (getClass() != obj.getClass())
             return false;
-        TwdTransitionClassifierModelMetadata other = (TwdTransitionClassifierModelMetadata) obj;
+        TwdTransitionClassifierModelContext other = (TwdTransitionClassifierModelContext) obj;
         if (maneuverTypeTransition != other.maneuverTypeTransition)
             return false;
         return true;
@@ -58,7 +58,7 @@ public class TwdTransitionClassifierModelMetadata extends ContextSpecificModelMe
 
     @Override
     public String toString() {
-        return "TwdTransitionClassifierModelMetadata [maneuverTypeTransition=" + maneuverTypeTransition + "]";
+        return "TwdTransitionClassifierModelContext [maneuverTypeTransition=" + maneuverTypeTransition + "]";
     }
 
     @Override

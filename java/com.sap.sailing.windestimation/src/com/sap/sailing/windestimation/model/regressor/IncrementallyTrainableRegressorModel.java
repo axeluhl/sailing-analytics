@@ -1,8 +1,8 @@
 package com.sap.sailing.windestimation.model.regressor;
 
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 
-public interface IncrementallyTrainableRegressorModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+public interface IncrementallyTrainableRegressorModel<InstanceType, T extends ModelContext<InstanceType>>
         extends TrainableRegressorModel<InstanceType, T> {
 
     void train(double[] x, double y);

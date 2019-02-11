@@ -1,17 +1,17 @@
 package com.sap.sailing.windestimation.model;
 
-public abstract class AbstractTrainableModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+public abstract class AbstractTrainableModel<InstanceType, T extends ModelContext<InstanceType>>
         implements TrainableModel<InstanceType, T> {
 
     private static final long serialVersionUID = 6483063459903792768L;
-    private final T contextSpecificModelMetadata;
+    private final T modelContext;
     private boolean trainingFinished = false;
     private double testScore = 0;
     private double trainScore = 0;
     private long numberOfTrainingInstances;
 
-    public AbstractTrainableModel(T contextSpecificModelMetadata) {
-        this.contextSpecificModelMetadata = contextSpecificModelMetadata;
+    public AbstractTrainableModel(T modelContext) {
+        this.modelContext = modelContext;
     }
 
     @Override
@@ -57,8 +57,8 @@ public abstract class AbstractTrainableModel<InstanceType, T extends ContextSpec
     }
 
     @Override
-    public T getContextSpecificModelMetadata() {
-        return contextSpecificModelMetadata;
+    public T getModelContext() {
+        return modelContext;
     }
 
 }

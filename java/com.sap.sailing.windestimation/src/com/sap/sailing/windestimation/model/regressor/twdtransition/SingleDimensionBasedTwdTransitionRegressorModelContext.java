@@ -1,17 +1,17 @@
 package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
-public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
-        extends ContextSpecificModelMetadata<TwdTransition> {
+public abstract class SingleDimensionBasedTwdTransitionRegressorModelContext
+        extends ModelContext<TwdTransition> {
 
     private static final long serialVersionUID = 20422671027132155L;
     private final String dimensionName;
     private final SupportedDimensionValueRange supportedDimensionValueRange;
 
-    public SingleDimensionBasedTwdTransitionRegressorModelMetadata(String dimensionName,
+    public SingleDimensionBasedTwdTransitionRegressorModelContext(String dimensionName,
             PersistenceContextType persistenceContextType, SupportedDimensionValueRange supportedDimensionValueRange) {
         super(persistenceContextType);
         this.dimensionName = dimensionName;
@@ -58,7 +58,7 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SingleDimensionBasedTwdTransitionRegressorModelMetadata other = (SingleDimensionBasedTwdTransitionRegressorModelMetadata) obj;
+        SingleDimensionBasedTwdTransitionRegressorModelContext other = (SingleDimensionBasedTwdTransitionRegressorModelContext) obj;
         if (dimensionName == null) {
             if (other.dimensionName != null)
                 return false;
@@ -74,7 +74,7 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelMetadata
 
     @Override
     public String toString() {
-        return dimensionName + "BasedTwdTransitionRegressorModelMetadata [dimensionName=" + dimensionName
+        return dimensionName + "BasedTwdTransitionRegressorModelContext [dimensionName=" + dimensionName
                 + ", supportedDimensionValueRange=" + supportedDimensionValueRange + "]";
     }
 

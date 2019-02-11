@@ -3,13 +3,18 @@ package com.sap.sailing.windestimation.model.regressor.twdtransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
-public class DistanceBasedTwdTransitionRegressorModelMetadata
-        extends SingleDimensionBasedTwdTransitionRegressorModelMetadata {
+/**
+ * Context definition
+ * @author Vladislav Chumak (D069712)
+ *
+ */
+public class DistanceBasedTwdTransitionRegressorModelContext
+        extends SingleDimensionBasedTwdTransitionRegressorModelContext {
 
     private static final String DIMENSION_NAME = "Distance";
     private static final long serialVersionUID = 4324543543l;
 
-    public DistanceBasedTwdTransitionRegressorModelMetadata(DistanceValueRange distanceValueRange) {
+    public DistanceBasedTwdTransitionRegressorModelContext(DistanceValueRange distanceValueRange) {
         super(DIMENSION_NAME, PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR,
                 distanceValueRange.getSupportedDimensionValueRange());
     }

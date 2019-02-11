@@ -11,61 +11,61 @@ import com.sap.sailing.windestimation.model.classifier.TrainableClassificationMo
 import com.sap.sailing.windestimation.model.classifier.smile.NeuralNetworkClassifier;
 
 public class ManeuverClassifierModelFactory
-        implements ClassifierModelFactory<ManeuverForEstimation, ManeuverClassifierModelMetadata> {
+        implements ClassifierModelFactory<ManeuverForEstimation, ManeuverClassifierModelContext> {
 
     public static final ManeuverTypeForClassification[] orderedSupportedTargetValues = {
             ManeuverTypeForClassification.TACK, ManeuverTypeForClassification.JIBE };
 
     @Override
-    public TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> getNewModel(
-            ManeuverClassifierModelMetadata contextSpecificModelMetadata) {
-        TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata> classificationModel = new NeuralNetworkClassifier<>(
-                contextSpecificModelMetadata);
+    public TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> getNewModel(
+            ManeuverClassifierModelContext modelContext) {
+        TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classificationModel = new NeuralNetworkClassifier<>(
+                modelContext);
         return classificationModel;
     }
 
     @Override
-    public List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> getAllTrainableModels(
-            ManeuverClassifierModelMetadata contextSpecificModelMetadata) {
-        ManeuverClassifierModelMetadata modelMetadata = createModelMetadata(
-                contextSpecificModelMetadata.getManeuverFeatures(), contextSpecificModelMetadata.getBoatClassName());
-        List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> classifiers = new ArrayList<>();
-        classifiers.add(new NeuralNetworkClassifier<>(modelMetadata));
-        List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelMetadata>> suitableClassifiers = classifiers
+    public List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> getAllTrainableModels(
+            ManeuverClassifierModelContext modelContext) {
+        ManeuverClassifierModelContext clonedModelContext = createModelContext(modelContext.getManeuverFeatures(),
+                modelContext.getBoatClassName());
+        List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> classifiers = new ArrayList<>();
+        classifiers.add(new NeuralNetworkClassifier<>(clonedModelContext));
+        List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> suitableClassifiers = classifiers
                 .stream().filter(classifier -> classifier.hasSupportForProvidedFeatures()).collect(Collectors.toList());
         return suitableClassifiers;
     }
 
-    private static ManeuverClassifierModelMetadata createModelMetadata(ManeuverFeatures maneuverFeatures,
+    private static ManeuverClassifierModelContext createModelContext(ManeuverFeatures maneuverFeatures,
             String boatClassName) {
-        ManeuverClassifierModelMetadata modelMetadata = new ManeuverClassifierModelMetadata(maneuverFeatures,
+        ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures,
                 boatClassName, orderedSupportedTargetValues);
-        return modelMetadata;
+        return modelContext;
     }
 
     @Override
-    public List<ManeuverClassifierModelMetadata> getAllValidContextSpecificModelMetadataFeatureSupersets(
-            ManeuverClassifierModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
-        ManeuverFeatures maneuverFeatures = contextSpecificModelMetadataWithMaxFeatures.getManeuverFeatures();
-        String boatClassName = contextSpecificModelMetadataWithMaxFeatures.getBoatClassName();
-        List<ManeuverClassifierModelMetadata> modelMetadataCandidates = new ArrayList<>();
+    public List<ManeuverClassifierModelContext> getAllValidModelContexts(
+            ManeuverClassifierModelContext modelContextWithMaxFeatures) {
+        ManeuverFeatures maneuverFeatures = modelContextWithMaxFeatures.getManeuverFeatures();
+        String boatClassName = modelContextWithMaxFeatures.getBoatClassName();
+        List<ManeuverClassifierModelContext> modelContextCandidates = new ArrayList<>();
         for (ManeuverFeatures possibleFeatures : ManeuverFeatures.values()) {
             if (possibleFeatures.isSubset(maneuverFeatures)) {
-                ManeuverClassifierModelMetadata modelMetadata = createModelMetadata(possibleFeatures, null);
-                modelMetadataCandidates.add(modelMetadata);
+                ManeuverClassifierModelContext modelContext = createModelContext(possibleFeatures, null);
+                modelContextCandidates.add(modelContext);
                 if (boatClassName != null) {
-                    ManeuverClassifierModelMetadata modelMetadataWithBoatClass = createModelMetadata(possibleFeatures,
+                    ManeuverClassifierModelContext modelContextWithBoatClass = createModelContext(possibleFeatures,
                             boatClassName);
-                    modelMetadataCandidates.add(modelMetadataWithBoatClass);
+                    modelContextCandidates.add(modelContextWithBoatClass);
                 }
             }
         }
-        return modelMetadataCandidates;
+        return modelContextCandidates;
     }
 
     @Override
-    public ManeuverClassifierModelMetadata getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
-        return new ManeuverClassifierModelMetadata(new ManeuverFeatures(false, false, false), null,
+    public ManeuverClassifierModelContext getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
+        return new ManeuverClassifierModelContext(new ManeuverFeatures(false, false, false), null,
                 ManeuverClassifierModelFactory.orderedSupportedTargetValues);
     }
 

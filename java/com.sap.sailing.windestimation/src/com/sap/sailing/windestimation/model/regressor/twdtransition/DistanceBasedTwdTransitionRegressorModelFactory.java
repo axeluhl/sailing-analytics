@@ -4,27 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
-import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelMetadata.DistanceValueRange;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
 
 public class DistanceBasedTwdTransitionRegressorModelFactory extends
-        SingleDimensionBasedTwdTransitionRegressorModelFactory<DistanceBasedTwdTransitionRegressorModelMetadata> {
+        SingleDimensionBasedTwdTransitionRegressorModelFactory<DistanceBasedTwdTransitionRegressorModelContext> {
 
     @Override
-    public List<DistanceBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadataFeatureSupersets(
-            DistanceBasedTwdTransitionRegressorModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
-        List<DistanceBasedTwdTransitionRegressorModelMetadata> modelMetadatas = new ArrayList<>();
-        modelMetadatas.add(contextSpecificModelMetadataWithMaxFeatures);
-        return modelMetadatas;
+    public List<DistanceBasedTwdTransitionRegressorModelContext> getAllValidModelContexts(
+            DistanceBasedTwdTransitionRegressorModelContext modelContextWithMaxFeatures) {
+        List<DistanceBasedTwdTransitionRegressorModelContext> modelContexts = new ArrayList<>();
+        modelContexts.add(modelContextWithMaxFeatures);
+        return modelContexts;
     }
 
     @Override
-    public DistanceBasedTwdTransitionRegressorModelMetadata createNewModelMetadata(TwdTransition twdTransition) {
+    public DistanceBasedTwdTransitionRegressorModelContext createNewModelContext(TwdTransition twdTransition) {
         double metersPassed = twdTransition.getDistance().getMeters();
         for (DistanceValueRange distanceValueRange : DistanceValueRange.values()) {
-            DistanceBasedTwdTransitionRegressorModelMetadata modelMetadata = new DistanceBasedTwdTransitionRegressorModelMetadata(
+            DistanceBasedTwdTransitionRegressorModelContext modelContext = new DistanceBasedTwdTransitionRegressorModelContext(
                     distanceValueRange);
-            if (modelMetadata.isDimensionValueSupported(metersPassed)) {
-                return modelMetadata;
+            if (modelContext.isDimensionValueSupported(metersPassed)) {
+                return modelContext;
             }
         }
         throw new IllegalStateException(

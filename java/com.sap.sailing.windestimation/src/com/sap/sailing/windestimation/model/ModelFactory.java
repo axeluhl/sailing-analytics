@@ -4,18 +4,18 @@ import java.util.List;
 
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
-public interface ModelFactory<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
+public interface ModelFactory<InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> {
 
-    ModelType getNewModel(T contextSpecificModelMetadata);
+    ModelType getNewModel(T modelContext);
 
-    List<ModelType> getAllTrainableModels(T contextSpecificModelMetadata);
+    List<ModelType> getAllTrainableModels(T modelContext);
 
-    List<T> getAllValidContextSpecificModelMetadataFeatureSupersets(T contextSpecificModelMetadataWithMaxFeatures);
+    List<T> getAllValidModelContexts(T modelContextWithMaxFeatures);
 
     default PersistenceContextType getPersistenceContextType() {
-        return getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures().getContextType();
+        return getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures().getContextType();
     }
 
-    T getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures();
+    T getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures();
 
 }

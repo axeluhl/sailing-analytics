@@ -3,7 +3,7 @@ package com.sap.sailing.windestimation.model.classifier;
 import java.util.List;
 import java.util.function.Function;
 
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 
 import smile.validation.ConfusionMatrix;
 
@@ -12,7 +12,7 @@ import smile.validation.ConfusionMatrix;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ClassifierScoring<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+public class ClassifierScoring<InstanceType, T extends ModelContext<InstanceType>>
         extends ConfusionMatrixScoring {
 
     private TrainableClassificationModel<InstanceType, T> trainedClassifier;
@@ -35,12 +35,12 @@ public class ClassifierScoring<InstanceType, T extends ContextSpecificModelMetad
     }
 
     public String printScoring(List<? extends InstanceType> instances, LabelExtraction<InstanceType> labelExtraction) {
-        T modelMetadata = trainedClassifier.getContextSpecificModelMetadata();
+        T modelContext = trainedClassifier.getModelContext();
         double[][] x = new double[instances.size()][];
         int[] y = labelExtraction.getYVector(instances);
         int i = 0;
         for (InstanceType instance : instances) {
-            x[i++] = modelMetadata.getX(instance);
+            x[i++] = modelContext.getX(instance);
         }
         return printScoring(x, y);
     }

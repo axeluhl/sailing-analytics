@@ -1,15 +1,15 @@
 package com.sap.sailing.windestimation.model.regressor;
 
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 
-public interface RegressorModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>> {
+public interface RegressorModel<InstanceType, T extends ModelContext<InstanceType>> {
     default double getValue(InstanceType instance) {
-        double[] x = getContextSpecificModelMetadata().getX(instance);
+        double[] x = getModelContext().getX(instance);
         return getValue(x);
     }
 
     double getValue(double[] x);
 
-    T getContextSpecificModelMetadata();
+    T getModelContext();
 
 }

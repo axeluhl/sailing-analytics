@@ -2,11 +2,17 @@ package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.regressor.IncrementalSingleDimensionPolynomialRegressor;
-import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelMetadata.DistanceValueRange;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
 import com.sap.sailing.windestimation.model.store.FileSystemModelStore;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
 
+/**
+ * Trains TWD delta standard deviation by considering the distance passed between two measurements.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class DistanceBasedTwdTransitionStdRegressorTrainer
         extends TwdTransitionManualTrainingDataInputRegressorTrainer {
 
@@ -23,10 +29,10 @@ public class DistanceBasedTwdTransitionStdRegressorTrainer
         modelStore.deleteAll(PersistenceContextType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR);
         DistanceBasedTwdTransitionRegressorModelFactory distanceBasedTwdTransitionRegressorModelFactory = new DistanceBasedTwdTransitionRegressorModelFactory();
         for (DistanceValueRange distanceValueRange : DistanceValueRange.values()) {
-            DistanceBasedTwdTransitionRegressorModelMetadata modelMetadata = new DistanceBasedTwdTransitionRegressorModelMetadata(
+            DistanceBasedTwdTransitionRegressorModelContext modelContext = new DistanceBasedTwdTransitionRegressorModelContext(
                     distanceValueRange);
-            IncrementalSingleDimensionPolynomialRegressor<TwdTransition, DistanceBasedTwdTransitionRegressorModelMetadata> model = distanceBasedTwdTransitionRegressorModelFactory
-                    .getNewModel(modelMetadata);
+            IncrementalSingleDimensionPolynomialRegressor<TwdTransition, DistanceBasedTwdTransitionRegressorModelContext> model = distanceBasedTwdTransitionRegressorModelFactory
+                    .getNewModel(modelContext);
             DistanceBasedTwdTransitionStdRegressorTrainer trainer = new DistanceBasedTwdTransitionStdRegressorTrainer(
                     modelStore);
             trainer.trainRegressor(model);

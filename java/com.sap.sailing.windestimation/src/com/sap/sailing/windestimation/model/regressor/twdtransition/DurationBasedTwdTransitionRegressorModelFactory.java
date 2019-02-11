@@ -4,27 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
-import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelMetadata.DurationValueRange;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
 
 public class DurationBasedTwdTransitionRegressorModelFactory extends
-        SingleDimensionBasedTwdTransitionRegressorModelFactory<DurationBasedTwdTransitionRegressorModelMetadata> {
+        SingleDimensionBasedTwdTransitionRegressorModelFactory<DurationBasedTwdTransitionRegressorModelContext> {
 
     @Override
-    public List<DurationBasedTwdTransitionRegressorModelMetadata> getAllValidContextSpecificModelMetadataFeatureSupersets(
-            DurationBasedTwdTransitionRegressorModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
-        List<DurationBasedTwdTransitionRegressorModelMetadata> modelMetadatas = new ArrayList<>();
-        modelMetadatas.add(contextSpecificModelMetadataWithMaxFeatures);
-        return modelMetadatas;
+    public List<DurationBasedTwdTransitionRegressorModelContext> getAllValidModelContexts(
+            DurationBasedTwdTransitionRegressorModelContext modelContextWithMaxFeatures) {
+        List<DurationBasedTwdTransitionRegressorModelContext> modelContexts = new ArrayList<>();
+        modelContexts.add(modelContextWithMaxFeatures);
+        return modelContexts;
     }
 
     @Override
-    public DurationBasedTwdTransitionRegressorModelMetadata createNewModelMetadata(TwdTransition twdTransition) {
+    public DurationBasedTwdTransitionRegressorModelContext createNewModelContext(TwdTransition twdTransition) {
         double secondsPassed = twdTransition.getDuration().asSeconds();
         for (DurationValueRange durationValueRange : DurationValueRange.values()) {
-            DurationBasedTwdTransitionRegressorModelMetadata modelMetadata = new DurationBasedTwdTransitionRegressorModelMetadata(
+            DurationBasedTwdTransitionRegressorModelContext modelContext = new DurationBasedTwdTransitionRegressorModelContext(
                     durationValueRange);
-            if (modelMetadata.isDimensionValueSupported(secondsPassed)) {
-                return modelMetadata;
+            if (modelContext.isDimensionValueSupported(secondsPassed)) {
+                return modelContext;
             }
         }
         throw new IllegalStateException(

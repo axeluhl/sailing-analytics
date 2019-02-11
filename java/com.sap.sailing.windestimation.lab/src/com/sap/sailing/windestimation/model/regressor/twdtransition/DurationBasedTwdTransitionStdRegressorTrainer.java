@@ -4,7 +4,7 @@ import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager.AggregatedSingleDimensionType;
 import com.sap.sailing.windestimation.model.regressor.IncrementalSingleDimensionPolynomialRegressor;
-import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelMetadata.DurationValueRange;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStore;
 import com.sap.sailing.windestimation.model.store.PersistenceContextType;
@@ -25,10 +25,10 @@ public class DurationBasedTwdTransitionStdRegressorTrainer extends TwdTransition
         modelStore.deleteAll(PersistenceContextType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR);
         DurationBasedTwdTransitionRegressorModelFactory durationBasedTwdTransitionRegressorModelFactory = new DurationBasedTwdTransitionRegressorModelFactory();
         for (DurationValueRange durationValueRange : DurationValueRange.values()) {
-            DurationBasedTwdTransitionRegressorModelMetadata modelMetadata = new DurationBasedTwdTransitionRegressorModelMetadata(
+            DurationBasedTwdTransitionRegressorModelContext modelContext = new DurationBasedTwdTransitionRegressorModelContext(
                     durationValueRange);
-            IncrementalSingleDimensionPolynomialRegressor<TwdTransition, DurationBasedTwdTransitionRegressorModelMetadata> model = durationBasedTwdTransitionRegressorModelFactory
-                    .getNewModel(modelMetadata);
+            IncrementalSingleDimensionPolynomialRegressor<TwdTransition, DurationBasedTwdTransitionRegressorModelContext> model = durationBasedTwdTransitionRegressorModelFactory
+                    .getNewModel(modelContext);
             TwdTransitionAggregatedStdRegressorTrainer trainer = new TwdTransitionAggregatedStdRegressorTrainer(
                     durationBasedPersistenceManager, modelStore);
             trainer.trainRegressor(model);

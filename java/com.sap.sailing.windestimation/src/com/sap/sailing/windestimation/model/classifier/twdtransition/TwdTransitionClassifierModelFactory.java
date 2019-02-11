@@ -13,41 +13,41 @@ import com.sap.sailing.windestimation.model.classifier.smile.NeuralNetworkClassi
 import com.sap.sailing.windestimation.model.classifier.smile.QDAClassifier;
 
 public class TwdTransitionClassifierModelFactory
-        implements ClassifierModelFactory<TwdTransition, TwdTransitionClassifierModelMetadata> {
+        implements ClassifierModelFactory<TwdTransition, TwdTransitionClassifierModelContext> {
 
-    public TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> getNewModel(
-            TwdTransitionClassifierModelMetadata contextSpecificModelMetadata) {
-        TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classificationModel = new LDAClassifier<>(
-                contextSpecificModelMetadata);
+    public TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext> getNewModel(
+            TwdTransitionClassifierModelContext modelContext) {
+        TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext> classificationModel = new LDAClassifier<>(
+                modelContext);
         return classificationModel;
     }
 
     @Override
-    public List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> getAllTrainableModels(
-            TwdTransitionClassifierModelMetadata contextSpecificModelMetadata) {
-        TwdTransitionClassifierModelMetadata modelMetadata = new TwdTransitionClassifierModelMetadata(
-                contextSpecificModelMetadata.getManeuverTypeTransition());
-        List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> classifiers = new ArrayList<>();
-        classifiers.add(new NeuralNetworkClassifier<>(modelMetadata));
-        classifiers.add(new LogisticRegressionClassifier<>(modelMetadata));
-        classifiers.add(new NaiveBayesClassifier<>(modelMetadata));
-        classifiers.add(new LDAClassifier<>(modelMetadata));
-        classifiers.add(new QDAClassifier<>(modelMetadata));
+    public List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext>> getAllTrainableModels(
+            TwdTransitionClassifierModelContext modelContext) {
+        TwdTransitionClassifierModelContext clonedModelContext = new TwdTransitionClassifierModelContext(
+                modelContext.getManeuverTypeTransition());
+        List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext>> classifiers = new ArrayList<>();
+        classifiers.add(new NeuralNetworkClassifier<>(clonedModelContext));
+        classifiers.add(new LogisticRegressionClassifier<>(clonedModelContext));
+        classifiers.add(new NaiveBayesClassifier<>(clonedModelContext));
+        classifiers.add(new LDAClassifier<>(clonedModelContext));
+        classifiers.add(new QDAClassifier<>(clonedModelContext));
         return classifiers;
     }
 
     @Override
-    public List<TwdTransitionClassifierModelMetadata> getAllValidContextSpecificModelMetadataFeatureSupersets(
-            TwdTransitionClassifierModelMetadata contextSpecificModelMetadataWithMaxFeatures) {
-        List<TwdTransitionClassifierModelMetadata> modelMetadataCandidates = new ArrayList<>();
-        modelMetadataCandidates.add(new TwdTransitionClassifierModelMetadata(
-                contextSpecificModelMetadataWithMaxFeatures.getManeuverTypeTransition()));
-        return modelMetadataCandidates;
+    public List<TwdTransitionClassifierModelContext> getAllValidModelContexts(
+            TwdTransitionClassifierModelContext modelContextWithMaxFeatures) {
+        List<TwdTransitionClassifierModelContext> modelContextCandidates = new ArrayList<>();
+        modelContextCandidates.add(new TwdTransitionClassifierModelContext(
+                modelContextWithMaxFeatures.getManeuverTypeTransition()));
+        return modelContextCandidates;
     }
 
     @Override
-    public TwdTransitionClassifierModelMetadata getContextSpecificModelMetadataWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
-        return new TwdTransitionClassifierModelMetadata(ManeuverTypeTransition.TACK_TACK);
+    public TwdTransitionClassifierModelContext getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
+        return new TwdTransitionClassifierModelContext(ManeuverTypeTransition.TACK_TACK);
     }
 
 }

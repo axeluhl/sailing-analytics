@@ -1,23 +1,23 @@
 package com.sap.sailing.windestimation.model.classifier.smile;
 
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.classifier.PreprocessingConfig.PreprocessingConfigBuilder;
 
 import smile.classification.NeuralNetwork;
 
-public class NeuralNetworkClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+public class NeuralNetworkClassifier<InstanceType, T extends ModelContext<InstanceType>>
         extends AbstractSmileClassificationModel<InstanceType, T> {
 
     private static final long serialVersionUID = -3364152319152090775L;
     private static final int EPOCHS = 20;
 
-    public NeuralNetworkClassifier(T contextSpecificModelMetadata) {
-        super(new PreprocessingConfigBuilder().scaling().build(), contextSpecificModelMetadata);
+    public NeuralNetworkClassifier(T modelContext) {
+        super(new PreprocessingConfigBuilder().scaling().build(), modelContext);
     }
 
     @Override
     protected NeuralNetwork trainInternalModel(double[][] x, int[] y) {
-        int k = getContextSpecificModelMetadata().getNumberOfPossibleTargetValues();
+        int k = getModelContext().getNumberOfPossibleTargetValues();
         int numberOfInputFeatures = x[0].length;
         NeuralNetwork net;
         int outputUnits = k == 2 ? 1 : k;
@@ -38,12 +38,12 @@ public class NeuralNetworkClassifier<InstanceType, T extends ContextSpecificMode
 
     @Override
     public double[] classifyWithProbabilities(double[] x) {
-        int k = getContextSpecificModelMetadata().getNumberOfPossibleTargetValues();
+        int k = getModelContext().getNumberOfPossibleTargetValues();
         if (k != 2) {
             return super.classifyWithProbabilities(x);
         }
         x = preprocessX(x);
-        double[] likelihoods = new double[getContextSpecificModelMetadata().getNumberOfPossibleTargetValues()];
+        double[] likelihoods = new double[getModelContext().getNumberOfPossibleTargetValues()];
         double[] likelihoodsInternal = new double[1];
         internalModel.predict(x, likelihoodsInternal);
         likelihoods[0] = 1 - likelihoodsInternal[0];

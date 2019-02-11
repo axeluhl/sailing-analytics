@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.TrainableModel;
 import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
@@ -23,7 +23,7 @@ public class InMemoryModelStore extends AbstractModelStore {
     private final Map<String, byte[]> serializedModels = new ConcurrentHashMap<>();
 
     @Override
-    public <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
+    public <InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadPersistedState(
             ModelType newModel) throws ModelPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         byte[] serializedModel = serializedModels.get(getFilename(newModel));
@@ -31,17 +31,17 @@ public class InMemoryModelStore extends AbstractModelStore {
             try (InputStream input = new ByteArrayInputStream(serializedModel)) {
                 @SuppressWarnings("unchecked")
                 ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(input);
-                if (!newModel.getContextSpecificModelMetadata().equals(loadedModel.getContextSpecificModelMetadata())) {
+                if (!newModel.getModelContext().equals(loadedModel.getModelContext())) {
                     throw new ModelPersistenceException(
-                            "The configuration of the loaded model is: " + loadedModel.getContextSpecificModelMetadata()
-                                    + ". \nExpected: " + newModel.getContextSpecificModelMetadata());
+                            "The configuration of the loaded model is: " + loadedModel.getModelContext()
+                                    + ". \nExpected: " + newModel.getModelContext());
                 }
                 return loadedModel;
             } catch (IOException e) {
                 throw new ModelPersistenceException(e);
             }
         }
-        throw new ModelNotFoundException(newModel.getContextSpecificModelMetadata());
+        throw new ModelNotFoundException(newModel.getModelContext());
     }
 
     @Override

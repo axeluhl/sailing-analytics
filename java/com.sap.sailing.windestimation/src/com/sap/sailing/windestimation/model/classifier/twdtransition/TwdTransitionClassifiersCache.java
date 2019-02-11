@@ -5,7 +5,7 @@ import com.sap.sailing.windestimation.model.classifier.AbstractClassifiersCache;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 
 public class TwdTransitionClassifiersCache extends
-        AbstractClassifiersCache<TwdTransition, TwdTransitionClassifierModelMetadata, TwdTransitionClassificationResult> {
+        AbstractClassifiersCache<TwdTransition, TwdTransitionClassifierModelContext, TwdTransitionClassificationResult> {
 
     public TwdTransitionClassifiersCache(ModelStore classifierModelStore, boolean preloadAllModels,
             long preserveLoadedClassifiersMillis) {
@@ -14,12 +14,12 @@ public class TwdTransitionClassifiersCache extends
     }
 
     @Override
-    public TwdTransitionClassifierModelMetadata getContextSpecificModelMetadata(TwdTransition twdTransition) {
+    public TwdTransitionClassifierModelContext getModelContext(TwdTransition twdTransition) {
         ManeuverTypeTransition maneuverTypeTransition = ManeuverTypeTransition
                 .valueOf(twdTransition.getFromManeuverType(), twdTransition.getToManeuverType());
-        TwdTransitionClassifierModelMetadata twdTrasitionModelMetadata = new TwdTransitionClassifierModelMetadata(
+        TwdTransitionClassifierModelContext modelContext = new TwdTransitionClassifierModelContext(
                 maneuverTypeTransition);
-        return twdTrasitionModelMetadata;
+        return modelContext;
     }
 
 }

@@ -25,15 +25,15 @@ public class PersistedTwdTransitionClassifiersScorePrinter {
     public static void main(String[] args)
             throws MalformedURLException, ClassNotFoundException, IOException, InterruptedException {
         ModelStore classifierModelStore = new MongoDbModelStore(new TwdTransitionPersistenceManager().getDb());
-        List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> allClassifierModels = new ArrayList<>();
+        List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext>> allClassifierModels = new ArrayList<>();
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();
         LoggingUtil.logInfo("### Loading classifiers:");
         for (ManeuverTypeTransition maneuverTypeTransition : ManeuverTypeTransition.values()) {
-            LabelledTwdTransitionClassifierModelMetadata labelledModelMetadata = new LabelledTwdTransitionClassifierModelMetadata(
+            LabelledTwdTransitionClassifierModelContext modelContext = new LabelledTwdTransitionClassifierModelContext(
                     maneuverTypeTransition);
-            List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata>> classifierModels = classifierModelFactory
-                    .getAllTrainableModels(labelledModelMetadata);
-            for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel : classifierModels) {
+            List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext>> classifierModels = classifierModelFactory
+                    .getAllTrainableModels(modelContext);
+            for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext> classifierModel : classifierModels) {
                 try {
                     classifierModel = classifierModelStore.loadPersistedState(classifierModel);
                     if (classifierModel != null) {
@@ -45,10 +45,10 @@ public class PersistedTwdTransitionClassifiersScorePrinter {
         }
         StringBuilder str = new StringBuilder("Classifier name \t| Maneuver type transition \t| Test score");
         Collections.sort(allClassifierModels, (a, b) -> Double.compare(a.getTestScore(), b.getTestScore()));
-        for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelMetadata> classifierModel : allClassifierModels) {
-            TwdTransitionClassifierModelMetadata modelMetadata = classifierModel.getContextSpecificModelMetadata();
+        for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext> classifierModel : allClassifierModels) {
+            TwdTransitionClassifierModelContext modelContext = classifierModel.getModelContext();
             str.append("\r\n" + classifierModel.getClass().getSimpleName() + ": \t| "
-                    + modelMetadata.getManeuverTypeTransition() + " \t| "
+                    + modelContext.getManeuverTypeTransition() + " \t| "
                     + String.format(" %.03f", classifierModel.getTestScore()));
         }
         String outputStr = str.toString();

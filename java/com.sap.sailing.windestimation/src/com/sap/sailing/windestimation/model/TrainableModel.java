@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.model;
 
 import com.sap.sailing.windestimation.model.store.PersistableModel;
 
-public interface TrainableModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+public interface TrainableModel<InstanceType, T extends ModelContext<InstanceType>>
         extends PersistableModel<InstanceType, T> {
 
     double getTestScore();

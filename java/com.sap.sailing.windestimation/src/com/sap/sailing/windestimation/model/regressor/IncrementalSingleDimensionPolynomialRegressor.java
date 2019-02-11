@@ -5,22 +5,22 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
-import com.sap.sailing.windestimation.model.ContextSpecificModelMetadata;
+import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.exception.ModelOperationException;
 
-public class IncrementalSingleDimensionPolynomialRegressor<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+public class IncrementalSingleDimensionPolynomialRegressor<InstanceType, T extends ModelContext<InstanceType>>
         extends AbstractRegressorModel<InstanceType, T>
         implements IncrementallyTrainableRegressorModel<InstanceType, T> {
 
     private static final long serialVersionUID = 2275631213670766824L;
     private final IncrementalLeastSquares regression;
 
-    public IncrementalSingleDimensionPolynomialRegressor(T contextSpecificModelMetadata, int polynomialOrder,
+    public IncrementalSingleDimensionPolynomialRegressor(T modelContext, int polynomialOrder,
             boolean withBias) {
-        super(contextSpecificModelMetadata);
-        if (contextSpecificModelMetadata.getNumberOfInputFeatures() > 1) {
+        super(modelContext);
+        if (modelContext.getNumberOfInputFeatures() > 1) {
             throw new IllegalArgumentException(
-                    "Only contextSpecificModelMetadata.getNumberOfInputFeatures() == 1 is supported");
+                    "Only modelContext.getNumberOfInputFeatures() == 1 is supported");
         }
         this.regression = new IncrementalAnyOrderLeastSquaresImpl(polynomialOrder, withBias);
     }
