@@ -16,7 +16,6 @@ import com.google.gwt.maps.client.overlays.Polyline;
  * @author Tim Hessenmüller (D062243)
  */
 public class MultiColorPolyline {
-    private MultiColorPolylineColorMode colorMode = MultiColorPolylineColorMode.POLYCHROMATIC;
     private MultiColorPolylineOptions options;
     
     private List<Polyline> polylines;
@@ -36,23 +35,17 @@ public class MultiColorPolyline {
         mouseOverMapHandler = new LinkedList<MouseOverMapHandler>();
     }
     
-    public MultiColorPolylineColorMode getColorMode() {
-        return colorMode;
-    }
-    
-    public void setColorMode(MultiColorPolylineColorMode colorMode) {
-        if (this.colorMode != colorMode) {
-            MVCArray<LatLng> path = MVCArray.newInstance(getPath().toArray(new LatLng[0]));
-            this.colorMode = colorMode;
-            setPath(path);
-        }
-    }
-    
     /*public MultiColorPolylineOptions getOptions() {
         return options;
     }*/
     public void setOptions(MultiColorPolylineOptions options) {
-        this.options = options;
+        if (this.options.getColorMode() != options.getColorMode()) {
+            MVCArray<LatLng> path = MVCArray.newInstance(getPath().toArray(new LatLng[0]));
+            this.options = options;
+            setPath(path);
+        } else {
+            this.options = options;
+        }
         for (int i = 0; i < polylines.size(); i++) {
             String color = options.getColorProvider().getColor(i);
             polylines.get(i).setOptions(options.newPolylineOptionsInstance(color));
@@ -62,7 +55,7 @@ public class MultiColorPolyline {
     
     
     public List<LatLng> getPath() {
-        int cap = getLength();
+        final int cap = getLength();
         List<LatLng> path = new ArrayList<>(cap);
         if (cap > 0) {
             path.add(polylines.get(0).getPath().get(0));
@@ -76,8 +69,8 @@ public class MultiColorPolyline {
     }
     
     public void setPath(MVCArray<LatLng> path) {
-        polylines.clear();
-        switch (colorMode) {
+        clear();
+        switch (options.getColorMode()) {
         case MONOCHROMATIC:
             polylines.add(createPolyline(path, 0));
             break;
@@ -93,7 +86,7 @@ public class MultiColorPolyline {
     }
     
     public void insertAt(int index, LatLng position) {
-        switch (colorMode) {
+        switch (options.getColorMode()) {
         case MONOCHROMATIC:
             if (polylines.isEmpty()) {
                 polylines.add(createPolyline(MVCArray.newInstance(), 0));   
@@ -134,7 +127,7 @@ public class MultiColorPolyline {
     }
     
     public LatLng removeAt(int index) {
-        switch (colorMode) {
+        switch (options.getColorMode()) {
         case MONOCHROMATIC:
             return polylines.get(0).getPath().removeAt(index);
         case POLYCHROMATIC:
@@ -147,8 +140,12 @@ public class MultiColorPolyline {
             } else if (index == getLength() - 1) {
                 // Remove the Polyline connecting the last two fixes
                 removed = polylines.get(index - 1).getPath().get(1);
-                polylines.get(index - 1).setMap(null);
-                polylines.remove(index - 1);
+                if (getLength() > 2) {
+                    polylines.get(index - 1).setMap(null);
+                    polylines.remove(index - 1);
+                } else {
+                    polylines.get(0).getPath().removeAt(1);
+                }
             } else {
                 // Remove the Polyline ending at fix
                 removed = polylines.get(index - 1).getPath().get(1);
@@ -164,7 +161,7 @@ public class MultiColorPolyline {
     }
     
     public void setAt(int index, LatLng position) {
-        switch (colorMode) {
+        switch (options.getColorMode()) {
         case MONOCHROMATIC:
             polylines.get(0).getPath().setAt(index, position);
             break;
@@ -188,11 +185,14 @@ public class MultiColorPolyline {
     }
     
     public void clear() {
+        for (Polyline l : polylines) {
+            l.setMap(null);
+        }
         polylines.clear();
     }
     
     public int getLength() {
-        switch (colorMode) {
+        switch (options.getColorMode()) {
         case MONOCHROMATIC:
             return polylines.isEmpty() ? 0 : polylines.get(0).getPath().getLength();
         case POLYCHROMATIC:

@@ -4,6 +4,8 @@ import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
 
 public class MultiColorPolylineOptions {
+    private MultiColorPolylineColorMode colorMode = MultiColorPolylineColorMode.MONOCHROMATIC;
+    
     private boolean clickable = true;
     private boolean draggable = false;
     private boolean editable  = false;
@@ -51,6 +53,13 @@ public class MultiColorPolylineOptions {
         opt.setStrokeOpacity(strokeOpacity);
         opt.setZindex(zIndex);
         return opt;
+    }
+    
+    public MultiColorPolylineColorMode getColorMode() {
+        return colorMode;
+    }
+    public void setColorMode(MultiColorPolylineColorMode colorMode) {
+        this.colorMode = colorMode;
     }
     
     public MultiColorPolylineColorProvider getColorProvider() {
