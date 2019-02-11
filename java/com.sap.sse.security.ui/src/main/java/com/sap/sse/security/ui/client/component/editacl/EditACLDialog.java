@@ -8,7 +8,6 @@ import java.util.function.Supplier;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;

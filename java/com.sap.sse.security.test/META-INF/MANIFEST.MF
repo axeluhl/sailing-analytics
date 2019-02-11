@@ -17,7 +17,8 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  jcl.over.slf4j;bundle-version="1.6.4",
  org.mockito.mockito-core;bundle-version="1.10.14",
  org.objenesis;bundle-version="2.1.0",
- org.hamcrest;bundle-version="1.1.0"
+ org.hamcrest;bundle-version="1.1.0",
+ com.sap.sailing.domain.common
 Import-Package: com.sap.sse.security.shared,
  com.sap.sse.security.ui.shared,
  org.apache.shiro.session.mgt
