@@ -181,7 +181,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
             if (sort != null) {
                 findIterable = findIterable.sort(sort);
             }
-            this.dbCursor = findIterable.iterator();
+            this.dbCursor = findIterable.noCursorTimeout(true).batchSize(50).iterator();
             LoggingUtil.logInfo(numberOfElements + " elements found in " + getCollectionName());
             prepareNext();
         }

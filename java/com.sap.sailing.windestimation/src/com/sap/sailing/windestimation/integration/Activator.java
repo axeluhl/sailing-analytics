@@ -20,7 +20,7 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.util.ClearStateTestSupport;
 
 /**
- * Handles OSGi (de-)registration of the polar data service.
+ * Handles OSGi (de-)registration of the wind estimation factory service.
  * 
  * @author Vladislav Chumak (D069712)
  *

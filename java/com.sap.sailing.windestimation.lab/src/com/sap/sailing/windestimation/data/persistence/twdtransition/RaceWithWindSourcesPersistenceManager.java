@@ -39,6 +39,12 @@ public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceMa
     }
 
     @Override
+    public void dropCollection() {
+        super.dropCollection();
+        getDb().getCollection(getWindSourcesCollectionName()).drop();
+    }
+
+    @Override
     protected JsonDeserializer<RaceWithWindSources> getNewJsonDeserializer() {
         return new RaceWithWindSourcesDeserializer() {
             @Override

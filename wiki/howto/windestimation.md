@@ -31,7 +31,6 @@ To complete the training process successfully, you need to make sure that you ha
 * A complete onboarding setup for SAP Sailing Analytics development
 * MongoDB (**3.4 or higher!**) is up and running (same MongoDB instance as required in onboarding howto)
 * At least 100 GB free space on the partition, where MongoDB is operating
-* At least 16 GB RAM (for in-memory preprocessing of wind data for regressors)
 * Installed graphical MongoDB client such as MongoDB Compass (Community version)
 
 ## Get the training data from sapsailing.com
@@ -46,7 +45,7 @@ The following steps import all the data required from sapsailing.com into the lo
 ## Duration-based TWD delta standard deviation regressor
 
 1. Run *com.sap.sailing.windestimation.data.importer.DurationBasedTwdTransitionImporter*
-2. Run *com.sap.sailing.windestimation.data.importer.AggregatedDurationBasedTwdTransitionImporter* with at least 10 GB JVM memory. For this, set the following VM arguments in your run config: ``-Xms10g -Xmx10g``.
+2. Run *com.sap.sailing.windestimation.data.importer.AggregatedDurationBasedTwdTransitionImporter*
 3. Run *com.sap.sailing.windestimation.datavisualization.AggregatedDurationDimensionPlot* to visualize the wind data. A Swing-based GUI-Window must open with two charts, one XY-chart where the x-axis represents **seconds**, and the y-axis represents TWD delta-based series measures (e.g. standard deviation or mean). Below the chart, a histogram for data points of the XY-Chart is provided. You can zoom-in and zoom-out in each of the chart by mouse dragging. Be aware that currently the zoom level of both charts is not synchronized
 4. Open your graphical MongoDB client and connect to *windEstimation* database hosted by your local MongoDB. Open the collection with name *aggregatedDurationTwdTransition*. Within the collection you will see all the instances/data points visualized in the previous step. The total number of the points must not exceed 100.
 5. Delete all the instances within the collection which do not make sense. For this, use the data visualization tool from step 3 to identify such instances. Pay a special attention to the instances in the beginnning and end. Some of the instances are not representative due to small number of supporting instances which is visualized in the histogram. Restart the data visualization tool as often as need to visualize the changed data.

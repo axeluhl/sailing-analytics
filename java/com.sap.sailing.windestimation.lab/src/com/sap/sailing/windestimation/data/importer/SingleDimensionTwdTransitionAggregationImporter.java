@@ -19,7 +19,7 @@ import smile.sort.QuickSelect;
 
 public class SingleDimensionTwdTransitionAggregationImporter {
 
-    private static final int MIN_NUMBER_OF_VALUES_PER_BUCKET = 100;
+    private static final int MIN_NUMBER_OF_VALUES_PER_BUCKET = 10000;
     private final SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionTwdTransitionPersistenceManager;
     private final AggregatedSingleDimensionType dimensionType;
     private final NextThresholdCalculator thresholdCalculator;

@@ -25,8 +25,8 @@ public abstract class AbstractModelCache<InstanceType, T extends ContextSpecific
         this.modelFactory = modelFactory;
         this.modelCache = new ShortTimeAfterLastHitCache<>(preserveLoadedModelsMillis,
                 contextSpecificModelMetadata -> loadModel(contextSpecificModelMetadata));
-        this.modelLoader = new ModelLoader<>(modelMetadata -> modelCache.getCachedValue(modelMetadata),
-                preloadAllModels ? null : modelStore, modelFactory);
+        this.modelLoader = new ModelLoader<>(modelMetadata -> modelCache.getCachedValue(modelMetadata), modelStore,
+                modelFactory);
         if (preloadAllModels) {
             preloadAllModels();
         }

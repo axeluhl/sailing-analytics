@@ -41,24 +41,18 @@ public class DurationBasedTwdTransitionImporter {
                 if (timePointOfLastConsideredWindFix == null || timePointOfLastConsideredWindFix
                         .until(windFix.getTimePoint()).asSeconds() >= currentBucketThreshold) {
                     timePointOfLastConsideredWindFix = windFix.getTimePoint();
-                    TimePoint timePointOfLastConsideredOtherWindFix = timePointOfLastConsideredWindFix;
                     for (ListIterator<Wind> otherWindFixesIterator = windSource.getWindFixes()
                             .listIterator(++windFixIndex); otherWindFixesIterator.hasNext();) {
                         Wind otherWindFix = otherWindFixesIterator.next();
-                        double secondsPassedSinceLastConsideredWindFix = timePointOfLastConsideredOtherWindFix
-                                .until(otherWindFix.getTimePoint()).asSeconds();
                         double secondsPassed = windFix.getTimePoint().until(otherWindFix.getTimePoint()).asSeconds();
-                        if (secondsPassedSinceLastConsideredWindFix >= currentBucketThreshold) {
-                            double absTwdChange = windFix.getBearing().getDifferenceTo(otherWindFix.getBearing())
+                        if (secondsPassed >= currentBucketThreshold) {
+                            double twdChange = windFix.getBearing().getDifferenceTo(otherWindFix.getBearing())
                                     .getDegrees();
                             SingleDimensionBasedTwdTransition entry = new SingleDimensionBasedTwdTransition(
-                                    secondsPassed, absTwdChange);
+                                    secondsPassed, twdChange);
                             entries.add(entry);
-                            timePointOfLastConsideredOtherWindFix = otherWindFix.getTimePoint();
-                            while (secondsPassedSinceLastConsideredWindFix >= currentBucketThreshold) {
-                                currentBucketThreshold = THRESHOLD_CALCULATOR.getNextThresholdValue(
-                                        secondsPassedSinceLastConsideredWindFix, currentBucketThreshold);
-                            }
+                            currentBucketThreshold = THRESHOLD_CALCULATOR.getNextThresholdValue(secondsPassed,
+                                    currentBucketThreshold);
                         }
                     }
                 }
@@ -73,7 +67,6 @@ public class DurationBasedTwdTransitionImporter {
                         .logInfo(totalEntries + " TWD transition entries imported, " + totalValuesCount + " in total");
             }
         }
-
         LoggingUtil.logInfo("###################\r\nDuration based TWD transitions Import finished");
         LoggingUtil.logInfo("Totally " + totalValuesCount + " TWD transitions imported");
     }
