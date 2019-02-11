@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
 
-import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
@@ -220,10 +219,6 @@ public class UserStoreImpl implements UserStore {
 
         for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, this.userGroups, this)) {
             users.put(u.getName(), u);
-            // setup all migrated users, to use the public server tenant group to match old behaviour
-            if (u.getDefaultTenant(ServerInfo.getName()) == null) {
-                u.setDefaultTenant(defaultTenant, ServerInfo.getName());
-            }
             addToUsersByEmail(u);
         }
         // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
