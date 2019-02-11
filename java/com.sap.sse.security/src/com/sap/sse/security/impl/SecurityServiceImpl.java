@@ -314,13 +314,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
                 User allUser = createUserInternal(SecurityService.ALL_USERNAME, null, getDefaultTenant());
 
-                apply(s -> s.internalSetOwnership(allUser.getIdentifier(),
-                        ALL_USERNAME, null, ALL_USERNAME));
+                // <all> user is explicitly not owned by itself because this would enable anybody to modify this user
+                setOwnership(allUser.getIdentifier(), null, getDefaultTenant());
 
                 // The permission to create new users is initially added but not recreated on server start if the admin removed it in the meanwhile.
                 // This allows servers to be configured to not permit self-registration of new users but only users being managed by an admin user.
-                addPermissionForUser(ALL_USERNAME,
-                        SecuredSecurityTypes.USER.getPermission(DefaultActions.CREATE));
+                WildcardPermission createUserPermission = SecuredSecurityTypes.USER.getPermission(DefaultActions.CREATE);
+                addPermissionForUser(ALL_USERNAME, createUserPermission);
+                QualifiedObjectIdentifier qualifiedTypeIdentifierForPermission = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                        .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(createUserPermission, allUser));
+                // Permission association is owned by the server tenant.
+                // This typically ensures that the server admin is able to remove the association.
+                setOwnership(qualifiedTypeIdentifierForPermission, null, getDefaultTenant());
             }
         } catch (UserManagementException | MailException | UserGroupManagementException e) {
             logger.log(Level.SEVERE,
