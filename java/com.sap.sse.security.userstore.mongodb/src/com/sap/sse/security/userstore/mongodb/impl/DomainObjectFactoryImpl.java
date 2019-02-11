@@ -198,14 +198,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      */
     @Override
     public Iterable<User> loadAllUsers(
-            Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration,
+            Map<UUID, RoleDefinition> roleDefinitionsById, RoleMigrationConverter roleMigrationConverter,
             Map<UUID, UserGroup> userGroups, UserGroupProvider userGroupProvider) throws UserManagementException {
         Map<String, User> result = new HashMap<>();
         MongoCollection<org.bson.Document> userCollection = db.getCollection(CollectionNames.USERS.name());
         try {
             for (Document o : userCollection.find()) {
                 User userWithProxyRoleUserQualifier = loadUserWithProxyRoleUserQualifiers(o, roleDefinitionsById,
-                        defaultTenantForRoleMigration, userGroups, userGroupProvider);
+                        roleMigrationConverter, userGroups, userGroupProvider);
                 result.put(userWithProxyRoleUserQualifier.getName(), userWithProxyRoleUserQualifier);
             }
         } catch (Exception e) {
@@ -251,7 +251,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      */
     @SuppressWarnings("unchecked")
     private User loadUserWithProxyRoleUserQualifiers(Document userDBObject,
-            Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration,
+            Map<UUID, RoleDefinition> roleDefinitionsById, RoleMigrationConverter roleMigrationConverter,
             Map<UUID, UserGroup> tenants, UserGroupProvider userGroupProvider) {
         final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
@@ -284,27 +284,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             List<Object> roleNames = (List<Object>) userDBObject.get("ROLES");
             if (roleNames != null) {
                 logger.info("Found old roles "+roleNames+" for user "+name);
-                if (defaultTenantForRoleMigration == null) {
-                    throw new IllegalStateException(
-                            "For role migration a valid default tenant is required. Set system property "
-                                    + UserStore.DEFAULT_TENANT_NAME_PROPERTY_NAME+" or provide a server name");
-                }
                 for (Object o : roleNames) {
-                    boolean found = false;
-                    for (final RoleDefinition roleDefinition : roleDefinitionsById.values()) {
-                        // migrate old admins to new admin!
-                        if (roleDefinition.getName().equals(o.toString())) {
-                            logger.info("Found role "+roleDefinition+" for old role "+o.toString()+" for user "+name);
-                            // we do not do role associations, to stay similar as before, meaning that all admins can
-                            // edit the roles. Without this we would need to determine which admin (if
-                            // multiple present) should own this association.
-                            roles.add(new Role(roleDefinition, defaultTenantForRoleMigration,
-                                    /* user qualification */ null));
-                            rolesMigrated = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
+                    final Role convertedRole = roleMigrationConverter.convert(o.toString(), name);
+                    if (convertedRole != null) {
+                        logger.info("Found role "+convertedRole.getRoleDefinition()+" for old role "+o.toString()+" for user "+name);
+                        // we do not do role associations, to stay similar as before, meaning that all admins can
+                        // edit the roles. Without this we would need to determine which admin (if
+                        // multiple present) should own this association.
+                        roles.add(convertedRole);
+                        rolesMigrated = true;
+                    }else {
                         logger.warning("Role " + o.toString() + " for user " + name
                                 + " not found during migration. User will no longer be in this role.");
                     }

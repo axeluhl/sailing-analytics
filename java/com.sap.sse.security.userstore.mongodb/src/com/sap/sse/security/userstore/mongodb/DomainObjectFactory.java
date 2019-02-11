@@ -10,12 +10,17 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
 public interface DomainObjectFactory {
+    public interface RoleMigrationConverter {
+        Role convert(String oldRoleName, String username);
+    }
+    
     Iterable<AccessControlListAnnotation> loadAllAccessControlLists(UserStore userStore);
     
     Iterable<OwnershipAnnotation> loadAllOwnerships(UserStore userStore);
@@ -33,13 +38,14 @@ public interface DomainObjectFactory {
     Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers(Map<UUID, RoleDefinition> roleDefinitionsById);
     
     /**
-     * @param defaultTenantForRoleMigration
-     *            when a string-based role is found on the user object it will be mapped to a {@link Role} object
-     *            pointing to an equal-named {@link RoleDefinition} from the {@code roleDefinitionsById} map, with a
-     *            {@link Role#getQualifiedForTenant() tenant qualification} as defined by this parameter; if this
-     *            parameter is {@code null}, role migration will throw an exception.
+     * @param roleMigrationConverter
+     *            when a string-based role is found on the user object it will be mapped to a {@link Role} object using
+     *            the given roleMigrationConverter. This implementation will take care of all migration specific, logic
+     *            including correct scoping of roles. In case, an existing role can not be converted to the new role
+     *            model, a warning must be logged.
      * @param userGroupProvider
-     *            a way for the user object that will be created to dynamically obtain the user groups to which it belongs
+     *            a way for the user object that will be created to dynamically obtain the user groups to which it
+     *            belongs
      * @return the user objects returned have dummy objects for their {@link SecurityUser#getDefaultTenant() default
      *         tenant} and for their {@link SecurityUser#getRoles() roles} attribute which need to be replaced by the
      *         caller once the {@link Tenant} objects and all user objects have been loaded from the DB. The only field
@@ -50,7 +56,7 @@ public interface DomainObjectFactory {
      *         expect valid IDs to be set; those objects need to be resolved against the full set of tenants and users
      *         loaded at a later point in time.
      */
-    Iterable<User> loadAllUsers(Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration,
+    Iterable<User> loadAllUsers(Map<UUID, RoleDefinition> roleDefinitionsById, RoleMigrationConverter roleMigrationConverter,
             Map<UUID, UserGroup> userGroups, UserGroupProvider userGroupProvider) throws UserManagementException;
     
     Map<String, Object> loadSettings();

@@ -31,6 +31,7 @@ public interface UserStore extends UserGroupProvider, Named {
      * read from a system property whose name is provided by this constant.
      */
     String DEFAULT_TENANT_NAME_PROPERTY_NAME = "security.defaultTenantName";
+    String ADMIN_USERNAME = "admin";
 
 
     Iterable<UserGroup> getUserGroups();

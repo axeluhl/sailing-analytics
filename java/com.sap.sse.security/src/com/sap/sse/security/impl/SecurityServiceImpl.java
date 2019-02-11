@@ -135,8 +135,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
-    private static final String ADMIN_USERNAME = "admin";
-
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
 
     private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();;
@@ -291,8 +289,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         assert adminRoleDefinition != null;
         try {
             if (!store.hasUsers()) {
-                logger.info("No users found, creating default user \""+ADMIN_USERNAME+"\" with password \""+ADMIN_DEFAULT_PASSWORD+"\"");
-                final User adminUser = createSimpleUser(ADMIN_USERNAME, "nobody@sapsailing.com",
+                logger.info("No users found, creating default user \""+UserStore.ADMIN_USERNAME+"\" with password \""+ADMIN_DEFAULT_PASSWORD+"\"");
+                final User adminUser = createSimpleUser(UserStore.ADMIN_USERNAME, "nobody@sapsailing.com",
                         ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
                         null);
@@ -327,7 +325,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }
         } catch (UserManagementException | MailException | UserGroupManagementException e) {
             logger.log(Level.SEVERE,
-                    "Exception while creating default " + ADMIN_USERNAME + " and " + SecurityService.ALL_USERNAME + " user", e);
+                    "Exception while creating default " + UserStore.ADMIN_USERNAME + " and " + SecurityService.ALL_USERNAME + " user", e);
         }
     }
     
