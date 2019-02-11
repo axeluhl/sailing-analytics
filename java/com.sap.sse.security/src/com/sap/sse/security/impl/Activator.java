@@ -30,7 +30,13 @@ import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -194,16 +200,58 @@ public class Activator implements BundleActivator {
                     accessControlStore.loadACLsAndOwnerships();
                     // create security service, it will also create a default admin user if no users exist
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
-                    // check if we already have an ownership for the server, create if it is missing
-                    QualifiedObjectIdentifier expectedServerOwner = SecuredSecurityTypes.SERVER
-                            .getQualifiedObjectIdentifier(
-                                    new TypeRelativeObjectIdentifier(ServerInfo.getName()));
-                    getSecurityService().setOwnershipIfNotSet(expectedServerOwner, null, userStore.getDefaultTenant());
-                } catch (InterruptedException | UserGroupManagementException | UserManagementException e) {
+                    
+                    migrate(userStore, securityService.get());
+                } catch (InterruptedException | UserGroupManagementException | UserManagementException | ExecutionException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }
             }
         }.start();
+    }
+    
+    private void migrate(UserStore userStore, SecurityService securityService) {
+        for (User user : userStore.getUsers()) {
+            securityService.migrateUser(user);
+        }
+        for (UserGroup group : userStore.getUserGroups()) {
+            securityService.migrateOwnership(group);
+        }
+        for (RoleDefinition role : userStore.getRoleDefinitions()) {
+            securityService.migrateOwnership(role);
+        }
+        for (User user : securityService.getUserList()) {
+            for (Role role : user.getRoles()) {
+                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+                QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier.toString());
+            }
+            for (WildcardPermission permission : user.getPermissions()) {
+                securityService.migratePermission(user, permission, this::getPermissionReplacement);
+                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
+                        user);
+                QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier.toString());
+            }
+        }
+        
+        final QualifiedObjectIdentifier expectedServerOwner = SecuredSecurityTypes.SERVER
+                .getQualifiedObjectIdentifier(
+                        new TypeRelativeObjectIdentifier(ServerInfo.getName()));
+        securityService.migrateOwnership(expectedServerOwner, expectedServerOwner.toString());
+
+        securityService.checkMigration(SecuredSecurityTypes.getAllInstances());
+    }
+    
+    public WildcardPermission getPermissionReplacement(WildcardPermission permission) {
+        final WildcardPermission replacement;
+        if ("data_mining".equalsIgnoreCase(permission.toString())) {
+            replacement = SecuredSecurityTypes.SERVER.getPermission(ServerActions.DATA_MINING);
+        } else {
+            replacement = null;
+        }
+        return replacement;
     }
 
     /*

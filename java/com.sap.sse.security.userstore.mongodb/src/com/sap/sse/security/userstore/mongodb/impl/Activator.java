@@ -1,30 +1,16 @@
 package com.sap.sse.security.userstore.mongodb.impl;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.ServerInfo;
-import com.sap.sse.common.Util.Function;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.PreferenceConverterRegistrationManager;
-import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
-import com.sap.sse.security.shared.impl.Role;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
-import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -60,65 +46,6 @@ public class Activator implements BundleActivator {
         for (CollectionNames name : CollectionNames.values()) {
             MongoDBService.INSTANCE.registerExclusively(CollectionNames.class, name.name());
         }
-
-        new Thread(getClass().getName() + "migrate ownerships after security service is ready") {
-            public void run() {
-                try {
-                    final ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker = new ServiceTracker<>(
-                            context, SecurityService.class, null);
-                    securityServiceServiceTracker.open();
-                    final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
-
-                    for (User user : userStore.getUsers()) {
-                        securityService.migrateUser(user);
-                    }
-                    for (UserGroup group : userStore.getUserGroups()) {
-                        securityService.migrateOwnership(group);
-                    }
-                    for (RoleDefinition role : userStore.getRoleDefinitions()) {
-                        securityService.migrateOwnership(role);
-                    }
-                    for (User user : securityService.getUserList()) {
-                        for (Role role : user.getRoles()) {
-                            TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
-                            QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
-                                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                            securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier.toString());
-                        }
-                        for (WildcardPermission permission : user.getPermissions()) {
-                            securityService.migratePermission(user, permission, new Function<WildcardPermission, WildcardPermission>() {
-                                // TODO replace with method reference when we can use Java 8 here
-                                @Override
-                                public WildcardPermission get(WildcardPermission wp) {
-                                    return getPermissionReplacement(wp);
-                                }
-                            });
-                            TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
-                                    .get(permission, user);
-                            QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
-                                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                            securityService.migrateOwnership(associationQualifiedIdentifier,
-                                    associationTypeIdentifier.toString());
-                        }
-                    }
-
-                    securityService.assumeOwnershipMigrated(SecuredSecurityTypes.SERVER.getName());
-                    securityService.checkMigration(SecuredSecurityTypes.getAllInstances());
-                } catch (InterruptedException e) {
-                    logger.log(Level.SEVERE, "Error in migration", e);
-                }
-            }
-        }.start();
-    }
-    
-    public WildcardPermission getPermissionReplacement(WildcardPermission permission) {
-        final WildcardPermission replacement;
-        if ("data_mining".equalsIgnoreCase(permission.toString())) {
-            replacement = SecuredSecurityTypes.SERVER.getPermission(ServerActions.DATA_MINING);
-        } else {
-            replacement = null;
-        }
-        return replacement;
     }
 
     /*
