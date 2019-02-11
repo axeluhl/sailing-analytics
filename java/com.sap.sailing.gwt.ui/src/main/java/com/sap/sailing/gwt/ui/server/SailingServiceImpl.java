@@ -7971,11 +7971,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount,
-            final int competitorCount, final int flightMultiplier) {
+            final int competitorCount, final int flightMultiplier, final int tolerance) {
         PairingListTemplate template = getService().createPairingListTemplate(flightCount, groupCount, competitorCount, 
-                flightMultiplier);
-        return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, 
-                template.getPairingListTemplate(), template.getQuality());
+                flightMultiplier, tolerance);
+        return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, tolerance,
+                template.getBoatChanges(), template.getPairingListTemplate(), template.getQuality(), template.getBoatAssignmentsQuality());
     }
     
     @Override
@@ -7992,7 +7992,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         PairingListTemplate pairingListTemplate = new PairingListTemplateImpl(templateDTO.getPairingListTemplate(),
-                templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier());
+                templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier(), templateDTO.getBoatChangeFactor());
         PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = getService()
                 .getPairingListFromTemplate(pairingListTemplate, leaderboardName, selectedRaces);
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
@@ -8116,7 +8116,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
         }
-        if (result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())) {
+        if (result.size()==raceColumnNames.size()*Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets())) {
             return result;
         }
         result.clear();
@@ -8132,11 +8132,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }
-        if (result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())) {
+        if (result.size()==raceColumnNames.size()*Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets())) {
             return result;
         }
         result.clear();
-        for (int count=1;count<=raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets());count++) {
+        for (int count=1;count<=raceColumnNames.size()*Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());count++) {
             result.add("Race "+count);
         }
         return result;

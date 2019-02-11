@@ -4,7 +4,6 @@
 	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 
-    
 	<!-- Disable directory listing: -->
 	<servlet>
 		<servlet-name>default</servlet-name>
@@ -62,6 +61,16 @@
 		<url-pattern>*.html</url-pattern>
 	</filter-mapping>
 
+	<servlet>
+	    <display-name>Status</display-name>
+	    <servlet-name>Status</servlet-name>
+    	<servlet-class>com.sap.sailing.gwt.ui.server.StatusServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Status</servlet-name>
+		<url-pattern>/status</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 	    <display-name>Sailing Service</display-name>
 	    <servlet-name>SailingService</servlet-name>
@@ -133,7 +142,6 @@
 		<url-pattern>/service/usermanagement</url-pattern>
 	</servlet-mapping>
 
-	
 	<!-- enabling remote logging -->
 	<servlet>
 		<servlet-name>remoteLoggingServlet</servlet-name>

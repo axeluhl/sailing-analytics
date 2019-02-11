@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.sap.sse.common.util.MappingIterable;
+import com.sap.sse.common.util.MappingIterator;
 import com.sap.sse.common.util.NaturalComparator;
 
 
@@ -343,12 +345,13 @@ public class Util {
     }
     
     public static interface Mapper<S, T> { T map(S s); }
-    public static <S, T> Iterable<T> map(Iterable<S> iterable, Mapper<S, T> mapper) {
-        List<T> result = new ArrayList<>();
-        for (final S s : iterable) {
-            result.add(mapper.map(s));
-        }
-        return result;
+    public static <S, T> Iterable<T> map(final Iterable<S> iterable, final Mapper<S, T> mapper) {
+        return new MappingIterable<>(iterable, new MappingIterator.MapFunction<S, T>() {
+            @Override
+            public T map(S s) {
+                return mapper.map(s);
+            }
+        });
     }
 
     /**

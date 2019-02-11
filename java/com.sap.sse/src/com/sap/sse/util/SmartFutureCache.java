@@ -610,7 +610,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         synchronized (ongoingRecalculations) {
             if (ongoingRecalculations.containsKey(key)) {
                 FutureTaskWithCancelBlocking scheduledOrRunning = ongoingRecalculations.get(key);
-                // a future is already scheduled for the key; try to 
+                // a future is already scheduled for the key; try to adjust the update interval
                 boolean reuseExistingFuture = scheduledOrRunning.tryToUpdateUpdateInterval(updateInterval);
                 if (reuseExistingFuture) {
                     result = scheduledOrRunning;

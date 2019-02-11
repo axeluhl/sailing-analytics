@@ -1123,7 +1123,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                         busyDialog.show();
                         sailingService.calculatePairingListTemplate(editedObject.getFlightCount(),
                                 editedObject.getGroupCount(), editedObject.getCompetitorCount(),
-                                editedObject.getFlightMultiplier(), new AsyncCallback<PairingListTemplateDTO>() {
+                                editedObject.getFlightMultiplier(), editedObject.getBoatChangeFactor(),
+                                new AsyncCallback<PairingListTemplateDTO>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
                                         busyDialog.hide();

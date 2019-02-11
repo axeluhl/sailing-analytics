@@ -42,6 +42,7 @@ public class UpdateMarkPassingTest {
         Course c = new CourseImpl("Test Course", Collections.singleton(waypoint));
         when(race.getCourse()).thenReturn(c);
         CompetitorWithBoat competitor = TrackBasedTest.createCompetitorWithBoat("Test Competitor");
+        when(race.getBoatOfCompetitor(competitor)).thenReturn(competitor.getBoat());
         when(race.getBoatClass()).thenReturn(new BoatClassImpl("49er", /* typicallyStartsUpwind */ true));
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(

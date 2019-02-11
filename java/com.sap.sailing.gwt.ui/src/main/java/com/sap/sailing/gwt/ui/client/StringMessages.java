@@ -230,6 +230,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pairingLists();
     String pairingListCreationInfo();
     String setCompetitors();
+    String setBoatChangeFactor();
     String seriesHint();
     String amountOfFlightRepeats();
     String insertIntoRegatta();
@@ -246,6 +247,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String numberOfFleets();
     String numberOfCompetitors();
     String quality();
+    String boatAssignmentQuality();
+    String boatChanges();
     String pairingListTemplate();
     String printHint();
     String blockedApplyButton();
