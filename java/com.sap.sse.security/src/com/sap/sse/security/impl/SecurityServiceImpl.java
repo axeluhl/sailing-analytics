@@ -1904,7 +1904,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
-        
+        this.migrateOwnership(identifier, null, displayName);
+    }
+    
+    @Override
+    public void migrateOwnership(final WithQualifiedObjectIdentifier identifier, User userOwnerToSet) {
+        migrateOwnership(identifier.getIdentifier(), userOwnerToSet, identifier.getName());
+    }
+    
+    public void migrateOwnership(final QualifiedObjectIdentifier identifier, User userOwnerToSet, final String displayName) {
         final OwnershipAnnotation owner = this.getOwnership(identifier);
         final UserGroup defaultTenant = this.getDefaultTenant();
         // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
@@ -1912,8 +1920,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
             logger.info("Permission-Vertical Migration: Setting ownership for: " + identifier + " to default tenant: "
-                    + defaultTenant);
-            this.setOwnership(identifier, null, defaultTenant, displayName);
+                    + defaultTenant + "; user: " + userOwnerToSet);
+            this.setOwnership(identifier, userOwnerToSet, defaultTenant, displayName);
         }
         migratedHasPermissionTypes.add(identifier.getTypeIdentifier());
     }

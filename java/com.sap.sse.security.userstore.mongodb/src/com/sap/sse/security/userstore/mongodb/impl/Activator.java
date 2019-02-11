@@ -68,7 +68,7 @@ public class Activator implements BundleActivator {
                     final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
 
                     for (User user : userStore.getUsers()) {
-                        securityService.migrateOwnership(user);
+                        securityService.migrateOwnership(user, user);
                     }
                     for (UserGroup group : userStore.getUserGroups()) {
                         securityService.migrateOwnership(group);
