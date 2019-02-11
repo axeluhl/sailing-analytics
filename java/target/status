@@ -27,7 +27,7 @@ echo "JAVA_HOME: $JAVA_HOME"
 echo "INSTANCE_ID: $INSTANCE_ID"
 echo ""
 
-STATUS=$(curl -i http://127.0.0.1:$SERVER_PORT/sailingserver/api/v1/status 2>/dev/null)
+STATUS=$(curl -i http://127.0.0.1:$SERVER_PORT/gwt/status 2>/dev/null)
 RESPONSE_STATUS_CODE=$(echo $STATUS | head -n 1 | cut -d ' ' -f 2)
 
 echo "AVAILABILITY_STATUS: $RESPONSE_STATUS_CODE"

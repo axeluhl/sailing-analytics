@@ -10,11 +10,11 @@ public class PairingListTemplateFactoryImpl implements PairingListTemplateFactor
 
     
     @Override
-    public PairingListTemplate createPairingListTemplate(PairingFrameProvider pairingFrameProvider, int flightMultiplier) {
-        return new PairingListTemplateImpl(pairingFrameProvider, flightMultiplier);
+    public PairingListTemplate createPairingListTemplate(PairingFrameProvider pairingFrameProvider, int flightMultiplier, int boatChangeFactor) {
+        return new PairingListTemplateImpl(pairingFrameProvider, flightMultiplier, boatChangeFactor);
     }
     
-    public PairingListTemplate createPairingListTemplate(PairingFrameProvider pairingFrameProvider, int iterations, int flightMultiplier) {
+    public PairingListTemplate createPairingListTemplate(PairingFrameProvider pairingFrameProvider, int iterations, int flightMultiplier, int boatChangeFactor) {
         return new PairingListTemplateImpl(pairingFrameProvider, iterations, flightMultiplier);
     }
     

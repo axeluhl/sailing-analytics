@@ -28,6 +28,7 @@ public class StatusResource extends AbstractSailingServerResource {
         if (replicationStatus != null) {
             result.put("replication", replicationStatus.toJSONObject());
         }
+        // FIXME we also need to figure out whether the GWT bundle has successfully started up; try a request to /gwt/Home.html
         final boolean available = service.getNumberOfTrackedRacesRestored() >= service.getNumberOfTrackedRacesToRestore() &&
                 (replicationStatus == null || replicationStatus.isAvailable());
         result.put("available", available);
