@@ -297,9 +297,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
                         null);
 
-                apply(s -> s.internalSetOwnership(
-                        adminUser.getIdentifier(), ADMIN_USERNAME, null,
-                        ADMIN_USERNAME));
+                setOwnership(adminUser.getIdentifier(), adminUser, null);
                 Role adminRole = new Role(adminRoleDefinition);
                 addRoleForUser(adminUser, adminRole);
                 TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(adminRole,
