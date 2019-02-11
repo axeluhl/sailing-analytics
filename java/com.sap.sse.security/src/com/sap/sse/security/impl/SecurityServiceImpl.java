@@ -796,9 +796,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = createUserInternal(username, email, upa);
-        // ownership is handled by caller
-        addRoleForUser(result,
-                new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
+        addUserRoleToUser(result);
         
         final UserGroup tenant = getOrCreateTenantForUser(result);
         setDefaultTenantForCurrentServerForUser(username, tenant.getId());
@@ -827,6 +825,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }.start();
         }
         return result;
+    }
+
+    private void addUserRoleToUser(final User user) {
+        addRoleForUser(user, new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ user));
     }
     
     private UserGroup getOrCreateTenantForUser(User user) throws UserGroupManagementException {
@@ -1927,13 +1929,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final String tenantNameForUsername = getDefaultTenantNameForUsername(user.getName());
             // if there is already a default creation tenant set for the user, this is not a migration
             // If the user's tenant already exists, this is no migration
-            if (user.getDefaultTenant(ServerInfo.getName()) == null && getUserGroupByName(tenantNameForUsername) == null ) {
+            if (user.getDefaultTenant(ServerInfo.getName()) == null
+                    && getUserGroupByName(tenantNameForUsername) == null) {
                 try {
                     final UserGroup tenantForUser = createTenantForUser(tenantNameForUsername, user);
                     setDefaultTenantForCurrentServerForUser(user.getName(), tenantForUser.getId());
                 } catch (UserGroupManagementException e) {
                     logger.log(Level.SEVERE, "Error during migration while creating tenant for user: " + user, e);
                 }
+                // Only adding user role if it is most probably a migration case
+                // In case an admin removes/changes the user role, it should not be recreated automatically
+                addUserRoleToUser(user);
             }
         }
     }
