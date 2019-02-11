@@ -1921,8 +1921,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void migrateOwnership(final WithQualifiedObjectIdentifier identifier, User userOwnerToSet) {
-        migrateOwnership(identifier.getIdentifier(), userOwnerToSet, identifier.getName());
+    public void migrateUser(final User user) {
+        // If no ownership migration was necessary, this is not a migration
+        if (migrateOwnership(user.getIdentifier(), user, user.getName())) {
+            final String tenantNameForUsername = getDefaultTenantNameForUsername(user.getName());
+            // if there is already a default creation tenant set for the user, this is not a migration
+            // If the user's tenant already exists, this is no migration
+            if (user.getDefaultTenant(ServerInfo.getName()) == null && getUserGroupByName(tenantNameForUsername) == null ) {
+                try {
+                    final UserGroup tenantForUser = createTenantForUser(tenantNameForUsername, user);
+                    setDefaultTenantForCurrentServerForUser(user.getName(), tenantForUser.getId());
+                } catch (UserGroupManagementException e) {
+                    logger.log(Level.SEVERE, "Error during migration while creating tenant for user: " + user, e);
+                }
+            }
+        }
     }
     
     @Override
@@ -1945,7 +1958,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         migrateOwnership(associationQualifiedIdentifier, associationQualifiedIdentifier.toString());
     }
     
-    private void migrateOwnership(final QualifiedObjectIdentifier identifier, User userOwnerToSet, final String displayName) {
+    private boolean migrateOwnership(final QualifiedObjectIdentifier identifier, User userOwnerToSet, final String displayName) {
+        boolean wasNecessaryToMigrate = false;
         final OwnershipAnnotation owner = this.getOwnership(identifier);
         final UserGroup defaultTenant = this.getDefaultTenant();
         // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
@@ -1955,8 +1969,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             logger.info("Permission-Vertical Migration: Setting ownership for: " + identifier + " to default tenant: "
                     + defaultTenant + "; user: " + userOwnerToSet);
             this.setOwnership(identifier, userOwnerToSet, defaultTenant, displayName);
+            wasNecessaryToMigrate = true;
         }
         migratedHasPermissionTypes.add(identifier.getTypeIdentifier());
+        return wasNecessaryToMigrate;
     }
 
     @Override

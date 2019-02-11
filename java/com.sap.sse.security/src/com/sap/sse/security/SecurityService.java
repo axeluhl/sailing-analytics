@@ -425,7 +425,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void migrateOwnership(QualifiedObjectIdentifier object, String displayName);
 
-    void migrateOwnership(WithQualifiedObjectIdentifier identifier, User userOwnerToSet);
+    void migrateUser(User user);
 
     void migratePermission(User user, WildcardPermission permissionToMigrate,
             com.sap.sse.common.Util.Function<WildcardPermission, WildcardPermission> permissionReplacement);
