@@ -124,7 +124,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * all candidates are considered that have at most this much lower probability than the candidate with the
      * highest probability in the contiguous sequence.
      */
-    private static final double MAX_PROBABILITY_DELTA = 0.001;
+    private static final double MAX_PROBABILITY_DELTA = 0.20;
     
     /**
      * If we identify several consecutive candidates that all lie in a bounding box with a {@link Bounds#getDiameter()
@@ -265,6 +265,8 @@ public class CandidateChooserImpl implements CandidateChooser {
             return result;
         }
     }
+    
+    private final StartAndEndAwareTimeBasedCandidateComparator CANDIDATE_COMPARATOR = new StartAndEndAwareTimeBasedCandidateComparator();
 
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.perCompetitorLocks = new HashMap<>();
@@ -281,9 +283,8 @@ public class CandidateChooserImpl implements CandidateChooser {
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
             perCompetitorLocks.put(c, createCompetitorLock(c));
-            final StartAndEndAwareTimeBasedCandidateComparator candidateComparator = new StartAndEndAwareTimeBasedCandidateComparator();
-            candidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(candidateComparator)));
-            filteredCandidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(candidateComparator)));
+            candidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
+            filteredCandidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
             final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
             currentMarkPasses.put(c, currentMarkPassesForCompetitor);
             // in case the tracked race already has mark passings, e.g., from another mark passing calculator,
@@ -1006,16 +1007,22 @@ public class CandidateChooserImpl implements CandidateChooser {
     private void findNewAndRemovedCandidates(Competitor competitor, SortedSet<Candidate> contiguousCandidateSequence,
             Set<Candidate> candidatesAddedToFiltered, Set<Candidate> candidatesRemovedFromFiltered) {
         assert !contiguousCandidateSequence.isEmpty();
+        final SortedSet<Candidate> candidatesPreviouslyPassingFilter = filteredCandidates.get(competitor).subSet(contiguousCandidateSequence.first(),
+                /* fromInclusive */ true, contiguousCandidateSequence.last(), /* toInclusive */ true);
         ArrayList<Candidate> sortedByProbabilityFromLowToHigh = new ArrayList<>(contiguousCandidateSequence);
         Collections.sort(sortedByProbabilityFromLowToHigh, (c1, c2)->Double.compare(c1.getProbability(), c2.getProbability()));
         double maxProbability = sortedByProbabilityFromLowToHigh.get(sortedByProbabilityFromLowToHigh.size()-1).getProbability();
-        for (int i=sortedByProbabilityFromLowToHigh.size()-1; i>=0 && sortedByProbabilityFromLowToHigh.get(i).getProbability()+MAX_PROBABILITY_DELTA >= maxProbability; i--) {
-            candidatesAddedToFiltered.add(sortedByProbabilityFromLowToHigh.get(i));
+        Set<Candidate> candidatesAcceptedFromSequence = new HashSet<>();
+        Candidate currentCandidate;
+        for (int i=sortedByProbabilityFromLowToHigh.size()-1; i>=0 &&
+                (currentCandidate=sortedByProbabilityFromLowToHigh.get(i)).getProbability()+MAX_PROBABILITY_DELTA >= maxProbability; i--) {
+            candidatesAcceptedFromSequence.add(currentCandidate);
+            if (!candidatesPreviouslyPassingFilter.contains(currentCandidate)) {
+                candidatesAddedToFiltered.add(currentCandidate);
+            }
         }
-        final SortedSet<Candidate> candidatesPreviouslyPassingFilter = filteredCandidates.get(competitor).subSet(contiguousCandidateSequence.first(),
-                /* fromInclusive */ true, contiguousCandidateSequence.last(), /* toInclusive */ true);
         for (final Candidate candidateThatPreviouslyPassedFilter : candidatesPreviouslyPassingFilter) {
-            if (!candidatesAddedToFiltered.contains(candidateThatPreviouslyPassedFilter)) {
+            if (!candidatesAcceptedFromSequence.contains(candidateThatPreviouslyPassedFilter)) {
                 candidatesRemovedFromFiltered.add(candidateThatPreviouslyPassedFilter);
             }
         }
@@ -1069,7 +1076,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      *            whether or not to include {@code startFrom} in the resulting set
      */
     private NavigableSet<Candidate> getTimeWiseContiguousDistanceCandidates(NavigableSet<Candidate> competitorCandidates, Candidate startFrom, boolean includeStartFrom) {
-        final NavigableSet<Candidate> result = new TreeSet<>(TimedComparator.INSTANCE);
+        final NavigableSet<Candidate> result = new TreeSet<>(CANDIDATE_COMPARATOR);
         if (includeStartFrom) {
             result.add(startFrom);
         }

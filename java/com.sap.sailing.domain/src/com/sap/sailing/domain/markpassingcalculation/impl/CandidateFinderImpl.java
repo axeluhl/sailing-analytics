@@ -690,7 +690,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t = fix.getTimePoint();
                                     final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(race, t);
                                     p = fix.getPosition();
-                                    Double newProbability = getDistanceBasedProbability(w, t, dis, markPositionCache);
+                                    Double newProbability = getDistanceBasedProbability(w, t, dis, markPositionCache, race.getBoatOfCompetitor(c).getBoatClass().getHullLength());
                                     if (newProbability != null) {
                                         // FIXME why not generate the candidate here where we have all information at hand?
                                         final double newOnCorrectSideOfWaypointPenalty = getSidePenalty(w, p, t, portMark, markPositionCache);
@@ -965,7 +965,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         final Distance d = portMark ? distances.get(0) : distances.get(1);
         final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(race, t);
         final double sidePenalty = getSidePenalty(w, p, t, portMark, markPositionCache);
-        final Double distanceBasedProbability = getDistanceBasedProbability(w, t, d, markPositionCache);
+        final Double distanceBasedProbability = getDistanceBasedProbability(w, t, d, markPositionCache, race.getBoatOfCompetitor(c).getBoatClass().getHullLength());
         double probability = distanceBasedProbability == null ? sidePenalty : distanceBasedProbability * sidePenalty;
         final Double passesInTheRightDirectionProbability = passesInTheRightDirection(w, xte1, xte2, portMark);
         // null would mean "unknown"; no penalty for those cases
@@ -1300,9 +1300,10 @@ public class CandidateFinderImpl implements CandidateFinder {
      * @return a probability based on the distance to <code>w</code>; for single marks the average leg lengths before
      *         and after the waypoint {@code w} is also taken into account; for two-mark waypoints such as gates and
      *         lines it seems fair to assume that the length of the adjacent legs should not play a role in how accurate
-     *         the competitor needs to pass the waypoint.
+     *         the competitor needs to pass the waypoint. Here, the hull length is taken into account, assuming that the distance
+     *         from the waypoint will be influenced by the size of the boat, specifically in "traffic."
      */
-    private Double getDistanceBasedProbability(Waypoint w, TimePoint t, Distance distance, MarkPositionAtTimePointCache markPositionCache) {
+    private Double getDistanceBasedProbability(Waypoint w, TimePoint t, Distance distance, MarkPositionAtTimePointCache markPositionCache, Distance hullLength) {
         assert t.equals(markPositionCache.getTimePoint());
         assert race == markPositionCache.getTrackedRace();
         assert distance.getMeters() >= 0;
@@ -1310,8 +1311,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         if (Util.size(w.getControlPoint().getMarks())>1) {
             result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
                     // for a two-mark control point such as a gate or a line only consider the relation of
-                    // the distance to 150x the typical HDOP error; 
-                    * Math.abs(Math.max(0.0, distance.divide(GPSFix.TYPICAL_HDOP.scale(150)))) + 1);
+                    // the distance to 150x the boat length after taking off 2xHDOP and two boat lengths 
+                    * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.add(hullLength).scale(-2)).
+                            divide(hullLength.scale(150)))) + 1);
         } else {
             Distance legLength = getAverageLengthOfAdjacentLegs(t, w, markPositionCache);
             if (legLength != null) {
