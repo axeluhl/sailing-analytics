@@ -148,6 +148,11 @@ public class Activator implements BundleActivator {
     }
     
     private void createRoleDefinitionsFromPrototypes(UserStore userStore) {
+        if (rolePrototypeProviderTracker != null) {
+            // In test cases, this method will be called multiple times. To not leak ServiceTracker instances, we need
+            // to correctly stop he previously used instance.
+            rolePrototypeProviderTracker.close();
+        }
         rolePrototypeProviderTracker = new ServiceTracker<>(
                 context, RolePrototypeProvider.class, /* customizer */ new ServiceTrackerCustomizer<RolePrototypeProvider, RolePrototypeProvider>() {
                     @Override
