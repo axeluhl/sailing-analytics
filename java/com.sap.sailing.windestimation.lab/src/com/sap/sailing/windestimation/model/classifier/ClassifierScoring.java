@@ -12,12 +12,11 @@ import smile.validation.ConfusionMatrix;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ClassifierScoring<InstanceType, T extends ModelContext<InstanceType>>
-        extends ConfusionMatrixScoring {
+public class ClassifierScoring<InstanceType, MC extends ModelContext<InstanceType>> extends ConfusionMatrixScoring {
 
-    private TrainableClassificationModel<InstanceType, T> trainedClassifier;
+    private TrainableClassificationModel<InstanceType, MC> trainedClassifier;
 
-    public ClassifierScoring(TrainableClassificationModel<InstanceType, T> trainedClassifierModel,
+    public ClassifierScoring(TrainableClassificationModel<InstanceType, MC> trainedClassifierModel,
             Function<Integer, String> indexOfTargetValueToLabelMapper) {
         super(trainedClassifierModel.getClass().getSimpleName(), indexOfTargetValueToLabelMapper);
         this.trainedClassifier = trainedClassifierModel;
@@ -34,8 +33,8 @@ public class ClassifierScoring<InstanceType, T extends ModelContext<InstanceType
         return printScoring(confusionMatrix);
     }
 
-    public String printScoring(List<? extends InstanceType> instances, LabelExtraction<InstanceType> labelExtraction) {
-        T modelContext = trainedClassifier.getModelContext();
+    public <T extends InstanceType> String printScoring(List<T> instances, LabelExtraction<T> labelExtraction) {
+        MC modelContext = trainedClassifier.getModelContext();
         double[][] x = new double[instances.size()][];
         int[] y = labelExtraction.getYVector(instances);
         int i = 0;

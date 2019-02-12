@@ -25,14 +25,12 @@ public class TwdTransitionClassifierModelFactory
     @Override
     public List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext>> getAllTrainableModels(
             TwdTransitionClassifierModelContext modelContext) {
-        TwdTransitionClassifierModelContext clonedModelContext = new TwdTransitionClassifierModelContext(
-                modelContext.getManeuverTypeTransition());
         List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext>> classifiers = new ArrayList<>();
-        classifiers.add(new NeuralNetworkClassifier<>(clonedModelContext));
-        classifiers.add(new LogisticRegressionClassifier<>(clonedModelContext));
-        classifiers.add(new NaiveBayesClassifier<>(clonedModelContext));
-        classifiers.add(new LDAClassifier<>(clonedModelContext));
-        classifiers.add(new QDAClassifier<>(clonedModelContext));
+        classifiers.add(new NeuralNetworkClassifier<>(modelContext));
+        classifiers.add(new LogisticRegressionClassifier<>(modelContext));
+        classifiers.add(new NaiveBayesClassifier<>(modelContext));
+        classifiers.add(new LDAClassifier<>(modelContext));
+        classifiers.add(new QDAClassifier<>(modelContext));
         return classifiers;
     }
 
@@ -40,8 +38,8 @@ public class TwdTransitionClassifierModelFactory
     public List<TwdTransitionClassifierModelContext> getAllValidModelContexts(
             TwdTransitionClassifierModelContext modelContextWithMaxFeatures) {
         List<TwdTransitionClassifierModelContext> modelContextCandidates = new ArrayList<>();
-        modelContextCandidates.add(new TwdTransitionClassifierModelContext(
-                modelContextWithMaxFeatures.getManeuverTypeTransition()));
+        modelContextCandidates
+                .add(new TwdTransitionClassifierModelContext(modelContextWithMaxFeatures.getManeuverTypeTransition()));
         return modelContextCandidates;
     }
 

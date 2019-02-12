@@ -27,10 +27,8 @@ public class ManeuverClassifierModelFactory
     @Override
     public List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> getAllTrainableModels(
             ManeuverClassifierModelContext modelContext) {
-        ManeuverClassifierModelContext clonedModelContext = createModelContext(modelContext.getManeuverFeatures(),
-                modelContext.getBoatClassName());
         List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> classifiers = new ArrayList<>();
-        classifiers.add(new NeuralNetworkClassifier<>(clonedModelContext));
+        classifiers.add(new NeuralNetworkClassifier<>(modelContext));
         List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> suitableClassifiers = classifiers
                 .stream().filter(classifier -> classifier.hasSupportForProvidedFeatures()).collect(Collectors.toList());
         return suitableClassifiers;

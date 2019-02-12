@@ -8,7 +8,7 @@ import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
-public class ManeuverClassifierModelContext extends ModelContext<ManeuverForEstimation> {
+public final class ManeuverClassifierModelContext extends ModelContext<ManeuverForEstimation> {
 
     private static final long serialVersionUID = -7074647974723150672L;
     private final ManeuverFeatures maneuverFeatures;

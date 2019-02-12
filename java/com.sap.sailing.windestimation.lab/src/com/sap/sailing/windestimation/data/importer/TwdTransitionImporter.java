@@ -19,7 +19,6 @@ import com.sap.sailing.windestimation.data.LabelledTwdTransition;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
@@ -49,7 +48,7 @@ public class TwdTransitionImporter {
             List<ManeuverWithProbabilisticTypeClassification> sortedManeuvers = getPreprocessedSortedManeuvers(
                     maneuverClassifier, preprocessingPipeline, race);
             if (sortedManeuvers.size() > 1) {
-                List<TwdTransition> twdTransitions = getTwdTransitions(sortedManeuvers, race.getRegattaName());
+                List<LabelledTwdTransition> twdTransitions = getTwdTransitions(sortedManeuvers, race.getRegattaName());
                 int numberOfTwdTransitions = twdTransitions.size();
                 twdTransitionPersistenceManager.add(twdTransitions);
                 twdTransitionsCount += numberOfTwdTransitions;
@@ -83,11 +82,11 @@ public class TwdTransitionImporter {
         return sortedManeuvers;
     }
 
-    private static List<TwdTransition> getTwdTransitions(
+    private static List<LabelledTwdTransition> getTwdTransitions(
             List<ManeuverWithProbabilisticTypeClassification> sortedManeuvers, String regattaName) {
         SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator = new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator(
                 true);
-        List<TwdTransition> result = new ArrayList<>(sortedManeuvers.size()
+        List<LabelledTwdTransition> result = new ArrayList<>(sortedManeuvers.size()
                 * ManeuverTypeForClassification.values().length * ManeuverTypeForClassification.values().length);
         int maneuverIndex = 0;
         for (ManeuverWithProbabilisticTypeClassification previousManeuver : sortedManeuvers) {

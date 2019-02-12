@@ -13,7 +13,7 @@ public interface ModelFactory<InstanceType, T extends ModelContext<InstanceType>
     List<T> getAllValidModelContexts(T modelContextWithMaxFeatures);
 
     default ModelDomainType getPersistenceContextType() {
-        return getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures().getContextType();
+        return getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures().getDomainType();
     }
 
     T getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures();

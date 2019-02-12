@@ -4,14 +4,13 @@ import java.io.Serializable;
 
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
-public abstract class ModelContext<InstanceType>
-        implements Serializable, FeatureExtraction<InstanceType> {
+public abstract class ModelContext<InstanceType> implements Serializable, FeatureExtraction<InstanceType> {
 
     private static final long serialVersionUID = 5069029031816423989L;
-    private final ModelDomainType contextType;
+    private final ModelDomainType domainType;
 
-    public ModelContext(ModelDomainType contextType) {
-        this.contextType = contextType;
+    public ModelContext(ModelDomainType domainType) {
+        this.domainType = domainType;
     }
 
     @Override
@@ -27,8 +26,8 @@ public abstract class ModelContext<InstanceType>
 
     public abstract String getId();
 
-    public ModelDomainType getContextType() {
-        return contextType;
+    public ModelDomainType getDomainType() {
+        return domainType;
     }
 
 }

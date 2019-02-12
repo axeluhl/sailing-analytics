@@ -35,7 +35,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
             ModelType newModel) throws ModelPersistenceException {
         ModelSerializationStrategy persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getPersistenceKey(newModel);
-        String bucketName = getCollectionName(newModel.getModelContext().getContextType());
+        String bucketName = getCollectionName(newModel.getModelContext().getDomainType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try (GridFSDownloadStream inputStream = gridFs.openDownloadStream(fileName)) {
             ModelContext<?> requestedModelContext = newModel.getModelContext();
@@ -53,7 +53,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
     public void persistModel(PersistableModel<?, ?> trainedModel) throws ModelPersistenceException {
         ModelSerializationStrategy persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         String newFileName = getPersistenceKey(trainedModel);
-        String bucketName = getCollectionName(trainedModel.getModelContext().getContextType());
+        String bucketName = getCollectionName(trainedModel.getModelContext().getDomainType());
         GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
         try {
             try (OutputStream outputStream = gridFs.openUploadStream(newFileName)) {

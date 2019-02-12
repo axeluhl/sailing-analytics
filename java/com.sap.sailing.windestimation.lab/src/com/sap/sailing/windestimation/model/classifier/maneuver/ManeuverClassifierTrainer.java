@@ -20,8 +20,8 @@ import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAc
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
-import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
+import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.Util.Pair;
 
@@ -43,7 +43,7 @@ public class ManeuverClassifierTrainer {
 
     public void trainClassifier(
             TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel,
-            LabelExtraction<ManeuverForEstimation> labelExtraction) throws Exception {
+            LabelExtraction<LabelledManeuverForEstimation> labelExtraction) throws Exception {
         ManeuverClassifierModelContext modelContext = classifierModel.getModelContext();
         List<LabelledManeuverForEstimation> maneuvers = getSuitableManeuvers(modelContext);
         LoggingUtil.logInfo("Using " + maneuvers.size() + " maneuvers");
@@ -120,13 +120,14 @@ public class ManeuverClassifierTrainer {
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
             LoggingUtil.logInfo(
                     "### Training classifier for all boat classes with maneuver features: " + maneuverFeatures);
-            LabelledManeuverClassifierModelContext modelContext = new LabelledManeuverClassifierModelContext(
-                    maneuverFeatures, null, ManeuverClassifierModelFactory.orderedSupportedTargetValues);
+            ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures, null,
+                    ManeuverClassifierModelFactory.orderedSupportedTargetValues);
+            ManeuverLabelExtraction labelExtraction = new ManeuverLabelExtraction(modelContext);
             List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> allTrainableModels = classifierModelFactory
                     .getAllTrainableModels(modelContext);
             for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : allTrainableModels) {
                 LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
-                classifierTrainer.trainClassifier(classifierModel, modelContext);
+                classifierTrainer.trainClassifier(classifierModel, labelExtraction);
             }
         }
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
@@ -135,14 +136,14 @@ public class ManeuverClassifierTrainer {
             for (BoatClass boatClass : allBoatClasses) {
                 LoggingUtil.logInfo("### Training classifier for boat class " + boatClass + " with maneuver features: "
                         + maneuverFeatures);
-                LabelledManeuverClassifierModelContext modelContext = new LabelledManeuverClassifierModelContext(
-                        maneuverFeatures, boatClass.getName(),
-                        ManeuverClassifierModelFactory.orderedSupportedTargetValues);
+                ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures,
+                        boatClass.getName(), ManeuverClassifierModelFactory.orderedSupportedTargetValues);
+                ManeuverLabelExtraction labelExtraction = new ManeuverLabelExtraction(modelContext);
                 List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> allTrainableClassifierModels = classifierModelFactory
                         .getAllTrainableModels(modelContext);
                 for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : allTrainableClassifierModels) {
                     LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
-                    classifierTrainer.trainClassifier(classifierModel, modelContext);
+                    classifierTrainer.trainClassifier(classifierModel, labelExtraction);
                 }
             }
         }

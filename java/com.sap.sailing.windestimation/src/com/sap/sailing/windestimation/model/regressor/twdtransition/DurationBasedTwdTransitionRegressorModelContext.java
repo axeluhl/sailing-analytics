@@ -3,7 +3,7 @@ package com.sap.sailing.windestimation.model.regressor.twdtransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
-public class DurationBasedTwdTransitionRegressorModelContext
+public final class DurationBasedTwdTransitionRegressorModelContext
         extends SingleDimensionBasedTwdTransitionRegressorModelContext {
 
     private static final String DIMENSION_NAME = "Duration";

@@ -47,7 +47,7 @@ public abstract class AbstractModelStoreImpl implements ModelStore {
     protected String getPersistenceKey(PersistableModel<?, ?> persistableModel) {
         StringBuilder fileName = new StringBuilder();
         fileName.append(getPersistenceKeyPartOfModelSerializationType(persistableModel.getPersistenceSupportType()));
-        ModelDomainType domainType = persistableModel.getModelContext().getContextType();
+        ModelDomainType domainType = persistableModel.getModelContext().getDomainType();
         fileName.append(getPersistenceKeyPartOfModelDomain(domainType));
         fileName.append(persistableModel.getClass().getSimpleName());
         fileName.append(NAME_PART_DELIMITER);

@@ -29,7 +29,7 @@ public class PersistedTwdTransitionClassifiersScorePrinter {
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();
         LoggingUtil.logInfo("### Loading classifiers:");
         for (ManeuverTypeTransition maneuverTypeTransition : ManeuverTypeTransition.values()) {
-            LabelledTwdTransitionClassifierModelContext modelContext = new LabelledTwdTransitionClassifierModelContext(
+            TwdTransitionClassifierModelContext modelContext = new TwdTransitionClassifierModelContext(
                     maneuverTypeTransition);
             List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext>> classifierModels = classifierModelFactory
                     .getAllTrainableModels(modelContext);

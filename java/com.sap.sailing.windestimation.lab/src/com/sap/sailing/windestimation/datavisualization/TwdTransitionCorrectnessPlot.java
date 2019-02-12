@@ -17,7 +17,6 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.statistics.HistogramDataset;
 
 import com.sap.sailing.windestimation.data.LabelledTwdTransition;
-import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransitionPersistenceManager;
 import com.sap.sailing.windestimation.data.serialization.TwdTransitionJsonSerializer;
@@ -51,7 +50,7 @@ public class TwdTransitionCorrectnessPlot extends JFrame {
                 .countElements(new Document(TwdTransitionJsonSerializer.CORRECT, false))];
         int i = 0;
         int j = 0;
-        for (PersistedElementsIterator<TwdTransition> iterator = persistenceManager.getIterator(); iterator
+        for (PersistedElementsIterator<LabelledTwdTransition> iterator = persistenceManager.getIterator(); iterator
                 .hasNext();) {
             LabelledTwdTransition twdTransition = (LabelledTwdTransition) iterator.next();
             if (twdTransition.isCorrect()) {

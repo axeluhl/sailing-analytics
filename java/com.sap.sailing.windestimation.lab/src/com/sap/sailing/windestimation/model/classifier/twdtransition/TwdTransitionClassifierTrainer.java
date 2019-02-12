@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
+import com.sap.sailing.windestimation.data.LabelledTwdTransition;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
@@ -7,9 +8,9 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.TwdTransiti
 import com.sap.sailing.windestimation.data.serialization.TwdTransitionJsonSerializer;
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
-import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class TwdTransitionClassifierTrainer {
@@ -43,7 +44,7 @@ public class TwdTransitionClassifierTrainer {
 
     public void trainClassifier(
             TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext> classifierModel,
-            LabelExtraction<TwdTransition> labelExtraction) throws Exception {
+            LabelExtraction<LabelledTwdTransition> labelExtraction) throws Exception {
         TwdTransitionClassifierModelContext modelContext = classifierModel.getModelContext();
         LoggingUtil.logInfo("Querying dataset...");
         String query = "Invalid query";
@@ -84,7 +85,7 @@ public class TwdTransitionClassifierTrainer {
                     getAndClauseForQuery(ManeuverTypeForClassification.HEAD_UP, ManeuverTypeForClassification.HEAD_UP));
             break;
         }
-        PersistedElementsIterator<TwdTransition> iterator = persistenceManager.getIterator(query);
+        PersistedElementsIterator<LabelledTwdTransition> iterator = persistenceManager.getIterator(query);
         int numberOfTrainingInstances = (int) iterator.getNumberOfElements();
         LoggingUtil.logInfo("Using " + numberOfTrainingInstances + " twd transitions instances");
         LoggingUtil.logInfo("Allocating array...");
@@ -93,7 +94,7 @@ public class TwdTransitionClassifierTrainer {
         int i = 0;
         LoggingUtil.logInfo("Converting dataset to array...");
         while (iterator.hasNext()) {
-            TwdTransition twdTransition = iterator.next();
+            LabelledTwdTransition twdTransition = iterator.next();
             x[i][0] = modelContext.getXAsSingleValue(twdTransition);
             y[i] = labelExtraction.getY(twdTransition);
             i++;
@@ -117,15 +118,16 @@ public class TwdTransitionClassifierTrainer {
         classifierModelStore.deleteAll(ModelDomainType.TWD_TRANSITION_CLASSIFIER);
         TwdTransitionClassifierTrainer classifierTrainer = new TwdTransitionClassifierTrainer(persistenceManager,
                 classifierModelStore);
+        TwdTransitionLabelExtraction labelExtraction = new TwdTransitionLabelExtraction();
         TwdTransitionClassifierModelFactory classifierModelFactory = new TwdTransitionClassifierModelFactory();
         for (ManeuverTypeTransition maneuverTypeTransition : ManeuverTypeTransition.values()) {
-            LabelledTwdTransitionClassifierModelContext modelContext = new LabelledTwdTransitionClassifierModelContext(
+            TwdTransitionClassifierModelContext modelContext = new TwdTransitionClassifierModelContext(
                     maneuverTypeTransition);
             LoggingUtil.logInfo("## ManeuverTypeTransition: " + maneuverTypeTransition);
             for (TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext> model : classifierModelFactory
                     .getAllTrainableModels(modelContext)) {
                 LoggingUtil.logInfo("## Classifier: " + model.getClass().getName());
-                classifierTrainer.trainClassifier(model, modelContext);
+                classifierTrainer.trainClassifier(model, labelExtraction);
             }
         }
     }

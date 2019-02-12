@@ -5,10 +5,11 @@ import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
 /**
  * Context definition
+ * 
  * @author Vladislav Chumak (D069712)
  *
  */
-public class DistanceBasedTwdTransitionRegressorModelContext
+public final class DistanceBasedTwdTransitionRegressorModelContext
         extends SingleDimensionBasedTwdTransitionRegressorModelContext {
 
     private static final String DIMENSION_NAME = "Distance";

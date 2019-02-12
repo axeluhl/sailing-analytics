@@ -4,9 +4,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.windestimation.data.LabelledTwdTransition;
-import com.sap.sailing.windestimation.data.TwdTransition;
 
-public class TwdTransitionJsonSerializer implements JsonSerializer<TwdTransition> {
+public class TwdTransitionJsonSerializer implements JsonSerializer<LabelledTwdTransition> {
 
     public static final String DURATION = "s";
     public static final String DISTANCE = "m";
@@ -17,18 +16,15 @@ public class TwdTransitionJsonSerializer implements JsonSerializer<TwdTransition
     public static final String TEST_DATASET = "test";
 
     @Override
-    public JSONObject serialize(TwdTransition transition) {
+    public JSONObject serialize(LabelledTwdTransition transition) {
         JSONObject json = new JSONObject();
         json.put(DURATION, transition.getDuration().asSeconds());
         json.put(DISTANCE, transition.getDistance().getMeters());
         json.put(TWD_CHANGE, transition.getTwdChange().getDegrees());
         json.put(FROM_MANEUVER_TYPE, transition.getFromManeuverType().ordinal());
         json.put(TO_MANEUVER_TYPE, transition.getToManeuverType().ordinal());
-        if (transition instanceof LabelledTwdTransition) {
-            LabelledTwdTransition labelledTransition = (LabelledTwdTransition) transition;
-            json.put(CORRECT, labelledTransition.isCorrect());
-            json.put(TEST_DATASET, labelledTransition.isTestDataset());
-        }
+        json.put(CORRECT, transition.isCorrect());
+        json.put(TEST_DATASET, transition.isTestDataset());
         return json;
     }
 
