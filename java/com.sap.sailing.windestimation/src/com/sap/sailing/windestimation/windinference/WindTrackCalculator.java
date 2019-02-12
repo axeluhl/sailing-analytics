@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 

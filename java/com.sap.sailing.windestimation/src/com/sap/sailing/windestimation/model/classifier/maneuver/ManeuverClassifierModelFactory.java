@@ -5,10 +5,17 @@ import java.util.List;
 
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.model.ModelFactory;
 import com.sap.sailing.windestimation.model.classifier.ClassifierModelFactory;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.classifier.smile.NeuralNetworkClassifier;
 
+/**
+ * {@link ModelFactory} for maneuver classifiers.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverClassifierModelFactory
         implements ClassifierModelFactory<ManeuverForEstimation, ManeuverClassifierModelContext> {
 

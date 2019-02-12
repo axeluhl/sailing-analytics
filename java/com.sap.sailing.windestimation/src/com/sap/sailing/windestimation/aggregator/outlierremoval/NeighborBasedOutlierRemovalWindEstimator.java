@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.aggregator.outlierremoval;
 
 import java.util.List;
 
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.windinference.TwdFromManeuverCalculator;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util.Pair;

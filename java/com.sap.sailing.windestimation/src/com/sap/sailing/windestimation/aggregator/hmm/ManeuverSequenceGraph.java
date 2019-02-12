@@ -6,8 +6,8 @@ import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
+import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 /**

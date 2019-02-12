@@ -5,6 +5,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 
 /**
+ * Represents maneuver classifications backed by a classification model.
  * 
  * @author Vladislav Chumak (D069712)
  *

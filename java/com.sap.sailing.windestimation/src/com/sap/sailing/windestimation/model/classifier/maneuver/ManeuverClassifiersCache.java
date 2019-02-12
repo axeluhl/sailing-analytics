@@ -2,9 +2,16 @@ package com.sap.sailing.windestimation.model.classifier.maneuver;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.model.ModelCache;
 import com.sap.sailing.windestimation.model.classifier.AbstractClassifiersCache;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 
+/**
+ * {@link ModelCache} which manages maneuver classifiers.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverClassifiersCache extends
         AbstractClassifiersCache<ManeuverForEstimation, ManeuverClassifierModelContext, ManeuverWithProbabilisticTypeClassification> {
 

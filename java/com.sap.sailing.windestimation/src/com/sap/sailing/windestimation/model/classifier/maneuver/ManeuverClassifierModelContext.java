@@ -8,6 +8,24 @@ import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
+/**
+ * Model context for maneuver classifiers. The context is defined by the following attributes:
+ * <ul>
+ * <li>maneuver features:
+ * <ul>
+ * <li>mark features yes/no</li>
+ * <li>polar features yes/no</li>
+ * <li>scaled speed features yes/no</li>
+ * </ul>
+ * </li>
+ * <li>Boat class name: {@code null} if all boat classes are used for training, otherwise the name of boat class which
+ * on which the training data was filtered</li>
+ * </ul>
+ * Furthermore this model context contains information about the maneuver type mapping in categorical integers from 0..n
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public final class ManeuverClassifierModelContext extends ModelContext<ManeuverForEstimation> {
 
     private static final long serialVersionUID = -7074647974723150672L;
@@ -15,8 +33,20 @@ public final class ManeuverClassifierModelContext extends ModelContext<ManeuverF
     private final String boatClassName;
     protected final int[] indexToManeuverTypeOrdinalMapping;
     private final int numberOfSupportedManeuverTypes;
-    private final int otherTypes;
+    private final int numberOfOtherTypes;
 
+    /**
+     * Constructs an instance of maneuver model context used for maneuver type classifiers.
+     * 
+     * @param maneuverFeatures
+     *            The features on which the model is trained for this context.
+     * @param boatClassName
+     *            The boat class name, for which the training data is filtered. {@code null} means that the model should
+     *            be trained considering the data of all boat classes.
+     * @param orderedSupportedTargetValues
+     *            The maneuver types which will be classified by the model associated with this context. Not specified
+     *            maneuver types will be classified together as one artificial maneuver type called "other".
+     */
     public ManeuverClassifierModelContext(ManeuverFeatures maneuverFeatures, String boatClassName,
             ManeuverTypeForClassification... orderedSupportedTargetValues) {
         super(ModelDomainType.MANEUVER_CLASSIFIER);
@@ -30,15 +60,15 @@ public final class ManeuverClassifierModelContext extends ModelContext<ManeuverF
         for (ManeuverTypeForClassification supportedManeuverType : orderedSupportedTargetValues) {
             indexToManeuverTypeOrdinalMapping[supportedManeuverType.ordinal()] = i++;
         }
-        int others = 0;
+        int numberOfOtherTypes = 0;
         for (int j = 0; j < indexToManeuverTypeOrdinalMapping.length; j++) {
             if (indexToManeuverTypeOrdinalMapping[j] == -1) {
                 indexToManeuverTypeOrdinalMapping[j] = i;
-                others++;
+                numberOfOtherTypes++;
             }
         }
-        this.otherTypes = others;
-        numberOfSupportedManeuverTypes = i + (others > 0 ? 1 : 0);
+        this.numberOfOtherTypes = numberOfOtherTypes;
+        numberOfSupportedManeuverTypes = i + (numberOfOtherTypes > 0 ? 1 : 0);
     }
 
     public ManeuverFeatures getManeuverFeatures() {
@@ -60,7 +90,7 @@ public final class ManeuverClassifierModelContext extends ModelContext<ManeuverF
             int mappedI = indexToManeuverTypeOrdinalMapping[j];
             likelihoodsPerManeuverTypes[j] = likelihoodsFromModel[mappedI];
         }
-        if (otherTypes > 1) {
+        if (numberOfOtherTypes > 1) {
             ProbabilityUtil.normalizeLikelihoodArray(likelihoodsPerManeuverTypes);
         }
         return likelihoodsPerManeuverTypes;
@@ -118,7 +148,7 @@ public final class ManeuverClassifierModelContext extends ModelContext<ManeuverF
     }
 
     public int getOtherTypes() {
-        return otherTypes;
+        return numberOfOtherTypes;
     }
 
     @Override

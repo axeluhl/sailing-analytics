@@ -2,17 +2,23 @@ package com.sap.sailing.windestimation.model.classifier.maneuver;
 
 import java.io.Serializable;
 
+/**
+ * Contains the enabled categories of input features for maneuver classifiers.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverFeatures implements Serializable {
 
     private static final long serialVersionUID = -695419180697024150L;
-    
+
     private static final ManeuverFeatures[] values = new ManeuverFeatures[8];
-    
+
     static {
         int i = 0;
-        for(int polars = 0; polars <= 1; polars++) {
-            for(int scaledSpeed = 0; scaledSpeed <= 1; scaledSpeed++) {
-                for(int marks = 0; marks <= 1; marks++) {
+        for (int polars = 0; polars <= 1; polars++) {
+            for (int scaledSpeed = 0; scaledSpeed <= 1; scaledSpeed++) {
+                for (int marks = 0; marks <= 1; marks++) {
                     values[i++] = new ManeuverFeatures(polars == 0, scaledSpeed == 0, marks == 0);
                 }
             }
@@ -36,14 +42,14 @@ public class ManeuverFeatures implements Serializable {
     public boolean isScaledSpeed() {
         return scaledSpeed;
     }
-    
+
     public boolean isMarksInformation() {
         return marksInformation;
     }
 
     public boolean isSubset(ManeuverFeatures superSet) {
-        return (!polarsInformation || superSet.polarsInformation)
-                && (!scaledSpeed || superSet.scaledSpeed) && (!marksInformation || superSet.marksInformation);
+        return (!polarsInformation || superSet.polarsInformation) && (!scaledSpeed || superSet.scaledSpeed)
+                && (!marksInformation || superSet.marksInformation);
     }
 
     @Override
@@ -56,7 +62,7 @@ public class ManeuverFeatures implements Serializable {
             if (scaledSpeed) {
                 str.append("ScaledSpeed");
             }
-            if(marksInformation) {
+            if (marksInformation) {
                 str.append("Marks");
             }
             return str.toString();

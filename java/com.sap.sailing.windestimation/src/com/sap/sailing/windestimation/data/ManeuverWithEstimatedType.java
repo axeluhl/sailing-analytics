@@ -1,8 +1,11 @@
-package com.sap.sailing.windestimation.model.classifier.maneuver;
+package com.sap.sailing.windestimation.data;
 
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
-
+/**
+ * Represents a final maneuver classification with estimated maneuver type and its confidence.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverWithEstimatedType implements Comparable<ManeuverWithEstimatedType> {
 
     private final ManeuverForEstimation maneuver;

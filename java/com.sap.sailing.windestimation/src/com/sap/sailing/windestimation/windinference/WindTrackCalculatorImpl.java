@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.util.WindUtil;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;

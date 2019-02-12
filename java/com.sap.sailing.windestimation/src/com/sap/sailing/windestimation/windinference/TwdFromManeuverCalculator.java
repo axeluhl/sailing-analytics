@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.windinference;
 
 import java.io.Serializable;
 
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sse.common.Bearing;
 
 /**

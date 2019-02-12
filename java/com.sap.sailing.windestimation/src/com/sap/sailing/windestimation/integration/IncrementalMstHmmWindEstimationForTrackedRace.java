@@ -25,8 +25,8 @@ import com.sap.sailing.windestimation.aggregator.msthmm.DistanceAndDurationAware
 import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculator;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculatorImpl;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
+import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
 import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculatorImpl;

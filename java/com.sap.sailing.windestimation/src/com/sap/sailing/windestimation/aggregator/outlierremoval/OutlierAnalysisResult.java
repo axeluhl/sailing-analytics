@@ -3,7 +3,7 @@ package com.sap.sailing.windestimation.aggregator.outlierremoval;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 
 public class OutlierAnalysisResult {
 
