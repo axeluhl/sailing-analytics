@@ -1938,6 +1938,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 // Only adding user role if it is most probably a migration case
                 // In case an admin removes/changes the user role, it should not be recreated automatically
                 addUserRoleToUser(user);
+                
+                final RoleDefinition adminRoleDefinition = getRoleDefinition(AdminRole.getInstance().getId());
+                for (Role roleOfUser : user.getRoles()) {
+                    if (roleOfUser.getRoleDefinition().equals(adminRoleDefinition)) {
+                        final UserGroup defaultTenant = getDefaultTenant();
+                        if (roleOfUser.getQualifiedForTenant() == null
+                                || roleOfUser.getQualifiedForTenant().equals(defaultTenant)) {
+                            // The user is a server admin -> Add it to the server group to allow setting the server
+                            // group as default creation group
+                            addUserToUserGroup(defaultTenant, user);
+                        }
+                    }
+                }
             }
         }
     }
