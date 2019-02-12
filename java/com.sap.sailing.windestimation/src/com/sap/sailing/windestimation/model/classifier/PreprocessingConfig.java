@@ -3,8 +3,9 @@ package com.sap.sailing.windestimation.model.classifier;
 import java.io.Serializable;
 
 /**
- * Represents pre-processing configuration of a model. The configured pre-processing must be applied on the input
- * feature vector before it will be forwarded to the model for training or predicting.
+ * Represents pre-processing configuration of a model. The pre-processing can include feature scaling with
+ * Standardization and dimensionality reduction with Principal Component Analysis (PCA). The configured pre-processing
+ * must be applied on the input feature vector before it will be forwarded to the model for training or predicting.
  * 
  * @author Vladislav Chumak (D069712)
  *

@@ -5,13 +5,26 @@ import com.sap.sailing.windestimation.model.classifier.PreprocessingConfig.Prepr
 
 import smile.classification.NeuralNetwork;
 
-public class NeuralNetworkClassifier<InstanceType, T extends ModelContext<InstanceType>>
-        extends AbstractSmileClassificationModel<InstanceType, T> {
+/**
+ * Multilayer Neural Network classifier with two hidden layers, each with 100 neurons and logistic sigmoid as it
+ * activation function. The network is trained in 20 epochs.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ * @param <InstanceType>
+ *            The type of input instances for this model. The purpose of the input instance is to supply the model with
+ *            feature vector x, so that the model can generate prediction y.
+ * @param <MC>
+ *            The type of model context associated with this model.
+ */
+public class NeuralNetworkClassifier<InstanceType, MC extends ModelContext<InstanceType>>
+        extends AbstractSmileClassificationModel<InstanceType, MC> {
 
+    private static final int HIDDEN_LAYER_NEURONS_NUMBER = 100;
     private static final long serialVersionUID = -3364152319152090775L;
     private static final int EPOCHS = 20;
 
-    public NeuralNetworkClassifier(T modelContext) {
+    public NeuralNetworkClassifier(MC modelContext) {
         super(new PreprocessingConfigBuilder().scaling().build(), modelContext);
     }
 
@@ -21,7 +34,8 @@ public class NeuralNetworkClassifier<InstanceType, T extends ModelContext<Instan
         int numberOfInputFeatures = x[0].length;
         NeuralNetwork net;
         int outputUnits = k == 2 ? 1 : k;
-        int[] numUnits = new int[] { numberOfInputFeatures, 100, 100, outputUnits };
+        int[] numUnits = new int[] { numberOfInputFeatures, HIDDEN_LAYER_NEURONS_NUMBER, HIDDEN_LAYER_NEURONS_NUMBER,
+                outputUnits };
         if (k == 2) {
             net = new NeuralNetwork(NeuralNetwork.ErrorFunction.CROSS_ENTROPY,
                     NeuralNetwork.ActivationFunction.LOGISTIC_SIGMOID, numUnits);

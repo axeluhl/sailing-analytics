@@ -3,14 +3,29 @@ package com.sap.sailing.windestimation.model.classifier.smile;
 import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.classifier.AbstractClassificationModel;
 import com.sap.sailing.windestimation.model.classifier.PreprocessingConfig;
+import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.model.store.ModelSerializationStrategyType;
 
 import smile.classification.SoftClassifier;
 import smile.feature.Standardizer;
 import smile.projection.PCA;
 
-public abstract class AbstractSmileClassificationModel<InstanceType, T extends ModelContext<InstanceType>>
-        extends AbstractClassificationModel<InstanceType, T> {
+/**
+ * Base class for all {@link TrainableClassificationModel} which are implemented using SMILE library. This base
+ * implementation introduces full support for pre-processing by means of value scaling by Standardization and
+ * dimensionality reduction with Principal Component Analysis (PCA). All this pre-processing methods require SMILE
+ * library.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ * @param <InstanceType>
+ *            The type of input instances for this model. The purpose of the input instance is to supply the model with
+ *            feature vector x, so that the model can generate prediction y.
+ * @param <MC>
+ *            The type of model context associated with this model.
+ */
+public abstract class AbstractSmileClassificationModel<InstanceType, MC extends ModelContext<InstanceType>>
+        extends AbstractClassificationModel<InstanceType, MC> {
 
     private static final long serialVersionUID = 1037686504611915506L;
 
@@ -18,7 +33,7 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends M
     private PCA pca = null;
     protected SoftClassifier<double[]> internalModel = null;
 
-    public AbstractSmileClassificationModel(PreprocessingConfig preprocessingConfig, T modelContext) {
+    public AbstractSmileClassificationModel(PreprocessingConfig preprocessingConfig, MC modelContext) {
         super(preprocessingConfig, modelContext);
     }
 
