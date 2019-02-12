@@ -126,10 +126,10 @@ public class Activator implements BundleActivator {
         AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
         userStore.clear();
         accessControlStore.clear();
-        createRoleDefinitionsFromPrototypes(userStore);
         userStore.ensureDefaultRolesExist();
         userStore.ensureDefaultTenantExists();
         getSecurityService().initialize();
+        createRoleDefinitionsFromPrototypes(userStore);
         applyCustomizations();
     }
 
@@ -149,7 +149,6 @@ public class Activator implements BundleActivator {
         context.registerService(Replicable.class.getName(), initialSecurityService, replicableServiceProperties);
         context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
-        applyCustomizations();
     }
     
     private void createRoleDefinitionsFromPrototypes(UserStore userStore) {
@@ -166,7 +165,10 @@ public class Activator implements BundleActivator {
                         final RolePrototype rolePrototype = service.getRolePrototype();
                         final RoleDefinition potentiallyExistingRoleDefinition = userStore.getRoleDefinition(rolePrototype.getId());
                         if (potentiallyExistingRoleDefinition == null) {
-                            userStore.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
+                            final RoleDefinition createdRoleDefinition = userStore.createRoleDefinition(
+                                    rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
+                            getSecurityService().setOwnership(createdRoleDefinition.getIdentifier(), null,
+                                    getSecurityService().getDefaultTenant());
                         }
                         return service;
                     }
@@ -228,7 +230,6 @@ public class Activator implements BundleActivator {
                     final UserStore userStore = userStoreTracker.waitForService(0);
                     final AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
                     logger.info("Obtained UserStore service "+userStore);
-                    createRoleDefinitionsFromPrototypes(userStore);
                     // must be called after the definition of the prototypes and after loading actual roles, but before
                     // loading users
                     userStore.ensureDefaultRolesExist();
@@ -238,6 +239,9 @@ public class Activator implements BundleActivator {
                     accessControlStore.loadACLsAndOwnerships();
                     // create security service, it will also create a default admin user if no users exist
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
+
+                    createRoleDefinitionsFromPrototypes(userStore);
+                    applyCustomizations();
                     
                     migrate(userStore, securityService.get());
                 } catch (InterruptedException | UserGroupManagementException | UserManagementException | ExecutionException e) {
