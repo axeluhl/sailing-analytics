@@ -126,13 +126,6 @@ public class CandidateChooserImpl implements CandidateChooser {
      */
     private static final double MAX_PROBABILITY_DELTA = 0.20;
     
-    /**
-     * If we identify several consecutive candidates that all lie in a bounding box with a {@link Bounds#getDiameter()
-     * diameter} less than or equal to this distance, only the first and the last of those candidates pass the filter.
-     * 
-     */
-    private static final Distance CANDIDATE_FILTER_DISTANCE = new MeterDistance(20);
-
     private static final Speed MAXIMUM_REASONABLE_SPEED = GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING;
 
     private static final double MINIMUM_PROBABILITY = Edge.getPenaltyForSkipping();
@@ -192,12 +185,20 @@ public class CandidateChooserImpl implements CandidateChooser {
     private final Map<Competitor, NavigableSet<Candidate>> candidates;
     
     /**
-     * Those candidates from {@link #candidates} that have passed the filter logic and are added to the {@link #allEdges graph}.
-     * This data structure is redundant to {@link #allEdges} and intended to speed up the algorithm used to find out which
-     * candidates must be added to and removed from the graph after changes have been applied to {@link #candidates} and
-     * the filter rules have been re-applied.
+     * Those candidates from {@link #candidates} that have passed the filter logic of stage 1 (of candidates in close
+     * chronological sequence pick only those that have the highest probability). They are fed into the filter stage 2
+     * before they may become part of the {@link #allEdges graph}.
      */
-    private final Map<Competitor, NavigableSet<Candidate>> filteredCandidates;
+    private final Map<Competitor, NavigableSet<Candidate>> filteredCandidatesStage1;
+    
+    /**
+     * Those candidates from {@link #candidates} that have passed the filter logic of stage 2 (of candidates between
+     * which the track does not leave a small bounding box pick only those at start and end of that sequence) and are
+     * added to the {@link #allEdges graph}. This data structure is redundant to {@link #allEdges} and intended to speed
+     * up the algorithm used to find out which candidates must be added to and removed from the graph after changes have
+     * been applied to {@link #candidates} and the filter rules have been re-applied.
+     */
+    private final Map<Competitor, NavigableSet<Candidate>> filteredCandidatesStage2;
     
     private final Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
     private final ConcurrentHashMap<Competitor, Integer> suppressedPassings = new ConcurrentHashMap<>();
@@ -279,12 +280,14 @@ public class CandidateChooserImpl implements CandidateChooser {
         end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints() + 1, /* TimePoint */null,
                 /* Probability */1, /* Waypoint */null);
         candidates = new HashMap<>();
-        filteredCandidates = new HashMap<>();
+        filteredCandidatesStage1 = new HashMap<>();
+        filteredCandidatesStage2 = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
             perCompetitorLocks.put(c, createCompetitorLock(c));
             candidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
-            filteredCandidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
+            filteredCandidatesStage1.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
+            filteredCandidatesStage2.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
             final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
             currentMarkPasses.put(c, currentMarkPassesForCompetitor);
             // in case the tracked race already has mark passings, e.g., from another mark passing calculator,
@@ -425,8 +428,8 @@ public class CandidateChooserImpl implements CandidateChooser {
         assert perCompetitorLocks.get(c).isWriteLocked();
         final Boolean isGateStart = race.isGateStart();
         Map<Candidate, Set<Edge>> edgesForCompetitor = allEdges.get(c);
+        final Set<Candidate> competitorCandidates = getFilteredCandidates(c);
         for (Candidate newCan : newCandidates) {
-            final Set<Candidate> competitorCandidates = candidates.get(c); // TODO bug4221: use a filtered view of candidates
             synchronized (competitorCandidates) {
                 for (Candidate oldCan : competitorCandidates) {
                     final Candidate early;
@@ -521,6 +524,14 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
             }
         }
+    }
+
+    /**
+     * @return the candidates that passed all stages of candidate filtering; see also
+     *         {@link #updateFilteredCandidates(Competitor, Iterable, Iterable)}
+     */
+    private Set<Candidate> getFilteredCandidates(Competitor c) {
+        return filteredCandidatesStage2.get(c);
     }
 
     private boolean travelingForwardInTimeOrUnknown(Candidate early, Candidate late) {
@@ -804,10 +815,10 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     /**
      * New candidates will be added to {@link #candidates}. The filtering rules will be applied to update
-     * {@link #filteredCandidates} so that the sets of filtered candidates are again consistent with the contents of
+     * {@link #filteredCandidatesStage1} so that the sets of filtered candidates are again consistent with the contents of
      * {@link #candidates} and the filter rules. Afterwards, the {@link #allEdges graph} will be updated by removing
-     * edges for candidates that are no longer part of {@link #filteredCandidates} and by adding edges for new
-     * {@link #filteredCandidates}. Note that the set of {@link #filteredCandidates} may actually shrink by adding
+     * edges for candidates that are no longer part of {@link #filteredCandidatesStage1} and by adding edges for new
+     * {@link #filteredCandidatesStage1}. Note that the set of {@link #filteredCandidatesStage1} may actually shrink by adding
      * a new candidate, simply because that candidate closes a gap between other candidates such that now it becomes
      * obvious that candidates previously passing the filter are really part of a cluster of little or no movement.
      */
@@ -826,7 +837,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     /**
      * Precondition: the {@link #candidates candidates(c)} for the competitor {@code c} have been updated.<p>
      * 
-     * Then this method applies the filter rules to update {@link #filteredCandidates filteredCandidates(c)} accordingly.
+     * Then this method applies the filter rules to update {@link #filteredCandidatesStage1 filteredCandidates(c)} accordingly.
      * Based on the difference in filter results, the {@link #allEdges graph} is adjusted by removing edges for those
      * candidates no longer passing the filter or no longer existing, and by adding edges for candidates that have now
      * become available as filtered candidates and that weren't before.
@@ -844,7 +855,20 @@ public class CandidateChooserImpl implements CandidateChooser {
     /**
      * Based on {@link #candidates candidates(c)}, computes the set of candidates that pass all filter rules and hence
      * are expected to be represented in the {@link #allEdges graph}. When this method returns, it has updated the
-     * {@link #filteredCandidates} accordingly.
+     * {@link #filteredCandidatesStage1} accordingly.<p>
+     * 
+     * A two-pass algorithm. In the first pass, clusters of {@link DistanceCandidateImpl distance candidates} in close
+     * time-wise proximity (see {@link #CANDIDATE_FILTER_TIME_WINDOW}) are sorted by their probability. Only the group
+     * with the highest probability is selected, assuming that multiple occurrences of the same mark in multiple
+     * waypoints leads to very similar if not equal probabilities. This way, candidates for marks further away don't
+     * depend on the overall minimum probability, but the relative ranking leads to a quick elimination of unlikely
+     * candidates.
+     * <p>
+     * 
+     * During the second pass, clusters of candidates are considered where the track between the first and the last
+     * candidate of the cluster does fit into a small bounding box. This suggests that the tracker was not actively
+     * sailing during this period, and only the first and the last candidate of the cluster will pass the filter.
+     * <p>
      * 
      * @param competitor
      *            the competitor whose candidates to filter
@@ -861,62 +885,35 @@ public class CandidateChooserImpl implements CandidateChooser {
      */
     private Pair<Set<Candidate>, Set<Candidate>> updateFilteredCandidates(Competitor competitor, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
         final NavigableSet<Candidate> competitorCandidates = candidates.get(competitor);
-        final Pair<Set<Candidate>, Set<Candidate>> result = filterCandidates(competitor, competitorCandidates, newCandidates, removedCandidates);
-        final NavigableSet<Candidate> filteredCompetitorCandidates = filteredCandidates.get(competitor);
-        filteredCompetitorCandidates.addAll(result.getA());
-        filteredCompetitorCandidates.removeAll(result.getB());
-        return result;
+        // pass 1
+        final Pair<Set<Candidate>, Set<Candidate>> filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence =
+                getMostProbableCandidatesPerContiguousSequence(competitor, competitorCandidates, newCandidates, removedCandidates);
+        final NavigableSet<Candidate> filteredCompetitorCandidatesStage1 = filteredCandidatesStage1.get(competitor);
+        filteredCompetitorCandidatesStage1.addAll(filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getA());
+        filteredCompetitorCandidatesStage1.removeAll(filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getB());
+        // pass 2
+        final Pair<Set<Candidate>, Set<Candidate>> candidatesOnTheMove = getCandidatesReallyOnTheMove(filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence);
+        final NavigableSet<Candidate> filteredCompetitorCandidatesStage2 = filteredCandidatesStage2.get(competitor);
+        filteredCompetitorCandidatesStage2.addAll(candidatesOnTheMove.getA());
+        filteredCompetitorCandidatesStage2.removeAll(candidatesOnTheMove.getB());
+        return candidatesOnTheMove;
     }
 
     /**
-     * A two-pass algorithm. In the first pass, clusters of {@link DistanceCandidateImpl distance candidates} in close
-     * time-wise proximity (see {@link #CANDIDATE_FILTER_TIME_WINDOW}) are sorted by their probability. Only the group
-     * with the highest probability is selected, assuming that multiple occurrences of the same mark in multiple
-     * waypoints leads to very similar if not equal probabilities. This way, candidates for marks further away don't
-     * depend on the overall minimum probability, but the relative ranking leads to a quick elimination of unlikely
-     * candidates.
-     * <p>
-     * 
-     * During the second pass, clusters of candidates are considered where the track between the first and the last
-     * candidate of the cluster does not leave a small bounding box. This suggests that the tracker was not actively
-     * sailing during this period, and only the first and the last candidate of the cluster will pass the filter.
-     * <p>
-     * 
-     * @param competitorCandidates
-     *            the unfiltered set of all candidates identified for the {@code competitor}
-     * @param newCandidates
-     *            to allow for incremental updates of filter results, this parameter tells the candidates that have been
-     *            added to {@code competitorCandidates}
-     * @param removedCandidates
-     *            to allow for incremental updates of filter results, this parameter tells the candidates that have been
-     *            removed from {@code competitorCandidates}
-     * 
-     * @return a pair whose first element holds the set of candidates that now pass the filter and didn't before, and
-     *         whose second element holds the set of candidates that did pass the filter before but don't anymore
-     */
-    private Pair<Set<Candidate>, Set<Candidate>> filterCandidates(Competitor competitor, NavigableSet<Candidate> competitorCandidates,
-            Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
-        final Pair<Set<Candidate>, Set<Candidate>> filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence =
-                getMostProbableCandidatesPerContiguousSequence(competitor, competitorCandidates, newCandidates, removedCandidates); // pass 1
-        final Pair<Set<Candidate>, Set<Candidate>> candidatesOnTheMove = getCandidatesReallyOnTheMove(filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence); // pass 2
-        return candidatesOnTheMove;
-    }
-    
-    /**
      * Finds the contiguous (by definition of {@link #CANDIDATE_FILTER_TIME_WINDOW}) sequences of candidates adjacent to
      * those candidates added / removed. The {@code competitorCandidates} set is expected to already contain the
-     * {@code newCandidates} and to no longer contain the {@code removedCandidates}. {@link #filteredCandidates} is
+     * {@code newCandidates} and to no longer contain the {@code removedCandidates}. {@link #filteredCandidatesStage1} is
      * expected to not yet reflect the changes described by {@code newCandidates} and {@code removedCandidates}.
      * <p>
      * 
      * The following steps are performed:
      * <ul>
-     * <li>All candidates from {@code removedCandidates} are removed from {@link #filteredCandidates}.</li>
+     * <li>All candidates from {@code removedCandidates} are removed from {@link #filteredCandidatesStage1}.</li>
      * <li>The disjoint sequences containing all new candidates and adjacent to all removed candidates are computed.</li>
      * <li>The most probable candidate(s) from each contiguous sequence is/are determined. Those pass the filter and are
-     * added to {@link #filteredCandidates}</li>
+     * added to {@link #filteredCandidatesStage1}</li>
      * <li>All other candidates from those sequences do not pass the filter. All of those that are still in
-     * {@link #filteredCandidates} are removed from {@link #filteredCandidates}.</li>
+     * {@link #filteredCandidatesStage1} are removed from {@link #filteredCandidatesStage1}.</li>
      * </ul>
      * @return a pair whose first element holds the set of candidates that now pass the filter and didn't before, and
      *         whose second element holds the set of candidates that did pass the filter before but don't anymore
@@ -952,7 +949,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         // any of the sequences produced by new candidates. Checking their CANDIDATE_FILTER_TIME_WINDOW-neighborhood
         // and constructing the sequences affected by their removal.
         Util.addAll(removedCandidates, candidatesRemovedFromFiltered);
-        candidatesRemovedFromFiltered.retainAll(filteredCandidates.get(competitor)); // those explicitly removed and previously accepted by the filter go away
+        candidatesRemovedFromFiltered.retainAll(filteredCandidatesStage1.get(competitor)); // those explicitly removed and previously accepted by the filter go away
         while (!removedCandidatesModifiableCopy.isEmpty()) {
             final Candidate nextRemovedCandidate = removedCandidatesModifiableCopy.iterator().next();
             removedCandidatesModifiableCopy.remove(nextRemovedCandidate);
@@ -997,17 +994,17 @@ public class CandidateChooserImpl implements CandidateChooser {
      * of the respective mark in the sequence of waypoints that defines the course.<p>
      * 
      * Once the filter result has been determined, we need to figure out how this <em>changes</em> the filter results.
-     * For this, we may assume that {@link #filteredCandidates} has not yet been modified to reflect any changes during
+     * For this, we may assume that {@link #filteredCandidatesStage1} has not yet been modified to reflect any changes during
      * this pass. Therefore, candidates added to the filter result can easily be identified because they are not yet
-     * contained in {@link #filteredCandidates}. Candidates that did pass the filter but no longer do can be identified
-     * based on the time range formed by {@code contiguousCandidateSequence}. Any candidate in {@link #filteredCandidates}
+     * contained in {@link #filteredCandidatesStage1}. Candidates that did pass the filter but no longer do can be identified
+     * based on the time range formed by {@code contiguousCandidateSequence}. Any candidate in {@link #filteredCandidatesStage1}
      * that is within this time range and is not part of the new filter result for the {@code contiguousCandidateSequence}
      * will have to be removed from the previous filter results.
      */
     private void findNewAndRemovedCandidates(Competitor competitor, SortedSet<Candidate> contiguousCandidateSequence,
             Set<Candidate> candidatesAddedToFiltered, Set<Candidate> candidatesRemovedFromFiltered) {
         assert !contiguousCandidateSequence.isEmpty();
-        final SortedSet<Candidate> candidatesPreviouslyPassingFilter = filteredCandidates.get(competitor).subSet(contiguousCandidateSequence.first(),
+        final SortedSet<Candidate> candidatesPreviouslyPassingFilter = filteredCandidatesStage1.get(competitor).subSet(contiguousCandidateSequence.first(),
                 /* fromInclusive */ true, contiguousCandidateSequence.last(), /* toInclusive */ true);
         ArrayList<Candidate> sortedByProbabilityFromLowToHigh = new ArrayList<>(contiguousCandidateSequence);
         Collections.sort(sortedByProbabilityFromLowToHigh, (c1, c2)->Double.compare(c1.getProbability(), c2.getProbability()));
@@ -1110,31 +1107,98 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     /**
      * Filters the candidates based on their movement pattern. The candidate sequence (independent of the
-     * {@link #CANDIDATE_FILTER_TIME_WINDOW}) is analyzed using a bounding box. As long as the track that connects the
-     * candidates fits in a bounding box smaller than {@link #CANDIDATE_FILTER_DISTANCE} in {@link Bounds#getDiameter()
-     * diameter}, those candidates are joined into a contiguous sequence, and only the first and the last of such a
-     * sequence pass the filter, multiplied by the marks to which those candidates apply.
+     * {@link #CANDIDATE_FILTER_TIME_WINDOW}) is analyzed using a bounding box. As long as the track that connects a
+     * sequence of candidates fits in a bounding box smaller than {@link #CANDIDATE_FILTER_DISTANCE} in
+     * {@link Bounds#getDiameter() diameter}, those candidates are joined into a "stationary sequence," and only a short
+     * head and tail of the sequence (based on the {@link #CANDIDATE_FILTER_TIME_WINDOW}) pass this filter, assuming
+     * that with such a time range-based head/tail we capture the candidates relevant for all waypoints to which they
+     * may apply.
      * <p>
      * 
      * This way, objects that were rather "stationary" won't feed huge candidate sets into the {@link #allEdges graph}.
      * Still, as a tracked object starts moving, candidates will be created, even for the stationary segment in the form
-     * of a first and a last candidate representing this stationary segment.
+     * of a short leading and tailing candidate sequence representing this stationary segment.
      * <p>
      * 
-     * Since this filter rule is applied only after the {@link #getMostProbableCandidatesPerContiguousSequence time
-     * window filtering} has been applied, candidates can be expected to be at least
-     * {@link #CANDIDATE_FILTER_TIME_WINDOW} apart on the time axis (here, candidate "multiplications" for different
-     * occurrences of the same mark will be treated as "one").<p>
+     * The algorithm starts with the first candidate that passed the first filter and adds it to a bounding box. It then
+     * keeps adding more such candidates, ordered by time. For each candidate added after the first, all (smoothened)
+     * fixes of the track between the candidates are added to the bounding box. If the bounding box's
+     * {@link Bounds#getDiameter() diameter} exceeds the {@link #CANDIDATE_FILTER_DISTANCE threshold}, the object is
+     * considered to compete reasonably, and the first and last candidate (which may be the same if there was only one
+     * candidate added so far) with the track between them completely within the bounding box of size less than or equal
+     * to {@link #CANDIDATE_FILTER_DISTANCE} have passed the filter. All candidates in between are removed from the
+     * filter result. Then, the next candidate starts a new bounding box, and so on, until all candidates from the first
+     * filter pass have been considered.
+     * <p>
      * 
-     * The algorithm starts with the first candidate that passed the first filter and adds it to a bounding box.
-     * It then keeps adding more such candidates, ordered by time. For each candidate added after the first, all
-     * (smoothened) fixes of the track between the candidates are added to the bounding box. If the bounding box's
-     * {@link Bounds#getDiameter() diameter} exceeds the {@link #CANDIDATE_FILTER_DISTANCE threshold}, the object
-     * is considered to compete reasonably, and the first and last candidate (which may be the same if there was
-     * only one candidate added so far) with the track between them completely within the bounding box of size
-     * less than or equal to {@link #CANDIDATE_FILTER_DISTANCE} have passed the filter. All candidates in between
-     * are removed from the filter result. Then, the next candidate starts a new bounding box, and so on, until
-     * all candidates from the first filter pass have been considered.
+     * This approach makes no guarantee regarding maximum length stationary sequences. Finding such segments with
+     * maximum length is considerably more expensive than finding "good" such segments with a "greedy" algorithm. If we
+     * analyze the candidate sequence in chronological order and build up stationary sequences by a "greedy" algorithm,
+     * not much harm will be done at the boundaries of two adjacent stationary sequences. Only the two candidates at the
+     * sequence boundary would be added and we would also need a solution for which candidates to preserve in case of
+     * overlapping stationary sequences. This seems acceptable. The approach will still help to significantly reduce the
+     * number of candidates for trackers that remained stationary for a significant amount of time.
+     * <p>
+     * 
+     * Considerations regarding incremental updates: We can remember all stationary sequences found so far and sort them
+     * by time. The algorithm shall guarantee that after a round of filtering each stationary sequence has at least two
+     * candidates in them which passed the first filter state, and no stationary sequence can be extended to the next
+     * candidate following it or any previous candidate preceding it because the track leading there would extend the
+     * stationary sequence's bounding box beyond limits. For all new candidates we can distinguish the following cases:
+     * <ul>
+     * <li>There is no existing stationary sequence yet and it's the first candidate that passed the filter's first
+     * pass. No sequence can be constructed from a single candidate, so the candidate passes this stage of the
+     * filter.</li>
+     * <li>The candidate is outside of any existing stationary sequence. Look for neighboring candidates in both
+     * directions. Since there is at least one neighboring candidate (otherwise see first case above), traverse the
+     * smoothened fixes along the track in the respective direction(s) towards the neighbor candidate(s) that passed the
+     * first filter stage. If the respective neighbor belongs to a stationary sequence, check if the fixes keep its
+     * bounding box sufficiently small and if so, add the new candidate to that stationary sequence; it passes the
+     * filter, whereas the neighbor is removed unless it is less than {@link #CANDIDATE_FILTER_TIME_WINDOW} away from
+     * the new candidate. If the neighbor does not belong to a stationary sequence yet and the fixes remained within
+     * small-enough bounds, create a new stationary segment with the new candidate and the neighbor. (Note: based on the
+     * invariant it is not possible that the new candidate has two neighbors each part of a stationary sequence and all
+     * fixes between them fitting into each of their bounding boxes; because if this were the case, the two sequences
+     * would already have been merged.)</li>
+     * <li>The candidate falls into an existing stationary sequence (at or after first and at or before last candidate
+     * in sequence). In this case the set of fixes on the track considered within the sequence hasn't changed. The
+     * candidate does not pass the filter, unless it is within {@link #CANDIDATE_FILTER_TIME_WINDOW} from the stationary
+     * sequence's start or end. The sequence's bounding box remains unchanged.</li>
+     * </ul>
+     * If a candidate no longer passes the first filter stage:
+     * <ul>
+     * <li>If it was not part of a stationary sequence, no action is required.</li>
+     * <li>If it was within the time range of an existing stationary sequence and further than
+     * {@link #CANDIDATE_FILTER_TIME_WINDOW} away from both of the sequence's borders, it used to be a candidate removed
+     * by this second filter stage. It is removed from the stationary sequence but doesn't change the filter
+     * results.</li>
+     * <li>If it was within the time range of an existing stationary sequence and closer than
+     * {@link #CANDIDATE_FILTER_TIME_WINDOW} to one of the sequence's borders, it used to be a candidate passing this
+     * second filter stage and therefore has to be removed from both, the stationary sequence and the filter result. If
+     * only one candidate is left in the sequence, delete the sequence. Otherwise, if it was the first or the last
+     * candidate of the stationary sequence, re-evaluate which fixes on that end of the sequence now fall within
+     * {@link #CANDIDATE_FILTER_TIME_WINDOW} from that border of the sequence.</li>
+     * </ul>
+     * In addition to a changing candidate set passing the first filter stage, changes to the GPS tracks are relevant
+     * for this second filter stage based on stationary sequences. The following cases can be distinguished:
+     * <ul>
+     * <li>A GPS fix was added to or replaces one of those in the competitor's track within the time range of an
+     * existing stationary sequence. The fix needs to be added to the stationary sequence's bounding box. If the box
+     * still remains small enough, nothing changes. Otherwise, the algorithm tries to extend the stationary sequence
+     * from the last candidate before the new fix until the track lets the bounding box grow too large. A new stationary
+     * sequence is started, adding all remaining candidates. Any of the sequences resulting from the split and having
+     * only one candidate left is removed. The candidates immediately left and right of the split now pass the filter
+     * and therefore are added to the {@link #allEdges graph}.</li>
+     * <li>A GPS fix was added outside any stationary sequence. Nothing changes because no bounding box would get
+     * smaller by a new fix added.</li>
+     * <li>A GPS fix <em>replaces</em> an existing one outside of any stationary sequence. In this case it is possible
+     * that the fix replaced caused a bounding box to exceed the diameter threshold and thus avoided a stationary sequence
+     * from being created, and the new fix "smoothes" the track such that a stationary sequence may come into
+     * existence. Therefore, if a fix is replaced outside of any stationary sequence, an extension attempt is made
+     * for any adjacent stationary sequence towards the fix replaced. The extension attempts could stop as they
+     * reach the next stationary sequence; however, we could also try to merge two adjacent stationary sequences
+     * in their entirety. If this fails, the next best solution is still to extend such that they touch each other.</li>
+     * </ul>
      */
     private Pair<Set<Candidate>, Set<Candidate>> getCandidatesReallyOnTheMove(Pair<Set<Candidate>, Set<Candidate>> candidatesAddedAndRemovedDuringFirstPass) {
         return candidatesAddedAndRemovedDuringFirstPass; // TODO implement getCandidatesReallyOnTheMove
@@ -1142,7 +1206,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     /**
      * Removes the {@code wrongCandidates} from the competitor's {@link #candidates} and updates the
-     * {@link #filteredCandidates} map accordingly. If filtered candidates are removed, their adjacent
+     * {@link #filteredCandidatesStage1} map accordingly. If filtered candidates are removed, their adjacent
      * edges are removed from the {@link #allEdges graph}. If candidates now pass the filter which
      * previously didn't, edges are inserted for them. This can happen, e.g., if a candidate is
      * removed which previously connected other candidates into a cluster which in its entirety
@@ -1184,7 +1248,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         long filtered = 0;
         for (final Entry<Competitor, NavigableSet<Candidate>> competitorAndCandidate : candidates.entrySet()) {
             original += competitorAndCandidate.getValue().size();
-            filtered += filteredCandidates.get(competitorAndCandidate.getKey()).size();
+            filtered += filteredCandidatesStage1.get(competitorAndCandidate.getKey()).size();
         }
         result.append(filtered);
         result.append("/");
