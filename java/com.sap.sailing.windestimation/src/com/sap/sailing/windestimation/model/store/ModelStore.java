@@ -9,8 +9,9 @@ import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
 /**
  * Persistence layer for {@link PersistableModel} which can be implemented using various persistence technologies, e.g.
- * database of file system. To comply with the persistence key generation strategy and etc., it is highly recommended to
- * sub-type {@link AbstractModelStoreImpl} if a new implementation of {@link ModelStore} is considered.
+ * database of file system. All implementations must be <b>thread-safe</b>. To comply with the persistence key
+ * generation strategy and etc., it is highly recommended to sub-type {@link AbstractModelStoreImpl} if a new
+ * implementation of {@link ModelStore} is considered.
  * 
  * @author Vladislav Chumak (D069712)
  *

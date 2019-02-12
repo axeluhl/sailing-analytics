@@ -17,7 +17,8 @@ import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
 /**
  * {@link ModelStore} implementation which reads its models from classpath. Write-operations are unsupported and will
- * quit with {@link UnsupportedOperationException}.
+ * quit with {@link UnsupportedOperationException}. This implementation is meant to be used as remedy to import models
+ * from class-path into another model store, e.g. for unit-tests or model initialization with defaults.
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -72,14 +73,14 @@ public class ClassPathReadOnlyModelStoreImpl extends AbstractModelStoreImpl {
     @Override
     public <InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadModel(
             ModelType newModel) throws ModelPersistenceException {
-        ModelSerializationStrategy persistenceSupport = checkAndGetPersistenceSupport(newModel);
+        ModelSerializationStrategy serializationStrategy = checkAndGetModelSerializationStrategy(newModel);
         String fileName = getPersistenceKey(newModel);
         String filePath = getFilePath(fileName);
         InputStream input = getResourceAsStream(filePath);
         if (input != null) {
             try {
                 @SuppressWarnings("unchecked")
-                ModelType loadedModel = (ModelType) persistenceSupport.deserializeFromStream(input);
+                ModelType loadedModel = (ModelType) serializationStrategy.deserializeFromStream(input);
                 if (!newModel.getModelContext().equals(loadedModel.getModelContext())) {
                     throw new ModelPersistenceException("The configuration of the loaded model is: "
                             + loadedModel.getModelContext() + ". \nExpected: " + newModel.getModelContext());
@@ -107,16 +108,16 @@ public class ClassPathReadOnlyModelStoreImpl extends AbstractModelStoreImpl {
     }
 
     @Override
-    public void deleteAll(ModelDomainType contextType) throws ModelPersistenceException {
+    public void deleteAll(ModelDomainType domainType) throws ModelPersistenceException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Map<String, byte[]> exportAllPersistedModels(ModelDomainType contextType) throws ModelPersistenceException {
+    public Map<String, byte[]> exportAllPersistedModels(ModelDomainType domainType) throws ModelPersistenceException {
         Map<String, byte[]> exportedModels = new HashMap<>();
         try {
             for (String fileName : getResourceFiles(destinationFolder)) {
-                if (isPersistenceKeyBelongingToModelDomain(fileName, contextType)) {
+                if (isPersistenceKeyBelongingToModelDomain(fileName, domainType)) {
                     String filePath = getFilePath(fileName);
                     byte[] exportedModel;
                     try (InputStream inputStream = getResourceAsStream(filePath)) {
@@ -135,29 +136,29 @@ public class ClassPathReadOnlyModelStoreImpl extends AbstractModelStoreImpl {
     }
 
     @Override
-    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, ModelDomainType contextType)
+    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, ModelDomainType domainType)
             throws ModelPersistenceException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<PersistableModel<?, ?>> loadAllPersistedModels(ModelDomainType contextType) {
+    public List<PersistableModel<?, ?>> loadAllPersistedModels(ModelDomainType domainType) {
         List<PersistableModel<?, ?>> loadedModels = new ArrayList<>();
         try {
             for (String fileName : getResourceFiles(destinationFolder)) {
-                if (isPersistenceKeyBelongingToModelDomain(fileName, contextType)) {
+                if (isPersistenceKeyBelongingToModelDomain(fileName, domainType)) {
                     String filePath = getFilePath(fileName);
                     try (InputStream inputStream = getResourceAsStream(filePath)) {
-                        ModelSerializationStrategy persistenceSupport = getModelSerializationStrategyFromPersistenceKey(
+                        ModelSerializationStrategy serializationStrategy = getModelSerializationStrategyFromPersistenceKey(
                                 fileName);
-                        if (persistenceSupport == null) {
+                        if (serializationStrategy == null) {
                             throw new ModelLoadingException(
                                     "Persistence support could not be determined due to invalid filename pattern: \""
                                             + fileName + "\"");
                         }
                         PersistableModel<?, ?> loadedModel;
                         try (InputStream input = getResourceAsStream(filePath)) {
-                            loadedModel = persistenceSupport.deserializeFromStream(input);
+                            loadedModel = serializationStrategy.deserializeFromStream(input);
                         } catch (Exception e) {
                             throw new ModelLoadingException("Could not read model \"" + fileName + "\" from filesystem",
                                     e);

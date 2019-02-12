@@ -19,10 +19,22 @@ import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelNotFoundException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 
+/**
+ * {@link ModelStore} which manages its persistence with files on a file system.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class FileSystemModelStoreImpl extends AbstractModelStoreImpl {
 
     private final String destinationFolder;
 
+    /**
+     * Constructs a new instance of file system model store.
+     * 
+     * @param destinationFolder
+     *            The folder where all models will be managed
+     */
     public FileSystemModelStoreImpl(String destinationFolder) {
         this.destinationFolder = destinationFolder;
         File folder = new File(destinationFolder);
@@ -47,12 +59,12 @@ public class FileSystemModelStoreImpl extends AbstractModelStoreImpl {
     @Override
     public <InstanceType, T extends ModelContext<InstanceType>, ModelType extends TrainableModel<InstanceType, T>> ModelType loadModel(
             ModelType untrainedModel) throws ModelPersistenceException {
-        ModelSerializationStrategy persistenceSupport = checkAndGetPersistenceSupport(untrainedModel);
+        ModelSerializationStrategy serializationStrategy = checkAndGetModelSerializationStrategy(untrainedModel);
         File modelFile = getFileForModel(untrainedModel);
         if (modelFile.exists()) {
             try (FileInputStream input = new FileInputStream(modelFile)) {
                 @SuppressWarnings("unchecked")
-                ModelType loadedModel = (ModelType) persistenceSupport.deserializeFromStream(input);
+                ModelType loadedModel = (ModelType) serializationStrategy.deserializeFromStream(input);
                 if (!untrainedModel.getModelContext().equals(loadedModel.getModelContext())) {
                     throw new ModelPersistenceException("The configuration of the loaded model is: "
                             + loadedModel.getModelContext() + ". \nExpected: " + untrainedModel.getModelContext());
@@ -67,16 +79,16 @@ public class FileSystemModelStoreImpl extends AbstractModelStoreImpl {
 
     @Override
     public void persistModel(PersistableModel<?, ?> trainedModel) throws ModelPersistenceException {
-        ModelSerializationStrategy persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
+        ModelSerializationStrategy serializationStrategy = checkAndGetModelSerializationStrategy(trainedModel);
         try (FileOutputStream output = new FileOutputStream(getFileForModel(trainedModel))) {
-            persistenceSupport.serializeToStream(trainedModel, output);
+            serializationStrategy.serializeToStream(trainedModel, output);
         } catch (IOException e) {
             throw new ModelPersistenceException(e);
         }
     }
 
     public <T extends PersistableModel<?, ?>> void delete(T newModel) throws ModelPersistenceException {
-        checkAndGetPersistenceSupport(newModel);
+        checkAndGetModelSerializationStrategy(newModel);
         File modelFile = getFileForModel(newModel);
         try {
             Files.deleteIfExists(modelFile.toPath());
@@ -86,11 +98,11 @@ public class FileSystemModelStoreImpl extends AbstractModelStoreImpl {
     }
 
     @Override
-    public void deleteAll(ModelDomainType contextType) throws ModelPersistenceException {
+    public void deleteAll(ModelDomainType domainType) throws ModelPersistenceException {
         File folder = new File(destinationFolder);
         for (File file : folder.listFiles()) {
-            if (file.isFile() && file.getName().endsWith(FILE_EXT)
-                    && file.getName().startsWith(getPersistenceKeyPartOfModelDomain(contextType))) {
+            if (file.isFile() && file.getName().endsWith(PERSISTENCE_KEY_SUFFIX)
+                    && file.getName().startsWith(getPersistenceKeyPartOfModelDomain(domainType))) {
                 try {
                     Files.deleteIfExists(file.toPath());
                 } catch (IOException e) {
@@ -101,13 +113,12 @@ public class FileSystemModelStoreImpl extends AbstractModelStoreImpl {
     }
 
     @Override
-    public Map<String, byte[]> exportAllPersistedModels(ModelDomainType contextType)
-            throws ModelPersistenceException {
+    public Map<String, byte[]> exportAllPersistedModels(ModelDomainType domainType) throws ModelPersistenceException {
         Map<String, byte[]> exportedModels = new HashMap<>();
         File folder = new File(destinationFolder);
         for (File file : folder.listFiles()) {
             String fileName = file.getName();
-            if (file.isFile() && isPersistenceKeyBelongingToModelDomain(fileName, contextType)) {
+            if (file.isFile() && isPersistenceKeyBelongingToModelDomain(fileName, domainType)) {
                 byte[] exportedModel;
                 try {
                     exportedModel = Files.readAllBytes(file.toPath());
@@ -121,7 +132,7 @@ public class FileSystemModelStoreImpl extends AbstractModelStoreImpl {
     }
 
     @Override
-    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, ModelDomainType contextType)
+    public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, ModelDomainType domainType)
             throws ModelPersistenceException {
         for (Entry<String, byte[]> entry : exportedPersistedModels.entrySet()) {
             String fileName = entry.getKey();
@@ -136,14 +147,15 @@ public class FileSystemModelStoreImpl extends AbstractModelStoreImpl {
     }
 
     @Override
-    public List<PersistableModel<?, ?>> loadAllPersistedModels(ModelDomainType contextType) {
+    public List<PersistableModel<?, ?>> loadAllPersistedModels(ModelDomainType domainType) {
         List<PersistableModel<?, ?>> loadedModels = new ArrayList<>();
         File folder = new File(destinationFolder);
         for (File file : folder.listFiles()) {
             String fileName = file.getName();
-            if (file.isFile() && isPersistenceKeyBelongingToModelDomain(fileName, contextType)) {
-                ModelSerializationStrategy persistenceSupport = getModelSerializationStrategyFromPersistenceKey(fileName);
-                if (persistenceSupport == null) {
+            if (file.isFile() && isPersistenceKeyBelongingToModelDomain(fileName, domainType)) {
+                ModelSerializationStrategy serializationStrategy = getModelSerializationStrategyFromPersistenceKey(
+                        fileName);
+                if (serializationStrategy == null) {
                     throw new ModelLoadingException(
                             "Persistence support could not be determined due to invalid filename pattern: \"" + fileName
                                     + "\"");
@@ -151,7 +163,7 @@ public class FileSystemModelStoreImpl extends AbstractModelStoreImpl {
                 PersistableModel<?, ?> loadedModel;
                 File modelFile = getFileForModel(fileName);
                 try (FileInputStream input = new FileInputStream(modelFile)) {
-                    loadedModel = persistenceSupport.deserializeFromStream(input);
+                    loadedModel = serializationStrategy.deserializeFromStream(input);
                 } catch (IOException e) {
                     throw new ModelLoadingException("Could not read model \"" + fileName + "\" from filesystem", e);
                 }
