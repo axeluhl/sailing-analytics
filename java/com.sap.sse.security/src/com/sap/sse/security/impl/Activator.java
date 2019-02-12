@@ -247,7 +247,9 @@ public class Activator implements BundleActivator {
     public WildcardPermission getPermissionReplacement(WildcardPermission permission) {
         final WildcardPermission replacement;
         if ("data_mining".equalsIgnoreCase(permission.toString())) {
-            replacement = SecuredSecurityTypes.SERVER.getPermission(ServerActions.DATA_MINING);
+            replacement = SecuredSecurityTypes.SERVER
+                    .getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(ServerInfo.getName()))
+                    .getPermission(ServerActions.DATA_MINING);
         } else {
             replacement = null;
         }
