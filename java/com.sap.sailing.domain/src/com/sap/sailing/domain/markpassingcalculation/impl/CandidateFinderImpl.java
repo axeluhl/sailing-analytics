@@ -1320,7 +1320,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
                         // reduce distance by 2x the typical HDOP, accounting for the possibility that some distance from the mark
                         // may have been caused by inaccurate GPS tracking
-                        * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.scale(-2)).divide(legLength))) + 1);
+                        * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.add(hullLength).scale(-2)).divide(legLength))) + 1);
             } else {
                 result = null;
             }

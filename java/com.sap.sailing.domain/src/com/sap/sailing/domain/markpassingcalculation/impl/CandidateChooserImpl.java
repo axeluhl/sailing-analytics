@@ -59,6 +59,7 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * changed, the proxy start and all edges containing it are updated.
  * 
  * @author Nicolas Klose
+ * @author Axel Uhl
  * 
  */
 public class CandidateChooserImpl implements CandidateChooser {
@@ -117,7 +118,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * path's ends such that each path step spans a duration less than or equal to the duration specified by this field.
      * In other words, each cluster is the transitive hull of fixes not further than this duration apart.
      */
-    private static final Duration CANDIDATE_FILTER_TIME_WINDOW = Duration.ONE_SECOND.times(10);
+    private static final Duration CANDIDATE_FILTER_TIME_WINDOW = Duration.ONE_SECOND.times(5);
     
     /**
      * When looking for the most probable candidates within time windows of length {@link #CANDIDATE_FILTER_TIME_WINDOW},
