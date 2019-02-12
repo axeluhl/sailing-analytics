@@ -151,6 +151,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private UserStore store;
     private AccessControlStore accessControlStore;
     
+    private boolean isInitialOrMigration;
+    
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
     private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
@@ -288,7 +290,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
         assert adminRoleDefinition != null;
         try {
+            isInitialOrMigration = false;
             if (!store.hasUsers()) {
+                isInitialOrMigration = true;
                 logger.info("No users found, creating default user \""+UserStore.ADMIN_USERNAME+"\" with password \""+ADMIN_DEFAULT_PASSWORD+"\"");
                 final User adminUser = createSimpleUser(UserStore.ADMIN_USERNAME, "nobody@sapsailing.com",
                         ADMIN_DEFAULT_PASSWORD,
@@ -307,6 +311,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }
             
             if (store.getUserByName(SecurityService.ALL_USERNAME) == null) {
+                isInitialOrMigration = true;
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
                 User allUser = createUserInternal(SecurityService.ALL_USERNAME, null);
 
@@ -2217,5 +2222,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void removeAllSessions(String cacheName) {
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().removeAllSessions(cacheName);
+    }
+
+    @Override
+    public boolean isInitialOrMigration() {
+        return isInitialOrMigration;
     }
 }

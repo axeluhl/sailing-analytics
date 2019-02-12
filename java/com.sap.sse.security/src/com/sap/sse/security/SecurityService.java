@@ -476,4 +476,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(RoleDefinition roleDefinition,
             Ownership qualificationForGrantedPermissions);
+
+    /**
+     * @return {@code true} if the {@link UserStore} is initial or permission vertical migration is necessary.
+     */
+    boolean isInitialOrMigration();
 }
