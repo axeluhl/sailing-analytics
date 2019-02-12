@@ -123,12 +123,10 @@ public class ManeuverClassifierTrainer {
             ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures, null,
                     ManeuverClassifierModelFactory.orderedSupportedTargetValues);
             ManeuverLabelExtraction labelExtraction = new ManeuverLabelExtraction(modelContext);
-            List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> allTrainableModels = classifierModelFactory
-                    .getAllTrainableModels(modelContext);
-            for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : allTrainableModels) {
-                LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
-                classifierTrainer.trainClassifier(classifierModel, labelExtraction);
-            }
+            TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel = classifierModelFactory
+                    .getNewModel(modelContext);
+            LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
+            classifierTrainer.trainClassifier(classifierModel, labelExtraction);
         }
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
 
@@ -139,12 +137,10 @@ public class ManeuverClassifierTrainer {
                 ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures,
                         boatClass.getName(), ManeuverClassifierModelFactory.orderedSupportedTargetValues);
                 ManeuverLabelExtraction labelExtraction = new ManeuverLabelExtraction(modelContext);
-                List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> allTrainableClassifierModels = classifierModelFactory
-                        .getAllTrainableModels(modelContext);
-                for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : allTrainableClassifierModels) {
-                    LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
-                    classifierTrainer.trainClassifier(classifierModel, labelExtraction);
-                }
+                TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel = classifierModelFactory
+                        .getNewModel(modelContext);
+                LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
+                classifierTrainer.trainClassifier(classifierModel, labelExtraction);
             }
         }
     }

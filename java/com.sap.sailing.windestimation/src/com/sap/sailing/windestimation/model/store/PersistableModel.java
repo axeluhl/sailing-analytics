@@ -10,9 +10,12 @@ import com.sap.sailing.windestimation.model.ModelContext;
  * @author Vladislav Chumak (D069712)
  *
  * @param <InstanceType>
- *            The type of instances which are used as input for prediction with this model
+ *            The type of input instance for this model. The purpose of the input instance is to supply the model with
+ *            feature vector x, so that the model can generate prediction y. For instance, to classify a maneuver type
+ *            of a maneuver, a maneuver instance with features such as speed in/out, turning rate, lowest speed and etc.
+ *            must be provided to maneuver classifier.
  * @param <MC>
- *            The type of context of the model
+ *            The type of model context associated with this model.
  */
 public interface PersistableModel<InstanceType, MC extends ModelContext<InstanceType>> extends Serializable {
 

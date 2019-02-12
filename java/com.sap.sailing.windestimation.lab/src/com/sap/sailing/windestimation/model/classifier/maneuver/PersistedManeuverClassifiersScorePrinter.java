@@ -38,29 +38,25 @@ public class PersistedManeuverClassifiersScorePrinter {
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
             ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures, null,
                     ManeuverClassifierModelFactory.orderedSupportedTargetValues);
-            List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> classifierModels = classifierModelFactory
-                    .getAllTrainableModels(modelContext);
-            for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : classifierModels) {
+            TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel = classifierModelFactory
+                    .getNewModel(modelContext);
+            try {
+                classifierModel = classifierModelStore.loadModel(classifierModel);
+                if (classifierModel != null) {
+                    allClassifierModels.add(classifierModel);
+                }
+            } catch (ModelPersistenceException e) {
+            }
+            for (BoatClass boatClass : allBoatClasses) {
+                modelContext = new ManeuverClassifierModelContext(maneuverFeatures, boatClass.getName(),
+                        ManeuverClassifierModelFactory.orderedSupportedTargetValues);
+                classifierModel = classifierModelFactory.getNewModel(modelContext);
                 try {
                     classifierModel = classifierModelStore.loadModel(classifierModel);
                     if (classifierModel != null) {
                         allClassifierModels.add(classifierModel);
                     }
                 } catch (ModelPersistenceException e) {
-                }
-            }
-            for (BoatClass boatClass : allBoatClasses) {
-                modelContext = new ManeuverClassifierModelContext(maneuverFeatures, boatClass.getName(),
-                        ManeuverClassifierModelFactory.orderedSupportedTargetValues);
-                classifierModels = classifierModelFactory.getAllTrainableModels(modelContext);
-                for (TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel : classifierModels) {
-                    try {
-                        classifierModel = classifierModelStore.loadModel(classifierModel);
-                        if (classifierModel != null) {
-                            allClassifierModels.add(classifierModel);
-                        }
-                    } catch (ModelPersistenceException e) {
-                    }
                 }
             }
         }

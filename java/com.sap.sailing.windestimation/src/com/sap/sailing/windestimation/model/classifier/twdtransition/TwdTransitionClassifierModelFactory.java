@@ -22,7 +22,6 @@ public class TwdTransitionClassifierModelFactory
         return classificationModel;
     }
 
-    @Override
     public List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext>> getAllTrainableModels(
             TwdTransitionClassifierModelContext modelContext) {
         List<TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext>> classifiers = new ArrayList<>();
@@ -35,7 +34,7 @@ public class TwdTransitionClassifierModelFactory
     }
 
     @Override
-    public List<TwdTransitionClassifierModelContext> getAllValidModelContexts(
+    public List<TwdTransitionClassifierModelContext> getAllCompatibleModelContexts(
             TwdTransitionClassifierModelContext modelContextWithMaxFeatures) {
         List<TwdTransitionClassifierModelContext> modelContextCandidates = new ArrayList<>();
         modelContextCandidates
@@ -44,8 +43,10 @@ public class TwdTransitionClassifierModelFactory
     }
 
     @Override
-    public TwdTransitionClassifierModelContext getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
-        return new TwdTransitionClassifierModelContext(ManeuverTypeTransition.TACK_TACK);
+    public TwdTransitionClassifierModelContext getModelContextWhichModelAreAlwaysPresent() {
+        TwdTransitionClassifierModelContext modelContext = new TwdTransitionClassifierModelContext(
+                ManeuverTypeTransition.TACK_TACK);
+        return modelContext;
     }
 
 }

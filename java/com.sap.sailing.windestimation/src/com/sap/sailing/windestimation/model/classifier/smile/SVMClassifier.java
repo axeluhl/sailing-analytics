@@ -29,10 +29,4 @@ public class SVMClassifier<InstanceType, T extends ModelContext<InstanceType>>
         return svm;
     }
 
-    @Override
-    public boolean hasSupportForProvidedFeatures() {
-        // return getModelContext().getBoatClass() != null;
-        return true;
-    }
-
 }

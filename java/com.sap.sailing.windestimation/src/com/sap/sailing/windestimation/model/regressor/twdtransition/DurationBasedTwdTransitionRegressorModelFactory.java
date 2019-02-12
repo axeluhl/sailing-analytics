@@ -10,7 +10,7 @@ public class DurationBasedTwdTransitionRegressorModelFactory extends
         SingleDimensionBasedTwdTransitionRegressorModelFactory<DurationBasedTwdTransitionRegressorModelContext> {
 
     @Override
-    public List<DurationBasedTwdTransitionRegressorModelContext> getAllValidModelContexts(
+    public List<DurationBasedTwdTransitionRegressorModelContext> getAllCompatibleModelContexts(
             DurationBasedTwdTransitionRegressorModelContext modelContextWithMaxFeatures) {
         List<DurationBasedTwdTransitionRegressorModelContext> modelContexts = new ArrayList<>();
         modelContexts.add(modelContextWithMaxFeatures);

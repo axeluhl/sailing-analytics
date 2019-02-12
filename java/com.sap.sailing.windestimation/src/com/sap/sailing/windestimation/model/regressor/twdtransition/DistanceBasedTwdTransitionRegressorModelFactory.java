@@ -10,7 +10,7 @@ public class DistanceBasedTwdTransitionRegressorModelFactory extends
         SingleDimensionBasedTwdTransitionRegressorModelFactory<DistanceBasedTwdTransitionRegressorModelContext> {
 
     @Override
-    public List<DistanceBasedTwdTransitionRegressorModelContext> getAllValidModelContexts(
+    public List<DistanceBasedTwdTransitionRegressorModelContext> getAllCompatibleModelContexts(
             DistanceBasedTwdTransitionRegressorModelContext modelContextWithMaxFeatures) {
         List<DistanceBasedTwdTransitionRegressorModelContext> modelContexts = new ArrayList<>();
         modelContexts.add(modelContextWithMaxFeatures);

@@ -2,7 +2,6 @@ package com.sap.sailing.windestimation.model.classifier.maneuver;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
@@ -24,16 +23,6 @@ public class ManeuverClassifierModelFactory
         return classificationModel;
     }
 
-    @Override
-    public List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> getAllTrainableModels(
-            ManeuverClassifierModelContext modelContext) {
-        List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> classifiers = new ArrayList<>();
-        classifiers.add(new NeuralNetworkClassifier<>(modelContext));
-        List<TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext>> suitableClassifiers = classifiers
-                .stream().filter(classifier -> classifier.hasSupportForProvidedFeatures()).collect(Collectors.toList());
-        return suitableClassifiers;
-    }
-
     private static ManeuverClassifierModelContext createModelContext(ManeuverFeatures maneuverFeatures,
             String boatClassName) {
         ManeuverClassifierModelContext modelContext = new ManeuverClassifierModelContext(maneuverFeatures,
@@ -42,7 +31,7 @@ public class ManeuverClassifierModelFactory
     }
 
     @Override
-    public List<ManeuverClassifierModelContext> getAllValidModelContexts(
+    public List<ManeuverClassifierModelContext> getAllCompatibleModelContexts(
             ManeuverClassifierModelContext modelContextWithMaxFeatures) {
         ManeuverFeatures maneuverFeatures = modelContextWithMaxFeatures.getManeuverFeatures();
         String boatClassName = modelContextWithMaxFeatures.getBoatClassName();
@@ -62,7 +51,7 @@ public class ManeuverClassifierModelFactory
     }
 
     @Override
-    public ManeuverClassifierModelContext getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
+    public ManeuverClassifierModelContext getModelContextWhichModelAreAlwaysPresent() {
         return new ManeuverClassifierModelContext(new ManeuverFeatures(false, false, false), null,
                 ManeuverClassifierModelFactory.orderedSupportedTargetValues);
     }

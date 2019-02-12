@@ -24,7 +24,7 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends M
 
     @Override
     public void train(double[][] x, int[] y) {
-        trainingStarted();
+        resetTrainingStats();
         PreprocessingConfig preprocessingConfig = getPreprocessingConfig();
         scaler = null;
         if (preprocessingConfig.isScaling()) {
