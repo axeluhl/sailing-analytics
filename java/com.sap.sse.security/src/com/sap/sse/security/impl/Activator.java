@@ -20,6 +20,7 @@ import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.RolePrototypeProvider;
+import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
@@ -59,6 +60,8 @@ public class Activator implements BundleActivator {
     private static AccessControlStore testAccessControlStore;
 
     private ServiceTracker<RolePrototypeProvider, RolePrototypeProvider> rolePrototypeProviderTracker;
+    
+    private ServiceTracker<SecurityInitializationCustomizer, SecurityInitializationCustomizer> securityInitializationCustomizerTracker;
 
     private ServiceTracker<UserStore, UserStore> userStoreTracker;
 
@@ -127,6 +130,7 @@ public class Activator implements BundleActivator {
         userStore.ensureDefaultRolesExist();
         userStore.ensureDefaultTenantExists();
         getSecurityService().initialize();
+        applyCustomizations();
     }
 
     private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore userStore, AccessControlStore accessControlStore) {
@@ -145,6 +149,7 @@ public class Activator implements BundleActivator {
         context.registerService(Replicable.class.getName(), initialSecurityService, replicableServiceProperties);
         context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
+        applyCustomizations();
     }
     
     private void createRoleDefinitionsFromPrototypes(UserStore userStore) {
@@ -177,6 +182,34 @@ public class Activator implements BundleActivator {
                     }
                 });
         rolePrototypeProviderTracker.open();
+    }
+    
+    private void applyCustomizations() {
+        if (securityInitializationCustomizerTracker != null) {
+            // In test cases, this method will be called multiple times. To not leak ServiceTracker instances, we need
+            // to correctly stop he previously used instance.
+            securityInitializationCustomizerTracker.close();
+        }
+        securityInitializationCustomizerTracker = new ServiceTracker<>(
+                context, SecurityInitializationCustomizer.class, /* customizer */ new ServiceTrackerCustomizer<SecurityInitializationCustomizer, SecurityInitializationCustomizer>() {
+                    @Override
+                    public SecurityInitializationCustomizer addingService(ServiceReference<SecurityInitializationCustomizer> reference) {
+                        final SecurityInitializationCustomizer service = context.getService(reference);
+                        service.customizeSecurityService(getSecurityService());
+                        return service;
+                    }
+                    
+                    @Override
+                    public void modifiedService(ServiceReference<SecurityInitializationCustomizer> reference,
+                            SecurityInitializationCustomizer service) {
+                    }
+                    
+                    @Override
+                    public void removedService(ServiceReference<SecurityInitializationCustomizer> reference,
+                            SecurityInitializationCustomizer service) {
+                    }
+                });
+        securityInitializationCustomizerTracker.open();
     }
 
     private void waitForUserStoreService(BundleContext bundleContext) {
@@ -270,6 +303,10 @@ public class Activator implements BundleActivator {
         if (rolePrototypeProviderTracker != null) {
             rolePrototypeProviderTracker.close();
             rolePrototypeProviderTracker = null;
+        }
+        if (securityInitializationCustomizerTracker != null) {
+            securityInitializationCustomizerTracker.close();
+            securityInitializationCustomizerTracker = null;
         }
         if (registration != null) {
             registration.unregister();
