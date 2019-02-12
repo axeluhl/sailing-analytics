@@ -69,6 +69,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.MainScheduleFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
@@ -184,21 +185,14 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
 
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.racing_view_container);
-        if (!(fragment instanceof RaceInfoFragment || fragment instanceof WelcomeFragment)) {
-            if (getFragmentManager().getBackStackEntryCount() > 0) {
-                getFragmentManager().popBackStackImmediate();
-                getFragmentManager().beginTransaction().commit();
-
-                // fix for filled out RaceInfoFragment
-                if (infoFragment != null && infoFragment.isFragmentUIActive() && mSelectedRace != null) {
-                    ExLog.i(this, this.getClass().getCanonicalName(), "Returning to RaceInfoFragment");
-
-                    getFragmentManager().popBackStackImmediate();
-                    onRaceItemClicked(mSelectedRace);
-                }
-            }
-        } else {
+        if (fragment instanceof WelcomeFragment) {
             logoutSession();
+        } else if (fragment instanceof RaceInfoFragment || fragment instanceof MainScheduleFragment) {
+            loadWelcomeFragment();
+            mSelectedRace = null;
+            mRaceList.resetSelectedRace();
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -291,7 +285,8 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     private void loadWelcomeFragment() {
         preferences = AppPreferences.on(this);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.racing_view_container, WelcomeFragment.newInstance()).commitAllowingStateLoss();
+                .replace(R.id.racing_view_container, WelcomeFragment.newInstance())
+                .commitAllowingStateLoss();
     }
 
     public TimePoint getStartTime() {
@@ -332,7 +327,9 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
             setupActionBar(managedRace);
 
-            getSupportFragmentManager().beginTransaction().replace(R.id.racing_view_container, infoFragment).commit();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.racing_view_container, infoFragment)
+                    .commit();
         }
     }
 
@@ -369,17 +366,17 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.options_menu_reset:
-            ExLog.i(this, TAG, "Clicked RESET RACE");
-            resetRace();
-            return true;
+            case R.id.options_menu_reset:
+                ExLog.i(this, TAG, "Clicked RESET RACE");
+                resetRace();
+                return true;
 
-        case R.id.options_menu_role:
-            logoutSession();
-            return true;
+            case R.id.options_menu_role:
+                logoutSession();
+                return true;
 
-        default:
-            return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -481,7 +478,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     }
 
     public List<ManagedRace> getRacesWithStartTimeImmediatelyDependingOn(ManagedRace currentRace,
-            @Nullable RaceLogRaceStatus[] state) {
+                                                                         @Nullable RaceLogRaceStatus[] state) {
         StartTimeFinderResult result;
         SimpleRaceLogIdentifier identifier;
         ArrayList<ManagedRace> list = new ArrayList<>();
@@ -704,10 +701,10 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                             dialog.cancel();
                         }
                     }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
             builder.create().show();
         }
 
