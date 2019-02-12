@@ -1,5 +1,11 @@
 package com.sap.sailing.windestimation.model.exception;
 
+/**
+ * Indicates that something wrong has happened during run-time where a machine learning model was involved.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ModelRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 170716968865186247L;

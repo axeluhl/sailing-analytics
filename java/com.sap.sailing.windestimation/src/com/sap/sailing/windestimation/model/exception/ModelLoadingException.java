@@ -1,5 +1,11 @@
 package com.sap.sailing.windestimation.model.exception;
 
+/**
+ * Indicates that a machine learning model could not be loaded during runtime due to some unexpected error.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ModelLoadingException extends ModelRuntimeException {
 
     private static final long serialVersionUID = 9129472285700533042L;

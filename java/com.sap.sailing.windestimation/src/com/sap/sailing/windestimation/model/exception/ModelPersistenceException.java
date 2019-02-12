@@ -2,6 +2,12 @@ package com.sap.sailing.windestimation.model.exception;
 
 import java.io.IOException;
 
+/**
+ * Indicates that something went wrong in the context of model persistence and/or serialization/deserialization.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ModelPersistenceException extends IOException {
 
     private static final long serialVersionUID = -7672415389872133921L;

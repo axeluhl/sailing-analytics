@@ -1,5 +1,11 @@
 package com.sap.sailing.windestimation.model.exception;
 
+/**
+ * Indicates that a trained and loaded model has failed during its prediction task at runtime.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ModelOperationException extends ModelRuntimeException {
 
     private static final long serialVersionUID = 7308703386832127467L;
