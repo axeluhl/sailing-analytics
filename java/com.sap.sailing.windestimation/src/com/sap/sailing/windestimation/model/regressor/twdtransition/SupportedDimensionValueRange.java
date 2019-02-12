@@ -6,17 +6,20 @@ public class SupportedDimensionValueRange implements Serializable {
 
     private static final long serialVersionUID = -3288594458162374160L;
     public static final double MAX_VALUE = 100000000000.0;
+    public static final int SQUARE_ROOT_AS_POLYNOMIAL_DEGREE = -1;
     private final double fromInclusive;
     private final double toExclusive;
-    private int polynomialDegree;
-    private boolean withBias;
+    private final int polynomialDegree;
+    private final boolean withBias;
+    private final boolean squareRootInput;
 
     public SupportedDimensionValueRange(double fromInclusive, double toExclusive, int polynomialDegree,
             boolean withBias) {
         this.fromInclusive = fromInclusive;
         this.toExclusive = toExclusive;
-        this.polynomialDegree = polynomialDegree;
+        this.polynomialDegree = Math.abs(polynomialDegree);
         this.withBias = withBias;
+        this.squareRootInput = polynomialDegree == SQUARE_ROOT_AS_POLYNOMIAL_DEGREE;
     }
 
     public double getFromInclusive() {
@@ -35,8 +38,23 @@ public class SupportedDimensionValueRange implements Serializable {
         return polynomialDegree;
     }
 
+    public int getPolynomialDegreeForRegressor() {
+        return Math.abs(polynomialDegree);
+    }
+
     public boolean isWithBias() {
         return withBias;
+    }
+
+    public boolean isSquareRootInput() {
+        return squareRootInput;
+    }
+
+    @Override
+    public String toString() {
+        return "SupportedDimensionValueRange [fromInclusive=" + fromInclusive + ", toExclusive=" + toExclusive
+                + ", polynomialDegree=" + polynomialDegree + ", withBias=" + withBias + ", squareRootInput="
+                + squareRootInput + "]";
     }
 
     @Override
@@ -47,6 +65,7 @@ public class SupportedDimensionValueRange implements Serializable {
         temp = Double.doubleToLongBits(fromInclusive);
         result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + polynomialDegree;
+        result = prime * result + (squareRootInput ? 1231 : 1237);
         temp = Double.doubleToLongBits(toExclusive);
         result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + (withBias ? 1231 : 1237);
@@ -66,18 +85,13 @@ public class SupportedDimensionValueRange implements Serializable {
             return false;
         if (polynomialDegree != other.polynomialDegree)
             return false;
+        if (squareRootInput != other.squareRootInput)
+            return false;
         if (Double.doubleToLongBits(toExclusive) != Double.doubleToLongBits(other.toExclusive))
             return false;
         if (withBias != other.withBias)
             return false;
         return true;
-    }
-
-    @Override
-    public String toString() {
-        return "SupportedDimensionValueRange [fromInclusive=" + fromInclusive + ", toExclusive="
-                + (toExclusive >= MAX_VALUE ? "Maximum" : toExclusive) + ", polynomialDegree=" + polynomialDegree
-                + ", withBias=" + withBias + "]";
     }
 
 }

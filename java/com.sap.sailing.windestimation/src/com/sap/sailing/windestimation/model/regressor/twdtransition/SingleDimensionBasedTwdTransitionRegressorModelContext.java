@@ -4,8 +4,7 @@ import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
-public abstract class SingleDimensionBasedTwdTransitionRegressorModelContext
-        extends ModelContext<TwdTransition> {
+public abstract class SingleDimensionBasedTwdTransitionRegressorModelContext extends ModelContext<TwdTransition> {
 
     private static final long serialVersionUID = 20422671027132155L;
     private final String dimensionName;
@@ -24,7 +23,12 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelContext
 
     public abstract double getDimensionValue(TwdTransition instance);
 
-    public abstract double getPreprocessedDimensionValue(double dimensionValue);
+    public double getPreprocessedDimensionValue(double dimensionValue) {
+        if (getSupportedDimensionValueRange().isSquareRootInput()) {
+            return Math.sqrt(dimensionValue);
+        }
+        return dimensionValue;
+    }
 
     public SupportedDimensionValueRange getSupportedDimensionValueRange() {
         return supportedDimensionValueRange;

@@ -26,11 +26,6 @@ public final class DistanceBasedTwdTransitionRegressorModelContext
         return getPreprocessedDimensionValue(meters);
     }
 
-    @Override
-    public double getPreprocessedDimensionValue(double meters) {
-        return meters;
-    }
-
     public enum DistanceValueRange {
         BEGINNING(0, 80, 1, false), MIDDLE(80, 1368, 1, true), REMAINDER(1368, SupportedDimensionValueRange.MAX_VALUE,
                 1, true);

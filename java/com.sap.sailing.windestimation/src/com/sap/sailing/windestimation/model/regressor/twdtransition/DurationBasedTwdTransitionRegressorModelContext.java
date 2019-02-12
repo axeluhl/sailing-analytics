@@ -20,17 +20,9 @@ public final class DurationBasedTwdTransitionRegressorModelContext
         return getPreprocessedDimensionValue(seconds);
     }
 
-    @Override
-    public double getPreprocessedDimensionValue(double seconds) {
-        if (getSupportedDimensionValueRange().equals(DurationValueRange.MIDDLE1.getSupportedDimensionValueRange())) {
-            seconds = Math.sqrt(seconds);
-        }
-        return seconds;
-    }
-
     public enum DurationValueRange {
-        BEGINNING(0, 5, 1, false), MIDDLE1(5, 62, 1, true), MIDDLE2(62, 5394, 1, true), REMAINDER(5394,
-                SupportedDimensionValueRange.MAX_VALUE, 1, true);
+        BEGINNING(0, 5, 1, false), MIDDLE1(5, 62, SupportedDimensionValueRange.SQUARE_ROOT_AS_POLYNOMIAL_DEGREE,
+                true), MIDDLE2(62, 5394, 1, true), REMAINDER(5394, SupportedDimensionValueRange.MAX_VALUE, 1, true);
 
         private final SupportedDimensionValueRange supportedDimensionValueRange;
 

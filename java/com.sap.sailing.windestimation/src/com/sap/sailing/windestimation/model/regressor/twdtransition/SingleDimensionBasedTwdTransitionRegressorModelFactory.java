@@ -12,12 +12,12 @@ import com.sap.sailing.windestimation.model.regressor.TrainableRegressorModel;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
-public abstract class SingleDimensionBasedTwdTransitionRegressorModelFactory<T extends SingleDimensionBasedTwdTransitionRegressorModelContext>
-        implements RegressorModelFactory<TwdTransition, T> {
+public abstract class SingleDimensionBasedTwdTransitionRegressorModelFactory<MC extends SingleDimensionBasedTwdTransitionRegressorModelContext>
+        implements RegressorModelFactory<TwdTransition, MC> {
 
     @Override
-    public IncrementalSingleDimensionPolynomialRegressor<TwdTransition, T> getNewModel(T modelContext) {
-        IncrementalSingleDimensionPolynomialRegressor<TwdTransition, T> regressorModel = new IncrementalSingleDimensionPolynomialRegressor<>(
+    public IncrementalSingleDimensionPolynomialRegressor<TwdTransition, MC> getNewModel(MC modelContext) {
+        IncrementalSingleDimensionPolynomialRegressor<TwdTransition, MC> regressorModel = new IncrementalSingleDimensionPolynomialRegressor<>(
                 modelContext,
                 modelContext.getSupportedDimensionValueRange().getPolynomialDegree(),
                 modelContext.getSupportedDimensionValueRange().isWithBias());
@@ -25,21 +25,21 @@ public abstract class SingleDimensionBasedTwdTransitionRegressorModelFactory<T e
     }
 
     @Override
-    public List<TrainableRegressorModel<TwdTransition, T>> getAllTrainableModels(T modelContext) {
-        List<TrainableRegressorModel<TwdTransition, T>> regressors = new ArrayList<>();
+    public List<TrainableRegressorModel<TwdTransition, MC>> getAllTrainableModels(MC modelContext) {
+        List<TrainableRegressorModel<TwdTransition, MC>> regressors = new ArrayList<>();
         regressors.add(new IncrementalSingleDimensionPolynomialRegressor<>(modelContext,
                 modelContext.getSupportedDimensionValueRange().getPolynomialDegree(),
                 modelContext.getSupportedDimensionValueRange().isWithBias()));
         return regressors;
     }
 
-    public abstract T createNewModelContext(TwdTransition twdTransition);
+    public abstract MC createNewModelContext(TwdTransition twdTransition);
 
     @Override
-    public T getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
+    public MC getContextSpecificModelContextWhichModelIsAlwaysPresentAndHasMinimalFeatures() {
         TwdTransition twdTransition = new TwdTransition(new MeterDistance(100), Duration.ONE_MINUTE,
                 new DegreeBearingImpl(5), ManeuverTypeForClassification.TACK, ManeuverTypeForClassification.TACK);
-        T modelContext = createNewModelContext(twdTransition);
+        MC modelContext = createNewModelContext(twdTransition);
         return modelContext;
     }
 
