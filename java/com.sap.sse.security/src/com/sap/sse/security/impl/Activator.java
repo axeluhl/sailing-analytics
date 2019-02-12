@@ -123,7 +123,7 @@ public class Activator implements BundleActivator {
         AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
         userStore.clear();
         accessControlStore.clear();
-        createRoleDefinitionsFromPrototypes(context, userStore);
+        createRoleDefinitionsFromPrototypes(userStore);
         userStore.ensureDefaultRolesExist();
         userStore.ensureDefaultTenantExists();
         getSecurityService().initialize();
@@ -147,9 +147,9 @@ public class Activator implements BundleActivator {
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
     
-    private void createRoleDefinitionsFromPrototypes(BundleContext bundleContext, UserStore userStore) {
+    private void createRoleDefinitionsFromPrototypes(UserStore userStore) {
         rolePrototypeProviderTracker = new ServiceTracker<>(
-                bundleContext, RolePrototypeProvider.class, /* customizer */ new ServiceTrackerCustomizer<RolePrototypeProvider, RolePrototypeProvider>() {
+                context, RolePrototypeProvider.class, /* customizer */ new ServiceTrackerCustomizer<RolePrototypeProvider, RolePrototypeProvider>() {
                     @Override
                     public RolePrototypeProvider addingService(ServiceReference<RolePrototypeProvider> reference) {
                         final RolePrototypeProvider service = context.getService(reference);
@@ -190,7 +190,7 @@ public class Activator implements BundleActivator {
                     final UserStore userStore = userStoreTracker.waitForService(0);
                     final AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
                     logger.info("Obtained UserStore service "+userStore);
-                    createRoleDefinitionsFromPrototypes(bundleContext, userStore);
+                    createRoleDefinitionsFromPrototypes(userStore);
                     // must be called after the definition of the prototypes and after loading actual roles, but before
                     // loading users
                     userStore.ensureDefaultRolesExist();
