@@ -4,15 +4,15 @@ import java.util.List;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
+import com.sap.sailing.windestimation.data.LabeledManeuverForEstimation;
 
 public class CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer
-        implements CompetitorTrackTransformer<CompleteManeuverCurveWithEstimationData, LabelledManeuverForEstimation> {
+        implements CompetitorTrackTransformer<CompleteManeuverCurveWithEstimationData, LabeledManeuverForEstimation> {
 
-    private final LabelledManeuverForEstimationTransformer internalTransformer = new LabelledManeuverForEstimationTransformer();
+    private final LabeledManeuverForEstimationTransformer internalTransformer = new LabeledManeuverForEstimationTransformer();
 
     @Override
-    public List<LabelledManeuverForEstimation> transformElements(
+    public List<LabeledManeuverForEstimation> transformElements(
             CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithElementsToTransform) {
         List<ConvertableToLabelledManeuverForEstimation> convertableManeuvers = ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData
                 .getConvertableManeuvers(competitorTrackWithElementsToTransform.getElements());

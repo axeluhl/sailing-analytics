@@ -3,9 +3,9 @@ package com.sap.sailing.windestimation.data.serialization;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.windestimation.data.LabelledTwdTransition;
+import com.sap.sailing.windestimation.data.LabeledTwdTransition;
 
-public class TwdTransitionJsonSerializer implements JsonSerializer<LabelledTwdTransition> {
+public class TwdTransitionJsonSerializer implements JsonSerializer<LabeledTwdTransition> {
 
     public static final String DURATION = "s";
     public static final String DISTANCE = "m";
@@ -16,7 +16,7 @@ public class TwdTransitionJsonSerializer implements JsonSerializer<LabelledTwdTr
     public static final String TEST_DATASET = "test";
 
     @Override
-    public JSONObject serialize(LabelledTwdTransition transition) {
+    public JSONObject serialize(LabeledTwdTransition transition) {
         JSONObject json = new JSONObject();
         json.put(DURATION, transition.getDuration().asSeconds());
         json.put(DISTANCE, transition.getDistance().getMeters());

@@ -14,8 +14,8 @@ import com.sap.sailing.windestimation.aggregator.hmm.SimpleIntersectedWindRangeB
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
-import com.sap.sailing.windestimation.data.LabelledTwdTransition;
+import com.sap.sailing.windestimation.data.LabeledManeuverForEstimation;
+import com.sap.sailing.windestimation.data.LabeledTwdTransition;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
@@ -48,7 +48,7 @@ public class TwdTransitionImporter {
             List<ManeuverWithProbabilisticTypeClassification> sortedManeuvers = getPreprocessedSortedManeuvers(
                     maneuverClassifier, preprocessingPipeline, race);
             if (sortedManeuvers.size() > 1) {
-                List<LabelledTwdTransition> twdTransitions = getTwdTransitions(sortedManeuvers, race.getRegattaName());
+                List<LabeledTwdTransition> twdTransitions = getTwdTransitions(sortedManeuvers, race.getRegattaName());
                 int numberOfTwdTransitions = twdTransitions.size();
                 twdTransitionPersistenceManager.add(twdTransitions);
                 twdTransitionsCount += numberOfTwdTransitions;
@@ -82,11 +82,11 @@ public class TwdTransitionImporter {
         return sortedManeuvers;
     }
 
-    private static List<LabelledTwdTransition> getTwdTransitions(
+    private static List<LabeledTwdTransition> getTwdTransitions(
             List<ManeuverWithProbabilisticTypeClassification> sortedManeuvers, String regattaName) {
         SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator simpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator = new SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator(
                 true);
-        List<LabelledTwdTransition> result = new ArrayList<>(sortedManeuvers.size()
+        List<LabeledTwdTransition> result = new ArrayList<>(sortedManeuvers.size()
                 * ManeuverTypeForClassification.values().length * ManeuverTypeForClassification.values().length);
         int maneuverIndex = 0;
         for (ManeuverWithProbabilisticTypeClassification previousManeuver : sortedManeuvers) {
@@ -103,7 +103,7 @@ public class TwdTransitionImporter {
                 Distance distance = previousManeuver.getManeuver().getManeuverPosition()
                         .getDistance(currentManeuver.getManeuver().getManeuverPosition());
                 for (GraphNode previousNode : previousLevel.getLevelNodes()) {
-                    if (previousNode.getManeuverType() == ((LabelledManeuverForEstimation) previousLevel.getManeuver())
+                    if (previousNode.getManeuverType() == ((LabeledManeuverForEstimation) previousLevel.getManeuver())
                             .getManeuverType()) {
                         WindCourseRange previousWindCourseRange = previousNode.getValidWindRange();
                         for (GraphNode currentNode : currentLevel.getLevelNodes()) {
@@ -112,10 +112,10 @@ public class TwdTransitionImporter {
                                     .intersect(currentWindCourseRange, CombinationModeOnViolation.INTERSECTION);
                             double twdChangeDegrees = intersectedWindRange.getViolationRange();
                             boolean correct = currentNode
-                                    .getManeuverType() == ((LabelledManeuverForEstimation) currentLevel.getManeuver())
+                                    .getManeuverType() == ((LabeledManeuverForEstimation) currentLevel.getManeuver())
                                             .getManeuverType();
                             boolean testDataset = regattaName.contains("2018");
-                            LabelledTwdTransition labelledTwdTransition = new LabelledTwdTransition(distance, duration,
+                            LabeledTwdTransition labelledTwdTransition = new LabeledTwdTransition(distance, duration,
                                     new DegreeBearingImpl(twdChangeDegrees), correct, previousNode.getManeuverType(),
                                     currentNode.getManeuverType(), testDataset);
                             result.add(labelledTwdTransition);

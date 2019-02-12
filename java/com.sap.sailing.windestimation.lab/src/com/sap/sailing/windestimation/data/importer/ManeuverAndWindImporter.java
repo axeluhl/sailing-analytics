@@ -41,7 +41,7 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithManeuver
 import com.sap.sailing.windestimation.data.persistence.twdtransition.RaceWithWindSourcesPersistenceManager;
 import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
 import com.sap.sailing.windestimation.data.serialization.ManeuverForDataAnalysisJsonSerializer;
-import com.sap.sailing.windestimation.data.serialization.LabelledManeuverForEstimationJsonSerializer;
+import com.sap.sailing.windestimation.data.serialization.LabeledManeuverForEstimationJsonSerializer;
 import com.sap.sailing.windestimation.data.transformer.CompetitorTrackTransformer;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer;
@@ -68,7 +68,7 @@ public class ManeuverAndWindImporter {
     private final CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer maneuverForDataAnalysisTransformer;
     private final CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer maneuverForEstimationTransformer;
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
-    private final LabelledManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
+    private final LabeledManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
     private boolean skipRace;
 
     public ManeuverAndWindImporter() throws UnknownHostException {
@@ -79,7 +79,7 @@ public class ManeuverAndWindImporter {
         this.maneuverForDataAnalysisTransformer = new CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer();
         this.maneuverForEstimationTransformer = new CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer();
         this.maneuverForDataAnalysisJsonSerializer = new ManeuverForDataAnalysisJsonSerializer();
-        this.maneuverForEstimationJsonSerializer = new LabelledManeuverForEstimationJsonSerializer();
+        this.maneuverForEstimationJsonSerializer = new LabeledManeuverForEstimationJsonSerializer();
     }
 
     public HttpClient createNewHttpClient() {

@@ -23,14 +23,13 @@ public interface FeatureExtraction<InstanceType> {
     double[] getX(InstanceType instance);
 
     /**
-     * Similar as {@link #getX(Object)}, but instead of a single instance, a list of instances is processed and a
-     * multidimensional matrix is returned, where each row (first dimension) represents the feature vector of an
-     * instance. This method is useful for model training where all training instances must be provided as matrix
-     * representation.
+     * Similar as {@link #getX(Object)}, but instead of a single instance, a list of instances is processed and a matrix
+     * is returned, where each row (first dimension) represents the feature vector of an instance. This method is useful
+     * for model training where all training instances must be provided as matrix representation.
      * 
      * @param instances
      *            The input instances containing the input features for model.
-     * @return Two-dimensional array [n][m] where n is the number of instance and m is the number of input features
+     * @return Two-dimensional array [n][m] where n is the number of instances and m is the number of input features
      *         provided by each instance.
      */
     default double[][] getXMatrix(List<? extends InstanceType> instances) {

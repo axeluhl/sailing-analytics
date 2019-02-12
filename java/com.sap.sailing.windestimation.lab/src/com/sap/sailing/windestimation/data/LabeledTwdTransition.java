@@ -4,12 +4,12 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 
-public class LabelledTwdTransition extends TwdTransition {
+public class LabeledTwdTransition extends TwdTransition {
 
     private final boolean correct;
     private boolean testDataset;
 
-    public LabelledTwdTransition(Distance distance, Duration duration, Bearing twdChange, boolean correct,
+    public LabeledTwdTransition(Distance distance, Duration duration, Bearing twdChange, boolean correct,
             ManeuverTypeForClassification fromManeuverType, ManeuverTypeForClassification toManeuverType,
             boolean testDataset) {
         super(distance, duration, twdChange, fromManeuverType, toManeuverType);

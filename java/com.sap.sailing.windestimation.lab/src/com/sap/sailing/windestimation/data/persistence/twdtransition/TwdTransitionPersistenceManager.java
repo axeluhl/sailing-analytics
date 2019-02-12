@@ -9,12 +9,12 @@ import org.json.simple.JSONObject;
 
 import com.mongodb.BasicDBObject;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.windestimation.data.LabelledTwdTransition;
+import com.sap.sailing.windestimation.data.LabeledTwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
 import com.sap.sailing.windestimation.data.serialization.TwdTransitionJsonDeserializer;
 import com.sap.sailing.windestimation.data.serialization.TwdTransitionJsonSerializer;
 
-public class TwdTransitionPersistenceManager extends AbstractPersistenceManager<LabelledTwdTransition> {
+public class TwdTransitionPersistenceManager extends AbstractPersistenceManager<LabeledTwdTransition> {
 
     private static final String COLLECTION_NAME = "twdTransitions";
     private final TwdTransitionJsonSerializer serializer = new TwdTransitionJsonSerializer();
@@ -31,17 +31,17 @@ public class TwdTransitionPersistenceManager extends AbstractPersistenceManager<
     }
 
     @Override
-    protected JsonDeserializer<LabelledTwdTransition> getNewJsonDeserializer() {
+    protected JsonDeserializer<LabeledTwdTransition> getNewJsonDeserializer() {
         return new TwdTransitionJsonDeserializer();
     }
 
-    public void add(LabelledTwdTransition twdTransition) {
+    public void add(LabeledTwdTransition twdTransition) {
         JSONObject jsonObject = serializer.serialize(twdTransition);
         Document dbObject = parseJsonString(jsonObject.toString());
         getDb().getCollection(getCollectionName()).insertOne(dbObject);
     }
 
-    public void add(List<LabelledTwdTransition> twdTransitions) {
+    public void add(List<LabeledTwdTransition> twdTransitions) {
         List<Document> dbObjects = twdTransitions.stream()
                 .map(twdTransition -> parseJsonString(serializer.serialize(twdTransition).toString()))
                 .collect(Collectors.toList());

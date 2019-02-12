@@ -7,13 +7,13 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
-public class LabelledManeuverForEstimation extends ManeuverForEstimation {
+public class LabeledManeuverForEstimation extends ManeuverForEstimation {
 
     private final ManeuverTypeForClassification maneuverType;
     private final Wind wind;
     private final String regattaName;
 
-    public LabelledManeuverForEstimation(TimePoint maneuverTimePoint, Position maneuverPosition, Bearing middleCourse,
+    public LabeledManeuverForEstimation(TimePoint maneuverTimePoint, Position maneuverPosition, Bearing middleCourse,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
             double courseChangeInDegrees, double courseChangeWithinMainCurveInDegrees,
             double maxTurningRateInDegreesPerSecond, Double deviationFromOptimalTackAngleInDegrees,

@@ -4,9 +4,9 @@ import java.net.UnknownHostException;
 
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
+import com.sap.sailing.windestimation.data.LabeledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.serialization.CompetitorTrackWithEstimationDataJsonDeserializer;
-import com.sap.sailing.windestimation.data.serialization.LabelledManeuverForEstimationJsonDeserializer;
+import com.sap.sailing.windestimation.data.serialization.LabeledManeuverForEstimationJsonDeserializer;
 
 /**
  * 
@@ -14,7 +14,7 @@ import com.sap.sailing.windestimation.data.serialization.LabelledManeuverForEsti
  *
  */
 public class RaceWithManeuverForEstimationPersistenceManager
-        extends AbstractRaceWithEstimationDataPersistenceManager<LabelledManeuverForEstimation> {
+        extends AbstractRaceWithEstimationDataPersistenceManager<LabeledManeuverForEstimation> {
 
     public static final String COLLECTION_NAME = "racesWithManeuversForEstimation";
 
@@ -27,8 +27,8 @@ public class RaceWithManeuverForEstimationPersistenceManager
     }
 
     @Override
-    public CompetitorTrackWithEstimationDataJsonDeserializer<LabelledManeuverForEstimation> getNewCompetitorTrackWithEstimationDataJsonDeserializer() {
-        LabelledManeuverForEstimationJsonDeserializer maneuverForEstimationJsonDeserializer = new LabelledManeuverForEstimationJsonDeserializer();
+    public CompetitorTrackWithEstimationDataJsonDeserializer<LabeledManeuverForEstimation> getNewCompetitorTrackWithEstimationDataJsonDeserializer() {
+        LabeledManeuverForEstimationJsonDeserializer maneuverForEstimationJsonDeserializer = new LabeledManeuverForEstimationJsonDeserializer();
         BoatClassJsonDeserializer boatClassDeserializer = new BoatClassJsonDeserializer(DomainFactory.INSTANCE);
         return new CompetitorTrackWithEstimationDataJsonDeserializer<>(boatClassDeserializer,
                 maneuverForEstimationJsonDeserializer);

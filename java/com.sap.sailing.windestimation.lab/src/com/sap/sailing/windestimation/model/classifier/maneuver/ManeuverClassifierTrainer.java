@@ -12,7 +12,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
+import com.sap.sailing.windestimation.data.LabeledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.TransformedManeuversPersistenceManager;
@@ -28,14 +28,14 @@ import com.sap.sse.common.Util.Pair;
 public class ManeuverClassifierTrainer {
     private static final int MIN_MANEUVERS_COUNT = 500;
 
-    private final TransformedManeuversPersistenceManager<LabelledManeuverForEstimation> persistenceManager;
-    private List<LabelledManeuverForEstimation> allManeuvers;
-    private Map<Pair<String, ManeuverFeatures>, List<LabelledManeuverForEstimation>> maneuversPerBoatClass = new HashMap<>();
+    private final TransformedManeuversPersistenceManager<LabeledManeuverForEstimation> persistenceManager;
+    private List<LabeledManeuverForEstimation> allManeuvers;
+    private Map<Pair<String, ManeuverFeatures>, List<LabeledManeuverForEstimation>> maneuversPerBoatClass = new HashMap<>();
 
     private final ModelStore classifierModelStore;
 
     public ManeuverClassifierTrainer(
-            TransformedManeuversPersistenceManager<LabelledManeuverForEstimation> persistenceManager,
+            TransformedManeuversPersistenceManager<LabeledManeuverForEstimation> persistenceManager,
             ModelStore classifierModelStore) {
         this.persistenceManager = persistenceManager;
         this.classifierModelStore = classifierModelStore;
@@ -43,17 +43,17 @@ public class ManeuverClassifierTrainer {
 
     public void trainClassifier(
             TrainableClassificationModel<ManeuverForEstimation, ManeuverClassifierModelContext> classifierModel,
-            LabelExtraction<LabelledManeuverForEstimation> labelExtraction) throws Exception {
+            LabelExtraction<LabeledManeuverForEstimation> labelExtraction) throws Exception {
         ManeuverClassifierModelContext modelContext = classifierModel.getModelContext();
-        List<LabelledManeuverForEstimation> maneuvers = getSuitableManeuvers(modelContext);
+        List<LabeledManeuverForEstimation> maneuvers = getSuitableManeuvers(modelContext);
         LoggingUtil.logInfo("Using " + maneuvers.size() + " maneuvers");
         if (maneuvers.size() < MIN_MANEUVERS_COUNT) {
             LoggingUtil.logInfo("Not enough maneuver data for training. Training aborted!");
         } else {
             LoggingUtil.logInfo("Splitting training and test data...");
-            List<LabelledManeuverForEstimation> trainManeuvers = new ArrayList<>();
-            List<LabelledManeuverForEstimation> testManeuvers = new ArrayList<>();
-            for (LabelledManeuverForEstimation maneuver : maneuvers) {
+            List<LabeledManeuverForEstimation> trainManeuvers = new ArrayList<>();
+            List<LabeledManeuverForEstimation> testManeuvers = new ArrayList<>();
+            for (LabeledManeuverForEstimation maneuver : maneuvers) {
                 if (maneuver.getRegattaName().contains("2018")) {
                     testManeuvers.add(maneuver);
                 } else {
@@ -86,12 +86,12 @@ public class ManeuverClassifierTrainer {
         }
     }
 
-    private List<LabelledManeuverForEstimation> getSuitableManeuvers(ManeuverClassifierModelContext modelContext)
+    private List<LabeledManeuverForEstimation> getSuitableManeuvers(ManeuverClassifierModelContext modelContext)
             throws JsonDeserializationException, ParseException {
         String boatClassName = modelContext.getBoatClassName();
         ManeuverFeatures maneuverFeatures = modelContext.getManeuverFeatures();
         Pair<String, ManeuverFeatures> key = new Pair<>(boatClassName, maneuverFeatures);
-        List<LabelledManeuverForEstimation> maneuvers = maneuversPerBoatClass.get(key);
+        List<LabeledManeuverForEstimation> maneuvers = maneuversPerBoatClass.get(key);
         if (maneuvers == null) {
             if (allManeuvers == null) {
                 LoggingUtil.logInfo("Connecting to MongoDB");

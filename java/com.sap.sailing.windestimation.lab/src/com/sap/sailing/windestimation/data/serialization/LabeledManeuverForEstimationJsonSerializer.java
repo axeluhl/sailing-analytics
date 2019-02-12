@@ -5,9 +5,9 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedBoatClassJsonSerializer;
-import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
+import com.sap.sailing.windestimation.data.LabeledManeuverForEstimation;
 
-public class LabelledManeuverForEstimationJsonSerializer implements JsonSerializer<LabelledManeuverForEstimation> {
+public class LabeledManeuverForEstimationJsonSerializer implements JsonSerializer<LabeledManeuverForEstimation> {
 
     public static final String TIMEPOINT = "unixTime";
     public static final String POSITION_LATITUDE = "posLat";
@@ -40,7 +40,7 @@ public class LabelledManeuverForEstimationJsonSerializer implements JsonSerializ
     private final BoatClassJsonSerializer boatClassSerializer = new DetailedBoatClassJsonSerializer();
 
     @Override
-    public JSONObject serialize(LabelledManeuverForEstimation maneuver) {
+    public JSONObject serialize(LabeledManeuverForEstimation maneuver) {
         JSONObject json = new JSONObject();
         json.put(TIMEPOINT, maneuver.getManeuverTimePoint().asMillis());
         json.put(POSITION_LATITUDE, maneuver.getManeuverPosition().getLatDeg());

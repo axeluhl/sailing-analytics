@@ -6,23 +6,23 @@ import java.util.List;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
+import com.sap.sailing.windestimation.data.LabeledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 
-public class LabelledManeuverForEstimationTransformer implements
-        CompetitorTrackTransformer<ConvertableToLabelledManeuverForEstimation, LabelledManeuverForEstimation> {
+public class LabeledManeuverForEstimationTransformer implements
+        CompetitorTrackTransformer<ConvertableToLabelledManeuverForEstimation, LabeledManeuverForEstimation> {
 
     private final ManeuverForEstimationTransformer internalTransformer = new ManeuverForEstimationTransformer();
 
-    public LabelledManeuverForEstimation getManeuverForEstimation(ConvertableToLabelledManeuverForEstimation maneuver,
+    public LabeledManeuverForEstimation getManeuverForEstimation(ConvertableToLabelledManeuverForEstimation maneuver,
             ConvertableToLabelledManeuverForEstimation previousManeuver,
             ConvertableToLabelledManeuverForEstimation nextManeuver, double speedScalingDivisor, BoatClass boatClass,
             String regattaName) {
         ManeuverForEstimation maneuverForEstimation = internalTransformer.getManeuverForEstimation(maneuver,
                 speedScalingDivisor, boatClass);
         ManeuverTypeForClassification maneuverType = getManeuverTypeForClassification(maneuver);
-        LabelledManeuverForEstimation labelledManeuverForEstimation = new LabelledManeuverForEstimation(
+        LabeledManeuverForEstimation labelledManeuverForEstimation = new LabeledManeuverForEstimation(
                 maneuverForEstimation.getManeuverTimePoint(), maneuverForEstimation.getManeuverPosition(),
                 maneuverForEstimation.getMiddleCourse(), maneuverForEstimation.getSpeedWithBearingBefore(),
                 maneuverForEstimation.getSpeedWithBearingAfter(), maneuverForEstimation.getCourseChangeInDegrees(),
@@ -58,16 +58,16 @@ public class LabelledManeuverForEstimationTransformer implements
         throw new IllegalStateException();
     }
 
-    public List<LabelledManeuverForEstimation> getManeuversForEstimation(
+    public List<LabeledManeuverForEstimation> getManeuversForEstimation(
             List<ConvertableToLabelledManeuverForEstimation> convertableManeuvers, BoatClass boatClass,
             String regattaName) {
         double speedScalingDivisor = internalTransformer.getSpeedScalingDivisor(convertableManeuvers);
-        List<LabelledManeuverForEstimation> maneuversForEstimation = new ArrayList<>();
+        List<LabeledManeuverForEstimation> maneuversForEstimation = new ArrayList<>();
         ConvertableToLabelledManeuverForEstimation previousManeuver = null;
         ConvertableToLabelledManeuverForEstimation maneuver = null;
         for (ConvertableToLabelledManeuverForEstimation nextManeuver : convertableManeuvers) {
             if (maneuver != null) {
-                LabelledManeuverForEstimation maneuverForEstimation = getManeuverForEstimation(maneuver,
+                LabeledManeuverForEstimation maneuverForEstimation = getManeuverForEstimation(maneuver,
                         previousManeuver, nextManeuver, speedScalingDivisor, boatClass, regattaName);
                 if (maneuverForEstimation != null) {
                     maneuversForEstimation.add(maneuverForEstimation);
@@ -77,7 +77,7 @@ public class LabelledManeuverForEstimationTransformer implements
             maneuver = nextManeuver;
         }
         if (maneuver != null) {
-            LabelledManeuverForEstimation maneuverForEstimation = getManeuverForEstimation(maneuver, previousManeuver,
+            LabeledManeuverForEstimation maneuverForEstimation = getManeuverForEstimation(maneuver, previousManeuver,
                     null, speedScalingDivisor, boatClass, regattaName);
             if (maneuverForEstimation != null) {
                 maneuversForEstimation.add(maneuverForEstimation);
@@ -87,7 +87,7 @@ public class LabelledManeuverForEstimationTransformer implements
     }
 
     @Override
-    public List<LabelledManeuverForEstimation> transformElements(
+    public List<LabeledManeuverForEstimation> transformElements(
             CompetitorTrackWithEstimationData<ConvertableToLabelledManeuverForEstimation> competitorTrackWithElementsToTransform) {
         return getManeuversForEstimation(competitorTrackWithElementsToTransform.getElements(),
                 competitorTrackWithElementsToTransform.getBoatClass(),

@@ -2,6 +2,13 @@ package com.sap.sailing.windestimation.model.classifier;
 
 import java.io.Serializable;
 
+/**
+ * Represents pre-processing configuration of a model. The configured pre-processing must be applied on the input
+ * feature vector before it will be forwarded to the model for training or predicting.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class PreprocessingConfig implements Serializable {
 
     private static final long serialVersionUID = 1468758171182350224L;

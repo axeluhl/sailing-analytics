@@ -1,9 +1,9 @@
 package com.sap.sailing.windestimation.model.classifier.maneuver;
 
-import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
+import com.sap.sailing.windestimation.data.LabeledManeuverForEstimation;
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 
-public class ManeuverLabelExtraction implements LabelExtraction<LabelledManeuverForEstimation> {
+public class ManeuverLabelExtraction implements LabelExtraction<LabeledManeuverForEstimation> {
 
     private final ManeuverClassifierModelContext modelContext;
 
@@ -12,7 +12,7 @@ public class ManeuverLabelExtraction implements LabelExtraction<LabelledManeuver
     }
 
     @Override
-    public int getY(LabelledManeuverForEstimation maneuver) {
+    public int getY(LabeledManeuverForEstimation maneuver) {
         int y = modelContext.indexToManeuverTypeOrdinalMapping[maneuver.getManeuverType().ordinal()];
         return y;
     }

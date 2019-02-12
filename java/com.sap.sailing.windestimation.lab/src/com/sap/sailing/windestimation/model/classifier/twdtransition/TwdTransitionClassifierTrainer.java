@@ -1,6 +1,6 @@
 package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
-import com.sap.sailing.windestimation.data.LabelledTwdTransition;
+import com.sap.sailing.windestimation.data.LabeledTwdTransition;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
@@ -44,7 +44,7 @@ public class TwdTransitionClassifierTrainer {
 
     public void trainClassifier(
             TrainableClassificationModel<TwdTransition, TwdTransitionClassifierModelContext> classifierModel,
-            LabelExtraction<LabelledTwdTransition> labelExtraction) throws Exception {
+            LabelExtraction<LabeledTwdTransition> labelExtraction) throws Exception {
         TwdTransitionClassifierModelContext modelContext = classifierModel.getModelContext();
         LoggingUtil.logInfo("Querying dataset...");
         String query = "Invalid query";
@@ -85,7 +85,7 @@ public class TwdTransitionClassifierTrainer {
                     getAndClauseForQuery(ManeuverTypeForClassification.HEAD_UP, ManeuverTypeForClassification.HEAD_UP));
             break;
         }
-        PersistedElementsIterator<LabelledTwdTransition> iterator = persistenceManager.getIterator(query);
+        PersistedElementsIterator<LabeledTwdTransition> iterator = persistenceManager.getIterator(query);
         int numberOfTrainingInstances = (int) iterator.getNumberOfElements();
         LoggingUtil.logInfo("Using " + numberOfTrainingInstances + " twd transitions instances");
         LoggingUtil.logInfo("Allocating array...");
@@ -94,7 +94,7 @@ public class TwdTransitionClassifierTrainer {
         int i = 0;
         LoggingUtil.logInfo("Converting dataset to array...");
         while (iterator.hasNext()) {
-            LabelledTwdTransition twdTransition = iterator.next();
+            LabeledTwdTransition twdTransition = iterator.next();
             x[i][0] = modelContext.getXAsSingleValue(twdTransition);
             y[i] = labelExtraction.getY(twdTransition);
             i++;
