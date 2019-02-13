@@ -25,7 +25,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
-import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserManagementException;
@@ -77,9 +76,7 @@ public class SecurityResource extends AbstractSecurityResource {
     @Path("/change_password")
     @Produces("text/plain;charset=UTF-8")
     public Response changePassword(@FormParam("username") String username, @FormParam("password") String password) {
-        final Subject subject = SecurityUtils.getSubject();
-        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
-                || !username.equals(subject.getPrincipal().toString()))) {
+        if (!getService().hasCurrentUserUpdatePermission(getService().getUserByName(username))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
             try {
@@ -177,9 +174,7 @@ public class SecurityResource extends AbstractSecurityResource {
     @Produces("application/json;charset=UTF-8")
     public Response getUser(@QueryParam("username") String username) {
         final Subject subject = SecurityUtils.getSubject();
-        // ADMIN can query all; otherwise, only the owning user can query
-        // TODO: ideally, we would introduce a USER:READ:<username> permission which later can be granted to tenant admins for all users of that tenant
-        if (subject.getPrincipal() == null || (username != null && !subject.hasRole(AdminRole.getInstance().getName()))) {
+        if (!getService().hasCurrentUserReadPermission(getService().getUserByName(username))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
             final User user = getService().getUserByName(username == null ? subject.getPrincipal().toString() : username);
@@ -221,10 +216,7 @@ public class SecurityResource extends AbstractSecurityResource {
     public Response updateUser(@Context UriInfo uriInfo, @QueryParam("username") String username,
             @QueryParam("email") String email, @QueryParam("fullName") String fullName,
             @QueryParam("company") String company) {
-        final Subject subject = SecurityUtils.getSubject();
-        // the signed-in subject has role ADMIN
-        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
-                || !username.equals(subject.getPrincipal().toString()))) {
+        if (!getService().hasCurrentUserUpdatePermission(getService().getUserByName(username))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
             try {
