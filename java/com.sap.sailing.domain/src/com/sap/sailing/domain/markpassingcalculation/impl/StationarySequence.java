@@ -1,10 +1,13 @@
 package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -12,6 +15,7 @@ import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -37,8 +41,8 @@ public class StationarySequence {
     private final GPSFixTrack<Competitor, GPSFixMoving> track;
     
     private Bounds boundingBoxOfTrackSpanningCandidates;
-    
-    public StationarySequence(Comparator<Candidate> candidateComparator, GPSFixTrack<Competitor, GPSFixMoving> track) {
+
+    protected StationarySequence(Comparator<Candidate> candidateComparator, GPSFixTrack<Competitor, GPSFixMoving> track) {
         candidates = new TreeSet<>(candidateComparator);
         this.track = track;
     }
@@ -61,7 +65,7 @@ public class StationarySequence {
     }
     
     void add(Candidate candidate) {
-        candidates.add(candidate);
+        candidates.add(candidate); // TODO update the bounding box here?
     }
     
     Candidate getFirst() {
@@ -70,5 +74,20 @@ public class StationarySequence {
     
     Candidate getLast() {
         return candidates.last();
+    }
+    
+    /**
+     * Returns the candidates that are closer than {@link #CANDIDATE_FILTER_TIME_WINDOW} to this sequence's
+     * {@link #getFirst() first} or {@link #getLast() last} {@link Candidate}.
+     */
+    Iterable<Candidate> getBorderCandidates() {
+        final Set<Candidate> result = new HashSet<>();
+        result.addAll(candidates.headSet(new CandidateImpl(
+                /* one-based index of waypoint */ 1, getFirst().getTimePoint().plus(CANDIDATE_FILTER_TIME_WINDOW),
+                /* probability */ 0, /* waypoint */ null)));
+        result.addAll(candidates.tailSet(new CandidateImpl(
+                /* one-based index of waypoint */ 1, getLast().getTimePoint().minus(CANDIDATE_FILTER_TIME_WINDOW),
+                /* probability */ 0, /* waypoint */ null)));
+        return result;
     }
 }

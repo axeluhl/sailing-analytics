@@ -362,7 +362,6 @@ public class MarkPassingCalculator {
          * along with any new competitor fixes, are passed into the executor, one task per competitor. The
          * {@link CandidateFinder} uses the fixes to calculate any new or wrong Candidates. These are passed to the
          * {@link CandidateChooser} to calculate any new {@link MarkPassing}s (see {@link ComputeMarkPassings}).
-         * 
          */
         private void computeMarkPasses(Map<Competitor, List<GPSFixMoving>> newCompetitorFixes,
                 Map<Mark, List<GPSFix>> newMarkFixes) {

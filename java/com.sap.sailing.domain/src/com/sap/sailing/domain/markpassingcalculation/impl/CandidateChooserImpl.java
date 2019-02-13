@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -199,7 +198,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * up the algorithm used to find out which candidates must be added to and removed from the graph after changes have
      * been applied to {@link #candidates} and the filter rules have been re-applied.
      */
-    private final Map<Competitor, NavigableSet<Candidate>> filteredCandidatesStage2;
+    private final Map<Competitor, StationarySequences> filteredCandidatesStage2;
     
     private final Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
     private final ConcurrentHashMap<Competitor, Integer> suppressedPassings = new ConcurrentHashMap<>();
@@ -288,7 +287,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             perCompetitorLocks.put(c, createCompetitorLock(c));
             candidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
             filteredCandidatesStage1.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
-            filteredCandidatesStage2.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
+            filteredCandidatesStage2.put(c, new StationarySequences(CANDIDATE_COMPARATOR));
             final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
             currentMarkPasses.put(c, currentMarkPassesForCompetitor);
             // in case the tracked race already has mark passings, e.g., from another mark passing calculator,
@@ -532,7 +531,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      *         {@link #updateFilteredCandidates(Competitor, Iterable, Iterable)}
      */
     private Set<Candidate> getFilteredCandidates(Competitor c) {
-        return filteredCandidatesStage2.get(c);
+        return filteredCandidatesStage2.get(c).getFilteredCandidates();
     }
 
     private boolean travelingForwardInTimeOrUnknown(Candidate early, Candidate late) {
@@ -844,7 +843,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * become available as filtered candidates and that weren't before.
      */
     private void updateFilteredCandidatesAndAdjustGraph(Competitor c, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
-        Pair<Set<Candidate>, Set<Candidate>> filteredCandidatesAddedAndRemoved = updateFilteredCandidates(c, newCandidates, removedCandidates);
+        Pair<Iterable<Candidate>, Iterable<Candidate>> filteredCandidatesAddedAndRemoved = updateFilteredCandidates(c, newCandidates, removedCandidates);
         final Map<Candidate, Set<Edge>> competitorEdges = allEdges.get(c);
         for (final Candidate candidateRemoved : filteredCandidatesAddedAndRemoved.getB()) {
             logger.finest(()->"Removing all edges containing " + candidateRemoved + "of "+ c);
@@ -884,7 +883,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * @return a pair whose first element holds the set of candidates that now pass the filter and didn't before, and
      *         whose second element holds the set of candidates that did pass the filter before but don't anymore
      */
-    private Pair<Set<Candidate>, Set<Candidate>> updateFilteredCandidates(Competitor competitor, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
+    private Pair<Iterable<Candidate>, Iterable<Candidate>> updateFilteredCandidates(Competitor competitor, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
         final NavigableSet<Candidate> competitorCandidates = candidates.get(competitor);
         // pass 1
         final Pair<Set<Candidate>, Set<Candidate>> filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence =
@@ -893,10 +892,9 @@ public class CandidateChooserImpl implements CandidateChooser {
         filteredCompetitorCandidatesStage1.addAll(filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getA());
         filteredCompetitorCandidatesStage1.removeAll(filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getB());
         // pass 2
-        final Pair<Set<Candidate>, Set<Candidate>> candidatesOnTheMove = getCandidatesReallyOnTheMove(filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence);
-        final NavigableSet<Candidate> filteredCompetitorCandidatesStage2 = filteredCandidatesStage2.get(competitor);
-        filteredCompetitorCandidatesStage2.addAll(candidatesOnTheMove.getA());
-        filteredCompetitorCandidatesStage2.removeAll(candidatesOnTheMove.getB());
+        final Pair<Iterable<Candidate>, Iterable<Candidate>> candidatesOnTheMove = filteredCandidatesStage2.get(competitor).updateCandidates(
+                filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getA(),
+                filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getB());
         return candidatesOnTheMove;
     }
 
@@ -1104,105 +1102,6 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
             }
         }
-    }
-
-    /**
-     * Filters the candidates based on their movement pattern. The candidate sequence (independent of the
-     * {@link #CANDIDATE_FILTER_TIME_WINDOW}) is analyzed using a bounding box. As long as the track that connects a
-     * sequence of candidates fits in a bounding box smaller than {@link #CANDIDATE_FILTER_DISTANCE} in
-     * {@link Bounds#getDiameter() diameter}, those candidates are joined into a "stationary sequence," and only a short
-     * head and tail of the sequence (based on the {@link #CANDIDATE_FILTER_TIME_WINDOW}) pass this filter, assuming
-     * that with such a time range-based head/tail we capture the candidates relevant for all waypoints to which they
-     * may apply.
-     * <p>
-     * 
-     * This way, objects that were rather "stationary" won't feed huge candidate sets into the {@link #allEdges graph}.
-     * Still, as a tracked object starts moving, candidates will be created, even for the stationary segment in the form
-     * of a short leading and tailing candidate sequence representing this stationary segment.
-     * <p>
-     * 
-     * The algorithm starts with the first candidate that passed the first filter and adds it to a bounding box. It then
-     * keeps adding more such candidates, ordered by time. For each candidate added after the first, all (smoothened)
-     * fixes of the track between the candidates are added to the bounding box. If the bounding box's
-     * {@link Bounds#getDiameter() diameter} exceeds the {@link #CANDIDATE_FILTER_DISTANCE threshold}, the object is
-     * considered to compete reasonably, and the first and last candidate (which may be the same if there was only one
-     * candidate added so far) with the track between them completely within the bounding box of size less than or equal
-     * to {@link #CANDIDATE_FILTER_DISTANCE} have passed the filter. All candidates in between are removed from the
-     * filter result. Then, the next candidate starts a new bounding box, and so on, until all candidates from the first
-     * filter pass have been considered.
-     * <p>
-     * 
-     * This approach makes no guarantee regarding maximum length stationary sequences. Finding such segments with
-     * maximum length is considerably more expensive than finding "good" such segments with a "greedy" algorithm. If we
-     * analyze the candidate sequence in chronological order and build up stationary sequences by a "greedy" algorithm,
-     * not much harm will be done at the boundaries of two adjacent stationary sequences. Only the two candidates at the
-     * sequence boundary would be added and we would also need a solution for which candidates to preserve in case of
-     * overlapping stationary sequences. This seems acceptable. The approach will still help to significantly reduce the
-     * number of candidates for trackers that remained stationary for a significant amount of time.
-     * <p>
-     * 
-     * Considerations regarding incremental updates: We can remember all stationary sequences found so far and sort them
-     * by time. The algorithm shall guarantee that after a round of filtering each stationary sequence has at least two
-     * candidates in them which passed the first filter state, and no stationary sequence can be extended to the next
-     * candidate following it or any previous candidate preceding it because the track leading there would extend the
-     * stationary sequence's bounding box beyond limits. For all new candidates we can distinguish the following cases:
-     * <ul>
-     * <li>There is no existing stationary sequence yet and it's the first candidate that passed the filter's first
-     * pass. No sequence can be constructed from a single candidate, so the candidate passes this stage of the
-     * filter.</li>
-     * <li>The candidate is outside of any existing stationary sequence. Look for neighboring candidates in both
-     * directions. Since there is at least one neighboring candidate (otherwise see first case above), traverse the
-     * smoothened fixes along the track in the respective direction(s) towards the neighbor candidate(s) that passed the
-     * first filter stage. If the respective neighbor belongs to a stationary sequence, check if the fixes keep its
-     * bounding box sufficiently small and if so, add the new candidate to that stationary sequence; it passes the
-     * filter, whereas the neighbor is removed unless it is less than {@link #CANDIDATE_FILTER_TIME_WINDOW} away from
-     * the new candidate. If the neighbor does not belong to a stationary sequence yet and the fixes remained within
-     * small-enough bounds, create a new stationary segment with the new candidate and the neighbor. (Note: based on the
-     * invariant it is not possible that the new candidate has two neighbors each part of a stationary sequence and all
-     * fixes between them fitting into each of their bounding boxes; because if this were the case, the two sequences
-     * would already have been merged.)</li>
-     * <li>The candidate falls into an existing stationary sequence (at or after first and at or before last candidate
-     * in sequence). In this case the set of fixes on the track considered within the sequence hasn't changed. The
-     * candidate does not pass the filter, unless it is within {@link #CANDIDATE_FILTER_TIME_WINDOW} from the stationary
-     * sequence's start or end. The sequence's bounding box remains unchanged.</li>
-     * </ul>
-     * If a candidate no longer passes the first filter stage:
-     * <ul>
-     * <li>If it was not part of a stationary sequence, no action is required.</li>
-     * <li>If it was within the time range of an existing stationary sequence and further than
-     * {@link #CANDIDATE_FILTER_TIME_WINDOW} away from both of the sequence's borders, it used to be a candidate removed
-     * by this second filter stage. It is removed from the stationary sequence but doesn't change the filter
-     * results.</li>
-     * <li>If it was within the time range of an existing stationary sequence and closer than
-     * {@link #CANDIDATE_FILTER_TIME_WINDOW} to one of the sequence's borders, it used to be a candidate passing this
-     * second filter stage and therefore has to be removed from both, the stationary sequence and the filter result. If
-     * only one candidate is left in the sequence, delete the sequence. Otherwise, if it was the first or the last
-     * candidate of the stationary sequence, re-evaluate which fixes on that end of the sequence now fall within
-     * {@link #CANDIDATE_FILTER_TIME_WINDOW} from that border of the sequence.</li>
-     * </ul>
-     * In addition to a changing candidate set passing the first filter stage, changes to the GPS tracks are relevant
-     * for this second filter stage based on stationary sequences. The following cases can be distinguished:
-     * <ul>
-     * <li>A GPS fix was added to or replaces one of those in the competitor's track within the time range of an
-     * existing stationary sequence. The fix needs to be added to the stationary sequence's bounding box. If the box
-     * still remains small enough, nothing changes. Otherwise, the algorithm tries to extend the stationary sequence
-     * from the last candidate before the new fix until the track lets the bounding box grow too large. A new stationary
-     * sequence is started, adding all remaining candidates. Any of the sequences resulting from the split and having
-     * only one candidate left is removed. The candidates immediately left and right of the split now pass the filter
-     * and therefore are added to the {@link #allEdges graph}.</li>
-     * <li>A GPS fix was added outside any stationary sequence. Nothing changes because no bounding box would get
-     * smaller by a new fix added.</li>
-     * <li>A GPS fix <em>replaces</em> an existing one outside of any stationary sequence. In this case it is possible
-     * that the fix replaced caused a bounding box to exceed the diameter threshold and thus avoided a stationary sequence
-     * from being created, and the new fix "smoothes" the track such that a stationary sequence may come into
-     * existence. Therefore, if a fix is replaced outside of any stationary sequence, an extension attempt is made
-     * for any adjacent stationary sequence towards the fix replaced. The extension attempts could stop as they
-     * reach the next stationary sequence; however, we could also try to merge two adjacent stationary sequences
-     * in their entirety. If this fails, the next best solution is still to extend such that they touch each other.</li>
-     * </ul>
-     */
-    private Pair<Set<Candidate>, Set<Candidate>> getCandidatesReallyOnTheMove(Pair<Set<Candidate>, Set<Candidate>> candidatesAddedAndRemovedDuringFirstPass) {
-        return candidatesAddedAndRemovedDuringFirstPass; // TODO implement getCandidatesReallyOnTheMove
     }
 
     /**
