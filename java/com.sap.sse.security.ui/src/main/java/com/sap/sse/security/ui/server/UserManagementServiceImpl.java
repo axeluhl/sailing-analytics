@@ -37,7 +37,6 @@ import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -753,10 +752,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo deleteUser(String username) throws UnauthorizedException {
         User user = getSecurityService().getUserByName(username);
         if (user != null) {
-            // In addition to checking the default delete permission we currently explicitly require admin role for the
-            // owning user/group
-            if (!getSecurityService().hasCurrentUserRoleForOwnedObject(SecuredSecurityTypes.USER, user,
-                    AdminRole.getInstance())) {
+            if (!getSecurityService().hasCurrentUserExplictPermissions(user, DefaultActions.DELETE)) {
                 return new SuccessInfo(false, "You are not permitted to delete user " + username,
                         /* redirectURL */ null, null);
             }
