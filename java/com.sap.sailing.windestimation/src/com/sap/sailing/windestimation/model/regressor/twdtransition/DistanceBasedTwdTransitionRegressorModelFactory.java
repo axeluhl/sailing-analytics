@@ -4,8 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.model.ModelFactory;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
 
+/**
+ * {@link ModelFactory} for distance-based standard deviation of TWD delta regression models.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class DistanceBasedTwdTransitionRegressorModelFactory extends
         SingleDimensionBasedTwdTransitionRegressorModelFactory<DistanceBasedTwdTransitionRegressorModelContext> {
 

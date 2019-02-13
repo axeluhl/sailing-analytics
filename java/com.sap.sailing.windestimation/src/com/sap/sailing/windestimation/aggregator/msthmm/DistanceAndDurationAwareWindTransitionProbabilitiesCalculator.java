@@ -30,7 +30,7 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
 
     @Override
     protected double getPenaltyFactorForTransition(TwdTransition twdTransition) {
-        double penaltyFactor = gaussianBasedTwdTransitionDistributionCache.getP(twdTransition);
+        double penaltyFactor = gaussianBasedTwdTransitionDistributionCache.getProbability(twdTransition);
         return penaltyFactor + LA_PLACE_TRANSITION_PROBABILITY;
     }
 
@@ -62,7 +62,7 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
         IntersectedWindRange intersectedWindRangeUntilCurrentNode = null;
         for (int i = 0; i < intersectedWindRanges.length; i++) {
             IntersectedWindRange intersectedWindRange = intersectedWindRanges[i];
-            double transitionProbability = gaussianBasedTwdTransitionDistributionCache.getGaussianP(stdSum,
+            double transitionProbability = gaussianBasedTwdTransitionDistributionCache.getGaussianProbability(stdSum,
                     intersectedWindRange.getViolationRange());
             transitionProbability += LA_PLACE_TRANSITION_PROBABILITY;
             transitionProbabilitySum += transitionProbability;

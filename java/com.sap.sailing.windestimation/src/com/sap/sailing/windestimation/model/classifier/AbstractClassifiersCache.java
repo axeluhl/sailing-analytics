@@ -23,10 +23,29 @@ public abstract class AbstractClassifiersCache<InstanceType, MC extends ModelCon
 
     private final ClassificationResultMapper<InstanceType, MC, ClassificationResultType> classificationResultMapper;
 
-    public AbstractClassifiersCache(ModelStore classifierModelStore, boolean preloadAllModels,
-            long preserveLoadedClassifiersMillis, ClassifierModelFactory<InstanceType, MC> classifierModelFactory,
+    /**
+     * Constructs a new instance of a model cache.
+     * 
+     * @param modelStore
+     *            The model store containing all trained models which can be loaded in this cache
+     * @param preloadAllModels
+     *            If {@code true}, all models within the provided model store are loaded inside this cache immediately
+     *            within this constructor execution. If {@code false}, the models will be loaded on-demand (lazy
+     *            loading).
+     * @param preserveLoadedModelsMillis
+     *            If not {@link Long#MAX_VALUE}, then the in-memory cache with loaded models will drop models which
+     *            where not queried for longer than the provided milliseconds. However, an evicted model will be
+     *            reloaded from model store if it gets queried again.
+     * @param modelFactory
+     *            The model factory which is used to instantiate model instances which are managed by this cache
+     * @param classificationResultMapper
+     *            Mapper which converts the input instances and its classification likelihoods to the demanded return
+     *            type.
+     */
+    public AbstractClassifiersCache(ModelStore modelStore, boolean preloadAllModels, long preserveLoadedModelsMillis,
+            ClassifierModelFactory<InstanceType, MC> modelFactory,
             ClassificationResultMapper<InstanceType, MC, ClassificationResultType> classificationResultMapper) {
-        super(classifierModelStore, preloadAllModels, preserveLoadedClassifiersMillis, classifierModelFactory);
+        super(modelStore, preloadAllModels, preserveLoadedModelsMillis, modelFactory);
         this.classificationResultMapper = classificationResultMapper;
     }
 

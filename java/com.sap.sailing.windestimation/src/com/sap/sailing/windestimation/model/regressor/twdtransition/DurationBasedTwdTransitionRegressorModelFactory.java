@@ -4,8 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.model.ModelFactory;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
 
+/**
+ * {@link ModelFactory} for duration-based standard deviation of TWD delta regression models.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class DurationBasedTwdTransitionRegressorModelFactory extends
         SingleDimensionBasedTwdTransitionRegressorModelFactory<DurationBasedTwdTransitionRegressorModelContext> {
 

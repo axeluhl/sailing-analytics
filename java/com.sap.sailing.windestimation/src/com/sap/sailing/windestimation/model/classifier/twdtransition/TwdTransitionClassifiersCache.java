@@ -14,10 +14,24 @@ import com.sap.sailing.windestimation.model.store.ModelStore;
 public class TwdTransitionClassifiersCache extends
         AbstractClassifiersCache<TwdTransition, TwdTransitionClassifierModelContext, TwdTransitionClassificationResult> {
 
-    public TwdTransitionClassifiersCache(ModelStore classifierModelStore, boolean preloadAllModels,
-            long preserveLoadedClassifiersMillis) {
-        super(classifierModelStore, preloadAllModels, preserveLoadedClassifiersMillis,
-                new TwdTransitionClassifierModelFactory(), new TwdTransitionClassificationResultMapper());
+    /**
+     * Constructs a new instance of a model cache.
+     * 
+     * @param modelStore
+     *            The model store containing all trained models which can be loaded in this cache
+     * @param preloadAllModels
+     *            If {@code true}, all models within the provided model store are loaded inside this cache immediately
+     *            within this constructor execution. If {@code false}, the models will be loaded on-demand (lazy
+     *            loading).
+     * @param preserveLoadedModelsMillis
+     *            If not {@link Long#MAX_VALUE}, then the in-memory cache with loaded models will drop models which
+     *            where not queried for longer than the provided milliseconds. However, an evicted model will be
+     *            reloaded from model store if it gets queried again.
+     */
+    public TwdTransitionClassifiersCache(ModelStore modelStore, boolean preloadAllModels,
+            long preserveLoadedModelsMillis) {
+        super(modelStore, preloadAllModels, preserveLoadedModelsMillis, new TwdTransitionClassifierModelFactory(),
+                new TwdTransitionClassificationResultMapper());
     }
 
     @Override

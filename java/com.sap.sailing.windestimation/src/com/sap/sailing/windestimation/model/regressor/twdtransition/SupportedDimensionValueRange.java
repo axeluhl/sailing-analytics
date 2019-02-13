@@ -2,6 +2,13 @@ package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import java.io.Serializable;
 
+/**
+ * Represents an interval for which a certain regression model is responsible for. Additionally, it contains
+ * configuration for the regression model, such as polynomial degree to use, whether a bias should be used, or not.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class SupportedDimensionValueRange implements Serializable {
 
     private static final long serialVersionUID = -3288594458162374160L;
@@ -13,6 +20,22 @@ public class SupportedDimensionValueRange implements Serializable {
     private final boolean withBias;
     private final boolean squareRootInput;
 
+    /**
+     * Constructs a value range with configuration which is meant to be managed by a certain model.
+     * 
+     * @param fromInclusive
+     *            Lowest value of the interval (inclusive)
+     * @param toExclusive
+     *            Highest value of the interval (exclusive). {@link #MAX_VALUE} represents positive infinity.
+     * @param polynomialDegree
+     *            Polynomial order of the regression to use for this interval. {@link #SQUARE_ROOT_AS_POLYNOMIAL_DEGREE}
+     *            means that the polynomial order gets 1, but the input value must be square rooted before passing it to
+     *            the model for prediction (see
+     *            {@link SingleDimensionBasedTwdTransitionRegressorModelContext#getPreprocessedDimensionValue(double)}.
+     *            This logic leads to a square root function being learned instead of a linear one.
+     * @param withBias
+     *            Whether the regression model shall contain a bias, e.g. {@code ax + b} where {@code b} is bias.
+     */
     public SupportedDimensionValueRange(double fromInclusive, double toExclusive, int polynomialDegree,
             boolean withBias) {
         this.fromInclusive = fromInclusive;
@@ -22,30 +45,47 @@ public class SupportedDimensionValueRange implements Serializable {
         this.squareRootInput = polynomialDegree == SQUARE_ROOT_AS_POLYNOMIAL_DEGREE;
     }
 
+    /**
+     * Gets the lowest value of the represented interval (inclusive).
+     */
     public double getFromInclusive() {
         return fromInclusive;
     }
 
+    /**
+     * Gets the highest value of the represented interval (exclusive).
+     */
     public double getToExclusive() {
         return toExclusive;
     }
 
+    /**
+     * Gets the middle value between the interval boundaries.
+     */
     public double getSupportedIntervalMiddleValue() {
         return fromInclusive + (toExclusive - fromInclusive) / 2;
     }
 
+    /**
+     * Gets the polynomial order requirement for a regression model. If this instance was constructed with polynomial
+     * order set with {@link #SQUARE_ROOT_AS_POLYNOMIAL_DEGREE}, then 1 will be returned.
+     */
     public int getPolynomialDegree() {
         return polynomialDegree;
     }
 
-    public int getPolynomialDegreeForRegressor() {
-        return Math.abs(polynomialDegree);
-    }
-
+    /**
+     * Checks whether the regression model shall contain a bias, e.g. {@code ax + b} where {@code b} is bias.
+     */
     public boolean isWithBias() {
         return withBias;
     }
 
+    /**
+     * Checks whether the regression model requires its input being square rooted before passing it to the model for
+     * prediction or training. This will be the case if this instance was constructed with polynomial order set with
+     * {@link #SQUARE_ROOT_AS_POLYNOMIAL_DEGREE}.
+     */
     public boolean isSquareRootInput() {
         return squareRootInput;
     }

@@ -19,6 +19,22 @@ import com.sap.sailing.windestimation.model.store.ModelStore;
 public abstract class AbstractRegressorCache<InstanceType, MC extends ModelContext<InstanceType>>
         extends AbstractModelCache<InstanceType, MC, TrainableRegressorModel<InstanceType, MC>> {
 
+    /**
+     * Constructs a new instance of a model cache.
+     * 
+     * @param modelStore
+     *            The model store containing all trained models which can be loaded in this cache
+     * @param preloadAllModels
+     *            If {@code true}, all models within the provided model store are loaded inside this cache immediately
+     *            within this constructor execution. If {@code false}, the models will be loaded on-demand (lazy
+     *            loading).
+     * @param preserveLoadedModelsMillis
+     *            If not {@link Long#MAX_VALUE}, then the in-memory cache with loaded models will drop models which
+     *            where not queried for longer than the provided milliseconds. However, an evicted model will be
+     *            reloaded from model store if it gets queried again.
+     * @param modelFactory
+     *            The model factory which is used to instantiate model instances which are managed by this cache
+     */
     public AbstractRegressorCache(ModelStore modelStore, boolean preloadAllModels, long preserveLoadedModelsMillis,
             RegressorModelFactory<InstanceType, MC> modelFactory) {
         super(modelStore, preloadAllModels, preserveLoadedModelsMillis, modelFactory);
