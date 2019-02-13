@@ -17,6 +17,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONObject;
 
@@ -316,9 +317,16 @@ public class SecurityResource extends AbstractSecurityResource {
     Response respondWithAccessTokenForUser(final String username) {
         JSONObject response = new JSONObject();
         response.put("username", username);
-        String accessToken = getService().getOrCreateAccessToken(username);
-        if (accessToken == null) {
-            accessToken = getService().createAccessToken(username);
+        getService().checkCurrentUserReadPermission(getService().getUserByName(username));
+        String accessToken;
+        if (getService().hasCurrentUserUpdatePermission(getService().getUserByName(username))) {
+            accessToken = getService().getOrCreateAccessToken(username);
+        } else {
+            accessToken = getService().getAccessToken(username);
+            if (accessToken == null) {
+                throw new AuthorizationException(
+                        "No access token was found and the permission to create one is lacking.");
+            }
         }
         response.put("access_token", accessToken);
         return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();

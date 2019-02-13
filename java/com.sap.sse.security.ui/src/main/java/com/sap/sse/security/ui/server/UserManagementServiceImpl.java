@@ -940,12 +940,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public String getAccessToken(String username) {
+    public String getAccessToken(String username) throws UnauthorizedException {
+        getSecurityService().checkCurrentUserReadPermission(getUserByName(username));
         return getSecurityService().getAccessToken(username);
     }
 
     @Override
-    public String getOrCreateAccessToken(String username) {
+    public String getOrCreateAccessToken(String username) throws UnauthorizedException {
+        getSecurityService().checkCurrentUserUpdatePermission(getUserByName(username));
         return getSecurityService().getOrCreateAccessToken(username);
     }
 

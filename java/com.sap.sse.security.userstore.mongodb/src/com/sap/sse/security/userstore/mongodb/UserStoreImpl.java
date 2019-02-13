@@ -14,8 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.shiro.SecurityUtils;
-
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
@@ -519,26 +517,11 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public String getAccessToken(String username) {
-        // TODO replace check for admin role by a check for the read permission for the access token which then has to
-        // be implied for the user by the user role
-        // only the user or an administrator may request a user's access token
-        final Object principal = SecurityUtils.getSubject().getPrincipal();
-        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName())
-                || (principal != null && principal.toString().equals(username))) {
-            return getPreference(username, ACCESS_TOKEN_KEY);
-        } else {
-            throw new org.apache.shiro.authz.AuthorizationException(
-                    "Only admin role or owner can retrieve access token");
-        }
+        return getPreference(username, ACCESS_TOKEN_KEY);
     }
 
     @Override
     public void removeAccessToken(String username) {
-        // TODO replace check for admin role by a check for the read permission for the access token which then has to
-        // be implied for the user by the user role
-        // only the user or an administrator may request a user's access token
-        if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName())
-                || SecurityUtils.getSubject().getPrincipal().toString().equals(username)) {
             User user = users.get(username);
             if (user != null) {
                 final String accessToken = getPreference(username, ACCESS_TOKEN_KEY);
@@ -548,10 +531,6 @@ public class UserStoreImpl implements UserStore {
                 // the access token actually existed; now we need to update the preferences
                 unsetPreference(username, ACCESS_TOKEN_KEY);
             }
-        } else {
-            throw new org.apache.shiro.authz.AuthorizationException(
-                    "Only admin role or owner can retrieve access token");
-        }
     }
 
     private void addToUsersByEmail(User u) {

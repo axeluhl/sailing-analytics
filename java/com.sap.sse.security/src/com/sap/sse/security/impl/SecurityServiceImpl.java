@@ -1580,7 +1580,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void removeAccessToken(String username) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(AdminRole.getInstance().getName()) || username.equals(subject.getPrincipal().toString())) {
+        if (hasCurrentUserUpdatePermission(getUserByName(username))) {
             apply(s -> s.internalRemoveAccessToken(username));
         } else {
             throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()

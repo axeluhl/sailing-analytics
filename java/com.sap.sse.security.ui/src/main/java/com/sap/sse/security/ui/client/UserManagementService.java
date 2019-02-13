@@ -147,9 +147,9 @@ public interface UserManagementService extends RemoteService {
     
     Map<String, String> getAllPreferences(String username) throws UserManagementException, UnauthorizedException;
 
-    String getAccessToken(String username);
+    String getAccessToken(String username) throws UnauthorizedException;
 
-    String getOrCreateAccessToken(String username);
+    String getOrCreateAccessToken(String username) throws UnauthorizedException;
 
     // ------------------------------------------------ OAuth Interface --------------------------------------------------------------
 
