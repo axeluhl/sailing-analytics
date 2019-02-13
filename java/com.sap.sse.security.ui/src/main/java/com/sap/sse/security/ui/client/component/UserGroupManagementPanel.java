@@ -19,6 +19,7 @@ import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.usergroup.roles.UserGroupRoleDefinitionPanel;
+import com.sap.sse.security.ui.client.component.usergroup.users.UserGroupDetailPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -100,10 +101,8 @@ public class UserGroupManagementPanel extends DockPanel {
      * @param tableResources */
     private HorizontalPanel createUserGroupDetailsPanel(final StringMessages stringMessages,
             final UserManagementServiceAsync userManagementService, UserService userService, Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter, CellTableWithCheckboxResources tableResources) {
-        final TextBox userFilterBox = new TextBox();
-        userFilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
-        userGroupDetailPanel = new UserGroupDetailPanel(userFilterBox, userGroupTableWrapper.getSelectionModel(),
-                userGroupListDataProvider, userManagementService, stringMessages);
+        userGroupDetailPanel = new UserGroupDetailPanel(userGroupTableWrapper.getSelectionModel(),
+                userGroupListDataProvider, userService, stringMessages);
 
         
         userGroupRoleDefinitionPanel = new UserGroupRoleDefinitionPanel(userService,
@@ -111,7 +110,6 @@ public class UserGroupManagementPanel extends DockPanel {
                 userGroupTableWrapper.getSelectionModel(), userGroupListDataProvider);
 
         final VerticalPanel userListWrapper = new VerticalPanel();
-        userListWrapper.add(userFilterBox);
         userListWrapper.add(userGroupDetailPanel);
         final CaptionPanel userListCaption = new CaptionPanel(stringMessages.users());
         userListCaption.add(userListWrapper);
@@ -134,7 +132,7 @@ public class UserGroupManagementPanel extends DockPanel {
     public void updateUserGroups() {
         userGroupTableWrapper.refreshUserList(null);
         userGroupListDataProvider.updateDisplays();
-        userGroupDetailPanel.updateLists();
+        userGroupDetailPanel.updateUserList();
         userGroupRoleDefinitionPanel.updateUserGroups();
     }
 }
