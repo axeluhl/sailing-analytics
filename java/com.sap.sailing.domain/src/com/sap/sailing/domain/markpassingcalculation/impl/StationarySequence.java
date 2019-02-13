@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.markpassingcalculation.impl;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -18,6 +21,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 /**
@@ -38,11 +42,13 @@ public class StationarySequence {
 
     private static final Duration CANDIDATE_FILTER_TIME_WINDOW = Duration.ONE_SECOND.times(10);
     
-    private final SortedSet<Candidate> candidates;
+    private final NavigableSet<Candidate> candidates;
 
     private final GPSFixTrack<Competitor, GPSFixMoving> track;
     
     private Bounds boundingBoxOfTrackSpanningCandidates;
+
+    private final Comparator<Candidate> candidateComparator;
 
     /**
      * Constructs a new stationary sequence with a single {@code seed} candidate in it which acts as {@link #getFirst()
@@ -51,6 +57,7 @@ public class StationarySequence {
      */
     StationarySequence(Candidate seed, Comparator<Candidate> candidateComparator, GPSFixTrack<Competitor, GPSFixMoving> track) {
         this.candidates = new TreeSet<>(candidateComparator);
+        this.candidateComparator = candidateComparator;
         this.track = track;
         this.candidates.add(seed);
         boundingBoxOfTrackSpanningCandidates = createNewBounds(seed);
@@ -306,11 +313,98 @@ public class StationarySequence {
     }
     
     /**
+     * A fix was added to the track in the time range spanned by this stationary sequence. One of the following cases
+     * applied:
+     * <ul>
+     * <li>Adding the fix to the {@link #boundingBoxOfTrackSpanningCandidates} keeps the bounding box's
+     * {@link Bounds#getDiameter() diameter} within {@link #CANDIDATE_FILTER_DISTANCE thresholds}. Only the bounding box
+     * update is performed, and no change to the candidates that pass this filter is applied.</li>
+     * <li>Adding the fix enlarged the bounding box beyond thresholds. This stationary sequence needs splitting. This
+     * object keeps its {@link #getFirst() first} candidate and all further candidates up to but excluding the time
+     * point of the {@code newFix}. (Note: the first candidate may still be exactly at the fix, but a resulting sequence
+     * with only one candidate will be removed anyway.) A second, new stationary sequence is created for all remaining
+     * candidates if there are at least two of them. The changes to the filter results are announced by updating
+     * {@code candidatesEffectivelyAdded} and {@code candidatesEffectivelyRemoved}.</li>
+     * </ul>
+     * 
+     * @return {@code null} if no new {@link StationarySequence} resulted from any splitting activity (could be because
+     *         no split took place, or the split didn't leave more than one candidate for a second sequence}; the new
+     *         sequence created by a split otherwise.
+     */
+    StationarySequence tryToAddFix(GPSFixMoving newFix, Set<Candidate> candidatesEffectivelyAdded,
+            Set<Candidate> candidatesEffectivelyRemoved) {
+        assert !newFix.getTimePoint().before(getFirst().getTimePoint());
+        assert !newFix.getTimePoint().after(getLast().getTimePoint());
+        final Bounds newBounds = boundingBoxOfTrackSpanningCandidates.extend(newFix.getPosition());
+        final StationarySequence tailSequence;
+        if (newBounds.getDiameter().compareTo(CANDIDATE_FILTER_DISTANCE) < 0) {
+            boundingBoxOfTrackSpanningCandidates = newBounds; // ...and we're done
+            tailSequence = null;
+        } else {
+            // split:
+            final Set<Candidate> oldValidCandidates = new HashSet<>();
+            Util.addAll(getValidCandidates(), oldValidCandidates);
+            final Candidate dummyCandidateForFix = createDummyCandidate(newFix.getTimePoint());
+            SortedSet<Candidate> tailSet = candidates.tailSet(dummyCandidateForFix);
+            boolean tryToAddCandidateAtFixLater = false;
+            if (!tailSet.isEmpty() && tailSet.first().getTimePoint().equals(dummyCandidateForFix.getTimePoint())) {
+                // new fix is exactly on a candidate in this stationary sequence; construct the tailing stationary sequence
+                // without this candidate to start with, then try whether it can be extended to the left:
+                tryToAddCandidateAtFixLater = true;
+                tailSet = candidates.tailSet(dummyCandidateForFix, /* inclusive */ false);
+            }
+            tailSequence = tailSet.isEmpty() ? null : createStationarySequence(tailSet);
+            if (tailSequence != null && tryToAddCandidateAtFixLater) {
+                tailSequence.tryToExtendBeforeFirst(candidates.floor(dummyCandidateForFix), new HashSet<>(), new HashSet<>());
+            }
+            // now remove the tail set candidates from this stationary sequence:
+            candidates.removeAll(new ArrayList<>(candidates.tailSet(dummyCandidateForFix)));
+            refreshBoundingBox();
+            final Set<Candidate> newValidCandidates = new HashSet<>();
+            Util.addAll(getValidCandidates(), newValidCandidates);
+            if (tailSequence != null) { // this includes the possibility of a single candidate being added to the tail set
+                Util.addAll(tailSequence.getValidCandidates(), newValidCandidates);
+            }
+            final Set<Candidate> candidatesAdded = new HashSet<>(newValidCandidates);
+            candidatesAdded.removeAll(newValidCandidates);
+            final Set<Candidate> candidatesRemoved = new HashSet<>(oldValidCandidates);
+            candidatesRemoved.removeAll(newValidCandidates);
+            candidatesEffectivelyAdded.addAll(candidatesAdded);
+            candidatesEffectivelyRemoved.removeAll(candidatesAdded);
+            candidatesEffectivelyRemoved.addAll(candidatesRemoved);
+            candidatesEffectivelyAdded.removeAll(candidatesRemoved);
+        }
+        return tailSequence != null && Util.size(tailSequence.getAllCandidates()) >= 2 ? tailSequence : null;
+    }
+
+    /**
+     * Precondition: the track between the {@code candidates} is valid for a stationary sequence, not leaving a bounding
+     * box of diameter {@link #CANDIDATE_FILTER_DISTANCE}, and {@code candidates} contains at least one element.<p>
+     * 
+     * Constructs a new sequence from the candidates. No updates to {@link #candidates} are performed here.
+     * 
+     * @return a sequence with the candidate(s)
+     */
+    private StationarySequence createStationarySequence(SortedSet<Candidate> candidates) {
+        final Set<Candidate> candidatesEffectivelyAdded = new HashSet<>();
+        final Set<Candidate> candidatesEffectivelyRemoved = new HashSet<>();
+        final Iterator<Candidate> candidateIterator = candidates.iterator();
+        assert candidateIterator.hasNext();
+        final StationarySequence result = new StationarySequence(candidateIterator.next(), candidateComparator, track);
+        while (candidateIterator.hasNext()) {
+            boolean extensionOk = result.tryToExtendAfterLast(candidateIterator.next(), candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+            assert extensionOk;
+        }
+        return result;
+    }
+
+    /**
      * Creates a dummy time point that can be used for searching in {@link #candidates} by time point. It
      * uses {@code 1} for the one-based waypoint index, {@code null} for the waypoint and {@code 0.0} for its
      * probability.
      */
-    private Candidate createDummyCandidate(TimePoint timePoint) {
+    static Candidate createDummyCandidate(TimePoint timePoint) {
         return new CandidateImpl(/* one-based index of waypoint */ 1, timePoint, /* probability */ 0, /* waypoint */ null);
     }
 }
+

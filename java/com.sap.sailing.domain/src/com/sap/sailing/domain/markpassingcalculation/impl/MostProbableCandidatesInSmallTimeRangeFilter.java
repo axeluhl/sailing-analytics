@@ -55,7 +55,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
     private final Candidate startProxyCandidate;
     private final Candidate endProxyCandidate;
 
-    public MostProbableCandidatesInSmallTimeRangeFilter(Comparator<Candidate> candidateComparator, Candidate startProxyCandidate,
+    MostProbableCandidatesInSmallTimeRangeFilter(Comparator<Candidate> candidateComparator, Candidate startProxyCandidate,
             Candidate endProxyCandidate) {
         this.candidateComparator = candidateComparator;
         filteredCandidates = new TreeSet<>(candidateComparator);
@@ -271,7 +271,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
         }
     }
 
-    public Iterable<Candidate> getFilteredCandidates() {
+    Iterable<Candidate> getFilteredCandidates() {
         return filteredCandidates;
     }
 

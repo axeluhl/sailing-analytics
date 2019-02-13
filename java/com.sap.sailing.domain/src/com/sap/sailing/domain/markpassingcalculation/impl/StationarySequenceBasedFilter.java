@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.markpassingcalculation.impl;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.NavigableSet;
@@ -114,7 +113,7 @@ public class StationarySequenceBasedFilter {
      * as they have been added. They never participate in any {@link StationarySequence} managed by this filter and are
      * always returned as part of the {@link #getFilteredCandidates()} result once they were added.
      */
-    protected StationarySequenceBasedFilter(final Comparator<Candidate> candidateComparator,
+    StationarySequenceBasedFilter(final Comparator<Candidate> candidateComparator,
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track, Candidate startProxyCandidate, Candidate endProxyCandidate) {
         this.stationarySequences = new TreeSet<>((ss1, ss2)->candidateComparator.compare(ss1.getFirst(), ss2.getFirst()));
         this.candidateComparator = candidateComparator;
@@ -379,18 +378,22 @@ public class StationarySequenceBasedFilter {
      * existing stationary sequence. The fix needs to be added to the stationary sequence's bounding box. If the box
      * still remains small enough, nothing changes. Otherwise, the algorithm tries to extend the stationary sequence
      * from the last candidate before the new fix until the track lets the bounding box grow too large. A new stationary
-     * sequence is started, adding all remaining candidates. Any of the sequences resulting from the split and having
-     * only one candidate left is removed. The candidates immediately left and right of the split now pass the filter
-     * and therefore are added to the {@link #allEdges graph}.</li>
+     * sequence is started, adding all remaining candidates. Any sequence resulting from such a split and having only
+     * one candidate left is removed. The candidates immediately left and right of the split now pass the filter and
+     * therefore are added to the {@link #allEdges graph}.</li>
      * <li>A GPS fix was added outside any stationary sequence. Nothing changes because no bounding box would get
      * smaller by a new fix added.</li>
      * <li>A GPS fix <em>replaces</em> an existing one outside of any stationary sequence. In this case it is possible
      * that the fix replaced caused a bounding box to exceed the diameter threshold and thus avoided a stationary
-     * sequence from being created, and the new fix "smoothes" the track such that a stationary sequence may come into
-     * existence. Therefore, if a fix is replaced outside of any stationary sequence, an extension attempt is made for
-     * any adjacent stationary sequence towards the fix replaced. The extension attempts could stop as they reach the
-     * next stationary sequence; however, we could also try to merge two adjacent stationary sequences in their
-     * entirety. If this fails, the next best solution is still to extend such that they touch each other.</li>
+     * sequence from being created or extended, and the new fix "smoothes" the track such that a stationary sequence may come into
+     * existence or be extended. Therefore, if a fix is replaced outside of any stationary sequence, a stationary sequence creation or
+     * extension attempt is made for any adjacent candidate towards the fix replaced. For simplicity, the extension
+     * attempts will stop as they reach the next candidate, although slightly improved results may be
+     * achievable by trying to merge two adjacent stationary sequences in their entirety where possible. We can, however,
+     * be sure that we won't miss any possible segment between two candidates; being able to extend further than up to the next
+     * candidate would mean that there must already have been a stationary sequence covering the segment from the next to
+     * the one after the next, but that was excluded because we didn't want to extend into existing adjacent stationary
+     * sequences.</li>
      * </ul>
      * 
      * @return the candidates that now pass the filter after applying the fix changes (and which didn't pass before) as
@@ -398,11 +401,58 @@ public class StationarySequenceBasedFilter {
      *         filter after applying the fix changes (and which did pass the filter before) as the {@link Pair#getB()
      *         second} element of the pair returned.
      */
-    public Pair<Iterable<Candidate>, Iterable<Candidate>> updateFixes(Iterable<GPSFixMoving> newFixes,
+    Pair<Iterable<Candidate>, Iterable<Candidate>> updateFixes(Iterable<GPSFixMoving> newFixes,
             Iterable<GPSFixMoving> fixesReplacingExistingOnes) {
-        // TODO Auto-generated method stub
-        final Set<Candidate> candidatesEffectivelyAdded = Collections.emptySet();
-        final Set<Candidate> candidatesEffectivelyRemoved = Collections.emptySet();
+        final Set<Candidate> candidatesEffectivelyAdded = new HashSet<>();
+        final Set<Candidate> candidatesEffectivelyRemoved = new HashSet<>();
+        for (final GPSFixMoving newFix : newFixes) {
+            final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(createStationarySequence(
+                    StationarySequence.createDummyCandidate(newFix.getTimePoint())));
+            if (lastSequenceStartingAtOrBeforeFix != null && !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(newFix.getTimePoint())) {
+                // fix falls into the existing StationarySequence; update its bounding box:
+                final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                if (Util.size(lastSequenceStartingAtOrBeforeFix.getAllCandidates()) <= 1) {
+                    stationarySequences.remove(lastSequenceStartingAtOrBeforeFix);
+                }
+                if (splitResult != null) {
+                    stationarySequences.add(splitResult);
+                }
+            }
+        }
+        for (final GPSFixMoving fixReplacingExistingOne : fixesReplacingExistingOnes) {
+            assert Util.contains(newFixes, fixesReplacingExistingOnes);
+            final Candidate dummyCandidateForReplacementFix = StationarySequence.createDummyCandidate(fixReplacingExistingOne.getTimePoint());
+            final StationarySequence dummyStationarySequenceForFix = createStationarySequence(dummyCandidateForReplacementFix);
+            final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(dummyStationarySequenceForFix);
+            final boolean fixIsInStationarySequence = !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(fixReplacingExistingOne.getTimePoint());
+            if (!fixIsInStationarySequence) {
+                final StationarySequence lastSequenceEndingBeforeFix = // null in case fix is within a stationary sequence
+                        lastSequenceStartingAtOrBeforeFix != null && fixIsInStationarySequence ? null : lastSequenceStartingAtOrBeforeFix;
+                final Candidate lastCandidateBeforeReplacementFix = candidates.lower(dummyCandidateForReplacementFix);
+                if (lastCandidateBeforeReplacementFix != null) {
+                    final Candidate firstCandidateAfterReplacementFix = candidates.higher(dummyCandidateForReplacementFix);
+                    if (firstCandidateAfterReplacementFix != null) {
+                        // the fix is between two candidates, so we may try to extend or create a stationary sequence:
+                        if (lastCandidateBeforeReplacementFix == lastSequenceEndingBeforeFix.getLast()) {
+                            // previous candidate is end of a sequence; try to extend
+                            lastSequenceEndingBeforeFix.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                        } else {
+                            final StationarySequence firstSequenceStartingAfterFix = stationarySequences.higher(dummyStationarySequenceForFix);
+                            if (firstCandidateAfterReplacementFix == firstSequenceStartingAfterFix.getFirst()) {
+                                // next candidate is start of a sequence; try to extend
+                                firstSequenceStartingAfterFix.tryToExtendBeforeFirst(lastCandidateBeforeReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                            } else {
+                                // none of the adjacent candidates is part of a sequence; try to create a new one:
+                                final StationarySequence newSequence = createStationarySequence(lastCandidateBeforeReplacementFix);
+                                if (newSequence.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
+                                    stationarySequences.add(newSequence);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         updateFilteredCandidates(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
         return new Pair<>(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
     }
@@ -412,7 +462,7 @@ public class StationarySequenceBasedFilter {
      *         {@link Candidate}s that are not part of any stationary sequence or are at the border of a stationary
      *         sequence.
      */
-    public Iterable<Candidate> getFilteredCandidates() {
+    Iterable<Candidate> getFilteredCandidates() {
         return filteredCandidates;
     }
 }
