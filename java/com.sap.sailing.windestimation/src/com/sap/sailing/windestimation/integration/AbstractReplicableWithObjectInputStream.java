@@ -19,6 +19,13 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.ClearStateTestSupport;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ * @param <S>
+ * @param <O>
+ */
 public abstract class AbstractReplicableWithObjectInputStream<S, O extends OperationWithResult<S, ?>>
         implements ReplicableWithObjectInputStream<S, O>, ClearStateTestSupport {
 

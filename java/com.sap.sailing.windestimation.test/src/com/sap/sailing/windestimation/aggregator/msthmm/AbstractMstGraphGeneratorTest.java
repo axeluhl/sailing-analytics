@@ -11,6 +11,11 @@ import com.sap.sailing.windestimation.aggregator.msthmm.AbstractMstGraphGenerato
 import com.sap.sailing.windestimation.aggregator.msthmm.AbstractMstGraphGenerator.NodeWithNeighbors;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class AbstractMstGraphGeneratorTest {
 
     private static final double DOUBLE_TOLERANCE = 0.0000001;

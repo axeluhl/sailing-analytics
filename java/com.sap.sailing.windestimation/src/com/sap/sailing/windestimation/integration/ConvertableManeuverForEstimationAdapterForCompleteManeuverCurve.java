@@ -3,12 +3,21 @@ package com.sap.sailing.windestimation.integration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.transformer.ConvertableToManeuverForEstimation;
+import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Conversion helper class for {@link ManeuverForEstimationTransformer} to convert {@link CompleteManeuverCurve} to
+ * {@link ManeuverForEstimation}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ConvertableManeuverForEstimationAdapterForCompleteManeuverCurve
         implements ConvertableToManeuverForEstimation {
 

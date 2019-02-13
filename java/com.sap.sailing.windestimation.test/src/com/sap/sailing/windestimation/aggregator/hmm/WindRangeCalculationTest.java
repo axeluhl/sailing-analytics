@@ -8,6 +8,11 @@ import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange;
 import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.CombinationModeOnViolation;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class WindRangeCalculationTest {
 
     private static final double TOLERANCE = 0.0001;

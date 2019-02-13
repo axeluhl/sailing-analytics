@@ -88,8 +88,9 @@ public class IncrementalMstManeuverGraphGeneratorTest extends OnlineTracTracBase
         assertTrue("Wind estimation models are empty",
                 gaussianBasedTwdTransitionDistributionCache.isReady() && maneuverClassifiersCache.isReady());
         DynamicTrackedRaceImpl trackedRace = getTrackedRace();
-        IncrementalMstManeuverGraphGenerator generator = new IncrementalMstManeuverGraphGenerator(trackedRace,
-                transitionProbabilitiesCalculator, maneuverClassifiersCache, null);
+        IncrementalMstManeuverGraphGenerator generator = new IncrementalMstManeuverGraphGenerator(
+                new CompleteManeuverCurveToManeuverForEstimationConverter(trackedRace, null),
+                transitionProbabilitiesCalculator, maneuverClassifiersCache);
         Set<Pair<Position, TimePoint>> cleanManeuvers = new TreeSet<>(
                 new TimePointAndPositionWithToleranceComparator());
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
@@ -105,8 +106,9 @@ public class IncrementalMstManeuverGraphGeneratorTest extends OnlineTracTracBase
             for (CompleteManeuverCurve nextManeuver : maneuverCurves) {
                 generator.add(competitor, nextManeuver, trackTimeInfo);
                 if (currentManeuver != null) {
-                    ManeuverForEstimation convertedManeuver = generator.convertCleanManeuverSpotToManeuverForEstimation(
-                            currentManeuver, previousManeuver, nextManeuver, competitor, trackTimeInfo);
+                    ManeuverForEstimation convertedManeuver = generator.getManeuverConverter()
+                            .convertCleanManeuverSpotToManeuverForEstimation(currentManeuver, previousManeuver,
+                                    nextManeuver, competitor, trackTimeInfo);
                     if (convertedManeuver != null && convertedManeuver.isClean()) {
                         cleanManeuvers.add(new Pair<>(convertedManeuver.getManeuverPosition(),
                                 convertedManeuver.getManeuverTimePoint()));
@@ -116,8 +118,9 @@ public class IncrementalMstManeuverGraphGeneratorTest extends OnlineTracTracBase
                 currentManeuver = nextManeuver;
             }
             if (currentManeuver != null) {
-                ManeuverForEstimation convertedManeuver = generator.convertCleanManeuverSpotToManeuverForEstimation(
-                        currentManeuver, previousManeuver, null, competitor, trackTimeInfo);
+                ManeuverForEstimation convertedManeuver = generator.getManeuverConverter()
+                        .convertCleanManeuverSpotToManeuverForEstimation(currentManeuver, previousManeuver, null,
+                                competitor, trackTimeInfo);
                 if (convertedManeuver != null && convertedManeuver.isClean()) {
                     cleanManeuvers.add(new Pair<>(convertedManeuver.getManeuverPosition(),
                             convertedManeuver.getManeuverTimePoint()));

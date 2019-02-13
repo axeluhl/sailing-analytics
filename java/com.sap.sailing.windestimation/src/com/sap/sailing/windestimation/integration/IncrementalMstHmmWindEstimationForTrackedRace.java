@@ -73,8 +73,9 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
         this.windSource = windSource;
         DistanceAndDurationAwareWindTransitionProbabilitiesCalculator transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
                 gaussianBasedTwdTransitionDistributionCache, true);
-        this.mstManeuverGraphGenerator = new IncrementalMstManeuverGraphGenerator(trackedRace,
-                transitionProbabilitiesCalculator, maneuverClassifiersCache, polarDataService);
+        this.mstManeuverGraphGenerator = new IncrementalMstManeuverGraphGenerator(
+                new CompleteManeuverCurveToManeuverForEstimationConverter(trackedRace, polarDataService),
+                transitionProbabilitiesCalculator, maneuverClassifiersCache);
         this.bestPathsCalculator = new MstBestPathsCalculatorImpl(transitionProbabilitiesCalculator);
         this.windTrackCalculator = new WindTrackCalculatorImpl(new MiddleCourseBasedTwdCalculatorImpl(),
                 polarDataService == null ? new DummyBasedTwsCalculatorImpl()
