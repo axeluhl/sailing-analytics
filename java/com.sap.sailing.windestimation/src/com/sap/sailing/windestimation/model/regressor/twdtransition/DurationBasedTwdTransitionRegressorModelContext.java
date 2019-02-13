@@ -21,8 +21,8 @@ public final class DurationBasedTwdTransitionRegressorModelContext
     }
 
     public enum DurationValueRange {
-        BEGINNING(0, 5, 1, false), MIDDLE1(5, 62, SupportedDimensionValueRange.SQUARE_ROOT_AS_POLYNOMIAL_DEGREE,
-                true), MIDDLE2(62, 5394, 1, true), REMAINDER(5394, SupportedDimensionValueRange.MAX_VALUE, 1, true);
+        BEGINNING(0, 1, 1, false), MIDDLE1(1, 140, SupportedDimensionValueRange.SQUARE_ROOT_AS_POLYNOMIAL_DEGREE,
+                true), MIDDLE2(140, 5394, 1, true), REMAINDER(5394, SupportedDimensionValueRange.MAX_VALUE, 1, true);
 
         private final SupportedDimensionValueRange supportedDimensionValueRange;
 

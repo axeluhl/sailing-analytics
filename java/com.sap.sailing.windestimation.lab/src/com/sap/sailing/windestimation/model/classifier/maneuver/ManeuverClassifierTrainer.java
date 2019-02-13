@@ -66,6 +66,7 @@ public class ManeuverClassifierTrainer {
                 LoggingUtil.logInfo("Training with  " + trainManeuvers.size() + " maneuvers...");
                 double[][] x = modelContext.getXMatrix(maneuvers);
                 int[] y = labelExtraction.getYVector(maneuvers);
+                classifierModel.resetTrainingStats();
                 classifierModel.train(x, y);
                 LoggingUtil.logInfo("Training finished. Validating on train dataset...");
                 ManeuverClassifierScoring classifierScoring = new ManeuverClassifierScoring(classifierModel);
@@ -79,7 +80,7 @@ public class ManeuverClassifierTrainer {
                 LoggingUtil.logInfo("Test score:\n" + printScoring);
                 double testScore = classifierScoring.getLastAvgF1Score();
                 LoggingUtil.logInfo("Persisting trained classifier...");
-                classifierModel.setTrainingStats(trainScore, testScore, numberOfTrainingInstances);
+                classifierModel.setStatsAfterSuccessfulTraining(trainScore, testScore, numberOfTrainingInstances);
                 classifierModelStore.persistModel(classifierModel);
                 LoggingUtil.logInfo("Classifier persisted successfully. Finished!");
             }

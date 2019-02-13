@@ -19,6 +19,7 @@ public class IncrementalSingleDimensionPolynomialRegressorTrainerHelper {
             IncrementalSingleDimensionPolynomialRegressor<?, ?> model) {
         this.regressorModelStore = regressorModelStore;
         this.model = model;
+        model.resetTrainingStats();
     }
 
     public void finishTraining() throws ModelPersistenceException {
@@ -26,7 +27,7 @@ public class IncrementalSingleDimensionPolynomialRegressorTrainerHelper {
         DecimalFormat df = new DecimalFormat("#.###");
         LoggingUtil.logInfo("Root mean square error = " + df.format(rootMeanSquareError));
         LoggingUtil.logInfo("Regressor polynom = " + model.getPolynomAsString());
-        model.setTrainingStats(rootMeanSquareError, rootMeanSquareError, numberOfTrainingInstances);
+        model.setStatsAfterSuccessfulTraining(rootMeanSquareError, rootMeanSquareError, numberOfTrainingInstances);
         LoggingUtil.logInfo("Number of training instances: " + numberOfTrainingInstances);
         LoggingUtil.logInfo("Number of test instances: " + numberOfTestInstances);
         LoggingUtil.logInfo("Persisting trained regressor...");

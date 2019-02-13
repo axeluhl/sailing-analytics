@@ -100,6 +100,7 @@ public class TwdTransitionClassifierTrainer {
             i++;
         }
         LoggingUtil.logInfo("Training with  " + numberOfTrainingInstances + " instances...");
+        classifierModel.resetTrainingStats();
         classifierModel.train(x, y);
         LoggingUtil.logInfo("Training finished. Validating on train dataset...");
         TwdTransitionClassifierScoring classifierScoring = new TwdTransitionClassifierScoring(classifierModel);
@@ -107,7 +108,7 @@ public class TwdTransitionClassifierTrainer {
         LoggingUtil.logInfo("Training score:\n" + printScoring);
         double trainScore = classifierScoring.getLastAvgF1Score();
         LoggingUtil.logInfo("Persisting trained classifier...");
-        classifierModel.setTrainingStats(trainScore, trainScore, numberOfTrainingInstances);
+        classifierModel.setStatsAfterSuccessfulTraining(trainScore, trainScore, numberOfTrainingInstances);
         classifierModelStore.persistModel(classifierModel);
         LoggingUtil.logInfo("Classifier persisted successfully. Finished!");
     }

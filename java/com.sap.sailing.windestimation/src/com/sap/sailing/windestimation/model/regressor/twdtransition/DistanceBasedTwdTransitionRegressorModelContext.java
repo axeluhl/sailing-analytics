@@ -27,8 +27,8 @@ public final class DistanceBasedTwdTransitionRegressorModelContext
     }
 
     public enum DistanceValueRange {
-        BEGINNING(0, 80, 1, false), MIDDLE(80, 1368, 1, true), REMAINDER(1368, SupportedDimensionValueRange.MAX_VALUE,
-                1, true);
+        BEGINNING(0, 10, 1, false), MIDDLE1(10, 912, 1, true), MIDDLE2(912, 1368, 1, true), REMAINDER(1368,
+                SupportedDimensionValueRange.MAX_VALUE, 1, true);
 
         private final SupportedDimensionValueRange supportedDimensionValueRange;
 

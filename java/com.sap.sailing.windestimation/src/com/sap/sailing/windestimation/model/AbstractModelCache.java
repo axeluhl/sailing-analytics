@@ -124,9 +124,8 @@ public abstract class AbstractModelCache<InstanceType, MC extends ModelContext<I
 
     @Override
     public boolean isReady() {
-        ModelType omnipresentModel = getBestModel(
-                modelFactory.getModelContextWhichModelAreAlwaysPresent());
-        return omnipresentModel != null;
+        ModelType omnipresentModel = getBestModel(modelFactory.getModelContextWhichModelAreAlwaysPresent());
+        return omnipresentModel != null && omnipresentModel.isModelReady();
     }
 
     @Override

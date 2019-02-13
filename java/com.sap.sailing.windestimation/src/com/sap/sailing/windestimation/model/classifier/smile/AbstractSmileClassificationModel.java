@@ -39,7 +39,6 @@ public abstract class AbstractSmileClassificationModel<InstanceType, MC extends 
 
     @Override
     public void train(double[][] x, int[] y) {
-        resetTrainingStats();
         PreprocessingConfig preprocessingConfig = getPreprocessingConfig();
         scaler = null;
         if (preprocessingConfig.isScaling()) {
@@ -58,7 +57,6 @@ public abstract class AbstractSmileClassificationModel<InstanceType, MC extends 
             x = pca.project(x);
         }
         internalModel = trainInternalModel(x, y);
-        trainingFinishedSuccessfully();
     }
 
     protected abstract SoftClassifier<double[]> trainInternalModel(double[][] x, int[] y);

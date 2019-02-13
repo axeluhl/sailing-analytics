@@ -1,11 +1,13 @@
 package com.sap.sailing.windestimation.model.regressor.twdtransition;
 
 import com.sap.sailing.windestimation.data.TwdTransition;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager;
+import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager.AggregatedSingleDimensionType;
 import com.sap.sailing.windestimation.model.regressor.IncrementalSingleDimensionPolynomialRegressor;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
 import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
-import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
+import com.sap.sailing.windestimation.model.store.ModelStore;
 
 /**
  * Trains TWD delta standard deviation by considering the distance passed between two measurements.
@@ -13,18 +15,18 @@ import com.sap.sailing.windestimation.model.store.ModelDomainType;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class DistanceBasedTwdTransitionStdRegressorTrainer
-        extends TwdTransitionManualTrainingDataInputRegressorTrainer {
+public class DistanceBasedTwdTransitionStdRegressorTrainer extends TwdTransitionAggregatedStdRegressorTrainer {
 
-    public DistanceBasedTwdTransitionStdRegressorTrainer(ModelStore regressorModelStore) {
-        super(regressorModelStore, getTrainingDataForDistance());
+    public DistanceBasedTwdTransitionStdRegressorTrainer(
+            AggregatedSingleDimensionBasedTwdTransitionPersistenceManager persistenceManager,
+            ModelStore regressorModelStore) {
+        super(persistenceManager, regressorModelStore);
     }
 
     public static void main(String[] args) throws Exception {
+        AggregatedSingleDimensionBasedTwdTransitionPersistenceManager distanceBasedPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
+                AggregatedSingleDimensionType.DISTANCE);
         ModelStore modelStore = new FileSystemModelStoreImpl("trained_wind_estimation_models");
-        // AggregatedSingleDimensionBasedTwdTransitionPersistenceManager distanceBasedPersistenceManager = new
-        // AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
-        // AggregatedSingleDimensionType.DISTANCE);
         // ModelStore modelStore = new MongoDbModelStore(distanceBasedPersistenceManager.getDb());
         modelStore.deleteAll(ModelDomainType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR);
         DistanceBasedTwdTransitionRegressorModelFactory distanceBasedTwdTransitionRegressorModelFactory = new DistanceBasedTwdTransitionRegressorModelFactory();
@@ -34,14 +36,9 @@ public class DistanceBasedTwdTransitionStdRegressorTrainer
             IncrementalSingleDimensionPolynomialRegressor<TwdTransition, DistanceBasedTwdTransitionRegressorModelContext> model = distanceBasedTwdTransitionRegressorModelFactory
                     .getNewModel(modelContext);
             DistanceBasedTwdTransitionStdRegressorTrainer trainer = new DistanceBasedTwdTransitionStdRegressorTrainer(
-                    modelStore);
+                    distanceBasedPersistenceManager, modelStore);
             trainer.trainRegressor(model);
         }
-    }
-
-    public static double[][] getTrainingDataForDistance() {
-        return new double[][] { { 0, 0 }, { 80, 19.3146206798595 }, { 1368, 26.2654474715468 },
-                { 599103, 116.008722136383 } };
     }
 
 }

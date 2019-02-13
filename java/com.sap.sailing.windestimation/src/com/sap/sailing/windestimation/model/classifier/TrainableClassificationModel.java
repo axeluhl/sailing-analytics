@@ -30,7 +30,7 @@ public interface TrainableClassificationModel<InstanceType, MC extends ModelCont
      * @param y
      *            Single-dimensional array [n] where n is the number of instances.
      * @see FeatureExtraction
-     * @see #setTrainingStats(double, double, long)
+     * @see #setStatsAfterSuccessfulTraining(double, double, long)
      */
     void train(double[][] x, int[] y);
 

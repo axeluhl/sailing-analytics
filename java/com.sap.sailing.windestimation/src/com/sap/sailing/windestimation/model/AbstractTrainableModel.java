@@ -48,26 +48,19 @@ public abstract class AbstractTrainableModel<InstanceType, MC extends ModelConte
     }
 
     @Override
-    public void setTrainingStats(double trainScore, double testScore, long numberOfTrainingInstances) {
+    public void setStatsAfterSuccessfulTraining(double trainScore, double testScore, long numberOfTrainingInstances) {
+        trainingFinished = true;
         this.trainScore = trainScore;
         this.testScore = testScore;
         this.numberOfTrainingInstances = numberOfTrainingInstances;
     }
 
-    /**
-     * Should be called before the training of the represented model is started.
-     */
-    protected void resetTrainingStats() {
+    @Override
+    public void resetTrainingStats() {
         trainingFinished = false;
         testScore = 0;
         trainScore = 0;
-    }
-
-    /**
-     * Should be called after model training successfully finishes.
-     */
-    protected void trainingFinishedSuccessfully() {
-        trainingFinished = true;
+        numberOfTrainingInstances = 0;
     }
 
     @Override

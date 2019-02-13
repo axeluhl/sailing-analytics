@@ -28,8 +28,13 @@ public class TwdTransitionAggregatedStdRegressorTrainer {
         PersistedElementsIterator<AggregatedSingleDimensionBasedTwdTransition> iterator = persistenceManager
                 .getIterator();
         double[] x = new double[1];
-        LoggingUtil
-                .logInfo("########## Training of " + model.getModelContext().getId() + " started...");
+        LoggingUtil.logInfo("########## Training of " + model.getModelContext().getId() + " started...");
+        // train with x = 0, y = 0
+        if (model.getModelContext().isDimensionValueSupportedForTraining(0)) {
+            x[0] = model.getModelContext().getPreprocessedDimensionValue(0);
+            trainerHelper.incrementalModelTraining(x, 0);
+        }
+        // train with aggregated twd transitions in MongoDB
         while (iterator.hasNext()) {
             AggregatedSingleDimensionBasedTwdTransition twdTransition = iterator.next();
             double dimensionValue = twdTransition.getDimensionValue();
@@ -39,6 +44,12 @@ public class TwdTransitionAggregatedStdRegressorTrainer {
             }
         }
         LoggingUtil.logInfo("Calculating root mean square error ...");
+        // evaluate with x = 0, y = 0
+        if (model.getModelContext().isDimensionValueSupportedForTraining(0)) {
+            x[0] = model.getModelContext().getPreprocessedDimensionValue(0);
+            trainerHelper.incrementRmseCalculation(x, 0);
+        }
+        // evaluate twd transitions in MongoDB
         iterator = persistenceManager.getIterator();
         while (iterator.hasNext()) {
             AggregatedSingleDimensionBasedTwdTransition twdTransition = iterator.next();
