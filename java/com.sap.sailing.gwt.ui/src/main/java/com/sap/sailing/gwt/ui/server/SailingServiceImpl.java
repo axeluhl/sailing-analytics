@@ -1907,8 +1907,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public CompactBoatPositionsDTO getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate) throws NoWindException {
-        return new CompactBoatPositionsDTO(getBoatPositionsInternal(raceIdentifier, fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate, null, null, null));
+            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName)
+                    throws NoWindException {
+        return new CompactBoatPositionsDTO(getBoatPositionsInternal(raceIdentifier, fromPerCompetitorIdAsString,
+                toPerCompetitorIdAsString, extrapolate, detailType, leaderboardName, leaderboardGroupName));
     }
 
     /**

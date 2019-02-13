@@ -400,8 +400,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             String leaderboardName, String leaderboardGroupName, AsyncCallback<CompactRaceMapDataDTO> callback);
 
     void getBoatPositions(RegattaAndRaceIdentifier raceIdentifier, Map<String, Date> fromPerCompetitorIdAsString,
-            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate,
-            AsyncCallback<CompactBoatPositionsDTO> callback);
+            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, DetailType detailType,
+            String leaderboardName, String leaderboardGroupName, AsyncCallback<CompactBoatPositionsDTO> callback);
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 

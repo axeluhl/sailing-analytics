@@ -198,7 +198,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     CompactBoatPositionsDTO getBoatPositions(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate) throws NoWindException;
+            boolean extrapolate, DetailType detailType, String leaderboardName, String leaderboardGroupName)
+                    throws NoWindException;
 
     RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
