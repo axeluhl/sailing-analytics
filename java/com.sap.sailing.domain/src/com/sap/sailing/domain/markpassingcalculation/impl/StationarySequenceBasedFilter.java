@@ -73,7 +73,7 @@ import com.sap.sse.common.Util.Pair;
  * @author Axel Uhl (D043530)
  *
  */
-public class StationarySequences {
+public class StationarySequenceBasedFilter {
     /**
      * Set of sequences managed here; ordered by their {@link StationarySequence#getFirst() first} candidate,
      * based on the candidate comparator passed to the constructor.
@@ -114,7 +114,7 @@ public class StationarySequences {
      * as they have been added. They never participate in any {@link StationarySequence} managed by this filter and are
      * always returned as part of the {@link #getFilteredCandidates()} result once they were added.
      */
-    protected StationarySequences(final Comparator<Candidate> candidateComparator,
+    protected StationarySequenceBasedFilter(final Comparator<Candidate> candidateComparator,
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track, Candidate startProxyCandidate, Candidate endProxyCandidate) {
         this.stationarySequences = new TreeSet<>((ss1, ss2)->candidateComparator.compare(ss1.getFirst(), ss2.getFirst()));
         this.candidateComparator = candidateComparator;

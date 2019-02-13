@@ -40,12 +40,10 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
@@ -111,22 +109,6 @@ public class CandidateChooserImpl implements CandidateChooser {
      */
     private static final Speed MINIMUM_REASONABLE_SPEED = new KnotSpeedImpl(3);
     
-    /**
-     * Candidate filtering will be used to select only the most likely Candidates from those that are very close
-     * time-wise. The duration is used to construct clusters of candidates per competitor such that for each pair of two
-     * candidates in the cluster there is a sequence of candidates in the same cluster with the two candidates at the
-     * path's ends such that each path step spans a duration less than or equal to the duration specified by this field.
-     * In other words, each cluster is the transitive hull of fixes not further than this duration apart.
-     */
-    private static final Duration CANDIDATE_FILTER_TIME_WINDOW = Duration.ONE_SECOND.times(5);
-    
-    /**
-     * When looking for the most probable candidates within time windows of length {@link #CANDIDATE_FILTER_TIME_WINDOW},
-     * all candidates are considered that have at most this much lower probability than the candidate with the
-     * highest probability in the contiguous sequence.
-     */
-    private static final double MAX_PROBABILITY_DELTA = 0.20;
-    
     private static final Speed MAXIMUM_REASONABLE_SPEED = GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING;
 
     private static final double MINIMUM_PROBABILITY = Edge.getPenaltyForSkipping();
@@ -190,7 +172,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * chronological sequence pick only those that have the highest probability). They are fed into the filter stage 2
      * before they may become part of the {@link #allEdges graph}.
      */
-    private final Map<Competitor, NavigableSet<Candidate>> filteredCandidatesStage1;
+    private final Map<Competitor, MostProbableCandidatesInSmallTimeRangeFilter> mostProbableCandidatesInSmallTimeRangeFilters;
     
     /**
      * Those candidates from {@link #candidates} that have passed the filter logic of stage 2 (of candidates between
@@ -199,7 +181,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * up the algorithm used to find out which candidates must be added to and removed from the graph after changes have
      * been applied to {@link #candidates} and the filter rules have been re-applied.
      */
-    private final Map<Competitor, StationarySequences> filteredCandidatesStage2;
+    private final Map<Competitor, StationarySequenceBasedFilter> stationarySequenceBasedFilters;
     
     private final Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
     private final ConcurrentHashMap<Competitor, Integer> suppressedPassings = new ConcurrentHashMap<>();
@@ -281,14 +263,14 @@ public class CandidateChooserImpl implements CandidateChooser {
         end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints() + 1, /* TimePoint */null,
                 /* Probability */1, /* Waypoint */null);
         candidates = new HashMap<>();
-        filteredCandidatesStage1 = new HashMap<>();
-        filteredCandidatesStage2 = new HashMap<>();
+        mostProbableCandidatesInSmallTimeRangeFilters = new HashMap<>();
+        stationarySequenceBasedFilters = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
             perCompetitorLocks.put(c, createCompetitorLock(c));
             candidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
-            filteredCandidatesStage1.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
-            filteredCandidatesStage2.put(c, new StationarySequences(CANDIDATE_COMPARATOR, race.getTrack(c), start, end));
+            mostProbableCandidatesInSmallTimeRangeFilters.put(c, new MostProbableCandidatesInSmallTimeRangeFilter(CANDIDATE_COMPARATOR, start, end));
+            stationarySequenceBasedFilters.put(c, new StationarySequenceBasedFilter(CANDIDATE_COMPARATOR, race.getTrack(c), start, end));
             final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
             currentMarkPasses.put(c, currentMarkPassesForCompetitor);
             // in case the tracked race already has mark passings, e.g., from another mark passing calculator,
@@ -366,7 +348,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     /**
-     * The {@link StationarySequences} object for competitor {@code c} is updated using the new
+     * The {@link StationarySequenceBasedFilter} object for competitor {@code c} is updated using the new
      * and replacing fixes. The resulting changes in candidates passing that filter stage are
      * {@link #adjustGraph(Competitor, Pair) propagated} into the {@link #allEdges graph}, but
      * no {@link #findShortestPath(Competitor) recalculation of shortest path} is done yet.
@@ -375,7 +357,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             Iterable<GPSFixMoving> fixesReplacingExistingOnes) {
         LockUtil.lockForWrite(perCompetitorLocks.get(c));
         try {
-            adjustGraph(c, filteredCandidatesStage2.get(c).updateFixes(newFixes, fixesReplacingExistingOnes));
+            adjustGraph(c, stationarySequenceBasedFilters.get(c).updateFixes(newFixes, fixesReplacingExistingOnes));
         } finally {
             LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
@@ -556,7 +538,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      *         {@link #updateFilteredCandidates(Competitor, Iterable, Iterable)}
      */
     private Iterable<Candidate> getFilteredCandidates(Competitor c) {
-        return filteredCandidatesStage2.get(c).getFilteredCandidates();
+        return stationarySequenceBasedFilters.get(c).getFilteredCandidates();
     }
 
     private boolean travelingForwardInTimeOrUnknown(Candidate early, Candidate late) {
@@ -840,10 +822,10 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     /**
      * New candidates will be added to {@link #candidates}. The filtering rules will be applied to update
-     * {@link #filteredCandidatesStage1} so that the sets of filtered candidates are again consistent with the contents of
+     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} so that the sets of filtered candidates are again consistent with the contents of
      * {@link #candidates} and the filter rules. Afterwards, the {@link #allEdges graph} will be updated by removing
-     * edges for candidates that are no longer part of {@link #filteredCandidatesStage1} and by adding edges for new
-     * {@link #filteredCandidatesStage1}. Note that the set of {@link #filteredCandidatesStage1} may actually shrink by adding
+     * edges for candidates that are no longer part of {@link #mostProbableCandidatesInSmallTimeRangeFilters} and by adding edges for new
+     * {@link #mostProbableCandidatesInSmallTimeRangeFilters}. Note that the set of {@link #mostProbableCandidatesInSmallTimeRangeFilters} may actually shrink by adding
      * a new candidate, simply because that candidate closes a gap between other candidates such that now it becomes
      * obvious that candidates previously passing the filter are really part of a cluster of little or no movement.
      */
@@ -863,9 +845,9 @@ public class CandidateChooserImpl implements CandidateChooser {
      * Precondition: the {@link #candidates candidates(c)} for the competitor {@code c} have been updated.
      * <p>
      * 
-     * Then this method applies the filter rules to update {@link #filteredCandidatesStage1} of filter stage 1 (based on
+     * Then this method applies the filter rules to update {@link #mostProbableCandidatesInSmallTimeRangeFilters} of filter stage 1 (based on
      * highest probability in short time ranges) and subsequently the second filter stage's
-     * {@link #filteredCandidatesStage2}. Based on the difference in filter results, the {@link #allEdges graph} is
+     * {@link #stationarySequenceBasedFilters}. Based on the difference in filter results, the {@link #allEdges graph} is
      * adjusted by removing edges for those candidates no longer passing the filter or no longer existing, and by adding
      * edges for candidates that have now become available as filtered candidates and that weren't before. No shortest
      * path analysis is triggered yet.
@@ -892,7 +874,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     /**
      * Based on {@link #candidates candidates(c)}, computes the set of candidates that pass all filter rules and hence
      * are expected to be represented in the {@link #allEdges graph}. When this method returns, it has updated the
-     * {@link #filteredCandidatesStage1} accordingly.<p>
+     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} accordingly.<p>
      * 
      * A two-pass algorithm. In the first pass, clusters of {@link DistanceCandidateImpl distance candidates} in close
      * time-wise proximity (see {@link #CANDIDATE_FILTER_TIME_WINDOW}) are sorted by their probability. Only the group
@@ -924,226 +906,17 @@ public class CandidateChooserImpl implements CandidateChooser {
         final NavigableSet<Candidate> competitorCandidates = candidates.get(competitor);
         // pass 1
         final Pair<Set<Candidate>, Set<Candidate>> filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence =
-                getMostProbableCandidatesPerContiguousSequence(competitor, competitorCandidates, newCandidates, removedCandidates);
-        final NavigableSet<Candidate> filteredCompetitorCandidatesStage1 = filteredCandidatesStage1.get(competitor);
-        filteredCompetitorCandidatesStage1.addAll(filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getA());
-        filteredCompetitorCandidatesStage1.removeAll(filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getB());
+                mostProbableCandidatesInSmallTimeRangeFilters.get(competitor).updateCandidates(competitorCandidates, newCandidates, removedCandidates);
         // pass 2
-        final Pair<Iterable<Candidate>, Iterable<Candidate>> candidatesOnTheMove = filteredCandidatesStage2.get(competitor).updateCandidates(
+        final Pair<Iterable<Candidate>, Iterable<Candidate>> candidatesOnTheMove = stationarySequenceBasedFilters.get(competitor).updateCandidates(
                 filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getA(),
                 filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getB());
         return candidatesOnTheMove;
     }
 
     /**
-     * Finds the contiguous (by definition of {@link #CANDIDATE_FILTER_TIME_WINDOW}) sequences of candidates adjacent to
-     * those candidates added / removed. The {@code competitorCandidates} set is expected to already contain the
-     * {@code newCandidates} and to no longer contain the {@code removedCandidates}. {@link #filteredCandidatesStage1} is
-     * expected to not yet reflect the changes described by {@code newCandidates} and {@code removedCandidates}.
-     * <p>
-     * 
-     * The following steps are performed:
-     * <ul>
-     * <li>All candidates from {@code removedCandidates} are removed from {@link #filteredCandidatesStage1}.</li>
-     * <li>The disjoint sequences containing all new candidates and adjacent to all removed candidates are computed.</li>
-     * <li>The most probable candidate(s) from each contiguous sequence is/are determined. Those pass the filter and are
-     * added to {@link #filteredCandidatesStage1}</li>
-     * <li>All other candidates from those sequences do not pass the filter. All of those that are still in
-     * {@link #filteredCandidatesStage1} are removed from {@link #filteredCandidatesStage1}.</li>
-     * </ul>
-     * @return a pair whose first element holds the set of candidates that now pass the filter and didn't before, and
-     *         whose second element holds the set of candidates that did pass the filter before but don't anymore
-     */
-    private Pair<Set<Candidate>, Set<Candidate>> getMostProbableCandidatesPerContiguousSequence(Competitor competitor,
-            NavigableSet<Candidate> competitorCandidates, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
-        assert Util.containsAll(competitorCandidates, newCandidates); // all new candidates must be in competitorCandidates
-        assert !competitorCandidates.stream().filter(c->Util.contains(removedCandidates, c)).findAny().isPresent(); // no removedCandidate must be in competitorCandidates
-        final Set<Candidate> candidatesAddedToFiltered = new HashSet<>();
-        final Set<Candidate> candidatesRemovedFromFiltered = new HashSet<>();
-        // create a copy of newCandidates so we can remove objects from the copy as we add candidates to sequences;
-        // this way we'll obtain disjoint sequences and don't need to consider candidates again which have already
-        // been added to a sequence:
-        final Set<Candidate> newCandidatesModifiableCopy = new HashSet<>();
-        final Set<Candidate> removedCandidatesModifiableCopy = new HashSet<>();
-        Util.addAll(newCandidates, newCandidatesModifiableCopy);
-        Util.addAll(removedCandidates, removedCandidatesModifiableCopy);
-        // If the start/end candidates are part of newCandidates and/or removedCandidates, pass them on as is;
-        // they may have null TimePoints and cannot reasonably be considered by the algorithm implemented here:
-        filterStartAndEndCandidates(newCandidatesModifiableCopy, removedCandidatesModifiableCopy, candidatesAddedToFiltered, candidatesRemovedFromFiltered);
-        final Set<SortedSet<Candidate>> disjointSequencesAffectedByNewAndRemovedCandidates = new HashSet<>();
-        while (!newCandidatesModifiableCopy.isEmpty()) {
-            final Candidate nextNewCandidate = newCandidatesModifiableCopy.iterator().next();
-            newCandidatesModifiableCopy.remove(nextNewCandidate);
-            final NavigableSet<Candidate> contiguousSequenceForNextNewCandidate = getTimeWiseContiguousDistanceCandidates(competitorCandidates, nextNewCandidate, /* includeStartFrom */ true);
-            disjointSequencesAffectedByNewAndRemovedCandidates.add(contiguousSequenceForNextNewCandidate);
-            // remove the candidate grouped in the sequence from the remaining new candidates to consider
-            // because they have been "scooped up" by this sequence already and need no further consideration:
-            Util.removeAll(contiguousSequenceForNextNewCandidate, newCandidatesModifiableCopy);
-            removeAllRemovedCandidatesInOrNearSequence(contiguousSequenceForNextNewCandidate, removedCandidatesModifiableCopy);
-        }
-        // Those candidates that were not yet removed from removedCandidatesModifiableCopy were not within or near
-        // any of the sequences produced by new candidates. Checking their CANDIDATE_FILTER_TIME_WINDOW-neighborhood
-        // and constructing the sequences affected by their removal.
-        Util.addAll(removedCandidates, candidatesRemovedFromFiltered);
-        candidatesRemovedFromFiltered.retainAll(filteredCandidatesStage1.get(competitor)); // those explicitly removed and previously accepted by the filter go away
-        while (!removedCandidatesModifiableCopy.isEmpty()) {
-            final Candidate nextRemovedCandidate = removedCandidatesModifiableCopy.iterator().next();
-            removedCandidatesModifiableCopy.remove(nextRemovedCandidate);
-            final NavigableSet<Candidate> contiguousSequenceForNextRemovedCandidate = getTimeWiseContiguousDistanceCandidates(competitorCandidates, nextRemovedCandidate, /* includeStartFrom */ false);
-            removeAllRemovedCandidatesInOrNearSequence(contiguousSequenceForNextRemovedCandidate, removedCandidatesModifiableCopy);
-            // If adjacent sequences were added before and after the removed candidate,
-            // we need to distinguish whether the gap around the removed candidate was greater
-            // than the CANDIDATE_FILTER_TIME_WINDOW or not. If it was greater, we need to split
-            // the sequence into two:
-            Util.addAll(splitIfGapAroundRemovedCandidateIsTooLarge(contiguousSequenceForNextRemovedCandidate, nextRemovedCandidate),
-                    disjointSequencesAffectedByNewAndRemovedCandidates);
-        }
-        // Now find the most probable candidates in the sequences affected by new/removed candidates
-        for (final SortedSet<Candidate> contiguousCandidateSequence : disjointSequencesAffectedByNewAndRemovedCandidates) {
-            findNewAndRemovedCandidates(competitor, contiguousCandidateSequence, candidatesAddedToFiltered, candidatesRemovedFromFiltered);
-        }
-        return new Pair<>(candidatesAddedToFiltered, candidatesRemovedFromFiltered);
-    }
-    
-    /**
-     * The {@link #start} and {@link #end} proxy candidates are moved from {@link #newCandidatesModifiableCopy} to
-     * {@link #candidatesAddedToFiltered} and from {@link #removedCandidatesModifiableCopy} to
-     * {@link #candidatesRemovedFromFiltered}, respectively.
-     */
-    private void filterStartAndEndCandidates(Set<Candidate> newCandidatesModifiableCopy,
-            Set<Candidate> removedCandidatesModifiableCopy, Set<Candidate> candidatesAddedToFiltered,
-            Set<Candidate> candidatesRemovedFromFiltered) {
-        for (final Candidate startAndEnd : Arrays.asList(start, end)) {
-            if (newCandidatesModifiableCopy.remove(startAndEnd)) {
-                candidatesAddedToFiltered.add(startAndEnd);
-            }
-            if (removedCandidatesModifiableCopy.remove(startAndEnd)) {
-                candidatesRemovedFromFiltered.add(startAndEnd);
-            }
-        }
-    }
-
-    /**
-     * The "core" of the first filter pass: The most probable candidates in the {@code contiguousCandidateSequence}
-     * are determined. Within a small probability tolerance only the top probabilities pass the filter, assuming that
-     * those are the usually equally probable candidates based on the same fix and distance, but for different occurrences
-     * of the respective mark in the sequence of waypoints that defines the course.<p>
-     * 
-     * Once the filter result has been determined, we need to figure out how this <em>changes</em> the filter results.
-     * For this, we may assume that {@link #filteredCandidatesStage1} has not yet been modified to reflect any changes during
-     * this pass. Therefore, candidates added to the filter result can easily be identified because they are not yet
-     * contained in {@link #filteredCandidatesStage1}. Candidates that did pass the filter but no longer do can be identified
-     * based on the time range formed by {@code contiguousCandidateSequence}. Any candidate in {@link #filteredCandidatesStage1}
-     * that is within this time range and is not part of the new filter result for the {@code contiguousCandidateSequence}
-     * will have to be removed from the previous filter results.
-     */
-    private void findNewAndRemovedCandidates(Competitor competitor, SortedSet<Candidate> contiguousCandidateSequence,
-            Set<Candidate> candidatesAddedToFiltered, Set<Candidate> candidatesRemovedFromFiltered) {
-        assert !contiguousCandidateSequence.isEmpty();
-        final SortedSet<Candidate> candidatesPreviouslyPassingFilter = filteredCandidatesStage1.get(competitor).subSet(contiguousCandidateSequence.first(),
-                /* fromInclusive */ true, contiguousCandidateSequence.last(), /* toInclusive */ true);
-        ArrayList<Candidate> sortedByProbabilityFromLowToHigh = new ArrayList<>(contiguousCandidateSequence);
-        Collections.sort(sortedByProbabilityFromLowToHigh, (c1, c2)->Double.compare(c1.getProbability(), c2.getProbability()));
-        double maxProbability = sortedByProbabilityFromLowToHigh.get(sortedByProbabilityFromLowToHigh.size()-1).getProbability();
-        Set<Candidate> candidatesAcceptedFromSequence = new HashSet<>();
-        Candidate currentCandidate;
-        for (int i=sortedByProbabilityFromLowToHigh.size()-1; i>=0 &&
-                (currentCandidate=sortedByProbabilityFromLowToHigh.get(i)).getProbability()+MAX_PROBABILITY_DELTA >= maxProbability; i--) {
-            candidatesAcceptedFromSequence.add(currentCandidate);
-            if (!candidatesPreviouslyPassingFilter.contains(currentCandidate)) {
-                candidatesAddedToFiltered.add(currentCandidate);
-            }
-        }
-        for (final Candidate candidateThatPreviouslyPassedFilter : candidatesPreviouslyPassingFilter) {
-            if (!candidatesAcceptedFromSequence.contains(candidateThatPreviouslyPassedFilter)) {
-                candidatesRemovedFromFiltered.add(candidateThatPreviouslyPassedFilter);
-            }
-        }
-    }
-
-    /**
-     * A singleton containing {@code contiguousSequenceForNextRemovedCandidate} will be returned,
-     * unless it contains candidates before and after {@code nextRemovedCandidate} such that
-     * the smallest gap spanning {@code nextRemovedCandidate} exceeds {@link #CANDIDATE_FILTER_TIME_WINDOW}.
-     * In the latter case, the sequence is split into two at the time point of {@code nextRemovedCandidate}.
-     */
-    private Iterable<SortedSet<Candidate>> splitIfGapAroundRemovedCandidateIsTooLarge(
-            NavigableSet<Candidate> contiguousSequenceForNextRemovedCandidate, Candidate nextRemovedCandidate) {
-        Iterable<SortedSet<Candidate>> result;
-        final Candidate lastBefore = contiguousSequenceForNextRemovedCandidate.lower(nextRemovedCandidate);
-        if (lastBefore != null) {
-            final Candidate firstAfter = contiguousSequenceForNextRemovedCandidate.higher(nextRemovedCandidate);
-            if (firstAfter != null && lastBefore.getTimePoint().until(firstAfter.getTimePoint()).compareTo(CANDIDATE_FILTER_TIME_WINDOW) > 0) {
-                // split:
-                result = Arrays.asList(contiguousSequenceForNextRemovedCandidate.headSet(nextRemovedCandidate),
-                        contiguousSequenceForNextRemovedCandidate.tailSet(nextRemovedCandidate, /* inclusive */ false));
-            } else {
-                result = Collections.singleton(contiguousSequenceForNextRemovedCandidate);
-            }
-        } else {
-            result = Collections.singleton(contiguousSequenceForNextRemovedCandidate);
-        }
-        return result;
-    }
-
-    private void removeAllRemovedCandidatesInOrNearSequence(NavigableSet<Candidate> contiguousSequenceForNextNewCandidate,
-            Set<Candidate> removedCandidatesModifiableCopy) {
-        assert !contiguousSequenceForNextNewCandidate.isEmpty();
-        final TimeRange sequenceTimeRange = new TimeRangeImpl(
-                contiguousSequenceForNextNewCandidate.first().getTimePoint(), contiguousSequenceForNextNewCandidate.last().getTimePoint());
-        for (final Iterator<Candidate> removedCandidateIter = removedCandidatesModifiableCopy.iterator(); removedCandidateIter.hasNext(); ) {
-            final Candidate removedCandidate = removedCandidateIter.next();
-            if (sequenceTimeRange.timeDifference(removedCandidate.getTimePoint()).compareTo(CANDIDATE_FILTER_TIME_WINDOW) <= 0) {
-                removedCandidateIter.remove();
-            }
-        }
-    }
-
-    /**
-     * Starting at {@code startFrom}, looks into earlier and later candidates in the {@code candidates} set and adds all
-     * candidates that continue to be no more than {@link #CANDIDATE_FILTER_TIME_WINDOW} away from their adjacent
-     * candidate. This way, in the resulting set, the time difference between any two adjacent fixes is no more than
-     * {@link #CANDIDATE_FILTER_TIME_WINDOW}. The result will always at least contain {@code startFrom}.
-     * 
-     * @param includeStartFrom
-     *            whether or not to include {@code startFrom} in the resulting set
-     */
-    private NavigableSet<Candidate> getTimeWiseContiguousDistanceCandidates(NavigableSet<Candidate> competitorCandidates, Candidate startFrom, boolean includeStartFrom) {
-        final NavigableSet<Candidate> result = new TreeSet<>(CANDIDATE_COMPARATOR);
-        if (includeStartFrom) {
-            result.add(startFrom);
-        }
-        addContiguousCandidates(competitorCandidates.descendingSet().tailSet(startFrom), result);
-        addContiguousCandidates(competitorCandidates.tailSet(startFrom), result);
-        return result;
-    }
-
-    /**
-     * The first element in the iteration order of {@code candidates} will not be added to {@code addTo}
-     * but serves as the first element to compute distance to. The {@link #start} and {@link #end} proxy
-     * candidates are ignored by this method and will never be added to {@code addTo}.
-     */
-    private void addContiguousCandidates(Iterable<Candidate> candidates, Collection<Candidate> addTo) {
-        final Iterator<Candidate> iter = candidates.iterator();
-        if (iter.hasNext()) {
-            Candidate current = iter.next();
-            while (iter.hasNext()) {
-                final Candidate next = iter.next();
-                if (next != start && next != end) {
-                    if (next.getTimePoint().until(current.getTimePoint()).abs().compareTo(CANDIDATE_FILTER_TIME_WINDOW) <= 0) {
-                        addTo.add(next);
-                        current = next;
-                    } else {
-                        break; // too large a gap; end of contiguous sequence in this direction found
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Removes the {@code wrongCandidates} from the competitor's {@link #candidates} and updates the
-     * {@link #filteredCandidatesStage1} map accordingly. If filtered candidates are removed, their adjacent
+     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} map accordingly. If filtered candidates are removed, their adjacent
      * edges are removed from the {@link #allEdges graph}. If candidates now pass the filter which
      * previously didn't, edges are inserted for them. This can happen, e.g., if a candidate is
      * removed which previously connected other candidates into a cluster which in its entirety
@@ -1185,7 +958,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         long filtered = 0;
         for (final Entry<Competitor, NavigableSet<Candidate>> competitorAndCandidate : candidates.entrySet()) {
             original += competitorAndCandidate.getValue().size();
-            filtered += filteredCandidatesStage1.get(competitorAndCandidate.getKey()).size();
+            filtered += Util.size(mostProbableCandidatesInSmallTimeRangeFilters.get(competitorAndCandidate.getKey()).getFilteredCandidates());
         }
         result.append(filtered);
         result.append("/");
