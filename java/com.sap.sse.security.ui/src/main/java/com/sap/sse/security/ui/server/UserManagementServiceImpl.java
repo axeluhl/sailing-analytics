@@ -364,10 +364,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public void addUserToUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException {
+    public void addUserToUserGroup(String userGroupIdAsString, String username)
+            throws UnauthorizedException, UserManagementException {
         final UserGroup tenant = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
         if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObject(DefaultActions.UPDATE, tenant))) {
-            getSecurityService().addUserToUserGroup(tenant, getSecurityService().getUserByName(username));
+            final User userByName = getSecurityService().getUserByName(username);
+            if (userByName == null) {
+                throw new UserManagementException("user '" + username + "' not found.");
+            }
+            getSecurityService().addUserToUserGroup(tenant, userByName);
         } else {
             throw new UnauthorizedException("Not permitted to add user to group");
         }

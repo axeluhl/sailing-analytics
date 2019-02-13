@@ -54,6 +54,8 @@ public class UserGroupDetailPanel extends HorizontalPanel
     private final MultiSelectionModel<String> tenantUsersSelectionModel;
     private final TenantUsersListDataProvider tenantUsersListDataProvider;
 
+    private UserGroupSuggestOracle oracle;
+
     private class StringCell extends AbstractCell<String> {
         @Override
         public void render(Context context, String value, SafeHtmlBuilder sb) {
@@ -156,7 +158,7 @@ public class UserGroupDetailPanel extends HorizontalPanel
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
 
         // setup suggest
-        final UserGroupSuggestOracle oracle = new UserGroupSuggestOracle(userManagementService, stringMessages);
+        this.oracle = new UserGroupSuggestOracle(userManagementService, stringMessages);
         final SuggestBox suggestUser = new SuggestBox(oracle);
         suggestUser.addStyleName(userGroupUserResources.css().userDefinitionSuggest());
         suggestUser.getElement().setPropertyString("placeholder", stringMessages.enterUsername());
@@ -167,29 +169,29 @@ public class UserGroupDetailPanel extends HorizontalPanel
         // add add button
         buttonPanel.addCreateAction(stringMessages.addUser(), () -> {
             final String selectedUsername = suggestUser.getValue();
-            final UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
-            userManagementService.addUserToUserGroup(tenant.getId().toString(), selectedUsername,
-                    new AsyncCallback<Void>() {
+            if (!tenantUsersList.getVisibleItems().contains(selectedUsername)) {
+                final UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
+                userManagementService.addUserToUserGroup(tenant.getId().toString(), selectedUsername,
+                        new AsyncCallback<Void>() {
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert(stringMessages.couldNotAddUserToUserGroup(selectedUsername, tenant.getName(),
-                                    caught.getMessage()));
-                        }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.couldNotAddUserToUserGroup(selectedUsername,
+                                        tenant.getName(), caught.getMessage()));
+                            }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            tenant.add(new StrippedUserDTO(selectedUsername));
-                            updateUserList();
-                            suggestUser.setText("");
-                            // TODO: update suggest
-                        }
-                    });
+                            @Override
+                            public void onSuccess(Void result) {
+                                tenant.add(new StrippedUserDTO(selectedUsername));
+                                updateUserList();
+                                suggestUser.setText("");
+                            }
+                        });
+            }
         });
 
         // add remove button
         buttonPanel.addRemoveAction(stringMessages.removeRole(), () -> {
-
             UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
             Set<String> users = tenantUsersSelectionModel.getSelectedSet();
             if (tenant == null) {
@@ -217,7 +219,6 @@ public class UserGroupDetailPanel extends HorizontalPanel
                                 if (userToRemoveFromTenant != null) {
                                     tenant.remove(userToRemoveFromTenant);
                                 }
-                                // TODO: update suggest
                                 updateUserList();
                             }
                         });
@@ -248,5 +249,6 @@ public class UserGroupDetailPanel extends HorizontalPanel
 
     public void updateUserList() {
         tenantUsersListDataProvider.updateDisplays();
+        oracle.resetAndRemoveExistingUsers(tenantUsersList.getVisibleItems());
     }
 }

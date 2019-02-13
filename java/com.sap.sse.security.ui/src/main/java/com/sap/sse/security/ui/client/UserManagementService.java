@@ -55,7 +55,8 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UserGroupManagementException, UnauthorizedException;
     
-    void addUserToUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException;
+    void addUserToUserGroup(String userGroupIdAsString, String username)
+            throws UnauthorizedException, UserManagementException;
 
     void removeUserFromUserGroup(String userGroupIdAsString, String user) throws UnauthorizedException;
 
