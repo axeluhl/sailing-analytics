@@ -2,8 +2,9 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.NavigableSet;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -37,10 +38,11 @@ import com.sap.sse.common.Util.Pair;
  * algorithm guarantees that after a call to {@link #updateCandidates(Iterable, Iterable)} as well as after a call to
  * {@link #addFix} each stationary sequence has at least two candidates in them which passed the first filter state, and
  * no stationary sequence can be extended to the next candidate following it or any previous candidate preceding it
- * because the track leading there would extend the stationary sequence's bounding box beyond limits. Furthermore, all
- * {@link StationarySequence}s maintain their invariant, in particular that the track leading from their
- * {@link StationarySequence#getFirst() first} to their {@link StationarySequence#getLast() last} candidate remains
- * within a bounding box whose {@link Bounds#getDiameter() diameter} remains below the threshold. Calling
+ * because the track leading there would extend the stationary sequence's bounding box beyond limits, and no two
+ * adjacent candidates that are not part of the same {@link StationarySequence} can be joined into a valid such sequence.
+ * Furthermore, all {@link StationarySequence}s maintain their invariant, in particular that the track leading from
+ * their {@link StationarySequence#getFirst() first} to their {@link StationarySequence#getLast() last} candidate
+ * remains within a bounding box whose {@link Bounds#getDiameter() diameter} remains below the threshold. Calling
  * {@link #getFilteredCandidates()} returns those candidates that were announced through
  * {@link #updateCandidates(Iterable, Iterable)} as being added, not being announced later through
  * {@link #updateCandidates(Iterable, Iterable)} as having been removed and that currently pass this filter.
@@ -76,7 +78,7 @@ public class StationarySequences {
      * Set of sequences managed here; ordered by their {@link StationarySequence#getFirst() first} candidate,
      * based on the candidate comparator passed to the constructor.
      */
-    private final SortedSet<StationarySequence> stationarySequences;
+    private final NavigableSet<StationarySequence> stationarySequences;
     
     /**
      * Set of all candidates managed by this filter. A subset of these may be contained in
@@ -84,19 +86,52 @@ public class StationarySequences {
      * to being filtered out if they are not close to the border of their sequence. Candidates
      * that are not part of a {@link StationarySequence} will pass this filter.
      */
-    private final SortedSet<Candidate> candidates;
+    private final NavigableSet<Candidate> candidates;
+    
+    /**
+     * Maintains those {@link Candidate}s from {@link #candidates} and the {@link #startProxyCandidate} and
+     * {@link #endProxyCandidate} (if the latter have been added) that pass the filter. The set is updated by calls to
+     * {@link #updateCandidates(Iterable, Iterable)} and {@link #updateFixes(Iterable, Iterable)} which each tell the
+     * caller how this set has changed.
+     */
+    private final Set<Candidate> filteredCandidates;
 
     /**
      * The competitor's position track; fixes on this track decide which {@link Candidate}s form a
      * {@link StationarySequence}
      */
     private DynamicGPSFixTrack<Competitor, GPSFixMoving> track;
+
+    private final Comparator<Candidate> candidateComparator;
+
+    private final Candidate startProxyCandidate;
     
+    private final Candidate endProxyCandidate;
+    
+    /**
+     * The start and end proxy candidates need to be known because they need special treatment, particularly because
+     * their time points may be {@code null}, and in particular because they explicitly always pass all filters as soon
+     * as they have been added. They never participate in any {@link StationarySequence} managed by this filter and are
+     * always returned as part of the {@link #getFilteredCandidates()} result once they were added.
+     */
     protected StationarySequences(final Comparator<Candidate> candidateComparator,
-            DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
+            DynamicGPSFixTrack<Competitor, GPSFixMoving> track, Candidate startProxyCandidate, Candidate endProxyCandidate) {
         this.stationarySequences = new TreeSet<>((ss1, ss2)->candidateComparator.compare(ss1.getFirst(), ss2.getFirst()));
+        this.candidateComparator = candidateComparator;
         this.candidates = new TreeSet<>(candidateComparator);
+        this.filteredCandidates = new TreeSet<>(candidateComparator);
         this.track = track;
+        this.startProxyCandidate = startProxyCandidate;
+        this.endProxyCandidate = endProxyCandidate;
+    }
+    
+    /**
+     * Creates a {@link StationarySequence} with a single candidate ({@code firstCandidate}) in it. Such a sequence
+     * can also be used for searches in {@link #stationarySequences}.
+     */
+    private StationarySequence createStationarySequence(final Candidate firstCandidate) {
+        assert firstCandidate != startProxyCandidate && firstCandidate != endProxyCandidate;
+        return new StationarySequence(firstCandidate, candidateComparator, track);
     }
     
     /**
@@ -141,12 +176,195 @@ public class StationarySequences {
      * <p>
      */
     Pair<Iterable<Candidate>, Iterable<Candidate>> updateCandidates(Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
-        // TODO naively, update the candidates collection for now...
-        Util.addAll(newCandidates, candidates);
-        Util.removeAll(removedCandidates, candidates);
-        return new Pair<>(newCandidates, removedCandidates);
+        // The following two sets build up the resulting "delta." As we may handle more than one change here,
+        // changes may also revert previous changes. For example, a candidate that extends a stationary sequence
+        // may cause an inner candidate in that sequence to no longer pass the filter; but then removing a candidate
+        // from the other end of the same stationary sequence may make the candidate be sufficiently close to that
+        // sequence's border again, so it is decided to again pass the filter.
+        final Set<Candidate> candidatesEffectivelyAdded = new HashSet<>();
+        final Set<Candidate> candidatesEffectivelyRemoved = new HashSet<>();
+        for (final Candidate newCandidate : newCandidates) {
+            addCandidate(newCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+        }
+        for (final Candidate removedCandidate : removedCandidates) {
+            removeCandidate(removedCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+        }
+        updateFilteredCandidates(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+        return new Pair<>(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+    }
+
+    private void updateFilteredCandidates(final Set<Candidate> candidatesEffectivelyAdded, final Set<Candidate> candidatesEffectivelyRemoved) {
+//        assert filteredCandidates.containsAll(candidatesEffectivelyRemoved);
+        assert !new HashSet<>(filteredCandidates).removeAll(candidatesEffectivelyAdded);
+        filteredCandidates.addAll(candidatesEffectivelyAdded);
+        filteredCandidates.removeAll(candidatesEffectivelyRemoved);
+        assert !new HashSet<>(candidatesEffectivelyAdded).removeAll(candidatesEffectivelyRemoved) &&
+               !new HashSet<>(candidatesEffectivelyRemoved).removeAll(candidatesEffectivelyAdded);
+    }
+
+    /**
+     * For all new candidates we can distinguish the following cases:
+     * <ul>
+     * <li>The candidate is outside of any existing stationary sequence. We look for neighboring candidates in both
+     * directions. For each neighbor found, if the neighbor belongs to a stationary sequence, check if it can be
+     * extended up to the new candidate, and if so, add the new candidate to that stationary sequence; it passes the
+     * filter, whereas the neighbor is removed unless it is less than {@link #CANDIDATE_FILTER_TIME_WINDOW} away from
+     * the new candidate. If the neighbor does not belong to a stationary sequence yet or that sequence cannot validly
+     * be extended up to the new candidate, try to construct a new {@link StationarySequence} from the new candidate to
+     * the neighbor (new candidate and neighbor will still pass the filter if such a sequence can be validly constructed
+     * as they are the only two candidates in the new sequence for now). (Note: It is not possible that a single
+     * {@link StationarySequence} can be constructed spanning between the two neighbors because it it were possible then
+     * this would have had to have happened before as it does not depend on the appearance of the new candidate.)</li>
+     * <li>The candidate falls into an existing stationary sequence (at or after first and at or before last candidate
+     * in sequence). In this case the set of fixes on the track considered within the sequence hasn't changed. The
+     * candidate does not pass the filter, unless it is within {@link #CANDIDATE_FILTER_TIME_WINDOW} from the stationary
+     * sequence's start or end. The sequence's bounding box remains unchanged.</li>
+     * </ul>
+     */
+    private void addCandidate(Candidate newCandidate,
+            Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved) {
+        assert !candidates.contains(newCandidate);
+        if (newCandidate == startProxyCandidate) {
+            candidatesEffectivelyAdded.add(newCandidate);
+            candidatesEffectivelyRemoved.remove(newCandidate);
+        } else if (newCandidate == endProxyCandidate) {
+            candidatesEffectivelyAdded.add(newCandidate);
+            candidatesEffectivelyRemoved.remove(newCandidate);
+        } else {
+            candidates.add(newCandidate);
+            lookLeft(newCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+            lookRight(newCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+        }
+    }
+
+    private void lookLeft(Candidate newCandidate, Set<Candidate> candidatesEffectivelyAdded,
+            Set<Candidate> candidatesEffectivelyRemoved) {
+        final StationarySequence latestStationarySequenceStartingAtOrBeforeNewCandidate =
+                                            stationarySequences.floor(createStationarySequence(newCandidate));
+        final boolean createNewSequenceFromLowerToNew;
+        if (latestStationarySequenceStartingAtOrBeforeNewCandidate != null) {
+            if (latestStationarySequenceStartingAtOrBeforeNewCandidate.getLast().getTimePoint().before(newCandidate.getTimePoint())) {
+                // earlier sequence ends before newCandidate; try to extend, and if extending doesn't work,
+                // request a new sequence to be constructed:
+                createNewSequenceFromLowerToNew = !latestStationarySequenceStartingAtOrBeforeNewCandidate.tryToExtendAfterLast(
+                        newCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+            } else {
+                // newCandidate falls within the sequence
+                latestStationarySequenceStartingAtOrBeforeNewCandidate.addWithin(newCandidate, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                createNewSequenceFromLowerToNew = false;
+            }
+        } else {
+            // no stationary sequence found before newCandidate; try to create one
+            createNewSequenceFromLowerToNew = true;
+        }
+        if (createNewSequenceFromLowerToNew) {
+            candidatesEffectivelyAdded.add(newCandidate);
+            candidatesEffectivelyRemoved.remove(newCandidate);
+            // neighbour's stationary sequence can't be extended to newCandidate or there was no earlier stationary sequence,
+            // look for an earlier candidate and try to create a new stationary sequence; no candidate from the new
+            // sequence will be eliminated by this filter for now as they form the sequence's boundaries.
+            final Candidate lower = candidates.lower(newCandidate);
+            if (lower != null) {
+                final StationarySequence newSequence = tryToConstructStationarySequence(lower, newCandidate);
+                if (newSequence != null) {
+                    stationarySequences.add(newSequence);
+                }
+            }
+        }
     }
     
+    /**
+     * Looks for a {@link StationarySequence} starting truly later than {@code newCandidate} because a sequence that ends
+     * at {@code newCandidate} would already have been considered by {@link #lookLeft(Candidate, Set, Set)}.
+     */
+    private void lookRight(Candidate newCandidate, Set<Candidate> candidatesEffectivelyAdded,
+            Set<Candidate> candidatesEffectivelyRemoved) {
+        final StationarySequence earliestStationarySequenceStartingAfterNewCandidate =
+                                            stationarySequences.higher(createStationarySequence(newCandidate));
+        if (earliestStationarySequenceStartingAfterNewCandidate == null
+                || !earliestStationarySequenceStartingAfterNewCandidate.tryToExtendBeforeFirst(newCandidate,
+                        candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
+            // no later sequence found, or extending it backwards to newCandidate wasn't validly possible;
+            // request a new sequence to be constructed; newCandidate will pass the filter as it's one of
+            // only two candidates in the new sequence.
+            candidatesEffectivelyAdded.add(newCandidate);
+            candidatesEffectivelyRemoved.remove(newCandidate);
+            final Candidate higher = candidates.higher(newCandidate);
+            if (higher != null) {
+                final StationarySequence newSequence = tryToConstructStationarySequence(newCandidate, higher);
+                if (newSequence != null) {
+                    stationarySequences.add(newSequence);
+                }
+            }
+        }
+    }
+    
+    private StationarySequence tryToConstructStationarySequence(Candidate start, Candidate end) {
+        assert start != null && end != null;
+        final StationarySequence newSequence = createStationarySequence(start);
+        // we don't care about the updates here because we know for a fact that both candidates will be
+        // passed through as valid by the new sequence as they form its borders
+        final StationarySequence result = newSequence.tryToExtendAfterLast(end,
+                /* candidatesEffectivelyAdded */ new HashSet<>(), /* candidatesEffectivelyRemoved */ new HashSet<>())
+                ? newSequence : null;
+        assert result == null || Util.contains(result.getValidCandidates(), start) && Util.contains(result.getValidCandidates(), end);
+        return result;
+    }
+
+    /**
+     * For all candidates removed (either because the {@link CandidateFinder} no longer considers them candidates, or
+     * because a previous filter stage filtered them out):
+     * <ul>
+     * <li>If it was not part of a stationary sequence, no action is required in the stationary sequences; the candidate
+     * is removed from the filter results.</li>
+     * <li>If it was within the time range of an existing stationary sequence and further than
+     * {@link #CANDIDATE_FILTER_TIME_WINDOW} away from both of the sequence's borders, it used to be a candidate removed
+     * by this second filter stage. It is removed from the stationary sequence but doesn't change the filter
+     * results.</li>
+     * <li>If it was within the time range of an existing stationary sequence and closer than
+     * {@link #CANDIDATE_FILTER_TIME_WINDOW} to one of the sequence's borders, it used to be a candidate passing this
+     * second filter stage and therefore has to be removed from both, the stationary sequence and the filter result. If
+     * only one candidate is left in the sequence, delete the sequence. Otherwise, if it was the first or the last
+     * candidate of the stationary sequence, re-evaluate which fixes on that end of the sequence now fall within
+     * {@link #CANDIDATE_FILTER_TIME_WINDOW} from that border of the sequence.</li>
+     * </ul>
+     * <p>
+     */
+    private void removeCandidate(Candidate removedCandidate, Set<Candidate> candidatesEffectivelyAdded,
+            Set<Candidate> candidatesEffectivelyRemoved) {
+        if (removedCandidate == startProxyCandidate) {
+            candidatesEffectivelyRemoved.add(removedCandidate);
+            candidatesEffectivelyAdded.remove(removedCandidate);
+        } else if (removedCandidate == endProxyCandidate) {
+            candidatesEffectivelyRemoved.add(removedCandidate);
+            candidatesEffectivelyAdded.remove(removedCandidate);
+        } else {
+            assert candidates.contains(removedCandidate);
+            final StationarySequence latestStationarySequenceStartingAtOrBeforeRemovedCandidate =
+                    stationarySequences.floor(createStationarySequence(removedCandidate));
+            final boolean addToEffectivelyRemoved;
+            if (latestStationarySequenceStartingAtOrBeforeRemovedCandidate != null) {
+                if (!latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getLast().getTimePoint()
+                        .before(removedCandidate.getTimePoint())) {
+                    // within the sequence; remove:
+                    latestStationarySequenceStartingAtOrBeforeRemovedCandidate.remove(removedCandidate,
+                            candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                    addToEffectivelyRemoved = false; // already taken care of by the remove call above
+                } else {
+                    // candidate not in any sequence
+                    addToEffectivelyRemoved = true;
+                }
+            } else {
+                // no stationary sequence found before newCandidate
+                addToEffectivelyRemoved = true;
+            }
+            if (addToEffectivelyRemoved) {
+                candidatesEffectivelyRemoved.add(removedCandidate);
+                candidatesEffectivelyAdded.remove(removedCandidate);
+            }
+        }
+    }
+
     /**
      * Informs this filter that for its competitor a new position fix was added or replaced. All necessary updates to
      * the stationary sequences managed by this filter are carried out, and the changes that this has to the result of
@@ -183,16 +401,18 @@ public class StationarySequences {
     public Pair<Iterable<Candidate>, Iterable<Candidate>> updateFixes(Iterable<GPSFixMoving> newFixes,
             Iterable<GPSFixMoving> fixesReplacingExistingOnes) {
         // TODO Auto-generated method stub
-        return new Pair<>(Collections.emptySet(), Collections.emptySet());
+        final Set<Candidate> candidatesEffectivelyAdded = Collections.emptySet();
+        final Set<Candidate> candidatesEffectivelyRemoved = Collections.emptySet();
+        updateFilteredCandidates(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+        return new Pair<>(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
     }
 
     /**
-     * @return the candidates from the sequences managed here that pass the filter criteria; these
-     * are the {@link Candidate}s that are not part of any stationary sequence or are at the border of
-     * a stationary sequence, within {@link 
+     * @return the candidates from the sequences managed here that pass the filter criteria; these are the
+     *         {@link Candidate}s that are not part of any stationary sequence or are at the border of a stationary
+     *         sequence.
      */
-    public Set<Candidate> getFilteredCandidates() {
-        return candidates; // TODO
+    public Iterable<Candidate> getFilteredCandidates() {
+        return filteredCandidates;
     }
-
 }

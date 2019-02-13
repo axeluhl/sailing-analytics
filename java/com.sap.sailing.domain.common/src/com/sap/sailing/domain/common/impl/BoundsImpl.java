@@ -16,6 +16,10 @@ public class BoundsImpl implements Bounds {
         crossesDateLine = ne.getLngDeg() < sw.getLngDeg();
     }
     
+    public BoundsImpl(Position position) {
+        this(position, position);
+    }
+
     @Override
     public Position getNorthWest() {
         return new DegreePosition(getNorthEast().getLatDeg(), getSouthWest().getLngDeg());

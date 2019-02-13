@@ -288,7 +288,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             perCompetitorLocks.put(c, createCompetitorLock(c));
             candidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
             filteredCandidatesStage1.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
-            filteredCandidatesStage2.put(c, new StationarySequences(CANDIDATE_COMPARATOR, race.getTrack(c)));
+            filteredCandidatesStage2.put(c, new StationarySequences(CANDIDATE_COMPARATOR, race.getTrack(c), start, end));
             final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
             currentMarkPasses.put(c, currentMarkPassesForCompetitor);
             // in case the tracked race already has mark passings, e.g., from another mark passing calculator,
@@ -453,7 +453,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         assert perCompetitorLocks.get(c).isWriteLocked();
         final Boolean isGateStart = race.isGateStart();
         Map<Candidate, Set<Edge>> edgesForCompetitor = allEdges.get(c);
-        final Set<Candidate> competitorCandidates = getFilteredCandidates(c);
+        final Iterable<Candidate> competitorCandidates = getFilteredCandidates(c);
         for (Candidate newCan : newCandidates) {
             synchronized (competitorCandidates) {
                 for (Candidate oldCan : competitorCandidates) {
@@ -555,7 +555,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * @return the candidates that passed all stages of candidate filtering; see also
      *         {@link #updateFilteredCandidates(Competitor, Iterable, Iterable)}
      */
-    private Set<Candidate> getFilteredCandidates(Competitor c) {
+    private Iterable<Candidate> getFilteredCandidates(Competitor c) {
         return filteredCandidatesStage2.get(c).getFilteredCandidates();
     }
 
