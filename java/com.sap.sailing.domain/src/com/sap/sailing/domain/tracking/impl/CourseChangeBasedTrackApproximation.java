@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sse.common.Duration;
@@ -338,7 +339,7 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
     }
 
     @Override
-    public synchronized void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack) {
+    public synchronized void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack, AddResult addedOrReplaced) {
         assert competitor == track.getTrackedItem();
         if (fixWindow.isAtOrAfterFirst(fix.getTimePoint())) {
             addFix(fix);

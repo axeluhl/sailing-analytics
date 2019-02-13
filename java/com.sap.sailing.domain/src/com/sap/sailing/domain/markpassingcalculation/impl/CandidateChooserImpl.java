@@ -287,7 +287,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             perCompetitorLocks.put(c, createCompetitorLock(c));
             candidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
             filteredCandidatesStage1.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
-            filteredCandidatesStage2.put(c, new StationarySequences(CANDIDATE_COMPARATOR));
+            filteredCandidatesStage2.put(c, new StationarySequences(CANDIDATE_COMPARATOR, race.getTrack(c)));
             final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
             currentMarkPasses.put(c, currentMarkPassesForCompetitor);
             // in case the tracked race already has mark passings, e.g., from another mark passing calculator,

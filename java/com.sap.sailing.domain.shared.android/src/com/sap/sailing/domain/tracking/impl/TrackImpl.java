@@ -6,6 +6,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.FixAcceptancePredicate;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.Duration;
@@ -399,7 +400,8 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     protected boolean add(FixType fix, boolean replace) {
         lockForWrite();
         try {
-            return addWithoutLocking(fix, replace);
+            final AddResult addResult =  addWithoutLocking(fix, replace);
+            return addResult == AddResult.ADDED || addResult == AddResult.REPLACED;
         } finally {
             unlockAfterWrite();
         }
@@ -413,14 +415,14 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
      *            comparator used for the {@link #fixes} set. By default this is a comparator only comparing the
      *            fixes' time stamps. Subclasses may use different comparator implementations.
      */
-    protected boolean addWithoutLocking(FixType fix, boolean replace) {
-        final boolean result;
+    protected AddResult addWithoutLocking(FixType fix, boolean replace) {
+        final AddResult result;
         final boolean added = getInternalRawFixes().add(fix);
         if (!added && replace) {
             getInternalRawFixes().remove(fix);
-            result = getInternalRawFixes().add(fix);
+            result = getInternalRawFixes().add(fix) ? AddResult.REPLACED : AddResult.NOT_ADDED;
         } else {
-            result = added;
+            result = added ? AddResult.ADDED : AddResult.NOT_ADDED;
         }
         return result;
     }

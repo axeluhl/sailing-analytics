@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
@@ -391,7 +392,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             private static final long serialVersionUID = -2855787105725103732L;
 
             @Override
-            public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack) {
+            public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack, AddResult addedOrReplaced) {
                 updated(fix.getTimePoint());
                 triggerManeuverCacheRecalculationForAllCompetitors();
                 notifyListeners(fix, mark, firstFixInTrack);
@@ -1025,7 +1026,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack) {
+    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack, AddResult addedOrReplaced) {
         updated(fix.getTimePoint());
         triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor);
@@ -1224,7 +1225,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             }
 
             @Override
-            public void fixReceived(FixT fix, Competitor item, String trackName, boolean firstFixInTrack) {
+            public void fixReceived(FixT fix, Competitor item, String trackName, boolean firstFixInTrack, AddResult addedOrReplaced) {
                 notifyListeners(item, trackName, fix);
             }
         });
