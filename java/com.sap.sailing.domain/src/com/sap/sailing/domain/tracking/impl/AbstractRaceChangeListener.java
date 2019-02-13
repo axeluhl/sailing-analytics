@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -74,7 +75,7 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
         defaultAction();
     }
 
@@ -94,7 +95,7 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
-    public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
+    public void competitorPositionChanged(GPSFixMoving fix, Competitor item, AddResult addedOrReplaced) {
         defaultAction();
     }
 

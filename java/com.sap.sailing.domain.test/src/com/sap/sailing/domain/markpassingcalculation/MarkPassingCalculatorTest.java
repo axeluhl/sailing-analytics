@@ -56,12 +56,12 @@ public class MarkPassingCalculatorTest {
         mpc.suspend();
         mpc.enqueueUpdate(new StorePositionUpdateStrategy() {
             @Override
-            public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes, Map<Mark, List<GPSFix>> markFixes,
-                    List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints, IntHolder smallestChangedWaypointIndex,
-                    List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
-                    List<Pair<Competitor, Integer>> removedMarkPassings, List<Pair<Competitor, Integer>> suppressedMarkPassings,
-                    List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder,
-                    CandidateChooser candidateChooser) {
+            public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes, Map<Competitor, List<GPSFixMoving>> competitorFixesThatReplacedExistingOnes,
+                    Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
+                    IntHolder smallestChangedWaypointIndex,
+                    List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings, List<Pair<Competitor, Integer>> removedMarkPassings,
+                    List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings,
+                    CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
                 executed[0] = true;
             }
         });

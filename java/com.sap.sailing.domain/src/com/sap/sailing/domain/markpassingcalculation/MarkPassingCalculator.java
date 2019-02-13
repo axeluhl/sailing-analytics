@@ -65,10 +65,10 @@ public class MarkPassingCalculator {
     private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
         @Override
         public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes,
-                Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                IntHolder smallestChangedWaypointIndex, List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
-                List<Pair<Competitor, Integer>> removedMarkPassings,
-                List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
+                Map<Competitor, List<GPSFixMoving>> competitorFixesThatReplacedExistingOnes, Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints,
+                List<Waypoint> removedWaypoints, IntHolder smallestChangedWaypointIndex,
+                List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+                List<Pair<Competitor, Integer>> removedMarkPassings, List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
         }
     };
 
@@ -233,6 +233,7 @@ public class MarkPassingCalculator {
                 logger.fine("MarkPassingCalculator is listening on race "+raceName);
                 boolean finished = false;
                 final Map<Competitor, List<GPSFixMoving>> competitorFixes = new HashMap<>();
+                final Map<Competitor, List<GPSFixMoving>> competitorFixesThatReplacedExistingOnes = new HashMap<>();
                 final Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
                 final List<Waypoint> addedWaypoints = new ArrayList<>();
                 final List<Waypoint> removedWaypoints = new ArrayList<>();
@@ -272,9 +273,10 @@ public class MarkPassingCalculator {
                                     break;
                                 } else {
                                     try {
-                                        fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
-                                                smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
-                                                suppressedMarkPassings, unsuppressedMarkPassings, finder, chooser);
+                                        fixInsertion.storePositionUpdate(competitorFixes, competitorFixesThatReplacedExistingOnes,
+                                                markFixes, addedWaypoints,
+                                                removedWaypoints, smallestChangedWaypointIndex, fixedMarkPassings,
+                                                removedFixedMarkPassings, suppressedMarkPassings, unsuppressedMarkPassings, finder, chooser);
                                         hasUnprocessedUpdates = true;
                                     } catch (Exception e) {
                                         logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+
@@ -465,11 +467,11 @@ public class MarkPassingCalculator {
             enqueueUpdate(new StorePositionUpdateStrategy() {
                 @Override
                 public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes,
-                        Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
+                        Map<Competitor, List<GPSFixMoving>> competitorFixesThatReplacedExistingOnes, Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints,
+                        List<Waypoint> removedWaypoints,
                         IntHolder smallestChangedWaypointIndex,
                         List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
-                        List<Pair<Competitor, Integer>> removedMarkPassings,
-                        List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
+                        List<Pair<Competitor, Integer>> removedMarkPassings, List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
                 }
             });
         }

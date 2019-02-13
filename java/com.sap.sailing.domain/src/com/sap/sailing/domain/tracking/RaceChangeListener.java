@@ -21,9 +21,9 @@ import com.sap.sse.common.TimePoint;
 
 
 public interface RaceChangeListener extends CourseListener {
-    void competitorPositionChanged(GPSFixMoving fix, Competitor competitor);
+    void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, AddResult addedOrReplaced);
     
-    void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack);
+    void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced);
     
     void firstGPSFixReceived();
     
