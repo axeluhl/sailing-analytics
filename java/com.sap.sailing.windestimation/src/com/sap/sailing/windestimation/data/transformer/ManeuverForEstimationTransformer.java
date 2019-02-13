@@ -10,6 +10,13 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
 import smile.sort.QuickSelect;
 
+/**
+ * Converts instances which implement {@link ConvertableToManeuverForEstimation} to {@link ManeuverForEstimation}
+ * instances.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverForEstimationTransformer
         implements CompetitorTrackTransformer<ConvertableToManeuverForEstimation, ManeuverForEstimation> {
 

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
@@ -16,6 +17,16 @@ import com.sap.sailing.windestimation.windinference.WindTrackCalculator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;;
 
+/**
+ * Stand-alone wind estimation which operates on maneuvers. The maneuvers can be derived from arbitrary sources and
+ * formats providing that the provided pre-processing pipeline is capable of converting the source instances into
+ * {@link ManeuverForEstimation}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ * @param <InputType>
+ *            The type of the input, from which this wind estimation implementation infers the desired wind track.
+ */
 public class ManeuverBasedWindEstimationComponentImpl<InputType>
         implements WindEstimationComponentWithInternals<InputType> {
     private final PreprocessingPipeline<InputType, RaceWithEstimationData<ManeuverForEstimation>> preprocessingPipeline;

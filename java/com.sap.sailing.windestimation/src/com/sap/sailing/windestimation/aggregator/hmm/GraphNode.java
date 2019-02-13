@@ -3,6 +3,10 @@ package com.sap.sailing.windestimation.aggregator.hmm;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 
+/**
+ * Assumed maneuver type of a maneuver within {@link GraphLevelBase}.
+ *
+ */
 public class GraphNode {
 
     private final WindCourseRange validWindRange;

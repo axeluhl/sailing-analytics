@@ -1,5 +1,10 @@
 package com.sap.sailing.windestimation.aggregator.polarsfitting;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class WindSpeedRange {
 
     private final double upperSpeed;

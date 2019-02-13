@@ -20,7 +20,7 @@ public class CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTra
     @Override
     public List<ManeuverForDataAnalysis> transformElements(
             CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithElementsToTransform) {
-        List<ConvertableToLabelledManeuverForEstimation> convertableManeuvers = ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData
+        List<ConvertableToLabeledManeuverForEstimation> convertableManeuvers = ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData
                 .getConvertableManeuvers(competitorTrackWithElementsToTransform.getElements());
         double speedScalingDivisor = internalTransformer.getSpeedScalingDivisor(convertableManeuvers);
         List<ManeuverForDataAnalysis> maneuversForClassification = new ArrayList<>();

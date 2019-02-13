@@ -26,6 +26,11 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class PolarsFittingWindEstimation {
 
     private static final int COURSE_CLUSTER_SIZE = 10;

@@ -5,6 +5,13 @@ import java.util.List;
 
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
+/**
+ * Incremental Minimum Spanning Tree (MST) builder which is capable to parse an acyclic directed graph for
+ * {@link MstManeuverGraph}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class MstManeuverGraphGenerator extends AbstractMstGraphGenerator<ManeuverWithProbabilisticTypeClassification>
         implements Cloneable {
 

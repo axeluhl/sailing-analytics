@@ -4,6 +4,11 @@ import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassificationResult;
 import com.sap.sailing.windestimation.model.classifier.twdtransition.TwdTransitionClassifiersCache;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class TwdTransitionClassifierBasedTransitionProbabilitiesCalculator
         extends SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator {
 

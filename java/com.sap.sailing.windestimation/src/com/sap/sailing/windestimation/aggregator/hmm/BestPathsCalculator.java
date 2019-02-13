@@ -10,6 +10,9 @@ import java.util.Map.Entry;
 import com.sap.sse.common.Util.Pair;
 
 /**
+ * Infers best path within possible solution space with hidden states for each observation using an adapted variant of
+ * Viterbi for conventional HMM models which allows to label each provided maneuver with its most suitable maneuver
+ * type. Forward-Backward algorithm is used to induce the confidence for each produced {@link GraphLevelInference}.
  * 
  * @author Vladislav Chumak (D069712)
  *

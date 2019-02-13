@@ -7,6 +7,13 @@ import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelBase;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNodeTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
+/**
+ * As {@link GraphLevelBase}, but specifies that each observation is followed by 0..n next observations and preceded by
+ * maximally one observation which implies an acyclic directed graph.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class MstGraphLevel extends GraphLevelBase {
 
     private final MstGraphLevel parent;

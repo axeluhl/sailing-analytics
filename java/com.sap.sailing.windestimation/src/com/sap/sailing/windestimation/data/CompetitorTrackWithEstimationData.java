@@ -9,9 +9,12 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
+ * Competitor track with elements (e.g. maneuvers or gps-fixes) which has been fetched during data import.
  * 
  * @author Vladislav Chumak (D069712)
  *
+ * @param <T>
+ *            The type of elements within a competitor track. E.g. maneuver, or gps-fix.
  */
 public class CompetitorTrackWithEstimationData<T> {
 

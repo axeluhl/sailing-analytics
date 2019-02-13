@@ -7,6 +7,8 @@ import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 /**
+ * As {@link GraphLevelBase}, but specifies that each observation is followed and preceded by maximally one next
+ * observation which implies that {@link GraphLevel}-instances are considered as a sequence.
  * 
  * @author Vladislav Chumak (D069712)
  *

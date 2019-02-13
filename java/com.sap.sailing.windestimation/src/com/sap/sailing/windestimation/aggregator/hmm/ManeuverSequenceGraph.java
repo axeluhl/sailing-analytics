@@ -5,12 +5,21 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
 
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
+import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregator;
 import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 /**
+ * {@link ManeuverClassificationsAggregator} which is using a sequence-based Hidden Markov Model (HMM) to aggregate
+ * maneuver classifications. Maneuvers with its features are considered as observation. The maneuver type of a maneuver
+ * is treated as a hidden state. The observation probability for a maneuver type of a maneuver is given by the maneuver
+ * type likelihood provided in maneuver classification. The transition probability is calculated by considering TWD
+ * delta between maneuvers with assumed maneuver types. The detailed strategy for transition probability derivation is
+ * given by {@link BestPathsCalculator#getTransitionProbabilitiesCalculator()}. To infer the maneuver types of each
+ * maneuver, Viterbi algorithm is used, which is implemented in the provided {@link BestPathsCalculator}. For wind fix
+ * confidence determination, Forward-Backward algorithm is used which is also implemented in
+ * {@link BestPathsCalculator}.
  * 
  * @author Vladislav Chumak (D069712)
  *

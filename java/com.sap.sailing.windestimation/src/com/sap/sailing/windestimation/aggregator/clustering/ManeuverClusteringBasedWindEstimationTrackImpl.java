@@ -11,10 +11,12 @@ import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.windestimation.AbstractManeuverBasedWindEstimationTrackImpl;
+import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl;
 import com.sap.sailing.polars.windestimation.ManeuverClassification;
 import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
+import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.model.exception.ModelOperationException;
 import com.sap.sse.common.Bearing;
@@ -23,6 +25,9 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.kmeans.Cluster;
 
 /**
+ * Adapted variant of clustering-based wind estimation which was initially coded by Axel Uhl as
+ * {@link ManeuverBasedWindEstimationTrackImpl}. It includes maneuver classification results of
+ * {@link ManeuverClassifiersCache} to compute tack and jibe clusters.
  * 
  * @author Vladislav Chumak (D069712)
  *

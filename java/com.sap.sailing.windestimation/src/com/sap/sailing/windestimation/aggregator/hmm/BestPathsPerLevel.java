@@ -1,5 +1,11 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
+/**
+ * As {@link AbstractBestPathsPerLevel}, with additional compatibility to {@link ManeuverSequenceGraph}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class BestPathsPerLevel extends AbstractBestPathsPerLevel implements Comparable<BestPathsPerLevel> {
 
     private final BestManeuverNodeInfo[] bestPreviousNodeInfosPerManeuverNode;

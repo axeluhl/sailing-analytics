@@ -8,6 +8,11 @@ import com.sap.sailing.windestimation.windinference.TwdFromManeuverCalculator;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class MeanBasedOutlierRemovalWindEstimator extends AbstractOutlierRemovalWindEstimator {
 
     public MeanBasedOutlierRemovalWindEstimator(TwdFromManeuverCalculator twdCalculator) {

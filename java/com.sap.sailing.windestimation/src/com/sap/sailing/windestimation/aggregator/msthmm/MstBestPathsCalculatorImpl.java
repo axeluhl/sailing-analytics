@@ -12,6 +12,13 @@ import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange.Combination
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * Infers best path within MST using an adapted variant of Viterbi for conventional HMM models which allows to label
+ * each provided maneuver with its most suitable maneuver type.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class MstBestPathsCalculatorImpl implements MstBestPathsCalculator {
 
     private final MstGraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;

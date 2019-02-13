@@ -1,5 +1,11 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
+/**
+ * Represents inference result for a {@link GraphLevelBase} within HMM.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class GraphLevelInference {
 
     private final GraphLevelBase graphLevel;

@@ -6,6 +6,13 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
+/**
+ * Converts competitor tracks with of type {@link CompleteManeuverCurveWithEstimationData} to competitor tracks with
+ * instances of type {@link ManeuverForEstimation} instances.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer
         implements CompetitorTrackTransformer<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> {
 
@@ -14,7 +21,7 @@ public class CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTrans
     @Override
     public List<ManeuverForEstimation> transformElements(
             CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithElementsToTransform) {
-        List<ConvertableToLabelledManeuverForEstimation> convertableManeuvers = ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData
+        List<ConvertableToLabeledManeuverForEstimation> convertableManeuvers = ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData
                 .getConvertableManeuvers(competitorTrackWithElementsToTransform.getElements());
         return internalTransformer.getManeuversForEstimation(convertableManeuvers,
                 competitorTrackWithElementsToTransform.getBoatClass());

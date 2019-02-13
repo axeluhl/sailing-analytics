@@ -6,6 +6,14 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Maneuver class which is used in context of wind estimation for maneuver classification and further aggregation. This
+ * class contains all the features which are required by maneuver classifier models to estimate the corresponding
+ * maneuver type without knowledge about TWD.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> {
 
     private final TimePoint maneuverTimePoint;

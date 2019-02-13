@@ -2,6 +2,14 @@ package com.sap.sailing.windestimation.data;
 
 import java.util.List;
 
+/**
+ * Regatta with races which has been fetched during data import.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ * @param <T>
+ *            The type of elements within a competitor track. E.g. maneuver, or gps-fix.
+ */
 public class RegattaWithEstimationData<T> {
 
     private final String regattaName;

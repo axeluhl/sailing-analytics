@@ -4,6 +4,13 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 
+/**
+ * Represents a transition between two maneuvers which is composed of duration and distance between maneuvers, the TWD
+ * delta which occurred within the transition and the types of both maneuvers.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class TwdTransition extends ManeuverTransition {
 
     private final Bearing twdChange;
@@ -22,7 +29,5 @@ public class TwdTransition extends ManeuverTransition {
     public String toString() {
         return "TwdTransition [twdChange=" + twdChange + ", " + super.toString() + "]";
     }
-    
-    
 
 }

@@ -13,8 +13,15 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Conversion helper class to convert {@link CompleteManeuverCurveWithEstimationData} instances to
+ * {@link LabeledManeuverForEstimation}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData
-        implements ConvertableToLabelledManeuverForEstimation {
+        implements ConvertableToLabeledManeuverForEstimation {
 
     private final CompleteManeuverCurveWithEstimationData maneuver;
     private final Double courseChangeInDegreesWithinTurningSectionOfPreviousManeuver;
@@ -155,9 +162,9 @@ public class ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWith
         return maneuver.getManeuverTypeForCompleteManeuverCurve();
     }
 
-    public static List<ConvertableToLabelledManeuverForEstimation> getConvertableManeuvers(
+    public static List<ConvertableToLabeledManeuverForEstimation> getConvertableManeuvers(
             List<CompleteManeuverCurveWithEstimationData> maneuvers) {
-        List<ConvertableToLabelledManeuverForEstimation> convertableManeuvers = new ArrayList<>(maneuvers.size());
+        List<ConvertableToLabeledManeuverForEstimation> convertableManeuvers = new ArrayList<>(maneuvers.size());
         CompleteManeuverCurveWithEstimationData previousManeuver = null;
         CompleteManeuverCurveWithEstimationData currentManeuver = null;
         for (CompleteManeuverCurveWithEstimationData nextManeuver : maneuvers) {

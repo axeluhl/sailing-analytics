@@ -18,8 +18,8 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
 import com.sap.sailing.windestimation.model.store.InMemoryModelStoreImpl;
-import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
+import com.sap.sailing.windestimation.model.store.ModelStore;
 
 public class WindEstimationFactoryServiceImpl
         extends AbstractReplicableWithObjectInputStream<WindEstimationFactoryService, WindEstimationDataOperation<?>>
@@ -33,7 +33,7 @@ public class WindEstimationFactoryServiceImpl
 
     private static final ManeuverFeatures MAX_MANEUVER_FEATURES = new ManeuverFeatures(ENABLE_POLARS_INFORMATION,
             ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION);
-    private static final ModelDomainType[] relevantContextTypes = new ModelDomainType[] {
+    private static final ModelDomainType[] modelDomainTypesRequiredByWindEstimation = new ModelDomainType[] {
             ModelDomainType.MANEUVER_CLASSIFIER, ModelDomainType.DURATION_BASED_TWD_DELTA_STD_REGRESSOR,
             ModelDomainType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR };
 
@@ -70,9 +70,9 @@ public class WindEstimationFactoryServiceImpl
     @Override
     public void initiallyFillFromInternal(ObjectInputStream is)
             throws IOException, ClassNotFoundException, InterruptedException {
-        for (ModelDomainType contextType : relevantContextTypes) {
+        for (ModelDomainType domainType : modelDomainTypesRequiredByWindEstimation) {
             Map<String, byte[]> exportedModels = (Map<String, byte[]>) is.readObject();
-            MODEL_STORE.importPersistedModels(exportedModels, contextType);
+            MODEL_STORE.importPersistedModels(exportedModels, domainType);
         }
         clearState();
     }
@@ -106,8 +106,8 @@ public class WindEstimationFactoryServiceImpl
 
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
-        for (ModelDomainType contextType : relevantContextTypes) {
-            Map<String, byte[]> exportedModels = MODEL_STORE.exportAllPersistedModels(contextType);
+        for (ModelDomainType domainType : modelDomainTypesRequiredByWindEstimation) {
+            Map<String, byte[]> exportedModels = MODEL_STORE.exportAllPersistedModels(domainType);
             objectOutputStream.writeObject(exportedModels);
         }
     }
@@ -117,8 +117,8 @@ public class WindEstimationFactoryServiceImpl
      */
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
-        for (ModelDomainType contextType : relevantContextTypes) {
-            MODEL_STORE.deleteAll(contextType);
+        for (ModelDomainType domainType : modelDomainTypesRequiredByWindEstimation) {
+            MODEL_STORE.deleteAll(domainType);
         }
         clearState();
     }
@@ -146,10 +146,10 @@ public class WindEstimationFactoryServiceImpl
      * Imports all the models which are available in the provided model store.
      */
     public void importAllModelsFromModelStore(ModelStore modelStore) throws ModelPersistenceException {
-        for (ModelDomainType contextType : relevantContextTypes) {
-            Map<String, byte[]> exportedModels = modelStore.exportAllPersistedModels(contextType);
-            MODEL_STORE.deleteAll(contextType);
-            MODEL_STORE.importPersistedModels(exportedModels, contextType);
+        for (ModelDomainType domainType : modelDomainTypesRequiredByWindEstimation) {
+            Map<String, byte[]> exportedModels = modelStore.exportAllPersistedModels(domainType);
+            MODEL_STORE.deleteAll(domainType);
+            MODEL_STORE.importPersistedModels(exportedModels, domainType);
         }
         clearState();
     }

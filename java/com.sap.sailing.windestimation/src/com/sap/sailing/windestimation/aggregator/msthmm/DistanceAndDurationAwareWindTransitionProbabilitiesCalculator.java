@@ -12,6 +12,12 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * Transition probabilities calculator which makes use of {@link GaussianBasedTwdTransitionDistributionCache}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
         extends SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
         implements MstGraphNodeTransitionProbabilitiesCalculator {

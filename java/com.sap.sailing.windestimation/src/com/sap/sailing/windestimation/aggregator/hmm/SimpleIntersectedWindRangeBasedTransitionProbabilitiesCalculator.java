@@ -3,6 +3,11 @@ package com.sap.sailing.windestimation.aggregator.hmm;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Bearing;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class SimpleIntersectedWindRangeBasedTransitionProbabilitiesCalculator
         extends IntersectedWindRangeBasedTransitionProbabilitiesCalculator {
 

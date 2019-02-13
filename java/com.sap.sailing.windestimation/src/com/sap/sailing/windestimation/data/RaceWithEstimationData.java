@@ -3,9 +3,12 @@ package com.sap.sailing.windestimation.data;
 import java.util.List;
 
 /**
+ * Race with competitor tracks which has been fetched during data import.
  * 
  * @author Vladislav Chumak (D069712)
  *
+ * @param <T>
+ *            The type of elements within a competitor track. E.g. maneuver, or gps-fix.
  */
 public class RaceWithEstimationData<T> {
 

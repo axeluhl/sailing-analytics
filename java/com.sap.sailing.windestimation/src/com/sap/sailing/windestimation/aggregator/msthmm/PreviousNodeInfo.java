@@ -3,6 +3,13 @@ package com.sap.sailing.windestimation.aggregator.msthmm;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 
+/**
+ * Helper class for {@link MstGraphNodeTransitionProbabilitiesCalculator} which wraps best previous node of a previous
+ * level with its intersected wind range.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class PreviousNodeInfo {
 
     private final MstGraphLevel previousLevel;

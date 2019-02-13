@@ -8,6 +8,12 @@ import com.sap.sailing.windestimation.aggregator.hmm.GraphNode;
 import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * As {@link AbstractBestPathsPerLevel}, with additional compatibility to {@link MstManeuverGraph}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class MstBestPathsPerLevel extends AbstractBestPathsPerLevel {
 
     private final MstBestManeuverNodeInfo[] bestPreviousNodeInfosPerManeuverNode;
@@ -15,8 +21,7 @@ public class MstBestPathsPerLevel extends AbstractBestPathsPerLevel {
 
     public MstBestPathsPerLevel(MstGraphLevel currentLevel) {
         this.currentLevel = currentLevel;
-        this.bestPreviousNodeInfosPerManeuverNode = new MstBestManeuverNodeInfo[currentLevel.getLevelNodes()
-                .size()];
+        this.bestPreviousNodeInfosPerManeuverNode = new MstBestManeuverNodeInfo[currentLevel.getLevelNodes().size()];
     }
 
     @Override
@@ -25,8 +30,8 @@ public class MstBestPathsPerLevel extends AbstractBestPathsPerLevel {
     }
 
     public MstBestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode currentNode,
-            List<Pair<MstGraphLevel, GraphNode>> previousGraphLevelsWithBestPreviousNodes,
-            double probabilityFromStart, IntersectedWindRange intersectedWindRange) {
+            List<Pair<MstGraphLevel, GraphNode>> previousGraphLevelsWithBestPreviousNodes, double probabilityFromStart,
+            IntersectedWindRange intersectedWindRange) {
         MstBestManeuverNodeInfo bestManeuverNodeInfo = new MstBestManeuverNodeInfo(
                 previousGraphLevelsWithBestPreviousNodes, probabilityFromStart, intersectedWindRange);
         bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()] = bestManeuverNodeInfo;

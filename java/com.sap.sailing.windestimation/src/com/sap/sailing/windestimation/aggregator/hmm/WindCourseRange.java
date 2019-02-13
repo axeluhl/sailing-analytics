@@ -1,5 +1,12 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
+/**
+ * Represents a range of inverted TWD. The range starts the reference course specified by {@link #getFromPortside()} and
+ * encompasses all the range toward starboard which is limited by {@link #getAngleTowardStarboard()}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class WindCourseRange {
 
     private final double fromPortside;
@@ -127,7 +134,8 @@ public class WindCourseRange {
                 }
             }
         }
-        if(combinationModeOnViolation == CombinationModeOnViolation.EXPANSION && this instanceof IntersectedWindRange) {
+        if (combinationModeOnViolation == CombinationModeOnViolation.EXPANSION
+                && this instanceof IntersectedWindRange) {
             violationRange += ((IntersectedWindRange) this).getViolationRange();
         }
         return new IntersectedWindRange(newFromPortside, newAngleTowardStarboard, violationRange);

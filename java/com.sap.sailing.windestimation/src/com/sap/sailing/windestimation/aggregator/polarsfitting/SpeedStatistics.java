@@ -2,6 +2,11 @@ package com.sap.sailing.windestimation.aggregator.polarsfitting;
 
 import java.io.Serializable;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class SpeedStatistics implements Serializable {
 
     private static final long serialVersionUID = 3722822093000803195L;

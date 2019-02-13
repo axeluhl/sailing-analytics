@@ -20,7 +20,17 @@ import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifi
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 /**
- * Incremental
+ * Specialization of {@link MstManeuverGraphGenerator}, which operates on {@link CompleteManeuverCurve} instances. The
+ * implementation pre-processes the provided maneuvers, sorts out irrelevant ones and the ones with bad quality data,
+ * performs a maneuver classification by means of provided maneuver model cache, and passes the yielded maneuver
+ * classification to its super class {@link MstManeuverGraphGenerator} as nodes. However, since new maneuvers can be
+ * immediately followed by other new maneuvers making the previous maneuver of bad quality, this implementation
+ * differentiates between non-temporary and temporary maneuvers. Temporary maneuver is the last yet available maneuver
+ * within a competitor track. If a new maneuver is added which is after the temporary maneuver, the temporary maneuver
+ * with its classification are evaluated again regarding its quality which is affected by duration between its preceding
+ * and following maneuvers. If the maneuver is considered as clean, then it will be forever added as node to
+ * {@link MstManeuverGraphGenerator}, otherwise it will be thrown away from MST. The dropping strategy is implemented in
+ * {@link #parseGraph()}.
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -39,6 +49,9 @@ public class IncrementalMstManeuverGraphGenerator extends MstManeuverGraphGenera
         this.maneuverClassifiersCache = maneuverClassifiersCache;
     }
 
+    /**
+     * Adds a new maneuver classification to MST if the quality requirements are satisfied by the provided maneuver.
+     */
     public void add(Competitor competitor, CompleteManeuverCurve newManeuver, TrackTimeInfo trackTimeInfo) {
         ManeuverDataOfCompetitor maneuverData = maneuverDataPerCompetitor.get(competitor);
         if (maneuverData == null) {

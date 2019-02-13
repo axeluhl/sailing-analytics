@@ -20,6 +20,12 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
+/**
+ * Converts {@link CompleteManeuverCurve} instances to {@link ManeuverForEstimation} instances.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class CompleteManeuverCurveToManeuverForEstimationConverter {
 
     private static final Duration MIN_DURATION_TO_OTHER_MANEUVER = new MillisecondsDurationImpl(

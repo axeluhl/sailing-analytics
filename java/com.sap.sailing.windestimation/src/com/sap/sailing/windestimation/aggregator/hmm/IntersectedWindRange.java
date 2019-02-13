@@ -1,5 +1,13 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
+/**
+ * Represents result of a merge of two {@link WindCourseRange}-instances by means of
+ * {@link WindCourseRange#intersect(WindCourseRange, CombinationModeOnViolation)}. The {@link #getViolationRange()}
+ * contains the TWD delta which can be used for transition probability derivation.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class IntersectedWindRange extends WindCourseRange {
 
     private final double violationRange;

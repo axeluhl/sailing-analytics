@@ -3,7 +3,7 @@ package com.sap.sailing.windestimation.aggregator.outlierremoval;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
+import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
@@ -14,6 +14,11 @@ import com.sap.sailing.windestimation.windinference.TwdFromManeuverCalculator;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public abstract class AbstractOutlierRemovalWindEstimator implements ManeuverClassificationsAggregator {
 
     public static final double MAX_DEVIATON_FROM_AVG_WIND_COURSE = 30;

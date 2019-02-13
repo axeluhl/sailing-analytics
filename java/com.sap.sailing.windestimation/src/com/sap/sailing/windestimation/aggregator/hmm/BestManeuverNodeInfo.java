@@ -1,5 +1,11 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
+/**
+ * Contains information about best path until the node from level represented in {@link BestPathsPerLevel}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class BestManeuverNodeInfo extends BestNodeInfo {
 
     private final GraphNode bestPreviousNode;

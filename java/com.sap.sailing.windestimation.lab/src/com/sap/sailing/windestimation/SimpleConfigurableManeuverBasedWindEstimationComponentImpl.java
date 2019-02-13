@@ -2,7 +2,9 @@ package com.sap.sailing.windestimation;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory.HmmTransitionProbabilitiesCalculator;
+import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregator;
+import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregatorFactory;
+import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregatorFactory.HmmTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer;

@@ -1,6 +1,7 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
 /**
+ * Util which can normalize arrays with probabilities such that it sums up to one.
  * 
  * @author Vladislav Chumak (D069712)
  *

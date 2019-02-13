@@ -10,6 +10,14 @@ import java.util.Map;
 
 import com.sap.sse.common.Util.Triple;
 
+/**
+ * A generic implementation of Incremental Minimum Spanning Tree (MST) builder which is capable to parse an acyclic
+ * directed graph for arbitrary instances provided that the distance between instances can be measured (see
+ * {@link #getDistanceBetweenObservations(Object, Object)}).
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public abstract class AbstractMstGraphGenerator<T> {
 
     private final List<NodeWithNeighbors<T>> nodes;
@@ -58,6 +66,9 @@ public abstract class AbstractMstGraphGenerator<T> {
         return result;
     }
 
+    /**
+     * Gets the distance between two provided instances.
+     */
     protected abstract double getDistanceBetweenObservations(T o1, T o2);
 
     private void addEdge(NodeWithNeighbors<T> newNode, NodeWithDistance<T> closestNeighborWithDistance) {

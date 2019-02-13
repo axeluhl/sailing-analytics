@@ -6,6 +6,17 @@ import java.util.function.Function;
 
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 
+/**
+ * Transforms a {@link CompetitorTrackWithEstimationData} with elements of one type into a new competitor track with
+ * same metadata, but having its elements of another type.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ * @param <FromType>
+ *            The type of elements from the original competitor track to transform
+ * @param <ToType>
+ *            The target type of elements to which the provided competitor track will be transformed
+ */
 public interface CompetitorTrackTransformer<FromType, ToType>
         extends Function<CompetitorTrackWithEstimationData<FromType>, CompetitorTrackWithEstimationData<ToType>> {
 

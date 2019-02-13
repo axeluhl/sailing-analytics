@@ -1,5 +1,12 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
+/**
+ * Contains information about best previous paths for the each of the nodes contained in the provided
+ * {@link GraphLevel}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public abstract class AbstractBestPathsPerLevel {
 
     public abstract BestNodeInfo getBestPreviousNodeInfo(GraphNode currentNode);

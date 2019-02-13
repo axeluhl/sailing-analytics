@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation;
+package com.sap.sailing.windestimation.aggregator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +31,13 @@ import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBase
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculatorImpl;
 
+/**
+ * Factory class which provides convenience methods to construct the desired {@link ManeuverClassificationsAggregator}
+ * instance.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverClassificationsAggregatorFactory {
 
     private final PolarDataService polarDataService;

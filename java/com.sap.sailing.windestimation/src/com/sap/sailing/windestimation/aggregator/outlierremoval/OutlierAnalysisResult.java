@@ -5,6 +5,11 @@ import java.util.List;
 
 import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class OutlierAnalysisResult {
 
     private final List<ManeuverWithEstimatedType> includedManeuvers = new ArrayList<>();

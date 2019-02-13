@@ -39,7 +39,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.windestimation.ManeuverBasedWindEstimationComponentImpl;
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregatorFactory;
+import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregatorFactory;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;

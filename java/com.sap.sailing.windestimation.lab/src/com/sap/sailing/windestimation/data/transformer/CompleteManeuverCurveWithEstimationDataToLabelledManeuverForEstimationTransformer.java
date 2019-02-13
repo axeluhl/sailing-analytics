@@ -14,7 +14,7 @@ public class CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimat
     @Override
     public List<LabeledManeuverForEstimation> transformElements(
             CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithElementsToTransform) {
-        List<ConvertableToLabelledManeuverForEstimation> convertableManeuvers = ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData
+        List<ConvertableToLabeledManeuverForEstimation> convertableManeuvers = ConvertableManeuverForEstimationAdapterForCompleteManeuverCurveWithEstimationData
                 .getConvertableManeuvers(competitorTrackWithElementsToTransform.getElements());
         return internalTransformer.getManeuversForEstimation(convertableManeuvers,
                 competitorTrackWithElementsToTransform.getBoatClass(),

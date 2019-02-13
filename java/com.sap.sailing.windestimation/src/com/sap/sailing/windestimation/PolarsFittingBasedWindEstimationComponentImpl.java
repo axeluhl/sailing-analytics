@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
+import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregator;
 import com.sap.sailing.windestimation.aggregator.polarsfitting.PolarsFittingWindEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
@@ -23,6 +24,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**
+ * Wind estimation implementation which operates by matching COG/SOG tuples contained in pre-processed maneuver
+ * instances with polar chart. This implementation is considered as experimental and highly inaccurate in comparison to
+ * {@link ManeuverBasedWindEstimationComponentImpl}.
  * 
  * @author Vladislav Chumak (D069712)
  *

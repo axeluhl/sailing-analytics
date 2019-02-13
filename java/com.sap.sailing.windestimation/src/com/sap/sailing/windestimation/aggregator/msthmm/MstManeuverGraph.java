@@ -5,14 +5,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
+import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregator;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
+import com.sap.sailing.windestimation.aggregator.hmm.ManeuverSequenceGraph;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
 import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
 /**
+ * Similar as {@link ManeuverSequenceGraph}, but this variant is using Minimum Spanning Tree (MST) structure for best
+ * path determination instead of a sequence.
  * 
  * @author Vladislav Chumak (D069712)
  *

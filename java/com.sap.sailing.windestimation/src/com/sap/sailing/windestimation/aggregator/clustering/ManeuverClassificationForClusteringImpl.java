@@ -7,6 +7,12 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
+/**
+ * Variant of {@link ManeuverClassificationImpl} compatible to {@link ManeuverClusteringBasedWindEstimationTrackImpl}.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverClassificationForClusteringImpl extends ManeuverClassificationImpl {
 
     private final ManeuverWithProbabilisticTypeClassification maneuverWithProbabilisticTypeClassification;

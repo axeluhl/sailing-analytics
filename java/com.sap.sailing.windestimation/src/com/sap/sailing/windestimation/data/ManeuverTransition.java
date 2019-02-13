@@ -3,6 +3,13 @@ package com.sap.sailing.windestimation.data;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 
+/**
+ * Represents a transition between two maneuvers which is composed of duration and distance between maneuvers, and the
+ * types of both maneuvers.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class ManeuverTransition {
 
     private final Distance distance;
@@ -39,5 +46,5 @@ public class ManeuverTransition {
         return "ManeuverTransition [distance=" + distance + ", duration=" + duration + ", fromManeuverType="
                 + fromManeuverType + ", toManeuverType=" + toManeuverType + "]";
     }
-    
+
 }

@@ -10,6 +10,11 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ */
 public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         implements GraphNodeTransitionProbabilitiesCalculator {
 
