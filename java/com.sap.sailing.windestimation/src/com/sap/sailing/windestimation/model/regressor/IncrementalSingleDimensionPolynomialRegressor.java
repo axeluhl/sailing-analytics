@@ -8,19 +8,28 @@ import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImp
 import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.exception.ModelOperationException;
 
-public class IncrementalSingleDimensionPolynomialRegressor<InstanceType, T extends ModelContext<InstanceType>>
-        extends AbstractRegressorModel<InstanceType, T>
-        implements IncrementallyTrainableRegressorModel<InstanceType, T> {
+/**
+ * Regression model which supports regressions of arbitrary polynomial order in an incremental manner. It uses
+ * {@link IncrementalLeastSquares} under the hood.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ * @param <InstanceType>
+ *            The type of input instances for this model. The purpose of the input instance is to supply the model with
+ *            feature vector x, so that the model can generate prediction y.
+ * @param <MC>
+ *            The type of model context associated with this model.
+ */
+public class IncrementalSingleDimensionPolynomialRegressor<InstanceType, MC extends ModelContext<InstanceType>> extends
+        AbstractRegressorModel<InstanceType, MC> implements IncrementallyTrainableRegressorModel<InstanceType, MC> {
 
     private static final long serialVersionUID = 2275631213670766824L;
     private final IncrementalLeastSquares regression;
 
-    public IncrementalSingleDimensionPolynomialRegressor(T modelContext, int polynomialOrder,
-            boolean withBias) {
+    public IncrementalSingleDimensionPolynomialRegressor(MC modelContext, int polynomialOrder, boolean withBias) {
         super(modelContext);
         if (modelContext.getNumberOfInputFeatures() > 1) {
-            throw new IllegalArgumentException(
-                    "Only modelContext.getNumberOfInputFeatures() == 1 is supported");
+            throw new IllegalArgumentException("Only modelContext.getNumberOfInputFeatures() == 1 is supported");
         }
         this.regression = new IncrementalAnyOrderLeastSquaresImpl(polynomialOrder, withBias);
     }
@@ -66,6 +75,9 @@ public class IncrementalSingleDimensionPolynomialRegressor<InstanceType, T exten
         return false;
     }
 
+    /**
+     * Gets a user friendly string representation of the regression polynomial learned from the training data.
+     */
     public String getPolynomAsString() {
         PolynomialFunction polynomialFunction;
         try {

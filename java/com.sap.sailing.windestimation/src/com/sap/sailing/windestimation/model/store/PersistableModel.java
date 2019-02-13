@@ -24,7 +24,7 @@ public interface PersistableModel<InstanceType, MC extends ModelContext<Instance
      * 
      * @see ModelSerializationStrategyType
      */
-    ModelSerializationStrategyType getPersistenceSupportType();
+    ModelSerializationStrategyType getModelSerializationStrategyType();
 
     /**
      * Gets the associated context of the model.

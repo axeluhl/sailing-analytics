@@ -39,7 +39,7 @@ public abstract class AbstractModelStoreImpl implements ModelStore {
      */
     protected <T extends PersistableModel<?, ?>> ModelSerializationStrategy checkAndGetModelSerializationStrategy(
             T trainedModel) throws ModelPersistenceException {
-        ModelSerializationStrategy modelSerializationStrategy = trainedModel.getPersistenceSupportType()
+        ModelSerializationStrategy modelSerializationStrategy = trainedModel.getModelSerializationStrategyType()
                 .getModelSerializationStrategy();
         if (modelSerializationStrategy == null) {
             throw new ModelPersistenceException(
@@ -59,7 +59,7 @@ public abstract class AbstractModelStoreImpl implements ModelStore {
      */
     protected String getPersistenceKey(PersistableModel<?, ?> persistableModel) {
         StringBuilder fileName = new StringBuilder();
-        fileName.append(getPersistenceKeyPartOfModelSerializationType(persistableModel.getPersistenceSupportType()));
+        fileName.append(getPersistenceKeyPartOfModelSerializationType(persistableModel.getModelSerializationStrategyType()));
         ModelDomainType domainType = persistableModel.getModelContext().getDomainType();
         fileName.append(getPersistenceKeyPartOfModelDomain(domainType));
         fileName.append(persistableModel.getClass().getSimpleName());

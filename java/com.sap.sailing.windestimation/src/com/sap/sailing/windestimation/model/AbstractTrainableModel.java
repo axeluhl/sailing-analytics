@@ -1,5 +1,7 @@
 package com.sap.sailing.windestimation.model;
 
+import com.sap.sailing.windestimation.model.store.ModelSerializationStrategyType;
+
 /**
  * Base class for {@link TrainableModel} with useful attributes which are required by all implementations.
  * 
@@ -66,6 +68,11 @@ public abstract class AbstractTrainableModel<InstanceType, MC extends ModelConte
     @Override
     public MC getModelContext() {
         return modelContext;
+    }
+
+    @Override
+    public ModelSerializationStrategyType getModelSerializationStrategyType() {
+        return ModelSerializationStrategyType.SERIALIZATION;
     }
 
 }

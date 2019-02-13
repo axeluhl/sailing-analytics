@@ -2,8 +2,18 @@ package com.sap.sailing.windestimation.model.regressor;
 
 import com.sap.sailing.windestimation.model.AbstractTrainableModel;
 import com.sap.sailing.windestimation.model.ModelContext;
-import com.sap.sailing.windestimation.model.store.ModelSerializationStrategyType;
 
+/**
+ * Base class for classification models.
+ * 
+ * @author Vladislav Chumak (D069712)
+ *
+ * @param <InstanceType>
+ *            The type of input instances for this model. The purpose of the input instance is to supply the model with
+ *            feature vector x, so that the model can generate prediction y.
+ * @param <MC>
+ *            The type of model context associated with this model.
+ */
 public abstract class AbstractRegressorModel<InstanceType, T extends ModelContext<InstanceType>>
         extends AbstractTrainableModel<InstanceType, T> implements TrainableRegressorModel<InstanceType, T> {
 
@@ -11,11 +21,6 @@ public abstract class AbstractRegressorModel<InstanceType, T extends ModelContex
 
     public AbstractRegressorModel(T modelContext) {
         super(modelContext);
-    }
-
-    @Override
-    public ModelSerializationStrategyType getPersistenceSupportType() {
-        return ModelSerializationStrategyType.SERIALIZATION;
     }
 
 }

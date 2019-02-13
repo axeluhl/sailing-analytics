@@ -4,7 +4,6 @@ import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.classifier.AbstractClassificationModel;
 import com.sap.sailing.windestimation.model.classifier.PreprocessingConfig;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.model.store.ModelSerializationStrategyType;
 
 import smile.classification.SoftClassifier;
 import smile.feature.Standardizer;
@@ -80,11 +79,6 @@ public abstract class AbstractSmileClassificationModel<InstanceType, MC extends 
             x = pca.project(x);
         }
         return x;
-    }
-
-    @Override
-    public ModelSerializationStrategyType getPersistenceSupportType() {
-        return ModelSerializationStrategyType.SERIALIZATION;
     }
 
 }
