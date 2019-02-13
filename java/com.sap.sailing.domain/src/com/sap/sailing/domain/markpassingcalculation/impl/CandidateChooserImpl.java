@@ -373,7 +373,12 @@ public class CandidateChooserImpl implements CandidateChooser {
      */
     private void updateStationarySequences(Competitor c, Iterable<GPSFixMoving> newFixes,
             Iterable<GPSFixMoving> fixesReplacingExistingOnes) {
-        adjustGraph(c, filteredCandidatesStage2.get(c).updateFixes(newFixes, fixesReplacingExistingOnes));
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            adjustGraph(c, filteredCandidatesStage2.get(c).updateFixes(newFixes, fixesReplacingExistingOnes));
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
+        }
     }
 
     @Override
