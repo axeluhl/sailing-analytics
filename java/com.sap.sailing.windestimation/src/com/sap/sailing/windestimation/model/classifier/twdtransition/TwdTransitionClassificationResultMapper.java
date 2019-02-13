@@ -3,6 +3,11 @@ package com.sap.sailing.windestimation.model.classifier.twdtransition;
 import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.classifier.ClassificationResultMapper;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ * @see TwdTransitionClassifiersCache
+ */
 public class TwdTransitionClassificationResultMapper implements
         ClassificationResultMapper<TwdTransition, TwdTransitionClassifierModelContext, TwdTransitionClassificationResult> {
 

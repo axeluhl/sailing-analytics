@@ -4,6 +4,11 @@ import com.sap.sailing.windestimation.data.TwdTransition;
 import com.sap.sailing.windestimation.model.ModelContext;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ * @see TwdTransitionClassifiersCache
+ */
 public final class TwdTransitionClassifierModelContext extends ModelContext<TwdTransition> {
 
     private static final long serialVersionUID = 819528288811779220L;

@@ -1,5 +1,9 @@
 package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
+/**
+ * @author Vladislav Chumak (D069712)
+ * @see TwdTransitionClassifiersCache
+ */
 public class TwdTransitionClassificationResult {
 
     private final double transitionCorrectProbability;

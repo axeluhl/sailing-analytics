@@ -12,6 +12,11 @@ import com.sap.sailing.windestimation.model.classifier.smile.NaiveBayesClassifie
 import com.sap.sailing.windestimation.model.classifier.smile.NeuralNetworkClassifier;
 import com.sap.sailing.windestimation.model.classifier.smile.QDAClassifier;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ * @see TwdTransitionClassifiersCache
+ */
 public class TwdTransitionClassifierModelFactory
         implements ClassifierModelFactory<TwdTransition, TwdTransitionClassifierModelContext> {
 

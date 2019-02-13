@@ -2,6 +2,11 @@ package com.sap.sailing.windestimation.model.classifier.twdtransition;
 
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 
+/**
+ * 
+ * @author Vladislav Chumak (D069712)
+ * @see TwdTransitionClassifiersCache
+ */
 public enum ManeuverTypeTransition {
     TACK_TACK, TACK_JIBE, TACK_OTHER, JIBE_JIBE, JIBE_OTHER, OTHER_OTHER;
 
