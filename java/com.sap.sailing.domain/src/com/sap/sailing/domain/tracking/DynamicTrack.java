@@ -19,7 +19,7 @@ public interface DynamicTrack<FixType extends Timed> extends Track<FixType> {
      * 
      * @param replace
      *            whether or not to replace an existing fix in the track that is equal to {@link #fix} as defined by the
-     *            comparator used for the {@link #fixes} set. By default this is a comparator only comparing the fixes'
+     *            comparator used for the {@link #fixesConsideredAffectedByFinder} set. By default this is a comparator only comparing the fixes'
      *            time stamps. Subclasses may use different comparator implementations.
      * 
      * @return <code>true</code> if the element was added, <code>false</code> otherwise.

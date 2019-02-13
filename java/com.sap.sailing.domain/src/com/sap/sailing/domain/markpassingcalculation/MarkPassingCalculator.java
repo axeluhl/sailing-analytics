@@ -290,6 +290,8 @@ public class MarkPassingCalculator {
                         // haven't processed them yet with the CandidateFinder or CandidateChooser.
                         if (!finished && !suspended) {
                             if (smallestChangedWaypointIndex.value != -1) {
+                                // there was a course change; finder and chooser need to be updated in this regard;
+                                // do this before the other changes such as new / replaced position fixes are considered:
                                 final Course course = race.getRace().getCourse();
                                 final Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas;
                                 // obtain the course's read lock so that the finder creates the candidate deltas under the
@@ -316,8 +318,9 @@ public class MarkPassingCalculator {
                                 executor.invokeAll(tasks);
                             }
                             updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings, unsuppressedMarkPassings);
-                            computeMarkPasses(competitorFixes, markFixes);
+                            computeMarkPasses(competitorFixes, competitorFixesThatReplacedExistingOnes, markFixes);
                             competitorFixes.clear();
+                            competitorFixesThatReplacedExistingOnes.clear();
                             markFixes.clear();
                             addedWaypoints.clear();
                             removedWaypoints.clear();
@@ -365,32 +368,34 @@ public class MarkPassingCalculator {
          * {@link CandidateFinder} uses the fixes to calculate any new or wrong Candidates. These are passed to the
          * {@link CandidateChooser} to calculate any new {@link MarkPassing}s (see {@link ComputeMarkPassings}).
          */
-        private void computeMarkPasses(Map<Competitor, List<GPSFixMoving>> newCompetitorFixes,
-                Map<Mark, List<GPSFix>> newMarkFixes) {
+        private void computeMarkPasses(final Map<Competitor, List<GPSFixMoving>> newCompetitorFixes,
+                final Map<Competitor, List<GPSFixMoving>> competitorFixesThatReplacedExistingOnes, Map<Mark, List<GPSFix>> newMarkFixes) {
             logger.finer("Calculating markpassings for race "+raceName+" with " + newCompetitorFixes.size() + " new competitor Fixes and "
                     + newMarkFixes.size() + " new mark fixes.");
-            Map<Competitor, Collection<GPSFixMoving>> combinedCompetitorFixes = new HashMap<>();
-
+            Map<Competitor, Collection<GPSFixMoving>> combinedCompetitorFixesFinderConsidersAffected = new HashMap<>();
             for (Entry<Competitor, List<GPSFixMoving>> competitorEntry : newCompetitorFixes.entrySet()) {
                 Collection<GPSFixMoving> fixesForCompetitor = new LinkedList<>();
-                combinedCompetitorFixes.put(competitorEntry.getKey(), fixesForCompetitor);
+                combinedCompetitorFixesFinderConsidersAffected.put(competitorEntry.getKey(), fixesForCompetitor);
                 fixesForCompetitor.addAll(competitorEntry.getValue());
             }
             if (!newMarkFixes.isEmpty()) {
                 // FIXME bug 2745 use new mark fixes to invalidate chooser's mark position and mutual mark/waypoint distance cache
                 for (Entry<Competitor, List<GPSFixMoving>> fixesAffectedByNewMarkFixes : finder
                         .calculateFixesAffectedByNewMarkFixes(newMarkFixes).entrySet()) {
-                    Collection<GPSFixMoving> fixes = combinedCompetitorFixes.get(fixesAffectedByNewMarkFixes.getKey());
+                    Collection<GPSFixMoving> fixes = combinedCompetitorFixesFinderConsidersAffected.get(fixesAffectedByNewMarkFixes.getKey());
                     if (fixes == null) {
                         fixes = new LinkedList<>();
-                        combinedCompetitorFixes.put(fixesAffectedByNewMarkFixes.getKey(), fixes);
+                        combinedCompetitorFixesFinderConsidersAffected.put(fixesAffectedByNewMarkFixes.getKey(), fixes);
                     }
                     fixes.addAll(fixesAffectedByNewMarkFixes.getValue());
                 }
             }
             List<Callable<Void>> tasks = new ArrayList<>();
-            for (final Entry<Competitor, Collection<GPSFixMoving>> c : combinedCompetitorFixes.entrySet()) {
-                final Runnable runnable = new ComputeMarkPassings(c.getKey(), c.getValue());
+            for (final Entry<Competitor, Collection<GPSFixMoving>> competitorAndFixesFinderConsidersAffected : combinedCompetitorFixesFinderConsidersAffected.entrySet()) {
+                final Runnable runnable = new ComputeMarkPassings(competitorAndFixesFinderConsidersAffected.getKey(),
+                        competitorAndFixesFinderConsidersAffected.getValue(),
+                        newCompetitorFixes.get(competitorAndFixesFinderConsidersAffected.getKey()),
+                        competitorFixesThatReplacedExistingOnes.get(competitorAndFixesFinderConsidersAffected.getKey()));
                 tasks.add(new Callable<Void>() {
                     @Override
                     public Void call() throws Exception {
@@ -403,7 +408,7 @@ public class MarkPassingCalculator {
                      */
                     @Override
                     public String toString() {
-                        return "Mark passing calculation for competitor "+c.getKey()+" with "+c.getValue().size()+" fixes";
+                        return "Mark passing calculation for competitor "+competitorAndFixesFinderConsidersAffected.getKey()+" with "+competitorAndFixesFinderConsidersAffected.getValue().size()+" fixes";
                     }
                 });
             }
@@ -415,23 +420,31 @@ public class MarkPassingCalculator {
         }
 
         private class ComputeMarkPassings implements Runnable {
-            final Competitor c;
-            final Iterable<GPSFixMoving> fixes;
+            private final Competitor c;
+            private final Iterable<GPSFixMoving> fixesFinderConsidersAffected;
+            private final List<GPSFixMoving> newCompetitorFixes;
+            private final List<GPSFixMoving> competitorFixesThatReplacedExistingOnes;
 
-            public ComputeMarkPassings(Competitor c, Iterable<GPSFixMoving> fixes) {
+            public ComputeMarkPassings(Competitor c, Iterable<GPSFixMoving> fixesFinderConsidersAffected,
+                    List<GPSFixMoving> newCompetitorFixes,
+                    List<GPSFixMoving> competitorFixesThatReplacedExistingOnes) {
                 this.c = c;
-                this.fixes = fixes;
+                this.fixesFinderConsidersAffected = fixesFinderConsidersAffected;
+                this.newCompetitorFixes = newCompetitorFixes;
+                this.competitorFixesThatReplacedExistingOnes = competitorFixesThatReplacedExistingOnes;
             }
 
             @Override
             public void run() {
                 try {
-                    logger.finer(()->"Calculating MarkPassings for race "+raceName+", competitor " + c + " (" + Util.size(fixes) + " new fixes)");
-                    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
+                    logger.finer(()->"Calculating MarkPassings for race "+raceName+", competitor " + c + " (" + Util.size(fixesFinderConsidersAffected) + " new fixes)");
+                    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixesFinderConsidersAffected);
                     logger.finer(()->"Received " + Util.size(candidateDeltas.getA()) + " new Candidates for race "+raceName+
                         " and competitor "+c+" and will remove "
                         + Util.size(candidateDeltas.getB()) + " old Candidates for " + c);
-                    chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());
+                    chooser.calculateMarkPassDeltas(c,
+                            newCompetitorFixes, competitorFixesThatReplacedExistingOnes,
+                            candidateDeltas.getA(), candidateDeltas.getB());
                 } catch (Exception e) {
                     // make sure the exception is logged and not only "swallowed" and suppressed by an invokeAll(...) statement
                     logger.log(Level.SEVERE, "Exception trying to compute mark passings for competitor "+c, e);

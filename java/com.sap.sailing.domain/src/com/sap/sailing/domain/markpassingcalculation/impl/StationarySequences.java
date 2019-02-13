@@ -175,9 +175,14 @@ public class StationarySequences {
      * entirety. If this fails, the next best solution is still to extend such that they touch each other.</li>
      * </ul>
      * 
+     * @return the candidates that now pass the filter after applying the fix changes (and which didn't pass before) as
+     *         the {@link Pair#getA() first} element of the pair returned, and the candidates that no longer pass the
+     *         filter after applying the fix changes (and which did pass the filter before) as the {@link Pair#getB()
+     *         second} element of the pair returned.
      */
-    Pair<Iterable<Candidate>, Iterable<Candidate>> addFix(GPSFixMoving fix) {
-        // TODO
+    public Pair<Iterable<Candidate>, Iterable<Candidate>> updateFixes(Iterable<GPSFixMoving> newFixes,
+            Iterable<GPSFixMoving> fixesReplacingExistingOnes) {
+        // TODO Auto-generated method stub
         return new Pair<>(Collections.emptySet(), Collections.emptySet());
     }
 
@@ -189,4 +194,5 @@ public class StationarySequences {
     public Set<Candidate> getFilteredCandidates() {
         return candidates; // TODO
     }
+
 }

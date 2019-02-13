@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
@@ -329,6 +330,14 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
+        calculateMarkPassDeltas(c, /* new fixes */ Collections.emptySet(), /* fixesReplacingExistingOnes */ Collections.emptySet(),
+                newCans, oldCans);
+    }
+
+    @Override
+    public void calculateMarkPassDeltas(Competitor c, Iterable<GPSFixMoving> newFixes,
+            Iterable<GPSFixMoving> fixesReplacingExistingOnes, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
+        updateStationarySequences(c, newFixes, fixesReplacingExistingOnes);
         final TimePoint startOfRace = race.getStartOfRace(/* inference */ false);
         if (startOfRace != null) {
             final boolean startTimeUpdated;
@@ -354,6 +363,17 @@ public class CandidateChooserImpl implements CandidateChooser {
         removeCandidates(c, oldCans);
         addCandidates(c, newCans);
         findShortestPath(c);
+    }
+
+    /**
+     * The {@link StationarySequences} object for competitor {@code c} is updated using the new
+     * and replacing fixes. The resulting changes in candidates passing that filter stage are
+     * {@link #adjustGraph(Competitor, Pair) propagated} into the {@link #allEdges graph}, but
+     * no {@link #findShortestPath(Competitor) recalculation of shortest path} is done yet.
+     */
+    private void updateStationarySequences(Competitor c, Iterable<GPSFixMoving> newFixes,
+            Iterable<GPSFixMoving> fixesReplacingExistingOnes) {
+        adjustGraph(c, filteredCandidatesStage2.get(c).updateFixes(newFixes, fixesReplacingExistingOnes));
     }
 
     @Override
@@ -835,15 +855,27 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     /**
-     * Precondition: the {@link #candidates candidates(c)} for the competitor {@code c} have been updated.<p>
+     * Precondition: the {@link #candidates candidates(c)} for the competitor {@code c} have been updated.
+     * <p>
      * 
-     * Then this method applies the filter rules to update {@link #filteredCandidatesStage1 filteredCandidates(c)} accordingly.
-     * Based on the difference in filter results, the {@link #allEdges graph} is adjusted by removing edges for those
-     * candidates no longer passing the filter or no longer existing, and by adding edges for candidates that have now
-     * become available as filtered candidates and that weren't before.
+     * Then this method applies the filter rules to update {@link #filteredCandidatesStage1} of filter stage 1 (based on
+     * highest probability in short time ranges) and subsequently the second filter stage's
+     * {@link #filteredCandidatesStage2}. Based on the difference in filter results, the {@link #allEdges graph} is
+     * adjusted by removing edges for those candidates no longer passing the filter or no longer existing, and by adding
+     * edges for candidates that have now become available as filtered candidates and that weren't before. No shortest
+     * path analysis is triggered yet.
      */
     private void updateFilteredCandidatesAndAdjustGraph(Competitor c, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
         Pair<Iterable<Candidate>, Iterable<Candidate>> filteredCandidatesAddedAndRemoved = updateFilteredCandidates(c, newCandidates, removedCandidates);
+        adjustGraph(c, filteredCandidatesAddedAndRemoved);
+    }
+
+    /**
+     * Adjusts the {@link #allEdges graph} based on the nodes added and removed. No {@link #findShortestPath(Competitor)
+     * path analysis} is performed yet.
+     */
+    private void adjustGraph(Competitor c,
+            Pair<Iterable<Candidate>, Iterable<Candidate>> filteredCandidatesAddedAndRemoved) {
         final Map<Candidate, Set<Edge>> competitorEdges = allEdges.get(c);
         for (final Candidate candidateRemoved : filteredCandidatesAddedAndRemoved.getB()) {
             logger.finest(()->"Removing all edges containing " + candidateRemoved + "of "+ c);

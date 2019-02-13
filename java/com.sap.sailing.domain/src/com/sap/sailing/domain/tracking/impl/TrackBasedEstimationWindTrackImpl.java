@@ -65,7 +65,7 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
  * miss it determines the result based on {@link TrackedRace#getEstimatedWindDirection(TimePoint)}.
  * <p>
  * 
- * Caching is done using the base class's {@link TrackImpl#fixes} field which is made accessible through
+ * Caching is done using the base class's {@link TrackImpl#fixesConsideredAffectedByFinder} field which is made accessible through
  * {@link #getCachedFixes()}. This track observes the {@link TrackedRace} for which it provides wind estimations.
  * Whenever a change occurs, all fixes whose derivation is potentially affected by the change are removed from the
  * cache. For new GPS fixes arriving this is the time span used for

@@ -40,7 +40,7 @@ public class StationarySequence {
     
     private Bounds boundingBoxOfTrackSpanningCandidates;
 
-    protected StationarySequence(Comparator<Candidate> candidateComparator, GPSFixTrack<Competitor, GPSFixMoving> track) {
+    StationarySequence(Comparator<Candidate> candidateComparator, GPSFixTrack<Competitor, GPSFixMoving> track) {
         candidates = new TreeSet<>(candidateComparator);
         this.track = track;
     }
@@ -50,7 +50,7 @@ public class StationarySequence {
      * {@link #boundingBoxOfTrackSpanningCandidates} and seeing if the bounding box grows larger than
      * {@link #CANDIDATE_FILTER_DISTANCE} in {@link Bounds#getDiameter() diameter}.
      */
-    public Pair<Iterable<Candidate>, Iterable<Candidate>> extendAfter() {
+    Pair<Iterable<Candidate>, Iterable<Candidate>> extendAfter() {
         return null; // TODO
     }
 
