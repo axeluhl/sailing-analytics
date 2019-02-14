@@ -18,7 +18,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
-import com.sap.sse.security.RolePrototypeProvider;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UsernamePasswordRealm;
@@ -27,7 +26,6 @@ import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -59,8 +57,6 @@ public class Activator implements BundleActivator {
     private static UserStore testUserStore;
     private static AccessControlStore testAccessControlStore;
 
-    private ServiceTracker<RolePrototypeProvider, RolePrototypeProvider> rolePrototypeProviderTracker;
-    
     private ServiceTracker<SecurityInitializationCustomizer, SecurityInitializationCustomizer> securityInitializationCustomizerTracker;
 
     private ServiceTracker<UserStore, UserStore> userStoreTracker;
@@ -129,7 +125,6 @@ public class Activator implements BundleActivator {
         userStore.ensureDefaultRolesExist();
         userStore.ensureDefaultTenantExists();
         getSecurityService().initialize();
-        createRoleDefinitionsFromPrototypes(userStore);
         applyCustomizations();
     }
 
@@ -149,41 +144,6 @@ public class Activator implements BundleActivator {
         context.registerService(Replicable.class.getName(), initialSecurityService, replicableServiceProperties);
         context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
-    }
-    
-    private void createRoleDefinitionsFromPrototypes(UserStore userStore) {
-        if (rolePrototypeProviderTracker != null) {
-            // In test cases, this method will be called multiple times. To not leak ServiceTracker instances, we need
-            // to correctly stop he previously used instance.
-            rolePrototypeProviderTracker.close();
-        }
-        rolePrototypeProviderTracker = new ServiceTracker<>(
-                context, RolePrototypeProvider.class, /* customizer */ new ServiceTrackerCustomizer<RolePrototypeProvider, RolePrototypeProvider>() {
-                    @Override
-                    public RolePrototypeProvider addingService(ServiceReference<RolePrototypeProvider> reference) {
-                        final RolePrototypeProvider service = context.getService(reference);
-                        final RolePrototype rolePrototype = service.getRolePrototype();
-                        final RoleDefinition potentiallyExistingRoleDefinition = userStore.getRoleDefinition(rolePrototype.getId());
-                        if (potentiallyExistingRoleDefinition == null) {
-                            final RoleDefinition createdRoleDefinition = userStore.createRoleDefinition(
-                                    rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
-                            getSecurityService().setOwnership(createdRoleDefinition.getIdentifier(), null,
-                                    getSecurityService().getDefaultTenant());
-                        }
-                        return service;
-                    }
-
-                    @Override
-                    public void modifiedService(ServiceReference<RolePrototypeProvider> reference,
-                            RolePrototypeProvider service) {
-                    }
-
-                    @Override
-                    public void removedService(ServiceReference<RolePrototypeProvider> reference,
-                            RolePrototypeProvider service) {
-                    }
-                });
-        rolePrototypeProviderTracker.open();
     }
     
     private void applyCustomizations() {
@@ -237,7 +197,6 @@ public class Activator implements BundleActivator {
             // create security service, it will also create a default admin user if no users exist
             createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
 
-            createRoleDefinitionsFromPrototypes(userStore);
             applyCustomizations();
             
             migrate(userStore, securityService.get());
@@ -299,10 +258,6 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext bundleContext) throws Exception {
-        if (rolePrototypeProviderTracker != null) {
-            rolePrototypeProviderTracker.close();
-            rolePrototypeProviderTracker = null;
-        }
         if (securityInitializationCustomizerTracker != null) {
             securityInitializationCustomizerTracker.close();
             securityInitializationCustomizerTracker = null;

@@ -113,6 +113,7 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -1818,6 +1819,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 result = false;
                 break;
             }
+        }
+        return result;
+    }
+    
+    @Override
+    public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype) {
+        final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
+        final RoleDefinition result;
+        if (potentiallyExistingRoleDefinition == null) {
+            result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
+                    rolePrototype.getPermissions());
+            setOwnership(result.getIdentifier(), null, getDefaultTenant());
+        } else {
+            result = potentiallyExistingRoleDefinition;
         }
         return result;
     }

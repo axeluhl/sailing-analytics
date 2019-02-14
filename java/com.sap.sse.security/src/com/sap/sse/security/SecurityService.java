@@ -25,6 +25,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -483,4 +484,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @return {@code true} if the {@link UserStore} is initial or permission vertical migration is necessary.
      */
     boolean isInitialOrMigration();
+
+    RoleDefinition getOrCreateRoleDefinitionFromPrototype(RolePrototype rolePrototype);
 }

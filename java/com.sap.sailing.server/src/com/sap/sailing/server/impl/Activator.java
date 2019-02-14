@@ -59,11 +59,11 @@ import com.sap.sse.mail.queue.MailQueue;
 import com.sap.sse.mail.queue.impl.ExecutorMailQueue;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
-import com.sap.sse.security.RolePrototypeProvider;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.shared.HasPermissionsProvider;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -206,15 +206,13 @@ public class Activator implements BundleActivator {
 
         registrations.add(context.registerService(HasPermissionsProvider.class,
                 (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
-
-        registrations.add(context.registerService(RolePrototypeProvider.class,
-                (RolePrototypeProvider) SailingViewerRole::getInstance, null));
         
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
+                    final RoleDefinition sailingViewerRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
                     if (securityService.isInitialOrMigration()) {
                         securityService.putRoleDefinitionToUserGroup(securityService.getDefaultTenant(),
-                                securityService.getRoleDefinition(SailingViewerRole.getInstance().getId()), true);
+                                sailingViewerRoleDefinition, true);
                     }
                 }, null));
 
