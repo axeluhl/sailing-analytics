@@ -31,15 +31,20 @@ import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class MarkPassingCalculatorWithTrackersOnStartBoatTest extends AbstractExportedPositionsBasedTest {
     private DynamicTrackedRaceImpl trackedRace;
     private Map<Competitor, Iterable<MarkPassing>> markPassings;
     private CandidateChooserImpl candidateChooser;
+    private TimePoint startOfSetup;
     
     @Before
     public void setUp() throws IOException, ParseException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        startOfSetup = MillisecondsTimePoint.now();
         trackedRace = readRace("/MoevensteinCompetitorPositions.json.gz", "/MoevensteinMarkPositions.json.gz", new BoatClassImpl("J/70", BoatClassMasterdata.J70));
         markPassings = new HashMap<>();
         for (final Competitor competitor : trackedRace.getRace().getCompetitors()) {
@@ -82,12 +87,14 @@ public class MarkPassingCalculatorWithTrackersOnStartBoatTest extends AbstractEx
 
     @Test
     public void testRaceCreation() throws IOException {
+        final Duration timeSinceStartOfSetup = startOfSetup.until(MillisecondsTimePoint.now());
         assertNotNull(trackedRace);
         assertEquals(5, Util.size(trackedRace.getRace().getCompetitors()));
         assertEquals(5, markPassings.size());
         final Stats stats = candidateChooser.getStats();
         final MeasurementXMLFile performanceReport = new MeasurementXMLFile(this.getClass());
         final MeasurementCase performanceReportCase = performanceReport.addCase(getClass().getSimpleName());
+        performanceReportCase.addMeasurement(new Measurement("TimeForSetupInMillis", timeSinceStartOfSetup.asMillis()));
         performanceReportCase.addMeasurement(new Measurement("TotalNumberOfCandidates", stats.getTotalNumberOfCandidates()));
         performanceReportCase.addMeasurement(new Measurement("TotalNumberOfCandidatesAfterHighestProbabilityInShortTimeFilter", stats.getTotalNumberOfCandidatesAfterHighestProbabilityInShortTimeFilter()));
         performanceReportCase.addMeasurement(new Measurement("TotalFilterRatioStage1",
