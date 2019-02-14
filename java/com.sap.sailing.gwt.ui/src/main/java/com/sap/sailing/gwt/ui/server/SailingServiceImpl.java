@@ -5766,14 +5766,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
         if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
             // new competitor
-            UUID competitorUUID = UUID.randomUUID();
-            DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
-            DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
+            final UUID competitorUUID = UUID.randomUUID();
+            final DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
+            final DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
             // new boat
-            DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
-            final UUID competitorUuid = UUID.randomUUID();
+            final DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUuid),
+                    SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUUID),
                     competitor.getName(), new ActionWithResult<CompetitorWithBoat>() {
                         @Override
                         public CompetitorWithBoat run() throws Exception {
