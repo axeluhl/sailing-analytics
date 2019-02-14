@@ -4,6 +4,7 @@ import static com.sap.sailing.domain.common.security.SecuredDomainType.LEADERBOA
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -600,7 +601,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         });
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD_GROUP;
-        final AccessControlledActionsColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
+        final AccessControlledActionsColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell> actionsColumn = create(
                 new LeaderboardGroupConfigImagesBarCell(stringMessages), userService);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_UPDATE, UPDATE,
                 this::openEditLeaderboardGroupDialog);

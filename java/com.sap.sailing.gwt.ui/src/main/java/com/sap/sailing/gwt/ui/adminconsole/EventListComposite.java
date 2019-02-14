@@ -4,6 +4,7 @@ import static com.sap.sailing.domain.common.security.SecuredDomainType.EVENT;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -330,7 +331,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final SecuredDTOOwnerColumn<EventDTO> groupColumn = SecuredDTOOwnerColumn.getGroupOwnerColumn();
         final SecuredDTOOwnerColumn<EventDTO> userColumn = SecuredDTOOwnerColumn.getUserOwnerColumn();
 
-        final AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
+        final AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> actionsColumn = create(
                 new EventConfigImagesBarCell(stringMessages), userService);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::openEditEventDialog);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_DELETE, DELETE, event -> {
