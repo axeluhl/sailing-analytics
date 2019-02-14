@@ -274,11 +274,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .build();
         }
         Response response;
-        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
-        HasRegattaLike hasRegattaLike = (HasRegattaLike) leaderboard;
-        DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
-        AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
-                AbstractLogEventAuthor.PRIORITY_COMPATIBILITY);
         RegattaLogDeviceMappingEventImpl<? extends Named> event;
         JSONObject requestObject;
         try {
@@ -296,75 +291,97 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         String boatId = (String) requestObject.get(DeviceMappingConstants.JSON_BOAT_ID_AS_STRING);
         String markId = (String) requestObject.get(DeviceMappingConstants.JSON_MARK_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
+        String regattaSecret = (String) requestObject.get(DeviceMappingConstants.JSON_REGISTER_SECRET);
         Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
 
-        // don't need the device type and push ID yet - important once we start add support for push notifications
-        // String deviceType = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_TYPE);
-        // String pushDeviceId = (String) requestObject.get(DeviceMappingConstants.JSON_PUSH_DEVICE_ID);
+        boolean allowedViaPermission = getSecurityService().hasCurrentUserUpdatePermission(leaderboard);
+        boolean allowedViaSecret = false;
 
-        if ((competitorId == null && boatId == null && markId == null) || deviceUuid == null || fromMillis == null) {
-            // || deviceType == null
-            logger.warning("Invalid JSON body in request");
-            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request").type(MediaType.TEXT_PLAIN)
-                    .build();
+        HasRegattaLike hasRegattaLike = (HasRegattaLike) leaderboard;
+        Regatta correspondingRegatta = getService().getRegattaByName(leaderboard.getName());
+        if (correspondingRegatta != null) {
+            allowedViaSecret = correspondingRegatta.getRegistrationLinkSecret().equals(regattaSecret);
         }
-        DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
-        TimePoint from = new MillisecondsTimePoint(fromMillis);
-        // TODO: use device type and pushDeviceId
-        final Named mappedTo;
-        if (competitorId != null) {
-            // map to a competitor
-            final Competitor mappedToCompetitor = domainFactory.getCompetitorAndBoatStore()
-                    .getExistingCompetitorByIdAsString(competitorId);
-            mappedTo = mappedToCompetitor;
-            if (mappedToCompetitor == null) {
-                logger.warning("No competitor found for id " + competitorId);
-                return Response.status(Status.BAD_REQUEST)
-                        .entity("No competitor found for id " + StringEscapeUtils.escapeHtml(competitorId))
+
+        DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
+        AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
+                AbstractLogEventAuthor.PRIORITY_COMPATIBILITY);
+
+        if (allowedViaPermission || allowedViaSecret) {
+
+            // don't need the device type and push ID yet - important once we start add support for push notifications
+            // String deviceType = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_TYPE);
+            // String pushDeviceId = (String) requestObject.get(DeviceMappingConstants.JSON_PUSH_DEVICE_ID);
+
+            if ((competitorId == null && boatId == null && markId == null) || deviceUuid == null
+                    || fromMillis == null) {
+                // || deviceType == null
+                logger.warning("Invalid JSON body in request");
+                return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                         .type(MediaType.TEXT_PLAIN).build();
             }
-            Set<Competitor> registered = (Set<Competitor>) hasRegattaLike.getAllCompetitors();
-            if (!registered.contains(mappedToCompetitor)) {
-                logger.warning("Competitor found but not registered on a race of " + leaderboardName);
-                return Response.status(Status.BAD_REQUEST).entity("Competitor found but not registered on a race of "
-                        + StringEscapeUtils.escapeHtml(leaderboardName)).type(MediaType.TEXT_PLAIN).build();
+            DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
+            TimePoint from = new MillisecondsTimePoint(fromMillis);
+            // TODO: use device type and pushDeviceId
+            final Named mappedTo;
+            if (competitorId != null) {
+                // map to a competitor
+                final Competitor mappedToCompetitor = domainFactory.getCompetitorAndBoatStore()
+                        .getExistingCompetitorByIdAsString(competitorId);
+                mappedTo = mappedToCompetitor;
+                if (mappedToCompetitor == null) {
+                    logger.warning("No competitor found for id " + competitorId);
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity("No competitor found for id " + StringEscapeUtils.escapeHtml(competitorId))
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
+                Set<Competitor> registered = (Set<Competitor>) hasRegattaLike.getAllCompetitors();
+                if (!registered.contains(mappedToCompetitor)) {
+                    logger.warning("Competitor found but not registered on a race of " + leaderboardName);
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity("Competitor found but not registered on a race of "
+                                    + StringEscapeUtils.escapeHtml(leaderboardName))
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
+                event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(),
+                        mappedToCompetitor, device, from, /* to */ null);
+            } else if (boatId != null) {
+                // map to a boat
+                final Boat mappedToBoat = domainFactory.getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
+                mappedTo = mappedToBoat;
+                if (mappedToBoat == null) {
+                    logger.warning("No boat found for id " + boatId);
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity("No boat found for id " + StringEscapeUtils.escapeHtml(boatId))
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
+                Iterable<Boat> registered = hasRegattaLike.getAllBoats();
+                if (!Util.contains(registered, mappedToBoat)) {
+                    logger.warning("Boat found but not registered for leaderboard " + leaderboardName);
+                    return Response.status(Status.BAD_REQUEST).entity("Boat found but not registered for leaderboard "
+                            + StringEscapeUtils.escapeHtml(leaderboardName)).type(MediaType.TEXT_PLAIN).build();
+                }
+                event = new RegattaLogDeviceBoatMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToBoat,
+                        device, from, /* to */ null);
+            } else {
+                // map to a mark
+                final Mark mappedToMark = domainFactory.getExistingMarkById(UUIDHelper.tryUuidConversion(markId));
+                mappedTo = mappedToMark;
+                if (mappedToMark == null) {
+                    logger.warning("No mark found for id " + markId);
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity("No mark found for id " + StringEscapeUtils.escapeHtml(markId))
+                            .type(MediaType.TEXT_PLAIN).build();
+                }
+                event = new RegattaLogDeviceMarkMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToMark,
+                        device, from, /* to */ null);
             }
-            event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(),
-                    mappedToCompetitor, device, from, /* to */ null);
-        } else if (boatId != null) {
-            // map to a boat
-            final Boat mappedToBoat = domainFactory.getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
-            mappedTo = mappedToBoat;
-            if (mappedToBoat == null) {
-                logger.warning("No boat found for id " + boatId);
-                return Response.status(Status.BAD_REQUEST)
-                        .entity("No boat found for id " + StringEscapeUtils.escapeHtml(boatId))
-                        .type(MediaType.TEXT_PLAIN).build();
-            }
-            Iterable<Boat> registered = hasRegattaLike.getAllBoats();
-            if (!Util.contains(registered, mappedToBoat)) {
-                logger.warning("Boat found but not registered for leaderboard " + leaderboardName);
-                return Response.status(Status.BAD_REQUEST).entity("Boat found but not registered for leaderboard "
-                        + StringEscapeUtils.escapeHtml(leaderboardName)).type(MediaType.TEXT_PLAIN).build();
-            }
-            event = new RegattaLogDeviceBoatMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToBoat, device,
-                    from, /* to */ null);
+            hasRegattaLike.getRegattaLike().getRegattaLog().add(event);
+            logger.fine("Successfully checked in " + ((markId != null) ? "mark " : "competitor ") + mappedTo.getName());
+            response = Response.status(Status.OK).build();
         } else {
-            // map to a mark
-            final Mark mappedToMark = domainFactory.getExistingMarkById(UUIDHelper.tryUuidConversion(markId));
-            mappedTo = mappedToMark;
-            if (mappedToMark == null) {
-                logger.warning("No mark found for id " + markId);
-                return Response.status(Status.BAD_REQUEST)
-                        .entity("No mark found for id " + StringEscapeUtils.escapeHtml(markId))
-                        .type(MediaType.TEXT_PLAIN).build();
-            }
-            event = new RegattaLogDeviceMarkMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToMark, device,
-                    from, /* to */ null);
+            response = Response.status(Status.FORBIDDEN).build();
         }
-        hasRegattaLike.getRegattaLike().getRegattaLog().add(event);
-        logger.fine("Successfully checked in " + ((markId != null) ? "mark " : "competitor ") + mappedTo.getName());
-        response = Response.status(Status.OK).build();
         return response;
     }
 
