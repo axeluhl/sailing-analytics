@@ -296,13 +296,17 @@ public class CandidateChooserImpl implements CandidateChooser {
         
         public int getTotalNumberOfCandidatesAfterHighestProbabilityInShortTimeFilter() {
             int result = 0;
-            // TODO bug4221 implement
+            for (final MostProbableCandidatesInSmallTimeRangeFilter competitorCandidates : mostProbableCandidatesInSmallTimeRangeFilters.values()) {
+                result += Util.size(competitorCandidates.getFilteredCandidates());
+            }
             return result;
         }
         
         public int getTotalNumberOfCandidatesAfterBoundingBoxFilter() {
             int result = 0;
-            // TODO bug4221 implement
+            for (final StationarySequenceBasedFilter competitorCandidates : stationarySequenceBasedFilters.values()) {
+                result += Util.size(competitorCandidates.getFilteredCandidates());
+            }
             return result;
         }
         
@@ -320,7 +324,10 @@ public class CandidateChooserImpl implements CandidateChooser {
             final Map<Competitor, CompetitorStats> result = new HashMap<>();
             for (final Entry<Competitor, NavigableSet<Candidate>> competitorAndCandidates : candidates.entrySet()) {
                 result.put(competitorAndCandidates.getKey(), new CompetitorStats(
-                        competitorAndCandidates.getValue().size(), 0, 0, getNumberOfEdges(competitorAndCandidates.getKey()))); // TODO bug4221 populate with filter stage results
+                        competitorAndCandidates.getValue().size(),
+                        Util.size(mostProbableCandidatesInSmallTimeRangeFilters.get(competitorAndCandidates.getKey()).getFilteredCandidates()),
+                        Util.size(stationarySequenceBasedFilters.get(competitorAndCandidates.getKey()).getFilteredCandidates()),
+                        getNumberOfEdges(competitorAndCandidates.getKey())));
             }
             return result;
         }
