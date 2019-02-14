@@ -41,7 +41,7 @@
   -->
   <system-properties>
      <system-property>
-        <name>webdriver.enable.native.events </name>
+        <name>webdriver.enable.native.events</name>
         <value>true</value>
      </system-property>
      <!--

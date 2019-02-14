@@ -275,6 +275,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.filestorage.FileStorageManagementService;
@@ -4312,7 +4313,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     @Override
     public PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount, 
-            final int competitorsCount, final int flightMultiplier) {
+            final int competitorsCount, final int flightMultiplier, final int boatChangeFactor) {
         PairingListTemplate template = pairingListTemplateFactory
                 .createPairingListTemplate(new PairingFrameProvider() {
                     @Override
@@ -4329,40 +4330,53 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     public int getCompetitorsCount() {
                         return competitorsCount;
                     }
-                }, flightMultiplier);
+                }, flightMultiplier, boatChangeFactor);
         return template;
     }
     
     @Override
-    public PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
-            final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumn) throws PairingListCreationException {
+    public PairingList<RaceColumn, Fleet, Competitor, Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
+            final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumns) throws PairingListCreationException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
-        Collections.shuffle(competitors);
-        PairingList<RaceColumn, Fleet, Competitor,Boat> pairingList = pairingListTemplate.createPairingList(
-                new CompetitionFormat<RaceColumn, Fleet, Competitor, Boat>() {
-            @Override
-            public Iterable<RaceColumn> getFlights() {
-                return selectedRaceColumn;
-            }
-            @Override
-            public Iterable<Competitor> getCompetitors() {
-                return competitors;
-            }
-            @Override
-            public Iterable<? extends Fleet> getGroups(RaceColumn flight) {
-                return leaderboard.getRaceColumnByName(flight.getName()).getFleets();
-            }
-            @Override
-            public int getGroupsCount() {
-                return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
-            }
-            @Override
-            public Iterable<Boat> getCompetitorAllocation() {
-                return leaderboard.getAllBoats();
-            }
-        });
+        Collections.sort(competitors, getCompetitorsComparator());
+        PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = pairingListTemplate
+                .createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor, Boat>() {
+                    @Override
+                    public Iterable<RaceColumn> getFlights() {
+                        return selectedRaceColumns;
+                    }
+
+                    @Override
+                    public Iterable<Competitor> getCompetitors() {
+                        return competitors;
+                    }
+
+                    @Override
+                    public Iterable<? extends Fleet> getGroups(RaceColumn flight) {
+                        return leaderboard.getRaceColumnByName(flight.getName()).getFleets();
+                    }
+
+                    @Override
+                    public int getGroupsCount() {
+                        return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
+                    }
+
+                    @Override
+                    public Iterable<Boat> getCompetitorAllocation() {
+                        return leaderboard.getAllBoats();
+                    }
+                });
         return pairingList;
+    }
+    
+    /**
+     * This comparator for competitors produces a stable ordering. It is based on the string representation
+     * of the competitors' {@link Competitor#getId() ID}.
+     */
+    private Comparator<Competitor> getCompetitorsComparator() {
+        final Comparator<String> naturalComparator = new NaturalComparator();
+        return (c1, c2) -> naturalComparator.compare(c1.getId().toString(), c2.getId().toString());
     }
 
     @Override

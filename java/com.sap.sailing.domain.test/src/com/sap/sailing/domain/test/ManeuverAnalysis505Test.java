@@ -106,7 +106,7 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
         assertManeuver(maneuvers, ManeuverType.JIBE,
                 new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:49:06")), JIBE_TOLERANCE);
         assertManeuver(maneuvers, ManeuverType.JIBE,
-                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:50:45")), JIBE_TOLERANCE);
+                new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:50:50")), JIBE_TOLERANCE);
 
         /*
          * Findel's track has an interesting challenge. When Findel, at 15:53:30, rounds the leeward gate, this has to

@@ -372,11 +372,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty
      * list of leaderboards.<br/>
-     * 
-     * @param displayName
-     *            TODO
-     * @param displayGroupsInReverseOrder
-     *            TODO
      */
     void createLeaderboardGroup(String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
@@ -951,11 +946,15 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            the count of competitors
      * @param flightMultiplier
      *            specifies how often the flights will be cloned
+     * @param boatChangeFactor
+     *            specifies the priority of well distributed assignment of competitors to boats (smallest factor) or
+     *            minimization of boat changes within a {@link PairingList} (highest factor); valid factors are
+     *            {@code 0..numberOfFlights}
      * @param callback
      *            returns a {@link PairingListTemplateDTO}
      */
     void calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
-            final int flightMultiplier, AsyncCallback<PairingListTemplateDTO> callback);
+            final int flightMultiplier, final int boatChangeFactor, AsyncCallback<PairingListTemplateDTO> callback);
 
     /**
      * Creates a {@link PairingListDTO} in which the competitors will be matched to a {@link PairingList} based on the
@@ -967,7 +966,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param callback
      */
     void getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
-            final Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO, AsyncCallback<PairingListDTO> callback);
+            final Iterable<String> selectedFlightNames, PairingListTemplateDTO templateDTO, AsyncCallback<PairingListDTO> callback);
 
     /**
      * Creates a {@link PairingListDTO} that is based on the competitors in the race logs of a leaderboard.

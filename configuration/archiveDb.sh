@@ -23,8 +23,10 @@ rm -rf dump/$DB
 ORIGINAL_HASH=$(./mongohash -p 10203 -d $DB)
 ARCHIVE_HASH=$(./mongohash -p 10202 -d $DB)
 if [ $ORIGINAL_HASH = $ARCHIVE_HASH ]; then
-  echo Hashes of old and new are equal: $ORIGINAL_HASH and $ARCHIVE_HASH. Dropping $DB in live DB
+  echo Hashes of old and new are equal: $ORIGINAL_HASH and $ARCHIVE_HASH. Dropping $DB and ${DB}-replica in live DB
   echo "use $DB
+db.dropDatabase()
+use ${DB}-replica
 db.dropDatabase()" | mongo "mongodb://localhost:10203/$DB?replicaSet=live"
   echo "Don't forget to switch your server's env.sh so it has MONGODB_URI=\"mongodb://dbserver.internal.sapsailing.com:10202/$DB\""
   exit 0

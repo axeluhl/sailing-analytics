@@ -86,12 +86,12 @@
     The capabilities section can be used for fine tuning of the driver (e.g. version). For more informations see the
     pages mentioned above.
   -->
+  <!--
   <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">
   </driver-definition>
-  <!--
+  -->
   <driver-definition class="org.openqa.selenium.chrome.ChromeDriver">
   </driver-definition>
-  -->
   <!--
   <driver-definition class="org.openqa.selenium.ie.InternetExplorerDriver">
     <capabilities>
