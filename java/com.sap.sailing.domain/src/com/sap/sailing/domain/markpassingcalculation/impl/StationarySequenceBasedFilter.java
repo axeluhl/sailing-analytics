@@ -405,47 +405,51 @@ public class StationarySequenceBasedFilter {
             Iterable<GPSFixMoving> fixesReplacingExistingOnes) {
         final Set<Candidate> candidatesEffectivelyAdded = new HashSet<>();
         final Set<Candidate> candidatesEffectivelyRemoved = new HashSet<>();
-        for (final GPSFixMoving newFix : newFixes) {
-            final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(createStationarySequence(
-                    StationarySequence.createDummyCandidate(newFix.getTimePoint())));
-            if (lastSequenceStartingAtOrBeforeFix != null && !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(newFix.getTimePoint())) {
-                // fix falls into the existing StationarySequence; update its bounding box:
-                final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
-                if (Util.size(lastSequenceStartingAtOrBeforeFix.getAllCandidates()) <= 1) {
-                    stationarySequences.remove(lastSequenceStartingAtOrBeforeFix);
-                }
-                if (splitResult != null) {
-                    stationarySequences.add(splitResult);
+        if (newFixes != null) {
+            for (final GPSFixMoving newFix : newFixes) {
+                final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(createStationarySequence(
+                        StationarySequence.createDummyCandidate(newFix.getTimePoint())));
+                if (lastSequenceStartingAtOrBeforeFix != null && !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(newFix.getTimePoint())) {
+                    // fix falls into the existing StationarySequence; update its bounding box:
+                    final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                    if (Util.size(lastSequenceStartingAtOrBeforeFix.getAllCandidates()) <= 1) {
+                        stationarySequences.remove(lastSequenceStartingAtOrBeforeFix);
+                    }
+                    if (splitResult != null) {
+                        stationarySequences.add(splitResult);
+                    }
                 }
             }
         }
-        for (final GPSFixMoving fixReplacingExistingOne : fixesReplacingExistingOnes) {
-            assert Util.contains(newFixes, fixesReplacingExistingOnes);
-            final Candidate dummyCandidateForReplacementFix = StationarySequence.createDummyCandidate(fixReplacingExistingOne.getTimePoint());
-            final StationarySequence dummyStationarySequenceForFix = createStationarySequence(dummyCandidateForReplacementFix);
-            final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(dummyStationarySequenceForFix);
-            final boolean fixIsInStationarySequence = !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(fixReplacingExistingOne.getTimePoint());
-            if (!fixIsInStationarySequence) {
-                final StationarySequence lastSequenceEndingBeforeFix = // null in case fix is within a stationary sequence
-                        lastSequenceStartingAtOrBeforeFix != null && fixIsInStationarySequence ? null : lastSequenceStartingAtOrBeforeFix;
-                final Candidate lastCandidateBeforeReplacementFix = candidates.lower(dummyCandidateForReplacementFix);
-                if (lastCandidateBeforeReplacementFix != null) {
-                    final Candidate firstCandidateAfterReplacementFix = candidates.higher(dummyCandidateForReplacementFix);
-                    if (firstCandidateAfterReplacementFix != null) {
-                        // the fix is between two candidates, so we may try to extend or create a stationary sequence:
-                        if (lastCandidateBeforeReplacementFix == lastSequenceEndingBeforeFix.getLast()) {
-                            // previous candidate is end of a sequence; try to extend
-                            lastSequenceEndingBeforeFix.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
-                        } else {
-                            final StationarySequence firstSequenceStartingAfterFix = stationarySequences.higher(dummyStationarySequenceForFix);
-                            if (firstCandidateAfterReplacementFix == firstSequenceStartingAfterFix.getFirst()) {
-                                // next candidate is start of a sequence; try to extend
-                                firstSequenceStartingAfterFix.tryToExtendBeforeFirst(lastCandidateBeforeReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+        if (fixesReplacingExistingOnes != null) {
+            for (final GPSFixMoving fixReplacingExistingOne : fixesReplacingExistingOnes) {
+                assert Util.contains(newFixes, fixesReplacingExistingOnes);
+                final Candidate dummyCandidateForReplacementFix = StationarySequence.createDummyCandidate(fixReplacingExistingOne.getTimePoint());
+                final StationarySequence dummyStationarySequenceForFix = createStationarySequence(dummyCandidateForReplacementFix);
+                final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(dummyStationarySequenceForFix);
+                final boolean fixIsInStationarySequence = !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(fixReplacingExistingOne.getTimePoint());
+                if (!fixIsInStationarySequence) {
+                    final StationarySequence lastSequenceEndingBeforeFix = // null in case fix is within a stationary sequence
+                            lastSequenceStartingAtOrBeforeFix != null && fixIsInStationarySequence ? null : lastSequenceStartingAtOrBeforeFix;
+                    final Candidate lastCandidateBeforeReplacementFix = candidates.lower(dummyCandidateForReplacementFix);
+                    if (lastCandidateBeforeReplacementFix != null) {
+                        final Candidate firstCandidateAfterReplacementFix = candidates.higher(dummyCandidateForReplacementFix);
+                        if (firstCandidateAfterReplacementFix != null) {
+                            // the fix is between two candidates, so we may try to extend or create a stationary sequence:
+                            if (lastCandidateBeforeReplacementFix == lastSequenceEndingBeforeFix.getLast()) {
+                                // previous candidate is end of a sequence; try to extend
+                                lastSequenceEndingBeforeFix.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
                             } else {
-                                // none of the adjacent candidates is part of a sequence; try to create a new one:
-                                final StationarySequence newSequence = createStationarySequence(lastCandidateBeforeReplacementFix);
-                                if (newSequence.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
-                                    stationarySequences.add(newSequence);
+                                final StationarySequence firstSequenceStartingAfterFix = stationarySequences.higher(dummyStationarySequenceForFix);
+                                if (firstCandidateAfterReplacementFix == firstSequenceStartingAfterFix.getFirst()) {
+                                    // next candidate is start of a sequence; try to extend
+                                    firstSequenceStartingAfterFix.tryToExtendBeforeFirst(lastCandidateBeforeReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                                } else {
+                                    // none of the adjacent candidates is part of a sequence; try to create a new one:
+                                    final StationarySequence newSequence = createStationarySequence(lastCandidateBeforeReplacementFix);
+                                    if (newSequence.tryToExtendAfterLast(firstCandidateAfterReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
+                                        stationarySequences.add(newSequence);
+                                    }
                                 }
                             }
                         }
