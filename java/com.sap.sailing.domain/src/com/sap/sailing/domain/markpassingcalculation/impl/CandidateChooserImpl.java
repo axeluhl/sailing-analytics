@@ -252,6 +252,88 @@ public class CandidateChooserImpl implements CandidateChooser {
     
     private final StartAndEndAwareTimeBasedCandidateComparator CANDIDATE_COMPARATOR = new StartAndEndAwareTimeBasedCandidateComparator();
 
+    /**
+     * Captures statistics about this candidate chooser.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    public class Stats {
+        public class CompetitorStats {
+            private final int candidates;
+            private final int candidatesAfterHighestProbabilityInShortTimeFilter;
+            private final int candidatesAfterBoundingBoxFilter;
+            private final int edges;
+            public CompetitorStats(int candidates, int candidatesAfterHighestProbabilityInShortTimeFilter,
+                    int candidatesAfterBoundingBoxFilter, int edges) {
+                super();
+                this.candidates = candidates;
+                this.candidatesAfterHighestProbabilityInShortTimeFilter = candidatesAfterHighestProbabilityInShortTimeFilter;
+                this.candidatesAfterBoundingBoxFilter = candidatesAfterBoundingBoxFilter;
+                this.edges = edges;
+            }
+            public int getCandidates() {
+                return candidates;
+            }
+            public int getCandidatesAfterHighestProbabilityInShortTimeFilter() {
+                return candidatesAfterHighestProbabilityInShortTimeFilter;
+            }
+            public int getCandidatesAfterBoundingBoxFilter() {
+                return candidatesAfterBoundingBoxFilter;
+            }
+            public int getEdges() {
+                return edges;
+            }
+        }
+        
+        public int getTotalNumberOfCandidates() {
+            int result = 0;
+            for (final Set<Candidate> competitorCandidates : candidates.values()) {
+                result += competitorCandidates.size();
+            }
+            return result;
+        }
+        
+        public int getTotalNumberOfCandidatesAfterHighestProbabilityInShortTimeFilter() {
+            int result = 0;
+            // TODO bug4221 implement
+            return result;
+        }
+        
+        public int getTotalNumberOfCandidatesAfterBoundingBoxFilter() {
+            int result = 0;
+            // TODO bug4221 implement
+            return result;
+        }
+        
+        public int getTotalNumberOfEdges() {
+            int result = 0;
+            for (final Map<Candidate, Set<Edge>> edgesPerCandidate : allEdges.values()) {
+                for (final Set<Edge> edges : edgesPerCandidate.values()) {
+                    result += edges.size();
+                }
+            }
+            return result;
+        }
+        
+        public Map<Competitor, CompetitorStats> getPerCompetitorStats() {
+            final Map<Competitor, CompetitorStats> result = new HashMap<>();
+            for (final Entry<Competitor, NavigableSet<Candidate>> competitorAndCandidates : candidates.entrySet()) {
+                result.put(competitorAndCandidates.getKey(), new CompetitorStats(
+                        competitorAndCandidates.getValue().size(), 0, 0, getNumberOfEdges(competitorAndCandidates.getKey()))); // TODO bug4221 populate with filter stage results
+            }
+            return result;
+        }
+
+        private int getNumberOfEdges(Competitor competitor) {
+            int result = 0;
+            for (final Set<Edge> edgeSet : allEdges.get(competitor).values()) {
+                result += edgeSet.size();
+            }
+            return result;
+        }
+    }
+
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.perCompetitorLocks = new HashMap<>();
         this.race = race;
@@ -304,6 +386,10 @@ public class CandidateChooserImpl implements CandidateChooser {
             fixedPasses.addAll(startAndEnd);
             addCandidates(c, startAndEnd);
         }
+    }
+
+    public Stats getStats() {
+        return new Stats();
     }
     
     private NamedReentrantReadWriteLock createCompetitorLock(Competitor c) {
