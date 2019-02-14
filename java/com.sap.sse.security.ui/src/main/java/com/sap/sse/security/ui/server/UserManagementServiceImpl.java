@@ -996,4 +996,96 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
     }
 
+    @Override
+    public SuccessInfo addRoleToUser(String username, UUID roleDefinitionId, String tenantQualifierName)
+            throws UserManagementException, UnauthorizedException {
+        User user = getSecurityService().getUserByName(username);
+        if (user == null) {
+            return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
+        }
+
+        getSecurityService().checkCurrentUserUpdatePermission(user);
+        getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.GRANT_PERMISSION);
+
+        UserGroup tenant;
+        if (tenantQualifierName == null || tenantQualifierName.trim().isEmpty()) {
+            tenant = null;
+        } else {
+            tenant = getSecurityService().getUserGroupByName(tenantQualifierName);
+            if (tenant == null) {
+                return new SuccessInfo(false, "Tenant " + tenantQualifierName + " does not exist.",
+                        /* redirectURL */ null, /* userDTO */ null);
+            }
+        }
+
+        Role role = createRoleFromIDs(roleDefinitionId, tenant.getId(), user.getName());
+        if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                role.getRoleDefinition(), role.getQualificationAsOwnership())) {
+            throw new UnauthorizedException("Not allowed.");
+        }
+
+        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier, associationTypeIdentifier.toString(),
+                new Action() {
+
+                    @Override
+                    public void run() throws Exception {
+                        getSecurityService().addRoleForUser(user, role);
+                    }
+                });
+
+        final String message = "added role " + role.getName() + " for user " + username;
+        logger.info(message);
+        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+        return new SuccessInfo(true, message, /* redirectURL */null,
+                new Triple<>(userDTO, getAllUser(), getServerInfo()));
+    }
+
+    @Override
+    public SuccessInfo removeRoleFromUser(String username, UUID roleDefinitionId, String tenantQualifierName)
+            throws UserManagementException, UnauthorizedException {
+        User user = getSecurityService().getUserByName(username);
+        if (user == null) {
+            return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
+        }
+
+        getSecurityService().checkCurrentUserUpdatePermission(user);
+        getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.REVOKE_PERMISSION);
+
+        UserGroup tenant;
+        if (tenantQualifierName == null || tenantQualifierName.trim().isEmpty()) {
+            tenant = null;
+        } else {
+            tenant = getSecurityService().getUserGroupByName(tenantQualifierName);
+            if (tenant == null) {
+                return new SuccessInfo(false, "Tenant " + tenantQualifierName + " does not exist.",
+                        /* redirectURL */ null, /* userDTO */ null);
+            }
+        }
+
+        Role role = createRoleFromIDs(roleDefinitionId, tenant.getId(), user.getName());
+        if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                role.getRoleDefinition(), role.getQualificationAsOwnership())) {
+            throw new UnauthorizedException("Not allowed.");
+        }
+
+        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier, associationTypeIdentifier.toString(),
+                new Action() {
+
+                    @Override
+                    public void run() throws Exception {
+                        getSecurityService().removeRoleFromUser(user, role);
+                    }
+                });
+
+        final String message = "removed role " + role.getName() + " for user " + username;
+        logger.info(message);
+        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+        return new SuccessInfo(true, message, /* redirectURL */null,
+                new Triple<>(userDTO, getAllUser(), getServerInfo()));
+    }
+
 }
