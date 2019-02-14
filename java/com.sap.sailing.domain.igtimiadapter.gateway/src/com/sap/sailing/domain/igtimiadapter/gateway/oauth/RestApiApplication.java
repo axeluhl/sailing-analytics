@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.oauth;
+package com.sap.sailing.domain.igtimiadapter.gateway.oauth;
 
 import java.util.Arrays;
 import java.util.HashSet;

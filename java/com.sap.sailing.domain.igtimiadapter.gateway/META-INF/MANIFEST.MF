@@ -43,4 +43,4 @@ Import-Package: com.sap.sse.security.shared,
 Web-ContextPath: /igtimi
 Bundle-Activator: com.sap.sailing.domain.igtimiadapter.gateway.impl.Activator
 Automatic-Module-Name: com.sap.sailing.domain.igtimiadapter.gateway
-Export-Package: com.sap.sailing.domain.igtimiadapter.oauth
+Export-Package: com.sap.sailing.domain.igtimiadapter.gateway.oauth
