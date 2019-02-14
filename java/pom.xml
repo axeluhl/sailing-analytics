@@ -45,7 +45,7 @@
       -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
     </parameters.common>
     <parameters.vm-settings>
-      -ea -Xmx1024m -XX:+UseG1GC
+      -ea -Xmx8096m -XX:+UseG1GC
     </parameters.vm-settings>
     <parameters.tractrac>
       -Dtractrac.tunnel=true -Dtractrac.tunnel.host=localhost

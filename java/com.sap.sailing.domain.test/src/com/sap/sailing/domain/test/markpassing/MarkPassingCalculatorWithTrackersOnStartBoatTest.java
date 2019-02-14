@@ -107,10 +107,10 @@ public class MarkPassingCalculatorWithTrackersOnStartBoatTest extends AbstractEx
         performanceReportCase.addMeasurement(new Measurement("TotalNumberOfEdges", stats.getTotalNumberOfEdges()));
         for (final Entry<Competitor, CompetitorStats> competitorStats : stats.getPerCompetitorStats().entrySet()) {
             performanceReportCase.addMeasurement(new Measurement(competitorStats.getKey().getName()+"-Candidates", competitorStats.getValue().getCandidates()));
-            performanceReportCase.addMeasurement(new Measurement(competitorStats.getKey().getName()+"-CandidatesAfterBoundingBoxFilter", competitorStats.getValue().getCandidatesAfterBoundingBoxFilter()));
+            performanceReportCase.addMeasurement(new Measurement(competitorStats.getKey().getName()+"-CandidatesAfterHighestProbabilityInShortTimeFilter", competitorStats.getValue().getCandidatesAfterHighestProbabilityInShortTimeFilter()));
             performanceReportCase.addMeasurement(new Measurement(competitorStats.getKey().getName()+"-FilterRatioStage1",
                     (double) competitorStats.getValue().getCandidatesAfterHighestProbabilityInShortTimeFilter() / (double) competitorStats.getValue().getCandidates()));
-            performanceReportCase.addMeasurement(new Measurement(competitorStats.getKey().getName()+"-CandidatesAfterHighestProbabilityInShortTimeFilter", competitorStats.getValue().getCandidatesAfterHighestProbabilityInShortTimeFilter()));
+            performanceReportCase.addMeasurement(new Measurement(competitorStats.getKey().getName()+"-CandidatesAfterBoundingBoxFilter", competitorStats.getValue().getCandidatesAfterBoundingBoxFilter()));
             performanceReportCase.addMeasurement(new Measurement(competitorStats.getKey().getName()+"-FilterRatioStage2",
                     (double) competitorStats.getValue().getCandidatesAfterBoundingBoxFilter() / (double) competitorStats.getValue().getCandidatesAfterHighestProbabilityInShortTimeFilter()));
             performanceReportCase.addMeasurement(new Measurement(competitorStats.getKey().getName()+"-FilterRatio",
