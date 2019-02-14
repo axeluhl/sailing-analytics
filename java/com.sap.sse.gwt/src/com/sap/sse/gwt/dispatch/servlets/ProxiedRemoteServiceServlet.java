@@ -1,16 +1,27 @@
 package com.sap.sse.gwt.dispatch.servlets;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 
 import com.google.gwt.user.client.rpc.SerializationException;
+import com.google.gwt.user.server.rpc.RPCRequest;
 import com.google.gwt.user.server.rpc.RPCServletUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.shared.RpcConstants;
 
 /**
@@ -18,7 +29,11 @@ import com.sap.sse.gwt.shared.RpcConstants;
  * when using GWT-RPC. This is due to the fact that GWT doesn't find the correct
  * serialization rule file. For non proxyfied environments you do not need to change
  * anything. In an Apache based env you need to add a line like the following to your
- * configuration: RequestHeader edit X-GWT-Module-Base sapsailing.com/(gwt/)? sapsailing.com/gwt/
+ * configuration: RequestHeader edit X-GWT-Module-Base sapsailing.com/(gwt/)? sapsailing.com/gwt/<p>
+ * 
+ * This servlet additionally measures the response time that this servlet takes for each request.
+ * Should the response time exceed {@link #LOG_REQUESTS_TAKING_LONGER_THAN} then the request
+ * will be logged.
  * 
  * @author Simon Pamies (info@pamies.de)
  * @since Oct 10, 2012
@@ -26,6 +41,20 @@ import com.sap.sse.gwt.shared.RpcConstants;
 public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
 
     private static final long serialVersionUID = 5379097888921157936L;
+    
+    private static final Duration LOG_REQUESTS_TAKING_LONGER_THAN = Duration.ONE_SECOND.times(2);
+    
+    private static final Logger logger = Logger.getLogger(ProxiedRemoteServiceServlet.class.getName());
+    
+    /**
+     * The {@link #processCall(RPCRequest)} override in this class records the start and the end time points
+     * of the processing of each request. The {@link #service(HttpServletRequest, HttpServletResponse)} method
+     * uses this, after having delegated to the superclass method which calls {@link #processCall(RPCRequest)} and
+     * performs response serialization afterwards. It can thus determine the actual processing duration as well
+     * as the serialization durations. Should the total exceed {@link #LOG_REQUESTS_TAKING_LONGER_THAN}, the
+     * request will be logged.
+     */
+    private static final ThreadLocal<Triple<RPCRequest, TimePoint, TimePoint>> processingStartAndFinishTime = new ThreadLocal<>();
 
     @Override
     protected SerializationPolicy doGetSerializationPolicy(
@@ -84,5 +113,42 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
         }
         // Using default locale if the client locale could not be determined
         return Locale.ENGLISH;
+    }
+
+    @Override
+    public String processCall(RPCRequest rpcRequest) throws SerializationException {
+        final TimePoint startOfRequestProcessing = MillisecondsTimePoint.now();
+        final String result = super.processCall(rpcRequest);
+        processingStartAndFinishTime.set(new Triple<>(rpcRequest, startOfRequestProcessing, MillisecondsTimePoint.now()));
+        return result;
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.service(req, resp);
+        final TimePoint afterResultSerialization = MillisecondsTimePoint.now();
+        final Triple<RPCRequest, TimePoint, TimePoint> startAndEndOfProcessing = processingStartAndFinishTime.get();
+        final Duration totalTime = startAndEndOfProcessing.getB().until(afterResultSerialization);
+        if (totalTime.compareTo(LOG_REQUESTS_TAKING_LONGER_THAN) > 0) {
+            logRequest(startAndEndOfProcessing.getA(), startAndEndOfProcessing.getB(), startAndEndOfProcessing.getC(), afterResultSerialization);
+        }
+    }
+
+    private void logRequest(RPCRequest request, TimePoint startOfProcessing, TimePoint endOfProcessing, TimePoint afterResultSerialization) {
+        final Duration processingDuration = startOfProcessing.until(endOfProcessing);
+        final Duration serializationDuration = endOfProcessing.until(afterResultSerialization);
+        final Duration totalDuration = startOfProcessing.until(afterResultSerialization);
+        final String username;
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject != null) {
+            username = subject.getPrincipal() == null ? null : subject.getPrincipal().toString();
+        } else {
+            username = null;
+        }
+        logger.log(Level.WARNING, "GWT RPC Request "+request.getMethod()+
+                " by user "+username+
+                " with parameters "+Arrays.toString(request.getParameters())+" on "+this+
+                " took "+processingDuration+" to process, "+serializationDuration+" to serialize the response, so "+
+                totalDuration+" in total.");
     }
 }

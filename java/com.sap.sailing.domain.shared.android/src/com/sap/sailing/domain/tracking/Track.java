@@ -167,8 +167,8 @@ public interface Track<FixType extends Timed> extends Serializable {
 
     /**
      * Returns an iterator starting at the first fix after <code>startingAt</code> (or "at or after" in case
-     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the smoothened fixes (see
-     * also {@link #getFixes()}, without any smoothening or dampening applied.
+     * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator exclude outliers (see
+     * also {@link #getFixes()} and returns the remaining fixes without any smoothening or dampening applied.
      * 
      * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an exception
      * will be thrown in case the caller has failed to do so.

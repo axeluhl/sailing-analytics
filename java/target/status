@@ -27,15 +27,14 @@ echo "JAVA_HOME: $JAVA_HOME"
 echo "INSTANCE_ID: $INSTANCE_ID"
 echo ""
 
-RACING_EVENT_SERVICE_AVAILABLE=$(curl http://127.0.0.1:$SERVER_PORT/sailingserver/api/v1/status 2>/dev/null | jq .available)
-REPLICATION_AVAILABLE=$(curl http://127.0.0.1:$SERVER_PORT/replication/replication?action=STATUS 2>/dev/null | jq .available)
-INDEX_HTML_STATUS=$(curl -I http://127.0.0.1:8888/index.html 2>/dev/null | head -n 1 | cut -d ' ' -f 2)
+STATUS=$(curl -i http://127.0.0.1:$SERVER_PORT/gwt/status 2>/dev/null)
+RESPONSE_STATUS_CODE=$(echo $STATUS | head -n 1 | cut -d ' ' -f 2)
 
-echo "RACING_EVENT_SERVICE_AVAILABLE: $RACING_EVENT_SERVICE_AVAILABLE"
-echo "REPLICATION_AVAILABLE: $REPLICATION_AVAILABLE"
-echo "INDEX_HTML_STATUS: $INDEX_HTML_STATUS"
+echo "AVAILABILITY_STATUS: $RESPONSE_STATUS_CODE"
+echo "AVAILABILITY_DETAILS:"
+echo "$STATUS" | grep "^\{" | jq .
 
-if [[ $RACING_EVENT_SERVICE_AVAILABLE == "true" && $REPLICATION_AVAILABLE == "true" && $INDEX_HTML_STATUS =~ 2.. ]]; then
+if [[ $RESPONSE_STATUS_CODE =~ 2.. ]]; then
     echo "Server $SERVER_NAME is available on $SERVER_PORT"
     exit 0
 else

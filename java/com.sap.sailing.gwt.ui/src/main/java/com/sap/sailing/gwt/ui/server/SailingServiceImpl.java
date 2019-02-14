@@ -64,6 +64,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -581,7 +582,6 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
@@ -2715,8 +2715,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
             String fleetName, RegattaAndRaceIdentifier raceIdentifier) {
-        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-        Object principal = SessionUtils.getPrincipal();
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        Object principal = subject.getPrincipal();
         if (principal != null) {
             logger.info(String.format("%s linked race column %s %s (%s) with tracked race %s.", principal.toString(),
                     leaderboardName, raceColumnName, fleetName, raceIdentifier.getRaceName()));
@@ -3618,8 +3619,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     final TimeRange timeRange = competitorTimeRanges.get(competitorDTO);
                     final TimePoint from = timeRange.from(), to = timeRange.to();
                     final RunnableFuture<List<ManeuverDTO>> future = new FutureTask<>(() -> {
-                        final Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, from, to,
-                                /* waitForLatest */ true);
+                        // We're on a web server request thread. Try not to take too long for this,
+                        // so don't wait for the latest results unless the cache doesn't have a valid
+                        // result yet:
+                        Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor, from, to, /* waitForLatest */ false);
+                        if (maneuvers == null) {
+                            maneuvers = trackedRace.getManeuvers(competitor, from, to, /* waitForLatest */ true);
+                        }
                         return createManeuverDTOsForCompetitor(maneuvers, trackedRace, competitor);
                     });
                     executor.execute(future);
@@ -7319,11 +7325,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public PairingListTemplateDTO calculatePairingListTemplate(final int flightCount, final int groupCount,
-            final int competitorCount, final int flightMultiplier) {
+            final int competitorCount, final int flightMultiplier, final int tolerance) {
         PairingListTemplate template = getService().createPairingListTemplate(flightCount, groupCount, competitorCount, 
-                flightMultiplier);
-        return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, 
-                template.getPairingListTemplate(), template.getQuality());
+                flightMultiplier, tolerance);
+        return new PairingListTemplateDTO(flightCount, groupCount, competitorCount, flightMultiplier, tolerance,
+                template.getBoatChanges(), template.getPairingListTemplate(), template.getQuality(), template.getBoatAssignmentsQuality());
     }
     
     @Override
@@ -7340,7 +7346,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         PairingListTemplate pairingListTemplate = new PairingListTemplateImpl(templateDTO.getPairingListTemplate(),
-                templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier());
+                templateDTO.getCompetitorCount(), templateDTO.getFlightMultiplier(), templateDTO.getBoatChangeFactor());
         PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = getService()
                 .getPairingListFromTemplate(pairingListTemplate, leaderboardName, selectedRaces);
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
@@ -7462,7 +7468,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 break;
             }
         }
-        if (result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())) {
+        if (result.size()==raceColumnNames.size()*Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets())) {
             return result;
         }
         result.clear();
@@ -7478,11 +7484,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }
-        if (result.size()==raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets())) {
+        if (result.size()==raceColumnNames.size()*Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets())) {
             return result;
         }
         result.clear();
-        for (int count=1;count<=raceColumnNames.size()*Util.size(leaderboard.getRaceColumnByName(raceColumnNames.get(0)).getFleets());count++) {
+        for (int count=1;count<=raceColumnNames.size()*Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());count++) {
             result.add("Race "+count);
         }
         return result;

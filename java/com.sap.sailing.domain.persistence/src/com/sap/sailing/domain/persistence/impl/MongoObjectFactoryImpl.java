@@ -549,7 +549,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         Document query = new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), oldName);
         Document update = new Document("$set", new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), newName));
-        leaderboardGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, update, new UpdateOptions().upsert(true));
+        leaderboardGroupCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, update, new UpdateOptions().upsert(true));
     }
 
     @Override
@@ -647,7 +647,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         MongoCollection<Document> eventCollection = database.getCollection(CollectionNames.EVENTS.name());
         Document query = new Document(FieldNames.EVENT_ID.name(), id);
         Document renameUpdate = new Document("$set", new Document(FieldNames.EVENT_NAME.name(), newName));
-        eventCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, renameUpdate, new UpdateOptions().upsert(true));
+        eventCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).updateOne(query, renameUpdate, new UpdateOptions().upsert(true));
     }
 
     @Override
@@ -1505,7 +1505,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void removeRaceLog(RaceLogIdentifier identifier) {
         Document query = new Document();
         storeRaceLogIdentifier(identifier, query);
-        getRaceLogCollection().deleteOne(query);
+        getRaceLogCollection().deleteMany(query);
     }
     
     @Override

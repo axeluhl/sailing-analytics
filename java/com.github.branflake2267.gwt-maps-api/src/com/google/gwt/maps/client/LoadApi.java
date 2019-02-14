@@ -35,9 +35,11 @@ import com.google.gwt.ajaxloader.client.AjaxLoader.AjaxLoaderOptions;
 public class LoadApi {
 
   /**
-   * Note: If you use 3, it will take the newest stable available. Don't want that. We didn't test with that yet!
+   * Note: If you use 3, it will take the newest stable available. We want that, although we didn't test with that yet!
+   * Google Release notes: https://developers.google.com/maps/documentation/javascript/releases.
+   * Subscribe to https://groups.google.com/forum/#!forum/google-maps-js-api-v3-notify for change notifications.
    */
-  public final static String API_VERSION = "3.32";
+  public final static String API_VERSION = "3";
 
   /**
    * Libraries not loaded by default <br>

@@ -27,6 +27,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bson.Document;
+import org.bson.json.JsonMode;
+import org.bson.json.JsonWriterSettings;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -41,7 +43,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.RenameCollectionOptions;
 import com.mongodb.client.result.DeleteResult;
-import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -708,8 +709,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     }
                     if (dbScoreCorrectionForCompetitorInRace
                             .containsKey(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
-                        final Double leaderboardCorrectedScore = dbScoreCorrectionForCompetitorInRace
-                                .getDouble(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
+                        final Number dbScoreCorrectionForCompetitorInRaceAsNumber = (Number) dbScoreCorrectionForCompetitorInRace
+                                        .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
+                        final Double leaderboardCorrectedScore = dbScoreCorrectionForCompetitorInRaceAsNumber == null ? null :
+                            dbScoreCorrectionForCompetitorInRaceAsNumber.doubleValue();
                         correctionsToUpdate.correctScoreByID(competitorId, raceColumn, leaderboardCorrectedScore);
                     }
                 }
@@ -1267,9 +1270,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             RegattaConfiguration configuration = null;
             if (dbRegatta.containsKey(FieldNames.REGATTA_REGATTA_CONFIGURATION.name())) {
+                final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
                 try {
                     JSONObject json = Helpers.toJSONObjectSafe(new JSONParser()
-                            .parse(JSON.serialize(dbRegatta.get(FieldNames.REGATTA_REGATTA_CONFIGURATION.name()))));
+                            .parse(((Document) dbRegatta.get(FieldNames.REGATTA_REGATTA_CONFIGURATION.name())).toJson(writerSettings)));
                     configuration = RegattaConfigurationJsonDeserializer.create().deserialize(json);
                 } catch (JsonDeserializationException | ParseException e) {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
@@ -2317,7 +2321,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             device = loadDeviceId(deviceIdentifierServiceFinder, (Document) dbObject.get(FieldNames.DEVICE_ID.name()));
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
-            e.printStackTrace();
         }
         ItemType mappedTo = itemResolver.get();
         @SuppressWarnings("deprecation")
@@ -2484,8 +2487,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Map<Serializable, DynamicCompetitor> competitorsById = new HashMap<>();
         MongoCollection<Document> collection = database.getCollection(CollectionNames.COMPETITORS.name());
         try {
+            final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
             for (Document o : collection.find()) {
-                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
+                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
                 DynamicCompetitor c = competitorWithBoatRefDeserializer.deserialize(json);
                 // ensure that in case there should be multiple competitors with equal IDs in the DB
                 // only one will survive
@@ -2531,8 +2535,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     MongoCollection<Document> collection = database.getCollection(CollectionNames.COMPETITORS_BAK.name());
                     try {
                         logger.log(Level.INFO, "Bug2822 DB-Migration: Load old competitors with embedded boats from COMPETITORS_BAK.");
+                        final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
                         for (Document o : collection.find()) {
-                            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
+                            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
                             CompetitorWithBoat c = legacyCompetitorWithBoatDeserializer.deserialize(json);
                             // accept only the first instance for any given ID
                             if (!competitorsById.containsKey(c.getId())) {
@@ -2554,8 +2559,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         ArrayList<DynamicBoat> result = new ArrayList<>();
         MongoCollection<Document> collection = database.getCollection(CollectionNames.BOATS.name());
         try {
+            final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
             for (Document o : collection.find()) {
-                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
+                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(o.toJson(writerSettings)));
                 DynamicBoat b = boatDeserializer.deserialize(json);
                 result.add(b);
             }
@@ -2606,8 +2612,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private DeviceConfiguration loadConfiguration(Document configObject) {
         DeviceConfiguration configuration = null;
         try {
+            final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
             JsonDeserializer<DeviceConfiguration> deserializer = DeviceConfigurationJsonDeserializer.create();
-            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(configObject)));
+            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(configObject.toJson(writerSettings)));
             configuration = deserializer.deserialize(json);
         } catch (JsonDeserializationException | ParseException e) {
             logger.log(Level.SEVERE,

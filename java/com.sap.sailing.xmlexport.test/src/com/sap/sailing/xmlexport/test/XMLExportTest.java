@@ -70,7 +70,7 @@ public class XMLExportTest extends OnlineTracTracBasedTest {
         String resultData = leaderboardData.getResultXML();
         assertNotNull(resultData);
         int resultDataLength = resultData.length();
-        assertTrue("resultData length was " + resultDataLength + ", but expected to be > 254000", resultDataLength > 254000);
+        assertTrue("resultData length was " + resultDataLength + ", but expected to be > 220000", resultDataLength > 220000);
     }
 
 }

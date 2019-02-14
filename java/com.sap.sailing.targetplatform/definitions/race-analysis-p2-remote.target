@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="148">
+<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="149">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -55,7 +55,6 @@
 <unit id="org.jdom.source" version="1.1.1.v201101151400"/>
 <unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
 <unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
-<unit id="org.eclipse.orbit.mongodb" version="3.2.2.v20170222-2110"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -256,7 +255,7 @@
 <plugin id="org.junit.source"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
-<plugin id="org.eclipse.orbit.mongodb"/>
+<plugin id="org.mongodb.mongo-java-driver"/>
 <plugin id="org.objectweb.asm"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objenesis"/>
