@@ -11,8 +11,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.UnauthorizedException;
-import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
@@ -157,8 +155,8 @@ public interface UserManagementServiceAsync {
     void verifySocialUser(CredentialDTO credential, AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> markedAsyncCallback);
 
     void addRoleToUser(String username, UUID roleDefinitionId, String tenantQualifierName,
-            AsyncCallback<SuccessInfo> callback) throws UserManagementException, UnauthorizedException;
+            AsyncCallback<SuccessInfo> callback);
 
     void removeRoleFromUser(String username, UUID roleDefinitionId, String tenantQualifierName,
-            AsyncCallback<SuccessInfo> callback) throws UserManagementException, UnauthorizedException;
+            AsyncCallback<SuccessInfo> callback);
 }
