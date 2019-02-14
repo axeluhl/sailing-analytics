@@ -57,17 +57,23 @@ public class QRCodeView extends Composite {
         case COMPETITOR:
         case COMPETITOR_2:
             titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitle(competitor.getName(), leaderboardName));
-            subtitleDivUi.setInnerText(
-                    StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
+            if (event != null) {
+                subtitleDivUi.setInnerText(
+                        StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
+            }
             break;
         case PUBLIC_INVITE:
             titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRegatta(regatta.getName()));
-            subtitleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeSubtitleOpenRegatta());
+            if (event != null) {
+                subtitleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeSubtitleOpenRegatta());
+            }
             break;
         case BOUY_TENDER:
             titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleBouy(leaderboardName));
-            subtitleDivUi.setInnerText(
-                    StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
+            if (event != null) {
+                subtitleDivUi.setInnerText(
+                        StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
+            }
             break;
         }
 
