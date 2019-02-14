@@ -21,6 +21,7 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.AccountDTO;
@@ -33,6 +34,7 @@ import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
@@ -85,7 +87,7 @@ public class SecurityDTOFactory {
                 accountDTOs, createRolesDTOs(user.getRoles(), fromOriginalToStrippedDownUser,
                         fromOriginalToStrippedDownUserGroup, securityService, user),
                 /* default tenant filled in later */ null,
-                user.getPermissions(),
+                getSecuredPermissions(user.getPermissions(), user),
                 createStrippedUserGroupDTOsFromUserGroups(securityService.getUserGroupsOfUser(user),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         userDTO.setDefaultTenantForCurrentServer(createStrippedUserGroupDTOFromUserGroup(
@@ -94,6 +96,19 @@ public class SecurityDTOFactory {
         SecurityDTOUtil.addSecurityInformation(this, securityService, userDTO, user.getIdentifier(),
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         return userDTO;
+    }
+
+    public Iterable<WildcardPermissionWithSecurityDTO> getSecuredPermissions(Iterable<WildcardPermission> permissions,
+            User user) {
+        Collection<WildcardPermissionWithSecurityDTO> securedPermissions = new ArrayList<>();
+        for (WildcardPermission permission : permissions) {
+            QualifiedObjectIdentifier identifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                    .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(permission, user));
+            WildcardPermissionWithSecurityDTO securedPermission = new WildcardPermissionWithSecurityDTO(
+                    permission.toString(), identifier);
+            securedPermissions.add(securedPermission);
+        }
+        return securedPermissions;
     }
 
 

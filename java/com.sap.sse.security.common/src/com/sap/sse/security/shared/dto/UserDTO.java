@@ -13,7 +13,8 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
-public class UserDTO extends SecurityUserImpl<StrippedRoleDefinitionDTO, RoleWithSecurityDTO, StrippedUserGroupDTO>
+public class UserDTO extends
+        SecurityUserImpl<StrippedRoleDefinitionDTO, RoleWithSecurityDTO, StrippedUserGroupDTO, WildcardPermissionWithSecurityDTO>
         implements Named, Serializable, SecuredDTO {
 
     private static final long serialVersionUID = 7556217539893146187L;
@@ -40,7 +41,7 @@ public class UserDTO extends SecurityUserImpl<StrippedRoleDefinitionDTO, RoleWit
      */
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
             List<AccountDTO> accounts, Iterable<RoleWithSecurityDTO> roles, StrippedUserGroupDTO defaultTenant,
-            Iterable<WildcardPermission> permissions,
+            Iterable<WildcardPermissionWithSecurityDTO> permissions,
             Iterable<StrippedUserGroupDTO> groups) {
         super(name, permissions);
         this.defaultTenantForCurrentServer = defaultTenant;

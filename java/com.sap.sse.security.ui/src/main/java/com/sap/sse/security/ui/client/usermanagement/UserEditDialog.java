@@ -37,11 +37,11 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccountDTO;
 import com.sap.sse.security.shared.dto.RoleDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
@@ -262,8 +262,8 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
         } else {
             roles = Collections.emptyList();
         }
-        final Iterable<WildcardPermission> newPermissionList = Util.map(permissionsEditor.getValue(),
-                WildcardPermission::new);
+        final Iterable<WildcardPermissionWithSecurityDTO> newPermissionList = Util.map(permissionsEditor.getValue(),
+                s -> new WildcardPermissionWithSecurityDTO(s, null));
         final UserDTO user = new UserDTO(userToEdit.getName(), email.getText(), fullName.getText(), company.getText(),
                 userToEdit.getLocale(), userToEdit.isEmailValidated(), userToEdit.getAccounts(),
                 /* roles */ Collections.emptyList(), userToEdit.getDefaultTenant(), newPermissionList,
