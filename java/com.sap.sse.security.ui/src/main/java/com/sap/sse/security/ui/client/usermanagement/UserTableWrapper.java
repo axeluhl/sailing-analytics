@@ -41,7 +41,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.dto.RoleDTO;
+import com.sap.sse.security.shared.dto.RoleWithSecurityDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -140,8 +140,8 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
             @Override
             public SafeHtml getValue(UserDTO user) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                for (Iterator<RoleDTO> roleIter = user.getRoles().iterator(); roleIter.hasNext();) {
-                    final RoleDTO role = roleIter.next();
+                for (Iterator<RoleWithSecurityDTO> roleIter = user.getRoles().iterator(); roleIter.hasNext();) {
+                    final RoleWithSecurityDTO role = roleIter.next();
                     builder.appendEscaped(role.toString());
                     if (roleIter.hasNext()) {
                         builder.appendHtmlConstant("<br>");

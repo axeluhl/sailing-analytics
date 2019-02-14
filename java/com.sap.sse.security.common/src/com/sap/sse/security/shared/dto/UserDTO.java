@@ -13,7 +13,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
-public class UserDTO extends SecurityUserImpl<StrippedRoleDefinitionDTO, RoleDTO, StrippedUserGroupDTO>
+public class UserDTO extends SecurityUserImpl<StrippedRoleDefinitionDTO, RoleWithSecurityDTO, StrippedUserGroupDTO>
         implements Named, Serializable, SecuredDTO {
 
     private static final long serialVersionUID = 7556217539893146187L;
@@ -28,7 +28,7 @@ public class UserDTO extends SecurityUserImpl<StrippedRoleDefinitionDTO, RoleDTO
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
     private StrippedUserGroupDTO defaultTenantForCurrentServer;
 
-    private Set<RoleDTO> roles;
+    private Set<RoleWithSecurityDTO> roles;
 
     @Deprecated // gwt only
     UserDTO() {
@@ -39,7 +39,7 @@ public class UserDTO extends SecurityUserImpl<StrippedRoleDefinitionDTO, RoleDTO
      * @param groups may be {@code null} which is equivalent to passing an empty groups collection
      */
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
-            List<AccountDTO> accounts, Iterable<RoleDTO> roles, StrippedUserGroupDTO defaultTenant,
+            List<AccountDTO> accounts, Iterable<RoleWithSecurityDTO> roles, StrippedUserGroupDTO defaultTenant,
             Iterable<WildcardPermission> permissions,
             Iterable<StrippedUserGroupDTO> groups) {
         super(name, permissions);
@@ -57,7 +57,7 @@ public class UserDTO extends SecurityUserImpl<StrippedRoleDefinitionDTO, RoleDTO
     }
     
     @Override
-    protected Set<RoleDTO> getRolesInternal() {
+    protected Set<RoleWithSecurityDTO> getRolesInternal() {
         return roles;
     }
 

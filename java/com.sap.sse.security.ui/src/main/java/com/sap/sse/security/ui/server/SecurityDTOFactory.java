@@ -16,6 +16,7 @@ import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -25,8 +26,8 @@ import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.AccountDTO;
 import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
-import com.sap.sse.security.shared.dto.RoleDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.RoleWithSecurityDTO;
 import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
@@ -34,7 +35,9 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
@@ -80,7 +83,7 @@ public class SecurityDTOFactory {
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
                 accountDTOs, createRolesDTOs(user.getRoles(), fromOriginalToStrippedDownUser,
-                        fromOriginalToStrippedDownUserGroup, securityService),
+                        fromOriginalToStrippedDownUserGroup, securityService, user),
                 /* default tenant filled in later */ null,
                 user.getPermissions(),
                 createStrippedUserGroupDTOsFromUserGroups(securityService.getUserGroupsOfUser(user),
@@ -94,25 +97,28 @@ public class SecurityDTOFactory {
     }
 
 
-    private Iterable<RoleDTO> createRolesDTOs(Iterable<Role> roles,
+    private Iterable<RoleWithSecurityDTO> createRolesDTOs(Iterable<Role> roles,
             Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
             Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup,
-            SecurityService securityService) {
+            SecurityService securityService, User user) {
         return Util.map(roles, role->createRoleDTO(role,
-                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup, securityService));
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup, securityService, user));
     }
 
-    private RoleDTO createRoleDTO(Role role, Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
+    private RoleWithSecurityDTO createRoleDTO(Role role, Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
             Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup,
-            SecurityService securityService) {
+            SecurityService securityService, User user) {
         RoleDefinition rdef = role.getRoleDefinition();
         StrippedRoleDefinitionDTO rdefDTO = createStrippedRoleDefinitionDTO(rdef,
                 fromOriginalToStrippedDownUserGroup);
-        RoleDTO mappedRole = new RoleDTO(rdefDTO,
+        QualifiedObjectIdentifier identifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(role, user));
+        RoleWithSecurityDTO mappedRole = new RoleWithSecurityDTO(rdefDTO,
                 createStrippedUserGroupDTOFromUserGroup(role.getQualifiedForTenant(),
                 fromOriginalToStrippedDownUserGroup),
                 createUserDTOFromUser(role.getQualifiedForUser(),
-                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
+                identifier);
         return mappedRole;
     }
     
