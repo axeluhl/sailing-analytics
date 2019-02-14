@@ -229,7 +229,7 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
                 }
             }
 
-            roles = Util.map(userRolesEditor.getValue(), userRoleSpec -> {
+            roles = Util.addAll(Util.map(userRolesEditor.getValue(), userRoleSpec -> {
                 final String roleNameToAdd = userRoleSpec.getA();
                 final String roleTenantNameToAdd = userRoleSpec.getB();
                 final String roleUsernameToAdd = userRoleSpec.getC();
@@ -258,7 +258,7 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
                 }
                 // Triple containing RoleDefinition id, qualifying tenant name and qualifying user name
                 return new Triple<>(roleDefinition.getId(), roleTenantNameToAdd, roleUsernameToAdd);
-            });
+            }), new ArrayList<>());
         } else {
             roles = Collections.emptyList();
         }
