@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -324,7 +325,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         
         // CompetitorTableEditFeatures
         final HasPermissions type = SecuredDomainType.COMPETITOR;
-        AccessControlledActionsColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new AccessControlledActionsColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
+        AccessControlledActionsColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = create(
                 new CompetitorConfigImagesBarCell(getStringMessages()), userService);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE, this::editCompetitor);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -170,7 +171,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         
         // BoatTable edit features
         final HasPermissions type = SecuredDomainType.BOAT;
-        AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = new AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell>(
+        AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = create(
                 new BoatConfigImagesBarCell(getStringMessages()), userService);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE,
                 this::openEditBoatDialog);

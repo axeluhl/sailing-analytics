@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -41,8 +43,9 @@ import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
-import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 
 
 public class RegattaDetailsComposite extends Composite {
@@ -77,8 +80,9 @@ public class RegattaDetailsComposite extends Composite {
 
     private static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public RegattaDetailsComposite(final SailingServiceAsync sailingService, final RegattaRefresher regattaRefresher,  
-            final ErrorReporter errorReporter, final StringMessages stringMessages) {
+    public RegattaDetailsComposite(final SailingServiceAsync sailingService, final UserService userService,
+            final RegattaRefresher regattaRefresher, final ErrorReporter errorReporter,
+            final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
@@ -108,7 +112,7 @@ public class RegattaDetailsComposite extends Composite {
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
         registrationLinkWithQRCodeOpenButton = addRegistrationLinkOpenButton(grid, currentRow++, stringMessages.registrationLink(), "RegistrationLinkWithQRCodeDialog");
-        seriesTable = createRegattaSeriesTable();
+        seriesTable = createRegattaSeriesTable(userService);
         seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
         seriesSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -157,7 +161,7 @@ public class RegattaDetailsComposite extends Composite {
         return button;
     }
 
-    private CellTable<SeriesDTO> createRegattaSeriesTable() {
+    private CellTable<SeriesDTO> createRegattaSeriesTable(final UserService userService) {
         CellTable<SeriesDTO> table = new BaseCelltable<SeriesDTO>(/* pageSize */10000, tableRes);
         table.setWidth("100%");
         TextColumn<SeriesDTO> seriesNameColumn = new TextColumn<SeriesDTO>() {
@@ -265,32 +269,26 @@ public class RegattaDetailsComposite extends Composite {
             }
         };
 
-        ImagesBarColumn<SeriesDTO, SeriesConfigImagesBarCell> seriesActionColumn = new ImagesBarColumn<SeriesDTO, SeriesConfigImagesBarCell>(
-                new SeriesConfigImagesBarCell(stringMessages));
-        seriesActionColumn.setFieldUpdater(new FieldUpdater<SeriesDTO, String>() {
-            @Override
-            public void update(int index, final SeriesDTO series, String value) {
-                if (SeriesConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    editRacesOfRegattaSeries(regatta, series);
-                } else if (SeriesConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    RegattaIdentifier identifier = new RegattaName(regatta.getName());
-                    if (Window.confirm(stringMessages.reallyRemoveSeries(series.getName()))) {
-                        sailingService.removeSeries(identifier, series.getName(),
-                                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
-                                    @Override
-                                    public void onFailure(Throwable cause) {
-                                        errorReporter.reportError("Error trying to remove series " + series.getName()
-                                                + ": " + cause.getMessage());
-                                    }
+        final AccessControlledActionsColumn<SeriesDTO, SeriesConfigImagesBarCell> actionsColumn = create(
+                new SeriesConfigImagesBarCell(stringMessages), userService, series -> regatta);
+        actionsColumn.addAction(SeriesConfigImagesBarCell.ACTION_EDIT, UPDATE,
+                series -> editRacesOfRegattaSeries(regatta, series));
+        actionsColumn.addAction(SeriesConfigImagesBarCell.ACTION_REMOVE, UPDATE, series -> {
+            RegattaIdentifier identifier = new RegattaName(regatta.getName());
+            if (Window.confirm(stringMessages.reallyRemoveSeries(series.getName()))) {
+                sailingService.removeSeries(identifier, series.getName(),
+                        new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable cause) {
+                                errorReporter.reportError("Error trying to remove series " + series.getName() + ": "
+                                        + cause.getMessage());
+                            }
 
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        regattaRefresher.fillRegattas();
-                                    }
-                                }));
-                    }
-                }
-
+                            @Override
+                            public void onSuccess(Void result) {
+                                regattaRefresher.fillRegattas();
+                            }
+                        }));
             }
         });
         
@@ -304,7 +302,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(hasSplitFleetContiguousScoringColumn, stringMessages.hasSplitFleetContiguousScoring());
         table.addColumn(isFleetsCanRunInParallelColumn, stringMessages.canFleetsRunInParallel());
         table.addColumn(maximumNumberOfDiscardsColumn, stringMessages.maximumNumberOfDiscards());
-        table.addColumn(seriesActionColumn, stringMessages.actions());
+        table.addColumn(actionsColumn, stringMessages.actions());
         
         return table;
     }

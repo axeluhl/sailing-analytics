@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -415,7 +416,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
             SecuredDTOOwnerColumn.configureOwnerColumns(raceTable, columnSortHandler, stringMessages);
 
             final HasPermissions type = SecuredDomainType.TRACKED_RACE;
-            final AccessControlledActionsColumn<RaceDTO, DefaultActionsImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
+            final AccessControlledActionsColumn<RaceDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                     new DefaultActionsImagesBarCell(stringMessages), userService);
             final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                     race -> regattaRefresher.fillRegattas(), stringMessages);

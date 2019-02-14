@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.client.component;
 
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
 
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class UserGroupTableWrapper extends
                 UserGroupDTO -> UserGroupDTO.getName(), userColumnListHandler);
 
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
-        final AccessControlledActionsColumn<UserGroupDTO, DefaultActionsImagesBarCell> actionColumn = new AccessControlledActionsColumn<>(
+        final AccessControlledActionsColumn<UserGroupDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(ACTION_DELETE, DELETE, userGroupDTO -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroupDTO.getName()))) {
