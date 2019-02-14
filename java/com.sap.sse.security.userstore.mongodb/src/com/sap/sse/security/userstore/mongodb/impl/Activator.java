@@ -8,9 +8,9 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sse.ServerInfo;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.security.AccessControlStore;
-import com.sap.sse.security.PreferenceConverterRegistrationManager;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.interfaces.PreferenceConverterRegistrationManager;
+import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 

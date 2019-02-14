@@ -1,4 +1,4 @@
-package com.sap.sse.security;
+package com.sap.sse.security.interfaces;
 
 import java.util.Map;
 import java.util.Set;

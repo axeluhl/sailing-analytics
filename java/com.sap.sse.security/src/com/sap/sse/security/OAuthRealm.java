@@ -33,6 +33,10 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
+import com.sap.sse.security.interfaces.Credential;
+import com.sap.sse.security.interfaces.OAuthToken;
+import com.sap.sse.security.interfaces.Social;
+import com.sap.sse.security.interfaces.SocialSettingsKeys;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;

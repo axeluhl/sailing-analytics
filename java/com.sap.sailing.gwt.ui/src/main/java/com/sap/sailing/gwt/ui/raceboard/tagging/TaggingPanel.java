@@ -56,7 +56,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  * shown at the {@link com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel RaceBoard}. Tags consist of a title and optional
  * a comment and/or image. Tag-Buttons allow users to preset tags which are used more frequently. Public tags will be
  * stored as an {@link com.sap.sailing.domain.abstractlog.race.RaceLogEvent RaceLogEvent}, private tags will be stored
- * in the {@link com.sap.sse.security.UserStore UserStore}.
+ * in the {@link com.sap.sse.security.interfaces.UserStore UserStore}.
  * 
  * @author Julian Rendl, Henri Kohlberg
  */
@@ -336,7 +336,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     /**
      * Sends request to {@link SailingServiceAsync SailingService} to add the given tag to the
      * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} if the parameter <code>isVisibleForPublic</code>
-     * is set to <code>true</code>. Otherwise tag will be stored in the {@link com.sap.sse.security.UserStore
+     * is set to <code>true</code>. Otherwise tag will be stored in the {@link com.sap.sse.security.interfaces.UserStore
      * UserStore}. <br/>
      * Checks parameters for valid values and replaces optional parameters with value <code>null</code> by default
      * values: <code>comment</code> and <code>imageURL</code> will be replaced by an empty string,

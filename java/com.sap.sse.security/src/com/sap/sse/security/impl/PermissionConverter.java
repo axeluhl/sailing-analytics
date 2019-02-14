@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.apache.shiro.authz.Permission;
 
-import com.sap.sse.security.AccessControlStore;
+import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.PermissionToObjectIdConverter;
 

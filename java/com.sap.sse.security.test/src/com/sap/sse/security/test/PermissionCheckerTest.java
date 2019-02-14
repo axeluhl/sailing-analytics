@@ -18,9 +18,9 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.AbstractCompositeAuthorizingRealm;
-import com.sap.sse.security.AccessControlStore;
-import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
+import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;

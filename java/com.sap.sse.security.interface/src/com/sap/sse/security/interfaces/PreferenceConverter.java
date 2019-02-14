@@ -1,4 +1,4 @@
-package com.sap.sse.security;
+package com.sap.sse.security.interfaces;
 
 /**
  * Converter to be used by {@link UserStore} to convert preference objects to/from Strings.

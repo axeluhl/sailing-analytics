@@ -1,4 +1,4 @@
-package com.sap.sse.security;
+package com.sap.sse.security.interfaces;
 
 import org.apache.shiro.authc.SaltedAuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;

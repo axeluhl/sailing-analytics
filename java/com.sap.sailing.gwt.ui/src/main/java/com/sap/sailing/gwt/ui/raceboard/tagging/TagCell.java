@@ -237,7 +237,7 @@ public class TagCell extends AbstractCell<TagDTO> {
     /**
      * Asks user for confirmation if user presses the delete button on the {@link TagCell}. If user confirms deletion,
      * {@link TagDTO tag} will be deleted from {@link TaggingPanel} including
-     * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} or {@link com.sap.sse.security.UserStore
+     * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} or {@link com.sap.sse.security.interfaces.UserStore
      * UserStore}, depending on where the tag is saved. Also allows users to edit {@link TagDTO tags}, by putting
      * {@link TaggingPanel} into state {@link TaggingPanel.State#EDIT_TAG edit} when user presses the edit button.
      */

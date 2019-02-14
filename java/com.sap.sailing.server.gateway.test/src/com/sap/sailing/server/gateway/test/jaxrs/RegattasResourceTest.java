@@ -49,7 +49,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.UserImpl;
+import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.impl.User;
 

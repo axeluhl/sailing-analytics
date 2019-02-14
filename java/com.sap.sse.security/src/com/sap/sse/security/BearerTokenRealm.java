@@ -5,6 +5,7 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SaltedAuthenticationInfo;
 
+import com.sap.sse.security.interfaces.SimpleSaltedAuthenticationInfo;
 import com.sap.sse.security.shared.impl.User;
 
 /**

@@ -19,6 +19,9 @@ import com.sap.sse.common.Stoppable;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.security.interfaces.PreferenceConverter;
+import com.sap.sse.security.interfaces.PreferenceObjectListener;
+import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.impl.User;
 
 /**

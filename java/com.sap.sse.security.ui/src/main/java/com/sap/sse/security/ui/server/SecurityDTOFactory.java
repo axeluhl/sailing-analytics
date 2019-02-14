@@ -11,7 +11,7 @@ import java.util.Set;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.Social;
+import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;

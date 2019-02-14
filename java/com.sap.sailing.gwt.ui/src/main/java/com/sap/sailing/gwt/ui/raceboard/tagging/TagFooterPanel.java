@@ -18,7 +18,7 @@ public class TagFooterPanel extends FlowPanel {
     private final TagButtonPanel tagButtonPanel;
 
     /**
-     * Creates footer panel and loads {@link TagButton tag-buttons} from {@link com.sap.sse.security.UserStore
+     * Creates footer panel and loads {@link TagButton tag-buttons} from {@link com.sap.sse.security.interfaces.UserStore
      * UserStore}.
      * 
      * @param taggingPanel
@@ -97,14 +97,14 @@ public class TagFooterPanel extends FlowPanel {
     }
 
     /**
-     * Loads all {@link TagButton tag-buttons} from {@link com.sap.sse.security.UserStore UserStore} and displays them.
+     * Loads all {@link TagButton tag-buttons} from {@link com.sap.sse.security.interfaces.UserStore UserStore} and displays them.
      */
     protected void loadAllTagButtons() {
         tagButtonPanel.loadAllTagButtons();
     }
 
     /**
-     * Stores all {@link TagButton tag-buttons} into {@link com.sap.sse.security.UserStore UserStore}.
+     * Stores all {@link TagButton tag-buttons} into {@link com.sap.sse.security.interfaces.UserStore UserStore}.
      */
     protected void storeAllTagButtons() {
         tagButtonPanel.storeAllTagButtons();

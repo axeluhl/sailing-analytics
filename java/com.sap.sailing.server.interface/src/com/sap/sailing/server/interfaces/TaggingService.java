@@ -47,7 +47,7 @@ public interface TaggingService {
      * @param visibleForPublic
      *            when set to <code>true</code>, tag will be saved in
      *            {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} (visible for every user), otherwise
-     *            tag will be saved in {@link com.sap.sse.security.UserStore UserStore} (only visible for the creator)
+     *            tag will be saved in {@link com.sap.sse.security.interfaces.UserStore UserStore} (only visible for the creator)
      * @param raceTimepoint
      *            timepoint in race when user created tag, must <b>NOT</b> be <code>null</code>
      * @throws AuthorizationException
@@ -68,7 +68,7 @@ public interface TaggingService {
 
     /**
      * Removes public {@link TagDTO tag} from {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} and
-     * private {@link TagDTO tag} from {@link com.sap.sse.security.UserStore UserStore}.
+     * private {@link TagDTO tag} from {@link com.sap.sse.security.interfaces.UserStore UserStore}.
      * 
      * @param leaderboardName
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>

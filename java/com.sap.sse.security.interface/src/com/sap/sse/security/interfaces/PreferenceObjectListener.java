@@ -1,4 +1,4 @@
-package com.sap.sse.security;
+package com.sap.sse.security.interfaces;
 
 /**
  * Listener used by UserStore to notify about changes of stored preference objects.

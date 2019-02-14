@@ -134,7 +134,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationService;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
@@ -587,7 +587,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     /**
      * Adds public tag as {@link RaceLogTagEvent} to {@link RaceLog} and private tag to
-     * {@link com.sap.sse.security.UserStore UserStore}.
+     * {@link com.sap.sse.security.interfaces.UserStore UserStore}.
      * 
      * @param leaderboardName
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
