@@ -13,15 +13,15 @@ Import-Package: com.sap.sse,
  org.osgi.util.tracker;version="1.5.1"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Require-Bundle: com.sap.sse.security,
- org.apache.shiro.core;bundle-version="1.2.2",
+Require-Bundle: org.apache.shiro.core;bundle-version="1.2.2",
  com.sap.sse.mongodb,
  com.sap.sse.common,
  com.sap.sse.security.common,
  com.sap.sse.shared.android,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sse.replication,
- com.sap.sse
+ com.sap.sse,
+ com.sap.sse.security.interface
 Export-Package: com.sap.sse.security.userstore.mongodb,
  com.sap.sse.security.userstore.mongodb.impl;x-friends:="com.sap.sse.security.test"
 Automatic-Module-Name: com.sap.sse.security.userstore.mongodb
