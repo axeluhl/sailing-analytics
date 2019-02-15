@@ -1005,7 +1005,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         // get user for which to add a role
         final User user = getSecurityService().getUserByName(username);
         if (user == null) {
-            return new SuccessInfo(false, "User " + username + " does not exist.", /* redirectURL */ null, null);
+            return new SuccessInfo(false,
+                    "You are not allowed to give this role to user " + username
+                            + " or the user, tenant or role did not exist.",
+                    /* redirectURL */ null, null);
         }
 
         // check permissions
@@ -1014,7 +1017,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
         // get user for which the role is qualified, if one exists
         if (!userQualifierName.isEmpty() && getSecurityService().getUserByName(userQualifierName) == null) {
-            return new SuccessInfo(false, "User " + userQualifierName + " does not exist for role qualification.",
+            return new SuccessInfo(false,
+                    "You are not allowed to give this role to user " + username
+                            + " or the user, tenant or role did not exist.",
                     /* redirectURL */ null, null);
         }
 
@@ -1026,7 +1031,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             tenant = getSecurityService().getUserGroupByName(tenantQualifierName);
             if (tenant == null) {
                 // unknown tenant
-                return new SuccessInfo(false, "Tenant " + tenantQualifierName + " does not exist.",
+                return new SuccessInfo(false,
+                        "You are not allowed to give this role to user " + username
+                                + " or the user, tenant or role did not exist.",
                         /* redirectURL */ null, /* userDTO */ null);
             }
         }
@@ -1035,7 +1042,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 userQualifierName);
         if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
                 role.getRoleDefinition(), role.getQualificationAsOwnership())) {
-            throw new UnauthorizedException("Not allowed.");
+            throw new UnauthorizedException(
+                    "You are not allowed to give this role to user " + username
+                            + " or the user, tenant or role did not exist.");
         }
 
         final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
@@ -1063,7 +1072,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throws UserManagementException, UnauthorizedException {
         final User user = getSecurityService().getUserByName(username);
         if (user == null) {
-            return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
+            return new SuccessInfo(false, "You are not allowed to take this role to user " + username
+                    + " or the user, tenant or role did not exist.", /* redirectURL */ null, null);
         }
 
         getSecurityService().checkCurrentUserUpdatePermission(user);
@@ -1075,7 +1085,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         } else {
             tenant = getSecurityService().getUserGroupByName(tenantQualifierName);
             if (tenant == null) {
-                return new SuccessInfo(false, "Tenant " + tenantQualifierName + " does not exist.",
+                return new SuccessInfo(false,
+                        "You are not allowed to take this role to user " + username
+                                + " or the user, tenant or role did not exist.",
                         /* redirectURL */ null, /* userDTO */ null);
             }
         }
@@ -1084,7 +1096,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 userQualifierName);
         if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
                 role.getRoleDefinition(), role.getQualificationAsOwnership())) {
-            throw new UnauthorizedException("Not allowed.");
+            throw new UnauthorizedException("You are not allowed to take this role to user " + username
+                    + " or the user, tenant or role did not exist.");
         }
 
         final String message = "removed role " + role.getName() + " for user " + username;
@@ -1115,7 +1128,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         SuccessInfo successInfo;
         if (user == null) {
             successInfo = new SuccessInfo(false,
-                    "Not permitted to grant permission " + permission + " for user " + username, /* redirectURL */null,
+                    "Not permitted to grant permission " + permission + " for user " + username
+                            + " or the user or permission did not exist.",
+                    /* redirectURL */null,
                     null);
         }
 
@@ -1126,7 +1141,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
             if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
                 successInfo = new SuccessInfo(false,
-                        "Not permitted to grant permission " + permission + " for user " + username,
+                        "Not permitted to grant permission " + permission + " for user " + username
+                                + " or the user or permission did not exist.",
                         /* redirectURL */null, null);
             } else {
 
@@ -1162,7 +1178,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         SuccessInfo successInfo;
         if (user == null) {
             successInfo = new SuccessInfo(false,
-                    "Not permitted to revoke permission " + permission + " for user " + username, /* redirectURL */null,
+                    "Not permitted to revoke permission " + permission + " for user " + username
+                            + " or the user or permission did not exist",
+                    /* redirectURL */null,
                     null);
         } else {
 
@@ -1172,7 +1190,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
             if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
                 successInfo = new SuccessInfo(false,
-                        "Not permitted to revoke permission " + permission + " for user " + username,
+                        "Not permitted to revoke permission " + permission + " for user " + username
+                                + " or the user or permission did not exist",
                         /* redirectURL */null, null);
             } else {
 
