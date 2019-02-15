@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
@@ -378,7 +379,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     /**
      * In addition to creating the track which is performed by the superclass implementation, this implementation
-     * registers a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark, boolean)
+     * registers a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark, boolean, AddResult)
      * notifies the listeners} about updates. In previous versions the {@link #updated(TimePoint)} method was
      * <em>not</em> called with the mark fix's time point because mark fixes could have been received also from marks
      * that don't belong to this race. However, we don't support any connector anymore that works this way. Therefore,
@@ -391,10 +392,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             private static final long serialVersionUID = -2855787105725103732L;
 
             @Override
-            public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack) {
+            public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack, AddResult addedOrReplaced) {
                 updated(fix.getTimePoint());
                 triggerManeuverCacheRecalculationForAllCompetitors();
-                notifyListeners(fix, mark, firstFixInTrack);
+                notifyListeners(fix, mark, firstFixInTrack, addedOrReplaced);
             }
 
             @Override
@@ -477,7 +478,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     try {
                         boolean firstInTrack = true;
                         for (GPSFix fix : markTrack.getRawFixes()) {
-                            listener.markPositionChanged(fix, mark, firstInTrack);
+                            listener.markPositionChanged(fix, mark, firstInTrack, /* addedOrReplaced */ AddResult.ADDED);
                             firstInTrack = false;
                         }
                     } finally {
@@ -490,7 +491,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     competitorTrack.lockForRead();
                     try {
                         for (GPSFixMoving fix : competitorTrack.getRawFixes()) {
-                            listener.competitorPositionChanged(fix, competitor);
+                            listener.competitorPositionChanged(fix, competitor, /* addedOrReplaced */ AddResult.ADDED);
                         }
                     } finally {
                         competitorTrack.unlockAfterRead();
@@ -575,12 +576,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListenersWaypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
     }
 
-    private void notifyListeners(GPSFix fix, Mark mark, boolean firstInTrack) {
-        notifyListeners(listener -> listener.markPositionChanged(fix, mark, firstInTrack));
+    private void notifyListeners(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
+        notifyListeners(listener -> listener.markPositionChanged(fix, mark, firstInTrack, addedOrReplaced));
     }
 
-    private void notifyListeners(GPSFixMoving fix, Competitor competitor) {
-        notifyListeners(listener -> listener.competitorPositionChanged(fix, competitor));
+    private void notifyListeners(GPSFixMoving fix, Competitor competitor, AddResult addedOrReplaced) {
+        notifyListeners(listener -> listener.competitorPositionChanged(fix, competitor, addedOrReplaced));
     }
 
     private void notifyListenersAboutFirstGPSFixReceived() {
@@ -619,8 +620,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.competitorSensorTrackAdded(track));
     }
     
-    private void notifyListeners(Competitor competitor, String trackName, SensorFix fix) {
-        notifyListeners(listener -> listener.competitorSensorFixAdded(competitor, trackName, fix));
+    private void notifyListeners(Competitor competitor, String trackName, SensorFix fix, AddResult addedOrReplaced) {
+        notifyListeners(listener -> listener.competitorSensorFixAdded(competitor, trackName, fix, addedOrReplaced));
     }
 
     /**
@@ -1025,10 +1026,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack) {
+    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack, AddResult addedOrReplaced) {
         updated(fix.getTimePoint());
         triggerManeuverCacheRecalculation(competitor);
-        notifyListeners(fix, competitor);
+        notifyListeners(fix, competitor, addedOrReplaced);
         
         // getAndSet call is atomic which means, that it can be ensured that the listeners are notified only once
         final boolean oldGPSFixReceived = gpsFixReceived.getAndSet(true);
@@ -1224,8 +1225,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             }
 
             @Override
-            public void fixReceived(FixT fix, Competitor item, String trackName, boolean firstFixInTrack) {
-                notifyListeners(item, trackName, fix);
+            public void fixReceived(FixT fix, Competitor item, String trackName, boolean firstFixInTrack, AddResult addedOrReplaced) {
+                notifyListeners(item, trackName, fix, addedOrReplaced);
             }
         });
         return Optional.of(()->notifyListenersAboutSensorTrackAdded(track));
