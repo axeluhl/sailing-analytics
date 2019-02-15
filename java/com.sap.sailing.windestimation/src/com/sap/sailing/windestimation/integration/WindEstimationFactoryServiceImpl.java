@@ -12,7 +12,6 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
-import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
@@ -20,9 +19,11 @@ import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBase
 import com.sap.sailing.windestimation.model.store.InMemoryModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
+import com.sap.sse.mongodb.MongoDBService;
 
-public class WindEstimationFactoryServiceImpl
-        extends AbstractReplicableWithObjectInputStream<WindEstimationFactoryService, WindEstimationDataOperation<?>>
+public class WindEstimationFactoryServiceImpl extends
+        AbstractReplicableWithObjectInputStream<WindEstimationFactoryServiceImpl, WindEstimationModelsUpdateOperation>
         implements ReplicableWindEstimationFactoryService {
 
     private static final boolean PRELOAD_ALL_MODELS = true;
@@ -45,11 +46,16 @@ public class WindEstimationFactoryServiceImpl
     private boolean shutdown = false;
 
     public WindEstimationFactoryServiceImpl() {
-        MODEL_STORE = new InMemoryModelStoreImpl();
+        MODEL_STORE = isMaster() ? new MongoDbModelStoreImpl(MongoDBService.INSTANCE.getDB())
+                : new InMemoryModelStoreImpl();
         maneuverClassifiersCache = new ManeuverClassifiersCache(MODEL_STORE, PRELOAD_ALL_MODELS,
                 PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
         gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(MODEL_STORE,
                 PRELOAD_ALL_MODELS, PRESERVE_LOADED_MODELS_MILLIS);
+    }
+
+    private boolean isMaster() {
+        return getMasterDescriptor() == null;
     }
 
     @Override
@@ -66,13 +72,20 @@ public class WindEstimationFactoryServiceImpl
         return modelsReady;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void initiallyFillFromInternal(ObjectInputStream is)
             throws IOException, ClassNotFoundException, InterruptedException {
+        ExportedModels exportedModels = (ExportedModels) is.readObject();
+        updateWindEstimationModels(exportedModels);
+    }
+
+    public void updateWindEstimationModels(ExportedModels exportedModels) throws ModelPersistenceException {
         for (ModelDomainType domainType : modelDomainTypesRequiredByWindEstimation) {
-            Map<String, byte[]> exportedModels = (Map<String, byte[]>) is.readObject();
-            MODEL_STORE.importPersistedModels(exportedModels, domainType);
+            Map<String, byte[]> serializedModelsForDomainType = exportedModels
+                    .getSerializedModelsForDomainType(domainType);
+            if (serializedModelsForDomainType != null) {
+                MODEL_STORE.importPersistedModels(serializedModelsForDomainType, domainType);
+            }
         }
         clearState();
     }
@@ -106,10 +119,12 @@ public class WindEstimationFactoryServiceImpl
 
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
+        ExportedModels exportedModels = new ExportedModels();
         for (ModelDomainType domainType : modelDomainTypesRequiredByWindEstimation) {
-            Map<String, byte[]> exportedModels = MODEL_STORE.exportAllPersistedModels(domainType);
-            objectOutputStream.writeObject(exportedModels);
+            Map<String, byte[]> exportedModelsForDomainType = MODEL_STORE.exportAllPersistedModels(domainType);
+            exportedModels.addSerializedModelsForDomainType(domainType, exportedModelsForDomainType);
         }
+        objectOutputStream.writeObject(exportedModels);
     }
 
     /**

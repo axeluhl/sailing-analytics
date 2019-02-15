@@ -1,6 +1,5 @@
 package com.sap.sailing.windestimation.integration;
 
-import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
 import com.sap.sse.replication.OperationWithResult;
 
 /**
@@ -9,8 +8,8 @@ import com.sap.sse.replication.OperationWithResult;
  * 
  * @author Vladislav Chumak (D069712)
  *
- * @param <T>
  */
-public interface WindEstimationDataOperation<T> extends OperationWithResult<WindEstimationFactoryService, T> {
+public interface WindEstimationModelsUpdateOperation
+        extends OperationWithResult<WindEstimationFactoryServiceImpl, Void> {
 
 }

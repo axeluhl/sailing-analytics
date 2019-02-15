@@ -43,7 +43,6 @@ public class RestServletContainer extends ServletContainer {
     @Override
     public void destroy() {
         super.destroy();
-
         if (polarDataServiceTracker != null) {
             polarDataServiceTracker.close();
         }

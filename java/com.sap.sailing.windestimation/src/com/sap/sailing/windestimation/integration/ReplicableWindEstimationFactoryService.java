@@ -11,5 +11,5 @@ import com.sap.sse.replication.ReplicableWithObjectInputStream;
  *
  */
 public interface ReplicableWindEstimationFactoryService extends WindEstimationFactoryService,
-        ReplicableWithObjectInputStream<WindEstimationFactoryService, WindEstimationDataOperation<?>> {
+        ReplicableWithObjectInputStream<WindEstimationFactoryServiceImpl, WindEstimationModelsUpdateOperation> {
 }

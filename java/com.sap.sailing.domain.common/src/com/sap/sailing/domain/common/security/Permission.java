@@ -42,6 +42,7 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     LEADERBOARD_GROUP,
     TRACKED_RACE,
     DATA_MINING,
+    WIND_ESTIMATION_MODELS
     ;
 
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface

@@ -4,6 +4,7 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
@@ -11,6 +12,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
+import com.sap.sailing.windestimation.jaxrs.client.WindEstimationDataClient;
 import com.sap.sailing.windestimation.model.exception.ModelLoadingException;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
@@ -54,8 +56,6 @@ public class Activator implements BundleActivator {
             importWindEstimationModelsFromUrl(windEstimationModelDataSourceURL);
         } else if (windEstimationModelDataSourceFolder != null) {
             importWindEstimationModelsFromFolder(windEstimationModelDataSourceFolder);
-        } else {
-            importWindEstimationModelsFromMongoDb();
         }
         final ServiceRegistration<WindEstimationFactoryService> serviceRegistration = context
                 .registerService(WindEstimationFactoryService.class, service, null);
@@ -76,15 +76,6 @@ public class Activator implements BundleActivator {
         }
     }
 
-    private void importWindEstimationModelsFromMongoDb() {
-        MongoDbModelStoreImpl modelStore = new MongoDbModelStoreImpl(MongoDBService.INSTANCE.getDB());
-        try {
-            service.importAllModelsFromModelStore(modelStore);
-        } catch (ModelPersistenceException e) {
-            throw new ModelLoadingException("Could not import wind estimation models from MongoDB", e);
-        }
-    }
-
     private void importWindEstimationModelsFromFolder(String windEstimationModelDataSourceFolder) {
         FileSystemModelStoreImpl modelStore = new FileSystemModelStoreImpl(windEstimationModelDataSourceFolder);
         try {
@@ -97,17 +88,14 @@ public class Activator implements BundleActivator {
 
     private void importWindEstimationModelsFromUrl(String windEstimationModelDataSourceURL) {
         logger.info("Importing wind estimation data from URL: " + windEstimationModelDataSourceURL);
-        // TODO implement import client for wind estimation models
-        // PolarDataClient polarDataClient = new PolarDataClient(windEstimationModelDataSourceURL,
-        // windEstimationFactoryService);
-        // try {
-        // polarDataClient.updatePolarDataRegressions();
-        // TODO ensure that polarDataService has been loaded and initialized
-        // } catch (Exception e) {
-        // logger.log(Level.SEVERE,
-        // "Exception while trying to import wind estimation model data from " +
-        // windEstimationModelDataSourceURL, e);
-        // }
+        WindEstimationDataClient polarDataClient = new WindEstimationDataClient(windEstimationModelDataSourceURL,
+                service);
+        try {
+            polarDataClient.updateWindEstimationModels();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception while trying to import wind estimation model data from "
+                    + windEstimationModelDataSourceURL, e);
+        }
         logger.info("Import of wind estimation data finished successfully ");
     }
 
