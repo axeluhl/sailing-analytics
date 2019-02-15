@@ -1150,7 +1150,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return user;
     }
 
-    private void checkPermissionForPermissionOrRoleChange(User user, UserActions action, WildcardPermission permission)
+    /**
+     * Checks, whether the current user has the required permissions to add or remove a WildcardPermission with the
+     * given action ({@link UserActions.GRANT_PERMISSION} or {@link UserActions.REVOKE_PERMISSION}) for the specific
+     * user
+     */
+    private void checkPermissionForPermissionUpdate(User user, UserActions action, WildcardPermission permission)
             throws UnauthorizedException {
         // check permissions
         getSecurityService().checkCurrentUserUpdatePermission(user);
@@ -1172,7 +1177,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             User user = getOrThrowUser(username);
 
             // check permissions
-            checkPermissionForPermissionOrRoleChange(user, UserActions.GRANT_PERMISSION, permission);
+            checkPermissionForPermissionUpdate(user, UserActions.GRANT_PERMISSION, permission);
 
             // grant permission
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
@@ -1209,7 +1214,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             User user = getOrThrowUser(username);
 
             // check permissions
-            checkPermissionForPermissionOrRoleChange(user, UserActions.REVOKE_PERMISSION, permission);
+            checkPermissionForPermissionUpdate(user, UserActions.REVOKE_PERMISSION, permission);
 
             // revoke permission
             final String message = "Revoked permission " + permission + " for user " + username;
