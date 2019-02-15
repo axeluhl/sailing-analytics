@@ -1118,53 +1118,63 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 new Triple<>(userDTO, getAllUser(), getServerInfo()));
     }
 
+    /**
+     * @return the User associated with the username or a {@link UserManagementException}, if the user is null
+     */
+    private User getUserOrThrow(String username) throws UserManagementException {
+        final User user = getSecurityService().getUserByName(username);
+
+        if (user == null) {
+            throw new UserManagementException("user " + username + " not found.");
+        }
+        return user;
+    }
+
+    private void checkPermissionForPermissionOrRoleChange(User user, UserActions action, WildcardPermission permission)
+            throws UnauthorizedException {
+        // check permissions
+        getSecurityService().checkCurrentUserUpdatePermission(user);
+        getSecurityService().checkCurrentUserAnyExplicitPermissions(user, action);
+
+        if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
+            throw new UnauthorizedException(
+                    "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
+        }
+    }
+
     @Override
     public SuccessInfo addPermissionForUser(String username, WildcardPermission permission)
             throws UnauthorizedException {
 
-        // check if user exists
-        final User user = getSecurityService().getUserByName(username);
-
         SuccessInfo successInfo;
-        if (user == null) {
-            successInfo = new SuccessInfo(false,
-                    "Not permitted to grant permission " + permission + " for user " + username
-                            + " or the user or permission did not exist.",
-                    /* redirectURL */null,
-                    null);
-        }
+        try {
+            // check if user exists
+            User user = getUserOrThrow(username);
 
-        else {
             // check permissions
-            getSecurityService().checkCurrentUserUpdatePermission(user);
-            getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.GRANT_PERMISSION);
+            checkPermissionForPermissionOrRoleChange(user, UserActions.GRANT_PERMISSION, permission);
 
-            if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
-                successInfo = new SuccessInfo(false,
-                        "Not permitted to grant permission " + permission + " for user " + username
-                                + " or the user or permission did not exist.",
-                        /* redirectURL */null, null);
-            } else {
+            // grant permission
+            final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
+                    user);
+            final String message = "Added permission " + permission + " for user " + username;
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
+                    associationTypeIdentifier.toString(), new Action() {
 
-                // grant permission
-                final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
-                        .get(permission, user);
-                final String message = "Added permission " + permission + " for user " + username;
-                getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                        SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
-                        associationTypeIdentifier.toString(), new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            getSecurityService().addPermissionForUser(username, permission);
+                            logger.info(message);
+                        }
+                    });
 
-                            @Override
-                            public void run() throws Exception {
-                                getSecurityService().addPermissionForUser(username, permission);
-                                logger.info(message);
-                            }
-                        });
-
-                final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
-                successInfo = new SuccessInfo(true, message, /* redirectURL */null,
-                        new Triple<>(userDTO, getAllUser(), getServerInfo()));
-            }
+            final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+            successInfo = new SuccessInfo(true, message, /* redirectURL */null,
+                    new Triple<>(userDTO, getAllUser(), getServerInfo()));
+        } catch (UserManagementException | UnauthorizedException e) {
+            successInfo = new SuccessInfo(false, "Not permitted to grant permission " + permission + " for user "
+                    + username + " or the user or permission did not exist.", /* redirectURL */null, null);
         }
         return successInfo;
     }
@@ -1172,50 +1182,40 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permission)
             throws UnauthorizedException {
-        // check if user exists
-        final User user = getSecurityService().getUserByName(username);
 
         SuccessInfo successInfo;
-        if (user == null) {
-            successInfo = new SuccessInfo(false,
-                    "Not permitted to revoke permission " + permission + " for user " + username
-                            + " or the user or permission did not exist",
-                    /* redirectURL */null,
-                    null);
-        } else {
+        try {
+            // check if user exists
+            User user = getUserOrThrow(username);
 
             // check permissions
-            getSecurityService().checkCurrentUserUpdatePermission(user);
-            getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.REVOKE_PERMISSION);
+            checkPermissionForPermissionOrRoleChange(user, UserActions.REVOKE_PERMISSION, permission);
 
-            if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
-                successInfo = new SuccessInfo(false,
-                        "Not permitted to revoke permission " + permission + " for user " + username
-                                + " or the user or permission did not exist",
-                        /* redirectURL */null, null);
-            } else {
+            // revoke permission
+            final String message = "Revoked permission " + permission + " for user " + username;
+            final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
+                    user);
+            final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
 
-                // revoke permission
-                final String message = "Revoked permission " + permission + " for user " + username;
-                final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
-                        .get(permission, user);
-                final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
-                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                    new ActionWithResult<Void>() {
+                        @Override
+                        public Void run() throws Exception {
+                            getSecurityService().removePermissionFromUser(username, permission);
+                            logger.info(message);
+                            return null;
+                        }
+                    });
 
-                getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
-                        new ActionWithResult<Void>() {
-                            @Override
-                            public Void run() throws Exception {
-                                getSecurityService().removePermissionFromUser(username, permission);
-                                logger.info(message);
-                                return null;
-                            }
-                        });
+            final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+            successInfo = new SuccessInfo(true, message, /* redirectURL */null,
+                    new Triple<>(userDTO, getAllUser(), getServerInfo()));
 
-                final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
-                successInfo = new SuccessInfo(true, message, /* redirectURL */null,
-                        new Triple<>(userDTO, getAllUser(), getServerInfo()));
-            }
+        } catch (UserManagementException | UnauthorizedException e) {
+            successInfo = new SuccessInfo(false, "Not permitted to revoke permission " + permission + " for user "
+                    + username + " or the user or permission did not exist", /* redirectURL */null, null);
+
         }
         return successInfo;
     }
