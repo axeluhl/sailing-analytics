@@ -130,7 +130,7 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
     
     @Override
-    public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix) {
+    public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix, AddResult addedOrReplaced) {
         defaultAction();
     }
     

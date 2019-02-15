@@ -620,8 +620,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.competitorSensorTrackAdded(track));
     }
     
-    private void notifyListeners(Competitor competitor, String trackName, SensorFix fix) {
-        notifyListeners(listener -> listener.competitorSensorFixAdded(competitor, trackName, fix));
+    private void notifyListeners(Competitor competitor, String trackName, SensorFix fix, AddResult addedOrReplaced) {
+        notifyListeners(listener -> listener.competitorSensorFixAdded(competitor, trackName, fix, addedOrReplaced));
     }
 
     /**
@@ -1226,7 +1226,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
             @Override
             public void fixReceived(FixT fix, Competitor item, String trackName, boolean firstFixInTrack, AddResult addedOrReplaced) {
-                notifyListeners(item, trackName, fix);
+                notifyListeners(item, trackName, fix, addedOrReplaced);
             }
         });
         return Optional.of(()->notifyListenersAboutSensorTrackAdded(track));

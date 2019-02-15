@@ -745,7 +745,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         }
         
         @Override
-        public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix) {
+        public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix, AddResult addedOrReplaced) {
             // no action required
         }
         
