@@ -14,6 +14,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -29,6 +30,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.CreateUserDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.usermanagement.permissions.WildcardPermissionPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class UserManagementPanel<TR extends CellTableWithCheckboxResources> extends DockPanel {
@@ -120,11 +122,20 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         });
         updateUsers();
 
+        final HorizontalPanel detailsPanel = new HorizontalPanel();
+
         // add details panel for user roles
         final UserRoleDefinitionPanel userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages,
                 errorReporter,
                 tableResources, userList.getSelectionModel(), () -> updateUsers());
-        west.add(userRoleDefinitionPanel);
+        detailsPanel.add(userRoleDefinitionPanel);
+
+        // add details panel for user permissions
+        final WildcardPermissionPanel userPermissionPanel = new WildcardPermissionPanel(userService, stringMessages,
+                errorReporter, tableResources, userList.getSelectionModel(), () -> updateUsers());
+        detailsPanel.add(userPermissionPanel);
+
+        west.add(detailsPanel);
     }
     
     public void updateUsers() {
