@@ -38,7 +38,7 @@ public class StationarySequence {
      * If we identify several consecutive candidates that all lie in a bounding box with a {@link Bounds#getDiameter()
      * diameter} less than or equal to this distance, only the first and the last of those candidates pass the filter.
      */
-    private static final Distance CANDIDATE_FILTER_DISTANCE = new MeterDistance(20);
+    private static final Distance CANDIDATE_FILTER_DISTANCE = new MeterDistance(30);
 
     private static final Duration CANDIDATE_FILTER_TIME_WINDOW = Duration.ONE_SECOND.times(10);
     
