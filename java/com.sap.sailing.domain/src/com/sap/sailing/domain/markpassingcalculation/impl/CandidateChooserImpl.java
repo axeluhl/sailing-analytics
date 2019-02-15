@@ -57,7 +57,7 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * changed, the proxy start and all edges containing it are updated.
  * 
  * @author Nicolas Klose
- * @author Axel Uhl
+ * @author Axel Uhl (d043530)
  * 
  */
 public class CandidateChooserImpl implements CandidateChooser {
@@ -430,8 +430,8 @@ public class CandidateChooserImpl implements CandidateChooser {
                     removeCandidates(competitor, startList);
                 }
                 start.setTimePoint(raceStartTime);
-                for (Competitor com : allEdges.keySet()) {
-                    addCandidates(com, startList);
+                for (Competitor competitor : allEdges.keySet()) {
+                    addCandidates(competitor, startList);
                 }
             }
         }
@@ -915,12 +915,14 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     /**
      * New candidates will be added to {@link #candidates}. The filtering rules will be applied to update
-     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} so that the sets of filtered candidates are again consistent with the contents of
-     * {@link #candidates} and the filter rules. Afterwards, the {@link #allEdges graph} will be updated by removing
-     * edges for candidates that are no longer part of {@link #mostProbableCandidatesInSmallTimeRangeFilters} and by adding edges for new
-     * {@link #mostProbableCandidatesInSmallTimeRangeFilters}. Note that the set of {@link #mostProbableCandidatesInSmallTimeRangeFilters} may actually shrink by adding
-     * a new candidate, simply because that candidate closes a gap between other candidates such that now it becomes
-     * obvious that candidates previously passing the filter are really part of a cluster of little or no movement.
+     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} and {@link #stationarySequenceBasedFilters} so that the
+     * sets of filtered candidates are again consistent with the contents of {@link #candidates} and the filter rules.
+     * Afterwards, the {@link #allEdges graph} will be updated by removing edges for candidates that are no longer part
+     * of {@link #stationarySequenceBasedFilters} (the last filter stage) and by adding edges for new candidates in
+     * {@link #stationarySequenceBasedFilters}. Note that the set of {@link #stationarySequenceBasedFilters} may
+     * actually shrink by adding a new candidate, simply because that candidate closes a gap between other candidates in
+     * the {@link #mostProbableCandidatesInSmallTimeRangeFilters} filter or by extending a stationary sequence such that
+     * a candidate in the middle of that sequence no longer is close enough to the sequence's border.
      */
     private void addCandidates(Competitor c, Iterable<Candidate> newCandidates) {
         LockUtil.lockForWrite(perCompetitorLocks.get(c));
@@ -967,19 +969,21 @@ public class CandidateChooserImpl implements CandidateChooser {
     /**
      * Based on {@link #candidates candidates(c)}, computes the set of candidates that pass all filter rules and hence
      * are expected to be represented in the {@link #allEdges graph}. When this method returns, it has updated the
-     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} accordingly.<p>
+     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} accordingly.
+     * <p>
      * 
      * A two-pass algorithm. In the first pass, clusters of {@link DistanceCandidateImpl distance candidates} in close
-     * time-wise proximity (see {@link #CANDIDATE_FILTER_TIME_WINDOW}) are sorted by their probability. Only the group
-     * with the highest probability is selected, assuming that multiple occurrences of the same mark in multiple
-     * waypoints leads to very similar if not equal probabilities. This way, candidates for marks further away don't
-     * depend on the overall minimum probability, but the relative ranking leads to a quick elimination of unlikely
-     * candidates.
+     * time-wise proximity are sorted by their probability (see {@link MostProbableCandidatesInSmallTimeRangeFilter}).
+     * Only the group with the highest probability is selected, assuming that multiple occurrences of the same mark in
+     * multiple waypoints leads to very similar if not equal probabilities. This way, candidates for marks further away
+     * don't depend on the overall minimum probability, but the relative ranking leads to a quick elimination of
+     * unlikely candidates.
      * <p>
      * 
      * During the second pass, clusters of candidates are considered where the track between the first and the last
-     * candidate of the cluster does fit into a small bounding box. This suggests that the tracker was not actively
-     * sailing during this period, and only the first and the last candidate of the cluster will pass the filter.
+     * candidate of the cluster does fit into a small bounding box (see {@link StationarySequenceBasedFilter}). This
+     * suggests that the tracker was not actively sailing during this period, and only the first and the last candidate
+     * of the cluster will pass the filter.
      * <p>
      * 
      * @param competitor
@@ -989,9 +993,9 @@ public class CandidateChooserImpl implements CandidateChooser {
      *            already have been in the collection, so the parameter actually describes a superset of the candidates
      *            added
      * @param removedCandidates
-     *            the candidates that were removed from the {@link #candidates candidates(c)} collection; some of these may
-     *            already have been missing from the collection, so the parameter actually describes a superset of the candidates
-     *            removed
+     *            the candidates that were removed from the {@link #candidates candidates(c)} collection; some of these
+     *            may already have been missing from the collection, so the parameter actually describes a superset of
+     *            the candidates removed
      * @return a pair whose first element holds the set of candidates that now pass the filter and didn't before, and
      *         whose second element holds the set of candidates that did pass the filter before but don't anymore
      */
@@ -1009,12 +1013,12 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     /**
      * Removes the {@code wrongCandidates} from the competitor's {@link #candidates} and updates the
-     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} map accordingly. If filtered candidates are removed, their adjacent
-     * edges are removed from the {@link #allEdges graph}. If candidates now pass the filter which
-     * previously didn't, edges are inserted for them. This can happen, e.g., if a candidate is
-     * removed which previously connected other candidates into a cluster which in its entirety
-     * became subject to filtering and which now after the removal of the candidate is split up
-     * such that the parts of the former cluster now may pass the filter.
+     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} and {@link #stationarySequenceBasedFilters} filters
+     * accordingly. If filtered candidates are removed, their adjacent edges are removed from the {@link #allEdges
+     * graph}. If candidates now pass the filter which previously didn't, edges are inserted for them. This can happen,
+     * e.g., if a candidate is removed which previously connected other candidates into a cluster which in its entirety
+     * became subject to filtering and which now after the removal of the candidate is split up such that the parts of
+     * the former cluster now may pass the filter.
      */
     private void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
         LockUtil.lockForWrite(perCompetitorLocks.get(c));
