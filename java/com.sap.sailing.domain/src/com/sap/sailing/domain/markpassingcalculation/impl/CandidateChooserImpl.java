@@ -2,6 +2,7 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,10 +20,12 @@ import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
@@ -32,10 +35,12 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -52,6 +57,7 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * changed, the proxy start and all edges containing it are updated.
  * 
  * @author Nicolas Klose
+ * @author Axel Uhl (d043530)
  * 
  */
 public class CandidateChooserImpl implements CandidateChooser {
@@ -102,7 +108,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * lead to the edge being discarded.
      */
     private static final Speed MINIMUM_REASONABLE_SPEED = new KnotSpeedImpl(3);
-
+    
     private static final Speed MAXIMUM_REASONABLE_SPEED = GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING;
 
     private static final double MINIMUM_PROBABILITY = Edge.getPenaltyForSkipping();
@@ -112,19 +118,73 @@ public class CandidateChooserImpl implements CandidateChooser {
     private Map<Competitor, Map<Waypoint, MarkPassing>> currentMarkPasses = new HashMap<>();
     
     /**
+     * The graph of edges connecting the candidates in time-wise ascending order. The {@link Edge#getStart()} candidate
+     * always happens before the {@link Edge#getEnd()} candidate. Edges are keyed by the {@link Competitor} to whose
+     * track they belong. The value maps key the edges by their {@link Edge#getStart() start candidate}.
+     * <p>
+     *
      * Methods operating on this collection and the collections embedded in it must be {@code synchronized} in order to
      * avoid overlapping operations. This will generally not limit concurrency further than usual, except for the
      * start-up phase where a background thread may be spawned by the constructor in case the
-     * {@link MarkPassingCalculator#MarkPassingCalculator(DynamicTrackedRace, boolean, boolean)} constructor is
-     * invoked with the {@code waitForInitialMarkPassingCalculation} parameter set to {@code false}. In this
-     * case, mark passing calculation will be launched in the background and will not be waited for. This then
-     * needs to be synchronized with the dynamic (re-)calculations triggered by fixes and other data popping in.
+     * {@link MarkPassingCalculator#MarkPassingCalculator(DynamicTrackedRace, boolean, boolean)} constructor is invoked
+     * with the {@code waitForInitialMarkPassingCalculation} parameter set to {@code false}. In this case, mark passing
+     * calculation will be launched in the background and will not be waited for. This then needs to be synchronized
+     * with the dynamic (re-)calculations triggered by fixes and other data popping in.
      */
     private Map<Competitor, Map<Candidate, Set<Edge>>> allEdges = new HashMap<>();
     
-    private Map<Competitor, Set<Candidate>> candidates = new HashMap<>();
-    private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
-    private ConcurrentHashMap<Competitor, Integer> suppressedPassings = new ConcurrentHashMap<>();
+    /**
+     * The candidates found, keyed by the {@link Competitor} to whose track they belong.
+     * The value sets contain all candidates found, but not for all of them do we want to
+     * construct {@link Edge}s in the {@link #allEdges graph}. Whenever a competitor's candidate set
+     * changes, filter rules are applied to eliminate redundant and "stray" candidates. For example,
+     * if a tracker has been left on the race committee boat forming one end of the start line, and
+     * the tracker keeps tracking, it will swerve back and forth slightly, producing many distance
+     * candidates for various waypoints. By identifying that the tracker hasn't left a small bounding
+     * box over significant amounts of time, many of those candidates can be removed and represented by,
+     * say, the first and the last candidate in that small bounding box.<p>
+     * 
+     * Furthermore, specifically for {@link DistanceCandidateImpl distance candidates} we often see
+     * candidates for different marks created for approximately (sometimes even precisely) the same
+     * time point. For example, if a tracker approaches a start line from the leeward side and then
+     * moves away again, a candidate for the start line but also for the gate situated on the windward
+     * side of the start line will be created, roughly at the same time. Of those fixes only the one or
+     * two most likely ones should have edges constructed for them. This should help eliminate, e.g.,
+     * candidates for the windward mark if the tracker was near the start line at that time. This augments
+     * the filter rule suppressing candidates with very low probability; it takes relative probability
+     * of candidates with similar time points into account.<p>
+     * 
+     * Note, however, that we cannot know for which lap a candidate has to be created. If the same mark
+     * is referred to by more than one {@link Waypoint} in the {@link Course}, if one candidate survives
+     * the filtering then the respective candidates for all occurrences of that mark have to survive, too.
+     * Example: if the fix reaches maximum proximity to the windward mark, candidates for all occurrences
+     * of the windward mark in the course's waypoints will result. Around that time, other candidates may
+     * have been produced due to the course change also for the leeward gate or even the start line or an
+     * offset mark. Comparing the probabilities of the candidates in such a narrow time window will usually
+     * show as many equal-rated candidates for the windward mark as there are occurrences of the windward
+     * mark in the course. All of them need to pass the filter, and not only a single one. Other candidates
+     * from the time window whose probability is discernably less should be filtered.
+     */
+    private final Map<Competitor, NavigableSet<Candidate>> candidates;
+    
+    /**
+     * Those candidates from {@link #candidates} that have passed the filter logic of stage 1 (of candidates in close
+     * chronological sequence pick only those that have the highest probability). They are fed into the filter stage 2
+     * before they may become part of the {@link #allEdges graph}.
+     */
+    private final Map<Competitor, MostProbableCandidatesInSmallTimeRangeFilter> mostProbableCandidatesInSmallTimeRangeFilters;
+    
+    /**
+     * Those candidates from {@link #candidates} that have passed the filter logic of stage 2 (of candidates between
+     * which the track does not leave a small bounding box pick only those at start and end of that sequence) and are
+     * added to the {@link #allEdges graph}. This data structure is redundant to {@link #allEdges} and intended to speed
+     * up the algorithm used to find out which candidates must be added to and removed from the graph after changes have
+     * been applied to {@link #candidates} and the filter rules have been re-applied.
+     */
+    private final Map<Competitor, StationarySequenceBasedFilter> stationarySequenceBasedFilters;
+    
+    private final Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
+    private final ConcurrentHashMap<Competitor, Integer> suppressedPassings = new ConcurrentHashMap<>();
     
     /**
      * Set to {@link #EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME} milliseconds before the actual race start,
@@ -151,6 +211,47 @@ public class CandidateChooserImpl implements CandidateChooser {
      */
     private final HashMap<Competitor, NamedReentrantReadWriteLock> perCompetitorLocks;
     
+    /**
+     * The {@link #start} and {@link #end} proxy candidates may have {@code null} time points and hence
+     * would cause trouble with a regular {@link TimedComparator}. Therefore, this specialized comparator
+     * considers the {@link #start} candidate less than all others, the {@link #end} candidate greater
+     * than all others, and all other candidates are compared using a regular {@link TimedComparator},
+     * but if time points are equal, disambiguation follows this order of precedence: waypoint index,
+     * probability, candidate class (XTE before distance).
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class StartAndEndAwareTimeBasedCandidateComparator implements Comparator<Candidate> {
+        private final Comparator<Timed> timedComparator = TimedComparator.INSTANCE;
+        
+        @Override
+        public int compare(Candidate o1, Candidate o2) {
+            int result;
+            if (o1 == o2) {
+                result = 0;
+            } else if (o1 == start || o2 == end) {
+                result = -1;
+            } else if (o1 == end || o2 == start) {
+                result = 1;
+            } else {
+                result = timedComparator.compare(o1, o2);
+                if (result == 0) {
+                    result = Integer.compare(o1.getOneBasedIndexOfWaypoint(), o2.getOneBasedIndexOfWaypoint());
+                    if (result == 0) {
+                        result = Double.compare(o1.getProbability(), o2.getProbability());
+                        if (result == 0) {
+                            result = o2.getClass().getSimpleName().compareTo(o1.getClass().getSimpleName());
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+    }
+    
+    private final StartAndEndAwareTimeBasedCandidateComparator CANDIDATE_COMPARATOR = new StartAndEndAwareTimeBasedCandidateComparator();
+
     /**
      * Captures statistics about this candidate chooser.
      * 
@@ -195,13 +296,17 @@ public class CandidateChooserImpl implements CandidateChooser {
         
         public int getTotalNumberOfCandidatesAfterHighestProbabilityInShortTimeFilter() {
             int result = 0;
-            // TODO bug4221 implement
+            for (final MostProbableCandidatesInSmallTimeRangeFilter competitorCandidates : mostProbableCandidatesInSmallTimeRangeFilters.values()) {
+                result += Util.size(competitorCandidates.getFilteredCandidates());
+            }
             return result;
         }
         
         public int getTotalNumberOfCandidatesAfterBoundingBoxFilter() {
             int result = 0;
-            // TODO bug4221 implement
+            for (final StationarySequenceBasedFilter competitorCandidates : stationarySequenceBasedFilters.values()) {
+                result += Util.size(competitorCandidates.getFilteredCandidates());
+            }
             return result;
         }
         
@@ -217,9 +322,12 @@ public class CandidateChooserImpl implements CandidateChooser {
         
         public Map<Competitor, CompetitorStats> getPerCompetitorStats() {
             final Map<Competitor, CompetitorStats> result = new HashMap<>();
-            for (final Entry<Competitor, Set<Candidate>> competitorAndCandidates : candidates.entrySet()) {
+            for (final Entry<Competitor, NavigableSet<Candidate>> competitorAndCandidates : candidates.entrySet()) {
                 result.put(competitorAndCandidates.getKey(), new CompetitorStats(
-                        competitorAndCandidates.getValue().size(), 0, 0, getNumberOfEdges(competitorAndCandidates.getKey()))); // TODO bug4221 populate with filter stage results
+                        competitorAndCandidates.getValue().size(),
+                        Util.size(mostProbableCandidatesInSmallTimeRangeFilters.get(competitorAndCandidates.getKey()).getFilteredCandidates()),
+                        Util.size(stationarySequenceBasedFilters.get(competitorAndCandidates.getKey()).getFilteredCandidates()),
+                        getNumberOfEdges(competitorAndCandidates.getKey())));
             }
             return result;
         }
@@ -244,10 +352,14 @@ public class CandidateChooserImpl implements CandidateChooser {
         end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints() + 1, /* TimePoint */null,
                 /* Probability */1, /* Waypoint */null);
         candidates = new HashMap<>();
+        mostProbableCandidatesInSmallTimeRangeFilters = new HashMap<>();
+        stationarySequenceBasedFilters = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
             perCompetitorLocks.put(c, createCompetitorLock(c));
-            candidates.put(c, Collections.synchronizedSet(new TreeSet<Candidate>()));
+            candidates.put(c, Collections.synchronizedNavigableSet(new TreeSet<Candidate>(CANDIDATE_COMPARATOR)));
+            mostProbableCandidatesInSmallTimeRangeFilters.put(c, new MostProbableCandidatesInSmallTimeRangeFilter(CANDIDATE_COMPARATOR, start, end));
+            stationarySequenceBasedFilters.put(c, new StationarySequenceBasedFilter(CANDIDATE_COMPARATOR, race.getTrack(c), start, end));
             final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
             currentMarkPasses.put(c, currentMarkPassesForCompetitor);
             // in case the tracked race already has mark passings, e.g., from another mark passing calculator,
@@ -293,6 +405,14 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
+        calculateMarkPassDeltas(c, /* new fixes */ Collections.emptySet(), /* fixesReplacingExistingOnes */ Collections.emptySet(),
+                newCans, oldCans);
+    }
+
+    @Override
+    public void calculateMarkPassDeltas(Competitor c, Iterable<GPSFixMoving> newFixes,
+            Iterable<GPSFixMoving> fixesReplacingExistingOnes, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
+        updateStationarySequences(c, newFixes, fixesReplacingExistingOnes);
         final TimePoint startOfRace = race.getStartOfRace(/* inference */ false);
         if (startOfRace != null) {
             final boolean startTimeUpdated;
@@ -305,20 +425,35 @@ public class CandidateChooserImpl implements CandidateChooser {
                 }
             }
             if (startTimeUpdated) {
-                List<Candidate> startList = new ArrayList<>();
-                startList.add(start);
-                for (Competitor com : candidates.keySet()) {
-                    removeCandidates(com, startList);
+                Collection<Candidate> startList = Collections.singleton(start);
+                for (Competitor competitor : candidates.keySet()) {
+                    removeCandidates(competitor, startList);
                 }
                 start.setTimePoint(raceStartTime);
-                for (Competitor com : allEdges.keySet()) {
-                    addCandidates(com, startList);
+                for (Competitor competitor : allEdges.keySet()) {
+                    addCandidates(competitor, startList);
                 }
             }
         }
         removeCandidates(c, oldCans);
         addCandidates(c, newCans);
         findShortestPath(c);
+    }
+
+    /**
+     * The {@link StationarySequenceBasedFilter} object for competitor {@code c} is updated using the new
+     * and replacing fixes. The resulting changes in candidates passing that filter stage are
+     * {@link #adjustGraph(Competitor, Pair) propagated} into the {@link #allEdges graph}, but
+     * no {@link #findShortestPath(Competitor) recalculation of shortest path} is done yet.
+     */
+    private void updateStationarySequences(Competitor c, Iterable<GPSFixMoving> newFixes,
+            Iterable<GPSFixMoving> fixesReplacingExistingOnes) {
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            adjustGraph(c, stationarySequenceBasedFilters.get(c).updateFixes(newFixes, fixesReplacingExistingOnes));
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
+        }
     }
 
     @Override
@@ -345,10 +480,10 @@ public class CandidateChooserImpl implements CandidateChooser {
                 if (!fixed.add(fixedCan)) {
                     Candidate old = fixed.ceiling(fixedCan);
                     fixed.remove(old);
-                    removeCandidates(c, Arrays.asList(old));
+                    removeCandidates(c, Collections.singleton(old));
                     fixed.add(fixedCan);
                 }
-                addCandidates(c, Arrays.asList(fixedCan));
+                addCandidates(c, Collections.singleton(fixedCan));
                 findShortestPath(c);
             }
         } finally {
@@ -392,9 +527,9 @@ public class CandidateChooserImpl implements CandidateChooser {
     private void createNewEdges(Competitor c, Iterable<Candidate> newCandidates) {
         assert perCompetitorLocks.get(c).isWriteLocked();
         final Boolean isGateStart = race.isGateStart();
-        Map<Candidate, Set<Edge>> edges = allEdges.get(c);
+        Map<Candidate, Set<Edge>> edgesForCompetitor = allEdges.get(c);
+        final Iterable<Candidate> competitorCandidates = getFilteredCandidates(c);
         for (Candidate newCan : newCandidates) {
-            final Set<Candidate> competitorCandidates = candidates.get(c);
             synchronized (competitorCandidates) {
                 for (Candidate oldCan : competitorCandidates) {
                     final Candidate early;
@@ -484,23 +619,31 @@ public class CandidateChooserImpl implements CandidateChooser {
                             edge = new Edge(early, late,
                                     startTimingProbability * estimatedDistanceProbability, race.getRace().getCourse().getNumberOfWaypoints());
                         }
-                        addEdge(edges, edge);
+                        addEdge(edgesForCompetitor, edge);
                     }
                 }
             }
         }
     }
 
+    /**
+     * @return the candidates that passed all stages of candidate filtering; see also
+     *         {@link #updateFilteredCandidates(Competitor, Iterable, Iterable)}
+     */
+    private Iterable<Candidate> getFilteredCandidates(Competitor c) {
+        return stationarySequenceBasedFilters.get(c).getFilteredCandidates();
+    }
+
     private boolean travelingForwardInTimeOrUnknown(Candidate early, Candidate late) {
         return early.getTimePoint() == null || late.getTimePoint() == null || early.getTimePoint().before(late.getTimePoint());
     }
 
-    private void addEdge(Map<Candidate, Set<Edge>> edges, Edge e) {
+    private void addEdge(Map<Candidate, Set<Edge>> edgesForCompetitor, Edge e) {
         logger.finest(()->"Adding "+ e.toString());
-        Set<Edge> edgeSet = edges.get(e.getStart());
+        Set<Edge> edgeSet = edgesForCompetitor.get(e.getStart());
         if (edgeSet == null) {
             edgeSet = new HashSet<>();
-            edges.put(e.getStart(), edgeSet);
+            edgesForCompetitor.put(e.getStart(), edgeSet);
         }
         edgeSet.add(e); // FIXME what about edges that should replace an edge between the same two candidates? Will those edges somehow be removed?
     }
@@ -770,38 +913,156 @@ public class CandidateChooserImpl implements CandidateChooser {
         return totalGreatCircleDistance;
     }
 
+    /**
+     * New candidates will be added to {@link #candidates}. The filtering rules will be applied to update
+     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} and {@link #stationarySequenceBasedFilters} so that the
+     * sets of filtered candidates are again consistent with the contents of {@link #candidates} and the filter rules.
+     * Afterwards, the {@link #allEdges graph} will be updated by removing edges for candidates that are no longer part
+     * of {@link #stationarySequenceBasedFilters} (the last filter stage) and by adding edges for new candidates in
+     * {@link #stationarySequenceBasedFilters}. Note that the set of {@link #stationarySequenceBasedFilters} may
+     * actually shrink by adding a new candidate, simply because that candidate closes a gap between other candidates in
+     * the {@link #mostProbableCandidatesInSmallTimeRangeFilters} filter or by extending a stationary sequence such that
+     * a candidate in the middle of that sequence no longer is close enough to the sequence's border.
+     */
     private void addCandidates(Competitor c, Iterable<Candidate> newCandidates) {
         LockUtil.lockForWrite(perCompetitorLocks.get(c));
         try {
             for (Candidate can : newCandidates) {
                 candidates.get(c).add(can);
             }
-            createNewEdges(c, newCandidates);
+            updateFilteredCandidatesAndAdjustGraph(c, newCandidates, /* removedCandidates */ Collections.emptySet());
         } finally {
             LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
     }
 
-    private synchronized void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
+    /**
+     * Precondition: the {@link #candidates candidates(c)} for the competitor {@code c} have been updated.
+     * <p>
+     * 
+     * Then this method applies the filter rules to update {@link #mostProbableCandidatesInSmallTimeRangeFilters} of filter stage 1 (based on
+     * highest probability in short time ranges) and subsequently the second filter stage's
+     * {@link #stationarySequenceBasedFilters}. Based on the difference in filter results, the {@link #allEdges graph} is
+     * adjusted by removing edges for those candidates no longer passing the filter or no longer existing, and by adding
+     * edges for candidates that have now become available as filtered candidates and that weren't before. No shortest
+     * path analysis is triggered yet.
+     */
+    private void updateFilteredCandidatesAndAdjustGraph(Competitor c, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
+        Pair<Iterable<Candidate>, Iterable<Candidate>> filteredCandidatesAddedAndRemoved = updateFilteredCandidates(c, newCandidates, removedCandidates);
+        adjustGraph(c, filteredCandidatesAddedAndRemoved);
+    }
+
+    /**
+     * Adjusts the {@link #allEdges graph} based on the nodes added and removed. No {@link #findShortestPath(Competitor)
+     * path analysis} is performed yet.
+     */
+    private void adjustGraph(Competitor c,
+            Pair<Iterable<Candidate>, Iterable<Candidate>> filteredCandidatesAddedAndRemoved) {
+        final Map<Candidate, Set<Edge>> competitorEdges = allEdges.get(c);
+        for (final Candidate candidateRemoved : filteredCandidatesAddedAndRemoved.getB()) {
+            logger.finest(()->"Removing all edges containing " + candidateRemoved + "of "+ c);
+            removeEdgesForCandidate(candidateRemoved, competitorEdges);
+        }
+        createNewEdges(c, filteredCandidatesAddedAndRemoved.getA());
+    }
+    
+    /**
+     * Based on {@link #candidates candidates(c)}, computes the set of candidates that pass all filter rules and hence
+     * are expected to be represented in the {@link #allEdges graph}. When this method returns, it has updated the
+     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} accordingly.
+     * <p>
+     * 
+     * A two-pass algorithm. In the first pass, clusters of {@link DistanceCandidateImpl distance candidates} in close
+     * time-wise proximity are sorted by their probability (see {@link MostProbableCandidatesInSmallTimeRangeFilter}).
+     * Only the group with the highest probability is selected, assuming that multiple occurrences of the same mark in
+     * multiple waypoints leads to very similar if not equal probabilities. This way, candidates for marks further away
+     * don't depend on the overall minimum probability, but the relative ranking leads to a quick elimination of
+     * unlikely candidates.
+     * <p>
+     * 
+     * During the second pass, clusters of candidates are considered where the track between the first and the last
+     * candidate of the cluster does fit into a small bounding box (see {@link StationarySequenceBasedFilter}). This
+     * suggests that the tracker was not actively sailing during this period, and only the first and the last candidate
+     * of the cluster will pass the filter.
+     * <p>
+     * 
+     * @param competitor
+     *            the competitor whose candidates to filter
+     * @param newCandidates
+     *            the candidates that were added to the {@link #candidates candidates(c)} collection; some of these may
+     *            already have been in the collection, so the parameter actually describes a superset of the candidates
+     *            added
+     * @param removedCandidates
+     *            the candidates that were removed from the {@link #candidates candidates(c)} collection; some of these
+     *            may already have been missing from the collection, so the parameter actually describes a superset of
+     *            the candidates removed
+     * @return a pair whose first element holds the set of candidates that now pass the filter and didn't before, and
+     *         whose second element holds the set of candidates that did pass the filter before but don't anymore
+     */
+    private Pair<Iterable<Candidate>, Iterable<Candidate>> updateFilteredCandidates(Competitor competitor, Iterable<Candidate> newCandidates, Iterable<Candidate> removedCandidates) {
+        final NavigableSet<Candidate> competitorCandidates = candidates.get(competitor);
+        // pass 1
+        final Pair<Set<Candidate>, Set<Candidate>> filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence =
+                mostProbableCandidatesInSmallTimeRangeFilters.get(competitor).updateCandidates(competitorCandidates, newCandidates, removedCandidates);
+        // pass 2
+        final Pair<Iterable<Candidate>, Iterable<Candidate>> candidatesOnTheMove = stationarySequenceBasedFilters.get(competitor).updateCandidates(
+                filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getA(),
+                filteredCandidatesAddedAndRemovedBasedOnMostProbableCandidatesPerSequence.getB());
+        return candidatesOnTheMove;
+    }
+
+    /**
+     * Removes the {@code wrongCandidates} from the competitor's {@link #candidates} and updates the
+     * {@link #mostProbableCandidatesInSmallTimeRangeFilters} and {@link #stationarySequenceBasedFilters} filters
+     * accordingly. If filtered candidates are removed, their adjacent edges are removed from the {@link #allEdges
+     * graph}. If candidates now pass the filter which previously didn't, edges are inserted for them. This can happen,
+     * e.g., if a candidate is removed which previously connected other candidates into a cluster which in its entirety
+     * became subject to filtering and which now after the removal of the candidate is split up such that the parts of
+     * the former cluster now may pass the filter.
+     */
+    private void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
         LockUtil.lockForWrite(perCompetitorLocks.get(c));
         try {
             for (Candidate can : wrongCandidates) {
-                logger.finest(()->"Removing all edges containing " + can + "of "+ c);
                 candidates.get(c).remove(can);
-                Map<Candidate, Set<Edge>> edges = allEdges.get(c);
-                edges.remove(can);
-                for (Set<Edge> set : edges.values()) {
-                    for (Iterator<Edge> i = set.iterator(); i.hasNext();) {
-                        final Edge e = i.next();
-                        if (e.getStart() == can || e.getEnd() == can) {
-                            i.remove();
-                        }
-                    }
-                }
             }
+            updateFilteredCandidatesAndAdjustGraph(c, /* newCandidates */ Collections.emptySet(), wrongCandidates);
         } finally {
             LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
+    }
+
+    private void removeEdgesForCandidate(Candidate can, Map<Candidate, Set<Edge>> edges) {
+        edges.remove(can);
+        for (Set<Edge> set : edges.values()) {
+            for (Iterator<Edge> i = set.iterator(); i.hasNext();) {
+                final Edge e = i.next();
+                if (e.getStart() == can || e.getEnd() == can) {
+                    i.remove();
+                }
+            }
+        }
+    }
+    
+    @Override
+    public String toString() {
+        final StringBuilder result = new StringBuilder();
+        result.append(getClass().getSimpleName());
+        result.append(" for race ");
+        result.append(race.getRace().getName());
+        result.append(". Filtered vs. original candidate ratio: ");
+        long original = 0;
+        long filtered = 0;
+        for (final Entry<Competitor, NavigableSet<Candidate>> competitorAndCandidate : candidates.entrySet()) {
+            original += competitorAndCandidate.getValue().size();
+            filtered += Util.size(mostProbableCandidatesInSmallTimeRangeFilters.get(competitorAndCandidate.getKey()).getFilteredCandidates());
+        }
+        result.append(filtered);
+        result.append("/");
+        result.append(original);
+        result.append("=");
+        result.append((double) filtered/(double) original);
+        return result.toString();
     }
 
     private static class CandidateWithSettableTime extends CandidateImpl {
