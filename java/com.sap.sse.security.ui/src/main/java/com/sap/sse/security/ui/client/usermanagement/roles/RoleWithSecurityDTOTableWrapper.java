@@ -1,4 +1,10 @@
-package com.sap.sse.security.ui.client.usermanagement;
+package com.sap.sse.security.ui.client.usermanagement.roles;
+
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,18 +20,23 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.ImagesBarCell;
-import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.RoleWithSecurityDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.component.usergroup.roles.RoleDefinitionImagesBarCell;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.usermanagement.PermissionAndRoleImagesBarCell;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
@@ -61,9 +72,10 @@ public class RoleWithSecurityDTOTableWrapper extends
         final TextColumn<RoleWithSecurityDTO> userGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<RoleWithSecurityDTO>(
                 dto -> dto.toString(), userColumnListHandler);
 
-        final ImagesBarColumn<RoleWithSecurityDTO, ImagesBarCell> actionColumn = new ImagesBarColumn<RoleWithSecurityDTO, ImagesBarCell>(
-                new RoleDefinitionImagesBarCell(stringMessages));
-        actionColumn.setFieldUpdater((i, selectedRole, v) -> {
+        // add action column
+        final AccessControlledActionsColumn<RoleWithSecurityDTO, PermissionAndRoleImagesBarCell> userActionColumn = create(
+                new PermissionAndRoleImagesBarCell(stringMessages), userService);
+        userActionColumn.addAction(ACTION_DELETE, DELETE, selectedRole -> {
             UserDTO selectedObject = userSelectionModel.getSelectedObject();
             if (selectedObject != null) {
                 StrippedUserGroupDTO qualifiedForTenant = selectedRole.getQualifiedForTenant();
@@ -95,6 +107,17 @@ public class RoleWithSecurityDTOTableWrapper extends
             }
         });
 
+        final HasPermissions type = SecuredSecurityTypes.PERMISSION_ASSOCIATION;
+
+        final EditOwnershipDialog.DialogConfig<RoleWithSecurityDTO> configOwnership = EditOwnershipDialog
+                .create(userService.getUserManagementService(), type, permission -> refreshRoleList(), stringMessages);
+
+        final EditACLDialog.DialogConfig<RoleWithSecurityDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
+        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                permission -> configACL.openDialog(permission));
+
         // filter field configuration
         filterField = new LabeledAbstractFilterablePanel<RoleWithSecurityDTO>(new Label(stringMessages.filterRoles()),
                 new ArrayList<RoleWithSecurityDTO>(), dataProvider) {
@@ -117,8 +140,7 @@ public class RoleWithSecurityDTOTableWrapper extends
         // setup table
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.roleName());
-
-        table.addColumn(actionColumn);
+        table.addColumn(userActionColumn);
     }
 
     public LabeledAbstractFilterablePanel<RoleWithSecurityDTO> getFilterField() {

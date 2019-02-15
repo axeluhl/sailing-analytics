@@ -9,7 +9,8 @@ import com.google.gwt.resources.client.CssResource;
  */
 public interface RoleAndPermissionDetailsResources extends ClientBundle {
 
-    public static final RoleAndPermissionDetailsResources INSTANCE = GWT.create(RoleAndPermissionDetailsResources.class);
+    public static final RoleAndPermissionDetailsResources INSTANCE = GWT
+            .create(RoleAndPermissionDetailsResources.class);
 
     @Source("RoleAndPermissionDetailsResources.gss")
     LocalCss css();

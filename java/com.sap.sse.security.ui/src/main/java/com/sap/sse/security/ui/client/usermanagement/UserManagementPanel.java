@@ -31,6 +31,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.CreateUserDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.usermanagement.permissions.WildcardPermissionPanel;
+import com.sap.sse.security.ui.client.usermanagement.roles.UserRoleDefinitionPanel;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class UserManagementPanel<TR extends CellTableWithCheckboxResources> extends DockPanel {

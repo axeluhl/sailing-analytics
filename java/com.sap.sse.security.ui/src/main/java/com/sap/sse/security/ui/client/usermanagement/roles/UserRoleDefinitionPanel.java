@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.client.usermanagement;
+package com.sap.sse.security.ui.client.usermanagement.roles;
 
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -33,8 +33,8 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.UserGroupListDataProvider.UserGroupListDataProviderChangeHandler;
 import com.sap.sse.security.ui.client.component.usergroup.roles.RoleDefinitionSuggestOracle;
-import com.sap.sse.security.ui.client.component.usergroup.roles.UserGroupRoleResources;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.usermanagement.RoleAndPermissionDetailsResources;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
@@ -47,7 +47,8 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
     private final RoleWithSecurityDTOTableWrapper roleWithSecurityDTOTableWrapper;
     private final SingleSelectionModel<UserDTO> userSelectionModel;
     private final SuggestBox suggestRole;
-    private final UserGroupRoleResources userGroupRoleResources = GWT.create(UserGroupRoleResources.class);
+    private final RoleAndPermissionDetailsResources roleAndPermissionDetailsResources = GWT
+            .create(RoleAndPermissionDetailsResources.class);
 
     public UserRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final CellTableWithCheckboxResources tableResources,
@@ -74,8 +75,8 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
         final RoleDefinitionSuggestOracle oracle = new RoleDefinitionSuggestOracle(
                 userService.getUserManagementService(), stringMessages);
         suggestRole = new SuggestBox(oracle);
-        userGroupRoleResources.css().ensureInjected();
-        suggestRole.addStyleName(userGroupRoleResources.css().roleDefinitionSuggest());
+        roleAndPermissionDetailsResources.css().ensureInjected();
+        suggestRole.addStyleName(roleAndPermissionDetailsResources.css().enterRoleNameSuggest());
         suggestRole.getElement().setPropertyString("placeholder", stringMessages.enterRoleName());
         this.initPlaceholder(suggestRole, stringMessages.enterRoleName());
 

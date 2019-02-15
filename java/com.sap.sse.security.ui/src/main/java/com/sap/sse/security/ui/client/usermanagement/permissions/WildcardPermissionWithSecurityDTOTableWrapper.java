@@ -36,7 +36,7 @@ import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.client.usermanagement.RoleWithSecurityDTOImagesBarCell;
+import com.sap.sse.security.ui.client.usermanagement.PermissionAndRoleImagesBarCell;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
@@ -49,22 +49,23 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
     private final LabeledAbstractFilterablePanel<WildcardPermissionWithSecurityDTO> filterField;
     private final SingleSelectionModel<UserDTO> userSelectionModel;
 
-    public WildcardPermissionWithSecurityDTOTableWrapper(final UserService userService, final StringMessages stringMessages,
-            final ErrorReporter errorReporter, boolean enablePager, final CellTableWithCheckboxResources tableResources,
-            final SingleSelectionModel<UserDTO> userSelectionModel, final Runnable updateUsers) {
+    public WildcardPermissionWithSecurityDTOTableWrapper(final UserService userService,
+            final StringMessages stringMessages, final ErrorReporter errorReporter, boolean enablePager,
+            final CellTableWithCheckboxResources tableResources, final SingleSelectionModel<UserDTO> userSelectionModel,
+            final Runnable updateUsers) {
         super(stringMessages, errorReporter, false, enablePager,
                 new EntityIdentityComparator<WildcardPermissionWithSecurityDTO>() {
-            @Override
+                    @Override
                     public boolean representSameEntity(WildcardPermissionWithSecurityDTO dto1,
                             WildcardPermissionWithSecurityDTO dto2) {
-                return dto1.getIdentifier().equals(dto2.getIdentifier());
-            }
+                        return dto1.getIdentifier().equals(dto2.getIdentifier());
+                    }
 
-            @Override
+                    @Override
                     public int hashCode(WildcardPermissionWithSecurityDTO t) {
-                return t.getIdentifier().hashCode();
-            }
-        }, tableResources);
+                        return t.getIdentifier().hashCode();
+                    }
+                }, tableResources);
         this.userSelectionModel = userSelectionModel;
         this.userSelectionModel.addSelectionChangeHandler(e -> refreshPermissionList());
 
@@ -74,8 +75,8 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
         final TextColumn<WildcardPermissionWithSecurityDTO> userGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<WildcardPermissionWithSecurityDTO>(
                 dto -> dto.toString(), userColumnListHandler);
 
-        final AccessControlledActionsColumn<WildcardPermissionWithSecurityDTO, RoleWithSecurityDTOImagesBarCell> userActionColumn = create(
-                new RoleWithSecurityDTOImagesBarCell(stringMessages), userService);
+        final AccessControlledActionsColumn<WildcardPermissionWithSecurityDTO, PermissionAndRoleImagesBarCell> userActionColumn = create(
+                new PermissionAndRoleImagesBarCell(stringMessages), userService);
         userActionColumn.addAction(ACTION_DELETE, DELETE, selectedPermission -> {
             UserDTO selectedObject = userSelectionModel.getSelectedObject();
             if (selectedObject != null) {
@@ -106,9 +107,8 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
         final HasPermissions type = SecuredSecurityTypes.PERMISSION_ASSOCIATION;
 
         final EditOwnershipDialog.DialogConfig<WildcardPermissionWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(
-                userService.getUserManagementService(), type,
-                        permission -> refreshPermissionList(), stringMessages);
+                .create(userService.getUserManagementService(), type, permission -> refreshPermissionList(),
+                        stringMessages);
 
         final EditACLDialog.DialogConfig<WildcardPermissionWithSecurityDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
@@ -150,7 +150,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
         UserDTO selectedObject = userSelectionModel.getSelectedObject();
         if (selectedObject != null) {
             Collection<WildcardPermissionWithSecurityDTO> permissions = new ArrayList<>();
-            for(WildcardPermission permission : selectedObject.getPermissions()) {
+            for (WildcardPermission permission : selectedObject.getPermissions()) {
                 permissions.add((WildcardPermissionWithSecurityDTO) permission);
             }
             filterField.updateAll(permissions);
