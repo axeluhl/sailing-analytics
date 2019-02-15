@@ -21,7 +21,7 @@ import com.sap.sse.common.Util;
  * <pre>
  *       MeasurementXMLFile performanceReport = new MeasurementXMLFile(this.getClass());
  *       MeasurementCase performanceReportCase = performanceReport.addCase(getClass().getSimpleName());
- *       performanceReportCase.addMeasurement(new Measurement("This is a measurement name", 12345); // 12345 is the value to be recorded
+ *       performanceReportCase.addMeasurement(new Measurement("This is a measurement name", 12345)); // 12345 is the value to be recorded
  *       performanceReport.write();
  * </pre>
  * 

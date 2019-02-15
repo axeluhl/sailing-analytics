@@ -1,7 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.ArrayList;
-import java.util.Calendar;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -22,7 +29,6 @@ import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.SelectionAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -30,15 +36,8 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 public class MainScheduleFragment extends BaseFragment implements View.OnClickListener, SelectionAdapter.ItemClick {
 
@@ -249,12 +248,12 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-        case R.id.start_race:
-            startRace();
-            break;
+            case R.id.start_race:
+                startRace();
+                break;
 
-        default:
-            ExLog.i(getActivity(), TAG, "Clicked on " + v);
+            default:
+                ExLog.i(getActivity(), TAG, "Clicked on " + v);
         }
     }
 
@@ -337,7 +336,10 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             args.putBoolean(RACE_GROUP, mItemRaceGroup.isChecked());
         }
 
-        getFragmentManager().beginTransaction().replace(R.id.racing_view_container, fragment).commitAllowingStateLoss();
+        getFragmentManager().beginTransaction()
+                .replace(R.id.racing_view_container, fragment)
+                .addToBackStack(null)
+                .commitAllowingStateLoss();
     }
 
     @Override
@@ -352,9 +354,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         @Override
         public void onStatusChanged(ReadonlyRaceState state) {
             super.onStatusChanged(state);
-
-            openFragment(
-                    RaceInfoFragmentChooser.on(state.getRacingProcedure().getType()).choose(getActivity(), getRace()));
+            RacingActivity activity = (RacingActivity) requireActivity();
+            activity.onRaceItemClicked(getRace(), true);
         }
     }
 }
