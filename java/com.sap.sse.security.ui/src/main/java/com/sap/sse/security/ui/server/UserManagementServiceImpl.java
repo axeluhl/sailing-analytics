@@ -55,6 +55,7 @@ import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
@@ -1096,6 +1097,85 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     public void run() throws Exception {
                         getSecurityService().removeRoleFromUser(user, role);
                         logger.info(message);
+                    }
+                });
+
+        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+        return new SuccessInfo(true, message, /* redirectURL */null,
+                new Triple<>(userDTO, getAllUser(), getServerInfo()));
+    }
+
+    @Override
+    public SuccessInfo addPermissionForUser(String username, WildcardPermission permission)
+            throws UnauthorizedException {
+
+        // check if user exists
+        User user = getSecurityService().getUserByName(username);
+        if (user == null) {
+            return new SuccessInfo(false, "Not permitted to grant permission " + permission + " for user " + username,
+                    /* redirectURL */null, null);
+        }
+
+        // check permissions
+        getSecurityService().checkCurrentUserUpdatePermission(user);
+        getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.GRANT_PERMISSION);
+
+        if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
+            return new SuccessInfo(false, "Not permitted to grant permission " + permission + " for user " + username,
+                    /* redirectURL */null, null);
+        }
+
+        // grant permission
+        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission, user);
+        final String message = "Added permission " + permission + " for user " + username;
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
+                associationTypeIdentifier.toString(), new Action() {
+
+                    @Override
+                    public void run() throws Exception {
+                        getSecurityService().addPermissionForUser(username, permission);
+                        logger.info(message);
+                    }
+                });
+
+        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+        return new SuccessInfo(true, message, /* redirectURL */null,
+                new Triple<>(userDTO, getAllUser(), getServerInfo()));
+    }
+
+    @Override
+    public SuccessInfo removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permission)
+            throws UnauthorizedException {
+        // check if user exists
+        User user = getSecurityService().getUserByName(username);
+        if (user == null) {
+            return new SuccessInfo(false, "Not permitted to revoke permission " + permission + " for user " + username,
+                    /* redirectURL */null, null);
+        }
+
+        // check permissions
+        getSecurityService().checkCurrentUserUpdatePermission(user);
+        getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.REVOKE_PERMISSION);
+
+        if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
+            return new SuccessInfo(false, "Not permitted to revoke permission " + permission + " for user " + username,
+                    /* redirectURL */null, null);
+        }
+
+        // revoke permission
+        final String message = "Revoked permission " + permission + " for user " + username;
+        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission, user);
+        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                .getQualifiedObjectIdentifier(associationTypeIdentifier);
+
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                new ActionWithResult<Void>() {
+                    @Override
+                    public Void run() throws Exception {
+                        getSecurityService().removePermissionFromUser(username, permission);
+                        logger.info(message);
+                        return null;
                     }
                 });
 
