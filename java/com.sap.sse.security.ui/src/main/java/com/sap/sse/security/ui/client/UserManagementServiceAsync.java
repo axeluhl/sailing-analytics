@@ -154,9 +154,10 @@ public interface UserManagementServiceAsync {
 
     void verifySocialUser(CredentialDTO credential, AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> markedAsyncCallback);
 
-    void addRoleToUser(String username, UUID roleDefinitionId, String tenantQualifierName,
+    void addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId, String tenantQualifierName,
             AsyncCallback<SuccessInfo> callback);
 
-    void removeRoleFromUser(String username, UUID roleDefinitionId, String tenantQualifierName,
+    void removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
+            String tenantQualifierName,
             AsyncCallback<SuccessInfo> callback);
 }

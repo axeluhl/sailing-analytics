@@ -166,9 +166,11 @@ public interface UserManagementService extends RemoteService {
     AccessControlListDTO getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject)
             throws UnauthorizedException;
 
-    SuccessInfo addRoleToUser(String username, UUID roleDefinitionId, String tenantQualifierName)
+    SuccessInfo addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId,
+            String tenantQualifierName)
             throws UserManagementException, UnauthorizedException;
 
-    SuccessInfo removeRoleFromUser(String username, UUID roleDefinitionId, String tenantQualifierName)
+    SuccessInfo removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
+            String tenantQualifierName)
             throws UserManagementException, UnauthorizedException;
 }

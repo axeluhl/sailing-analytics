@@ -997,34 +997,49 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public SuccessInfo addRoleToUser(String username, UUID roleDefinitionId, String tenantQualifierName)
+    public SuccessInfo addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId,
+            String tenantQualifierName)
             throws UserManagementException, UnauthorizedException {
-        User user = getSecurityService().getUserByName(username);
+
+        // get user for which to add a role
+        final User user = getSecurityService().getUserByName(username);
         if (user == null) {
-            return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
+            return new SuccessInfo(false, "User " + username + " does not exist.", /* redirectURL */ null, null);
         }
 
+        // check permissions
         getSecurityService().checkCurrentUserUpdatePermission(user);
         getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.GRANT_PERMISSION);
 
-        UserGroup tenant;
+        // get user for which the role is qualified, if one exists
+        if (!userQualifierName.isEmpty() && getSecurityService().getUserByName(userQualifierName) == null) {
+            return new SuccessInfo(false, "User " + userQualifierName + " does not exist for role qualification.",
+                    /* redirectURL */ null, null);
+        }
+
+        // get the group tenant the role is qualified for if one exists
+        final UserGroup tenant;
         if (tenantQualifierName == null || tenantQualifierName.trim().isEmpty()) {
             tenant = null;
         } else {
             tenant = getSecurityService().getUserGroupByName(tenantQualifierName);
             if (tenant == null) {
+                // unknown tenant
                 return new SuccessInfo(false, "Tenant " + tenantQualifierName + " does not exist.",
                         /* redirectURL */ null, /* userDTO */ null);
             }
         }
 
-        Role role = createRoleFromIDs(roleDefinitionId, tenant.getId(), user.getName());
+        final Role role = createRoleFromIDs(roleDefinitionId, tenant != null ? tenant.getId() : null,
+                userQualifierName);
         if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
                 role.getRoleDefinition(), role.getQualificationAsOwnership())) {
             throw new UnauthorizedException("Not allowed.");
         }
 
-        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+        final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+
+        final String message = "added role " + role.getName() + " for user " + username;
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier, associationTypeIdentifier.toString(),
                 new Action() {
@@ -1032,20 +1047,20 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     @Override
                     public void run() throws Exception {
                         getSecurityService().addRoleForUser(user, role);
+                        logger.info(message);
                     }
                 });
 
-        final String message = "added role " + role.getName() + " for user " + username;
-        logger.info(message);
         final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
         return new SuccessInfo(true, message, /* redirectURL */null,
                 new Triple<>(userDTO, getAllUser(), getServerInfo()));
     }
 
     @Override
-    public SuccessInfo removeRoleFromUser(String username, UUID roleDefinitionId, String tenantQualifierName)
+    public SuccessInfo removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
+            String tenantQualifierName)
             throws UserManagementException, UnauthorizedException {
-        User user = getSecurityService().getUserByName(username);
+        final User user = getSecurityService().getUserByName(username);
         if (user == null) {
             return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
         }
@@ -1053,7 +1068,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         getSecurityService().checkCurrentUserUpdatePermission(user);
         getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.REVOKE_PERMISSION);
 
-        UserGroup tenant;
+        final UserGroup tenant;
         if (tenantQualifierName == null || tenantQualifierName.trim().isEmpty()) {
             tenant = null;
         } else {
@@ -1064,13 +1079,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }
 
-        Role role = createRoleFromIDs(roleDefinitionId, tenant.getId(), user.getName());
+        final Role role = createRoleFromIDs(roleDefinitionId, tenant == null ? null : tenant.getId(),
+                userQualifierName);
         if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
                 role.getRoleDefinition(), role.getQualificationAsOwnership())) {
             throw new UnauthorizedException("Not allowed.");
         }
 
-        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+        final String message = "removed role " + role.getName() + " for user " + username;
+        final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier, associationTypeIdentifier.toString(),
                 new Action() {
@@ -1078,11 +1095,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     @Override
                     public void run() throws Exception {
                         getSecurityService().removeRoleFromUser(user, role);
+                        logger.info(message);
                     }
                 });
 
-        final String message = "removed role " + role.getName() + " for user " + username;
-        logger.info(message);
         final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
         return new SuccessInfo(true, message, /* redirectURL */null,
                 new Triple<>(userDTO, getAllUser(), getServerInfo()));

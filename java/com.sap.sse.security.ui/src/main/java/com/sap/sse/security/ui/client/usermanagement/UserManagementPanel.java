@@ -119,6 +119,12 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
             }
         });
         updateUsers();
+
+        // add details panel for user roles
+        final UserRoleDefinitionPanel userRoleDefinitionPanel = new UserRoleDefinitionPanel(userService, stringMessages,
+                errorReporter,
+                tableResources, userList.getSelectionModel(), () -> updateUsers());
+        west.add(userRoleDefinitionPanel);
     }
     
     public void updateUsers() {
