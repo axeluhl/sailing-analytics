@@ -1,5 +1,5 @@
 package com.sap.sailing.windestimation.evaluation;
 
 public enum EvaluatableWindEstimationImplementation {
-    HMM, MST_HMM, CLUSTERING, MEAN_OUTLIER, NEIGHBOR_OUTLIER, POLARS_FITTING
+    HMM, HMM_GAUSS, MST_HMM, CLUSTERING, MEAN_OUTLIER, NEIGHBOR_OUTLIER, POLARS_FITTING
 }

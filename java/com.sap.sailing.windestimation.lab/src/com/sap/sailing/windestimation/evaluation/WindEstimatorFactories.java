@@ -6,6 +6,7 @@ import com.sap.sailing.windestimation.PolarsFittingBasedWindEstimationComponentI
 import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl;
 import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl.ManeuverClassificationsAggregatorImplementation;
 import com.sap.sailing.windestimation.WindEstimationComponent;
+import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregatorFactory.HmmTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
@@ -34,7 +35,9 @@ public class WindEstimatorFactories {
             EvaluatableWindEstimationImplementation windEstimationImplementation) {
         switch (windEstimationImplementation) {
         case HMM:
-            return hmm();
+            return hmm(HmmTransitionProbabilitiesCalculator.INTERSECTED);
+        case HMM_GAUSS:
+            return hmm(HmmTransitionProbabilitiesCalculator.GAUSSIAN_REGRESSOR);
         case MST_HMM:
             return mstHmm();
         case CLUSTERING:
@@ -49,7 +52,8 @@ public class WindEstimatorFactories {
         throw new IllegalArgumentException(windEstimationImplementation + " is unsupported");
     }
 
-    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> hmm() {
+    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> hmm(
+            HmmTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         return new WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>>() {
 
             @Override
@@ -58,7 +62,7 @@ public class WindEstimatorFactories {
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
                                 new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
-                        ManeuverClassificationsAggregatorImplementation.HMM);
+                        ManeuverClassificationsAggregatorImplementation.HMM, transitionProbabilitiesCalculator);
             }
 
             @Override
@@ -77,7 +81,7 @@ public class WindEstimatorFactories {
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
                                 new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
-                        ManeuverClassificationsAggregatorImplementation.MST_HMM);
+                        ManeuverClassificationsAggregatorImplementation.MST_HMM, null);
             }
 
             @Override
@@ -96,7 +100,7 @@ public class WindEstimatorFactories {
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
                                 new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
-                        ManeuverClassificationsAggregatorImplementation.CLUSTERING);
+                        ManeuverClassificationsAggregatorImplementation.CLUSTERING, null);
             }
 
             @Override
@@ -133,7 +137,7 @@ public class WindEstimatorFactories {
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
                                 new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
-                        ManeuverClassificationsAggregatorImplementation.MEAN_OUTLIER);
+                        ManeuverClassificationsAggregatorImplementation.MEAN_OUTLIER, null);
             }
 
             @Override
@@ -152,7 +156,7 @@ public class WindEstimatorFactories {
                         polarService,
                         new RaceElementsFilteringPreprocessingPipelineImpl(
                                 new CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer()),
-                        ManeuverClassificationsAggregatorImplementation.NEIGHBOR_OUTLIER);
+                        ManeuverClassificationsAggregatorImplementation.NEIGHBOR_OUTLIER, null);
             }
 
             @Override

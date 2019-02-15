@@ -12,22 +12,22 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElement
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
+import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelStore;
-import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class WindEstimatorManeuverNumberDependentEvaluationRunner {
 
     private static final Integer MAX_RACES = null;
     private static final int MAX_MANEUVERS = 10;
-    private static final boolean EVALUATE_PER_COMPETITOR_TRACK = true;
+    private static final boolean EVALUATE_PER_COMPETITOR_TRACK = false;
     private static final boolean ENABLE_MARKS_INFORMATION = false;
     private static final boolean ENABLE_SCALED_SPEED = false;
     private static final boolean ENABLE_POLARS = true;
     private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.75;
     private static final double MAX_TWS_DEVIATION_PERCENT = 0.2;
     private static final int MAX_TWD_DEVIATION_DEG = 20;
-    private static final EvaluatableWindEstimationImplementation WIND_ESTIMATION_IMPLEMENTATION = EvaluatableWindEstimationImplementation.HMM;
+    private static final EvaluatableWindEstimationImplementation WIND_ESTIMATION_IMPLEMENTATION = EvaluatableWindEstimationImplementation.MST_HMM;
 
     private static final File csvFile = new File(
             "maneuverNumberDependentEvaluation" + WIND_ESTIMATION_IMPLEMENTATION + ".csv");
@@ -38,10 +38,10 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
         LoggingUtil.logInfo("Loading polar data");
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         LoggingUtil.logInfo("Wind estimator evaluation started...");
-        ModelStore classifierModelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
+        ModelStore modelStore = new FileSystemModelStoreImpl("trained_wind_estimation_models");
+        // ModelStore modelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
         WindEstimatorFactories estimatorFactories = new WindEstimatorFactories(polarService,
-                new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION),
-                classifierModelStore);
+                new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION), modelStore);
 
         double[] avgErrorDegreesPerManeuverCount = new double[MAX_MANEUVERS];
         double[] avgConfidencePerManeuverCount = new double[MAX_MANEUVERS];
