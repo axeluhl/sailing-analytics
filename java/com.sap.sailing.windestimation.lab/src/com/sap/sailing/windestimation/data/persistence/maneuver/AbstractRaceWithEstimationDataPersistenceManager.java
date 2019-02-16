@@ -72,26 +72,28 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
     @Override
     public void addRace(String regattaName, String trackedRaceName, WindQuality windQuality,
             List<JSONObject> competitorTracks) {
-        List<Document> dbCompetitorTracks = new ArrayList<>(competitorTracks.size());
-        for (JSONObject competitorTrack : competitorTracks) {
-            Document entry = parseJsonString(competitorTrack.toString());
-            dbCompetitorTracks.add(entry);
+        if (!competitorTracks.isEmpty()) {
+            List<Document> dbCompetitorTracks = new ArrayList<>(competitorTracks.size());
+            for (JSONObject competitorTrack : competitorTracks) {
+                Document entry = parseJsonString(competitorTrack.toString());
+                dbCompetitorTracks.add(entry);
+            }
+            Document dbObject = new Document();
+            dbObject.put(RaceWithEstimationDataDeserializer.REGATTA_NAME, regattaName);
+            dbObject.put(RaceWithEstimationDataDeserializer.TRACKED_RACE_NAME, trackedRaceName);
+            dbObject.put(RaceWithEstimationDataDeserializer.WIND_QUALITY, windQuality.name());
+            MongoCollection<Document> competitorTracksCollection = getDb()
+                    .getCollection(getCompetitorTracksCollectionName());
+            competitorTracksCollection.insertMany(dbCompetitorTracks);
+            BasicDBList dbCompetitorTrackIds = new BasicDBList();
+            for (Document dbCompetitorTrack : dbCompetitorTracks) {
+                ObjectId dbId = (ObjectId) dbCompetitorTrack.get(FIELD_DB_ID);
+                dbCompetitorTrackIds.add(dbId.toHexString());
+            }
+            dbObject.put(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS, dbCompetitorTrackIds);
+            MongoCollection<Document> races = getDb().getCollection(getCollectionName());
+            races.insertOne(dbObject);
         }
-        Document dbObject = new Document();
-        dbObject.put(RaceWithEstimationDataDeserializer.REGATTA_NAME, regattaName);
-        dbObject.put(RaceWithEstimationDataDeserializer.TRACKED_RACE_NAME, trackedRaceName);
-        dbObject.put(RaceWithEstimationDataDeserializer.WIND_QUALITY, windQuality.name());
-        MongoCollection<Document> competitorTracksCollection = getDb()
-                .getCollection(getCompetitorTracksCollectionName());
-        competitorTracksCollection.insertMany(dbCompetitorTracks);
-        BasicDBList dbCompetitorTrackIds = new BasicDBList();
-        for (Document dbCompetitorTrack : dbCompetitorTracks) {
-            ObjectId dbId = (ObjectId) dbCompetitorTrack.get(FIELD_DB_ID);
-            dbCompetitorTrackIds.add(dbId.toHexString());
-        }
-        dbObject.put(RaceWithEstimationDataDeserializer.COMPETITOR_TRACKS, dbCompetitorTrackIds);
-        MongoCollection<Document> races = getDb().getCollection(getCollectionName());
-        races.insertOne(dbObject);
     }
 
     protected String getCompetitorTracksCollectionName() {
