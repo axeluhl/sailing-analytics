@@ -165,7 +165,6 @@ public class ManeuverAndWindImporter {
     private void importRegatta(String regattaName, ImportStatistics importStatistics)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         String encodedRegattaName = encodeUrlPathPart(regattaName);
-        // TODO The encoding of some regatta names with special characters does not work well
         HttpGet getRegatta = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName);
         JSONObject regattaJson = null;
         try {
@@ -174,7 +173,7 @@ public class ManeuverAndWindImporter {
             synchronized (importStatistics) {
                 importStatistics.ignoredRegattas++;
             }
-            LoggingUtil.logInfo("Error while processing regatta: " + regattaName);
+            LoggingUtil.logInfo("Error while processing regatta: " + regattaName + "\r\n" + getRegatta);
             return;
         }
         for (Object seriesJson : (JSONArray) regattaJson.get("series")) {
@@ -199,8 +198,12 @@ public class ManeuverAndWindImporter {
                                 synchronized (importStatistics) {
                                     importStatistics.ingoredRaces += 1;
                                 }
+                                String extraLog = "";
+                                if (e instanceof HttpClientException) {
+                                    extraLog = "\r\n" + ((HttpClientException) e).getRequest();
+                                }
                                 LoggingUtil.logInfo("Error while processing race nr. " + raceNumber + ": \""
-                                        + trackedRaceName + "\"");
+                                        + trackedRaceName + "\"" + extraLog);
                             }
                         });
                     }
@@ -251,13 +254,14 @@ public class ManeuverAndWindImporter {
                 JSONArray windFixesJson = (JSONArray) ((JSONObject) windSourceObj).get(RaceWindJsonSerializer.FIXES);
                 windFixesCount += windFixesJson.size();
             }
-            LoggingUtil.logInfo(
-                    "Imported " + windFixesCount + " wind fixes from " + windSourcesJson.size() + " wind sources");
+            LoggingUtil.logInfo("Imported " + windFixesCount + " wind fixes from " + windSourcesJson.size()
+                    + " wind sources in race \"" + trackedRaceName + "\" of regatta \"" + regattaName + "\"");
             synchronized (importStatistics) {
                 importStatistics.racesWithHighQualityWindData++;
             }
         } else {
-            LoggingUtil.logInfo("No high quality wind fixes contained");
+            LoggingUtil.logInfo("No high quality wind fixes contained in race \"" + trackedRaceName + "\" of regatta \""
+                    + regattaName + "\"");
         }
     }
 
@@ -310,8 +314,8 @@ public class ManeuverAndWindImporter {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        LoggingUtil.logInfo(
-                "Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount + " maneuvers");
+        LoggingUtil.logInfo("Imported " + competitorTracks.size() + " competitor tracks with " + maneuversCount
+                + " maneuvers in race \"" + trackedRaceName + "\" of regatta \"" + regattaName + "\"");
         synchronized (importStatistics) {
             importStatistics.competitorTracksCount += competitorTracks.size();
             importStatistics.maneuversCount += maneuversCount;
@@ -325,19 +329,8 @@ public class ManeuverAndWindImporter {
         for (int i = 1; i <= 10; i++) {
             try {
                 httpResponse = createNewHttpClient().execute(getEstimationData);
-                if (httpResponse.getStatusLine().getStatusCode() == 200) {
-                    JSONObject resultJson;
-                    try {
-                        resultJson = (JSONObject) getJsonFromResponse(httpResponse);
-                        return resultJson;
-                    } catch (Exception e) {
-                        System.out.println(getEstimationData);
-                        throw e;
-                    }
-                } else {
-                    LoggingUtil.logInfo("Connection error (" + i + "/10) while querying races of regatta \""
-                            + trackedRegattaName + "\" (status code not 200), retrying...");
-                }
+                JSONObject resultJson = (JSONObject) getJsonFromResponse(httpResponse);
+                return resultJson;
             } catch (Exception e) {
                 Thread.sleep(10000);
                 lastException = e;
@@ -350,7 +343,7 @@ public class ManeuverAndWindImporter {
                 }
             }
         }
-        throw lastException;
+        throw new HttpClientException(getEstimationData.toString(), lastException);
     }
 
     private <ToType> void addTransformedElementsToCompetitorTrackJson(List<JSONObject> competitorTracks,
@@ -397,6 +390,22 @@ public class ManeuverAndWindImporter {
         private int ignoredRegattas = 0;
         private int ingoredRaces = 0;
         private int racesWithHighQualityWindData = 0;
+    }
+
+    private static class HttpClientException extends Exception {
+
+        private static final long serialVersionUID = 4948532287832868768L;
+        private final String request;
+
+        public HttpClientException(String request, Exception e) {
+            super(e);
+            this.request = request;
+        }
+
+        public String getRequest() {
+            return request;
+        }
+
     }
 
 }
