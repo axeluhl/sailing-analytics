@@ -36,7 +36,6 @@ echo "$autostart_bundles"
 bundleStartLevelSection="
                  <bundle>
                    <id>com.sap.sailing.server.gateway.test.support</id>
-                   <id>com.sap.sailing.news</id>
                    <level>4</level>
                    <autoStart>true</autoStart>
                  </bundle>"
