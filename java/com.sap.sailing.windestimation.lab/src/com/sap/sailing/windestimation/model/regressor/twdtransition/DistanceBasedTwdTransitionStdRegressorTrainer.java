@@ -5,9 +5,9 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedS
 import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedSingleDimensionBasedTwdTransitionPersistenceManager.AggregatedSingleDimensionType;
 import com.sap.sailing.windestimation.model.regressor.IncrementalSingleDimensionPolynomialRegressor;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
-import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 
 /**
  * Trains TWD delta standard deviation by considering the distance passed between two measurements.
@@ -26,8 +26,7 @@ public class DistanceBasedTwdTransitionStdRegressorTrainer extends TwdTransition
     public static void main(String[] args) throws Exception {
         AggregatedSingleDimensionBasedTwdTransitionPersistenceManager distanceBasedPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
                 AggregatedSingleDimensionType.DISTANCE);
-        ModelStore modelStore = new FileSystemModelStoreImpl("trained_wind_estimation_models");
-        // ModelStore modelStore = new MongoDbModelStore(distanceBasedPersistenceManager.getDb());
+        ModelStore modelStore = new MongoDbModelStoreImpl(distanceBasedPersistenceManager.getDb());
         modelStore.deleteAll(ModelDomainType.DISTANCE_BASED_TWD_DELTA_STD_REGRESSOR);
         DistanceBasedTwdTransitionRegressorModelFactory distanceBasedTwdTransitionRegressorModelFactory = new DistanceBasedTwdTransitionRegressorModelFactory();
         for (DistanceValueRange distanceValueRange : DistanceValueRange.values()) {

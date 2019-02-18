@@ -12,8 +12,8 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElement
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
-import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class WindEstimatorManeuverNumberDependentEvaluationRunner {
@@ -38,18 +38,15 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
         LoggingUtil.logInfo("Loading polar data");
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         LoggingUtil.logInfo("Wind estimator evaluation started...");
-        ModelStore modelStore = new FileSystemModelStoreImpl("trained_wind_estimation_models");
-        // ModelStore modelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
+        ModelStore modelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
         WindEstimatorFactories estimatorFactories = new WindEstimatorFactories(polarService,
                 new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION), modelStore);
-
         double[] avgErrorDegreesPerManeuverCount = new double[MAX_MANEUVERS];
         double[] avgConfidencePerManeuverCount = new double[MAX_MANEUVERS];
         double[] avgConfidenceOfCorrectEstimationsPerManeuverCount = new double[MAX_MANEUVERS];
         double[] avgConfidenceOfIncorrectEstimationsPerManeuverCount = new double[MAX_MANEUVERS];
         double[] accuracyPerManeuverCount = new double[MAX_MANEUVERS];
         double[] emptyEstimationsPercentagePerManeuverCount = new double[MAX_MANEUVERS];
-
         for (int fixedNumberOfManeuvers = 1; fixedNumberOfManeuvers <= MAX_MANEUVERS; fixedNumberOfManeuvers++) {
             LoggingUtil.logInfo("Running evaluation with " + fixedNumberOfManeuvers + " maneuvers");
             WindEstimationEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(

@@ -13,8 +13,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.Header;
@@ -73,8 +74,8 @@ public class ManeuverAndWindImporter {
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
     private final LabeledManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
     private boolean skipRace;
-    private static final int NUMBER_OF_THREADS = 50; //high number due to HTTP requests
-    private final ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+    private static final int NUMBER_OF_THREADS = 50; // high number due to HTTP requests
+    private final ThreadPoolExecutor executorService;
 
     public ManeuverAndWindImporter() throws UnknownHostException {
         this.completeManeuverCurvePersistanceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
@@ -85,11 +86,23 @@ public class ManeuverAndWindImporter {
         this.maneuverForEstimationTransformer = new CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer();
         this.maneuverForDataAnalysisJsonSerializer = new ManeuverForDataAnalysisJsonSerializer();
         this.maneuverForEstimationJsonSerializer = new LabeledManeuverForEstimationJsonSerializer();
+        this.executorService = new ThreadPoolExecutor(NUMBER_OF_THREADS, NUMBER_OF_THREADS, 0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(NUMBER_OF_THREADS));
+        this.executorService.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                // this will block if the queue is full
+                try {
+                    executor.getQueue().put(r);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public HttpClient createNewHttpClient() {
         HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, 30000);
+        HttpConnectionParams.setConnectionTimeout(httpParams, 60000 * 5);
         HttpClient client = new SystemDefaultHttpClient(httpParams);
         return client;
     }
@@ -312,7 +325,19 @@ public class ManeuverAndWindImporter {
         for (int i = 1; i <= 10; i++) {
             try {
                 httpResponse = createNewHttpClient().execute(getEstimationData);
-                break;
+                if (httpResponse.getStatusLine().getStatusCode() == 200) {
+                    JSONObject resultJson;
+                    try {
+                        resultJson = (JSONObject) getJsonFromResponse(httpResponse);
+                        return resultJson;
+                    } catch (Exception e) {
+                        System.out.println(getEstimationData);
+                        throw e;
+                    }
+                } else {
+                    LoggingUtil.logInfo("Connection error (" + i + "/10) while querying races of regatta \""
+                            + trackedRegattaName + "\" (status code not 200), retrying...");
+                }
             } catch (Exception e) {
                 Thread.sleep(10000);
                 lastException = e;
@@ -325,17 +350,7 @@ public class ManeuverAndWindImporter {
                 }
             }
         }
-        if (httpResponse == null) {
-            throw lastException;
-        }
-        JSONObject resultJson;
-        try {
-            resultJson = (JSONObject) getJsonFromResponse(httpResponse);
-        } catch (Exception e) {
-            System.out.println(getEstimationData);
-            throw e;
-        }
-        return resultJson;
+        throw lastException;
     }
 
     private <ToType> void addTransformedElementsToCompetitorTrackJson(List<JSONObject> competitorTracks,
@@ -358,7 +373,6 @@ public class ManeuverAndWindImporter {
         }
     }
 
-    // FIXME duplicated code taken from ConnectivityUtils
     public static Object getJsonFromResponse(HttpResponse response)
             throws IllegalStateException, IOException, ParseException {
         JSONParser jsonParser = new JSONParser();

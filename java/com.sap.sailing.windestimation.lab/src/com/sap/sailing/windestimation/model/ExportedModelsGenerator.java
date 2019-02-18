@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation;
+package com.sap.sailing.windestimation.model;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -19,9 +19,9 @@ import com.sap.sailing.windestimation.data.persistence.maneuver.TransformedManeu
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.model.classifier.LabelExtraction;
 import com.sap.sailing.windestimation.model.classifier.TrainableClassificationModel;
-import com.sap.sailing.windestimation.model.store.FileSystemModelStoreImpl;
 import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
+import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.Util.Pair;
 
@@ -112,8 +112,7 @@ public class ManeuverClassifierTrainer {
     public static void main(String[] args) throws Exception {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         RegularManeuversForEstimationPersistenceManager persistenceManager = new RegularManeuversForEstimationPersistenceManager();
-        ModelStore classifierModelStore = new FileSystemModelStoreImpl("trained_wind_estimation_models");
-        // ModelStore classifierModelStore = new MongoDbModelStore(persistenceManager.getDb());
+        ModelStore classifierModelStore = new MongoDbModelStoreImpl(persistenceManager.getDb());
         classifierModelStore.deleteAll(ModelDomainType.MANEUVER_CLASSIFIER);
         ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(persistenceManager,
                 classifierModelStore);

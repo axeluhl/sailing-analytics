@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation;
+package com.sap.sailing.windestimation.model;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,7 +30,8 @@ import com.sap.sailing.windestimation.util.LoggingUtil;
  */
 public class SimpleModelsTraining {
 
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(3);
+    private static final int NUMBER_OF_THREADS = 2;
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
 
     public static void main(String[] args) throws Exception {
         new ManeuverForEstimationPersistenceManager().dropCollection();
@@ -88,7 +89,7 @@ public class SimpleModelsTraining {
                 + " dimension. Remove instances from MongoDB collection \"" + dimension.getCollectioName()
                 + "\" which do not make sense. E.g. values which are represented by a small number of supporting instances (see histogram), values which cause implausible zig zag sections within zero-mean standard deviation curve and etc. Close the graphical tool, when you are done to resume model training.");
     }
-    
+
     private static void awaitThreadPoolCompletion() throws InterruptedException {
         executorService.awaitTermination(24, TimeUnit.HOURS);
         Thread.sleep(1000L);
