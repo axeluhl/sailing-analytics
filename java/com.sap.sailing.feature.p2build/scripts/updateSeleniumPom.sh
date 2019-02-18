@@ -33,7 +33,13 @@ echo "$autostart_bundles"
 # may occur either in the target_bundles or the workspace_bundles attribute in the .launch
 # configuration. All other entries in the .launch configuration are set to @default:default.
 # Now collect the bundles from the feature.xml files, split by workspace vs. target:
-bundleStartLevelSection=""
+bundleStartLevelSection="
+                 <bundle>
+                   <id>com.sap.sailing.server.gateway.test.support</id>
+                   <id>com.sap.sailing.news</id>
+                   <level>4</level>
+                   <autoStart>true</autoStart>
+                 </bundle>"
 for feature in $features; do
     feature_xml_file=${GIT_ROOT}/java/$feature/feature.xml
     bundles_in_feature=$(cat "$feature_xml_file" | grep "id=\"" | grep -v "id=\"$feature\"" | sed -e 's/^.*id="\([^"]*\)".*$/\1/')
@@ -46,7 +52,7 @@ for feature in $features; do
             # found a configuration for the bundle
             echo ' *** Found a non-default configuration for bundle '${bundle}' ***'
 	     bundleStartLevelSection="${bundleStartLevelSection}
-	        <bundle>
+                <bundle>
                   <id>${bundle}</id>
                   <level>$( echo "${autostart_bundles}" | grep "^${bundle} [0-9-]* true" | sed -e "s/^${bundle} \([0-9-]*\) true$/\1/" )</level>
                   <autoStart>true</autoStart>
