@@ -4,7 +4,7 @@ import com.sap.sse.replication.OperationWithResult;
 
 /**
  * 
- * Needed in the context of the initial replication of the wind estimation factory service.
+ * Updates wind estimation models.
  * 
  * @author Vladislav Chumak (D069712)
  *

@@ -22,6 +22,7 @@ import com.sap.sailing.windestimation.integration.WindEstimationModelsUpdateOper
 import com.sap.sailing.windestimation.jaxrs.AbstractWindEstimationDataResource;
 
 /**
+ * Resource which manages wind estimation model metadata. Data export and import are supported.
  * 
  * @author Vladislav Chumak (D069712)
  *
