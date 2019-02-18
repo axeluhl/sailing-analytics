@@ -86,6 +86,7 @@ public class MultiColorPolyline {
     }
     
     public void insertAt(int index, LatLng position) {
+        if (position == null) throw new IllegalArgumentException("Cannot insert value: null");
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
             if (polylines.isEmpty()) {
@@ -96,12 +97,20 @@ public class MultiColorPolyline {
         case POLYCHROMATIC:
             if (index == 0) {
                 // Prepend a new Polyline
-                MVCArray<LatLng> path = MVCArray.newInstance();
-                path.push(position);
-                if (!polylines.isEmpty()) {
-                    path.push(polylines.get(0).getPath().get(0));
+                if (polylines.isEmpty() || polylines.get(0).getPath().getLength() == 2) {
+                    // There either is no Polyline or the existing Polyline at index 0 is completed
+                    // Prepend a new Polyline
+                    MVCArray<LatLng> path = MVCArray.newInstance();
+                    path.push(position);
+                    if (!polylines.isEmpty()) { // If we can connect the new Polyline to an existing one do so
+                        path.push(polylines.get(0).getPath().get(0));
+                    }
+                    polylines.add(0, createPolyline(path, index));
+                } else {
+                    // The Polyline at index 0 is incomplete
+                    // Complete it
+                    polylines.get(0).getPath().insertAt(0, position);
                 }
-                polylines.add(0, createPolyline(path, index));
             } else if (index == getLength()) {
                 if (index == 1 && polylines.get(0).getPath().getLength() == 1) {
                     // Finish first polyline
@@ -127,6 +136,9 @@ public class MultiColorPolyline {
     }
     
     public LatLng removeAt(int index) {
+        if (index < 0 || index >= getLength()) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + getLength());
+        }
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
             return polylines.get(0).getPath().removeAt(index);
@@ -135,8 +147,13 @@ public class MultiColorPolyline {
             if (index == 0) {
                 // Remove the Polyline connecting the first to the second fix
                 removed = polylines.get(0).getPath().get(0);
-                polylines.get(0).setMap(null);
-                polylines.remove(0);
+                if (polylines.size() == 1 && polylines.get(0).getPath().getLength() == 2) {
+                    // If there is only one polyline with two fixes left remove the first fix but keep the second
+                    polylines.get(0).getPath().removeAt(0);
+                } else {
+                    polylines.get(0).setMap(null);
+                    polylines.remove(0);
+                }
             } else if (index == getLength() - 1) {
                 // Remove the Polyline connecting the last two fixes
                 removed = polylines.get(index - 1).getPath().get(1);
@@ -174,6 +191,7 @@ public class MultiColorPolyline {
                 polylines.get(index - 1).getPath().setAt(1, position);
                 polylines.get(index).getPath().setAt(0, position);
             }
+            break;
         }
     }
     
