@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import org.bson.Document;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -55,7 +54,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         try {
             settingCollection.createIndex(new Document(FieldNames.Preferences.USERNAME.name(), 1), new IndexOptions().name("uniquebyusername").unique(true));
-        } catch (DuplicateKeyException e) {
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "There are duplicate keys in the "+CollectionNames.PREFERENCES.name()+
                     " collection. Unique index cannot be created. Consider cleaning up.", e);
         }

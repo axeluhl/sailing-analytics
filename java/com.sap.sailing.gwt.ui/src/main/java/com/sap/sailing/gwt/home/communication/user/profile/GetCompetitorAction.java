@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.common.security.SecuredDomainType.CompetitorAndBoatActions;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
@@ -37,6 +38,10 @@ public class GetCompetitorAction implements SailingAction<SimpleCompetitorWithId
         if (id != null) {
             CompetitorAndBoatStore competitorStore = ctx.getRacingEventService().getCompetitorAndBoatStore();
             Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(id.toString());
+            if (competitor != null) {
+                ctx.getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
+                        CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS);
+            }
             return (competitor == null ? new SimpleCompetitorWithIdDTO(id.toString(), id.toString(), "", null, null)
                     : new SimpleCompetitorWithIdDTO(competitor));
         } else {
