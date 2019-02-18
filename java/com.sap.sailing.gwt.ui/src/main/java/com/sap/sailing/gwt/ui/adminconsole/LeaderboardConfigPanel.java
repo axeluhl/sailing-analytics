@@ -6,6 +6,7 @@ import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_O
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.READ;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -307,7 +308,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 (o1, o2) -> new NaturalComparator().compare(o1.defaultCourseAreaName, o2.defaultCourseAreaName));
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
-        final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new AccessControlledActionsColumn<>(
+        final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, LeaderboardConfigImagesBarCell> leaderboardActionColumn = create(
                 new LeaderboardConfigImagesBarCell(stringMessages), userService);
 
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::editLeaderboard);

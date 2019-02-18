@@ -120,6 +120,7 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -2805,7 +2806,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
 
         @Override
-        public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack) {
+        public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack, AddResult addedOrReplaced) {
             clearDirectionFromStartToNextMarkCache();
         }
 

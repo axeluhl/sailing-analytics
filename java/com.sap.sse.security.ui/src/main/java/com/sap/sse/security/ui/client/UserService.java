@@ -480,6 +480,10 @@ public class UserService {
                 anonymousUser, ownership);
     }
     
+    public Iterable<HasPermissions> getAllKnownPermissions() {
+        return allKnownHasPermissions;
+    }
+
     public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
         if (!hasServerPermission(ServerActions.CREATE_OBJECT)) {
             return false;

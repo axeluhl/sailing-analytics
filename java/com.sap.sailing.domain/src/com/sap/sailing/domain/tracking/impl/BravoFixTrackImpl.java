@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.scalablevalue.impl.ScalableDistance;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -85,7 +86,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         }
 
         @Override
-        public void gpsFixReceived(GPSFixMoving fix, ItemType item, boolean firstFixInTrack) {
+        public void gpsFixReceived(GPSFixMoving fix, ItemType item, boolean firstFixInTrack, AddResult addedOrReplaced) {
             assert item == getTrackedItem();
             foilingDistanceCache.invalidateAllAtOrLaterThan(fix.getTimePoint());
         }

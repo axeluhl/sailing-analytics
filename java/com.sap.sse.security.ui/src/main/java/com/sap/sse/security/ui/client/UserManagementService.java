@@ -24,6 +24,7 @@ import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -165,4 +166,19 @@ public interface UserManagementService extends RemoteService {
 
     AccessControlListDTO getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject)
             throws UnauthorizedException;
+
+    SuccessInfo addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId,
+            String tenantQualifierName)
+            throws UserManagementException, UnauthorizedException;
+
+    SuccessInfo removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
+            String tenantQualifierName)
+            throws UserManagementException, UnauthorizedException;
+
+    SuccessInfo addPermissionForUser(String username, WildcardPermission permissions)
+            throws UnauthorizedException;
+
+    SuccessInfo removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permissions)
+            throws UnauthorizedException;
+
 }

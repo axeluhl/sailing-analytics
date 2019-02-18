@@ -126,7 +126,8 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         });
         regattasContentPanel.add(regattaListComposite);
         
-        regattaDetailsComposite = new RegattaDetailsComposite(sailingService, regattaRefresher, errorReporter, stringMessages);
+        regattaDetailsComposite = new RegattaDetailsComposite(sailingService, userService, regattaRefresher,
+                errorReporter, stringMessages);
         regattaDetailsComposite.ensureDebugId("RegattaDetailsComposite");
         regattaDetailsComposite.setVisible(false);
         mainPanel.add(regattaDetailsComposite);

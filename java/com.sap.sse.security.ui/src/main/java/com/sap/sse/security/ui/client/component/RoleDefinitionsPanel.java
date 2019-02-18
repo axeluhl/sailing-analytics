@@ -4,6 +4,7 @@ import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_O
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.ROLE_DEFINITION;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
@@ -195,7 +196,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         });
         
         final HasPermissions type = SecuredSecurityTypes.ROLE_DEFINITION;
-        final AccessControlledActionsColumn<RoleDefinitionDTO, DefaultActionsImagesBarCell> roleActionColumn = new AccessControlledActionsColumn<>(
+        final AccessControlledActionsColumn<RoleDefinitionDTO, DefaultActionsImagesBarCell> roleActionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         roleActionColumn.addAction(ACTION_UPDATE, UPDATE, this::editRole);
         roleActionColumn.addAction(ACTION_DELETE, DELETE, roleDefinition -> {

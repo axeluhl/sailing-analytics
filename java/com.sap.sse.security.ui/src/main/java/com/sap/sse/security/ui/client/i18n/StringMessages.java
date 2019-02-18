@@ -177,4 +177,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String enterUsername();
     String addUser();
     String couldNotLoadUsers();
+    String couldNotRemoveRoleFromUser(String username, String role);
+    String couldNotRemovePermissionFromUser(String name, String string);
+    String filterPermission();
+    String permission();
 }

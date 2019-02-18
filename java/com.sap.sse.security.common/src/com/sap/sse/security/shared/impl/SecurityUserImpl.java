@@ -13,7 +13,7 @@ import com.sap.sse.security.shared.SecurityUserGroup;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup<?>>
+public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup<?>, P extends WildcardPermission>
         extends AbstractUserReference implements SecurityUser<RD, R, G> {
     private static final long serialVersionUID = -3639860207453072248L;
 
@@ -23,13 +23,13 @@ public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends Abst
      * Creates a user with empty permission set and empty role set
      */
     public SecurityUserImpl(String name) {
-        this(name, new HashSet<WildcardPermission>());
+        this(name, new HashSet<P>());
     }
     
-    public SecurityUserImpl(String name, Iterable<WildcardPermission> permissions) {
+    public SecurityUserImpl(String name, Iterable<P> permissions) {
         super(name);
         this.permissions = new HashSet<>();
-        for (WildcardPermission permission : permissions) {
+        for (P permission : permissions) {
             this.permissions.add(permission);
         }
     }
@@ -59,11 +59,11 @@ public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends Abst
         getRolesInternal().remove(role);
     }
 
-    public void addPermission(WildcardPermission permission) {
+    public void addPermission(P permission) {
         permissions.add(permission);
     }
     
-    public void removePermission(WildcardPermission permission) {
+    public void removePermission(P permission) {
         permissions.remove(permission);
     }
 

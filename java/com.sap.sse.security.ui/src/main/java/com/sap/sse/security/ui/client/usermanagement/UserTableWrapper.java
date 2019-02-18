@@ -3,6 +3,7 @@ package com.sap.sse.security.ui.client.usermanagement;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
@@ -41,7 +42,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.dto.RoleDTO;
+import com.sap.sse.security.shared.dto.RoleWithSecurityDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -140,8 +141,8 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
             @Override
             public SafeHtml getValue(UserDTO user) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                for (Iterator<RoleDTO> roleIter = user.getRoles().iterator(); roleIter.hasNext();) {
-                    final RoleDTO role = roleIter.next();
+                for (Iterator<RoleWithSecurityDTO> roleIter = user.getRoles().iterator(); roleIter.hasNext();) {
+                    final RoleWithSecurityDTO role = roleIter.next();
                     builder.appendEscaped(role.toString());
                     if (roleIter.hasNext()) {
                         builder.appendHtmlConstant("<br>");
@@ -159,7 +160,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         });
 
         final HasPermissions type = SecuredSecurityTypes.USER;
-        final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = new AccessControlledActionsColumn<>(
+        final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user, additionalPermissions));
         userActionColumn.addAction(ACTION_DELETE, DELETE, user -> {

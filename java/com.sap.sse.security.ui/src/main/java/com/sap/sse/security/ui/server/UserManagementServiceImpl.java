@@ -55,6 +55,7 @@ import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
@@ -994,6 +995,254 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         } else {
             throw new UnauthorizedException("Not permitted to get the unpruned ACL for a user");
         }
+    }
+
+    @Override
+    public SuccessInfo addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId,
+            String tenantQualifierName) throws UserManagementException, UnauthorizedException {
+
+        SuccessInfo successInfo;
+        try {
+            // get user for which to add a role
+            final User user = getOrThrowUser(username);
+
+            // check permissions
+            getSecurityService().checkCurrentUserUpdatePermission(user);
+            getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.GRANT_PERMISSION);
+
+            // get user for which the role is qualified, if one exists
+            getOrThrowQualifiedUser(userQualifierName);
+
+            // get the group tenant the role is qualified for if one exists
+            final UserGroup tenant = getOrThrowTenant(tenantQualifierName);
+
+            final Role role = getOrThrowRoleFromIDs(roleDefinitionId, tenant == null ? null : tenant.getId(),
+                    userQualifierName);
+
+            final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+
+            final String message = "added role " + role.getName() + " for user " + username;
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
+                    associationTypeIdentifier.toString(), new Action() {
+
+                        @Override
+                        public void run() throws Exception {
+                            getSecurityService().addRoleForUser(user, role);
+                            logger.info(message);
+                        }
+                    });
+
+            final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+            successInfo = new SuccessInfo(true, message, /* redirectURL */null,
+                    new Triple<>(userDTO, getAllUser(), getServerInfo()));
+        } catch (UserManagementException e) {
+            successInfo = new SuccessInfo(false,
+                    "You are not allowed to grant this role for user " + username
+                            + " or the username, group name or role name did not exist.",
+                    /* redirectURL */ null, /* userDTO */ null);
+        }
+        return successInfo;
+    }
+
+    @Override
+    public SuccessInfo removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
+            String tenantQualifierName) throws UserManagementException, UnauthorizedException {
+
+        SuccessInfo successInfo;
+        try {
+            // get user for which to remove role
+            final User user = getOrThrowUser(username);
+
+            // check permissions
+            getSecurityService().checkCurrentUserUpdatePermission(user);
+            getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.REVOKE_PERMISSION);
+
+            // get user for which the role is qualified, if one exists
+            getOrThrowQualifiedUser(userQualifierName);
+
+            // get the group tenant the role is qualified for if one exists
+            UserGroup tenant = getOrThrowTenant(tenantQualifierName);
+
+            Role role = getOrThrowRoleFromIDs(roleDefinitionId, tenant == null ? null : tenant.getId(),
+                    userQualifierName);
+
+            final String message = "removed role " + role.getName() + " for user " + username;
+            final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
+                    associationTypeIdentifier.toString(), new Action() {
+
+                        @Override
+                        public void run() throws Exception {
+                            getSecurityService().removeRoleFromUser(user, role);
+                            logger.info(message);
+                        }
+                    });
+
+            final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+            successInfo = new SuccessInfo(true, message, /* redirectURL */null,
+                    new Triple<>(userDTO, getAllUser(), getServerInfo()));
+        } catch (UserManagementException e) {
+            successInfo = new SuccessInfo(false,
+                    "You are not allowed to revoke this role from user " + username
+                            + " or the username, grou name or role name did not exist.",
+                    /* redirectURL */ null, /* userDTO */ null);
+        }
+        return successInfo;
+    }
+
+    /**
+     * @returns the user associated with the userQualifierName or null
+     * @throws UserManagementException
+     *             if the userQualifierName is not empty or null but no user was found.
+     */
+    private User getOrThrowQualifiedUser(String userQualifierName) throws UserManagementException {
+        User user = getSecurityService().getUserByName(userQualifierName);
+        if (userQualifierName != null && !userQualifierName.isEmpty() && user == null) {
+            throw new UserManagementException("User " + userQualifierName + " not found.");
+        }
+        return user;
+    }
+
+    /**
+     * @return the role associated with the given IDs and qualifiers
+     * @throws UserManagementException
+     *             if the current user does not have the meta permission to give this specific, qualified role in this
+     *             context.
+     */
+    private Role getOrThrowRoleFromIDs(UUID roleDefinitionId, UUID tenantId, String userQualifierName)
+            throws UserManagementException {
+        final Role role = createRoleFromIDs(roleDefinitionId, tenantId, userQualifierName);
+        if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                role.getRoleDefinition(), role.getQualificationAsOwnership())) {
+            throw new UserManagementException("You are not allowed to take this role to the user.");
+        }
+        return role;
+    }
+
+    /**
+     * @return the user group associated with the tenantQualifierName
+     * @throws UserManagementException,
+     *             if the tenantQualifierName was not empty or null but did not yield a valid user group
+     */
+    private UserGroup getOrThrowTenant(String tenantQualifierName) throws UserManagementException {
+        final UserGroup tenant;
+        if (tenantQualifierName == null || tenantQualifierName.trim().isEmpty()) {
+            tenant = null;
+        } else {
+            tenant = getSecurityService().getUserGroupByName(tenantQualifierName);
+            if (tenant == null) {
+                throw new UserManagementException("Tenant not found: " + tenantQualifierName);
+            }
+        }
+        return tenant;
+    }
+    /**
+     * @return the User associated with the username or a {@link UserManagementException}, if the user is null
+     */
+    private User getOrThrowUser(String username) throws UserManagementException {
+        final User user = getSecurityService().getUserByName(username);
+
+        if (user == null) {
+            throw new UserManagementException("user " + username + " not found.");
+        }
+        return user;
+    }
+
+    /**
+     * Checks, whether the current user has the required permissions to add or remove a WildcardPermission with the
+     * given action ({@link UserActions.GRANT_PERMISSION} or {@link UserActions.REVOKE_PERMISSION}) for the specific
+     * user
+     */
+    private void checkPermissionForPermissionUpdate(User user, UserActions action, WildcardPermission permission)
+            throws UnauthorizedException {
+        // check permissions
+        getSecurityService().checkCurrentUserUpdatePermission(user);
+        getSecurityService().checkCurrentUserAnyExplicitPermissions(user, action);
+
+        if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
+            throw new UnauthorizedException(
+                    "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
+        }
+    }
+
+    @Override
+    public SuccessInfo addPermissionForUser(String username, WildcardPermission permission)
+            throws UnauthorizedException {
+
+        SuccessInfo successInfo;
+        try {
+            // check if user exists
+            User user = getOrThrowUser(username);
+
+            // check permissions
+            checkPermissionForPermissionUpdate(user, UserActions.GRANT_PERMISSION, permission);
+
+            // grant permission
+            final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
+                    user);
+            final String message = "Added permission " + permission + " for user " + username;
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
+                    associationTypeIdentifier.toString(), new Action() {
+
+                        @Override
+                        public void run() throws Exception {
+                            getSecurityService().addPermissionForUser(username, permission);
+                            logger.info(message);
+                        }
+                    });
+
+            final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+            successInfo = new SuccessInfo(true, message, /* redirectURL */null,
+                    new Triple<>(userDTO, getAllUser(), getServerInfo()));
+        } catch (UserManagementException | UnauthorizedException e) {
+            successInfo = new SuccessInfo(false, "Not permitted to grant permission " + permission + " for user "
+                    + username + " or the user or permission did not exist.", /* redirectURL */null, null);
+        }
+        return successInfo;
+    }
+
+    @Override
+    public SuccessInfo removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permission)
+            throws UnauthorizedException {
+
+        SuccessInfo successInfo;
+        try {
+            // check if user exists
+            User user = getOrThrowUser(username);
+
+            // check permissions
+            checkPermissionForPermissionUpdate(user, UserActions.REVOKE_PERMISSION, permission);
+
+            // revoke permission
+            final String message = "Revoked permission " + permission + " for user " + username;
+            final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
+                    user);
+            final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
+
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                    new ActionWithResult<Void>() {
+                        @Override
+                        public Void run() throws Exception {
+                            getSecurityService().removePermissionFromUser(username, permission);
+                            logger.info(message);
+                            return null;
+                        }
+                    });
+
+            final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+            successInfo = new SuccessInfo(true, message, /* redirectURL */null,
+                    new Triple<>(userDTO, getAllUser(), getServerInfo()));
+
+        } catch (UserManagementException | UnauthorizedException e) {
+            successInfo = new SuccessInfo(false, "Not permitted to revoke permission " + permission + " for user "
+                    + username + " or the user or permission did not exist", /* redirectURL */null, null);
+
+        }
+        return successInfo;
     }
 
 }

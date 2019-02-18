@@ -460,32 +460,32 @@ public class Util {
      * made. This is the caller's obligation.
      */
     public static <K, V> boolean addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        return addToValueSet(map, key, value, new ValueSetConstructor<V>() {
+        return addToValueSet(map, key, value, new ValueCollectionConstructor<V, Set<V>>() {
             @Override
-            public Set<V> createSet() {
+            public Set<V> createValueCollection() {
                 return new HashSet<V>();
             }
         });
     }
 
-    public static interface ValueSetConstructor<T> {
-        Set<T> createSet();
+    public static interface ValueCollectionConstructor<T, C extends Collection<T>> {
+        C createValueCollection();
     }
     
     /**
-     * Ensures that a {@link Set Set&lt;V&gt;} is contained in {@code map} for {@code key} and then adds {@code value}
+     * Ensures that a {@link Collection Collection&lt;V&gt;} is contained in {@code map} for {@code key} and then adds {@code value}
      * to that set. No synchronization / concurrency control effort is made. This is the caller's obligation.
      * 
-     * @return {@code true} if the {@code value} was not yet contained in the {@code value} set for {@code key} or if
+     * @return {@code true} if the {@code value} was not yet contained in the {@code value} collection for {@code key} or if
      *         the {@code map} did not even contain a value set for {@code key} yet.
      */
-    public static <K, V> boolean addToValueSet(Map<K, Set<V>> map, K key, V value, ValueSetConstructor<V> setConstructor) {
-        Set<V> set = map.get(key);
-        if (set == null) {
-            set = setConstructor.createSet();
-            map.put(key, set);
+    public static <K, V, C extends Collection<V>> boolean addToValueSet(Map<K, C> map, K key, V value, ValueCollectionConstructor<V, C> setConstructor) {
+        C coll = map.get(key);
+        if (coll == null) {
+            coll = setConstructor.createValueCollection();
+            map.put(key, coll);
         }
-        return set.add(value);
+        return coll.add(value);
     }
 
     /**

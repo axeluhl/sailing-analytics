@@ -465,6 +465,12 @@ public class RaceListFragment extends LoggableFragment
         }
     }
 
+    public void resetSelectedRace() {
+        mSelectedRace = null;
+        mAdapter.setSelectedRace(null);
+        mAdapter.notifyDataSetChanged();
+    }
+
     private void unregisterOnAllRaces() {
         for (ManagedRace managedRace : mManagedRacesById.values()) {
             managedRace.getState().removeChangedListener(stateListener);

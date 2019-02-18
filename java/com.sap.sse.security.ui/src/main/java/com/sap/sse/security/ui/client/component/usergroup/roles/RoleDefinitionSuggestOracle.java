@@ -1,24 +1,28 @@
 package com.sap.sse.security.ui.client.component.usergroup.roles;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.sap.sse.common.Util;
-import com.sap.sse.gwt.client.suggestion.AbstractListSuggestOracle;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.usermanagement.roles.UserRoleDefinitionPanel;
 
 /**
- * Suggest oracle for use in {@link UserGroupRoleDefinitionPanel} which oracles the role names.
+ * Suggest oracle for use in {@link UserGroupRoleDefinitionPanel} and {@link UserRoleDefinitionPanel}, which oracles the
+ * role names.
  */
-public class RoleDefinitionSuggestOracle extends AbstractListSuggestOracle<StrippedRoleDefinitionDTO> {
+public class RoleDefinitionSuggestOracle extends MultiWordSuggestOracle {
 
-    private final Collection<StrippedRoleDefinitionDTO> allRoles = new ArrayList<>();
+    private final Map<String, StrippedRoleDefinitionDTO> allRoles = new HashMap<>();
 
     public RoleDefinitionSuggestOracle(final UserManagementServiceAsync userManagementService,
             final StringMessages stringMessages) {
@@ -26,9 +30,12 @@ public class RoleDefinitionSuggestOracle extends AbstractListSuggestOracle<Strip
             @Override
             public void onSuccess(ArrayList<RoleDefinitionDTO> result) {
                 for (RoleDefinitionDTO role : result) {
-                    allRoles.add(new StrippedRoleDefinitionDTO(role.getId(), role.getName(), role.getPermissions()));
+                    allRoles.put(role.getName(),
+                            new StrippedRoleDefinitionDTO(role.getId(), role.getName(), role.getPermissions()));
                 }
-                RoleDefinitionSuggestOracle.this.setSelectableValues(allRoles);
+                RoleDefinitionSuggestOracle.super.clear();
+                RoleDefinitionSuggestOracle.super.setDefaultSuggestionsFromText(allRoles.keySet());
+                RoleDefinitionSuggestOracle.super.addAll(allRoles.keySet());
             }
 
             @Override
@@ -43,39 +50,22 @@ public class RoleDefinitionSuggestOracle extends AbstractListSuggestOracle<Strip
      *          associated with the role name.
      */
     public StrippedRoleDefinitionDTO fromString(final String roleName) {
-        if (this.getSelectableValues() == null) {
+        if (allRoles.isEmpty()) {
             throw new NullPointerException("Role definitions are not loaded yet or could not be loaded.");
         }
-
-        for (StrippedRoleDefinitionDTO role : this.getSelectableValues()) {
-            if (role.getName().equals(roleName)) {
-                return role;
-            }
-        }
-        return null;
+        return allRoles.get(roleName);
     }
 
     /**
      * Clears the oracle suggestions, adds all existing roles and finally removes the existing roles from the oracle.
      */
     public void resetAndRemoveExistingRoles(Iterable<StrippedRoleDefinitionDTO> existingRoles) {
-        ArrayList<StrippedRoleDefinitionDTO> roles = new ArrayList<>(allRoles);
+        ArrayList<StrippedRoleDefinitionDTO> roles = new ArrayList<>(allRoles.values());
         Util.removeAll(existingRoles, roles);
-        RoleDefinitionSuggestOracle.this.setSelectableValues(roles);
-    }
-
-    @Override
-    protected String createSuggestionKeyString(StrippedRoleDefinitionDTO value) {
-        return value.getName();
-    }
-
-    @Override
-    protected String createSuggestionAdditionalDisplayString(StrippedRoleDefinitionDTO value) {
-        return null;
-    }
-
-    @Override
-    protected Iterable<String> getMatchingStrings(StrippedRoleDefinitionDTO value) {
-        return this.getSelectableValues().stream().map(r -> createSuggestionKeyString(r)).collect(Collectors.toList());
+        List<String> textSuggestions = roles.stream().map(StrippedRoleDefinitionDTO::getName)
+                .collect(Collectors.toList());
+        super.clear();
+        super.setDefaultSuggestionsFromText(textSuggestions);
+        super.addAll(textSuggestions);
     }
 }
