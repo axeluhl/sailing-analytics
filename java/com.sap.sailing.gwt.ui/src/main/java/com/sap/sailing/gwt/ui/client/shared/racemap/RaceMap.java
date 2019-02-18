@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -131,6 +130,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.ColorMapper;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -138,6 +138,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -1167,7 +1168,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
             asyncActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race, fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall,
-                    /* extrapolate */ true), GET_RACE_MAP_DATA_CATEGORY,
+                    /* extrapolate */ true, detailType, leaderboardName, leaderboardGroupName), GET_RACE_MAP_DATA_CATEGORY,
                     new MarkedAsyncCallback<>(new AsyncCallback<CompactBoatPositionsDTO>() {
                         @Override
                         public void onFailure(Throwable t) {
@@ -2948,16 +2949,25 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         switch(displayMode){
         case DEFAULT:
             //options.setColorProvider((p) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
-            Random r = new Random();
-            options.setColorProvider((p) -> new RGBColor(r.nextInt(256), r.nextInt(256), r.nextInt(256)).getAsHtml());
+            options.setColorMode(MultiColorPolylineColorMode.MONOCHROMATIC);
+            options.setColorProvider((i) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
             options.setStrokeWeight(1);
             break;
         case SELECTED:
-            options.setColorProvider((p) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
+            ColorMapper colorMapper = new ColorMapper(new ValueRangeFlexibleBoundaries(0, 15, 0.1, 0.5), false);
+            options.setColorMode(MultiColorPolylineColorMode.POLYCHROMATIC);
+            options.setColorProvider(i -> {
+                Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
+                if (detailValue != null) {
+                    return colorMapper.getColor(detailValue);
+                }
+                return competitorSelection.getColor(competitor, raceIdentifier).getAsHtml();
+            });
             options.setStrokeWeight(2);
             break;
         case NOT_SELECTED:
-            options.setColorProvider((p) -> LOWLIGHTED_TAIL_COLOR.getAsHtml());
+            options.setColorMode(MultiColorPolylineColorMode.MONOCHROMATIC);
+            options.setColorProvider((i) -> LOWLIGHTED_TAIL_COLOR.getAsHtml());
             options.setStrokeOpacity(LOWLIGHTED_TAIL_OPACITY);
             break;
         }
@@ -2972,7 +2982,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         MultiColorPolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
         MultiColorPolyline result = new MultiColorPolyline(options);
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
-        //result.setPath(pointsAsArray);
         result.setPath(pointsAsArray);
         result.setMap(map);
         //Hoverline resultHoverline = new Hoverline(result, options, this);

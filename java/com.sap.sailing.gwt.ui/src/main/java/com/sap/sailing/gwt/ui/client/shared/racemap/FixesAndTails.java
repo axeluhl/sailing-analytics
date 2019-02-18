@@ -518,7 +518,7 @@ public class FixesAndTails {
     private void clearTail(CompetitorDTO competitor) {
         final Trigger<MultiColorPolyline> tail = tails.get(competitor);
         if (tail != null) {
-            tail.get().getPath().clear();
+            tail.get().clear();
             firstShownFix.put(competitor, new Trigger<>(-1));
             lastShownFix.put(competitor, new Trigger<>(-1));
         }
@@ -602,6 +602,21 @@ public class FixesAndTails {
         }
         return null;
     }
+    
+    //TODO Temporary
+    protected Double getDetailValueAt(CompetitorDTO competitorDTO, int index) {
+        final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
+        int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1 : firstShownFixForCompetitor.get();
+        
+        //TODO Update ValueRangeFlexibleBoundaries
+        
+        
+        try {
+            return getFixes(competitorDTO).get(indexOfFirstShownFix + index).detailValue;
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
+    }
 
     /**
      * Clears all tail data, removing them from the map and from this object's internal structures. GPS fixes remain
@@ -611,7 +626,7 @@ public class FixesAndTails {
      */
     protected void clearTails() {
         for (final Trigger<MultiColorPolyline> tail : tails.values()) {
-            tail.get().setMap(null);
+            tail.get().clear();
         }
         tails.clear();
         firstShownFix.clear();
