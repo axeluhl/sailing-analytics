@@ -88,10 +88,10 @@ public class Activator implements BundleActivator {
 
     private void importWindEstimationModelsFromUrl(String windEstimationModelDataSourceURL) {
         logger.info("Importing wind estimation data from URL: " + windEstimationModelDataSourceURL);
-        WindEstimationDataClient polarDataClient = new WindEstimationDataClient(windEstimationModelDataSourceURL,
-                service);
+        WindEstimationDataClient windEstimationDataClient = new WindEstimationDataClient(
+                windEstimationModelDataSourceURL, service);
         try {
-            polarDataClient.updateWindEstimationModels();
+            windEstimationDataClient.updateWindEstimationModels();
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception while trying to import wind estimation model data from "
                     + windEstimationModelDataSourceURL, e);
