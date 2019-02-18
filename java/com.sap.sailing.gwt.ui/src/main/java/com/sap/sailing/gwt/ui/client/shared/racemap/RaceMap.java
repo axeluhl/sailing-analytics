@@ -517,6 +517,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
             RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
+            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider) {
+        this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
+                timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
+                showHeaderPanel, quickRanksDTOProvider, "", "");
+    }
+    
+    public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
+            RaceMapSettings raceMapSettings,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
+            RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
             RaceMapResources raceMapResources, boolean showHeaderPanel, QuickRanksDTOProvider quickRanksDTOProvider,
             String leaderboardName, String leaderboardGroupName) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
@@ -2420,6 +2431,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
         }
+        
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {
@@ -2984,7 +2996,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
         result.setPath(pointsAsArray);
         result.setMap(map);
-        //Hoverline resultHoverline = new Hoverline(result, options, this);
+        Hoverline resultHoverline = new Hoverline(result, options, this);
         final ClickMapHandler clickHandler = new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
@@ -2992,19 +3004,19 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         };
         result.addClickHandler(clickHandler);
-        //resultHoverline.addClickHandler(clickHandler);
+        resultHoverline.addClickHandler(clickHandler);
         result.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
                 map.setTitle(boat.getSailId() + ", " + competitor.getName());
             }
         });
-        /*resultHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
+        resultHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
             @Override
             public void onEvent(MouseOutMapEvent event) {
                 map.setTitle("");
             }
-        });*/
+        });
         return result;
     }
 

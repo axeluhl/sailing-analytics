@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
@@ -12,6 +13,7 @@ import com.google.gwt.maps.client.events.mouseover.MouseOverMapEvent;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
 import com.google.gwt.maps.client.events.mouseup.MouseUpMapEvent;
 import com.google.gwt.maps.client.events.mouseup.MouseUpMapHandler;
+import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
 
@@ -23,7 +25,7 @@ public class Hoverline {
     private final PolylineOptions options;
     protected boolean doNotProcessMouseMoveOut;
     
-    public Hoverline(final Polyline polyline, PolylineOptions polylineOptions, final RaceMap map) {     
+    public Hoverline(final Polyline polyline, PolylineOptions polylineOptions, final RaceMap map) {   
         this.options = PolylineOptions.newInstance();
         this.options.setClickable(polylineOptions.getClickable());
         this.options.setGeodesic(polylineOptions.getGeodesic());
@@ -76,6 +78,59 @@ public class Hoverline {
                 hoverline.setVisible(false);
             }
         });
+    }
+    
+    public Hoverline(final MultiColorPolyline multiColorPolyline, MultiColorPolylineOptions multiColorPolylineOptions,
+            final RaceMap map) {
+        this.options = multiColorPolylineOptions.newPolylineOptionsInstance(
+                multiColorPolylineOptions.getColorProvider().getColor(0)); //TODO Get color
+        //TODO Check if zindex was set
+        this.options.setMap(multiColorPolyline.getMap());
+        this.options.setPath(MVCArray.newInstance(multiColorPolyline.getPath().toArray(new LatLng[0])));
+        multiColorPolyline.addHoverline(this);
+        
+        this.hoverline = Polyline.newInstance(this.options);
+        this.hoverline.setVisible(false);
+        multiColorPolyline.addMouseOverHandler(new MouseOverMapHandler() {
+            @Override
+            public void onEvent(MouseOverMapEvent event) {
+                options.setStrokeOpacity(map.getSettings().getTransparentHoverlines() ? TRANSPARENT : VISIBLE);
+                options.setStrokeWeight(map.getSettings().getHoverlineStrokeWeight());
+                options.setVisible(true);
+                hoverline.setOptions(options);
+            }
+        });
+        //Workaround for bug4480 (chrome does fire mouseOutMove on mouseclick)
+        hoverline.addMouseDownHandler(new MouseDownMapHandler() {
+            @Override
+            public void onEvent(MouseDownMapEvent event) {
+                doNotProcessMouseMoveOut = true;
+            }
+        });
+        hoverline.addMouseUpHandler(new MouseUpMapHandler() {
+            @Override
+            public void onEvent(MouseUpMapEvent event) {
+                doNotProcessMouseMoveOut = false;
+            }
+        });
+        hoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
+            @Override
+            public void onEvent(MouseOutMapEvent event) {
+                if (!doNotProcessMouseMoveOut) {
+                    hoverline.setVisible(false);
+                }
+            }
+        });
+        map.getMap().addMouseMoveHandler(new MouseMoveMapHandler() {
+            @Override
+            public void onEvent(MouseMoveMapEvent event) {
+                hoverline.setVisible(false);
+            }
+        });
+    }
+    
+    public Polyline getHoverline() {
+        return hoverline;
     }
     
     public HandlerRegistration addClickHandler(ClickMapHandler handler) {

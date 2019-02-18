@@ -21,6 +21,7 @@ public class MultiColorPolyline {
     private List<Polyline> polylines;
     
     private MapWidget map;
+    private List<Hoverline> hoverlines;
     private List<ClickMapHandler> clickMapHandler;
     private List<MouseOverMapHandler> mouseOverMapHandler;
     
@@ -29,10 +30,11 @@ public class MultiColorPolyline {
     }
     public MultiColorPolyline(MultiColorPolylineOptions options) {
         this.options = options;
-        polylines = new ArrayList<Polyline>();
+        polylines = new ArrayList<>();
         
-        clickMapHandler = new LinkedList<ClickMapHandler>();
-        mouseOverMapHandler = new LinkedList<MouseOverMapHandler>();
+        hoverlines = new LinkedList<>();
+        clickMapHandler = new LinkedList<>();
+        mouseOverMapHandler = new LinkedList<>();
     }
     
     /*public MultiColorPolylineOptions getOptions() {
@@ -68,7 +70,7 @@ public class MultiColorPolyline {
         return path;
     }
     
-    public void setPath(MVCArray<LatLng> path) {
+    public void setPath(final MVCArray<LatLng> path) {
         clear();
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
@@ -82,6 +84,9 @@ public class MultiColorPolyline {
                 polylines.add(createPolyline(subPath, i));
             }
             break;
+        }
+        for (Hoverline line : hoverlines) {
+            line.getHoverline().setPath(path);
         }
     }
     
@@ -133,11 +138,17 @@ public class MultiColorPolyline {
             }
             break;
         }
+        for (Hoverline line : hoverlines) {
+            line.getHoverline().getPath().insertAt(index, position);
+        }
     }
     
     public LatLng removeAt(int index) {
         if (index < 0 || index >= getLength()) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + getLength());
+        }
+        for (Hoverline line : hoverlines) {
+            line.getHoverline().getPath().removeAt(index);
         }
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
@@ -193,6 +204,13 @@ public class MultiColorPolyline {
             }
             break;
         }
+        for (Hoverline line : hoverlines) {
+            line.getHoverline().getPath().setAt(index, position);
+        }
+    }
+    
+    public MapWidget getMap() {
+        return map;
     }
     
     public void setMap(MapWidget map) {
@@ -239,6 +257,10 @@ public class MultiColorPolyline {
             line.addMouseOverHandler(h);
         }
         return line;
+    }
+    
+    public void addHoverline(Hoverline hoverline) {
+        hoverlines.add(hoverline);
     }
     
     public void addClickHandler(ClickMapHandler handler) {
