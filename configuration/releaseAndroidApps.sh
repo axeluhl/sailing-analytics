@@ -116,7 +116,7 @@ fi
 echo "Launch a stage build here: https://xmake-mobile-dev.wdf.sap.corp/job/sapsailingprogram/job/sapsailingcapture.android-SP-REL-common_directshipment/"
 echo "using rel-1.4 as the Treeish to build."
 echo "When done, create a BCP update ticket. See https://wiki.wdf.sap.corp/wiki/display/NAAS/Mobile+Patch+Releases \(remove the saprole parameter from the URL\)"
-echo "Copy the description of, e.g., https://support.wdf.sap.corp/sap/support/message/1670304244 to start with and adjust versions and commit IDs."
+echo "Copy the description of, e.g., https://support.wdf.sap.corp/sap/support/message/1970099762 to start with and adjust versions and commit IDs."
 echo "Make sure you have your MoMa stuff updated, particularly the Release Notes section."
 echo "See, e.g., https://moma.mo.sap.corp/#/editAssemblyData/186"
 echo "Then wait for feedback on the release build being ready for smoke testing, do the smoke tests and report back in BCP. That\'s it :-\)"
