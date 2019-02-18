@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -64,7 +65,7 @@ import com.sap.sse.util.impl.ArrayListNavigableSet;
  * miss it determines the result based on {@link TrackedRace#getEstimatedWindDirection(TimePoint)}.
  * <p>
  * 
- * Caching is done using the base class's {@link TrackImpl#fixes} field which is made accessible through
+ * Caching is done using the base class's {@link TrackImpl#fixesConsideredAffectedByFinder} field which is made accessible through
  * {@link #getCachedFixes()}. This track observes the {@link TrackedRace} for which it provides wind estimations.
  * Whenever a change occurs, all fixes whose derivation is potentially affected by the change are removed from the
  * cache. For new GPS fixes arriving this is the time span used for
@@ -676,7 +677,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         }
 
         @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, AddResult addedOrReplaced) {
             if (!suspended) {
                 long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
                 WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(fix
@@ -730,7 +731,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         }
 
         @Override
-        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
             assert fix != null && fix.getTimePoint() != null;
             if (!suspended) {
                 // A mark position change can mean a leg type change. The interval over which the wind estimation is
@@ -744,7 +745,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         }
         
         @Override
-        public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix) {
+        public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix, AddResult addedOrReplaced) {
             // no action required
         }
         

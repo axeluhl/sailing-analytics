@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.junit.AfterClass;
 
@@ -46,7 +47,7 @@ import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
-
+    private static final Logger logger = Logger.getLogger(AbstractMarkPassingTest.class.getName());
     private Map<Competitor, Map<Waypoint, MarkPassing>> givenPasses = new HashMap<>();
     private List<Waypoint> waypoints = new ArrayList<>();
     private static String className;
@@ -122,7 +123,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         Map<Competitor, Map<Waypoint, MarkPassing>> computedPasses = new HashMap<>();
         // Get calculatedMarkPasses
         long time = System.currentTimeMillis();
-        new MarkPassingCalculator(getTrackedRace(), false, /* waitForInitialMarkPassingCalculation */ true);
+        MarkPassingCalculator mpc = new MarkPassingCalculator(getTrackedRace(), false, /* waitForInitialMarkPassingCalculation */ true);
         time = System.currentTimeMillis() - time;
 
         for (Competitor c : getRace().getCompetitors()) {
@@ -225,6 +226,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         skipped += wronglyNotComputed;
         extra += wronglyComputed;
         assertTrue("Expected accuracy to be at least 0.8 but was " + accuracy, accuracy >= 0.8);
+        logger.info(mpc.toString());
     }
 
     private void testMiddleOfRace(int zeroBasedIndexOfLastWaypointToBePassed) {

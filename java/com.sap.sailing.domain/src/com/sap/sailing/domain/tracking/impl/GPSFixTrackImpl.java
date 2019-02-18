@@ -33,6 +33,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.SpeedWithBearingStep;
@@ -1118,11 +1119,12 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
     @Override
     protected boolean add(FixType fix, boolean replace) {
         final boolean result;
+        final AddResult addResult;
         final boolean firstFixInTrack;
         lockForWrite();
         try {
             firstFixInTrack = getRawFixes().isEmpty();
-            result = addWithoutLocking(fix, replace);
+            addResult = addWithoutLocking(fix, replace);
             if (!validityCachingSuspended) {
                 invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
             }
@@ -1144,9 +1146,10 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
                 unlockAfterRead();
             }
         }
+        result = addResult == AddResult.ADDED || addResult == AddResult.REPLACED;
         if (result) {
             for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
-                listener.gpsFixReceived(fix, getTrackedItem(), firstFixInTrack);
+                listener.gpsFixReceived(fix, getTrackedItem(), firstFixInTrack, addResult);
             }
         }
         return result;

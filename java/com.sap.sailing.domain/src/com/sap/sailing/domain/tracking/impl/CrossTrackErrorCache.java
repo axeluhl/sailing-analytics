@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -383,13 +384,13 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
 
     @Override
-    public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+    public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, AddResult addedOrReplaced) {
         TimePoint from = owner.getTrack(competitor).getEstimatedPositionTimePeriodAffectedBy(fix).from();
         invalidate(competitor, from);
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
         TimePoint from = owner.getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix).from();
         final List<Competitor> shuffledCompetitors = new ArrayList<>(cachePerCompetitor.keySet());
         Collections.shuffle(shuffledCompetitors);
