@@ -1,14 +1,19 @@
 package com.sap.sailing.windestimation.jaxrs.api;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.util.Map;
 
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.windestimation.integration.ExportedModels;
 import com.sap.sailing.windestimation.integration.ReplicableWindEstimationFactoryService;
 import com.sap.sailing.windestimation.jaxrs.client.WindEstimationDataClient;
+import com.sap.sailing.windestimation.model.store.ModelDomainType;
+import com.sap.sailing.windestimation.model.store.ModelStore;
 
 /**
  * 
@@ -17,17 +22,26 @@ import com.sap.sailing.windestimation.jaxrs.client.WindEstimationDataClient;
  */
 public class WindEstimationDataClientMock extends WindEstimationDataClient {
 
-    private final File file;
+    private final ModelStore modelStore;
 
-    public WindEstimationDataClientMock(File file,
+    public WindEstimationDataClientMock(ModelStore modelStore,
             ReplicableWindEstimationFactoryService windEstimationFactoryService) {
         super(null, windEstimationFactoryService);
-        this.file = file;
+        this.modelStore = modelStore;
     }
 
     @Override
     protected InputStream getContentFromResponse() throws IOException, ParseException {
-        return new FileInputStream(file);
+        ExportedModels exportedModels = new ExportedModels();
+        for (ModelDomainType domainType : ModelDomainType.values()) {
+            Map<String, byte[]> exportedModelsForDomainType = modelStore.exportAllPersistedModels(domainType);
+            exportedModels.addSerializedModelsForDomainType(domainType, exportedModelsForDomainType);
+        }
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(byteArrayOutputStream)) {
+            oos.writeObject(exportedModels);
+        }
+        return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
     }
 
 }
