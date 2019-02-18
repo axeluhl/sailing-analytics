@@ -35,6 +35,9 @@ public class MultiColorPolylineOptions {
     
     
     public Polyline newPolylineInstance(int index) {
+        if (colorProvider == null) {
+            throw new IllegalStateException("A ColorProvider must be set prior to creating new Polylines.");
+        }
         return newPolylineInstance(colorProvider.getColor(index));
     }
     public Polyline newPolylineInstance(String strokeColor) {

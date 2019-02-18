@@ -1,13 +1,17 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
+import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
+import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
+import com.google.gwt.maps.client.events.mouseup.MouseUpMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 
@@ -15,15 +19,20 @@ import com.google.gwt.maps.client.overlays.Polyline;
  * 
  * @author Tim Hessenmüller (D062243)
  */
-public class MultiColorPolyline {
+public class MultiColorPolyline implements PathChangeHandler {
     private MultiColorPolylineOptions options;
     
     private List<Polyline> polylines;
     
     private MapWidget map;
-    private List<Hoverline> hoverlines;
-    private List<ClickMapHandler> clickMapHandler;
-    private List<MouseOverMapHandler> mouseOverMapHandler;
+    
+    private Set<PathChangeHandler> pathChangeHandlers;
+    
+    private Set<ClickMapHandler> clickMapHandlers;
+    private Set<MouseOverMapHandler> mouseOverMapHandlers;
+    private Set<MouseDownMapHandler> mouseDownMapHandlers;
+    private Set<MouseUpMapHandler> mouseUpMapHandlers;
+    private Set<MouseOutMapHandler> mouseOutMapHandlers;
     
     public MultiColorPolyline(MultiColorPolylineColorProvider colorProvider) {
         this(new MultiColorPolylineOptions(colorProvider));
@@ -32,15 +41,19 @@ public class MultiColorPolyline {
         this.options = options;
         polylines = new ArrayList<>();
         
-        hoverlines = new LinkedList<>();
-        clickMapHandler = new LinkedList<>();
-        mouseOverMapHandler = new LinkedList<>();
+        pathChangeHandlers = new HashSet<>();
+        
+        clickMapHandlers = new HashSet<>();
+        mouseOverMapHandlers = new HashSet<>();
+        mouseDownMapHandlers = new HashSet<>();
+        mouseUpMapHandlers = new HashSet<>();
+        mouseOutMapHandlers = new HashSet<>();
     }
     
     /*public MultiColorPolylineOptions getOptions() {
         return options;
     }*/
-    public void setOptions(MultiColorPolylineOptions options) {
+    public void setOptions(final MultiColorPolylineOptions options) {
         if (this.options.getColorMode() != options.getColorMode()) {
             MVCArray<LatLng> path = MVCArray.newInstance(getPath().toArray(new LatLng[0]));
             this.options = options;
@@ -53,8 +66,6 @@ public class MultiColorPolyline {
             polylines.get(i).setOptions(options.newPolylineOptionsInstance(color));
         }
     }
-    
-    
     
     public List<LatLng> getPath() {
         final int cap = getLength();
@@ -71,6 +82,9 @@ public class MultiColorPolyline {
     }
     
     public void setPath(final MVCArray<LatLng> path) {
+        for (PathChangeHandler handler : pathChangeHandlers) {
+            handler.setPath(path);
+        }
         clear();
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
@@ -85,13 +99,13 @@ public class MultiColorPolyline {
             }
             break;
         }
-        for (Hoverline line : hoverlines) {
-            line.getHoverline().setPath(path);
-        }
     }
     
     public void insertAt(int index, LatLng position) {
         if (position == null) throw new IllegalArgumentException("Cannot insert value: null");
+        for (PathChangeHandler handler : pathChangeHandlers) {
+            handler.insertAt(index, position);
+        }
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
             if (polylines.isEmpty()) {
@@ -138,17 +152,14 @@ public class MultiColorPolyline {
             }
             break;
         }
-        for (Hoverline line : hoverlines) {
-            line.getHoverline().getPath().insertAt(index, position);
-        }
     }
     
     public LatLng removeAt(int index) {
         if (index < 0 || index >= getLength()) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + getLength());
         }
-        for (Hoverline line : hoverlines) {
-            line.getHoverline().getPath().removeAt(index);
+        for (PathChangeHandler handler : pathChangeHandlers) {
+            handler.removeAt(index);
         }
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
@@ -189,6 +200,9 @@ public class MultiColorPolyline {
     }
     
     public void setAt(int index, LatLng position) {
+        for (PathChangeHandler handler : pathChangeHandlers) {
+            handler.setAt(index, position);
+        }
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
             polylines.get(0).getPath().setAt(index, position);
@@ -204,9 +218,6 @@ public class MultiColorPolyline {
             }
             break;
         }
-        for (Hoverline line : hoverlines) {
-            line.getHoverline().getPath().setAt(index, position);
-        }
     }
     
     public MapWidget getMap() {
@@ -221,6 +232,9 @@ public class MultiColorPolyline {
     }
     
     public void clear() {
+        for (PathChangeHandler handler : pathChangeHandlers) {
+            handler.clear();
+        }
         for (Polyline l : polylines) {
             l.setMap(null);
         }
@@ -250,21 +264,33 @@ public class MultiColorPolyline {
         if (map != null) {
             line.setMap(map);
         }
-        for (ClickMapHandler h : clickMapHandler) {
+        for (ClickMapHandler h : clickMapHandlers) {
             line.addClickHandler(h);
         }
-        for (MouseOverMapHandler h : mouseOverMapHandler) {
+        for (MouseOverMapHandler h : mouseOverMapHandlers) {
             line.addMouseOverHandler(h);
+        }
+        for (MouseDownMapHandler h : mouseDownMapHandlers) {
+            line.addMouseDownHandler(h);
+        }
+        for (MouseUpMapHandler h : mouseUpMapHandlers) {
+            line.addMouseUpHandler(h);
+        }
+        for (MouseOutMapHandler h : mouseOutMapHandlers) {
+            line.addMouseOutMoveHandler(h);
         }
         return line;
     }
     
-    public void addHoverline(Hoverline hoverline) {
-        hoverlines.add(hoverline);
+    public void addPathChangeHandler(PathChangeHandler handler) {
+        pathChangeHandlers.add(handler);
+    }
+    public boolean removePathChangeHandler(PathChangeHandler handler) {
+        return pathChangeHandlers.remove(handler);
     }
     
     public void addClickHandler(ClickMapHandler handler) {
-        clickMapHandler.add(handler);
+        clickMapHandlers.add(handler);
         // Add to already existing Polylines
         for (Polyline line : polylines) {
             line.addClickHandler(handler);
@@ -272,10 +298,34 @@ public class MultiColorPolyline {
     }
     
     public void addMouseOverHandler(MouseOverMapHandler handler) {
-        mouseOverMapHandler.add(handler);
+        mouseOverMapHandlers.add(handler);
         // Add to already existing Polylines
         for (Polyline line : polylines) {
             line.addMouseOverHandler(handler);
+        }
+    }
+    
+    public void addMouseDownHandler(MouseDownMapHandler handler) {
+        mouseDownMapHandlers.add(handler);
+        // Add to already existing Polylines
+        for (Polyline line : polylines) {
+            line.addMouseDownHandler(handler);
+        }
+    }
+    
+    public void addMouseUpHandler(MouseUpMapHandler handler) {
+        mouseUpMapHandlers.add(handler);
+        // Add to already existing Polylines
+        for (Polyline line : polylines) {
+            line.addMouseUpHandler(handler);
+        }
+    }
+    
+    public void addMouseOutMoveHandler(MouseOutMapHandler handler) {
+        mouseOutMapHandlers.add(handler);
+        // Add to already existing Polylines
+        for (Polyline line : polylines) {
+            line.addMouseOutMoveHandler(handler);
         }
     }
 }
