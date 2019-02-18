@@ -3,9 +3,13 @@ package com.sap.sailing.windestimation.datavisualization;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Ellipse2D;
+import java.util.concurrent.CountDownLatch;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -40,25 +44,52 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
     private XYSeries valuesSeries;
     private XYSeries stdSeries;
     private XYSeries zeroMeanStdSeries;
+    private final CountDownLatch windowClosedLatch = new CountDownLatch(1);
 
     public SingleDimensionAggregatesPlottingFrame(
             AggregatedSingleDimensionBasedTwdTransitionPersistenceManager persistenceManager) {
         super(persistenceManager.getCollectionName());
         this.persistenceManager = persistenceManager;
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent event) {
+                windowClosedLatch.countDown();
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                setLayout(null);
+                setVisible(false);
+                dispose();
+            }
+        });
+        initializeDataWithCharts();
+    }
+
+    private void initializeDataWithCharts() {
         createSeries();
         fillSeries();
         DefaultTableXYDataset mainDataset = createMainDataset();
         DefaultTableXYDataset histoDataset = createHistoDataset();
         mainChart = createMainChart(mainDataset);
         histoChart = createHistoChart(histoDataset);
-        // Create Panel
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         ChartPanel mainChartPanel = new ChartPanel(mainChart);
         ChartPanel histoChartPanel = new ChartPanel(histoChart);
+        JButton refreshButton = new JButton("Refresh charts");
+        refreshButton.addActionListener(event -> refreshCharts());
+        panel.add(refreshButton);
         panel.add(mainChartPanel);
         panel.add(histoChartPanel);
         setContentPane(panel);
+    }
+
+    public void refreshCharts() {
+        SwingUtilities.invokeLater(() -> {
+            initializeDataWithCharts();
+            revalidate();
+        });
     }
 
     private void createSeries() {
@@ -189,6 +220,10 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
             setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             setVisible(true);
         });
+    }
+
+    public void awaitWindowClosed() throws InterruptedException {
+        windowClosedLatch.await();
     }
 
 }
