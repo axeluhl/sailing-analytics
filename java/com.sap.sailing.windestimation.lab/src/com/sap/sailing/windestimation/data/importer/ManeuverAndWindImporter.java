@@ -365,7 +365,7 @@ public class ManeuverAndWindImporter {
         final Header contentEncoding = response.getEntity().getContentEncoding();
         final Reader reader;
         if (contentEncoding == null) {
-            reader = new InputStreamReader(response.getEntity().getContent());
+            reader = new InputStreamReader(response.getEntity().getContent(), "UTF-8");
         } else {
             reader = new InputStreamReader(response.getEntity().getContent(), contentEncoding.getValue());
         }
