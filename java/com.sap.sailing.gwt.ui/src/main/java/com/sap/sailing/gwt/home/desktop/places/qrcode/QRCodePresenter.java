@@ -98,7 +98,6 @@ public class QRCodePresenter {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        GWT.log("Error on loading regatta ", caught);
                         dataCollector.setRegatta(null);
                     }
 
@@ -152,7 +151,7 @@ public class QRCodePresenter {
                 }
             } else {
                 if (competitorIsSet && eventIsSet) {
-                    if (checkInUrl != null && event != null) {
+                    if (checkInUrl != null) {
                         String branchIoUrl = null;
                         switch (invitationMode) {
                         case BOUY_TENDER:
@@ -165,11 +164,11 @@ public class QRCodePresenter {
                                     + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
                                     + QRCodePresenter.this.checkInUrl;
                             break;
-                    case COMPETITOR_2:
-                        branchIoUrl = BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO + "?"
-                                + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
-                                + QRCodePresenter.this.checkInUrl;
-                        break;
+                        case COMPETITOR_2:
+                            branchIoUrl = BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO + "?"
+                                    + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
+                                    + QRCodePresenter.this.checkInUrl;
+                            break;
                         default:
                             break;
                         }
