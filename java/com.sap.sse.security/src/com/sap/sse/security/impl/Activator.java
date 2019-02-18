@@ -181,28 +181,33 @@ public class Activator implements BundleActivator {
                 /* customizer */ null);
         userStoreTracker.open();
         accessControlStoreTracker.open();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // ensure that classpath:... Shiro ini files are resolved properly
-            logger.info("Waiting for UserStore service...");
-            final UserStore userStore = userStoreTracker.waitForService(0);
-            final AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
-            logger.info("Obtained UserStore service "+userStore);
-            // must be called after the definition of the prototypes and after loading actual roles, but before
-            // loading users
-            userStore.ensureDefaultRolesExist();
-            // actually load the users and migrate them if required
-            userStore.loadAndMigrateUsers();
-            // loading ACLs and Ownerships requires users and UserGroups to be correctly loaded
-            accessControlStore.loadACLsAndOwnerships();
-            // create security service, it will also create a default admin user if no users exist
-            createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
-
-            applyCustomizations();
-            
-            migrate(userStore, securityService.get());
-        } catch (InterruptedException | UserGroupManagementException | UserManagementException | ExecutionException e) {
-            logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
-        }
+        new Thread("ServiceTracker waiting for UserStore service") {
+            @Override
+            public void run() {
+                try {
+                    Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // ensure that classpath:... Shiro ini files are resolved properly
+                    logger.info("Waiting for UserStore service...");
+                    final UserStore userStore = userStoreTracker.waitForService(0);
+                    final AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
+                    logger.info("Obtained UserStore service "+userStore);
+                    // must be called after the definition of the prototypes and after loading actual roles, but before
+                    // loading users
+                    userStore.ensureDefaultRolesExist();
+                    // actually load the users and migrate them if required
+                    userStore.loadAndMigrateUsers();
+                    // loading ACLs and Ownerships requires users and UserGroups to be correctly loaded
+                    accessControlStore.loadACLsAndOwnerships();
+                    // create security service, it will also create a default admin user if no users exist
+                    createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
+        
+                    applyCustomizations();
+                    
+                    migrate(userStore, securityService.get());
+                } catch (InterruptedException | UserGroupManagementException | UserManagementException | ExecutionException e) {
+                    logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
+                }
+            }
+        }.start();
     }
     
     private void migrate(UserStore userStore, SecurityService securityService) {
