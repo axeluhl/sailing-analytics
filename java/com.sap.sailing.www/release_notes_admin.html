@@ -31,6 +31,14 @@
 			    a typical league set-up (focus on reducing the number of boat changes while
 			    sacrificing a bit of boat assignment fairness).
 			</li>
+			<li>The built-in mark passing calculator that is primarily used for smartphone
+			    tracking has been improved. In particular, it now recognizes trackers left behind,
+			    e.g., on a committee boat, and avoids performance issues incurred by these scenarios
+			    by filtering possible mark passing candidates using a bounding box-based approach:
+			    if a tracker hardly moves over some time, only the most promising candidates from
+			    that time interval are considered. This avoids compute time and memory issues
+			    seen in the past.
+			</li>
                     </ul>
 
                     <h2 class="articleSubheadline">January 2019</h2>

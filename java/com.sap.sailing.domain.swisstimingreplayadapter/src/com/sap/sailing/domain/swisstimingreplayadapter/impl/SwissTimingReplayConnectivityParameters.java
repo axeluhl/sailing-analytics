@@ -195,4 +195,9 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
     public String getLink() {
         return link;
     }
+    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+" for "+raceName+"/"+raceID+", link: "+link+", boatClassName: "+boatClassName;
+    }
 }
