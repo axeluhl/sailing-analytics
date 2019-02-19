@@ -90,7 +90,7 @@ public class WindEstimationFactoryServiceImpl extends
                 MODEL_STORE.importPersistedModels(serializedModelsForDomainType, domainType);
             }
         }
-        clearState();
+        reloadWindEstimationModels();
     }
 
     @Override
@@ -138,15 +138,19 @@ public class WindEstimationFactoryServiceImpl extends
         for (ModelDomainType domainType : modelDomainTypesRequiredByWindEstimation) {
             MODEL_STORE.deleteAll(domainType);
         }
-        clearState();
+        reloadWindEstimationModels();
+    }
+
+    @Override
+    public void clearState() throws Exception {
+        clearReplicaState();
     }
 
     /**
      * Clears/Reloads all caches with machine learning models. Notifies ready state change listeners about the new ready
      * state of this wind estimation instance.
      */
-    @Override
-    public void clearState() {
+    public void reloadWindEstimationModels() {
         maneuverClassifiersCache.clearCache();
         gaussianBasedTwdTransitionDistributionCache.clearCache();
         List<WindEstimationModelsChangedListener> modelsChangedListeners;
@@ -169,7 +173,7 @@ public class WindEstimationFactoryServiceImpl extends
             MODEL_STORE.deleteAll(domainType);
             MODEL_STORE.importPersistedModels(exportedModels, domainType);
         }
-        clearState();
+        reloadWindEstimationModels();
     }
 
     /**
