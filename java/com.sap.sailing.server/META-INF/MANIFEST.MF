@@ -39,7 +39,7 @@ Require-Bundle: com.sap.sailing.domain,
  org.apache.shiro.core;bundle-version="1.2.2",
  javax.servlet;bundle-version="3.1.0",
  com.sap.sse.mail,
- com.sap.sailing.server.interface;bundle-version="1.0.0",
+ com.sap.sailing.server.interface,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sse.security.common
 Bundle-ClassPath: .
