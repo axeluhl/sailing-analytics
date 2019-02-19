@@ -1970,6 +1970,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                             // The user is a server admin -> Add it to the server group to allow setting the server
                             // group as default creation group
                             addUserToUserGroup(defaultTenant, user);
+                            if (UserStore.ADMIN_USERNAME.equals(user.getName())) {
+                                // For the "admin" user the server group is initially set as
+                                // default creation group. This is consistent to a newly created server
+                                // and in most cases this is the group, the admin is meant to work with.
+                                setDefaultTenantForCurrentServerForUser(user.getName(), getDefaultTenant().getId());
+                            }
                         }
                     }
                 }
