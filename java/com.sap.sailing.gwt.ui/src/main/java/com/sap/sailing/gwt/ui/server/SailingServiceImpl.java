@@ -1277,6 +1277,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, competitor.getIdentifier());
         return competitorDTO;
     }
+    
+    private CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(CompetitorWithBoat competitor) {
+        CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorWithBoatDTO(competitor);
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, competitor.getIdentifier());
+        BoatDTO boatDTO = competitorDTO.getBoat();
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO, competitor.getBoat().getIdentifier());
+        return competitorDTO;
+    }
 
     /**
      * Converts the {@link Competitor} objects passed as {@code iterable} to {@link CompetitorWithBoatDTO} objects with an empty boat.
@@ -5851,17 +5859,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public CompetitorDTO addOrUpdateCompetitorWithoutBoat(CompetitorDTO competitorDTO) throws URISyntaxException {
         Competitor competitor = addOrUpdateCompetitorWithoutBoatInternal(competitorDTO);
-        CompetitorDTO result = getBaseDomainFactory().convertToCompetitorDTO(competitor);
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, competitor.getIdentifier());
-        return result;
+        return convertToCompetitorDTO(competitor);
     }
     
     @Override
     public CompetitorWithBoatDTO addOrUpdateCompetitorWithBoat(CompetitorWithBoatDTO competitorDTO) throws URISyntaxException {
         CompetitorWithBoat competitor = addOrUpdateCompetitorWithBoatInternal(competitorDTO);
-        CompetitorWithBoatDTO result = getBaseDomainFactory().convertToCompetitorWithBoatDTO(competitor);
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, competitor.getIdentifier());
-        return result;
+        return convertToCompetitorWithBoatDTO(competitor);
     }
 
     @Override
@@ -5905,9 +5909,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public BoatDTO addOrUpdateBoat(BoatDTO boat) {
-        BoatDTO result = getBaseDomainFactory().convertToBoatDTO(addOrUpdateBoatInternal(boat));
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, boat.getIdentifier());
-        return result;
+        return convertToBoatDTO(addOrUpdateBoatInternal(boat));
     }
 
     private Boat addOrUpdateBoatInternal(BoatDTO boat) {
