@@ -174,20 +174,18 @@ public class SecurityResource extends AbstractSecurityResource {
     @Produces("application/json;charset=UTF-8")
     public Response getUser(@QueryParam("username") String username) {
         final Subject subject = SecurityUtils.getSubject();
-        if (!getService().hasCurrentUserReadPermission(getService().getUserByName(username))) {
+        final User user = getService().getUserByName(username == null ? subject.getPrincipal().toString() : username);
+        if (user == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
+        } else if (!getService().hasCurrentUserReadPermission(user)) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
-            final User user = getService().getUserByName(username == null ? subject.getPrincipal().toString() : username);
-            if (user == null) {
-                return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
-            } else {
-                JSONObject result = new JSONObject();
-                result.put("username", user.getName());
-                result.put("fullName", user.getFullName());
-                result.put("email", user.getEmail());
-                result.put("company", user.getCompany());
-                return Response.ok(result.toJSONString()).build();
-            }
+            JSONObject result = new JSONObject();
+            result.put("username", user.getName());
+            result.put("fullName", user.getFullName());
+            result.put("email", user.getEmail());
+            result.put("company", user.getCompany());
+            return Response.ok(result.toJSONString()).build();
         }
     }
     
