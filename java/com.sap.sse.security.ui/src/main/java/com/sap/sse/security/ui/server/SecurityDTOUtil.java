@@ -92,6 +92,10 @@ public abstract class SecurityDTOUtil {
      *            the {@link Map} to stripped down {@link SecurityUser user}s to use
      * @param fromOriginalToStrippedDownUserGroup
      *            the {@link Map} to stripped down {@link UserGroupImpl user group}s to use
+     * @param disablePruningForCurrentUser
+     *            if {@code true}, the whole ACL is added. If {@code false}, only that part of the ACL is added that is
+     *            relevant for the currently authenticated user. For security checks, only that part is necessary, but
+     *            when editing an ACL, all contents are required to be fetched to the UI.
      */
     public static void addSecurityInformation(final SecurityDTOFactory securityDTOFactory,
             final SecurityService securityService, final SecuredDTO securedObject,
