@@ -2598,15 +2598,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     protected RacingEventService getService() {
-        return racingEventServiceTracker.getService(); // grab the service
+        try {
+            return racingEventServiceTracker.waitForService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } // grab the service
     }
 
     protected ReplicationService getReplicationService() {
-        return replicationServiceTracker.getService();
+        try {
+            return replicationServiceTracker.waitForService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     protected SecurityService getSecurityService() {
-        return securityServiceTracker.getService();
+        try {
+            return securityServiceTracker.waitForService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     @Override
