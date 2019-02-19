@@ -308,7 +308,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
                 setOwnership(qualifiedTypeIdentifier, adminUser, null);
-                addUserToUserGroup(getDefaultTenant(), adminUser);
+                final UserGroup defaultTenant = getDefaultTenant();
+                addUserToUserGroup(defaultTenant, adminUser);
+                setDefaultTenantForCurrentServerForUser(adminUser.getName(), defaultTenant.getId());
             }
             
             if (store.getUserByName(SecurityService.ALL_USERNAME) == null) {
