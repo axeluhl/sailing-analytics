@@ -58,6 +58,7 @@ import com.sap.sailing.windestimation.util.LoggingUtil;
  */
 public class ManeuverAndWindImporter {
 
+    private static final int CONNECTION_TIMEOUT_MILLIS = 60000 * 5;
     public static final String REST_API_BASE_URL = "https://www.sapsailing.com/sailingserver/api/v1";
     public static final String REST_API_REGATTAS_PATH = "/regattas";
     public static final String REST_API_RACES_PATH = "/races";
@@ -74,7 +75,7 @@ public class ManeuverAndWindImporter {
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
     private final LabeledManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
     private boolean skipRace;
-    private static final int NUMBER_OF_THREADS = 50; // high number due to HTTP requests
+    private static final int NUMBER_OF_THREADS = 10; // high number due to HTTP requests
     private final ThreadPoolExecutor executorService;
 
     public ManeuverAndWindImporter() throws UnknownHostException {
@@ -102,8 +103,12 @@ public class ManeuverAndWindImporter {
 
     public HttpClient createNewHttpClient() {
         HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, 60000 * 5);
+        HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIMEOUT_MILLIS);
         HttpClient client = new SystemDefaultHttpClient(httpParams);
+        client.getParams().setParameter("http.socket.timeout", CONNECTION_TIMEOUT_MILLIS);
+        client.getParams().setParameter("http.connection.timeout", CONNECTION_TIMEOUT_MILLIS);
+        client.getParams().setParameter("http.connection-manager.timeout", new Long(CONNECTION_TIMEOUT_MILLIS));
+        client.getParams().setParameter("http.protocol.head-body-timeout", CONNECTION_TIMEOUT_MILLIS);
         return client;
     }
 

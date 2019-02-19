@@ -18,7 +18,6 @@ import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.windestimation.integration.ExportedModels;
 import com.sap.sailing.windestimation.integration.WindEstimationModelsUpdateOperation;
-import com.sap.sailing.windestimation.integration.WindEstimationModelsUpdateOperationImpl;
 import com.sap.sailing.windestimation.jaxrs.AbstractWindEstimationDataResource;
 
 /**
@@ -46,7 +45,7 @@ public class WindEstimationDataResource extends AbstractWindEstimationDataResour
         ObjectInputStream ois = getWindEstimationFactoryServiceImpl()
                 .createObjectInputStreamResolvingAgainstCache(inputStream);
         ExportedModels exportedModels = (ExportedModels) ois.readObject();
-        WindEstimationModelsUpdateOperation windEstimationModelsUpdateOperation = new WindEstimationModelsUpdateOperationImpl(
+        WindEstimationModelsUpdateOperation windEstimationModelsUpdateOperation = new WindEstimationModelsUpdateOperation(
                 exportedModels);
         getWindEstimationFactoryServiceImpl().apply(windEstimationModelsUpdateOperation);
         return Response.ok("Wind estimation models accepted").build();

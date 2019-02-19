@@ -146,7 +146,7 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -393,7 +393,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private transient PolarDataService polarDataService;
 
-    private transient volatile IncrementalWindEstimationTrack windEstimation;
+    private transient volatile IncrementalWindEstimation windEstimation;
 
     private transient ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache;
 
@@ -3611,25 +3611,32 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
         this.polarDataService = polarDataService;
+        if(polarDataService != null && windEstimation != null) {
+            updateManeuversAndWindWithNewWindEstimation(windEstimation, windEstimation);
+        }
     }
     
     @Override
-    public void setWindEstimation(IncrementalWindEstimationTrack windEstimation) {
-        IncrementalWindEstimationTrack previousWindEstimation = this.windEstimation;
+    public void setWindEstimation(IncrementalWindEstimation windEstimation) {
+        IncrementalWindEstimation previousWindEstimation = this.windEstimation;
         if (previousWindEstimation != windEstimation) {
-            if (previousWindEstimation != null) {
-                windTracks.remove(previousWindEstimation.getWindSource());
-            }
-            if (windEstimation != null) {
-                windTracks.put(windEstimation.getWindSource(), windEstimation);
-            }
-            this.windEstimation = windEstimation;
-            // TODO Make more efficient by reusing the state of incremental maneuver detectors. The already computed
-            // complete maneuver curves can be fed directly to the windEstimation.
-            maneuverDetectorPerCompetitorCache.clearCache();
-            shortTimeWindCache.clearCache();
-            triggerManeuverCacheRecalculationForAllCompetitors();
+            updateManeuversAndWindWithNewWindEstimation(windEstimation, previousWindEstimation);
         }
+    }
+
+    private void updateManeuversAndWindWithNewWindEstimation(IncrementalWindEstimation windEstimation,
+            IncrementalWindEstimation previousWindEstimation) {
+        WindSource windSource = new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION);
+        windTracks.remove(windSource);
+        if (windEstimation != null) {
+            windTracks.put(windSource, windEstimation.getWindTrack());
+        }
+        this.windEstimation = windEstimation;
+        // TODO Make more efficient by reusing the state of incremental maneuver detectors. The already computed
+        // complete maneuver curves can be fed directly into the windEstimation.
+        maneuverDetectorPerCompetitorCache.clearCache();
+        shortTimeWindCache.clearCache();
+        triggerManeuverCacheRecalculationForAllCompetitors();
     }
 
     /**

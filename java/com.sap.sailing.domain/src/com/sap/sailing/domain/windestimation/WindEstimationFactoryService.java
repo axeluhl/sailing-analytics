@@ -31,7 +31,7 @@ public interface WindEstimationFactoryService {
      * @see #isReady()
      * @see #addWindEstimationModelsChangedListenerAndReceiveUpdate(WindEstimationModelsChangedListener)
      */
-    IncrementalWindEstimationTrack createIncrementalWindEstimationTrack(TrackedRace trackedRace);
+    IncrementalWindEstimation createIncrementalWindEstimationTrack(TrackedRace trackedRace);
 
     /**
      * Checks whether the wind estimation is ready for its use. The wind estimation maintains multiple internal machine

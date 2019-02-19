@@ -124,6 +124,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -2078,12 +2079,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
         @Override
         public void windDataReceived(Wind wind, WindSource windSource) {
-            replicate(new RecordWindFix(getRaceIdentifier(), windSource, wind));
+            if (windSource.getType() != WindSourceType.MANEUVER_BASED_ESTIMATION) {
+                replicate(new RecordWindFix(getRaceIdentifier(), windSource, wind));
+            }
         }
 
         @Override
         public void windDataRemoved(Wind wind, WindSource windSource) {
-            replicate(new RemoveWindFix(getRaceIdentifier(), windSource, wind));
+            if (windSource.getType() != WindSourceType.MANEUVER_BASED_ESTIMATION) {
+                replicate(new RemoveWindFix(getRaceIdentifier(), windSource, wind));
+            }
         }
 
         @Override

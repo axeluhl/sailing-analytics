@@ -1,7 +1,8 @@
 package com.sap.sailing.windestimation.model;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
@@ -30,14 +31,16 @@ import com.sap.sailing.windestimation.util.LoggingUtil;
  */
 public class SimpleModelsTraining {
 
-    private static final int NUMBER_OF_THREADS = 2;
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+    private static final int NUMBER_OF_THREADS = 3;
+    private static final ExecutorService executorService = new ThreadPoolExecutor(NUMBER_OF_THREADS, NUMBER_OF_THREADS,
+            0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(NUMBER_OF_THREADS),
+            new ThreadPoolExecutor.CallerRunsPolicy());
 
     public static void main(String[] args) throws Exception {
         new ManeuverForEstimationPersistenceManager().dropCollection();
         new RegularManeuversForEstimationPersistenceManager().dropCollection();
         executeInThreadPool(() -> PolarDataImporter.main(args));
-        ManeuverAndWindImporter.main(args);
+        executeInThreadPool(() -> ManeuverAndWindImporter.main(args));
         awaitThreadPoolCompletion();
         executeInThreadPool(() -> {
             ManeuverClassifierTrainer.main(args);
@@ -49,9 +52,11 @@ public class SimpleModelsTraining {
             Thread.sleep(1000);
             AggregatedDurationBasedTwdTransitionImporter.main(args);
         });
-        DistanceBasedTwdTransitionImporter.main(args);
-        Thread.sleep(1000);
-        AggregatedDistanceBasedTwdTransitionImporter.main(args);
+        executeInThreadPool(() -> {
+            DistanceBasedTwdTransitionImporter.main(args);
+            Thread.sleep(1000);
+            AggregatedDistanceBasedTwdTransitionImporter.main(args);
+        });
         awaitThreadPoolCompletion();
         do {
             AggregatedDurationDimensionPlot.main(args);
@@ -99,8 +104,10 @@ public class SimpleModelsTraining {
         executorService.execute(() -> {
             try {
                 runnable.run();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Throwable t) {
+                t.printStackTrace();
+                System.exit(1);
+                LoggingUtil.logInfo("FAILURE: Caught unexpected exception. Model training aborted");
             }
         });
     }
