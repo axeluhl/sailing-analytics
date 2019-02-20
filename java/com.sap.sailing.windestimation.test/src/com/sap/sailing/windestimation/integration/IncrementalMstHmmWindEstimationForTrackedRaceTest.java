@@ -76,14 +76,14 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
             "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-Basic-All.clf" };
 
     protected final SimpleDateFormat dateFormat;
-    private final WindEstimationFactoryServiceImpl windEstimationFactoryService;
+    private WindEstimationFactoryServiceImpl windEstimationFactoryService;
     private ClassPathReadOnlyModelStoreImpl modelStore;
 
-    public IncrementalMstHmmWindEstimationForTrackedRaceTest()
-            throws MalformedURLException, URISyntaxException, ModelPersistenceException {
+    public IncrementalMstHmmWindEstimationForTrackedRaceTest() throws Exception {
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2")); // will result in CEST
         windEstimationFactoryService = new WindEstimationFactoryServiceImpl();
+        windEstimationFactoryService.clearState();
         modelStore = new ClassPathReadOnlyModelStoreImpl("trained_wind_estimation_models", getClass().getClassLoader(),
                 modelFilesNames);
         windEstimationFactoryService.importAllModelsFromModelStore(modelStore);
