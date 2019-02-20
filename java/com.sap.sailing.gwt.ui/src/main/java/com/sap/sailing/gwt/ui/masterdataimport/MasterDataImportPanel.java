@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.progressbar.CustomProgressBar;
+import com.sap.sse.gwt.client.dialog.DialogUtils;
 
 public class MasterDataImportPanel extends VerticalPanel {
 
@@ -97,7 +98,8 @@ public class MasterDataImportPanel extends VerticalPanel {
         passwordPanel.add(passwordBox);
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
         fetchIdsButton.ensureDebugId("fetchLeaderboardGroupList");
-
+        DialogUtils.linkEnterToButton(fetchIdsButton, usernameBox);
+        DialogUtils.linkEnterToButton(fetchIdsButton, passwordBox);
 
         this.add(serverAddressPanel);
         this.add(usernamePanel);
