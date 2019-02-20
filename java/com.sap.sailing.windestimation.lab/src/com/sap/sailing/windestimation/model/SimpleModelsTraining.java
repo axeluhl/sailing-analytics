@@ -20,7 +20,11 @@ import com.sap.sailing.windestimation.datavisualization.AggregatedDistanceDimens
 import com.sap.sailing.windestimation.datavisualization.AggregatedDurationDimensionPlot;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierTrainer;
 import com.sap.sailing.windestimation.model.classifier.maneuver.PersistedManeuverClassifiersScorePrinter;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionStdRegressorTrainer;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionStdRegressorTrainer;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
@@ -32,9 +36,7 @@ import com.sap.sailing.windestimation.util.LoggingUtil;
 public class SimpleModelsTraining {
 
     private static final int NUMBER_OF_THREADS = 3;
-    private static final ExecutorService executorService = new ThreadPoolExecutor(NUMBER_OF_THREADS, NUMBER_OF_THREADS,
-            0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(NUMBER_OF_THREADS),
-            new ThreadPoolExecutor.CallerRunsPolicy());
+    private static ExecutorService executorService;
 
     public static void main(String[] args) throws Exception {
         new ManeuverForEstimationPersistenceManager().dropCollection();
@@ -63,11 +65,15 @@ public class SimpleModelsTraining {
             showInfoAboutDataCleaning(AggregatedSingleDimensionType.DURATION);
             AggregatedDurationDimensionPlot.awaitWindowClosed();
         } while (JOptionPane.YES_OPTION != askDataCleaningFinished(AggregatedSingleDimensionType.DURATION));
+        showInfoAboutIntervalAdjustments(DurationBasedTwdTransitionRegressorModelContext.class,
+                DurationValueRange.class);
         do {
             AggregatedDistanceDimensionPlot.main(args);
             showInfoAboutDataCleaning(AggregatedSingleDimensionType.DISTANCE);
             AggregatedDistanceDimensionPlot.awaitWindowClosed();
         } while (JOptionPane.YES_OPTION != askDataCleaningFinished(AggregatedSingleDimensionType.DISTANCE));
+        showInfoAboutIntervalAdjustments(DistanceBasedTwdTransitionRegressorModelContext.class,
+                DistanceValueRange.class);
         DurationBasedTwdTransitionStdRegressorTrainer.main(args);
         DistanceBasedTwdTransitionStdRegressorTrainer.main(args);
         Thread.sleep(1000);
@@ -92,15 +98,25 @@ public class SimpleModelsTraining {
     private static void showInfoAboutDataCleaning(AggregatedSingleDimensionType dimension) {
         JOptionPane.showMessageDialog(null, "Now, clean the data for " + dimension
                 + " dimension. Remove instances from MongoDB collection \"" + dimension.getCollectioName()
-                + "\" which do not make sense. E.g. values which are represented by a small number of supporting instances (see histogram), values which cause implausible zig zag sections within zero-mean standard deviation curve and etc. Close the graphical tool, when you are done to resume model training.");
+                + "\" which do not make sense. E.g. values which are represented by a small number of supporting instances (see histogram), values which cause implausible zig zag sections within zero-mean standard deviation curve and etc. Close the graphical tool, when you are done to resume the model training.");
+    }
+
+    private static void showInfoAboutIntervalAdjustments(Class<?> classToAdjust, Class<?> valueRangeEnum) {
+        JOptionPane.showMessageDialog(null, "Now, open the source code of the class \"" + classToAdjust.getName()
+                + "\". Scroll down to the definition of the inner enum \"" + valueRangeEnum.getSimpleName()
+                + "\", read its JavaDoc and adjust its interval definitions so that each interval can be learned by the adjusted regressor model configuration with minimal error. Press OK ONLY after you are done.");
     }
 
     private static void awaitThreadPoolCompletion() throws InterruptedException {
+        executorService.shutdown();
         executorService.awaitTermination(24, TimeUnit.HOURS);
         Thread.sleep(1000L);
     }
 
     private static void executeInThreadPool(RunnableWithExceptionsCatch runnable) {
+        if (executorService == null || executorService.isShutdown()) {
+            createNewThreadPool();
+        }
         executorService.execute(() -> {
             try {
                 runnable.run();
@@ -110,6 +126,11 @@ public class SimpleModelsTraining {
                 LoggingUtil.logInfo("FAILURE: Caught unexpected exception. Model training aborted");
             }
         });
+    }
+
+    private static void createNewThreadPool() {
+        executorService = new ThreadPoolExecutor(NUMBER_OF_THREADS, NUMBER_OF_THREADS, 0, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(NUMBER_OF_THREADS), new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     /**

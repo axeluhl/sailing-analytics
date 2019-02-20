@@ -110,6 +110,7 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
                 out.write(line);
             }
         }
+        LoggingUtil.logInfo("CSV with evaluation results have been stored in: " + csvFile.getAbsolutePath());
     }
 
 }
