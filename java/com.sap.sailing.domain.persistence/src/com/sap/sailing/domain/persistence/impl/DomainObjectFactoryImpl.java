@@ -2869,7 +2869,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                     logger.info("Done restoring race #" + finalI + "/" + count + " of type " + type);
                                 } else {
                                     logger.warning("Couldn't restore race #" + finalI + "/" + count + " of type " + type
-                                            + " with parameters " + params
+                                            + " with parameters " + o
                                             + " because the parameters loaded from the DB couldn't be mapped. Maybe the owning leaderboard was removed?"
                                             + " Removing this parameter set from the list of races to restore. The server will make no further attempt to restore this race.");
                                     collection.deleteOne(o);
