@@ -155,16 +155,32 @@ public interface UserManagementServiceAsync {
 
     void verifySocialUser(CredentialDTO credential, AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> markedAsyncCallback);
 
+    /**
+     * Grants the role associated with the given {@code roleDefinitionId}, {@code userQualifierName} and
+     * {@code tenantQualifierName} to the given {@code username} if the current user has the required permissions
+     */
     void addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId, String tenantQualifierName,
             AsyncCallback<SuccessInfo> callback);
 
+    /**
+     * Revokes the role associated with the given {@code roleDefinitionId}, {@code userQualifierName} and
+     * {@code tenantQualifierName} for the given {@code username} if the current user has the required permissions
+     */
     void removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
             String tenantQualifierName,
             AsyncCallback<SuccessInfo> callback);
 
+    /**
+     * Grants the given {@code permission} to the given {@code username} if the current user has the required
+     * permissions
+     */
     void addPermissionForUser(String username, WildcardPermission permissions,
             AsyncCallback<SuccessInfo> callback);
 
-    void removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permissions,
+    /**
+     * Revokes the given {@code permission} for the given {@code username} if the current user has the required
+     * permissions
+     */
+    void removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permission,
             AsyncCallback<SuccessInfo> callback);
 }
