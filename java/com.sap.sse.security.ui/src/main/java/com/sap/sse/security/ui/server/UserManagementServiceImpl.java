@@ -1069,14 +1069,16 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
             final String message = "removed role " + role.getName() + " for user " + username;
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
-            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
-                    associationTypeIdentifier.toString(), new Action() {
+            final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
+                    new ActionWithResult<Void>() {
 
                         @Override
-                        public void run() throws Exception {
+                        public Void run() throws Exception {
                             getSecurityService().removeRoleFromUser(user, role);
                             logger.info(message);
+                            return null;
                         }
                     });
 

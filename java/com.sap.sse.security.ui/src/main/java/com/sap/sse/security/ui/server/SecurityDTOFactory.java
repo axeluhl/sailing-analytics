@@ -87,7 +87,7 @@ public class SecurityDTOFactory {
                 accountDTOs, createRolesDTOs(user.getRoles(), fromOriginalToStrippedDownUser,
                         fromOriginalToStrippedDownUserGroup, securityService, user),
                 /* default tenant filled in later */ null,
-                getSecuredPermissions(user.getPermissions(), user),
+                getSecuredPermissions(user.getPermissions(), user, securityService),
                 createStrippedUserGroupDTOsFromUserGroups(securityService.getUserGroupsOfUser(user),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         userDTO.setDefaultTenantForCurrentServer(createStrippedUserGroupDTOFromUserGroup(
@@ -98,14 +98,16 @@ public class SecurityDTOFactory {
         return userDTO;
     }
 
-    public Iterable<WildcardPermissionWithSecurityDTO> getSecuredPermissions(Iterable<WildcardPermission> permissions,
-            User user) {
+    public Iterable<WildcardPermissionWithSecurityDTO> getSecuredPermissions(
+            final Iterable<WildcardPermission> permissions, final User user, final SecurityService securityService) {
         Collection<WildcardPermissionWithSecurityDTO> securedPermissions = new ArrayList<>();
         for (WildcardPermission permission : permissions) {
             QualifiedObjectIdentifier identifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
                     .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(permission, user));
             WildcardPermissionWithSecurityDTO securedPermission = new WildcardPermissionWithSecurityDTO(
                     permission.toString(), identifier);
+
+            SecurityDTOUtil.addSecurityInformation(securityService, securedPermission, identifier);
             securedPermissions.add(securedPermission);
         }
         return securedPermissions;
@@ -134,6 +136,7 @@ public class SecurityDTOFactory {
                 createUserDTOFromUser(role.getQualifiedForUser(),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
                 identifier);
+        SecurityDTOUtil.addSecurityInformation(securityService, mappedRole, identifier);
         return mappedRole;
     }
     

@@ -143,7 +143,7 @@ public class RegattaDetailsComposite extends Composite {
                 RegistrationLinkWithQRCode registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
                 registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
                 RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingService, stringMessages, regatta.getName(),
-                        registrationLinkWithQRCode, /* editMode */ false, new DialogCallback<RegistrationLinkWithQRCode>() {
+                        registrationLinkWithQRCode, new DialogCallback<RegistrationLinkWithQRCode>() {
                             @Override
                             public void ok(RegistrationLinkWithQRCode result) {
                             }
@@ -151,7 +151,7 @@ public class RegattaDetailsComposite extends Composite {
                             @Override
                             public void cancel() {
                             }
-                        });
+                        }, regatta.registrationLinkSecret);
                 dialog.ensureDebugId(debugId);
                 dialog.show();
 
