@@ -44,8 +44,7 @@ Import-Package: javax.ws.rs;version="1.1.1",
 Web-ContextPath: /windestimation
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: com.sap.sailing.windestimation,
- com.sap.sailing.windestimation.integration
+Export-Package: com.sap.sailing.windestimation
 Bundle-ClassPath: lib/smile-core-1.5.2.jar,
  lib/smile-data-1.5.2.jar,
  lib/smile-graph-1.5.2.jar,

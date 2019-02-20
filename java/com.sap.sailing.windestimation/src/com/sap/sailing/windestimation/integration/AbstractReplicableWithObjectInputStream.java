@@ -106,7 +106,7 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        ObjectInputStream ois = new BundleObjectInputStream(is);
+        ObjectInputStream ois = new ObjectInputStreamWithContextClassLoaderAsResolver(is);
         return ois;
     }
 
@@ -147,15 +147,21 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
      * @author Vladislav Chumak (D069712)
      *
      */
-    private class BundleObjectInputStream extends ObjectInputStream {
+    private class ObjectInputStreamWithContextClassLoaderAsResolver extends ObjectInputStream {
 
-        public BundleObjectInputStream(InputStream in) throws IOException {
+        public ObjectInputStreamWithContextClassLoaderAsResolver(InputStream in) throws IOException {
             super(in);
         }
 
         @Override
         protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-            return super.resolveClass(desc);
+            String name = desc.getName();
+            try {
+                return Class.forName(name, /* initialize */true, Thread.currentThread().getContextClassLoader());
+            } catch (ClassNotFoundException ex) {
+                // fall back on super class in order to load primitive types
+                return super.resolveClass(desc);
+            }
         }
 
     }
