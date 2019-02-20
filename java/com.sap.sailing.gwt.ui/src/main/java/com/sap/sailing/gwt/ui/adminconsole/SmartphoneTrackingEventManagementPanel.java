@@ -45,6 +45,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -73,8 +74,12 @@ import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
@@ -176,6 +181,16 @@ public class SmartphoneTrackingEventManagementPanel
         leaderboardColumnListHandler.setComparator(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn, (l1, l2)->
             Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
 
+        final HasPermissions type = SecuredDomainType.EVENT;
+
+        final EditOwnershipDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configOwnership = EditOwnershipDialog
+                .create(userService.getUserManagementService(), type, leaderboard -> {
+                }, stringMessages);
+
+        final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, leaderboard -> leaderboard.getAccessControlList(),
+                stringMessages);
+
         ImagesBarColumn<StrippedLeaderboardDTOWithSecurity, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn = new ImagesBarColumn<StrippedLeaderboardDTOWithSecurity, RaceLogTrackingEventManagementImagesBarCell>(
                 new RaceLogTrackingEventManagementImagesBarCell(stringMessages));
         leaderboardActionColumn.setFieldUpdater(new FieldUpdater<StrippedLeaderboardDTOWithSecurity, String>() {
@@ -272,6 +287,10 @@ public class SmartphoneTrackingEventManagementPanel
                     openChooseEventDialogAndSendMails(leaderboardName);
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_SHOW_REGATTA_LOG.equals(value)) {
                     showRegattaLog();
+                } else if (DefaultActions.CHANGE_OWNERSHIP.name().equals(value)) {
+                    configOwnership.openDialog(getSelectedLeaderboard());
+                } else if (DefaultActions.CHANGE_ACL.name().equals(value)) {
+                    configACL.openDialog(getSelectedLeaderboard());
                 }
             }
 
