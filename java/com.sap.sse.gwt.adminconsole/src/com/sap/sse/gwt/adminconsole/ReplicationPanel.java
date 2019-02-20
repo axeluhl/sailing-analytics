@@ -225,13 +225,15 @@ public class ReplicationPanel extends FlowPanel {
             @Override
             public void onSuccess(ReplicationStateDTO replicas) {
                 int i=0;
+                int replicaCount = 0;
                 while (registeredReplicas.getRowCount() > 0) {
                     registeredReplicas.removeRow(0);
                 }
                 boolean replicaRegistered = false;
                 for (final ReplicaDTO replica : replicas.getReplicas()) {
+                    replicaCount++;
                     registeredReplicas.insertRow(i);
-                    registeredReplicas.setWidget(i, 0, new Label((i+1) + ". " + replica.getHostname() + " (" + replica.getIdentifier() + ")"));
+                    registeredReplicas.setWidget(i, 0, new Label(replicaCount + ". " + replica.getHostname() + " (" + replica.getIdentifier() + ")"));
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.registeredAt(replica.getRegistrationTime().toString())));
                     final Button removeReplicaButton = new Button(stringMessages.dropReplicaConnection());
                     removeReplicaButton.addClickHandler(new ClickHandler() {
