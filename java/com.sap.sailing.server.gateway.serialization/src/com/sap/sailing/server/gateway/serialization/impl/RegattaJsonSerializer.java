@@ -64,7 +64,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
         if (competitorSerializer != null) {
             JSONArray competitorsJson = new JSONArray();
             for (Competitor competitor : regatta.getAllCompetitors()) {
-                if (securityService.hasCurrentUserAnyExplictPermissions(competitor,
+                if (securityService.hasCurrentUserAnyExplicitPermissions(competitor,
                         SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                     competitorsJson.add(competitorSerializer.serialize(competitor));
                 }
@@ -74,7 +74,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
         if (regatta.canBoatsOfCompetitorsChangePerRace() && boatSerializer != null) {
             JSONArray boatsJson = new JSONArray();
             for (Boat boat : regatta.getAllBoats()) {
-                if (securityService.hasCurrentUserAnyExplictPermissions(boat,
+                if (securityService.hasCurrentUserAnyExplicitPermissions(boat,
                         SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                     boatsJson.add(boatSerializer.serialize(boat));
                 }

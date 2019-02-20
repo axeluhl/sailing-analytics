@@ -22,6 +22,7 @@ import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -392,29 +393,80 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             HasPermissions permittedObject, HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Function<T, R> filteredObjectsMapper);
 
+    /**
+     * Checks if the current user has the {@link DefaultActions#READ READ} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @return {@code true} if and only if the user has the permission or the {@code object} is {@code null}
+     */
     boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
 
+    /**
+     * Checks if the current user has the {@link DefaultActions#UPDATE UPDATE} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @return {@code true} if and only if the user has the permission or the {@code object} is {@code null}
+     */
     boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 
-    boolean hasCurrentUserExplictPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+    /**
+     * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     * 
+     * @return {@code true} if and only if the user has the permission or the {@code object} is {@code null}
+     */
+    boolean hasCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
 
     /**
-     * @return true, if any of the given actions is permitted
+     * @return true, if all of the given actions are permitted for the current user; if no action is provided
+     *         ({@code actions} is an empty array), {@code true} is returned because the user always has permission
+     *         "to do nothing."
      */
-    boolean hasCurrentUserAnyExplictPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+    boolean hasCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
 
+    /**
+     * @return true, if any of the given actions is permitted for the current user; if no action is provided
+     *         ({@code actions} is an empty array), {@code false} is returned because the user has none of the
+     *         permissions from this empty set.
+     */
+    boolean hasCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+
+    /**
+     * Checks if the current user has the {@link DefaultActions#READ READ} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     */
     void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
 
+    /**
+     * Checks if the current user has the {@link DefaultActions#UPDATE UPDATE} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     */
     void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 
+    /**
+     * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     */
     void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
 
+    /**
+     * Checks if the current user has the {@link DefaultActions#DELETE DELETE} permission on the {@code object} identified.
+     * If {@code object} is {@code null}, the check will always pass.
+     */
     void checkCurrentUserDeletePermission(QualifiedObjectIdentifier object);
 
+    /**
+     * Checks if the current user has the permission to perform all {@code actions} requested on the {@code object}
+     * identified. Throws an {@link AuthorizationException} if not. If {@code object} is {@code null}, everything is
+     * allowed. If the list of {@code actions} is empty, the method will return without exception (rationale: doing
+     * nothing is always allowed).
+     */
     void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
 
     /**
-     * Checks if the current user has permission any of the given actions.
+     * Checks if the current user has permission any of the given actions. If the {@code actions} list is empty,
+     * the current user formally has no permission for any action provided, so consequently an {@link AuthorizationException}
+     * results. Checks for a {@code null} value for {@code object} always pass without exception.
      */
     void checkCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
 

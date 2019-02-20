@@ -326,7 +326,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
             final JSONArray result = new JSONArray();
             for (final Competitor competitor : regatta.getAllCompetitors()) {
-                if (getSecurityService().hasCurrentUserAnyExplictPermissions(competitor,
+                if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
                         SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                     result.add(competitorSerializer.serialize(competitor));
                 }
@@ -723,7 +723,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 jsonRace.put("regatta", regatta.getName());
                 JSONArray jsonCompetitors = new JSONArray();
                 for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                    if (getSecurityService().hasCurrentUserAnyExplictPermissions(competitor,
+                    if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
                             SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                         if (competitorIds == null || competitorIds.isEmpty()
                                 || competitorIds.contains(competitor.getId().toString())) {
@@ -1400,7 +1400,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
 
                     for (Competitor competitor : competitors) {
-                        if (getSecurityService().hasCurrentUserAnyExplictPermissions(competitor,
+                        if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
                                 SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                             if (competitorFilter == null || competitor.getId().equals(competitorFilter)) {
                                 Iterable<Maneuver> maneuversForCompetitor = trackedRace.getManeuvers(competitor, startTime, endTime, false);
@@ -1593,7 +1593,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         JSONArray jsonCompetitors = new JSONArray();
                         Map<Competitor, Integer> ranks = leg.getRanks(timePoint);
                         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                            if (getSecurityService().hasCurrentUserAnyExplictPermissions(competitor,
+                            if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
                                     SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                                 JSONObject jsonCompetitorInLeg = new JSONObject();
                                 TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
@@ -1761,7 +1761,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint);
                     Integer overallRank = 1;
                     for (Competitor competitor : overallRanking) {
-                        if (getSecurityService().hasCurrentUserAnyExplictPermissions(competitor,
+                        if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
                                 SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                             overallRankPerCompetitor.put(competitor, overallRank++);
                         }
@@ -1769,7 +1769,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 }
                 Integer rank = 1;
                 for (Competitor competitor : competitorsFromBestToWorst) {
-                    if (getSecurityService().hasCurrentUserAnyExplictPermissions(competitor,
+                    if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
                             SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                         JSONObject jsonCompetitorInLeg = new JSONObject();
 

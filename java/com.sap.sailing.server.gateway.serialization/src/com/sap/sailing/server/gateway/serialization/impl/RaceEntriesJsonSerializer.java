@@ -37,9 +37,9 @@ public class RaceEntriesJsonSerializer implements JsonSerializer<RaceDefinition>
             JSONArray competitorsJson = new JSONArray();
             for (Entry<Competitor, Boat> competitorAndBoatEntry: race.getCompetitorsAndTheirBoats().entrySet()) {
                 Competitor competitor = competitorAndBoatEntry.getKey();
-                competitor = (securityService.hasCurrentUserExplictPermissions(competitor, DefaultActions.READ)) ? competitor : null;
+                competitor = (securityService.hasCurrentUserExplicitPermissions(competitor, DefaultActions.READ)) ? competitor : null;
                 DynamicBoat boat = (DynamicBoat) competitorAndBoatEntry.getValue();
-                boat = (securityService.hasCurrentUserExplictPermissions(boat, DefaultActions.READ)) ? boat : null; 
+                boat = (securityService.hasCurrentUserExplicitPermissions(boat, DefaultActions.READ)) ? boat : null; 
                 competitorsJson.add(competitorAndBoatSerializer.serialize(new Pair<>(competitor, boat)));
             }
             result.put(FIELD_COMPETITORS, competitorsJson);

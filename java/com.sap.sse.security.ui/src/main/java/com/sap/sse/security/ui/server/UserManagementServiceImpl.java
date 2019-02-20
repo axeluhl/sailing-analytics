@@ -758,7 +758,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo deleteUser(String username) throws UnauthorizedException {
         User user = getSecurityService().getUserByName(username);
         if (user != null) {
-            if (!getSecurityService().hasCurrentUserExplictPermissions(user, DefaultActions.DELETE)) {
+            if (!getSecurityService().hasCurrentUserExplicitPermissions(user, DefaultActions.DELETE)) {
                 return new SuccessInfo(false, "You are not permitted to delete user " + username,
                         /* redirectURL */ null, null);
             }

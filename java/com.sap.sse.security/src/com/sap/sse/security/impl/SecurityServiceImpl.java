@@ -2023,57 +2023,55 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void checkMigration(Iterable<HasPermissions> allInstances) {
         Class<? extends HasPermissions> clazz = Util.first(allInstances).getClass();
-        boolean allChecksSucessfull = true;
+        boolean allChecksSucessful = true;
         for (HasPermissions shouldBeMigrated : allInstances) {
             if (!migratedHasPermissionTypes.contains(shouldBeMigrated.getName())) {
                 logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
                         + " missing: " + shouldBeMigrated);
-                allChecksSucessfull = false;
+                allChecksSucessful = false;
             }
         }
-        if (allChecksSucessfull) {
+        if (allChecksSucessful) {
             logger.info("Permission-Vertical Migration: Sucessfully migrated all types in " + clazz.getName());
         }
     }
 
     @Override
     public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
-        if (object == null) {
-            return false;
-        }
-        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(
-                DefaultActions.READ, object));
+        return object == null ? true :
+            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
     }
 
     @Override
     public boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
-        if (object == null) {
-            return false;
-        }
-        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(
-                DefaultActions.UPDATE, object));
+        return object == null ? true :
+            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
     }
 
-    public boolean hasCurrentUserExplictPermissions(WithQualifiedObjectIdentifier object,
-            HasPermissions.Action... actions) {
-        if (object == null || actions.length == 0) {
-            return false;
-        }
+    @Override
+    public boolean hasCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
+        return object == null ? true :
+            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
+    }
+
+    public boolean hasCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
         boolean isPermitted = true;
-        for (int i = 0; i < actions.length; i++) {
-            isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(
-                    actions[i], object));
+        if (object != null) {
+            for (int i = 0; i < actions.length; i++) {
+                isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(actions[i], object));
+            }
         }
         return isPermitted;
     }
 
-    public boolean hasCurrentUserAnyExplictPermissions(WithQualifiedObjectIdentifier object,
-            HasPermissions.Action... actions) {
-        boolean result = false;
-        for (com.sap.sse.security.shared.HasPermissions.Action action : actions) {
-            if (hasCurrentUserExplictPermissions(object, action)) {
-                result = true;
-                break;
+    public boolean hasCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+        boolean result = object == null;
+        if (object != null) {
+            for (com.sap.sse.security.shared.HasPermissions.Action action : actions) {
+                if (hasCurrentUserExplicitPermissions(object, action)) {
+                    result = true;
+                    break;
+                }
             }
         }
         return result;
@@ -2081,60 +2079,55 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
-        if (object == null) {
-            throw new AuthorizationException();
+        if (object != null) {
+            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
         }
-        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
     }
 
     @Override
     public void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
-        if (object == null) {
-            throw new AuthorizationException();
+        if (object != null) {
+            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
         }
-        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
     }
 
     @Override
     public void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
-        if (object == null) {
-            throw new AuthorizationException();
+        if (object != null) {
+            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
         }
-        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
     }
 
     @Override
     public void checkCurrentUserDeletePermission(QualifiedObjectIdentifier identifier) {
-        SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
+        if (identifier != null) {
+            SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
+        }
     }
 
     @Override
     public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
-        if (object == null || actions.length == 0) {
-            throw new AuthorizationException();
-        }
-        for (int i = 0; i < actions.length; i++) {
-            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(actions[i], object));
+        if (object != null) {
+            for (int i = 0; i < actions.length; i++) {
+                SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(actions[i], object));
+            }
         }
     }
 
     @Override
-    public void checkCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object,
-            HasPermissions.Action... actions) {
-        if (object == null || actions.length == 0) {
-            throw new AuthorizationException();
-        }
-
-        boolean isPermitted = false;
-        for (int i = 0; i < actions.length; i++) {
-            if (SecurityUtils.getSubject()
-                    .isPermitted(object.getType().getStringPermissionForObject(actions[i], object))) {
-                isPermitted = true;
-                break;
+    public void checkCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+        if (object != null) {
+            boolean isPermitted = false;
+            for (int i = 0; i < actions.length; i++) {
+                if (SecurityUtils.getSubject()
+                        .isPermitted(object.getType().getStringPermissionForObject(actions[i], object))) {
+                    isPermitted = true;
+                    break;
+                }
             }
-        }
-        if (!isPermitted) {
-            throw new AuthorizationException();
+            if (!isPermitted) {
+                throw new AuthorizationException();
+            }
         }
     }
 
