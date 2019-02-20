@@ -9,6 +9,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.UserGroupProvider;
 import com.sap.sse.security.shared.WildcardPermission;
 
 /**
@@ -94,4 +95,8 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
     Map<String, UserGroup> getDefaultTenantMap();
 
     void setDefaultTenant(UserGroup newDefaultTenant, String serverName);
+
+    void setUserGroupProvider(UserGroupProvider userGroupProvider);
+    
+    UserGroupProvider getUserGroupProvider();
 }

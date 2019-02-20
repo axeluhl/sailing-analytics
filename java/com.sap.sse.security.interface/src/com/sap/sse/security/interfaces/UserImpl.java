@@ -22,6 +22,7 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.UserGroupProvider;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
@@ -146,8 +147,14 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
      * The main use case for this method is to restore the link to a {@link UserStore} after de-serialization, e.g.,
      * on a replica.
      */
+    @Override
     public void setUserGroupProvider(UserGroupProvider userGroupProvider) {
         this.userGroupProvider = userGroupProvider;
+    }
+
+    @Override
+    public UserGroupProvider getUserGroupProvider() {
+        return userGroupProvider;
     }
 
     /**

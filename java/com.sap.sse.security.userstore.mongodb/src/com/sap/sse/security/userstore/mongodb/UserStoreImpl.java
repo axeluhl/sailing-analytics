@@ -694,6 +694,10 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void updateUser(User user) {
         logger.info("Updating user " + user + " in DB");
+        if (user.getUserGroupProvider() != this) {
+            logger.info("Adjusting user group provider for user "+user+"; probably after de-serialization.");
+            user.setUserGroupProvider(this);
+        }
         users.put(user.getName(), user);
         removeFromUsersByEmail(user);
         addToUsersByEmail(user);

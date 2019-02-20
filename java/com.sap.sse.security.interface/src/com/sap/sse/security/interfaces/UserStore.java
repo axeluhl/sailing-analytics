@@ -9,6 +9,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.UserGroupProvider;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;

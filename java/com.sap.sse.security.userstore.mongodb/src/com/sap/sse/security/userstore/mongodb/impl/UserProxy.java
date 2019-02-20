@@ -8,6 +8,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.UserGroupProvider;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
@@ -189,6 +190,16 @@ public class UserProxy implements User {
 
     @Override
     public void setDefaultTenant(UserGroup newDefaultTenant, String serverName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setUserGroupProvider(UserGroupProvider userGroupProvider) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public UserGroupProvider getUserGroupProvider() {
         throw new UnsupportedOperationException();
     }
 }
