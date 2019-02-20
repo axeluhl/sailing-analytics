@@ -11,7 +11,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -31,9 +30,6 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
 
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
-    private final CaptionPanel secretPanel;
-    private final VerticalPanel secretPanelContent;
-    private final Label secretExplainLabel;
     private final CaptionPanel registrationLinkPanel;
     private final VerticalPanel registrationLinkPanelContent;
     private final Label registrationLinkExplain;
@@ -60,11 +56,6 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         this.registrationLinkWithQRCode = registrationLinkWithQRCode == null ? new RegistrationLinkWithQRCode()
                 : registrationLinkWithQRCode;
 
-        secretPanel = new CaptionPanel(stringMessages.registrationLinkSecret());
-        secretPanelContent = new VerticalPanel();
-        secretPanel.add(secretPanelContent);
-        secretExplainLabel = new Label(stringMessages.registrationLinkSecretExplain());
-        secretPanelContent.add(secretExplainLabel);
 
         registrationLinkPanel = new CaptionPanel(stringMessages.registrationLinkUrl());
         registrationLinkPanelContent = new VerticalPanel();
@@ -127,15 +118,6 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         }
         final VerticalPanel dialogPanel = new VerticalPanel();
         panel.add(dialogPanel);
-        dialogPanel.add(secretPanel);
-
-        final Grid secretPanelFormGrid = new Grid(1, 3);
-        secretPanelContent.add(secretPanelFormGrid);
-        secretPanelFormGrid.setWidget(0, 0, new Label(stringMessages.registrationLinkSecret() + ":"));
-        secretPanelFormGrid.setWidget(0, 1, secretTextBox);
-        if (generateSecretButton != null) {
-            secretPanelFormGrid.setWidget(0, 2, generateSecretButton);
-        }
 
         if (!editMode) {
             dialogPanel.add(registrationLinkPanel);
