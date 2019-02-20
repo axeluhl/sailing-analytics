@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
@@ -26,12 +25,8 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -274,94 +269,44 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
     }
     
     private void editUser(final UserDTO originalUser, Iterable<HasPermissions> additionalPermissions) {
-        final UserEditDialog dialog = new UserEditDialog(originalUser, new DialogCallback<Pair<UserDTO, Iterable<Triple<UUID, String, String>>>>() {
+        final UserEditDialog dialog = new UserEditDialog(originalUser, new DialogCallback<UserDTO>() {
             @Override
-            public void ok(final Pair<UserDTO, Iterable<Triple<UUID, String, String>>> userAndRoles) {
-                final List<UserDTO> users = new ArrayList<>();
-                final UserDTO user = userAndRoles.getA();
-                users.add(user);
-                        getUserManagementService().updateUserProperties(user.getName(), user.getFullName(),
-                                user.getCompany(), user.getLocale(),
-                                user.getDefaultTenant() != null ? user.getDefaultTenant().getId().toString() : null,
-                                new AsyncCallback<UserDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(getStringMessages().errorTryingToUpdateUser(user.getName(), caught.getMessage()));
-                    }
+            public void ok(final UserDTO user) {
+                getUserManagementService().updateUserProperties(user.getName(), user.getFullName(), user.getCompany(),
+                        user.getLocale(),
+                        user.getDefaultTenant() != null ? user.getDefaultTenant().getId().toString() : null,
+                        new AsyncCallback<UserDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(getStringMessages().errorTryingToUpdateUser(user.getName(),
+                                        caught.getMessage()));
+                            }
 
-                    @Override
-                    public void onSuccess(final UserDTO updatedUser) {
-                        int editedUserIndex = getFilterField().indexOf(originalUser);
-                        getFilterField().remove(originalUser);
-                        if (editedUserIndex >= 0) {
-                            getFilterField().add(editedUserIndex, updatedUser);
-                        } else {
-                            //in case competitor was not present --> not edit, but create
-                            getFilterField().add(updatedUser);
-                        }
-                        getUserManagementService().setRolesForUser(user.getName(), userAndRoles.getB(), new MarkedAsyncCallback<SuccessInfo>(
-                                new AsyncCallback<SuccessInfo>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        errorReporter.reportError(getStringMessages().errorUpdatingRoles(user.getName(), caught.getMessage()));
-                                    }
-
-                                    @Override
-                                    public void onSuccess(final SuccessInfo result) {
-                                        if (!result.isSuccessful()) {
-                                            Window.alert(getStringMessages().errorUpdatingRoles(user.getName(), result.getMessage()));
-                                        } else {
-                                            getFilterField().remove(updatedUser);
-                                                                    UserDTO userWithUpdatedRoles = result.getUserDTO()
-                                                                            .getA();
-                                            getFilterField().add(userWithUpdatedRoles);
-                                            if (userService.getCurrentUser().getName().equals(userWithUpdatedRoles.getName())) {
-                                                // if the current user's roles changed, update the user object in the user service and notify others
-                                                userService.updateUser(/* notify other instances */ true);
-                                            }
-                                            if (!Util.equalsWithNull(originalUser.getPermissions(), user.getPermissions())) {
-                                                getUserManagementService().setPermissionsForUser(user.getName(), user.getPermissions(), new MarkedAsyncCallback<SuccessInfo>(
-                                                        new AsyncCallback<SuccessInfo>() {
-                                                            @Override
-                                                            public void onFailure(Throwable caught) {
-                                                                errorReporter.reportError(getStringMessages().errorUpdatingPermissions(user.getName(), caught.getMessage()));
-                                                            }
-
-                                                            @Override
-                                                            public void onSuccess(final SuccessInfo result) {
-                                                                if (!result.isSuccessful()) {
-                                                                    errorReporter.reportError(getStringMessages().errorUpdatingPermissions(user.getName(), result.getMessage()));
-                                                                } else {
-                                                                    getFilterField().remove(userWithUpdatedRoles);
-                                                                                                            getFilterField()
-                                                                                                                    .add(result
-                                                                                                                            .getUserDTO()
-                                                                                                                            .getA());
-                                                                                                            if (userService
-                                                                                                                    .getCurrentUser()
-                                                                                                                    .getName()
-                                                                                                                    .equals(result
-                                                                                                                            .getUserDTO()
-                                                                                                                            .getA()
-                                                                                                                            .getName())) {
-                                                                        // if the current user's permissions changed, update the user object in the user service and notify others
-                                                                        userService.updateUser(/* notify other instances */ true);
-                                                                    }
-                                                                }
-                                                            }
-                                                        }));
-                                            }
-                                        }
-                                    }
-                                }));
-                    }  
-                });
+                            @Override
+                            public void onSuccess(final UserDTO updatedUser) {
+                                int editedUserIndex = getFilterField().indexOf(originalUser);
+                                getFilterField().remove(originalUser);
+                                if (editedUserIndex >= 0) {
+                                    getFilterField().add(editedUserIndex, updatedUser);
+                                } else {
+                                    // in case competitor was not present --> not edit, but create
+                                    getFilterField().add(updatedUser);
+                                }
+                                getFilterField().remove(updatedUser);
+                                getFilterField().add(updatedUser);
+                                if (userService.getCurrentUser().getName().equals(updatedUser.getName())) {
+                                    // if the current user's roles changed, update the user object in the user service
+                                    // and notify others
+                                    userService.updateUser(/* notify other instances */ true);
+                                }
+                            }
+                        });
             }
 
             @Override
             public void cancel() {
             }
-        }, userService, additionalPermissions, errorReporter);
+                }, userService, errorReporter);
         dialog.ensureDebugId("UserEditDialog");
         dialog.show();
     }
