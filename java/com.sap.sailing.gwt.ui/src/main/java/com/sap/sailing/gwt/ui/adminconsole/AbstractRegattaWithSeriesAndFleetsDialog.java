@@ -12,11 +12,13 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
@@ -69,6 +71,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final List<EventDTO> existingEvents;
     private EventDTO defaultEvent;
     private RegistrationLinkWithQRCode registrationLinkWithQRCode;
+
+    protected final CaptionPanel secretPanel;
 
     public AbstractRegattaWithSeriesAndFleetsDialog(final SailingServiceAsync sailingService, RegattaDTO regatta,
             Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO correspondingEvent, String title,
@@ -148,6 +152,61 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
             }
         });
         registrationLinkWithQRCodeOpenButton.ensureDebugId("RegistrationLinkWithQRCodeOpenButton");
+
+        competitorRegistrationTypeListBox.addChangeHandler(e -> {
+            updateConfigureButton();
+        });
+        
+        updateConfigureButton();
+
+        // secret panel
+        secretPanel = new CaptionPanel(stringMessages.registrationLinkSecret());
+        createSecretPanel(stringMessages, secretPanel);
+    }
+
+    private void createSecretPanel(final StringMessages stringMessages, final CaptionPanel secretPanel) {
+        final VerticalPanel secretPanelContent = new VerticalPanel();
+        secretPanel.add(secretPanelContent);
+
+        // explain Label with description of secret
+        final Label secretExplainLabel = new Label(stringMessages.registrationLinkSecretExplain());
+        secretPanelContent.add(secretExplainLabel);
+        secretExplainLabel.setWordWrap(true);
+
+        // Label
+        Label secretLabel = new Label(stringMessages.registrationLinkSecret() + ":");
+
+        // Textbox
+        final TextBox secretTextBox = createTextBox(registrationLinkWithQRCode.getSecret(), 30);
+        secretTextBox.ensureDebugId("SecretTextBox");
+
+        // Generate-Button
+        final Button generateSecretButton = new Button(stringMessages.registrationLinkSecretGenerate(),
+                new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        final String randomString = RandomString.createRandomSecret(20);
+                        registrationLinkWithQRCode.setSecret(randomString);
+                        secretTextBox.setText(randomString);
+                    }
+                });
+        generateSecretButton.ensureDebugId("GenerateSecretButton");
+
+        // add all to grid
+        final Grid secretPanelFormGrid = new Grid(1, 3);
+        secretPanelFormGrid.setWidget(0, 0, secretLabel);
+        secretPanelFormGrid.setWidget(0, 1, secretTextBox);
+        secretPanelFormGrid.setWidget(0, 2, generateSecretButton);
+
+        secretPanelContent.add(secretPanelFormGrid);
+    }
+
+    private void updateConfigureButton() {
+        // show button only if selected CompetitorRegistrationType is Open_Moderated
+        final boolean isOpenModerated = CompetitorRegistrationType.OPEN_MODERATED.name()
+                .equals(competitorRegistrationTypeListBox.getSelectedValue());
+        registrationLinkWithQRCodeOpenButton.setVisible(isOpenModerated);
     }
 
     /**
@@ -216,6 +275,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(9, 1, competitorRegistrationTypeListBox);
         formGrid.setWidget(10, 0, new Label(stringMessages.registrationLink() + ":"));
         formGrid.setWidget(10, 1, registrationLinkWithQRCodeOpenButton);
+
+        panel.add(secretPanel);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }
