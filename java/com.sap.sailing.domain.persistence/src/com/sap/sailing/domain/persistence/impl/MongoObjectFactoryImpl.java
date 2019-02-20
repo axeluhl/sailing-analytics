@@ -24,6 +24,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.DeleteResult;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -1729,7 +1730,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 final MongoCollection<Document> collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
                 Document key = new Document();
                 key.putAll(paramsPersistenceService.getKey(params));
-                collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(key);
+                final DeleteResult deleteResult = collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(key);
+                if (deleteResult.getDeletedCount() != 1) {
+                    logger.warning("Tried to delete connectivity params "+params+" from restore list but delete count was "+
+                            deleteResult.getDeletedCount());
+                }
             } else {
                 logger.warning("Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier);
             }

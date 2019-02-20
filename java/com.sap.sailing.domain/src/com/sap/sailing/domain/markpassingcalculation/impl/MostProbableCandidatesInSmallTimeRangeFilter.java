@@ -200,13 +200,14 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
 
     private void removeAllRemovedCandidatesInOrNearSequence(NavigableSet<Candidate> contiguousSequenceForNextNewCandidate,
             Set<Candidate> removedCandidatesModifiableCopy) {
-        assert !contiguousSequenceForNextNewCandidate.isEmpty();
-        final TimeRange sequenceTimeRange = new TimeRangeImpl(
-                contiguousSequenceForNextNewCandidate.first().getTimePoint(), contiguousSequenceForNextNewCandidate.last().getTimePoint());
-        for (final Iterator<Candidate> removedCandidateIter = removedCandidatesModifiableCopy.iterator(); removedCandidateIter.hasNext(); ) {
-            final Candidate removedCandidate = removedCandidateIter.next();
-            if (sequenceTimeRange.timeDifference(removedCandidate.getTimePoint()).compareTo(CANDIDATE_FILTER_TIME_WINDOW) <= 0) {
-                removedCandidateIter.remove();
+        if (!contiguousSequenceForNextNewCandidate.isEmpty()) {
+            final TimeRange sequenceTimeRange = new TimeRangeImpl(
+                    contiguousSequenceForNextNewCandidate.first().getTimePoint(), contiguousSequenceForNextNewCandidate.last().getTimePoint());
+            for (final Iterator<Candidate> removedCandidateIter = removedCandidatesModifiableCopy.iterator(); removedCandidateIter.hasNext(); ) {
+                final Candidate removedCandidate = removedCandidateIter.next();
+                if (sequenceTimeRange.timeDifference(removedCandidate.getTimePoint()).compareTo(CANDIDATE_FILTER_TIME_WINDOW) <= 0) {
+                    removedCandidateIter.remove();
+                }
             }
         }
     }

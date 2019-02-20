@@ -2869,21 +2869,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 }
                             }
                             try {
-                                final RaceTrackingConnectivityParameters params = connectivityParamsPersistenceService
-                                        .mapTo(map);
+                                final RaceTrackingConnectivityParameters params = connectivityParamsPersistenceService.mapTo(map);
                                 if (params != null) {
                                     callback.accept(params);
                                     logger.info("Done restoring race #" + finalI + "/" + count + " of type " + type);
                                 } else {
                                     logger.warning("Couldn't restore race #" + finalI + "/" + count + " of type " + type
-                                            + " because the parameters loaded from the DB couldn't be mapped. Maybe the owning leaderboard was removed?");
+                                            + " with parameters " + o
+                                            + " because the parameters loaded from the DB couldn't be mapped. Maybe the owning leaderboard was removed?"
+                                            + " Removing this parameter set from the list of races to restore. The server will make no further attempt to restore this race.");
+                                    collection.deleteOne(o);
                                 }
                             } catch (Exception e) {
                                 logger.log(Level.SEVERE,
                                         "Exception trying to load race #" + finalI + "/" + count + " of type " + type
                                                 + " from restore connectivity parameters " + o + " with handler "
-                                                + connectivityParamsPersistenceService,
+                                                + connectivityParamsPersistenceService
+                                                + ". Removing this parameter set from the list of races to restore."
+                                                + " The server will make no further attempt to restore this race: "+o,
                                         e);
+                                collection.deleteOne(o);
                             }
                         });
             }, /* void result */ null);
