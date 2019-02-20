@@ -11,6 +11,7 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -41,6 +42,7 @@ import com.sap.sse.security.shared.dto.RoleWithSecurityDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
@@ -301,6 +303,25 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                                 }
                             }
                         });
+
+                if (!originalUser.getEmail().equals(user.getEmail())) {
+                    getUserManagementService().updateSimpleUserEmail(user.getName(), user.getEmail(),
+                            EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
+                            new AsyncCallback<Void>() {
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            getStringMessages().errorChangingPassword(caught.getMessage()));
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    userService.updateUser(true);
+                                }
+                            });
+                }
+
             }
 
             @Override
