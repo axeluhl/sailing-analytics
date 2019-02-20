@@ -205,6 +205,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     private void updateConfigureButton() {
         // show button only if selected CompetitorRegistrationType is Open_Moderated
         final boolean isOpenModerated = CompetitorRegistrationType.OPEN_MODERATED.name()
+                .equals(competitorRegistrationTypeListBox.getSelectedValue())
+                || CompetitorRegistrationType.OPEN_UNMODERATED.name()
                 .equals(competitorRegistrationTypeListBox.getSelectedValue());
         registrationLinkWithQRCodeOpenButton.setVisible(isOpenModerated);
     }
