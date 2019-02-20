@@ -126,17 +126,24 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(stringMessages), t.name()));
         competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
 
+        // secret panel
+        final TextBox secretTextBox = createTextBox(regatta.registrationLinkSecret, 30);
+        secretPanel = new CaptionPanel(stringMessages.registrationLinkSecret());
+        createSecretPanel(stringMessages, secretPanel, secretTextBox);
+
+        // Registration Link
         registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
         if (regatta.registrationLinkSecret == null) {
             registrationLinkWithQRCode.setSecret(RandomString.createRandomSecret(20));
         } else {
             registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
         }
+
         registrationLinkWithQRCodeOpenButton = new Button(stringMessages.registrationLinkConfig(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingService, stringMessages, regatta.getName(),
-                        registrationLinkWithQRCode, /* editMode */ true, new DialogCallback<RegistrationLinkWithQRCode>() {
+                        registrationLinkWithQRCode, new DialogCallback<RegistrationLinkWithQRCode>() {
                             @Override
                             public void ok(RegistrationLinkWithQRCode result) {
                                 registrationLinkWithQRCode = result;
@@ -145,7 +152,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
                             @Override
                             public void cancel() {
                             }
-                        });
+                        }, secretTextBox.getValue());
                 dialog.ensureDebugId("RegistrationLinkWithQRCodeDialog");
                 dialog.show();
 
@@ -158,13 +165,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         });
         
         updateConfigureButton();
-
-        // secret panel
-        secretPanel = new CaptionPanel(stringMessages.registrationLinkSecret());
-        createSecretPanel(stringMessages, secretPanel);
     }
 
-    private void createSecretPanel(final StringMessages stringMessages, final CaptionPanel secretPanel) {
+    private void createSecretPanel(final StringMessages stringMessages, final CaptionPanel secretPanel,
+            final TextBox secretTextBox) {
         final VerticalPanel secretPanelContent = new VerticalPanel();
         secretPanel.add(secretPanelContent);
 
@@ -177,7 +181,6 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         Label secretLabel = new Label(stringMessages.registrationLinkSecret() + ":");
 
         // Textbox
-        final TextBox secretTextBox = createTextBox(registrationLinkWithQRCode.getSecret(), 30);
         secretTextBox.ensureDebugId("SecretTextBox");
 
         // Generate-Button
