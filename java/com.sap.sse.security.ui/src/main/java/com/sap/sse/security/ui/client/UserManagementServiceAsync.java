@@ -107,10 +107,6 @@ public interface UserManagementServiceAsync {
 
     void getRoleDefinitions(AsyncCallback<ArrayList<RoleDefinitionDTO>> callback);
 
-    void setRolesForUser(String username, Iterable<Triple<UUID, String, String>> roleDefinitionIdAndTenantNameAndUsernames, AsyncCallback<SuccessInfo> callback);
-
-    void setPermissionsForUser(String username, Iterable<WildcardPermission> permissions, AsyncCallback<SuccessInfo> callback);
-
     void deleteUser(String username, AsyncCallback<SuccessInfo> callback);
     
     void deleteUsers(Set<String> usernames, AsyncCallback<Set<SuccessInfo>> callback);

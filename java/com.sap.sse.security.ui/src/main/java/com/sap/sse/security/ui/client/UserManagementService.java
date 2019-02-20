@@ -108,12 +108,6 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo logout();
 
-    SuccessInfo setRolesForUser(String username,
-            Iterable<Triple<UUID, String, String>> roleDefinitionIdAndTenantQualifierNameAndUsernames)
-            throws UnauthorizedException;
-
-    SuccessInfo setPermissionsForUser(String username, Iterable<WildcardPermission> permissions) throws UnauthorizedException;
-
     Map<String, String> getSettings();
 
     Map<String, String> getSettingTypes();
