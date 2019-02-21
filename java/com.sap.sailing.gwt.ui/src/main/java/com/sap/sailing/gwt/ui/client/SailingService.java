@@ -958,6 +958,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     Set<ImageDTO> resizeImage(ImageResizingTaskDTO imageResizingTask) throws Exception;
 
+    MailInvitationType getMailType();
+
     /**
      * Generates a base64-encoded qrcode for the branch.io url used to allow registrations for open regattas.
      * 

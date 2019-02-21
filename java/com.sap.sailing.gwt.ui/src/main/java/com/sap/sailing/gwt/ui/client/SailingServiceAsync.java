@@ -1046,6 +1046,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void resizeImage(ImageResizingTaskDTO imageResizingTask, AsyncCallback<Set<ImageDTO>> asyncCallback);
 
+    void getMailType(AsyncCallback<MailInvitationType> callback);
+
     /**
      * @see SailingService#openRegattaRegistrationQrCode(String url)
      * @param url

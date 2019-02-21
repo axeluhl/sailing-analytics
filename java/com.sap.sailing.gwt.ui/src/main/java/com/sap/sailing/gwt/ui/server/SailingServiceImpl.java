@@ -8838,6 +8838,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public MailInvitationType getMailType() {
+        MailInvitationType type = MailInvitationType
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+        return type;
+    }
+
     public String openRegattaRegistrationQrCode(String url) {
         String result = "";
         try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 600, "H"))) {
