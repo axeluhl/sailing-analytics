@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.BranchIO;
 import com.sap.sailing.domain.common.BranchIOConstants;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -38,16 +39,19 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
     private final String secret;
 
     private RegistrationLinkWithQRCode registrationLinkWithQRCode;
+    private MailInvitationType invitationType;
 
     public RegistrationLinkWithQRCodeDialog(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, String regattaName,
             RegistrationLinkWithQRCode registrationLinkWithQRCode,
-            DialogCallback<RegistrationLinkWithQRCode> callback, final String secret) {
+            DialogCallback<RegistrationLinkWithQRCode> callback, final String secret,
+            MailInvitationType invitationType) {
         super(stringMessages.registrationLinkDialog(), stringMessages.explainRegistrationLinkDialog(),
                 stringMessages.ok(), stringMessages.cancel(), null, true, callback);
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.regattaName = regattaName;
+        this.invitationType = invitationType;
         this.registrationLinkWithQRCode = registrationLinkWithQRCode == null ? new RegistrationLinkWithQRCode()
                 : registrationLinkWithQRCode;
 
@@ -117,8 +121,7 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         String deeplinkUrl = BranchIO.generateLink(BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO, parameters,
                 URL::encodeQueryString);
         urlTextBox.setText(deeplinkUrl);
-        // FIXME: connect to back end to check if app version 1.0 or 2.0 are configured
-        if (true) {
+        if (invitationType != MailInvitationType.SailInsight2) {
             getStatusLabel().setText(stringMessages.warningSailInsightVersion());
             getStatusLabel().setStyleName("errorLabel");
         }
