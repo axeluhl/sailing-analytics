@@ -122,7 +122,8 @@ public class DomainFactoryImpl implements DomainFactory {
                     regattaBoatClass, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                     /*startDate*/ null, /*endDate*/ null,
                     trackedRegattaRegistry, getBaseDomainFactory().createScoringScheme(
-                            ScoringSchemeType.LOW_POINT), raceID, null);
+                            ScoringSchemeType.LOW_POINT),
+                    raceID, null, /* registrationLinkSecret */ UUID.randomUUID().toString());
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);
         }

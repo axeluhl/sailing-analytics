@@ -177,8 +177,8 @@ import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.statistics.Statistics;
-import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.AddResult;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -1056,11 +1056,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
                 logger.info(
                         "putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
-                if (regatta.getRegistrationLinkSecret() == null) {
-                    logger.info("Added missing RegistrationLinkSecret to " + regatta + " and stored to database");
-                    regatta.setRegistrationLinkSecret(UUID.randomUUID().toString());
-                    mongoObjectFactory.storeRegatta(regatta);
-                }
                 regattasByName.put(regatta.getName(), regatta);
                 regatta.addRegattaListener(this);
                 onRegattaLikeAdded(regatta);
@@ -1585,7 +1580,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, getBaseDomainFactory()
                     .getOrCreateBoatClass(boatClassName), /* canBoatsOfCompetitorsChangePerRace*/ false, CompetitorRegistrationType.CLOSED,
                     /* startDate */null, /* endDate */null, this,
-                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, /* course area */ null);
+                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, /* course area */ null,
+                    /* registrationLinkSecret */ UUID.randomUUID().toString());
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
             onRegattaLikeAdded(result);
             cacheAndReplicateDefaultRegatta(result);
@@ -1653,8 +1649,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, persistent,
-                scoringScheme, id, courseArea, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
-        regatta.setRegistrationLinkSecret(registrationLinkSecret);
+                scoringScheme, id, courseArea, buoyZoneRadiusInHullLengths, useStartTimeInference,
+                controlTrackingFromStartAndFinishTimes, rankingMetricConstructor, registrationLinkSecret);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);

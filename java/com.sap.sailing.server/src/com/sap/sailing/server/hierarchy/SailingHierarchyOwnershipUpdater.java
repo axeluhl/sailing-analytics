@@ -35,6 +35,7 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
 public class SailingHierarchyOwnershipUpdater {
     public static SailingHierarchyOwnershipUpdater createOwnershipUpdater(boolean createNewGroup,
             UUID existingGroupIdOrNull, String newGroupName, boolean migrateCompetitors, boolean migrateBoats,
+            boolean copyMembersAndRoles,
             RacingEventService service) {
         SecurityService securityService = service.getSecurityService();
 
@@ -42,9 +43,13 @@ public class SailingHierarchyOwnershipUpdater {
 
         final GroupOwnerUpdateStrategy updateStrategy;
         if (!createNewGroup) {
-            updateStrategy = createExitingGroupModifyingUpdate(sourceGroup);
+                updateStrategy = createExitingGroupModifyingUpdate(sourceGroup);
         } else {
-            updateStrategy = createNewGroupUsingUpdate(newGroupName, securityService, sourceGroup, service);
+            if (copyMembersAndRoles) {
+                updateStrategy = createNewGroupUsingUpdate(newGroupName, securityService, sourceGroup, service);
+            } else {
+                updateStrategy = createNewGroupWithoutCopying(newGroupName, securityService);
+            }
         }
         return new SailingHierarchyOwnershipUpdater(service, securityService, updateStrategy, migrateCompetitors,
                 migrateBoats);
@@ -187,6 +192,44 @@ public class SailingHierarchyOwnershipUpdater {
         return updateStrategy;
     }
 
+    /**
+     * Creates a new group without copying the members and roles from an old group but add the current user to the new
+     * group.
+     */
+    private static GroupOwnerUpdateStrategy createNewGroupWithoutCopying(final String newGroupName,
+            final SecurityService securityService) {
+        if (newGroupName == null || newGroupName.isEmpty()) {
+            throw new RuntimeException("No name for new Group given");
+        }
+
+        final GroupOwnerUpdateStrategy updateStrategy;
+        updateStrategy = new GroupOwnerUpdateStrategy() {
+
+            private UserGroup groupOwnerToSet;
+
+            @Override
+            public boolean needsUpdate(QualifiedObjectIdentifier identifier, OwnershipAnnotation currentOwnership) {
+                return true;
+            }
+
+            @Override
+            public UserGroup getNewGroupOwner() {
+                if (groupOwnerToSet == null) {
+                    try {
+                        groupOwnerToSet = securityService.createUserGroup(UUID.randomUUID(), newGroupName);
+                        final QualifiedObjectIdentifier identifier = groupOwnerToSet.getIdentifier();
+                        securityService.setDefaultOwnership(identifier, identifier.toString());
+                        securityService.addUserToUserGroup(groupOwnerToSet, securityService.getCurrentUser());
+                    } catch (UserGroupManagementException e) {
+                        throw new RuntimeException("Could not create user group");
+                    }
+                }
+                return groupOwnerToSet;
+            }
+        };
+        return updateStrategy;
+    }
+
     private static GroupOwnerUpdateStrategy createNewGroupUsingUpdate(String newGroupName,
             SecurityService securityService, final UserGroup sourceGroup, RacingEventService service) {
         if (newGroupName == null || newGroupName.isEmpty()) {
@@ -215,6 +258,8 @@ public class SailingHierarchyOwnershipUpdater {
                             // The migration may start at an object that currently has no group owner (e.g. in case
                             // this owner was just deleted) -> in this case we just create a new group
                             groupOwnerToSet = securityService.createUserGroup(UUID.randomUUID(), newGroupName);
+                            final QualifiedObjectIdentifier identifier = groupOwnerToSet.getIdentifier();
+                            securityService.setDefaultOwnership(identifier, identifier.toString());
                         }
                     } catch (UserGroupManagementException e) {
                         throw new RuntimeException("Could not create user group");

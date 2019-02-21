@@ -55,7 +55,7 @@ public class TestDeadlockInRegattaListener {
                 /* startDate */ null, /* endDate */ null,
                 /* trackedRegattaRegistry */ null, new LowPoint(), UUID.randomUUID(),
                 /* courseArea */ null, /* controlTrackingFromStartAndFinishTimes */ true,
-                OneDesignRankingMetric::new);
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta) {
             private static final long serialVersionUID = -3599667964201700780L;
 

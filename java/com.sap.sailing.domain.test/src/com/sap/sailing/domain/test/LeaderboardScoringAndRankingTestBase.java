@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -128,7 +129,8 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
 
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass,
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /* startDate */null, /* endDate */null, series, 
-                /* persistent */false, scoringScheme, "123", null, OneDesignRankingMetric::new);
+                /* persistent */false, scoringScheme, "123", null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
 
@@ -184,7 +186,8 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
 
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null, series, 
-                /* persistent */ false, scoringScheme, "123", null, OneDesignRankingMetric::new);
+                /* persistent */ false, scoringScheme, "123", null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
     
@@ -230,7 +233,8 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
         }
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null, series,
-                /* persistent */ false, scoringScheme, /* ID */ "123", /* course area */ null, OneDesignRankingMetric::new);
+                /* persistent */ false, scoringScheme, /* ID */ "123", /* course area */ null,
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
 }

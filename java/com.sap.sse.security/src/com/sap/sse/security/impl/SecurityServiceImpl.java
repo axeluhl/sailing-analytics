@@ -579,13 +579,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (tenantOwner == null) {
                 tenantOwner = getDefaultTenantForUser(userOwner);
             }
-            // FIXME define what is expected behaviour
-            // if (tenantOwner.contains(userOwner)) {
             tenantId = tenantOwner.getId();
-            // } else {
-            // throw new IllegalArgumentException("User is not part of Tenant Owner " + tenantOwner + " " +
-            // userOwner);
-            // }
         }
 
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
@@ -1610,8 +1604,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
             if (preexistingOwnership == null) {
                 didSetOwnerShip = true;
-                final User user = getCurrentUser();
-                setOwnership(identifier, user, getDefaultTenantForCurrentUser(), securityDisplayName);
+                setDefaultOwnership(identifier, securityDisplayName);
             } else {
                 logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
             }
@@ -1630,6 +1623,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new RuntimeException(e);
         }
         return result;
+    }
+
+    @Override
+    public void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description) {
+        setOwnership(identifier, getCurrentUser(), getDefaultTenantForCurrentUser(), description);
     }
 
     @Override
@@ -2019,7 +2017,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         // users correctly
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
-            logger.info("Permission-Vertical Migration: Setting ownership for: " + identifier + " to default tenant: "
+            logger.info("missing Ownership fixed: Setting ownership for: " + identifier
+                    + " to default tenant: "
                     + defaultTenant + "; user: " + userOwnerToSet);
             this.setOwnership(identifier, userOwnerToSet, defaultTenant, displayName);
             wasNecessaryToMigrate = true;
@@ -2034,13 +2033,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         boolean allChecksSucessful = true;
         for (HasPermissions shouldBeMigrated : allInstances) {
             if (!migratedHasPermissionTypes.contains(shouldBeMigrated.getName())) {
-                logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
+                logger.severe("ensure Ownership failed: Did not check Ownerships for " + clazz.getName()
                         + " missing: " + shouldBeMigrated);
                 allChecksSucessful = false;
             }
         }
         if (allChecksSucessful) {
-            logger.info("Permission-Vertical Migration: Sucessfully migrated all types in " + clazz.getName());
+            logger.info("Ownership checks finished: Sucessfully checked all types in " + clazz.getName());
         }
     }
 
@@ -2188,6 +2187,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback) {
         for (User user : source.getUsers()) {
             addUserToUserGroup(destination, user);
+        }
+
+        for (Map.Entry<RoleDefinition, Boolean> entr : source.getRoleDefinitionMap().entrySet()) {
+            putRoleDefinitionToUserGroup(destination, entr.getKey(), entr.getValue());
         }
 
         for (Pair<User, Role> userAndRole : store.getRolesQualifiedByUserGroup(source)) {

@@ -174,11 +174,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public RegattaImpl(String name, BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id,
-            CourseArea courseArea, RankingMetricConstructor rankingMetricConstructor) {
+            CourseArea courseArea, RankingMetricConstructor rankingMetricConstructor, String registrationLinkSecret) {
         this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                 startDate, endDate, series,
                 persistent, scoringScheme, id, courseArea, 0.0, /* useStartTimeInference */true, /* controlTrackingFromStartAndFinishTimes */ false,
-                rankingMetricConstructor);
+                rankingMetricConstructor, registrationLinkSecret);
     }
 
     /**
@@ -196,10 +196,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name, BoatClass boatClass,
             boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType, 
             TimePoint startDate, TimePoint endDate, TrackedRegattaRegistry trackedRegattaRegistry,
-            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
+            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, String registrationLinkSecret) {
         this(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                 startDate, endDate, trackedRegattaRegistry, scoringScheme,
-                id, courseArea, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+                id, courseArea, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new,
+                registrationLinkSecret);
     }
 
     /**
@@ -216,14 +217,15 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate, TrackedRegattaRegistry trackedRegattaRegistry,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor,
+            String registrationLinkSecret) {
         this(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                 startDate, endDate, Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
                 /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections
                         .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                 /* race column names */new ArrayList<String>(), trackedRegattaRegistry)), /* persistent */false,
                 scoringScheme, id, courseArea, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */true, controlTrackingFromStartAndFinishTimes,
-                rankingMetricConstructor);
+                rankingMetricConstructor, registrationLinkSecret);
     }
 
     /**
@@ -235,8 +237,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor,
+            String registrationLinkSecret) {
         super(name);
+        this.registrationLinkSecret = registrationLinkSecret;
         this.rankingMetricConstructor = rankingMetricConstructor;
         this.useStartTimeInference = useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;

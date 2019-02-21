@@ -36,7 +36,6 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.impl.XRRParserUtil;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
 import com.sap.sailing.xrr.schema.Division;
@@ -104,7 +103,8 @@ public class StructureImporter {
                     baseDomainFactory.getOrCreateBoatClass(result.getA().getBoatClass()), 
                     /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                     startDate, endDate, getSeries(buildStructure), false,
-                    this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null, OneDesignRankingMetric::new);
+                    this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null,
+                    OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
             addSpecificRegattas.add(regatta);
         }
         return addSpecificRegattas;

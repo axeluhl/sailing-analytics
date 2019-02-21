@@ -164,7 +164,8 @@ public abstract class TrackBasedTest {
                 RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass,
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
@@ -214,7 +215,8 @@ public abstract class TrackBasedTest {
         Series series = new SeriesImpl("series name", isMedal, /* isFleetsCanRunInParallel */ true, regattaFleets, raceColumnNames, trackedRegattaRegistry);
         Iterable<? extends Series> regattaSeries = Collections.singleton(series);
         return new RegattaImpl(regattaName, boatClass, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
-                startDate, endDate, regattaSeries, persistent, scoringScheme, regatteId , courseArea, OneDesignRankingMetric::new);
+                startDate, endDate, regattaSeries, persistent, scoringScheme, regatteId, courseArea,
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
     }
 
     public static void assignRacesToRegattaLeaderboardColumns(RegattaLeaderboard leaderboard, Collection<RaceIdentifier> raceIdentifiers) {

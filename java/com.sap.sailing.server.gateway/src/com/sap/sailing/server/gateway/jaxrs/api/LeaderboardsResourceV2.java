@@ -63,10 +63,13 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             @QueryParam("createNewGroup") Boolean createNewGroup,
             @QueryParam("existingGroupId") UUID existingGroupIdOrNull, @QueryParam("newGroupName") String newGroupName,
             @QueryParam("migrateCompetitors") Boolean migrateCompetitors,
-            @QueryParam("migrateBoats") Boolean migrateBoats) throws ParseException, JsonDeserializationException {
+            @QueryParam("migrateBoats") Boolean migrateBoats,
+            @QueryParam("copyMembersAndRoles") Boolean copyMembersAndRoles)
+            throws ParseException, JsonDeserializationException {
         Leaderboard leaderboardGroup = getService().getLeaderboardByName(leaderboardName);
         SailingHierarchyOwnershipUpdater updater = SailingHierarchyOwnershipUpdater.createOwnershipUpdater(
-                createNewGroup, existingGroupIdOrNull, newGroupName, migrateCompetitors, migrateBoats, getService());
+                createNewGroup, existingGroupIdOrNull, newGroupName, migrateCompetitors, migrateBoats,
+                copyMembersAndRoles == null ? true : copyMembersAndRoles, getService());
         updater.updateGroupOwnershipForLeaderboardHierarchy(leaderboardGroup);
         return Response.ok().build();
     }
