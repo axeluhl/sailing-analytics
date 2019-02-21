@@ -66,7 +66,6 @@ public class ManeuverClassifierTrainer {
                 LoggingUtil.logInfo("Training with  " + trainManeuvers.size() + " maneuvers...");
                 double[][] x = modelContext.getXMatrix(maneuvers);
                 int[] y = labelExtraction.getYVector(maneuvers);
-                classifierModel.resetTrainingStats();
                 classifierModel.train(x, y);
                 LoggingUtil.logInfo("Training finished. Validating on train dataset...");
                 ManeuverClassifierScoring classifierScoring = new ManeuverClassifierScoring(classifierModel);
