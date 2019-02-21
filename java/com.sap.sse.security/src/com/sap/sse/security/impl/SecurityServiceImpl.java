@@ -316,7 +316,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (store.getUserByName(SecurityService.ALL_USERNAME) == null) {
                 isInitialOrMigration = true;
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
-                User allUser = createUserInternal(SecurityService.ALL_USERNAME, null);
+                User allUser = apply(s->s.internalCreateUser(SecurityService.ALL_USERNAME, null));
 
                 // <all> user is explicitly not owned by itself because this would enable anybody to modify this user
                 setOwnership(allUser.getIdentifier(), null, getDefaultTenant());
@@ -369,8 +369,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (!user.isEmailValidated()) {
             throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
         }
-        final String passwordResetSecret = user.startPasswordReset();
-        apply(s->s.internalStoreUser(user)); // durably storing the password reset secret
+        final String passwordResetSecret = user.createRandomSecret();
+        apply(s->s.internalResetPassword(username, passwordResetSecret));
         Map<String, String> urlParameters = new HashMap<>();
         try {
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
@@ -395,6 +395,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     "Internal error: encoding UTF-8 not found. Couldn't send e-mail to user " + user.getName()
                             + " at e-mail address " + user.getEmail(), e);
         }
+    }
+
+    @Override
+    public Void internalResetPassword(String username, String passwordResetSecret) {
+        getUserByName(username).startPasswordReset(passwordResetSecret);
+        return null;
     }
 
     @Override
@@ -784,7 +790,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, Locale locale, final String validationBaseURL, UserGroup userOwner)
+            String company, Locale locale, final String validationBaseURL, UserGroup groupOwningUser)
             throws UserManagementException, MailException, UserGroupManagementException {
         logger.info("Creating user "+username);
         if (store.getUserByName(username) != null) {
@@ -801,35 +807,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-        final User result = createUserInternal(username, email, upa);
+        final User result = apply(s->s.internalCreateUser(username, email, upa)); // This also replicated the user creation
         addUserRoleToUser(result);
-        
         final UserGroup tenant = getOrCreateTenantForUser(result);
         setDefaultTenantForCurrentServerForUser(username, tenant.getId());
-        
         // the new user becomes its owner to ensure the user role is correctly working
         // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
-        accessControlStore.setOwnership(result.getIdentifier(), result, userOwner, username);
-        
-        result.setFullName(fullName);
-        result.setCompany(company);
-        result.setLocale(locale);
-        final String emailValidationSecret = result.startEmailValidation();
-        // don't replicate exception handling; replicate only the effect on the user store
-        apply(s->s.internalStoreUser(result));
-        if (validationBaseURL != null && email != null && !email.trim().isEmpty()) {
-            new Thread("e-mail validation for user " + username + " with e-mail address " + email) {
-                @Override
-                public void run() {
-                    try {
-                        startEmailValidation(result, emailValidationSecret, validationBaseURL);
-                    } catch (MailException e) {
-                        logger.log(Level.SEVERE, "Error sending mail for new account validation of user " + username
-                                + " to address " + email, e);
-                    }
-                }
-            }.start();
-        }
+        apply(s->s.internalSetOwnership(result.getIdentifier(), username, groupOwningUser.getId(), username));
+        updateUserProperties(username, fullName, company, locale);
+        updateSimpleUserEmail(username, email, validationBaseURL);
         return result;
     }
 
@@ -858,24 +844,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return tenant;
     }
 
-    private User createUserInternal(String username, String email, Account... accounts)
-            throws UserManagementException {
-        final User result = store.createUser(username, email, accounts); // TODO: get the principal
-                                                                                            // as owner
-        // now the user creation needs to be replicated so that when replicating role addition and group assignment
-        // the replica will be able to resolve the user correctly
-        apply(s -> s.internalStoreUser(result));
+    @Override
+    public User internalCreateUser(String username, String email, Account... accounts) throws UserManagementException {
+        final User result = store.createUser(username, email, accounts); // TODO: get the principal as owner
         return result;
     }
 
     private String getDefaultTenantNameForUsername(final String username) {
         return username + "-tenant";
-    }
-
-    @Override
-    public Void internalStoreUser(User user) {
-        store.updateUser(user);
-        return null;
     }
 
     @Override
@@ -892,14 +868,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         // for non-admins, check that the old password is correct
-        final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(newPassword, salt);
+        apply(s->s.internalUpdateSimpleUserPassword(user.getName(), salt, hashedPasswordBase64));
+    }
+    
+    @Override
+    public Void internalUpdateSimpleUserPassword(String username, byte[] salt, String hashedPasswordBase64) {
+        final User user = getUserByName(username);
+        final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
         user.passwordWasReset();
-        apply(s->s.internalStoreUser(user));
+        return null;
     }
 
     @Override
@@ -908,14 +890,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        updateUserProperties(user, fullName, company, locale);
+        apply(s->s.internalUpdateUserProperties(user, fullName, company, locale));
     }
 
-    private void updateUserProperties(User user, String fullName, String company, Locale locale) {
+    @Override
+    public Void internalUpdateUserProperties(User user, String fullName, String company, Locale locale) {
         user.setFullName(fullName);
         user.setCompany(company);
         user.setLocale(locale);
-        apply(s->s.internalStoreUser(user));
+        store.updateUser(user);
+        return null;
     }
 
     @Override
@@ -945,7 +929,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         logger.info("Changing e-mail address of user "+username+" to "+newEmail);
-        final String validationSecret = user.setEmail(newEmail);
+        final String validationSecret = user.createRandomSecret();
+        apply(s->s.internalUpdateSimpleUserEmail(username, newEmail, validationSecret));
         new Thread("e-mail validation after changing e-mail of user " + username + " to " + newEmail) {
             @Override
             public void run() {
@@ -957,7 +942,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 }
             }
         }.start();
-        apply(s->s.internalStoreUser(user));
+    }
+
+    @Override
+    public Void internalUpdateSimpleUserEmail(final String username, final String newEmail, final String validationSecret) {
+        final User user = getUserByName(username);
+        user.setEmail(newEmail);
+        user.startEmailValidation(validationSecret);
+        return null;
     }
 
     @Override
@@ -966,17 +958,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
+        return apply(s->s.internalValidateEmail(username, validationSecret));
+    }
+    
+    @Override
+    public Boolean internalValidateEmail(String username, String validationSecret) {
+        final User user = store.getUserByName(username);
         final boolean result = user.validate(validationSecret);
-        apply(s->s.internalStoreUser(user));
+        if (result) {
+            store.updateUser(user);
+        }
         return result;
     }
 
     /**
-     * {@link UserImpl#startEmailValidation() Triggers} e-mail validation for the <code>user</code> object and sends out a
+     * {@link UserImpl#startEmailValidation(String) Triggers} e-mail validation for the <code>user</code> object and sends out a
      * URL to the user's e-mail that has the validation secret ready for validation by clicking.
      * 
      * @param validationSecret
-     *            the result of either {@link UserImpl#startEmailValidation()} or {@link UserImpl#setEmail(String)}.
+     *            the result of either {@link UserImpl#startEmailValidation(String)} or {@link UserImpl#setEmail(String)}.
      * @param baseURL
      *            the URL under which the user can reach the e-mail validation service; this URL is required to assemble
      *            a validation URL that is sent by e-mail to the user, to make the user return the validation secret to

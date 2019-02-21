@@ -207,7 +207,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbPermissions.add(permission.toString());
         }
         dbUser.put(FieldNames.User.PERMISSIONS.name(), dbPermissions);
-
         List<Object> defaultTennants = new BasicDBList();
         for (Entry<String, UserGroup> entries : user.getDefaultTenantMap().entrySet()) {
             Document tenant = new Document();

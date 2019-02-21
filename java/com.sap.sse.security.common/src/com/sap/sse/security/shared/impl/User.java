@@ -51,7 +51,12 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
 
     Map<AccountType, Account> getAllAccounts();
 
-    String setEmail(String email);
+    /**
+     * Sets an e-mail address for this user. The address is considered not yet validated, therefore the
+     * caller shall also ensure that {@link #startEmailValidation} is invoked hereafter, with a secret
+     * produced by {@link #createRandomSecret()}.
+     */
+    void setEmail(String email);
 
     /**
      * When someone has requested a password reset, only the owner of the validated e-mail address is
@@ -61,9 +66,14 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
      */
     String getPasswordResetSecret();
 
-    String startPasswordReset();
+    void startPasswordReset(String randomSecret);
 
-    String startEmailValidation();
+    /**
+     * Resets the {@link #isEmailValidated()} property and stores the new {@code randomSecret} as the
+     * e-mail validation secret. The {@link #isEmailValidated()} method will return {@code true} only
+     * after {@link #validate(String)} has been called with the {@code randomSecret} passed here.
+     */
+    void startEmailValidation(String randomSecret);
 
     boolean validate(String validationSecret);
 
@@ -99,4 +109,6 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
     void setUserGroupProvider(UserGroupProvider userGroupProvider);
     
     UserGroupProvider getUserGroupProvider();
+
+    String createRandomSecret();
 }

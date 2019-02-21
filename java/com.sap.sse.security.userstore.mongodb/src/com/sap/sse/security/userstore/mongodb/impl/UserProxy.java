@@ -124,7 +124,7 @@ public class UserProxy implements User {
     }
 
     @Override
-    public String setEmail(String email) {
+    public void setEmail(String email) {
         throw new UnsupportedOperationException();
     }
 
@@ -134,12 +134,12 @@ public class UserProxy implements User {
     }
 
     @Override
-    public String startPasswordReset() {
+    public void startPasswordReset(String randomSecret) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String startEmailValidation() {
+    public void startEmailValidation(String randomSecret) {
         throw new UnsupportedOperationException();
     }
 
@@ -200,6 +200,11 @@ public class UserProxy implements User {
 
     @Override
     public UserGroupProvider getUserGroupProvider() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String createRandomSecret() {
         throw new UnsupportedOperationException();
     }
 }

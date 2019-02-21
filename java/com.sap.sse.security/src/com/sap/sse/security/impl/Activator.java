@@ -117,7 +117,6 @@ public class Activator implements BundleActivator {
         if (cm instanceof ReplicatingCacheManager) {
             ((ReplicatingCacheManager) cm).clear();
         }
-
         UserStore userStore = userStoreTracker.waitForService(0);
         AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
         userStore.clear();

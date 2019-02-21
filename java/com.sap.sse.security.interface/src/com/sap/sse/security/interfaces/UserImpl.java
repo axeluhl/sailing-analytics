@@ -225,15 +225,9 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
         return email;
     }
     
-    /**
-     * Sets an e-mail address for this user. The address is considered not yet validated, therefore the
-     * {@link #emailValidated} flag is reset, and a new {@link #validationSecret} is generated and returned which
-     * can be used in a call to {@link #validate(String)} to validate the e-mail address.
-     */
     @Override
-    public String setEmail(String email) {
+    public void setEmail(String email) {
         this.email = email;
-        return startEmailValidation();
     }
 
     /**
@@ -242,10 +236,9 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
      * can be used in a call to {@link #validate(String)} to validate the e-mail address.
      */
     @Override
-    public String startEmailValidation() {
-        validationSecret = createRandomSecret();
+    public void startEmailValidation(String randomSecret) {
+        validationSecret = randomSecret;
         emailValidated = false;
-        return validationSecret;
     }
     
     /**
@@ -254,9 +247,8 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
      * a user's password in case the service can provide the correct password reset secret.
      */
     @Override
-    public String startPasswordReset() {
-        passwordResetSecret = createRandomSecret();
-        return passwordResetSecret;
+    public void startPasswordReset(String randomSecret) {
+        passwordResetSecret = randomSecret;
     }
     
     @Override
@@ -264,7 +256,8 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
         return passwordResetSecret;
     }
     
-    private String createRandomSecret() {
+    @Override
+    public String createRandomSecret() {
         final byte[] bytes1 = new byte[64];
         new SecureRandom().nextBytes(bytes1);
         final byte[] bytes2 = new byte[64];
@@ -273,9 +266,10 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     }
     
     /**
-     * If the <code>validationSecret</code> passed matches {@link #validationSecret}, the e-mail is
-     * {@link #emailValidated marked as validated}, and <code>true</code> is returned. Otherwise, the validation secret
-     * on this user remains in place, and the e-mail address is not marked as validated.
+     * If the user's e-mail has already been {@link #isEmailValidated() validated}, or the <code>validationSecret</code>
+     * passed matches {@link #validationSecret}, the e-mail is {@link #emailValidated marked as validated}, and
+     * <code>true</code> is returned. Otherwise, the validation secret on this user remains in place, and the e-mail
+     * address is not marked as validated.
      */
     @Override
     public boolean validate(final String validationSecret) {

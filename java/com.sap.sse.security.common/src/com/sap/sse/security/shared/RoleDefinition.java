@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.Renamable;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
 
 /**
  * A role definition provides an ID, a (changeable) name and a set of permissions. As such, it represents a group of

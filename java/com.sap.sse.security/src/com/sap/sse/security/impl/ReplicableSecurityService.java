@@ -1,11 +1,13 @@
 package com.sap.sse.security.impl;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
 import org.apache.shiro.session.Session;
 
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -51,7 +53,19 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalRemoveRoleDefinitionFromUserGroup(UUID groupId, UUID roleDefinitionId)
             throws UserGroupManagementException;
 
-    Void internalStoreUser(User user);
+    /**
+     * Creates and stores a <em>new</em> user in the system. <em>Don't</em> use this to update an existing user.
+     * Use other {@code internal...} methods to update individual user properties instead.
+     */
+    User internalCreateUser(String username, String email, Account... accounts) throws UserManagementException;
+
+    Void internalUpdateSimpleUserEmail(String username, String newEmail, String validationSecret);
+
+    Void internalUpdateSimpleUserPassword(String username, byte[] salt, String hashedPasswordBase64);
+
+    Void internalUpdateUserProperties(User user, String fullName, String company, Locale locale);
+
+    Boolean internalValidateEmail(String username, String validationSecret);
 
     Void internalSetPreference(String username, String key, String value);
 
@@ -93,5 +107,7 @@ public interface ReplicableSecurityService extends SecurityService {
     void removeAllSessions(String cacheName);
 
     Void internalSetDefaultTenantForServerForUser(String username, UUID defaultTenantId, String serverName);
+
+    Void internalResetPassword(String username, String passwordResetSecret);
 
 }
