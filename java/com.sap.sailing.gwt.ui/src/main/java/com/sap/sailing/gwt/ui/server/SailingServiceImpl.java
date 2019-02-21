@@ -8917,7 +8917,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 migrateGroupOwnerForHierarchyDTO.isCreateNewGroup(),
                 migrateGroupOwnerForHierarchyDTO.getExistingUserGroupIdOrNull(),
                 migrateGroupOwnerForHierarchyDTO.getGroupName(), migrateGroupOwnerForHierarchyDTO.isUpdateCompetitors(),
-                migrateGroupOwnerForHierarchyDTO.isUpdateBoats(), getService());
+                migrateGroupOwnerForHierarchyDTO.isUpdateBoats(),
+                migrateGroupOwnerForHierarchyDTO.isCopyMembersAndRoles(), getService());
     }
 
     @Override

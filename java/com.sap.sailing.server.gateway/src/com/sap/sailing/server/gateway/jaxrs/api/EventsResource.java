@@ -118,10 +118,13 @@ public class EventsResource extends AbstractSailingServerResource {
             @QueryParam("createNewGroup") Boolean createNewGroup,
             @QueryParam("existingGroupId") UUID existingGroupIdOrNull, @QueryParam("newGroupName") String newGroupName,
             @QueryParam("migrateCompetitors") Boolean migrateCompetitors,
-            @QueryParam("migrateBoats") Boolean migrateBoats) throws ParseException, JsonDeserializationException {
+            @QueryParam("migrateBoats") Boolean migrateBoats,
+            @QueryParam("copyMembersAndRoles") Boolean copyMembersAndRoles)
+            throws ParseException, JsonDeserializationException {
         Event event = getService().getEvent(eventId);
         SailingHierarchyOwnershipUpdater updater = SailingHierarchyOwnershipUpdater.createOwnershipUpdater(
-                createNewGroup, existingGroupIdOrNull, newGroupName, migrateCompetitors, migrateBoats, getService());
+                createNewGroup, existingGroupIdOrNull, newGroupName, migrateCompetitors, migrateBoats,
+                copyMembersAndRoles == null ? true : copyMembersAndRoles, getService());
         updater.updateGroupOwnershipForEventHierarchy(event);
         return Response.ok().build();
     }
