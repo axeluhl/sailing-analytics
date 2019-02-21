@@ -54,7 +54,7 @@ public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements Wi
     
     @Override
     public HasPermissions getType() {
-        return SecuredDomainType.LEADERBOARD;
+        return SecuredDomainType.LEADERBOARD_GROUP;
     }
     
     @Override
