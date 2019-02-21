@@ -114,7 +114,7 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         parameters.put("regatta_name", regattaName);
         parameters.put("secret", secret);
         parameters.put("server", baseUrl);
-        String deeplinkUrl = BranchIO.generateLink(BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO, parameters,
+        String deeplinkUrl = BranchIO.generateLink(BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO, parameters,
                 URL::encodeQueryString);
         urlTextBox.setText(deeplinkUrl);
         sailingService.openRegattaRegistrationQrCode(deeplinkUrl, new AsyncCallback<String>() {

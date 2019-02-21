@@ -144,8 +144,8 @@ public class QRCodePresenter {
         private void proceedIfFinished() {
             if (invitationMode == InvitationMode.PUBLIC_INVITE) {
                 if (checkInUrl != null) {
-                    String branchIoUrl = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?"
-                            + BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO_PATH + "="
+                    String branchIoUrl = BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?"
+                            + BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO_PATH + "="
                             + QRCodePresenter.this.checkInUrl;
                     view.setData(null, null, "", regatta, branchIoUrl, invitationMode);
                 }

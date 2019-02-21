@@ -7,8 +7,7 @@ public class BranchIOConstants {
     public static final String BUOYPINGER_APP_BRANCHIO = "https://buoypinger-app.sapsailing.com/invite";
     public static final String BUOYPINGER_APP_BRANCHIO_PATH = "checkinUrl";
     public static final String OPEN_REGATTA_2_APP_BRANCHIO = "https://sailinsight20-app.sapsailing.com/publicInvite";
-    public static final String OPEN_REGATTA_APP_BRANCHIO = "https://sailinsight-app.sapsailing.com/publicInvite";
-    public static final String OPEN_REGATTA_APP_BRANCHIO_PATH = "checkinUrl";
+    public static final String OPEN_REGATTA_2_APP_BRANCHIO_PATH = "checkinUrl";
 
     private BranchIOConstants() {
     };
