@@ -141,8 +141,8 @@ public class ManeuverAndWindImporter {
                     + Math.round(100.0 * i / numberOfRegattas) + "%): \"" + regattaName + "\"");
             importRegatta(regattaName, importStatistics);
         }
-        boolean success = executorService.awaitTermination(24, TimeUnit.HOURS);
         executorService.shutdown();
+        boolean success = executorService.awaitTermination(2, TimeUnit.HOURS);
         if (success) {
             LoggingUtil.logInfo("Import finished");
             synchronized (importStatistics) {
@@ -150,7 +150,7 @@ public class ManeuverAndWindImporter {
                 logImportStatistics(importStatistics);
             }
         } else {
-            LoggingUtil.logInfo("Process was terminated");
+            new InterruptedException("Thread-pool was terminated after two hours waiting time");
         }
     }
 

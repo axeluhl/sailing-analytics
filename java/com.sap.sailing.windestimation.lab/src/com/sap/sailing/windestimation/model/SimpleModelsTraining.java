@@ -109,7 +109,10 @@ public class SimpleModelsTraining {
 
     private static void awaitThreadPoolCompletion() throws InterruptedException {
         executorService.shutdown();
-        executorService.awaitTermination(24, TimeUnit.HOURS);
+        boolean success = executorService.awaitTermination(2, TimeUnit.HOURS);
+        if (!success) {
+            new InterruptedException("Thread-pool was terminated after two hours waiting time");
+        }
         Thread.sleep(1000L);
     }
 
