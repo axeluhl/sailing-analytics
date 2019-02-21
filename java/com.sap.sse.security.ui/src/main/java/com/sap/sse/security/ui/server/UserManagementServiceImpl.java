@@ -154,6 +154,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                             }
                         }
                     }
+                    for (UserGroup group : getSecurityService().getUserGroupList()) {
+                        if (group.isRoleAssociated(role)) {
+                            getSecurityService().removeRoleDefintionFromUserGroup(group, role);
+                        }
+                    }
                     getSecurityService().deleteRoleDefinition(role);
                 }
             });
