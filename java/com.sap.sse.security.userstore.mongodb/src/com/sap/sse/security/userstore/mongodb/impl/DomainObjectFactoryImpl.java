@@ -70,7 +70,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     @SuppressWarnings("unchecked")
     private AccessControlListAnnotation loadAccessControlList(Document aclDBObject, UserStore userStore) {
-        final QualifiedObjectIdentifier id = new QualifiedObjectIdentifierImpl((String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name()));
+        final QualifiedObjectIdentifier id = QualifiedObjectIdentifierImpl
+                .fromDBWithoutEscaping((String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name()));
         final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name());
         List<Object> dbPermissionMap = ((List<Object>) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
@@ -105,7 +106,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private OwnershipAnnotation loadOwnership(Document ownershipDBObject, UserStore userStore) {
-        final QualifiedObjectIdentifier idOfOwnedObject = new QualifiedObjectIdentifierImpl((String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name()));
+        String rawId = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name());
+        final QualifiedObjectIdentifier idOfOwnedObject = QualifiedObjectIdentifierImpl.fromDBWithoutEscaping(rawId);
         final String displayNameOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
         final String userOwnerName = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
         final UUID tenantOwnerId = (UUID) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER_ID.name());

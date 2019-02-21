@@ -4741,7 +4741,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             getService().apply(new RemoveRegatta(regattaIdentifier));
             // cleanup the Ownership and ACLs
             for (QualifiedObjectIdentifier toRemovePermissionObjects : objectsThatWillBeImplicitlyCleanedByRemoveRegatta) {
-                getSecurityService().deleteOwnership(toRemovePermissionObjects);
+                getSecurityService().deleteAllDataForRemovedObject(toRemovePermissionObjects);
             }
 
         }
