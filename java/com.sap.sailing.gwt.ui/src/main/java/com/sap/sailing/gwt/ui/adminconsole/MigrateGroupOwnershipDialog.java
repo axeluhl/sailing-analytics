@@ -114,18 +114,20 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
         lblCopyMembersAndRoles = new Label(stringMessages.copyMembersAndRoles());
         lblCopyMembersAndRoles.setVisible(false);
 
-        userManagementService.getUserGroupByName(tenant.getName(), new AsyncCallback<UserGroupDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.errorObtainingUserGroup(caught.getMessage()),
-                        NotificationType.ERROR);
-            }
+        if (tenant != null) {
+            userManagementService.getUserGroupByName(tenant.getName(), new AsyncCallback<UserGroupDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.errorObtainingUserGroup(caught.getMessage()),
+                            NotificationType.ERROR);
+                }
 
-            @Override
-            public void onSuccess(UserGroupDTO result) {
-                oldUserGroup = result;
-            }
-        });
+                @Override
+                public void onSuccess(UserGroupDTO result) {
+                    oldUserGroup = result;
+                }
+            });
+        }
     }
 
     private void onRadioChange() {

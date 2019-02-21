@@ -32,7 +32,8 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
     }
     
     public CreateUserGroupDialog(final StringMessages stringMessages, UserService userService, 
-            final UserManagementServiceAsync userManagementService, final UserGroupListDataProvider userGroupListDataProvider) {
+            final UserManagementServiceAsync userManagementService,
+            final UserGroupListDataProvider userGroupListDataProvider, Runnable runOnSuccess) {
         this(stringMessages, stringMessages.createUserGroup(), stringMessages.enterUserGroupName(), userManagementService, null, new DialogCallback<UserGroupData>() {
             @Override
             public void ok(UserGroupData userGroupData) {
@@ -44,6 +45,7 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
                     @Override
                             public void onSuccess(UserGroupDTO result) {
                         userGroupListDataProvider.updateDisplays();
+                                runOnSuccess.run();
                     }
                 });
             }

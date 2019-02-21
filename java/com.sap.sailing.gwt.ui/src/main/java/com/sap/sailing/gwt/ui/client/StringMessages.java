@@ -2232,4 +2232,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String serverIsPublicButTenantIsNot();
     String serverIsPublicButTenantIsNotAndCouldBeChanged();
     String copyMembersAndRoles();
+    String invalidSecret();
 }
