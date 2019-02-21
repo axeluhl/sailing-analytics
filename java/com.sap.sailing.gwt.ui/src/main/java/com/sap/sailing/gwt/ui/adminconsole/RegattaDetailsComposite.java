@@ -436,6 +436,8 @@ public class RegattaDetailsComposite extends Composite {
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
             competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel(stringMessages));
+
+            sailingService.
             registrationLinkWithQRCodeOpenButton.setVisible(regatta.competitorRegistrationType.isOpen());
             buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths));
             

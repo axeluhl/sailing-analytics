@@ -571,8 +571,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
-            RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, String registrationLinkSecret, AsyncCallback<Void> callback);
+            RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
+            boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            String registrationLinkSecret, CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
 
     /**
      * @param detailType

@@ -775,6 +775,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
+    public void setCompetitorRegistrationType(CompetitorRegistrationType competitorRegistrationType) {
+        this.competitorRegistrationType = competitorRegistrationType;
+    }
+
+    @Override
     public CompetitorRegistrationType getCompetitorRegistrationType() {
            return this.competitorRegistrationType == null ? CompetitorRegistrationType.CLOSED : this.competitorRegistrationType;
     }

@@ -605,6 +605,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public void setRegistrationLinkSecret(String registrationLinkSecret) {
                     }
+
+                    @Override
+                    public void setCompetitorRegistrationType(CompetitorRegistrationType competitorRegistrationType) {
+                    }
                 };
             }
 

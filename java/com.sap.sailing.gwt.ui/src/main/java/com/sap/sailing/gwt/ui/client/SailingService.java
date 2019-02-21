@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
- 
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -285,7 +285,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            String registrationLinkSecret);
+            String registrationLinkSecret, CompetitorRegistrationType registrationType);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
             List<Pair<String, Integer>> columnNames);

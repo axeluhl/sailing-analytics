@@ -119,7 +119,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         // Test for 'null'
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, 
                 currentCourseAreaId, null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                /* registrationLinkSecret*/ null));
+                /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -129,7 +129,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         currentCourseAreaId = alphaCourseAreaId;
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, 
                 currentCourseAreaId, null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                /* registrationLinkSecret*/ null));
+                /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -139,7 +139,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         currentCourseAreaId = tvCourseAreaId;
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null,
                 currentCourseAreaId, null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                /* registrationLinkSecret*/ null));
+                /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -149,7 +149,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         currentCourseAreaId = null;
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, null,
                 /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                /* registrationLinkSecret*/ null));
+                /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -178,7 +178,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         // Test for 'null'
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, null,
                 /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                /* registrationLinkSecret*/ null));
+                /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -189,7 +189,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         config.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MARKS);
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, config,
                 /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                /* registrationLinkSecret*/ null));
+                /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);

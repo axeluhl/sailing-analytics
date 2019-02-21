@@ -66,7 +66,6 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
     protected final ListBox competitorRegistrationTypeListBox;
-    protected final Button registrationLinkWithQRCodeOpenButton;
 
     protected final List<EventDTO> existingEvents;
     private EventDTO defaultEvent;
@@ -141,33 +140,6 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         final TextBox secretTextBox = createTextBox(regatta.registrationLinkSecret, 30);
         secretPanel = new CaptionPanel(stringMessages.registrationLinkSecret());
         createSecretPanel(stringMessages, secretPanel, secretTextBox);
-
-        registrationLinkWithQRCodeOpenButton = new Button(stringMessages.registrationLinkConfig(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingService, stringMessages, regatta.getName(),
-                        registrationLinkWithQRCode, new DialogCallback<RegistrationLinkWithQRCode>() {
-                            @Override
-                            public void ok(RegistrationLinkWithQRCode result) {
-                                registrationLinkWithQRCode = result;
-                            }
-
-                            @Override
-                            public void cancel() {
-                            }
-                        }, secretTextBox.getValue());
-                dialog.ensureDebugId("RegistrationLinkWithQRCodeDialog");
-                dialog.show();
-
-            }
-        });
-        registrationLinkWithQRCodeOpenButton.ensureDebugId("RegistrationLinkWithQRCodeOpenButton");
-
-        competitorRegistrationTypeListBox.addChangeHandler(e -> {
-            updateConfigureButton();
-        });
-        
-        updateConfigureButton();
     }
 
     private void createSecretPanel(final StringMessages stringMessages, final CaptionPanel secretPanel,
@@ -220,15 +192,6 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
             getOkButton().setEnabled(true);
         }
         registrationLinkWithQRCode.setSecret(secretTextBox.getText());
-    }
-
-    private void updateConfigureButton() {
-        // show button only if selected CompetitorRegistrationType is open (moderated or unmoderated)
-        final boolean isOpenModerated = CompetitorRegistrationType.OPEN_MODERATED.name()
-                .equals(competitorRegistrationTypeListBox.getSelectedValue())
-                || CompetitorRegistrationType.OPEN_UNMODERATED.name()
-                        .equals(competitorRegistrationTypeListBox.getSelectedValue());
-        registrationLinkWithQRCodeOpenButton.setVisible(isOpenModerated);
     }
 
     /**
@@ -295,8 +258,6 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(8, 1, buoyZoneRadiusInHullLengthsDoubleBox);
         formGrid.setWidget(9, 0, new Label(stringMessages.competitorRegistrationType() + ":"));
         formGrid.setWidget(9, 1, competitorRegistrationTypeListBox);
-        formGrid.setWidget(10, 0, new Label(stringMessages.registrationLink() + ":"));
-        formGrid.setWidget(10, 1, registrationLinkWithQRCodeOpenButton);
 
         panel.add(secretPanel);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
@@ -427,11 +388,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         setCourseAreaInRegatta(result);
         result.series = getSeriesEditor().getValue();
         result.competitorRegistrationType = CompetitorRegistrationType.valueOf(competitorRegistrationTypeListBox.getSelectedValue());
-        if (result.competitorRegistrationType.isOpen() && registrationLinkWithQRCode != null) {
-            result.registrationLinkSecret = registrationLinkWithQRCode.getSecret();
-        } else {
-            result.registrationLinkSecret = null;
-        }
+        result.registrationLinkSecret = registrationLinkWithQRCode.getSecret();
         return result;
     }
 

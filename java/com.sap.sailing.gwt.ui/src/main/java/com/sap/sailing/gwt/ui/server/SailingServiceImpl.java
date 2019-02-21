@@ -4767,7 +4767,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void updateRegatta(RegattaIdentifier regattaName, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
             RegattaConfigurationDTO configurationDTO, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            String registrationLinkSecret) {
+            String registrationLinkSecret, CompetitorRegistrationType registrationType) {
         Regatta regatta = getService().getRegatta(regattaName);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(DefaultActions.UPDATE, regatta));
@@ -4776,7 +4776,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         getService().apply(new UpdateSpecificRegatta(regattaName, startTimePoint, endTimePoint, defaultCourseAreaUuid,
                 convertToRegattaConfiguration(configurationDTO), buoyZoneRadiusInHullLengths, useStartTimeInference,
-                controlTrackingFromStartAndFinishTimes, registrationLinkSecret));
+                controlTrackingFromStartAndFinishTimes, registrationLinkSecret, registrationType));
     }
 
     @Override

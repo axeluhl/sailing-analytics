@@ -2579,7 +2579,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration newRegattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            String registrationLinkSecret) {
+            String registrationLinkSecret, CompetitorRegistrationType registrationType) {
         if (useStartTimeInference && controlTrackingFromStartAndFinishTimes) {
             throw new IllegalArgumentException("Cannot set both of useStartTimeInference and controlTrackingFromStartAndFinishTimes to true");
         }
@@ -2594,6 +2594,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regatta.setBuoyZoneRadiusInHullLengths(buoyZoneRadiusInHullLengths);
         regatta.setControlTrackingFromStartAndFinishTimes(controlTrackingFromStartAndFinishTimes);
         regatta.setRegistrationLinkSecret(registrationLinkSecret);
+        regatta.setCompetitorRegistrationType(registrationType);
         if (regatta.useStartTimeInference() != useStartTimeInference) {
             regatta.setUseStartTimeInference(useStartTimeInference);
             final DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
