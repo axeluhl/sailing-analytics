@@ -16,13 +16,13 @@ import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 public class HasPermissionsTest {
 
-    private final static String OBJECT_NAME = " Regatta :2018 ";
+    private final static String OBJECT_NAME = " Regatta :2018///\"@::";
     private final static String OBJECT_NAME_ENCODED = WildcardPermissionEncoder.encode(OBJECT_NAME);
     private final static Action READ_ACTION = HasPermissions.DefaultActions.READ;
 
     @Test
     public void getQualifiedObjectIdentifierFromTypedObjectIdentifer() {
-        final QualifiedObjectIdentifier q = new QualifiedObjectIdentifierImpl("type/" + OBJECT_NAME);
+        final QualifiedObjectIdentifier q = QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("type/" + OBJECT_NAME);
         final HasPermissions h = new HasPermissionsImpl("type");
         final TypeRelativeObjectIdentifier t = new TypeRelativeObjectIdentifier(OBJECT_NAME);
         assertEquals(q, h.getQualifiedObjectIdentifier(t));

@@ -11,6 +11,13 @@ public class TypeRelativeObjectIdentifier implements Serializable {
 
     public TypeRelativeObjectIdentifier() {}
 
+    /**
+     * Only for DB restore, as the identifier is already escaped and would be double escaped
+     */
+    TypeRelativeObjectIdentifier(String rawIdentifier) {
+        typeRelativeIdentifer = rawIdentifier;
+    }
+
     public TypeRelativeObjectIdentifier(String... identifers) {
         typeRelativeIdentifer = WildcardPermissionEncoder.encode(identifers);
     }

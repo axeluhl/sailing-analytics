@@ -11,26 +11,30 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
     private final String typeIdentifier;
     private final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier;
     
-    /**
-     * Parses the output of {@link QualifiedObjectIdentifier#toString()} into an instance of this class.
-     * 
-     * @param qualifiedObjectIdentifierAsString
-     *            expected to contain {@link QualifiedObjectIdentifier#QUALIFIER_SEPARATOR}; an
-     *            {@link IllegalArgumentException will result otherwise.
-     */
-    public QualifiedObjectIdentifierImpl(String qualifiedObjectIdentifierAsString) {
+    private QualifiedObjectIdentifierImpl(String qualifiedObjectIdentifierAsString) {
         final int indexOfSeparator = qualifiedObjectIdentifierAsString.indexOf(QUALIFIER_SEPARATOR);
         if (indexOfSeparator < 0) {
             throw new IllegalArgumentException("Qualified object identifier must contain separator character "+QUALIFIER_SEPARATOR);
         }
         typeIdentifier = qualifiedObjectIdentifierAsString.substring(0, indexOfSeparator);
-        typeRelativeObjectIdentifier = new TypeRelativeObjectIdentifier(qualifiedObjectIdentifierAsString.substring(indexOfSeparator+1));
+        String typeRelativeIdentifier = qualifiedObjectIdentifierAsString.substring(indexOfSeparator + 1);
+        typeRelativeObjectIdentifier = new TypeRelativeObjectIdentifier(typeRelativeIdentifier);
     }
-    
+
     public QualifiedObjectIdentifierImpl(String typeIdentifier, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier) {
         super();
         this.typeIdentifier = typeIdentifier;
         this.typeRelativeObjectIdentifier = typeRelativeObjectIdentifier;
+    }
+
+    /**
+     * This should only be used from the db, as the TypeRelativeIdentifier is not escaped
+     * 
+     * @param rawId
+     * @return
+     */
+    public static QualifiedObjectIdentifier fromDBWithoutEscaping(String rawId) {
+        return new QualifiedObjectIdentifierImpl(rawId);
     }
 
     @Override
