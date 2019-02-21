@@ -813,8 +813,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         setDefaultTenantForCurrentServerForUser(username, tenant.getId());
         // the new user becomes its owner to ensure the user role is correctly working
         // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
-        apply(s->s.internalSetOwnership(result.getIdentifier(), username, groupOwningUser.getId(), username));
+        apply(s->s.internalSetOwnership(result.getIdentifier(), username, groupOwningUser==null?null:groupOwningUser.getId(), username));
         updateUserProperties(username, fullName, company, locale);
+        // email has been set during creation already; the following call will trigger the e-mail validation process
         updateSimpleUserEmail(username, email, validationBaseURL);
         return result;
     }
@@ -931,17 +932,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         logger.info("Changing e-mail address of user "+username+" to "+newEmail);
         final String validationSecret = user.createRandomSecret();
         apply(s->s.internalUpdateSimpleUserEmail(username, newEmail, validationSecret));
-        new Thread("e-mail validation after changing e-mail of user " + username + " to " + newEmail) {
-            @Override
-            public void run() {
-                try {
-                    startEmailValidation(user, validationSecret, validationBaseURL);
-                } catch (MailException e) {
-                    logger.log(Level.SEVERE, "Error sending mail to validate e-mail address change for user "
-                            + username + " to address " + newEmail, e);
+        if (validationBaseURL != null && newEmail != null && !newEmail.trim().isEmpty()) {
+            new Thread("e-mail validation after changing e-mail of user " + username + " to " + newEmail) {
+                @Override
+                public void run() {
+                    try {
+                        startEmailValidation(user, validationSecret, validationBaseURL);
+                    } catch (MailException e) {
+                        logger.log(Level.SEVERE, "Error sending mail to validate e-mail address change for user "
+                                + username + " to address " + newEmail, e);
+                    }
                 }
-            }
-        }.start();
+            }.start();
+        }
     }
 
     @Override
@@ -998,9 +1001,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     public StringBuilder buildURL(String baseURL, Map<String, String> urlParameters) {
-        StringBuilder url = new StringBuilder(baseURL);
+        StringBuilder url = new StringBuilder(baseURL==null?"":baseURL);
         // Potentially contained hash is checked to support place-based mail verification
-        boolean first = !baseURL.contains("?") || baseURL.contains("#");
+        boolean first = baseURL == null || !baseURL.contains("?") || baseURL.contains("#");
         for (Map.Entry<String, String> e : urlParameters.entrySet()) {
             if (first) {
                 url.append('?');
