@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 import javax.servlet.ServletContext;
 
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.osgi.framework.BundleContext;
@@ -18,6 +19,8 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.interfaces.Credential;
+import com.sap.sse.security.interfaces.PreferenceConverter;
+import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -540,4 +543,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     boolean isInitialOrMigration();
 
     RoleDefinition getOrCreateRoleDefinitionFromPrototype(RolePrototype rolePrototype);
+
+    /** Sets the default ownership based on the current user. */
+    void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description);
 }
