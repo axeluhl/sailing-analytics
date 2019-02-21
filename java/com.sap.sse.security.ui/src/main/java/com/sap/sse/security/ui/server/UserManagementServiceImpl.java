@@ -149,7 +149,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                                 TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(roleInstance, user);
                                 QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                                getSecurityService().deleteOwnership(qualifiedTypeIdentifier);
+                                getSecurityService().cleanOwnershipAndAclOnObjectRemoval(qualifiedTypeIdentifier);
                                 getSecurityService().removeRoleFromUser(user, roleInstance);
                             }
                         }
