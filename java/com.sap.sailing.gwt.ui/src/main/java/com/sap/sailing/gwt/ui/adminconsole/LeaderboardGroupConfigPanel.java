@@ -15,9 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -34,6 +37,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
@@ -95,6 +99,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
+    private final UserService userService;
+
     private VerticalPanel mainPanel;
     private HorizontalPanel splitPanel;
     private CaptionPanel groupDetailsCaptionPanel;
@@ -127,21 +133,24 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     private Button moveToLeaderboardsButton;
     private Button moveToGroupButton;
 
-    private ArrayList<LeaderboardGroupDTO> availableLeaderboardGroups;
-    private ArrayList<StrippedLeaderboardDTO> availableLeaderboards;
+    private final ArrayList<LeaderboardGroupDTO> availableLeaderboardGroups;
+    private final ArrayList<StrippedLeaderboardDTO> availableLeaderboards;
     private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
     private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
 
+    private final Set<Widget> permissionRestrictedComponent = new HashSet<>();
+    private final Label idLabel = new Label();
 
     public LeaderboardGroupConfigPanel(SailingServiceAsync sailingService, UserService userService,
             RegattaRefresher regattaRefresher, LeaderboardGroupsRefresher leaderboardGroupsRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher, ErrorReporter errorReporter,
             StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, stringMessages);
+        this.userService = userService;
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        availableLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
-        availableLeaderboards = new ArrayList<StrippedLeaderboardDTO>();
+        this.availableLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
+        this.availableLeaderboards = new ArrayList<StrippedLeaderboardDTO>();
         this.leaderboardGroupsRefresher = leaderboardGroupsRefresher;
         this.leaderboardsRefresher = leaderboardsRefresher;
 
@@ -151,19 +160,22 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         mainPanel.setWidth("95%");
         add(mainPanel);
 
-        mainPanel.add(createLeaderboardGroupsGUI(tableRes, userService));
+        mainPanel.add(createLeaderboardGroupsGUI(tableRes));
 
         splitPanel = new HorizontalPanel();
         splitPanel.ensureDebugId("LeaderboardGroupDetailsPanel");
-        splitPanel.setSpacing(5);
         splitPanel.setWidth("100%");
         splitPanel.setVisible(false);
         mainPanel.add(splitPanel);
 
         splitPanel.setVerticalAlignment(HorizontalPanel.ALIGN_TOP);
         splitPanel.add(createLeaderboardGroupDetailsGUI(tableRes));
-        splitPanel.add(createSwitchLeaderboardsGUI());
-        splitPanel.add(createLeaderboardsGUI(tableRes));
+        final Widget switchLeaderboardsGUI = createSwitchLeaderboardsGUI();
+        this.permissionRestrictedComponent.add(switchLeaderboardsGUI);
+        splitPanel.add(switchLeaderboardsGUI);
+        final Widget createLeaderboardsGUI = createLeaderboardsGUI(tableRes);
+        this.permissionRestrictedComponent.add(createLeaderboardsGUI);
+        splitPanel.add(createLeaderboardsGUI);
 
         //Load Data
         leaderboardGroupsRefresher.fillLeaderboardGroups();
@@ -171,29 +183,17 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     }
 
     private Widget createSwitchLeaderboardsGUI() {
-        VerticalPanel switchLeaderboardsPanel = new VerticalPanel();
+        final VerticalPanel switchLeaderboardsPanel = new VerticalPanel();
         switchLeaderboardsPanel.setSpacing(5);
-        switchLeaderboardsPanel.setWidth("5%");
+        switchLeaderboardsPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
 
-        moveToGroupButton = new Button("<-");
+        moveToGroupButton = new Button("<-", (ClickHandler) event -> moveToGroup());
         moveToGroupButton.ensureDebugId("AddLeaderboardButton");
-        moveToGroupButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                moveToGroup();
-            }
-        });
         moveToGroupButton.setEnabled(false);
         switchLeaderboardsPanel.add(moveToGroupButton);
 
-        moveToLeaderboardsButton = new Button("->");
+        moveToLeaderboardsButton = new Button("->", (ClickHandler) event -> moveToLeaderboards());
         moveToLeaderboardsButton.ensureDebugId("RemoveLeaderboardButton");
-        moveToLeaderboardsButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                moveToLeaderboards();
-            }
-        });
         moveToLeaderboardsButton.setEnabled(false);
         switchLeaderboardsPanel.add(moveToLeaderboardsButton);
 
@@ -202,7 +202,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
     private Widget createLeaderboardsGUI(Resources tableRes) {
         CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboardsExceptFromSelectedGroup());
-        leaderboardsCaptionPanel.setWidth("95%");
 
         VerticalPanel leaderboardsPanel = new VerticalPanel();
         leaderboardsCaptionPanel.add(leaderboardsPanel);
@@ -314,20 +313,27 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
     private Widget createLeaderboardGroupDetailsGUI(Resources tableRes) {
         groupDetailsCaptionPanel = new CaptionPanel();
-        groupDetailsCaptionPanel.setWidth("95%");
 
         VerticalPanel groupDetailsPanel = new VerticalPanel();
         groupDetailsPanel.setSpacing(7);
         groupDetailsCaptionPanel.add(groupDetailsPanel);
+
+        final Grid leaderboardGroupIdInfo = new Grid(1, 2);
+        leaderboardGroupIdInfo.setText(0, 0, stringMessages.id() + ":");
+        leaderboardGroupIdInfo.getCellFormatter().getElement(0, 0).getStyle().setFontWeight(FontWeight.BOLD);
+        leaderboardGroupIdInfo.setWidget(0, 1, idLabel);
+        groupDetailsPanel.add(leaderboardGroupIdInfo);
 
         //Create description area
         CaptionPanel descriptionCaptionPanel = new CaptionPanel(stringMessages.description());
         groupDetailsPanel.add(descriptionCaptionPanel);
 
         VerticalPanel descriptionPanel = new VerticalPanel();
+        descriptionPanel.setWidth("100%");
         descriptionCaptionPanel.add(descriptionPanel);
 
         descriptionTextArea = new TextArea();
+        descriptionTextArea.setWidth("100%");
         descriptionTextArea.ensureDebugId("DescriptionTextArea");
         descriptionTextArea.setCharacterWidth(60);
         descriptionTextArea.setVisibleLines(8);
@@ -336,46 +342,36 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         descriptionPanel.add(descriptionTextArea);
 
         HorizontalPanel descriptionFunctionsPanel = new HorizontalPanel();
-        descriptionFunctionsPanel.setSpacing(5);
         descriptionPanel.add(descriptionFunctionsPanel);
 
         editDescriptionButton = new Button(stringMessages.edit());
         editDescriptionButton.ensureDebugId("EditDescriptionButton");
-        editDescriptionButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                setDescriptionEditable(true);
-            }
-        });
+        editDescriptionButton.addClickHandler(event -> setDescriptionEditable(true));
+        editDescriptionButton.getElement().getStyle().setMarginRight(5, Unit.PX);
         descriptionFunctionsPanel.add(editDescriptionButton);
 
         abortDescriptionButton = new Button(stringMessages.abort());
         abortDescriptionButton.ensureDebugId("AbortButton");
-        abortDescriptionButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (isSingleGroupSelected) {
-                    LeaderboardGroupDTO selectedGroup = getSelectedGroup();
-                    setDescriptionEditable(false);
-                    descriptionTextArea.setText(selectedGroup.description);
-                }
+        abortDescriptionButton.addClickHandler(event -> {
+            if (isSingleGroupSelected) {
+                LeaderboardGroupDTO selectedGroup = getSelectedGroup();
+                setDescriptionEditable(false);
+                descriptionTextArea.setText(selectedGroup.description);
             }
         });
+        abortDescriptionButton.getElement().getStyle().setMarginRight(5, Unit.PX);
         abortDescriptionButton.setVisible(false);
         abortDescriptionButton.setEnabled(false);
         descriptionFunctionsPanel.add(abortDescriptionButton);
 
         saveDescriptionButton = new Button(stringMessages.save());
         saveDescriptionButton.ensureDebugId("SaveButton");
-        saveDescriptionButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                saveDescriptionChanges();
-            }
-        });
+        saveDescriptionButton.addClickHandler(event -> saveDescriptionChanges());
         saveDescriptionButton.setEnabled(false);
         saveDescriptionButton.setVisible(false);
         descriptionFunctionsPanel.add(saveDescriptionButton);
+
+        this.permissionRestrictedComponent.add(descriptionFunctionsPanel);
 
         //Create leaderboard table
         TextColumn<StrippedLeaderboardDTO> groupDetailsNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
@@ -465,10 +461,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         leaderboardDownButton.setEnabled(false);
         groupDetailsFunctionPanel.add(leaderboardDownButton);
 
+        permissionRestrictedComponent.add(groupDetailsFunctionPanel);
+
         return groupDetailsCaptionPanel;
     }
 
-    private Widget createLeaderboardGroupsGUI(final Resources tableRes, final UserService userService) {
+    private Widget createLeaderboardGroupsGUI(final Resources tableRes) {
         final CaptionPanel leaderboardGroupsCaptionPanel = new CaptionPanel(stringMessages.leaderboardGroups());
         final VerticalPanel leaderboardGroupsContentPanel = new VerticalPanel();
         leaderboardGroupsCaptionPanel.add(leaderboardGroupsContentPanel);
@@ -667,12 +665,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 
         refreshableGroupsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
-        refreshableGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                groupSelectionChanged();
-            }
-        });
+        refreshableGroupsSelectionModel.addSelectionChangeHandler(event -> groupSelectionChanged());
 
         groupsTable.setSelectionModel(refreshableGroupsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
         groupsProvider.addDataDisplay(groupsTable);
@@ -718,14 +711,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         }
         final LeaderboardGroupDTO selectedGroup = getSelectedGroup();
         if(selectedGroup != null) {
-            leaderboardsProvider.getList().addAll(availableLeaderboards);
-            leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
-            leaderboardsFilterablePanel.updateAll(leaderboardsProvider.getList());
+            this.updateLeaderboardFilterToShowAllLeaderboardsExceptThoseOf(selectedGroup);
             refreshableLeaderboardsSelectionModel.clear();
-            final Set<StrippedLeaderboardDTO> selectedLeaderboards = refreshableLeaderboardsSelectionModel.getSelectedSet();
-            for (StrippedLeaderboardDTO leaderboard : selectedLeaderboards) {
-                refreshableLeaderboardsSelectionModel.setSelected(leaderboard, true);
-            }
         }
     }
 
@@ -909,8 +896,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         refreshableGroupsSelectionModel.setSelected(group, false);
     }
 
-
-
     private void groupSelectionChanged() {
         Set<LeaderboardGroupDTO> selectedLeaderboardGroups = refreshableGroupsSelectionModel.getSelectedSet();
         isSingleGroupSelected = selectedLeaderboardGroups.size() == 1;
@@ -924,25 +909,33 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         if (isSingleGroupSelected && selectedGroup != null) {
             //Display details of the group
             groupDetailsCaptionPanel.setCaptionText(stringMessages.detailsOfLeaderboardGroup() + " '" + selectedGroup.getName() + "'");
+            idLabel.setText(selectedGroup.getId().toString());
             descriptionTextArea.setText(selectedGroup.description);
             setDescriptionEditable(false);
 
             groupDetailsProvider.getList().clear();
             groupDetailsProvider.getList().addAll(selectedGroup.leaderboards);
             groupDetailsProvider.refresh();
+            
+            final boolean userHasUpdateGroupPermission = userService.hasPermission(selectedGroup, UPDATE);
 
-            // Tell leaderboards filter panel to use all available leaderboards except the leaderboards of the group from the list
             refreshableLeaderboardsSelectionModel.clear();
-            ArrayList<StrippedLeaderboardDTO> allLeaderboardsExceptThoseOfSelectedLeaderboardGroup = new ArrayList<>(availableLeaderboards);
-            allLeaderboardsExceptThoseOfSelectedLeaderboardGroup.removeAll(selectedGroup.leaderboards);
-            leaderboardsFilterablePanel.updateAll(allLeaderboardsExceptThoseOfSelectedLeaderboardGroup);
             leaderboardsProvider.getList().clear();
-            leaderboardsProvider.getList().addAll(allLeaderboardsExceptThoseOfSelectedLeaderboardGroup);
-            leaderboardsProvider.refresh();
+            permissionRestrictedComponent.forEach(component -> component.setVisible(userHasUpdateGroupPermission));
+            if (userHasUpdateGroupPermission) {
+                this.updateLeaderboardFilterToShowAllLeaderboardsExceptThoseOf(selectedGroup);
+                leaderboardsProvider.refresh();
+            }
         }
     }
 
-
+    private void updateLeaderboardFilterToShowAllLeaderboardsExceptThoseOf(LeaderboardGroupDTO selectedGroup) {
+        final Map<String, StrippedLeaderboardDTO> allExceptOf = availableLeaderboards.stream()
+                .collect(Collectors.toMap(StrippedLeaderboardDTO::getName, Function.identity()));
+        selectedGroup.getLeaderboards().stream().map(StrippedLeaderboardDTO::getName).forEach(allExceptOf::remove);
+        leaderboardsFilterablePanel.updateAll(allExceptOf.values());
+        // leaderboardsProvider.getList().addAll(allExceptOf);
+    }
 
     private void moveToLeaderboards() {
         LeaderboardGroupDTO selectedGroup = getSelectedGroup();
@@ -957,7 +950,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             updateGroup(selectedGroup);
             //Refilters the leaderboards list (hides the moved leaderboards if they don't fit to the filter) and resorts the list
             leaderboardsFilterablePanel.updateAll(leaderboardsProvider.getList());
-
         }
     }
 
