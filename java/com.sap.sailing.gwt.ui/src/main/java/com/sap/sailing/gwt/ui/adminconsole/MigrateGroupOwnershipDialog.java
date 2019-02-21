@@ -111,8 +111,7 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
         this.stringMessages = stringMessages;
         resolveUserGroup();
 
-        // TODO: i18n
-        lblCopyMembersAndRoles = new Label("Copy members and roles");
+        lblCopyMembersAndRoles = new Label(stringMessages.copyMembersAndRoles());
         lblCopyMembersAndRoles.setVisible(false);
 
         userManagementService.getUserGroupByName(tenant.getName(), new AsyncCallback<UserGroupDTO>() {
