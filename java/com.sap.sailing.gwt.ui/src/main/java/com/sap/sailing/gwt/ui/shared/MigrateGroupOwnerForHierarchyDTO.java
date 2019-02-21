@@ -14,18 +14,20 @@ public class MigrateGroupOwnerForHierarchyDTO implements Serializable {
     private String newGroupName;
     private boolean updateCompetitors;
     private boolean updateBoats;
+    private boolean copyMembersAndRoles;
 
     @Deprecated // for GWT serialization only
     protected MigrateGroupOwnerForHierarchyDTO() {
     }
 
     public MigrateGroupOwnerForHierarchyDTO(UserGroupDTO existingUserGroup, boolean createNewGroup, String newGroupName,
-            boolean updateCompetitors, boolean updateBoats) {
+            boolean updateCompetitors, boolean updateBoats, boolean copyMembersAndRoles) {
         this.existingUserGroup = existingUserGroup;
         this.createNewGroup = createNewGroup;
         this.newGroupName = newGroupName;
         this.updateCompetitors = updateCompetitors;
         this.updateBoats = updateBoats;
+        this.copyMembersAndRoles = copyMembersAndRoles;
     }
 
     public UserGroupDTO getExistingUserGroup() {
@@ -54,5 +56,9 @@ public class MigrateGroupOwnerForHierarchyDTO implements Serializable {
             id = existingUserGroup.getId();
         }
         return id;
+    }
+
+    public boolean isCopyMembersAndRoles() {
+        return copyMembersAndRoles;
     }
 }

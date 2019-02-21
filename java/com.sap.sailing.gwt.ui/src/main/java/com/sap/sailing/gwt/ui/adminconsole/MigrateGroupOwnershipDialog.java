@@ -34,6 +34,10 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
     private final RadioButton toNewGroup;
     private final CheckBox migrateCompetitors;
     private final CheckBox migrateBoats;
+    private final CheckBox copyMembersAndRoles;
+
+    private final Label lblCopyMembersAndRoles;
+    private UserGroupDTO oldUserGroup;
 
     public static class MigrateGroupOwnerForHierarchyDialogDTO extends MigrateGroupOwnerForHierarchyDTO {
         private static final long serialVersionUID = -7336625438188182079L;
@@ -41,8 +45,9 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
         private boolean resolvingUserGroupName;
 
         public MigrateGroupOwnerForHierarchyDialogDTO(UserGroupDTO existingUserGroup, boolean resolvingUserGroupName,
-                boolean createNewGroup, String newGroupName, boolean updateCompetitors, boolean updateBoats) {
-            super(existingUserGroup, createNewGroup, newGroupName, updateCompetitors, updateBoats);
+                boolean createNewGroup, String newGroupName, boolean updateCompetitors, boolean updateBoats,
+                boolean copyMembersAndRoles) {
+            super(existingUserGroup, createNewGroup, newGroupName, updateCompetitors, updateBoats, copyMembersAndRoles);
             this.resolvingUserGroupName = resolvingUserGroupName;
         }
 
@@ -94,16 +99,44 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
         toExistingGroup = createRadioButton(radioGroupName, stringMessages.useExistingUserGroup());
         toNewGroup = createRadioButton(radioGroupName, stringMessages.useNewUserGroup());
         toExistingGroup.setValue(true);
+        copyMembersAndRoles = createCheckbox("");
+        copyMembersAndRoles.setVisible(false);
+        copyMembersAndRoles.setValue(true);
+        
+        toNewGroup.addValueChangeHandler(v -> onRadioChange());
+        toExistingGroup.addValueChangeHandler(v -> onRadioChange());
 
         migrateCompetitors = createCheckbox("");
         migrateBoats = createCheckbox("");
         this.stringMessages = stringMessages;
         resolveUserGroup();
+
+        lblCopyMembersAndRoles = new Label(stringMessages.copyMembersAndRoles());
+        lblCopyMembersAndRoles.setVisible(false);
+
+        userManagementService.getUserGroupByName(tenant.getName(), new AsyncCallback<UserGroupDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.errorObtainingUserGroup(caught.getMessage()),
+                        NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(UserGroupDTO result) {
+                oldUserGroup = result;
+            }
+        });
+    }
+
+    private void onRadioChange() {
+        copyMembersAndRoles.setVisible(toNewGroup.getValue());
+        lblCopyMembersAndRoles.setVisible(toNewGroup.getValue());
+
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(5, 2);
+        final Grid result = new Grid(6, 2);
         result.setWidget(0, 0, new Label(stringMessages.currentGroupOwner()));
         result.setWidget(0, 1, currentGroupLabel);
         result.setWidget(1, 0, toExistingGroup);
@@ -114,6 +147,8 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
         result.setWidget(3, 1, migrateCompetitors);
         result.setWidget(4, 0, new Label(stringMessages.migrateBoats()));
         result.setWidget(4, 1, migrateBoats);
+        result.setWidget(5, 0, lblCopyMembersAndRoles);
+        result.setWidget(5, 1, copyMembersAndRoles);
         return result;
     }
 
@@ -139,9 +174,9 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
     @Override
     protected MigrateGroupOwnerForHierarchyDialogDTO getResult() {
         final boolean newGroup = toNewGroup.getValue();
-        return new MigrateGroupOwnerForHierarchyDialogDTO(newGroup ? null : resolvedUserGroup,
+        return new MigrateGroupOwnerForHierarchyDialogDTO(newGroup ? oldUserGroup : resolvedUserGroup,
                 newGroup ? false : resolvingUserGroupName, newGroup, groupnameBox.getValue().trim(),
-                migrateCompetitors.getValue(), migrateBoats.getValue());
+                migrateCompetitors.getValue(), migrateBoats.getValue(), copyMembersAndRoles.getValue());
     }
 
     /**
@@ -193,7 +228,8 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
                 boolean createNewGroup = editedObject.isCreateNewGroup();
                 updateCallback.accept(securedObject, new MigrateGroupOwnerForHierarchyDTO(editedObject.getExistingUserGroup(),
                         createNewGroup, createNewGroup ? editedObject.getGroupName() : null,
-                        editedObject.isUpdateCompetitors(), editedObject.isUpdateBoats()));
+                                editedObject.isUpdateCompetitors(), editedObject.isUpdateBoats(),
+                                editedObject.isCopyMembersAndRoles()));
             }
 
             @Override

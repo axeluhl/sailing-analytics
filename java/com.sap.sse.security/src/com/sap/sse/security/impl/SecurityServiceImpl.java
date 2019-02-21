@@ -1601,8 +1601,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
             if (preexistingOwnership == null) {
                 didSetOwnerShip = true;
-                final User user = getCurrentUser();
-                setOwnership(identifier, user, getDefaultTenantForCurrentUser(), securityDisplayName);
+                setDefaultOwnership(identifier, securityDisplayName);
             } else {
                 logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
             }
@@ -1621,6 +1620,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new RuntimeException(e);
         }
         return result;
+    }
+
+    @Override
+    public void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description) {
+        setOwnership(identifier, getCurrentUser(), getDefaultTenantForCurrentUser(), description);
     }
 
     @Override
@@ -2180,6 +2184,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback) {
         for (User user : source.getUsers()) {
             addUserToUserGroup(destination, user);
+        }
+
+        for (Map.Entry<RoleDefinition, Boolean> entr : source.getRoleDefinitionMap().entrySet()) {
+            putRoleDefinitionToUserGroup(destination, entr.getKey(), entr.getValue());
         }
 
         for (Pair<User, Role> userAndRole : store.getRolesQualifiedByUserGroup(source)) {
