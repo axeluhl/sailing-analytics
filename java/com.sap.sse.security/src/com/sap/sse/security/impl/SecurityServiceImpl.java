@@ -573,13 +573,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (tenantOwner == null) {
                 tenantOwner = getDefaultTenantForUser(userOwner);
             }
-            // FIXME define what is expected behaviour
-            // if (tenantOwner.contains(userOwner)) {
             tenantId = tenantOwner.getId();
-            // } else {
-            // throw new IllegalArgumentException("User is not part of Tenant Owner " + tenantOwner + " " +
-            // userOwner);
-            // }
         }
 
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
