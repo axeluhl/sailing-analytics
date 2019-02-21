@@ -2182,6 +2182,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             addUserToUserGroup(destination, user);
         }
 
+        for (Map.Entry<RoleDefinition, Boolean> entr : source.getRoleDefinitionMap().entrySet()) {
+            putRoleDefinitionToUserGroup(destination, entr.getKey(), entr.getValue());
+        }
+
         for (Pair<User, Role> userAndRole : store.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
             final Role copyRole = new Role(existingRole.getRoleDefinition(), destination,
