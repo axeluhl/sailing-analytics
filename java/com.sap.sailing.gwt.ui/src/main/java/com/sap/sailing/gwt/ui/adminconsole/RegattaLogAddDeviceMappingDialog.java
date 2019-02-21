@@ -15,6 +15,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.BranchIOConstants;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
@@ -54,7 +56,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
     private String regattaRegisterSecret;
 
     public RegattaLogAddDeviceMappingDialog(SailingServiceAsync sailingService, final UserService userService, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, String leaderboardName, String regattaRegisterSecret,
+            final StringMessages stringMessages, String leaderboardName, String regattaRegisterSecret, final MailInvitationType mailInvitationType,
             DialogCallback<DeviceMappingDTO> callback,
             final DeviceMappingDTO mapping) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
@@ -145,7 +147,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
             from.setValue(mapping.from);
             to.setValue(mapping.to);
         }
-        qrWidget = setupQRCodeWidget();
+        qrWidget = setupQRCodeWidget(mailInvitationType);
         qrWidget.generateQRCode();
         this.leaderboardName = leaderboardName;
         loadCompetitorsBoatsAndMarks();
@@ -206,7 +208,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
         return panel;
     }
 
-    private DeviceMappingQRCodeWidget setupQRCodeWidget() {
+    private DeviceMappingQRCodeWidget setupQRCodeWidget(final MailInvitationType mailInvitationType) {
         return new DeviceMappingQRCodeWidget(stringMessages, new DeviceMappingQRCodeWidget.URLFactory() {
             @Override
             public String createURL(String baseUrlWithoutTrailingSlash, String mappedItemType, String mappedItemId)
@@ -214,9 +216,27 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                 if (events.getValue() == null) {
                     throw new QRCodeURLCreationException(stringMessages.noEventSelected());
                 }
-                String eventIdAsString = events.getValue().id.toString();
-                return DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash, eventIdAsString,
-                        leaderboardName, mappedItemType, mappedItemId, regattaRegisterSecret, GwtUrlHelper.INSTANCE);
+
+                final String eventIdAsString = events.getValue().id.toString();
+                String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash,
+                        eventIdAsString, leaderboardName, mappedItemType, mappedItemId, regattaRegisterSecret,
+                        GwtUrlHelper.INSTANCE);
+                if (mailInvitationType == MailInvitationType.LEGACY) {
+                    // URL is already legacy
+                } else if (mailInvitationType == MailInvitationType.SailInsight1) {
+                    url = BranchIOConstants.SAILINSIGHT_APP_BRANCHIO + "?"
+                            + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
+                            + GwtUrlHelper.INSTANCE.encodeQueryString(url);
+                } else if (mailInvitationType == MailInvitationType.SailInsight2) {
+                    url = BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO + "?"
+                            + BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO_PATH + "="
+                            + GwtUrlHelper.INSTANCE.encodeQueryString(url);
+                }
+                else {
+                    throw new QRCodeURLCreationException("Unknown mail invitation type: " + mailInvitationType);
+                }
+
+                return url;
             }
         });
     }
