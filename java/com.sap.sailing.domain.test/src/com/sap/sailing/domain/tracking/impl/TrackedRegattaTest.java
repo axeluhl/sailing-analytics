@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +51,8 @@ public class TrackedRegattaTest {
         regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
                 /* canBoatsOfCompetitorsChangePerRace */ false, CompetitorRegistrationType.CLOSED,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
     }
     
     @Test(expected = TimeoutException.class)

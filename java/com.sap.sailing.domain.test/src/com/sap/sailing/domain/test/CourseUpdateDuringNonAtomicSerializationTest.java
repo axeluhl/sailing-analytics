@@ -80,7 +80,8 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
                 new BoatClassImpl("505", BoatClassMasterdata._5O5), 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
-                new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
+                new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Alpha", UUID.randomUUID()),
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
         RaceDefinition race = new RaceDefinitionImpl("Test Race", course, regatta.getBoatClass(), Collections.<Competitor,Boat>emptyMap());
         trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptySet(),

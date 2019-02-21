@@ -79,7 +79,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,
@@ -156,7 +157,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,
@@ -199,7 +201,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,
@@ -245,7 +248,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
                 /* canBoatsOfCompetitorsChangePerRace */ true,  CompetitorRegistrationType.CLOSED,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
         assertTrue(regatta.getRegatta().useStartTimeInference());
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
@@ -360,7 +364,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
-                /* startDate */null, /* endDate */null, null, null, "a", null));
+                /* startDate */null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /* useMarkPassingCalculator */ false,

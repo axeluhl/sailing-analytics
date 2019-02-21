@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -72,7 +73,8 @@ public class StatisticsTest {
     public void setUp() {
         regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, false, 
-                CompetitorRegistrationType.CLOSED, /* startDate */ null, /* endDate */null, null, null, "a", null));
+                CompetitorRegistrationType.CLOSED, /* startDate */ null, /* endDate */null, null, null, "a", null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString()));
 
         final Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { waypoint1, waypoint2, waypoint3 }));

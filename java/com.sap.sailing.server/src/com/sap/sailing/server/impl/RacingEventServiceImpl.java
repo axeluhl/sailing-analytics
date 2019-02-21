@@ -1580,7 +1580,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, getBaseDomainFactory()
                     .getOrCreateBoatClass(boatClassName), /* canBoatsOfCompetitorsChangePerRace*/ false, CompetitorRegistrationType.CLOSED,
                     /* startDate */null, /* endDate */null, this,
-                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, /* course area */ null);
+                    getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), id, /* course area */ null,
+                    /* registrationLinkSecret */ UUID.randomUUID().toString());
             logger.info("Created default regatta " + result.getName() + " (" + hashCode() + ") on " + this);
             onRegattaLikeAdded(result);
             cacheAndReplicateDefaultRegatta(result);
@@ -1648,8 +1649,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, persistent,
-                scoringScheme, id, courseArea, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
-        regatta.setRegistrationLinkSecret(registrationLinkSecret);
+                scoringScheme, id, courseArea, buoyZoneRadiusInHullLengths, useStartTimeInference,
+                controlTrackingFromStartAndFinishTimes, rankingMetricConstructor, registrationLinkSecret);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -113,7 +114,8 @@ public class SimpleDomainFactoryTest {
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, "TestEvent",
                 /* boatClass */ null, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, new RacingEventServiceImpl(),
-                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                "123", null, /* registrationLinkSecret */ UUID.randomUUID().toString());
         Race race = new RaceImpl("1234", "R1", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
@@ -141,7 +143,8 @@ public class SimpleDomainFactoryTest {
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 "TestEvent", /* boatClass */ null, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, new RacingEventServiceImpl(),
-                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                "123", null, /* registrationLinkSecret */ UUID.randomUUID().toString());
         Race race = new RaceImpl("1234", "R1", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);

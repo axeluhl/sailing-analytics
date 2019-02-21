@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -309,7 +310,9 @@ public class CourseTest {
         final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(hasso, hasso.getBoat());
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
+                new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null,
+                        new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new,
+                        /* registrationLinkSecret */ UUID.randomUUID().toString())),
                 new RaceDefinitionImpl("Test Race", course, boatClass, competitorsAndBoats),
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */3000,
                 /* millisecondsOverWhichToAverageWind */30000,
@@ -343,7 +346,9 @@ public class CourseTest {
         final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(hasso, hasso.getBoat());
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
+                new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null,
+                        new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new,
+                        /* registrationLinkSecret */ UUID.randomUUID().toString())),
                 new RaceDefinitionImpl("Test Race", course, boatClass, competitorsAndBoats), Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,

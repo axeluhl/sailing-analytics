@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -47,7 +48,8 @@ public class UpdateMarkPassingTest {
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(
         /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, new HashSet<Series>(), false, null,
-                                "test", null, OneDesignRankingMetric::new)),
+                        "test", null, OneDesignRankingMetric::new,
+                        /* registrationLinkSecret */ UUID.randomUUID().toString())),
                 race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 
         /* delayToLiveInMillis */1000, /* millisecondsOverWhichToAverageWind */30000,
         /* millisecondsOverWhichToAverageSpeed */30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));

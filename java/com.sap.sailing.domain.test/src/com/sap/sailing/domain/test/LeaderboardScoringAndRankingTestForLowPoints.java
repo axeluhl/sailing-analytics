@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -29,8 +31,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import org.junit.Assert;
 
 /**
  * This class contains several tests for the {@link LowPointFirstToWinTwoRaces} scoring rule defined by
@@ -70,7 +70,8 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
                 DomainFactory.INSTANCE
                         .createScoringScheme(useFirstTwoWins ? ScoringSchemeType.LOW_POINT_FIRST_TO_WIN_TWO_RACES
                                 : ScoringSchemeType.LOW_POINT),
-                "123", /* course area */null, OneDesignRankingMetric::new);
+                "123", /* course area */null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
 

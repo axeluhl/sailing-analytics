@@ -461,7 +461,8 @@ public class DomainFactoryImpl implements DomainFactory {
                             /*startDate*/ null, /*endDate*/ null,
                             trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
-                            getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null);
+                            getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null,
+                            /* registrationLinkSecret */ UUID.randomUUID().toString());
                     regattaCache.put(key, result);
                     weakDefaultRegattaCache.put(race, result);
                     logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+") because none found for key "+key);

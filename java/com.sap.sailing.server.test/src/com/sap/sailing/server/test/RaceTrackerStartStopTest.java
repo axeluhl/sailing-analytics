@@ -76,7 +76,8 @@ public class RaceTrackerStartStopTest {
                 RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, 
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */
-                null, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null);
+                null, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         racingEventService.getRegattasByName().put(EVENTNAME, regatta);
         TrackedRegatta trackedRegatta1 = racingEventService.getOrCreateTrackedRegatta(regatta);
         racingEventService.getRegattasByName().put(EVENTNAME, regatta);

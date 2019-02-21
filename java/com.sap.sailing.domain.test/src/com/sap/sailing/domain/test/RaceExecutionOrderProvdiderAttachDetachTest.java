@@ -231,7 +231,8 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         ScoringScheme scoringScheme = new LowPoint();
         regatta = new RegattaImpl(RegattaImpl.getDefaultName(REGATTA, boatClass.getName()), boatClass,
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /* startDate */null, /* endDate */null, 
-                seriesSet, false, scoringScheme, UUID.randomUUID(), null, OneDesignRankingMetric::new);
+                seriesSet, false, scoringScheme, UUID.randomUUID(), null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
     }
     
     /**

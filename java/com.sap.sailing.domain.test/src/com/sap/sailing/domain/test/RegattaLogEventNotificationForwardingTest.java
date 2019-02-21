@@ -116,7 +116,9 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
     
     @Test
     public void testRegattaLeaderboardRegattaLogEventForwarding() {
-        Regatta regatta = new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new);
+        Regatta regatta = new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null,
+                new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         final RegattaLogEvent[] receivedRegattaLogEvent = new RegattaLogEvent[1];
         regatta.addRaceColumnListener(new RaceColumnListenerWithDefaultAction() {
             private static final long serialVersionUID = -3835439531940986851L;
@@ -137,7 +139,9 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
 
     @Test
     public void testRegattaLeaderboardRegattaLogEventForwardingAfterRegattaDeserialization() throws ClassNotFoundException, IOException {
-        Regatta regatta = new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new);
+        Regatta regatta = new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null,
+                new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         Regatta deserializedRegatta = cloneBySerialization(regatta, DomainFactory.INSTANCE);
         final RegattaLogEvent[] receivedRegattaLogEvent = new RegattaLogEvent[1];
         deserializedRegatta.addRaceColumnListener(new RaceColumnListenerWithDefaultAction() {
@@ -183,7 +187,8 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 /* fleets */ Collections.singleton(new FleetImpl("Default")),
                 Collections.singleton("R1"), /* trackedRegattaRegistry */ null);
         Regatta regatta = new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, Collections.singleton(series), false,
-                new LowPoint(), "test", null, OneDesignRankingMetric::new);
+                new LowPoint(), "test", null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
 

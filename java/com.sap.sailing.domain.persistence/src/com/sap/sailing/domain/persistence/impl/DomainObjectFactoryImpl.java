@@ -1299,6 +1299,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType
                     .valueOfOrDefault((String) dbRegatta.get(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name()));
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
+            String registrationLinkSecret = (String) dbRegatta.get(FieldNames.REGATTA_REGISTRATION_LINK_SECRET.name());
             if (createMigratableRegatta) {
                 result = new MigratableRegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
                         canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
@@ -1307,7 +1308,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                        rankingMetricConstructor, new MongoObjectFactoryImpl(database));
+                        rankingMetricConstructor, new MongoObjectFactoryImpl(database), registrationLinkSecret);
             } else {
                 result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
                         canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
@@ -1316,11 +1317,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                        rankingMetricConstructor);
+                        rankingMetricConstructor, registrationLinkSecret);
             }
             result.setRegattaConfiguration(configuration);
-            String registrationLinkSecret = (String) dbRegatta.get(FieldNames.REGATTA_REGISTRATION_LINK_SECRET.name());
-            result.setRegistrationLinkSecret(registrationLinkSecret);
         }
         // all regattas are required to have a secret, to allow tracking in classic scenarios or in open regatta ones
         if (result.getRegistrationLinkSecret() == null) {
