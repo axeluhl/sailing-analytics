@@ -117,6 +117,11 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         String deeplinkUrl = BranchIO.generateLink(BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO, parameters,
                 URL::encodeQueryString);
         urlTextBox.setText(deeplinkUrl);
+        // FIXME: connect to back end to check if app version 1.0 or 2.0 are configured
+        if (true) {
+            getStatusLabel().setText(stringMessages.warningSailInsightVersion());
+            getStatusLabel().setStyleName("errorLabel");
+        }
         sailingService.openRegattaRegistrationQrCode(deeplinkUrl, new AsyncCallback<String>() {
 
             @Override
@@ -128,6 +133,7 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
             public void onSuccess(String result) {
                 GWT.log("Qrcode generated for url: " + deeplinkUrl);
                 qrCodeImage.setUrl("data:image/png;base64, " + result);
+
             }
 
         });
