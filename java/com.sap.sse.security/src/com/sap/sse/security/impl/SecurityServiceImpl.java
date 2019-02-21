@@ -2016,7 +2016,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         // users correctly
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
-            logger.info("Permission-Vertical Migration: Setting ownership for: " + identifier + " to default tenant: "
+            logger.info("missing Ownership fixed: Setting ownership for: " + identifier
+                    + " to default tenant: "
                     + defaultTenant + "; user: " + userOwnerToSet);
             this.setOwnership(identifier, userOwnerToSet, defaultTenant, displayName);
             wasNecessaryToMigrate = true;
@@ -2031,13 +2032,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         boolean allChecksSucessful = true;
         for (HasPermissions shouldBeMigrated : allInstances) {
             if (!migratedHasPermissionTypes.contains(shouldBeMigrated.getName())) {
-                logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
+                logger.severe("ensure Ownership failed: Did not check Ownerships for " + clazz.getName()
                         + " missing: " + shouldBeMigrated);
                 allChecksSucessful = false;
             }
         }
         if (allChecksSucessful) {
-            logger.info("Permission-Vertical Migration: Sucessfully migrated all types in " + clazz.getName());
+            logger.info("Ownership checks finished: Sucessfully checked all types in " + clazz.getName());
         }
     }
 
