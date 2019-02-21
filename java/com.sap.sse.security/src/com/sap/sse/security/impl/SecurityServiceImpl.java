@@ -1694,7 +1694,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
             final T result = actionToDeleteObject.run();
-            cleanOwnershipAndAclOnObjectRemoval(identifier);
+            deleteAllDataForRemovedObject(identifier);
             return result;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -1702,7 +1702,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void cleanOwnershipAndAclOnObjectRemoval(QualifiedObjectIdentifier identifier) {
+    public void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier) {
         logger.info("Deleting ownerships for " + identifier);
         deleteOwnership(identifier);
         logger.info("Deleting acls for " + identifier);

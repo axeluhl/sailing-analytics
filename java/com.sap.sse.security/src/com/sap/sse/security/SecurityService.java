@@ -364,7 +364,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             ActionWithResult<T> actionToDeleteObject);
     
-    void cleanOwnershipAndAclOnObjectRemoval(QualifiedObjectIdentifier identifier);
+    void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier);
 
     <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
             com.sap.sse.security.shared.HasPermissions.Action action, Iterable<T> objectsToFilter,
