@@ -177,8 +177,8 @@ import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.statistics.Statistics;
-import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.AddResult;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -1056,11 +1056,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
                 logger.info(
                         "putting regatta " + regatta.getName() + " (" + regatta.hashCode() + ") into regattasByName");
-                if (regatta.getRegistrationLinkSecret() == null) {
-                    logger.info("Added missing RegistrationLinkSecret to " + regatta + " and stored to database");
-                    regatta.setRegistrationLinkSecret(UUID.randomUUID().toString());
-                    mongoObjectFactory.storeRegatta(regatta);
-                }
                 regattasByName.put(regatta.getName(), regatta);
                 regatta.addRegattaListener(this);
                 onRegattaLikeAdded(regatta);

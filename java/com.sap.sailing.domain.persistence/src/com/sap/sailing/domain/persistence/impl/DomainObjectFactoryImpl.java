@@ -1322,6 +1322,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             String registrationLinkSecret = (String) dbRegatta.get(FieldNames.REGATTA_REGISTRATION_LINK_SECRET.name());
             result.setRegistrationLinkSecret(registrationLinkSecret);
         }
+        // all regattas are required to have a secret, to allow tracking in classic scenarios or in open regatta ones
+        if (result.getRegistrationLinkSecret() == null) {
+            logger.info("Added missing RegistrationLinkSecret to " + result + " and stored to database");
+            result.setRegistrationLinkSecret(UUID.randomUUID().toString());
+            new MongoObjectFactoryImpl(database).storeRegatta(result);
+        }
         return result;
     }
 
