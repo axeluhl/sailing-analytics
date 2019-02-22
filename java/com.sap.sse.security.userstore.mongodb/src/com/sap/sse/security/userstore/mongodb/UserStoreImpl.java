@@ -38,7 +38,6 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
-import com.sap.sse.security.userstore.mongodb.DomainObjectFactory.RoleMigrationConverter;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
 /**
@@ -212,17 +211,9 @@ public class UserStoreImpl implements UserStore {
             this.userGroups.put(group.getId(), group);
             userGroupsByName.put(group.getName(), group);
         }
-
         // do this here, in case the default tenant was just loaded before
         ensureDefaultTenantExists();
-
-        for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, new RoleMigrationConverter() {
-            // TODO replace with method reference once we can use Java 8 here
-            @Override
-            public Role convert(String oldRoleName, String username) {
-                return convertToNewRoleModel(oldRoleName, username);
-            }
-        }, this.userGroups, this)) {
+        for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, this::convertToNewRoleModel, this.userGroups, this)) {
             users.put(u.getName(), u);
             addToUsersByEmail(u);
         }
@@ -235,9 +226,7 @@ public class UserStoreImpl implements UserStore {
                 Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
             }
         }
-        // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object
-        // anymore, remove them from the groups!
-
+        // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object anymore, remove them from the groups!
         for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
             if (e.getValue() != null) {
                 final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
@@ -262,8 +251,7 @@ public class UserStoreImpl implements UserStore {
                 final UserGroup groupQualifierForMigratedRole;
                 if (AdminRole.getInstance().getId().equals(roleDefinition.getId())
                         && UserStore.ADMIN_USERNAME.equals(username)) {
-                    // Special of the global admin's admin role to ensure that one initial user has global admin
-                    // permissions
+                    // Special of the global admin's admin role to ensure that one initial user has global admin permissions
                     groupQualifierForMigratedRole = null;
                 } else {
                     if (defaultTenant == null) {

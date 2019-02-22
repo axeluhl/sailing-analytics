@@ -198,9 +198,7 @@ public class Activator implements BundleActivator {
                     accessControlStore.loadACLsAndOwnerships();
                     // create security service, it will also create a default admin user if no users exist
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
-        
                     applyCustomizations();
-                    
                     migrate(userStore, securityService.get());
                 } catch (InterruptedException | UserGroupManagementException | UserManagementException | ExecutionException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);

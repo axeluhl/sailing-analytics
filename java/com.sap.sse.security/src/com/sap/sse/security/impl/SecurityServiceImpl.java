@@ -796,7 +796,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } else if (password == null || password.length() < 5) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
-        
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
@@ -805,7 +804,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         addUserRoleToUser(result);
         final UserGroup tenant = getOrCreateTenantForUser(result);
         setDefaultTenantForCurrentServerForUser(username, tenant.getId());
-        // the new user becomes its owner to ensure the user role is correctly working
+        // the new user becomes its owner to ensure the user role is working correctly
         // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
         apply(s->s.internalSetOwnership(result.getIdentifier(), username, groupOwningUser==null?null:groupOwningUser.getId(), username));
         updateUserProperties(username, fullName, company, locale);

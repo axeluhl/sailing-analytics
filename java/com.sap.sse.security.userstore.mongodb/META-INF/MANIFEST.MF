@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sse.security.userstore.mongodb
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sse.security.userstore.mongodb.impl.Activator
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sap.sse,
  com.sap.sse.util,
  org.json.simple,
