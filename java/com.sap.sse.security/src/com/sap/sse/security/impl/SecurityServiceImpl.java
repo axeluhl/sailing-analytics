@@ -1965,7 +1965,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 // Only adding user role if it is most probably a migration case
                 // In case an admin removes/changes the user role, it should not be recreated automatically
                 addUserRoleToUser(user);
-                
                 final RoleDefinition adminRoleDefinition = getRoleDefinition(AdminRole.getInstance().getId());
                 for (Role roleOfUser : user.getRoles()) {
                     if (roleOfUser.getRoleDefinition().equals(adminRoleDefinition)) {
@@ -2001,8 +2000,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } else {
             effectivePermission = permissionToMigrate;
         }
-        final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(effectivePermission,
-                user);
+        final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(effectivePermission, user);
         final QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
                 .getQualifiedObjectIdentifier(associationTypeIdentifier);
         migrateOwnership(associationQualifiedIdentifier, associationQualifiedIdentifier.toString());
