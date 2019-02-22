@@ -136,6 +136,7 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
             if (totalTime.compareTo(LOG_REQUESTS_TAKING_LONGER_THAN) > 0) {
                 logRequest(startAndEndOfProcessing.getA(), startAndEndOfProcessing.getB(), startAndEndOfProcessing.getC(), afterResultSerialization);
             }
+            processingStartAndFinishTime.set(null);
         }
     }
 
