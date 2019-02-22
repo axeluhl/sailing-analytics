@@ -797,17 +797,20 @@ public class SmartphoneTrackingEventManagementPanel
             DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
-                regatta.defaultCourseAreaUuid, configuration, regatta.buoyZoneRadiusInHullLengths, regatta.useStartTimeInference,
-                regatta.controlTrackingFromStartAndFinishTimes, regatta.registrationLinkSecret,
+                regatta.defaultCourseAreaUuid, configuration, regatta.buoyZoneRadiusInHullLengths,
+                regatta.useStartTimeInference, regatta.controlTrackingFromStartAndFinishTimes,
+                regatta.registrationLinkSecret, regatta.competitorRegistrationType,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.errorUpdatingRegatta(regatta.getName(),caught.getMessage()));
+                        errorReporter.reportError(
+                                stringMessages.errorUpdatingRegatta(regatta.getName(), caught.getMessage()));
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                        Notification.notify(stringMessages.notificationRegattaConfigurationUpdatedUsingByMarks(), NotificationType.SUCCESS);
+                        Notification.notify(stringMessages.notificationRegattaConfigurationUpdatedUsingByMarks(),
+                                NotificationType.SUCCESS);
                     }
                 }));
     }

@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.gwt.ui.client.MappableToDeviceFormatter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -303,31 +304,43 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     }
 
     private void showAddMappingDialog(DeviceMappingDTO mapping) {
-        new RegattaLogAddDeviceMappingDialog(sailingService, userService, errorReporter, stringMessages,
-                leaderboardName, regattaRegistrationSecret,
-                new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
-                    @Override
-                    public void ok(final DeviceMappingDTO mapping) {
-                        sailingService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
-                                new AsyncCallback<Void>() {
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        refresh();
-                                    }
+        sailingService.getMailType(new AsyncCallback<MailInvitationType>() {
 
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        showAddMappingDialog(mapping);
-                                        errorReporter.reportError("Could not add mapping: " + caught.getMessage());
-                                    }
-                                });
-                    }
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
 
-                    @Override
-                    public void cancel() {
-                        refresh();
-                    }
-                }, mapping).show();
+            @Override
+            public void onSuccess(MailInvitationType mailInvitationType) {
+                new RegattaLogAddDeviceMappingDialog(sailingService, userService, errorReporter, stringMessages,
+                        leaderboardName, regattaRegistrationSecret, mailInvitationType,
+                        new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
+                            @Override
+                            public void ok(final DeviceMappingDTO mapping) {
+                                sailingService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
+                                        new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onSuccess(Void result) {
+                                                refresh();
+                                            }
+
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                showAddMappingDialog(mapping);
+                                                errorReporter
+                                                        .reportError("Could not add mapping: " + caught.getMessage());
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void cancel() {
+                                refresh();
+                            }
+                        }, mapping).show();
+            }
+        });
     }
 
     private void importFixes() {

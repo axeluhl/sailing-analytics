@@ -6,6 +6,8 @@ import static com.sap.sse.security.ui.client.component.AccessControlledActionsCo
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,6 +26,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -49,6 +52,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 
 
 public class RegattaDetailsComposite extends Composite {
+    static private final Logger logger = Logger.getLogger(RegattaDetailsComposite.class.getName());
     private RegattaDTO regatta;
 
     private final CaptionPanel mainPanel;
@@ -140,21 +144,34 @@ public class RegattaDetailsComposite extends Composite {
         Button button = new Button(stringMessages.registrationLinkShare(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+
                 RegistrationLinkWithQRCode registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
                 registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
-                RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingService, stringMessages, regatta.getName(),
-                        registrationLinkWithQRCode, new DialogCallback<RegistrationLinkWithQRCode>() {
-                            @Override
-                            public void ok(RegistrationLinkWithQRCode result) {
-                            }
 
-                            @Override
-                            public void cancel() {
-                            }
-                        }, regatta.registrationLinkSecret);
-                dialog.ensureDebugId(debugId);
-                dialog.show();
+                sailingService.getMailType(new AsyncCallback<MailInvitationType>() {
 
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        logger.log(Level.SEVERE, "Could not determine MailInvitationType", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(MailInvitationType result) {
+                        RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingService,
+                                stringMessages, regatta.getName(), registrationLinkWithQRCode,
+                                new DialogCallback<RegistrationLinkWithQRCode>() {
+                                    @Override
+                                    public void ok(RegistrationLinkWithQRCode result) {
+                                    }
+
+                                    @Override
+                                    public void cancel() {
+                                    }
+                                }, regatta.registrationLinkSecret, result);
+                        dialog.ensureDebugId(debugId);
+                        dialog.show();
+                    }
+                });
             }
         });
         grid.setWidget(row , 1, button);
@@ -436,6 +453,7 @@ public class RegattaDetailsComposite extends Composite {
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
             competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel(stringMessages));
+
             registrationLinkWithQRCodeOpenButton.setVisible(regatta.competitorRegistrationType.isOpen());
             buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths));
             

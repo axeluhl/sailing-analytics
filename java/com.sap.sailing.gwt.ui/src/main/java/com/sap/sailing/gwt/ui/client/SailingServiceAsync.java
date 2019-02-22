@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
@@ -571,8 +572,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
-            RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, String registrationLinkSecret, AsyncCallback<Void> callback);
+            RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
+            boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            String registrationLinkSecret, CompetitorRegistrationType registrationType, AsyncCallback<Void> callback);
 
     /**
      * @param detailType
@@ -1044,6 +1046,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param asyncCallback The callback called after finishing resizing, storing the returned ImageDTOs somewhere is proposed
      */
     void resizeImage(ImageResizingTaskDTO imageResizingTask, AsyncCallback<Set<ImageDTO>> asyncCallback);
+
+    void getMailType(AsyncCallback<MailInvitationType> callback);
 
     /**
      * @see SailingService#openRegattaRegistrationQrCode(String url)

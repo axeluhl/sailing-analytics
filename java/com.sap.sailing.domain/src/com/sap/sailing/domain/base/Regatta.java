@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -278,5 +279,7 @@ public interface Regatta
      *            secret string
      */
     void setRegistrationLinkSecret(String registrationLinkSecret);
+
+    void setCompetitorRegistrationType(CompetitorRegistrationType competitorRegistrationType);
 
 }

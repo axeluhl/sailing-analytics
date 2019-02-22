@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
- 
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.NotFoundException;
@@ -285,7 +286,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
-            String registrationLinkSecret);
+            String registrationLinkSecret, CompetitorRegistrationType registrationType);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
             List<Pair<String, Integer>> columnNames);
@@ -957,6 +958,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * @throws Exception can throw different type of exceptions
      */
     Set<ImageDTO> resizeImage(ImageResizingTaskDTO imageResizingTask) throws Exception;
+
+    MailInvitationType getMailType();
 
     /**
      * Generates a base64-encoded qrcode for the branch.io url used to allow registrations for open regattas.
