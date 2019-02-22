@@ -884,11 +884,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        apply(s->s.internalUpdateUserProperties(user, fullName, company, locale));
+        apply(s->s.internalUpdateUserProperties(username, fullName, company, locale));
     }
 
     @Override
-    public Void internalUpdateUserProperties(User user, String fullName, String company, Locale locale) {
+    public Void internalUpdateUserProperties(String username, String fullName, String company, Locale locale) {
+        final User user = store.getUserByName(username);
         user.setFullName(fullName);
         user.setCompany(company);
         user.setLocale(locale);
