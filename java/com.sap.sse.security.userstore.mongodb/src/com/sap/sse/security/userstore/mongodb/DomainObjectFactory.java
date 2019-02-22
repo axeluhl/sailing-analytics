@@ -17,6 +17,7 @@ import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
 public interface DomainObjectFactory {
+    @FunctionalInterface
     public interface RoleMigrationConverter {
         Role convert(String oldRoleName, String username);
     }

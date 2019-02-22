@@ -255,7 +255,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private User loadUserWithProxyRoleUserQualifiers(Document userDBObject,
             Map<UUID, RoleDefinition> roleDefinitionsById, RoleMigrationConverter roleMigrationConverter,
             Map<UUID, UserGroup> tenants, UserGroupProvider userGroupProvider) {
-        final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
+        final String username = (String) userDBObject.get(FieldNames.User.NAME.name());
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
         final String company = (String) userDBObject.get(FieldNames.User.COMPANY.name());
@@ -274,7 +274,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 if (role != null) {
                     roles.add(role);
                 } else {
-                    logger.warning("Role with ID "+o+" that used to be assigned to user "+name+" not found");
+                    logger.warning("Role with ID "+o+" that used to be assigned to user "+username+" not found");
                 }
             }
         } else {
@@ -282,21 +282,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // try to find an equal-named role in the set of role definitions and create a role
             // that is qualified by the default tenant; for this a default tenant must exist because
             // otherwise a user would obtain global rights by means of migration which must not happen.
-            logger.info("Migrating roles of user "+name);
+            logger.info("Migrating roles of user "+username);
             List<Object> roleNames = (List<Object>) userDBObject.get("ROLES");
             if (roleNames != null) {
-                logger.info("Found old roles "+roleNames+" for user "+name);
+                logger.info("Found old roles "+roleNames+" for user "+username);
                 for (Object o : roleNames) {
-                    final Role convertedRole = roleMigrationConverter.convert(o.toString(), name);
+                    final Role convertedRole = roleMigrationConverter.convert(o.toString(), username);
                     if (convertedRole != null) {
-                        logger.info("Found role "+convertedRole.getRoleDefinition()+" for old role "+o.toString()+" for user "+name);
+                        logger.info("Found role "+convertedRole.getRoleDefinition()+" for old role "+o.toString()+" for user "+username);
                         // we do not do role associations, to stay similar as before, meaning that all admins can
                         // edit the roles. Without this we would need to determine which admin (if
                         // multiple present) should own this association.
                         roles.add(convertedRole);
                         rolesMigrated = true;
                     }else {
-                        logger.warning("Role " + o.toString() + " for user " + name
+                        logger.warning("Role " + o.toString() + " for user " + username
                                 + " not found during migration. User will no longer be in this role.");
                     }
                 }
@@ -318,7 +318,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 UUID groupId = (UUID) singleDefaultTenantObj.get(FieldNames.User.DEFAULT_TENANT_GROUP.name());
                 UserGroup tenantOfGroup = tenants.get(groupId);
                 if (tenantOfGroup == null) {
-                    logger.warning("Couldn't find tenant for user " + name + ". The tenant was identified by ID "
+                    logger.warning("Couldn't find tenant for user " + username + ". The tenant was identified by ID "
                             + groupId + " but no tenant with that ID was found");
                 } else {
                     defaultTenant.put(serverName, tenantOfGroup);
@@ -327,7 +327,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         Document accountsMap = (Document) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
-        User result = new UserImpl(name, email, fullName, company, locale,
+        User result = new UserImpl(username, email, fullName, company, locale,
                 emailValidated == null ? false : emailValidated, passwordResetSecret, validationSecret, defaultTenant,
                 accounts.values(), userGroupProvider);
         for (final Role role : roles) {
