@@ -251,7 +251,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         {@link Role#getQualifiedForUser() user qualifier} where only the username is set properly to identify the
      *         user in the calling method where ultimately all users will be known.
      */
-    @SuppressWarnings("unchecked")
     private User loadUserWithProxyRoleUserQualifiers(Document userDBObject,
             Map<UUID, RoleDefinition> roleDefinitionsById, RoleMigrationConverter roleMigrationConverter,
             Map<UUID, UserGroup> tenants, UserGroupProvider userGroupProvider) {
@@ -266,7 +265,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
         Set<Role> roles = new HashSet<>();
         Set<String> permissions = new HashSet<>();
-        List<Object> rolesO = (List<Object>) userDBObject.get(FieldNames.User.ROLE_IDS.name());
+        List<?> rolesO = (List<?>) userDBObject.get(FieldNames.User.ROLE_IDS.name());
         boolean rolesMigrated = false; // if a role needs migration, user needs an update in the DB
         if (rolesO != null) {
             for (Object o : rolesO) {
@@ -283,7 +282,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // that is qualified by the default tenant; for this a default tenant must exist because
             // otherwise a user would obtain global rights by means of migration which must not happen.
             logger.info("Migrating roles of user "+username);
-            List<Object> roleNames = (List<Object>) userDBObject.get("ROLES");
+            List<?> roleNames = (List<?>) userDBObject.get("ROLES");
             if (roleNames != null) {
                 logger.info("Found old roles "+roleNames+" for user "+username);
                 for (Object o : roleNames) {
@@ -310,7 +309,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
 
         final Map<String, UserGroup> defaultTenant = new ConcurrentHashMap<>();
-        final List<Object> defaultTenantIds = (List<Object>) userDBObject.get(FieldNames.User.DEFAULT_TENANT_IDS.name());
+        final List<?> defaultTenantIds = (List<?>) userDBObject.get(FieldNames.User.DEFAULT_TENANT_IDS.name());
         if (defaultTenantIds != null) {
             for (Object singleDefaultTenant : defaultTenantIds) {
                 Document singleDefaultTenantObj = (Document) singleDefaultTenant;
