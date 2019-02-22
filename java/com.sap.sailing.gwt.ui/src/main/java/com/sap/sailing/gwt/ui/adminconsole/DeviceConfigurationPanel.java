@@ -61,7 +61,6 @@ public abstract class DeviceConfigurationPanel extends SimplePanel implements De
         setupUi();
         refreshableMultiSelectionModel = listComposite.getSelectionModel();
         refreshableMultiSelectionModel.addSelectionChangeHandler(new Handler() {
-
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 Set<DeviceConfigurationMatcherDTO> selectedConfigurations = refreshableMultiSelectionModel
