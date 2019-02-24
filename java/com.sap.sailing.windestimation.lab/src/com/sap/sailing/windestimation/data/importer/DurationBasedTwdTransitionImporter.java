@@ -32,7 +32,8 @@ public class DurationBasedTwdTransitionImporter {
                 .getIterator(); iterator.hasNext();) {
             long percent = windSourceNumber * 100 / numberOfWindSources;
             WindSourceWithFixes windSource = iterator.next();
-            LoggingUtil.logInfo("Processing " + windSourceNumber++ + "/" + numberOfWindSources + " (" + percent + "%)");
+            LoggingUtil.logInfo("Processing wind source " + windSourceNumber++ + "/" + numberOfWindSources + " ("
+                    + percent + "%) for duration dimension");
             TimePoint timePointOfLastConsideredWindFix = null;
             List<SingleDimensionBasedTwdTransition> entries = new ArrayList<>();
             int windFixIndex = 0;
@@ -58,17 +59,17 @@ public class DurationBasedTwdTransitionImporter {
                 }
             }
             if (entries.isEmpty()) {
-                LoggingUtil.logInfo("No TWD transitions to import");
+                LoggingUtil.logInfo("No duration based TWD transitions to import");
             } else {
                 durationBasedTwdTransitionPersistenceManager.add(entries);
                 int totalEntries = entries.size();
                 totalValuesCount += totalEntries;
-                LoggingUtil
-                        .logInfo(totalEntries + " TWD transition entries imported, " + totalValuesCount + " in total");
+                LoggingUtil.logInfo(totalEntries + " duration based TWD transition entries imported, "
+                        + totalValuesCount + " in total");
             }
         }
         LoggingUtil.logInfo("###################\r\nDuration based TWD transitions Import finished");
-        LoggingUtil.logInfo("Totally " + totalValuesCount + " TWD transitions imported");
+        LoggingUtil.logInfo("Totally " + totalValuesCount + " duration based TWD transitions imported");
     }
 
     public static NextThresholdCalculator getThresholdCalculator() {

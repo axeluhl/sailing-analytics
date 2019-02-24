@@ -29,8 +29,8 @@ public class RaceWithWindSourcesPersistenceManager extends AbstractPersistenceMa
 
     public RaceWithWindSourcesPersistenceManager() throws UnknownHostException {
         Document indexes = new Document(RaceWindJsonSerializer.START_TIME_POINT, 1);
-        indexes.put(RaceWindJsonSerializer.END_TIME_POINT, 1);
-        getCollection().createIndex(indexes);
+        indexes.put(RaceWindJsonSerializer.END_TIME_POINT, -1);
+        getDb().getCollection(getWindSourcesCollectionName()).createIndex(indexes);
     }
 
     @Override

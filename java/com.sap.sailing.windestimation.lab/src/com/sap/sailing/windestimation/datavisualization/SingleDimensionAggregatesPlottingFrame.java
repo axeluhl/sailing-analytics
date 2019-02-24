@@ -223,6 +223,7 @@ public class SingleDimensionAggregatesPlottingFrame extends JFrame {
     }
 
     public void awaitWindowClosed() throws InterruptedException {
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         windowClosedLatch.await();
     }
 

@@ -23,7 +23,7 @@ public class WindSourcesPersistenceManager extends AbstractPersistenceManager<Wi
 
     public WindSourcesPersistenceManager() throws UnknownHostException {
         BasicDBObject indexes = new BasicDBObject(RaceWindJsonSerializer.START_TIME_POINT, 1);
-        indexes.put(RaceWindJsonSerializer.END_TIME_POINT, 1);
+        indexes.put(RaceWindJsonSerializer.END_TIME_POINT, -1);
         getCollection().createIndex(indexes);
     }
 

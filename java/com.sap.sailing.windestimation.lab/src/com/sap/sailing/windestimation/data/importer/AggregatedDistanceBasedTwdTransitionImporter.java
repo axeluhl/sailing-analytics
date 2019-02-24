@@ -9,12 +9,18 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.SingleDimen
 public class AggregatedDistanceBasedTwdTransitionImporter {
 
     public static void main(String[] args) throws UnknownHostException {
-        SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionBasedTwdTransitionPersistenceManager = new SingleDimensionBasedTwdTransitionPersistenceManager(
-                SingleDimensionType.DISTANCE);
+        SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionBasedTwdTransitionPersistenceManager = createPersistenceManagerAndEnsureIndex();
         SingleDimensionTwdTransitionAggregationImporter importer = new SingleDimensionTwdTransitionAggregationImporter(
                 singleDimensionBasedTwdTransitionPersistenceManager, AggregatedSingleDimensionType.DISTANCE,
                 new AnnealingNextThresholdCalculator(10, 1.5));
         importer.runAggregation();
+    }
+
+    public static SingleDimensionBasedTwdTransitionPersistenceManager createPersistenceManagerAndEnsureIndex()
+            throws UnknownHostException {
+        SingleDimensionBasedTwdTransitionPersistenceManager singleDimensionBasedTwdTransitionPersistenceManager = new SingleDimensionBasedTwdTransitionPersistenceManager(
+                SingleDimensionType.DISTANCE);
+        return singleDimensionBasedTwdTransitionPersistenceManager;
     }
 
 }
