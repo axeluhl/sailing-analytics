@@ -4944,6 +4944,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                ServerActions.CONFIGURE_LOCAL_SERVER, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         getService().apply(new UpdateServerConfiguration(
                 new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
         if (serverConfiguration.isSelfService() != null) {
