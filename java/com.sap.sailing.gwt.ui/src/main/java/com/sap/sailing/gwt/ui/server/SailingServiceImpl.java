@@ -1941,6 +1941,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throws NoWindException {
         Map<Pair<Leg, TimePoint>, LegType> legTypeCache = new HashMap<>();
         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
+        final ConcurrentHashMap<TimePoint, WindLegTypeAndLegBearingCache> cachesByTimePoint = new ConcurrentHashMap<>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
@@ -2019,8 +2020,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             WindDTO windDTO = wind == null ? null : createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
                             Double detailValue = null;
                             if (detailType != null) {
+                                MillisecondsTimePoint time = new MillisecondsTimePoint(fix.getTimePoint().asMillis());
+                                WindLegTypeAndLegBearingCache cache = cachesByTimePoint.get(time);
+                                if (cache == null) {
+                                    cache = new LeaderboardDTOCalculationReuseCache(time);
+                                    cachesByTimePoint.put(time, cache);
+                                }
                                 try {
-                                    detailValue = getCompetitorRaceDataEntry(detailType, trackedRace, competitor, fix.getTimePoint(), leaderboardGroupName, leaderboardName, null); //TODO cache
+                                    detailValue = getCompetitorRaceDataEntry(detailType, trackedRace, competitor,
+                                            fix.getTimePoint(), leaderboardGroupName, leaderboardName, cache);
                                 } catch (NoWindException nwe) {
                                     detailValue = null;
                                 }
