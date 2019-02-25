@@ -193,4 +193,9 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     public boolean isPreferReplayIfAvailable() {
         return preferReplayIfAvailable;
     }
+    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+" for "+paramURL+", liveURI: "+liveURI+", storedURI: "+storedURI;
+    }
 }

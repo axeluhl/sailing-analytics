@@ -1774,7 +1774,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @POST
     @Path("{regattaname}/removeracecolumn")
-    public Response addRaceColumns(@PathParam("regattaname") String regattaName,
+    public Response removeRaceColumns(@PathParam("regattaname") String regattaName,
             @QueryParam("racecolumn") String raceColumnName) {
         SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
         final Response response;
