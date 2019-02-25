@@ -6,7 +6,10 @@
 <string>6WQYJS4JUL</string>
 <key>method</key>
 <string>enterprise</string>
-<key>signingStyle</key>
-<string>automatic</string>
+<key>provisioningProfiles</key>
+<dict>
+<key>com.sap.sailing.ios.SAPTracker.enterprise</key>
+<string>com sap sailing ios SAPTracker enterprise</string>
+</dict>
 </dict>
 </plist>
