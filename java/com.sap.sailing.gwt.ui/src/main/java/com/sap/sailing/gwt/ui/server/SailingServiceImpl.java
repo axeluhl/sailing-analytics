@@ -6456,6 +6456,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Boolean denoteForRaceLogTracking(String leaderboardName,
     		String raceColumnName, String fleetName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
+        // FIXME security
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
     	RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
     	Fleet fleet = getFleetByName(raceColumn, fleetName);
@@ -6464,17 +6465,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
+        // FIXME security
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         getRaceLogTrackingAdapter().removeDenotationForRaceLogTracking(getService(), raceLog);
     }
     
     @Override
     public void denoteForRaceLogTracking(String leaderboardName) throws Exception {
+        // FIXME security
         denoteForRaceLogTracking(leaderboardName, /* race name prefix */ null);
     }
     
     @Override
     public void denoteForRaceLogTracking(String leaderboardName, String prefix) throws Exception {
+        // FIXME security
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
         getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard, prefix);
     }
