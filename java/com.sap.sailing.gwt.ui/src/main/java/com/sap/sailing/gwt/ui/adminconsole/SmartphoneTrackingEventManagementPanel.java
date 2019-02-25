@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -69,7 +70,6 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
-import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -93,7 +93,6 @@ public class SmartphoneTrackingEventManagementPanel
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     private CheckBox correctWindDirectionForDeclination;
     private CheckBox trackWind;
-    private ImagesBarColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, RaceLogTrackingEventManagementRaceImagesBarCell> raceActionColumn;
     protected boolean regattaHasCompetitors = false; 
     private Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> raceWithStartAndEndOfTrackingTime = new HashMap<>();
     
@@ -559,18 +558,27 @@ public class SmartphoneTrackingEventManagementPanel
             }
         }
         
+        boolean hasPermissionToChange = leaderboardSelectionModel.getSelectedSet().stream()
+                .filter(new Predicate<StrippedLeaderboardDTOWithSecurity>() {
+                    @Override
+                    public boolean test(StrippedLeaderboardDTOWithSecurity t) {
+                        return userService.hasPermission(t, DefaultActions.UPDATE);
+                    }
+                }).count() > 0;
+        
+        
         if ((!onlyTrackedRacesPresent && !onlyUntrackedRacesPresent)){
             startStopTrackingButton.setEnabled(false);
         }
         
         if (onlyTrackedRacesPresent){
             startStopTrackingButton.setDown(true);
-            startStopTrackingButton.setEnabled(true);
+            startStopTrackingButton.setEnabled(hasPermissionToChange);
         }
         
         if (onlyUntrackedRacesPresent || onlyRacesWithNonExistentTracker){
             startStopTrackingButton.setDown(false);
-            startStopTrackingButton.setEnabled(true);
+            startStopTrackingButton.setEnabled(hasPermissionToChange);
         }
         
     }
