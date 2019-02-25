@@ -35,7 +35,7 @@ android {
         minSdkVersion rootProject.ext.minSdk
         targetSdkVersion rootProject.ext.targetSdk
         versionCode appVersionCode.toInteger()
-        versionName "$appVersionCode - Altitude"
+        versionName appVersionName
     }
 
     sourceSets {
