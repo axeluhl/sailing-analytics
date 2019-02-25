@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
@@ -149,7 +150,12 @@ public class ImportMasterDataOperation extends
             if (masterData.getDeviceConfigurations() != null) {
                 importDeviceConfigurations(toState);
             }
-            toState.mediaTracksImported(masterData.getFilteredMediaTracks(), creationCount, override);
+            
+            Collection<MediaTrack> allMediaTracksToImport = masterData.getFilteredMediaTracks();
+            for (MediaTrack trackToImport : allMediaTracksToImport) {
+                ensureOwnership(trackToImport.getIdentifier(), securityService);
+            }
+            toState.mediaTracksImported(allMediaTracksToImport, creationCount, override);
 
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
