@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
@@ -21,24 +20,26 @@ public class Hoverline {
     private static final double TRANSPARENT = 0;
     private static final double VISIBLE = 0.2d;
     
-    private final Polyline hoverline;
-    private final PolylineOptions options;
+    private final MultiColorPolyline hoverline;
+    private final MultiColorPolylineOptions options;
     protected boolean doNotProcessMouseMoveOut;
     
     public Hoverline(final Polyline polyline, PolylineOptions polylineOptions, final RaceMap map) {   
-        this.options = PolylineOptions.newInstance();
-        this.options.setClickable(polylineOptions.getClickable());
-        this.options.setGeodesic(polylineOptions.getGeodesic());
-        this.options.setMap(polyline.getMap());
-        this.options.setPath(polyline.getPath());
-        this.options.setStrokeColor(polylineOptions.getStrokeColor());
+        options = new MultiColorPolylineOptions();
+        options.setClickable(polylineOptions.getClickable());
+        options.setEditable(polyline.getEditable());
+        options.setGeodesic(polylineOptions.getGeodesic());
         try {
-            this.options.setZindex(polylineOptions.getZindex());  // if the zindex is not set, this line throws an exception in dev mode
+            options.setZIndex(polylineOptions.getZindex());  // if the zindex is not set, this line throws an exception in dev mode
         } catch (Exception e) {
             // the Z-index of polylineOptions most likely was undefined and therefore cannot be copied (GWT DevMode problem, mostly)
         }
-        this.hoverline = Polyline.newInstance(this.options);
-        this.hoverline.setVisible(false);
+        options.setVisible(false);
+        options.setColorMode(MultiColorPolylineColorMode.MONOCHROMATIC);
+        options.setColorProvider((i) -> polylineOptions.getStrokeColor());
+        hoverline = new MultiColorPolyline(options);
+        hoverline.setMap(polyline.getMap());
+        hoverline.setPath(polyline.getPath());
         polyline.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
@@ -68,29 +69,29 @@ public class Hoverline {
             @Override
             public void onEvent(MouseOutMapEvent event) {
                 if (!doNotProcessMouseMoveOut) {
-                    hoverline.setVisible(false);
+                    options.setVisible(false);
+                    hoverline.setOptions(options);
                 }
             }
         });
         map.getMap().addMouseMoveHandler(new MouseMoveMapHandler() {
             @Override
             public void onEvent(MouseMoveMapEvent event) {
-                hoverline.setVisible(false);
+                options.setVisible(false);
+                hoverline.setOptions(options);
             }
         });
     }
     
-    public Hoverline(final MultiColorPolyline multiColorPolyline, MultiColorPolylineOptions multiColorPolylineOptions,
-            final RaceMap map) {
-        this.options = multiColorPolylineOptions.newPolylineOptionsInstance(
-                multiColorPolylineOptions.getColorProvider().getColor(0)); //TODO Get color
-        //TODO Check if zindex was set
-        this.options.setMap(multiColorPolyline.getMap());
-        this.options.setPath(MVCArray.newInstance(multiColorPolyline.getPath().toArray(new LatLng[0])));
-        multiColorPolyline.addHoverline(this);
+    public Hoverline(final MultiColorPolyline multiColorPolyline,
+            final MultiColorPolylineOptions multiColorPolylineOptions, final RaceMap map) {
+        options = multiColorPolylineOptions;
+        hoverline = new MultiColorPolyline(options);
+        hoverline.setMap(multiColorPolyline.getMap());
+        hoverline.setPath(MVCArray.newInstance(multiColorPolyline.getPath().toArray(new LatLng[0])));
+        multiColorPolyline.addPathChangeHandler(hoverline);
         
-        this.hoverline = Polyline.newInstance(this.options);
-        this.hoverline.setVisible(false);
+        options.setVisible(false);
         multiColorPolyline.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
@@ -117,31 +118,33 @@ public class Hoverline {
             @Override
             public void onEvent(MouseOutMapEvent event) {
                 if (!doNotProcessMouseMoveOut) {
-                    hoverline.setVisible(false);
+                    options.setVisible(false);
+                    hoverline.setOptions(options);
                 }
             }
         });
         map.getMap().addMouseMoveHandler(new MouseMoveMapHandler() {
             @Override
             public void onEvent(MouseMoveMapEvent event) {
-                hoverline.setVisible(false);
+                options.setVisible(false);
+                hoverline.setOptions(options);
             }
         });
     }
     
-    public Polyline getHoverline() {
+    /*public MultiColorPolyline getHoverline() {
         return hoverline;
+    }*/
+    
+    public void addClickHandler(ClickMapHandler handler) {
+        hoverline.addClickHandler(handler);
     }
     
-    public HandlerRegistration addClickHandler(ClickMapHandler handler) {
-        return this.hoverline.addClickHandler(handler);
+    public void addMouseOutMoveHandler(MouseOutMapHandler handler) {
+        hoverline.addMouseOutMoveHandler(handler);
     }
     
-    public HandlerRegistration addMouseOutMoveHandler(MouseOutMapHandler handler) {
-        return this.hoverline.addMouseOutMoveHandler(handler);
-    }
-    
-    public HandlerRegistration addMouseOverHandler(MouseOverMapHandler handler) {
-        return this.hoverline.addMouseOverHandler(handler);
+    public void addMouseOverHandler(MouseOverMapHandler handler) {
+        hoverline.addMouseOverHandler(handler);
     }
 }
