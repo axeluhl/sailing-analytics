@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sailing-tw2019-master
+  labels:
+    app: sailing-tw2019-master
+spec:
+  containers:
+  - name: sailing
+    image: donaldduck70/sapsailing:latest
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 8888
+      name: http-port
+    - containerPort: 14888
+      name: telnet-port
+    resources:
+      requests:
+        memory: "500Mi"
+        cpu: "250m"
+      limits:
+        memory: "8Gi"
+        cpu: "2"
+    env:
+    - name: MONGODB_URI
+      value: mongodb://mongodb-mongodb-replicaset-0.mongodb-mongodb-replicaset,mongodb-mongodb-replicaset-1.mongodb-mongodb-replicaset,mongodb-mongodb-replicaset-2.mongodb-mongodb-replicaset/tw2019?readPreference=primaryPreferred
+    livenessProbe:
+      httpGet:
+        path: /
+        port: http-port
+      initialDelaySeconds: 10
+      periodSeconds: 30
+    readinessProbe:
+      exec:
+        command:
+        - ./status
+      initialDelaySeconds: 10
+      periodSeconds: 30
+  imagePullSecrets:
+  - name: regcred

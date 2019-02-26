@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -18,6 +17,7 @@ import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniO
 import com.sap.sailing.gwt.home.shared.app.ActivityProxyCallback;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.ProvidesNavigationPath;
+import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
@@ -49,14 +49,20 @@ public class SeriesActivityProxy extends AbstractActivityProxy implements Provid
 
     @Override
     protected void startAsync() {
-        final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
-                new ActivityProxyCallback<EventSeriesViewDTO>(clientFactory, place) {
-            @Override
-            public void onSuccess(EventSeriesViewDTO series) {
-                afterLoad(series);
-            }
-        });
+        if (ctx.getLeaderboardGroupId() == null && ctx.getSeriesId() == null) {
+            ErrorPlace errorPlace = new ErrorPlace("series and leaderboardGroup is null");
+            errorPlace.setComingFrom(errorPlace);
+            clientFactory.getPlaceController().goTo(errorPlace);
+        } else {
+            clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx),
+                    new ActivityProxyCallback<EventSeriesViewDTO>(clientFactory, place) {
+                        @Override
+                        public void onSuccess(EventSeriesViewDTO series) {
+                            ctx.updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
+                            afterLoad(series);
+                        }
+                    });
+        }
     }
 
     private void afterLoad(final EventSeriesViewDTO series) {

@@ -2,13 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import java.util.ArrayList;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
-
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
@@ -19,6 +12,13 @@ import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.StartProcedureItem;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 public class StartProcedureFragment extends BaseFragment {
 
@@ -61,14 +61,14 @@ public class StartProcedureFragment extends BaseFragment {
 
         if (getView() != null && getArguments() != null) {
             switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
-                case START_MODE_PLANNED:
-                    if (AppUtils.with(getActivity()).isLandscape()) {
-                        mHeader.setVisibility(View.GONE);
-                    }
-                    break;
+            case START_MODE_PLANNED:
+                if (AppUtils.with(getActivity()).isLandscape()) {
+                    mHeader.setVisibility(View.GONE);
+                }
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
         RacingProcedure racingProcedure = getRaceState().getRacingProcedure();

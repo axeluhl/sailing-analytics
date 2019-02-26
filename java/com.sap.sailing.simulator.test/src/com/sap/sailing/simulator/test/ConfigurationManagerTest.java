@@ -13,7 +13,7 @@ import com.sap.sailing.simulator.impl.BoatClassPropertiesImpl;
 import com.sap.sailing.simulator.impl.ConfigurationManager;
 import com.sap.sailing.simulator.impl.RacePropertiesImpl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class ConfigurationManagerTest {
 

@@ -1,0 +1,14 @@
+[Unit]
+Description=Ensures all files under /var/lib/mongo are owned by mongod user/group
+Requires=var-lib-mongo.mount
+After=var-lib-mongo.mount
+Before=mongod.service
+
+[Install]
+RequiredBy=mongod.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/bin/chown -R mongod /var/lib/mongo/
+ExecStart=/bin/chgrp -R mongod /var/lib/mongo/

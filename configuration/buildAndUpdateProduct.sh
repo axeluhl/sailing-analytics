@@ -1,5 +1,6 @@
 #!/bin/bash
 set -o functrace
+source ./configuration/correctFilePathInRelationToCurrentOs.sh
 
 # This indicates the type of the project
 # and is used to correctly resolve bundle names
@@ -23,7 +24,7 @@ find_project_home ()
         return 0
     fi
 
-    echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
+    echo $(correct_file_path  "$1")
 }
 
 # this holds for default installation
@@ -40,8 +41,9 @@ if [[ "$PROJECT_HOME" == "" ]]; then
     exit 1
 fi
 
+#reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
 if [ "$SERVERS_HOME" = "" ]; then
-  SERVERS_HOME=`echo "$USER_HOME/servers" | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'`
+	SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
 fi
 
 # x86 or x86_64 should work for most cases
@@ -277,6 +279,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
     cp -v $PROJECT_HOME/java/target/configuration/mail.properties configuration/
+    cp -v $PROJECT_HOME/java/target/configuration/debug.properties configuration/
     cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
     cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
@@ -587,6 +590,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    #build local p2 repo
 	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
 	    echo "Maven version used: `mvn --version`"
+            echo "JAVA_HOME used: $JAVA_HOME"
 	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
@@ -627,58 +631,31 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             exit 1
         fi
         echo "ANDROID_HOME=$ANDROID_HOME"
-        PATH=$PATH:$ANDROID_HOME/tools
+        PATH=$PATH:$ANDROID_HOME/tools/bin
         PATH=$PATH:$ANDROID_HOME/platform-tools
         SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
         if [ \! -x "$SDK_MANAGER" ]; then
             SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
         fi
         
-	# Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
+        BUILD_TOOLS_VERSION=`grep "buildTools = " build.gradle | cut -d "\"" -f 2`
+        echo "BUILD_TOOLS_VERSION=$BUILD_TOOLS_VERSION"
+        TARGET_API_VERSION=`grep "targetSdk = " build.gradle | cut -d "=" -f 2 | sed 's/ //g'`
+        echo "TARGET_API_VERSION=$TARGET_API_VERSION"
+        sdkmanager --update && yes | sdkmanager --licenses
+        sdkmanager "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
+
+        # TODO: make distinction available for gradle builds as well
+        # Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
         # mobile_extra="-P -with-not-android-relevant -P with-mobile -P use-staged-third-party-artifacts -Dmaven.repo.local=${TMP}/temp_maven_repo"
-	# Use the following line for regular builds with no staged Nexus artifacts:
-        mobile_extra="-P -with-not-android-relevant -P with-mobile"
-        
-        if [ $testing -eq 0 ]; then
-            echo "INFO: Skipping tests"
-            mobile_extra="$mobile_extra -Dmaven.test.skip=true -DskipTests=true"
-        else
-            mobile_extra="$mobile_extra -DskipTests=false"
+        # Use the following line for regular builds with no staged Nexus artifacts:
+        # mobile_extra="-P -with-not-android-relevant -P with-mobile"
+
+        ./gradlew build
+        if [[ ${PIPESTATUS[0]} != 0 ]]; then
+            exit 100
         fi
-
-        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
-        echo "RC_APP_VERSION=$RC_APP_VERSION"
-
-        TRACKING_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/AndroidManifest.xml | cut -d "\"" -f 2`
-        echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
-
-        BUOY_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.buoy.positioning/AndroidManifest.xml | cut -d "\"" -f 2`
-        echo "BUOY_APP_VERSION=$BUOY_APP_VERSION"
-        
-        APP_VERSION_PARAMS="-Drc-app-version=$RC_APP_VERSION -Dtracking-app-version=$TRACKING_APP_VERSION -Dbuoy.positioning-app-version=$BUOY_APP_VERSION"
-        extra="$extra $APP_VERSION_PARAMS"
-        mobile_extra="$mobile_extra $APP_VERSION_PARAMS"
-        
-        NOW=$(date +"%s")
-        BUILD_TOOLS=22.0.1
-        TARGET_API=22
-        TEST_API=18
-        ANDROID_ABI=armeabi-v7a
-        AVD_NAME="androidTest-${NOW}"
-        echo "Updating Android SDK..." | tee -a $START_DIR/build.log
-        "$SDK_MANAGER" --update $ANDROID_OPTIONS
-        echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..." | tee -a $START_DIR/build.log
-        "$SDK_MANAGER" $ANDROID_OPTIONS "build-tools;${BUILD_TOOLS}"
-        echo "Updating Android SDK (android-${TARGET_API})..." | tee -a $START_DIR/build.log
-        "$SDK_MANAGER" $ANDROID_OPTIONS "platforms;android-${TARGET_API}"
-        echo "Updating Android SDK (extra-android-m2repository)..." | tee -a $START_DIR/build.log
-        "$SDK_MANAGER" $ANDROID_OPTIONS "extras;android;m2repository"
-        echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
-        "$SDK_MANAGER" $ANDROID_OPTIONS "extras;google;m2repository"
-
-        echo "Using following command for apps build: mvn $mobile_extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
-        echo "Maven version used: `mvn --version`"
-        mvn $mobile_extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
+        ./gradlew assemble
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
@@ -730,6 +707,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
+        echo "JAVA_HOME used: $JAVA_HOME"
         mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         # now get the exit status from mvn, and not that of tee which is what $? contains now
         MVN_EXIT_CODE=${PIPESTATUS[0]}
@@ -816,6 +794,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/

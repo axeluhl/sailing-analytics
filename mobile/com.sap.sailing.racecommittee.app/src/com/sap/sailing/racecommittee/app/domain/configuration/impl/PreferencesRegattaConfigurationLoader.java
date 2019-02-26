@@ -26,9 +26,10 @@ import com.sap.sse.common.Duration;
 public class PreferencesRegattaConfigurationLoader implements ConfigurationLoader<RegattaConfiguration> {
 
     private static final String TAG = PreferencesRegattaConfigurationLoader.class.getSimpleName();
-    
+
     public static PreferencesRegattaConfigurationLoader loadFromPreferences(AppPreferences preferences) {
-        PreferencesRegattaConfigurationLoader loader = new PreferencesRegattaConfigurationLoader(new RegattaConfigurationImpl(), preferences);
+        PreferencesRegattaConfigurationLoader loader = new PreferencesRegattaConfigurationLoader(
+                new RegattaConfigurationImpl(), preferences);
         loader.load();
         return loader;
     }
@@ -46,11 +47,12 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
 
     @Override
     public RegattaConfiguration load() {
-        
+
         configuration.setDefaultRacingProcedureType(preferences.getDefaultRacingProcedureType());
         configuration.setDefaultCourseDesignerMode(preferences.getDefaultCourseDesignerMode());
-        configuration.setDefaultProtestTimeDuration(Duration.ONE_MINUTE.times(preferences.getProtestTimeDurationInMinutes()));
-        
+        configuration.setDefaultProtestTimeDuration(
+                Duration.ONE_MINUTE.times(preferences.getProtestTimeDurationInMinutes()));
+
         RRS26ConfigurationImpl rrs26 = new RRS26ConfigurationImpl();
         rrs26.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.RRS26));
         rrs26.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.RRS26));
@@ -67,8 +69,10 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
 
         GateStartConfigurationImpl gateStart = new GateStartConfigurationImpl();
         gateStart.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.GateStart));
-        gateStart.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.GateStart));
-        gateStart.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.GateStart));
+        gateStart.setHasIndividualRecall(
+                preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.GateStart));
+        gateStart.setResultEntryEnabled(
+                preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.GateStart));
         gateStart.setHasPathfinder(preferences.getGateStartHasPathfinder());
         gateStart.setHasAdditionalGolfDownTime(preferences.getGateStartHasAdditionalGolfDownTime());
         configuration.setGateStartConfiguration(gateStart);
@@ -78,7 +82,7 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         ess.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.ESS));
         ess.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.ESS));
         configuration.setESSConfiguration(ess);
-        
+
         RacingProcedureConfigurationImpl basic = new RacingProcedureConfigurationImpl();
         basic.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.BASIC));
         basic.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.BASIC));
@@ -97,17 +101,18 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
     @Override
     public void store() {
         ExLog.i(preferences.getContext(), TAG, "Storing new racing procedure configuration.");
-        
+
         if (configuration.getDefaultRacingProcedureType() != null) {
             preferences.setDefaultRacingProcedureType(configuration.getDefaultRacingProcedureType());
         }
-        
+
         if (configuration.getDefaultCourseDesignerMode() != null) {
             preferences.setDefaultCourseDesignerMode(configuration.getDefaultCourseDesignerMode());
         }
 
         if (configuration.getDefaultProtestTimeDuration() != null) {
-            preferences.setDefaultProtestTimeDurationInMinutes((int) configuration.getDefaultProtestTimeDuration().asMinutes());
+            preferences.setDefaultProtestTimeDurationInMinutes(
+                    (int) configuration.getDefaultProtestTimeDuration().asMinutes());
             preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(false);
         } else {
             preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);

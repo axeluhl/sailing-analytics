@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.Util;
 
-public class CompetitorGoalPassingComparator  implements Comparator<Map.Entry<Competitor, Boat>> {
+public class CompetitorGoalPassingComparator implements Comparator<Map.Entry<Competitor, Boat>> {
 
     private ConcurrentMap<UUID, Integer> ranking;
 

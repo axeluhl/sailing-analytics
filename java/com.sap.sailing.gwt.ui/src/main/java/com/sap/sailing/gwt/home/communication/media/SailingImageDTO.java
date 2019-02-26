@@ -10,8 +10,8 @@ public class SailingImageDTO extends ImageDTO {
     
     private EventLinkDTO eventLink;
 
+    @Deprecated
     protected SailingImageDTO() {
-        super();
     }
 
     public SailingImageDTO(EventLinkDTO eventLink, String imageRef, Date createdAtDate) {

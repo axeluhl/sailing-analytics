@@ -1,0 +1,3 @@
+Deploy the .mount and .service units to /etc/systemd/system.
+Deploy the ephemeralvolume script to /usr/local/bin
+Deploy mongod.conf to /etc

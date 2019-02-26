@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -37,20 +38,26 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final SeriesContext ctx = place.getCtx();
-        final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
-                new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
-                    @Override
-                    public void onSuccess(EventSeriesViewDTO series) {
-                        SeriesActivity.this.series = series;
-                        initUi(panel, eventBus, series);
-                    }
-                });
+        if (ctx.getLeaderboardGroupId() == null && ctx.getSeriesId() == null) {
+            ErrorPlace errorPlace = new ErrorPlace("series and leaderboardGroup is null");
+            errorPlace.setComingFrom(errorPlace);
+            clientFactory.getPlaceController().goTo(errorPlace);
+        } else {
+            clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx),
+                    new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
+                        @Override
+                        public void onSuccess(EventSeriesViewDTO series) {
+                            ctx.updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
+                            SeriesActivity.this.series = series;
+                            initUi(panel, eventBus, series);
+                        }
+                    });
+        }
     }
     
     private void initUi(final AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
         final SeriesView view = new SeriesViewImpl(this, flagImageResolver);
-        view.setQuickFinderValues(series.getDisplayName(), series.getEventsDescending());
+        view.setQuickFinderValues(series.getDisplayName(), series.getEventsAndRegattasOfSeriesDescending());
         panel.setWidget(view.asWidget());
         
         initNavigationPath();
@@ -70,8 +77,9 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     }
     
     @Override
-    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId, String leaderboardName) {
+        return clientFactory.getNavigator()
+                .getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), leaderboardName), null, false);
     }
     
     @Override

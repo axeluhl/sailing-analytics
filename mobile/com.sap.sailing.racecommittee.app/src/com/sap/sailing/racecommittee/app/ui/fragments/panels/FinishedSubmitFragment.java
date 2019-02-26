@@ -1,17 +1,17 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
-import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
 public class FinishedSubmitFragment extends BasePanelFragment {
 

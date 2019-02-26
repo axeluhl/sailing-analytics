@@ -1,10 +1,10 @@
 package com.sap.sailing.server.anniversary;
 
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.replication.OperationWithResult;
 
 /**
- * Operation for replication of the race count known by {@link AnniversaryRaceDeterminator}.
+ * Operation for replication of the race count known by {@link AnniversaryRaceDeterminatorImpl}.
  */
 public class UpdateRaceCountOperation implements OperationWithResult<RacingEventService, Void> {
     private static final long serialVersionUID = 8989228640752085561L;

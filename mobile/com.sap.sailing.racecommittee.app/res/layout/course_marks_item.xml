@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="@dimen/default_padding_half">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="@dimen/default_padding_half">
 
     <ImageView
-        android:id="@+id/cell_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/markImage"
-        android:scaleType="fitCenter"
-        tools:src="@drawable/buoy_black_cyl"/>
+            android:id="@+id/cell_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/markImage"
+            android:scaleType="fitCenter"
+            tools:src="@drawable/buoy_black_cyl"/>
 
     <TextView
-        android:id="@+id/cell_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingTop="@dimen/default_padding_half"
-        android:singleLine="true"
-        android:textAppearance="?attr/textXXSmall"
-        android:textColor="?attr/white"
-        android:textIsSelectable="false"
-        tools:text="Black Cylinder"/>
+            android:id="@+id/cell_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="@dimen/default_padding_half"
+            android:singleLine="true"
+            android:textAppearance="?attr/textXXSmall"
+            android:textColor="?attr/white"
+            android:textIsSelectable="false"
+            tools:text="Black Cylinder"/>
 
 </LinearLayout>

@@ -45,7 +45,7 @@
       -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
     </parameters.common>
     <parameters.vm-settings>
-      -ea -Xmx1024m -XX:+UseG1GC
+      -ea -Xmx8096m -XX:+UseG1GC
     </parameters.vm-settings>
     <parameters.tractrac>
       -Dtractrac.tunnel=true -Dtractrac.tunnel.host=localhost
@@ -79,6 +79,9 @@
       <modules>
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
+        <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
+        <module>com.sap.sse.jettyextensions</module>
+        <module>com.sap.sailing.routeconverterjava11extension</module>
         <module>com.sap.sse.mail</module>
         <module>com.sap.sse.mail.replication.test</module>
         <module>com.sap.sse.mail.replication.testsupport</module>
@@ -87,12 +90,15 @@
         <module>com.sap.sse.gwt.adminconsole</module>
         <module>com.sap.sse.datamining</module>
         <module>com.sap.sse.datamining.shared</module>
-		<module>com.sap.sse.datamining.ui</module>
+        <module>com.sap.sse.datamining.ui</module>
         <module>com.sap.sse.security</module>
+        <module>com.sap.sse.security.persistence</module>
+        <module>com.sap.sse.security.persistence.test</module>
         <module>com.sap.sse.security.ui</module>
         <module>com.sap.sse.security.userstore.mongodb</module>
         <module>com.sap.sse.operationaltransformation</module>
         <module>com.sap.sse.replication</module>
+        <module>com.sap.sse.replication.interfaces</module>
         <module>com.sap.sse.threadmanager</module>
         <module>com.sap.sse.filestorage</module>
         <module>com.sap.sse.feature</module>
@@ -125,6 +131,7 @@
         <module>com.sap.sailing.expeditionconnector</module>
         <module>com.sap.sailing.expeditionconnector.persistence</module>
         <module>com.sap.sailing.server</module>
+        <module>com.sap.sailing.server.interface</module>
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>
         <module>com.sap.sailing.www</module>

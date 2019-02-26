@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="empty" translatable="false"></string>
     <string name="log_file_template" translatable="false">sap_insight_log_%s.txt</string>
     <string name="crash_file_name" translatable="false">sap_insight_crash_%s.txt</string>
@@ -72,4 +72,5 @@
     <string name="content_description_flag_icon" translatable="false">flag icon</string>
     <string name="tracking_notification_text">Currently Tracking %s</string>
     <string name="waiting_for_gps">Waiting for GPS</string>
+    <string name="service_info" translatable="false">SAP Sail InSight Service</string>
 </resources>

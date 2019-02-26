@@ -174,6 +174,7 @@ import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.statistics.Statistics;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -195,9 +196,8 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Replicator;
-import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
+import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminatorImpl;
 import com.sap.sailing.server.anniversary.RaceChangeObserverForAnniversaryDetection;
 import com.sap.sailing.server.anniversary.checker.QuarterChecker;
 import com.sap.sailing.server.anniversary.checker.SameDigitChecker;
@@ -206,7 +206,10 @@ import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserial
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
-import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.interfaces.SimulationService;
+import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sailing.server.notification.EmptySailingNotificationService;
 import com.sap.sailing.server.notification.SailingNotificationService;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
@@ -252,11 +255,11 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
-import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
 import com.sap.sailing.server.statistics.StatisticsCalculator;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
+import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Distance;
@@ -272,6 +275,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.filestorage.FileStorageManagementService;
@@ -282,8 +286,11 @@ import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -438,6 +445,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final SimulationService simulationService;
 
+    private final TaggingService taggingService;
+
     /**
      * A service that, if not {@code null}, must be called when certain events that the service can notify users about
      * have occurred. For example, the
@@ -472,9 +481,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
 
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
-            .withInitial(() -> false);
+    private boolean currentlyFillingFromInitialLoad = false;
     
+    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+
     private final Set<ClassLoader> masterDataClassLoaders = new HashSet<ClassLoader>();
     
     private final JoinedClassLoader joinedClassLoader;
@@ -483,7 +493,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final TrackedRegattaListenerManager trackedRegattaListener;
     
-    private int numberOfTrackedRacesToRestore;
+    private long numberOfTrackedRacesToRestore;
     
     private final AtomicInteger numberOfTrackedRacesRestored;
     
@@ -493,11 +503,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final TrackedRaceStatisticsCache trackedRaceStatisticsCache;
 
-    private final AnniversaryRaceDeterminator anniversaryRaceDeterminator;
+    private final AnniversaryRaceDeterminatorImpl anniversaryRaceDeterminator;
 
     /**
      * Observes {@link TrackedRegatta} and {@link TrackedRace} instances known to trigger an update of
-     * {@link AnniversaryRaceDeterminator} if the number of anniversary race candidates changes. To do this, the
+     * {@link AnniversaryRaceDeterminatorImpl} if the number of anniversary race candidates changes. To do this, the
      * instance is registered as {@link TrackedRegattaListener} on the {@link TrackedRegattaListenerManager} know by
      * this service.
      */
@@ -505,6 +515,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE; 
     
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
+     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
+     * method.
+     */
+    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
+
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -763,6 +781,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
         final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Simulator Background Executor");
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
+        taggingService = TaggingServiceFactory.INSTANCE.getService(this);
         this.raceLogReplicator = new RaceLogReplicatorAndNotifier(this);
         this.regattaLogReplicator = new RegattaLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
@@ -799,7 +818,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore();
         }
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
-        anniversaryRaceDeterminator = new AnniversaryRaceDeterminator(this, remoteSailingServerSet,
+        anniversaryRaceDeterminator = new AnniversaryRaceDeterminatorImpl(this, remoteSailingServerSet,
                 new QuarterChecker(), new SameDigitChecker());
         raceChangeObserverForAnniversaryDetection = new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator);
         this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
@@ -824,21 +843,36 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 int newNumberOfTrackedRacesRestored = numberOfTrackedRacesRestored.incrementAndGet();
                 logger.info("Added race to restore #"+newNumberOfTrackedRacesRestored+"/"+numberOfTrackedRacesToRestore);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Exception trying to restore race "+params, e);
+                logger.log(Level.SEVERE, "Exception trying to restore race "+params+
+                        ". Removing from the restore list. This server will no longer try to load this race automatically upon server restart.", e);
+                try {
+                    getMongoObjectFactory().removeConnectivityParametersForRaceToRestore(params);
+                } catch (MalformedURLException e1) {
+                    logger.log(Level.SEVERE, "Dang... even that failed. Couldn't remove connectivity params for "+
+                            params+" from restore list", e1);
+                }
             }
         }).getNumberOfParametersToLoad();
     }
 
     @Override
-    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
-        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
+    public boolean isCurrentlyFillingFromInitialLoad() {
+        return currentlyFillingFromInitialLoad;
     }
 
     @Override
-    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(
-            boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
-        this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster
-                .set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
+        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
+    }
+
+    @Override
+    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
+        return currentlyApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
+        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
     }
 
     @Override
@@ -849,6 +883,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public SimulationService getSimulationService() {
         return simulationService;
+    }
+    
+    @Override
+    public TaggingService getTaggingService() {
+        return taggingService;
     }
     
     @Override
@@ -1943,7 +1982,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor item, AddResult addedOrReplaced) {
             if (polarDataService != null) {
                 polarDataService.competitorPositionChanged(fix, item, race);
             }
@@ -2053,7 +2092,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, AddResult addedOrReplaced) {
             replicate(new RecordCompetitorGPSFix(getRaceIdentifier(), competitor, fix));
         }
 
@@ -2063,7 +2102,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
-        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
             final RecordMarkGPSFix operation;
             if (firstInTrack) {
                 operation = new RecordMarkGPSFixForNewMarkTrack(getRaceIdentifier(), mark, fix);
@@ -2099,7 +2138,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         
         @Override
-        public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix) {
+        public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix, AddResult addedOrReplaced) {
             replicate(new RecordCompetitorSensorFix(getRaceIdentifier(), competitor, trackName, fix));
         }
 
@@ -4037,7 +4076,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public int getNumberOfTrackedRacesToRestore() {
+    public long getNumberOfTrackedRacesToRestore() {
         return numberOfTrackedRacesToRestore;
     }
 
@@ -4241,13 +4280,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public AnniversaryRaceDeterminator getAnniversaryRaceDeterminator() {
+    public AnniversaryRaceDeterminatorImpl getAnniversaryRaceDeterminator() {
         return anniversaryRaceDeterminator;
     }
     
     @Override
     public PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount, 
-            final int competitorsCount, final int flightMultiplier) {
+            final int competitorsCount, final int flightMultiplier, final int boatChangeFactor) {
         PairingListTemplate template = pairingListTemplateFactory
                 .createPairingListTemplate(new PairingFrameProvider() {
                     @Override
@@ -4264,40 +4303,53 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     public int getCompetitorsCount() {
                         return competitorsCount;
                     }
-                }, flightMultiplier);
+                }, flightMultiplier, boatChangeFactor);
         return template;
     }
     
     @Override
-    public PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
-            final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumn) throws PairingListCreationException {
+    public PairingList<RaceColumn, Fleet, Competitor, Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
+            final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumns) throws PairingListCreationException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
-        Collections.shuffle(competitors);
-        PairingList<RaceColumn, Fleet, Competitor,Boat> pairingList = pairingListTemplate.createPairingList(
-                new CompetitionFormat<RaceColumn, Fleet, Competitor, Boat>() {
-            @Override
-            public Iterable<RaceColumn> getFlights() {
-                return selectedRaceColumn;
-            }
-            @Override
-            public Iterable<Competitor> getCompetitors() {
-                return competitors;
-            }
-            @Override
-            public Iterable<? extends Fleet> getGroups(RaceColumn flight) {
-                return leaderboard.getRaceColumnByName(flight.getName()).getFleets();
-            }
-            @Override
-            public int getGroupsCount() {
-                return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
-            }
-            @Override
-            public Iterable<Boat> getCompetitorAllocation() {
-                return leaderboard.getAllBoats();
-            }
-        });
+        Collections.sort(competitors, getCompetitorsComparator());
+        PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = pairingListTemplate
+                .createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor, Boat>() {
+                    @Override
+                    public Iterable<RaceColumn> getFlights() {
+                        return selectedRaceColumns;
+                    }
+
+                    @Override
+                    public Iterable<Competitor> getCompetitors() {
+                        return competitors;
+                    }
+
+                    @Override
+                    public Iterable<? extends Fleet> getGroups(RaceColumn flight) {
+                        return leaderboard.getRaceColumnByName(flight.getName()).getFleets();
+                    }
+
+                    @Override
+                    public int getGroupsCount() {
+                        return Util.size(Util.get(leaderboard.getRaceColumns(), 0).getFleets());
+                    }
+
+                    @Override
+                    public Iterable<Boat> getCompetitorAllocation() {
+                        return leaderboard.getAllBoats();
+                    }
+                });
         return pairingList;
+    }
+    
+    /**
+     * This comparator for competitors produces a stable ordering. It is based on the string representation
+     * of the competitors' {@link Competitor#getId() ID}.
+     */
+    private Comparator<Competitor> getCompetitorsComparator() {
+        final Comparator<String> naturalComparator = new NaturalComparator();
+        return (c1, c2) -> naturalComparator.compare(c1.getId().toString(), c2.getId().toString());
     }
 
     @Override
@@ -4332,5 +4384,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 /* flag image */ null, team, competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat);
         return competitorWithBoat;
+    }
+
+    @Override
+    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
+        this.unsentOperationsToMasterSender = service;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationsToMasterSender != null) {
+            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
+        }
     }
 }

@@ -10,9 +10,9 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class CourseBaseParser implements DataParser<CourseBase> {
-    
+
     private JsonDeserializer<CourseBase> deserializer;
-    
+
     public CourseBaseParser(JsonDeserializer<CourseBase> deserializer) {
         this.deserializer = deserializer;
     }

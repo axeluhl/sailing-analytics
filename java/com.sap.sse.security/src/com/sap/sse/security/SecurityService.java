@@ -11,7 +11,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.DefaultRoles;
@@ -159,6 +159,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     String getPreference(String username, String key);
     
     /**
+     * Gets a preference object. Always returns null if there is no converter associated with the given key -> see
+     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     */
+    <T> T getPreferenceObject(String username, String key);
+
+    /**
      * @return all preferences of the given user
      */
     Map<String, String> getAllPreferences(String username);
@@ -195,5 +201,4 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void removeAccessToken(String username);
 
     User loginByAccessToken(String accessToken);
-
 }

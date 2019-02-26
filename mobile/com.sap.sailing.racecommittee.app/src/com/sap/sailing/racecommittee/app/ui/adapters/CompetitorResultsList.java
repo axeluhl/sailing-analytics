@@ -9,16 +9,15 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
 
 /**
- * In addition to being an array list of {@link CompetitorResultEditableImpl} objects, instances of
- * this class can compute the {@link #getFirstRankZeroPosition()} which comes in handy in several
- * places where such a list is managed.
+ * In addition to being an array list of {@link CompetitorResultEditableImpl} objects, instances of this class can
+ * compute the {@link #getFirstRankZeroPosition()} which comes in handy in several places where such a list is managed.
  * 
  * @author Axel Uhl (d043530)
  *
  */
 public class CompetitorResultsList<C extends CompetitorResult> implements List<C> {
     private final List<C> list;
-    
+
     public CompetitorResultsList(List<C> list) {
         super();
         this.list = list;
@@ -150,15 +149,18 @@ public class CompetitorResultsList<C extends CompetitorResult> implements List<C
     }
 
     /**
-     * Determines the first position of an item in {@link #mCompetitor} for which its {@link CompetitorResult#getOneBasedRank() rank} is zero and for which
-     * this condition holds for all its successors. This means in particular that any in-between rank-0 item that is followed
-     * by other non-zero-ranked items will <em>not</em> be returned as the first such item.<p>
+     * Determines the first position of an item in {@link #mCompetitor} for which its
+     * {@link CompetitorResult#getOneBasedRank() rank} is zero and for which this condition holds for all its
+     * successors. This means in particular that any in-between rank-0 item that is followed by other non-zero-ranked
+     * items will <em>not</em> be returned as the first such item.
+     * <p>
      * 
-     * If no such item is found, the size of {@link #mCompetitor} is returned, thus pointing "behind" the end of the list.
+     * If no such item is found, the size of {@link #mCompetitor} is returned, thus pointing "behind" the end of the
+     * list.
      */
     public int getFirstRankZeroPosition() {
         int result = size();
-        for (int i = size()-1; i >= 0; i--) {
+        for (int i = size() - 1; i >= 0; i--) {
             if (get(i).getOneBasedRank() == 0) {
                 result = i;
             } else {

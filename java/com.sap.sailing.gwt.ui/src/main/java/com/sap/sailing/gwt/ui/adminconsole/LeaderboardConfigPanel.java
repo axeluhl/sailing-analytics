@@ -1001,15 +1001,15 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void onSuccess(StrippedLeaderboardDTO updatedLeaderboard) {
                 int indexOfLeaderboard = 0;
-                for (int i = 0; i < filteredLeaderboardList.getList().size(); i++) {
-                    StrippedLeaderboardDTO dao = filteredLeaderboardList.getList().get(i);
+                for (int i = 0; i < availableLeaderboardList.size(); i++) {
+                    StrippedLeaderboardDTO dao = availableLeaderboardList.get(i);
                     if (dao.name.equals(oldLeaderboardName)) {
                         indexOfLeaderboard = i;
                         break;
                     }
                 }
-                filteredLeaderboardList.getList().set(indexOfLeaderboard, updatedLeaderboard);
-                filteredLeaderboardList.refresh();
+                availableLeaderboardList.set(indexOfLeaderboard, updatedLeaderboard);
+                filterLeaderboardPanel.updateAll(availableLeaderboardList);
             }
         });
     }
@@ -1069,7 +1069,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 BusyDialog busyDialog = new BusyDialog();
                 busyDialog.show();
                 sailingService.calculatePairingListTemplate(editedObject.getFlightCount(), editedObject.getGroupCount(),
-                        editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), 
+                        editedObject.getCompetitorCount(), editedObject.getFlightMultiplier(), editedObject.getBoatChangeFactor(), 
                         new AsyncCallback<PairingListTemplateDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {

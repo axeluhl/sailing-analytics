@@ -1,10 +1,9 @@
 package com.sap.sailing.server.util;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.sharding.ShardingType;
-
-import junit.framework.Assert;
 
 public class ShardingLeaderBoardEncodingTest {
     @Test
@@ -14,6 +13,5 @@ public class ShardingLeaderBoardEncodingTest {
         Assert.assertEquals("/leaderboard/c_dille", ShardingType.LEADERBOARDNAME.encodeIfNeeded("cédille"));
         Assert.assertEquals("/leaderboard/Hello_World", ShardingType.LEADERBOARDNAME.encodeIfNeeded("Hello+World"));
         Assert.assertEquals("/leaderboard/Hello_World_", ShardingType.LEADERBOARDNAME.encodeIfNeeded("Hello(World)"));
-        
     }
 }

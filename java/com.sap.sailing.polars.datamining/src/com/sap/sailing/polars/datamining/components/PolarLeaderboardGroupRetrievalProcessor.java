@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardGroupPolarContext;
 import com.sap.sailing.polars.datamining.data.impl.LeaderboardGroupWithPolarContext;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 

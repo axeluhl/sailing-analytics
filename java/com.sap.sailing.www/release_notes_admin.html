@@ -21,8 +21,84 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+                    <h2 class="articleSubheadline">February 2019</h2>
+                    <ul class="bulletList">
+			<li>The pairing list construction supports a new parameter that can be used
+			    to balance fairness of boat assignment with the reduction of boat changes
+			    between flights. It can be set between 0 (focus on fair boat assignments;
+			    use this, e.g., if there are noticeable differences between the boats used
+			    to ensure a fair distribution) and the number of flights, e.g., 14 or 15 for
+			    a typical league set-up (focus on reducing the number of boat changes while
+			    sacrificing a bit of boat assignment fairness).
+			</li>
+			<li>The built-in mark passing calculator that is primarily used for smartphone
+			    tracking has been improved. In particular, it now recognizes trackers left behind,
+			    e.g., on a committee boat, and avoids performance issues incurred by these scenarios
+			    by filtering possible mark passing candidates using a bounding box-based approach:
+			    if a tracker hardly moves over some time, only the most promising candidates from
+			    that time interval are considered. This avoids compute time and memory issues
+			    seen in the past.
+			</li>
+			<li>When during a server re-start with the <tt>-Drestore.tracked.races=true</tt> parameter
+			    restoring a race fails with an exception, that race is now removed from the restore list,
+			    a corresponding <tt>SEVERE</tt> log entry is written, and the server will no longer try
+			    to restore that race upon future restarts. This way, races that have been removed at
+			    their source will not keep causing permanent restore trouble, and manual database
+			    intervention is no longer necessary.
+			</li>
+			<li>A new status REST endpoint has been added: <tt>/gwt/status</tt>. It combines the status
+			    checks of <tt>/sailingserver/api/v1/status</tt> and <tt>/replication/replication?action=STATUS</tt>,
+			    and because it is offered by the same module hosting the web UI of the server, its availability
+			    indicates that the corresponding module has started and has registered with the web server
+			    successfully. It reports a 200 HTTP response if itself and the status reports it syndicates
+			    report availability, a non-2XX status otherwise.
+			</li>
+                    </ul>
 
-                    <h2 class="articleSubheadline">July 2018</h2>
+                    <h2 class="articleSubheadline">January 2019</h2>
+                    <ul class="bulletList">
+                        <li>Allow entering a priority for courses managed in the AdminConsole.
+                            The new default priority now is 1. It used to be 0 which caused problems
+                            because the Race Manager app's highest (logically) priority is 1 which
+                            never took priority over the AdminConsole-provided prio-0 events.</li>
+                        <li>User sessions are now stored durably in the database so that they can be
+                            restored in case of a server re-start. Users therefore will no longer need
+                            to sign in again only because a server was re-started.</li>
+                        <li>New availability checks have been implemented. Two new REST endpoints are provided:
+                            <ul>
+                              <li>/sailingserver/api/v1/status reports the availability of the "Sailing" application</li>
+                              <li>/replication/replication?action=STATUS reports the availability of the replication module,
+                                  providing details about each replication-capable component and queue lengths</li>
+                              <li>the "status" script in the server's working directory, next to the "start" and "stop"
+                                  script, now provides output based on the status checks above, plus a check for a 2XX
+                                  response code for /index.html. The exit code for the "status" script is now 1 in case
+                                  of an error / lack of availability, and 0 if all checks passed and server looks
+                                  available.</li>
+                            </ul>
+                        </li>
+			<li>Upgraded the MongoDB driver to version 3.6.4. This allows you to specify the new
+			    retryWrites parameter, e.g., as in "mongodb://mongo0.internal.sapsailing.com/mydb?replicaSet=live&retryWrites=true".
+			    This will improve your system's behavior if you run with a MongoDB replica set and have to
+			    assume that at some point the PRIMARY MongoDB system may fail, with the remaining systems
+			    in the replica set voting for a new PRIMARY. Without retryWrites your system will bluntly
+			    fail, but with retryWrites, write operations will be re-tried once, with a timeout usually
+			    enough for the remaining replicas to agree on a new PRIMARY.
+			</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">October 2018</h2>
+                    <ul class="bulletList">
+                        <li>Added progress indicator to device mappings panel for smartphone tracking.</li>
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">September 2018</h2>
+                    <ul class="bulletList">
+                        <li>Added automatic resizing when adding images to an event using the ImageDialog. 
+                        It shows a check box if resizing is necessary, if you check it, the service will resize the image for you.</li>
+                        <li>Now showing an error when trying to upload an image or video to an event and no working FileStorageService is registered.</li>
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">August 2018</h2>
                     <ul class="bulletList">
                         <li>The mark passing editor now uses a full date/time format for the mark passing time points.</li>
                         <li>The TracTrac connector panel no longer shows a password visibly but uses a password text field.</li>

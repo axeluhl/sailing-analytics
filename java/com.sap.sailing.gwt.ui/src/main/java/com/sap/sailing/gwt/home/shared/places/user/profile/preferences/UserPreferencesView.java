@@ -1,9 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.preferences;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 
 /**
  * Interface for the user preferences UI. To support desktop as well as mobile version, an
@@ -23,12 +21,14 @@ public interface UserPreferencesView extends IsWidget {
     
     /**
      * Presenter interface for the user preferences UI, providing methods to load preferences and to access the
-     * required {@link SuggestedMultiSelectionDataProvider}s.
+     * required {@link SuggestedMultiSelectionPresenter}s.
      */
     public interface Presenter {
         void loadPreferences();
-        SuggestedMultiSelectionBoatClassDataProvider getFavoriteBoatClassesDataProvider();
-        SuggestedMultiSelectionCompetitorDataProvider getFavoriteCompetitorsDataProvider();
+
+        BoatClassSelectionPresenter getFavoriteBoatClassesDataProvider();
+
+        CompetitorSelectionPresenter getFavoriteCompetitorsDataProvider();
     }
 
 }

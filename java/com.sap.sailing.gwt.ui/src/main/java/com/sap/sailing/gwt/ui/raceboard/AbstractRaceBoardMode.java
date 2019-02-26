@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Map;
 
 import com.google.gwt.core.shared.GWT;
@@ -67,6 +69,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
     private LeaderboardDTO leaderboard;
     private LeaderboardDTO leaderboardForSpecificTimePoint;
     private RaceColumnDTO raceColumn;
+    private final Collection<Runnable> runnablesToRunAfterInitializationFinished = new LinkedList<>();
     
     @Override
     public void applyTo(RaceBoardPanel raceBoardPanel) {
@@ -78,8 +81,29 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         leaderboardPanel.setAutoExpandPreSelected(true);
         this.timer = raceBoardPanel.getTimer();
         this.raceIdentifier = raceBoardPanel.getSelectedRaceIdentifier();
+        raceBoardPanel.getMap().addMapInitializedListener(new Runnable() {
+            public void run() {
+                checkIfTrigger();
+            };
+        });
     }
     
+    protected void checkIfTrigger() {
+        if (raceBoardPanel.getMap().isDataInitialized()) {
+            trigger();
+        }
+    }
+
+    @Override
+    public void addInitializationFinishedRunner(Runnable runnable) {
+        runnablesToRunAfterInitializationFinished.add(runnable);
+    }
+
+    /** called after initialization and trigger method is finished */
+    protected void onInitializationFinished() {
+        runnablesToRunAfterInitializationFinished.forEach(r -> r.run());
+    }
+
     /**
      * Called whenever new information of any sort has become available. Subclasses can use this
      * to decide whether everything they need has been received in order to carry out their actions.
@@ -118,7 +142,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
         this.raceTimesInfo = raceTimesInfo;
         this.raceTimesInfoForRace = raceTimesInfo.get(getRaceIdentifier());
-        trigger();
+        checkIfTrigger();
     }
 
     protected void stopReceivingRaceTimesInfos() {
@@ -131,7 +155,8 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         this.leaderboard = leaderboard;
-        trigger();
+        checkIfTrigger();
+        ;
     }
 
     protected void stopReceivingLeaderboard() {
@@ -140,9 +165,9 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
 
     /**
      * Fetches the leaderboard named {@code leaderboardName} for {@code timePoint} with details for race column
-     * {@code raceColumnName} and stores it in {@link #leaderboardForSpecificTimePoint}, then invokes {@link #trigger()}.
-     * If a {@link #getLeaderboard()} has been received already, it is passed on in the call in order to reduce the
-     * bandwidth required, based on a differential approach.
+     * {@code raceColumnName} and stores it in {@link #leaderboardForSpecificTimePoint}, then invokes
+     * {@link #checkIfTrigger()}. If a {@link #getLeaderboard()} has been received already, it is passed on in the call
+     * in order to reduce the bandwidth required, based on a differential approach.
      */
     protected void loadLeaderboardForSpecificTimePoint(String leaderboardName,
             String raceColumnName, Date timePoint) {
@@ -156,7 +181,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
             public void onSuccess(LeaderboardDTO result) {
                 leaderboardForSpecificTimePoint = result;
                 getLeaderboardPanel().updateLeaderboard(result);
-                trigger();
+                checkIfTrigger();
             }
         };
         final ArrayList<String> raceColumnNameAsList = new ArrayList<>();
@@ -174,7 +199,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
         this.raceColumn = raceColumn;
-        trigger();
+        checkIfTrigger();
     }
     
     protected Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> getRaceTimesInfo() {

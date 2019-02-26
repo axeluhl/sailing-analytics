@@ -46,6 +46,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.domain.tractracadapter.impl.AbstractLoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -124,7 +125,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracRace(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null, createRaceDefinitionSet(),
-                /* trackedRegattaRegistry */null,
+                /* trackedRegattaRegistry */ null,
                 mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
                 null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, receiverTypes)) {
             receivers.add(r);
@@ -145,11 +146,17 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
                     }
                     break;
                 case End:
-                    logger.info("Stored data end");
-                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
-                    if (getTrackedRace() != null) {
-                        getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
-                    }
+                    logger.info("Stored data end. Delaying status update on tracked race "+getTrackedRace()+" until all events queued in receivers so far have been processed");
+                    new AbstractLoadingQueueDoneCallBack(receivers) {
+                        @Override
+                        protected void executeWhenAllReceiversAreDoneLoading() {
+                            logger.info("Queues of all receivers for tracked race "+getTrackedRace()+" have processed all events up to when StoredData.End was received");
+                            TrackedRaceStatusImpl lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
+                            if (getTrackedRace() != null) {
+                                getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
+                            }
+                        }
+                    };
                     break;
                 case Progress:
                     lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, storedDataEvent.getProgress());
@@ -216,6 +223,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
         return new DynamicRaceDefinitionSet() {
             @Override
             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+                setTrackedRace((DynamicTrackedRaceImpl) trackedRace);
             }
         };
     }
@@ -267,7 +275,6 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
      * downwind or reaching leg. Wind information is queried by {@link TrackedLegImpl} based on
      * the marks' positions. Therefore, approximate mark positions are set here for all marks
      * of {@link #getTrackedRace()}'s courses for the time span starting at the epoch up to now.
-     * @param timePointForFixes TODO
      */
     public static void fixApproximateMarkPositionsForWindReadOut(DynamicTrackedRace race, TimePoint timePointForFixes) {
         TimePoint epoch = new MillisecondsTimePoint(0l);

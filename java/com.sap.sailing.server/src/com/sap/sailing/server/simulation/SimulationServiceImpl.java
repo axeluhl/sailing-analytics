@@ -34,13 +34,15 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -217,7 +219,7 @@ public class SimulationServiceImpl implements SimulationService {
         }
 
         @Override
-        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
             // relevant for simulation
             if (this.isLive()) {
                 defaultAction();
@@ -246,7 +248,7 @@ public class SimulationServiceImpl implements SimulationService {
         }
 
         @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor item, AddResult addedOrReplaced) {
             // irrelevant for simulation: covered by wind estimation
         }
 

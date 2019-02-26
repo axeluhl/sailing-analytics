@@ -11,14 +11,17 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
+import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 
 public interface DataMiningServiceAsync {
 
@@ -56,19 +59,19 @@ public interface DataMiningServiceAsync {
             String localeInfoName, AsyncCallback<QueryResultDTO<HashSet<Object>>> callback);
 
     <ResultType extends Serializable> void runQuery(DataMiningSession session,
-            StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
+            ModifiableStatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
 
     void getPredefinedQueryIdentifiers(AsyncCallback<HashSet<PredefinedQueryIdentifier>> callback);
     
     void getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, String localeInfoName,
-            AsyncCallback<StatisticQueryDefinitionDTO> callback);
+            AsyncCallback<ModifiableStatisticQueryDefinitionDTO> callback);
 
     <ResultType extends Serializable> void runPredefinedQuery(DataMiningSession session,
             PredefinedQueryIdentifier identifier, String localeInfoName,
             AsyncCallback<QueryResultDTO<ResultType>> callback);
     
-    void localize(StatisticQueryDefinitionDTO queryDefinition, String localeInfoName,
-            AsyncCallback<StatisticQueryDefinitionDTO> callback);
+    void localize(ModifiableStatisticQueryDefinitionDTO queryDefinition, String localeInfoName,
+            AsyncCallback<ModifiableStatisticQueryDefinitionDTO> callback);
 
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining (like
@@ -76,4 +79,17 @@ public interface DataMiningServiceAsync {
      * This is necessary, because the type is somehow hidden from GWT. For Further information look at bug 1503.<br />
      */
     void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
+
+    /** Retrieves the {@link StoredDataMiningQueryDTO}s from the back end. */
+    void retrieveStoredQueries(AsyncCallback<ArrayList<StoredDataMiningQueryDTOImpl>> callback);
+
+    /** Updates or creates a {@link StoredDataMiningQueryDTO} in the back end. */
+    void updateOrCreateStoredQuery(StoredDataMiningQueryDTOImpl query,
+            AsyncCallback<StoredDataMiningQueryDTOImpl> callback);
+
+    /** Removes the {@link StoredDataMiningQueryDTO} if it exists from the back end. */
+    void removeStoredQuery(StoredDataMiningQueryDTOImpl query, AsyncCallback<StoredDataMiningQueryDTOImpl> callback);
+
+    /** Gets the {@link StatisticQueryDefinitionDTO} from the serialized String. */
+    void getDeserializedQuery(String serializedQuery, AsyncCallback<ModifiableStatisticQueryDefinitionDTO> callback);
 }

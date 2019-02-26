@@ -54,7 +54,7 @@ public class OutlierDetectionTest extends AbstractManeuverDetectionTestCase {
      * Tests the 505 Race 7 for competitor "Arthur / Anderson" at a time where an outlier exists
      */
     @Test
-    public void testManeuversForFindelCriticalDetection() throws ParseException, NoWindException {
+    public void testArthurAndersonOutlierDetectionAndElimination() throws ParseException, NoWindException {
         Competitor competitor = getCompetitorByName("Arthur / Anderson");
         assertNotNull(competitor);
         Date fromDate = dateFormat.parse("04/02/2015-15:04:50");

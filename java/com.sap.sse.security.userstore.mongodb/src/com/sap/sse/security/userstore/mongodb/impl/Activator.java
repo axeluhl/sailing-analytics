@@ -12,7 +12,7 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class Activator implements BundleActivator {
-
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
     private static BundleContext context;
     private ServiceRegistration<?> registration;
     private PreferenceConverterRegistrationManager preferenceConverterRegistrationManager;
@@ -28,11 +28,11 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
+        logger.info("Creating user store");
         UserStoreImpl userStore = new UserStoreImpl();
-        registration = context.registerService(UserStore.class.getName(),
-                userStore, null);
+        registration = context.registerService(UserStore.class.getName(), userStore, null);
         preferenceConverterRegistrationManager = new PreferenceConverterRegistrationManager(bundleContext, userStore);
-        Logger.getLogger(Activator.class.getName()).info("User store registered.");
+        logger.info("User store registered.");
         for (CollectionNames name : CollectionNames.values()) {
             MongoDBService.INSTANCE.registerExclusively(CollectionNames.class, name.name());
         }

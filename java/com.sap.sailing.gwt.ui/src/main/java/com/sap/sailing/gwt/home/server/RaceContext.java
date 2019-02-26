@@ -54,7 +54,7 @@ import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTra
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.home.communication.race.wind.SimpleWindDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;

@@ -14,10 +14,8 @@ import android.widget.LinearLayout;
  * the margin.
  */
 class IcsLinearLayout extends LinearLayout {
-    private static final int[] LL = new int[] {
-    /* 0 */android.R.attr.divider,
-    /* 1 */android.R.attr.showDividers,
-    /* 2 */android.R.attr.dividerPadding, };
+    private static final int[] LL = new int[] { /* 0 */android.R.attr.divider, /* 1 */android.R.attr.showDividers,
+            /* 2 */android.R.attr.dividerPadding, };
     private static final int LL_DIVIDER = 0;
     private static final int LL_SHOW_DIVIDER = 1;
     private static final int LL_DIVIDER_PADDING = 2;
@@ -158,8 +156,8 @@ class IcsLinearLayout extends LinearLayout {
     }
 
     private void drawVerticalDivider(Canvas canvas, int left) {
-        mDivider.setBounds(left, getPaddingTop() + mDividerPadding, left + mDividerWidth, getHeight()
-                - getPaddingBottom() - mDividerPadding);
+        mDivider.setBounds(left, getPaddingTop() + mDividerPadding, left + mDividerWidth,
+                getHeight() - getPaddingBottom() - mDividerPadding);
         mDivider.draw(canvas);
     }
 

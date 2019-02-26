@@ -131,7 +131,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private Long numberOfStoredMessages;
     
-    public SailMasterConnectorImpl(String host, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
+    public SailMasterConnectorImpl(String host, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         super();
         maxSequenceNumber = -1l;
         this.raceId = raceId; // from this time on, the connector interprets messages for raceID
@@ -143,6 +143,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         this.port = port;
         this.listeners = new HashSet<SailMasterListener>();
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
+        this.addSailMasterListener(swissTimingRaceTracker);
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();
     }
@@ -361,16 +362,16 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         assert message.getType() == MessageType.RPD;
         String[] sections = message.getSections();
         String raceID = sections[1];
-        final RaceStatus raceStatus;
-        final RacingStatus racingStatus;
         final String[] raceStatusIntAndRacingStatusInt = sections[2].split(",");
+        final String raceStatusAsString = raceStatusIntAndRacingStatusInt.length > 0 ? raceStatusIntAndRacingStatusInt[0] : null;
+        final RaceStatus raceStatus = raceStatusAsString == null || raceStatusAsString.trim().isEmpty() ? null : RaceStatus.values()[Integer.valueOf(raceStatusAsString)];
+        final String racingStatusAsString;
         if (raceStatusIntAndRacingStatusInt.length > 1) {
-            raceStatus = RaceStatus.values()[Integer.valueOf(raceStatusIntAndRacingStatusInt[0])];
-            racingStatus = RacingStatus.values()[Integer.valueOf(raceStatusIntAndRacingStatusInt[1])];
+            racingStatusAsString = raceStatusIntAndRacingStatusInt[1];
         } else {
-            raceStatus = RaceStatus.values()[Integer.valueOf(raceStatusIntAndRacingStatusInt[0])];
-            racingStatus = null;
+            racingStatusAsString = null;
         }
+        final RacingStatus racingStatus = racingStatusAsString == null || racingStatusAsString.trim().isEmpty() ? null : RacingStatus.values()[Integer.valueOf(racingStatusAsString)];
         TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3], raceID));
         lastRPDMessageTimePoint = timePoint;
         String dateISO = sections[3].substring(0, sections[3].indexOf('T'));
@@ -391,12 +392,17 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             final boolean postVersion1_0 = sections[9+i].split(";", -1).length >= 14;
             if (fixSections.length > 2) {
                 final String trackedObjectIdAsString = fixSections[fixDetailIndex++].trim();
-                if (trackedObjectIdAsString != null && !trackedObjectIdAsString.isEmpty()) {
-                    final TrackerType trackerType = TrackerType.values()[Integer.valueOf(fixSections[fixDetailIndex++])];
-                    final Long ageOfDataInMilliseconds = 1000l * Long.valueOf(fixSections[fixDetailIndex++]);
-                    final Position position = new DegreePosition(Double.valueOf(fixSections[fixDetailIndex++]),
-                            Double.valueOf(fixSections[fixDetailIndex++]));
-                    final Double speedOverGroundInKnots = Double.valueOf(fixSections[fixDetailIndex++]);
+                if (trackedObjectIdAsString != null && !trackedObjectIdAsString.trim().isEmpty()) {
+                    final String trackerTypeAsString = fixSections[fixDetailIndex++];
+                    final TrackerType trackerType = trackerTypeAsString == null || trackerTypeAsString.trim().isEmpty() ? null : TrackerType.values()[Integer.valueOf(trackerTypeAsString)];
+                    final String ageOfDataInMillisAsString = fixSections[fixDetailIndex++];
+                    final Long ageOfDataInMilliseconds = ageOfDataInMillisAsString==null || ageOfDataInMillisAsString.trim().isEmpty() ? null : (1000l * Long.valueOf(ageOfDataInMillisAsString));
+                    final String latDegAsString = fixSections[fixDetailIndex++];
+                    final String lngDegAsString = fixSections[fixDetailIndex++];
+                    final Position position = latDegAsString==null || latDegAsString.trim().isEmpty() || lngDegAsString==null || lngDegAsString.trim().isEmpty() ? null :
+                        new DegreePosition(Double.valueOf(latDegAsString), Double.valueOf(lngDegAsString));
+                    final String sogInKnotsAsString = fixSections[fixDetailIndex++];
+                    final Double speedOverGroundInKnots = sogInKnotsAsString==null || sogInKnotsAsString.trim().isEmpty() ? null : Double.valueOf(sogInKnotsAsString);
                     final int alsIndex = postVersion1_0 ? fixDetailIndex+1 : fixDetailIndex;
                     final int vmgIndex = postVersion1_0 ? fixDetailIndex : fixDetailIndex+1;
                     final Speed averageSpeedOverGround = fixSections[alsIndex].trim().length() == 0 ? null
@@ -404,9 +410,10 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                     final Speed velocityMadeGood = fixSections[vmgIndex].trim().length() == 0 ? null : new KnotSpeedImpl(
                             Double.valueOf(fixSections[vmgIndex]));
                     fixDetailIndex += 2;
-                    final AbstractBearing cog = new DegreeBearingImpl(
-                            Double.valueOf(fixSections[fixDetailIndex++]));
-                    final SpeedWithBearing speed = new KnotSpeedWithBearingImpl(speedOverGroundInKnots, cog);
+                    final String cogAsString = fixSections[fixDetailIndex++];
+                    final AbstractBearing cog = cogAsString==null || cogAsString.trim().isEmpty() ? null :
+                        new DegreeBearingImpl(Double.valueOf(cogAsString));
+                    final SpeedWithBearing speed = speedOverGroundInKnots == null || cog == null ? null : new KnotSpeedWithBearingImpl(speedOverGroundInKnots, cog);
                     final Integer nextMarkIndex = fixSections.length <= fixDetailIndex
                             || fixSections[fixDetailIndex].trim().length() == 0 ? null : Integer
                             .valueOf(fixSections[fixDetailIndex]);
@@ -475,7 +482,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
     }
     
     @Override
-    public void addSailMasterListener(SailMasterListener listener) throws UnknownHostException, IOException, InterruptedException {
+    public void addSailMasterListener(SailMasterListener listener)  {
         synchronized (listeners) {
             listeners.add(listener);
         }

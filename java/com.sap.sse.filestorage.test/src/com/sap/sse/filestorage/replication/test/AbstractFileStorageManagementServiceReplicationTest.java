@@ -25,7 +25,7 @@ public abstract class AbstractFileStorageManagementServiceReplicationTest extend
         protected void persistenceSetUp(boolean dropDB) {
             mongoDBService = MongoDBService.INSTANCE;
             if (dropDB) {
-                mongoDBService.getDB().dropDatabase();
+                mongoDBService.getDB().drop();
             }
         }
 
@@ -52,7 +52,7 @@ public abstract class AbstractFileStorageManagementServiceReplicationTest extend
 
         @Override
         protected void persistenceTearDown() {
-            mongoDBService.getDB().dropDatabase();
+            mongoDBService.getDB().drop();
         }
     }
 }

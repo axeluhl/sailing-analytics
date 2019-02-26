@@ -137,10 +137,14 @@ name to make sure you get to the event you're interested in.
         <td><a href="regattaUpdateOrCreateSeries.html">/api/v1/regattas/updateOrCreateSeries</a></td>
         <td>Creates a Series in an regatta, and configures the Series it contains</td>
     </tr>
-	<tr>
-		<td><a href="regattasCompetitorsCreateAndAdd.html">/api/v1/regattas/{regattaname}/competitors/createandadd</a></td>
-		<td>Creates a competitor and adds it to the regatta</td>
-	</tr>
+   <tr>
+        <td><a href="regattasCompetitorsCreateAndAddWithBoat.html">/api/v1/regattas/{regattaname}/competitors/createandaddwithboat</a></td>
+        <td>Creates a competitor using an already exising boat and adds it to the regatta</td>
+   </tr>
+   <tr>
+        <td><a href="regattasCompetitorsCreateAndAdd.html">/api/v1/regattas/{regattaname}/competitors/createandadd</a></td>
+        <td>Creates a competitor and adds it to the regatta</td>
+    </tr>
 	<tr>
 		<td>/api/v1/regattas/{regattaname}/competitors/{competitorId}/add</td>
 		<td>Registers a competitor with a regatta (POST)</td>
@@ -206,6 +210,10 @@ name to make sure you get to the event you're interested in.
 		<td>Stops tracking for a race</td>
 	</tr>
     <tr>
+        <td><a href="leaderboardRaceRemove.html">/api/v1/leaderboards/{name}/removeTrackedRace</a></td>
+        <td>Removes a tracked race</td>
+    </tr>
+    <tr>
         <td><a href="leaderboardRaceDenoteForTracking.html">/api/v1/leaderboards/{name}/denoteForTracking</a></td>
         <td>Denotes a race for tracking</td>
     </tr>
@@ -252,39 +260,60 @@ name to make sure you get to the event you're interested in.
         <td><a href="getRacesGetDoc.html">/api/v1/trackedRaces/getRaces</a></td>
         <td>Gets all TrackedRaces found on the local instance with a valid start time.</td>
     </tr>
-        <tr>
+    <tr>
         <td><a href="raceDetailsGetDoc.html">/api/v1/trackedRaces/raceDetails</a></td>
         <td>Gets more information about a specified RegattaAndRace identifier</td>
     </tr>
+    <tr>
+        <td><a href="boatclasses.html">/api/v1/boatclasses</a></td>
+        <td>Obtains information about all or a single boat class</td>
     </tr>
-        <tr>
+    <tr>
         <td><a href="boats.html">/api/v1/boats</a></td>
         <td>Obtains information about a single boat</td>
     </tr>
-    </tr>
-        <tr>
+    <tr>
         <td><a href="putWind.html">/api/v1/wind/putWind</a></td>
         <td>Allows to add wind values to 1-x races, similar to AdminConsole</td>
     </tr>
-        </tr>
-        <tr>
+    <tr>
         <td><a href="addCompetitorToRace.html">/api/v1/mark/addCompetitorToRace</a></td>
         <td>Updates the competitor registrations</td>
     </tr>
-     </tr>
-        <tr>
+    <tr>
         <td><a href="addCourseDefinitionToRaceLog.html">/api/v1/mark/addCourseDefinitionToRaceLog</a></td>
         <td>Allows to create a Coursedefinition that is then inserted into the racelog</td>
     </tr>
-     </tr>
-        <tr>
+    <tr>
         <td><a href="addMarkFix.html">/api/v1/mark/addMarkFix</a></td>
         <td>Adds a fix to a specified Mark, the Marks uuid must be known</td>
     </tr>
-     </tr>
-        <tr>
+    <tr>
         <td><a href="addMarkToRegatta.html">/api/v1/mark/addMarkToRegatta</a></td>
         <td>Adds a Mark to a specified Regatta</td>
+    </tr>
+    <tr>
+        <td><a href="tagsCRUDDoc.html">/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags</a></td>
+        <td>Gets, creates, updates and deletes tags.</td>
+    </tr>
+        <tr>
+        <td><a href="preferencesPut.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
+        <td>Stores a document into the preferences of a user</td>
+    </tr>
+    </tr>
+        <tr>
+        <td><a href="preferencesGet.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
+        <td>Retrives a document that was stored into the preferences of a user</td>
+    </tr>
+    </tr>
+        <tr>
+        <td><a href="preferencesDelete.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
+        <td>Removes a document from the preferences of a user</td>
+    </tr>
+    </tr>
+        <tr>
+        <td><a href="status.html">/api/v1/status</a></td>
+        <td>Returns a status description for the "RacingEventService" core service</td>
     </tr>
 </tbody>
 </table>

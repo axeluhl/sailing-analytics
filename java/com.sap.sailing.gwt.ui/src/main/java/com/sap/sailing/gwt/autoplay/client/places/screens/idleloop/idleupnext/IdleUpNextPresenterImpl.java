@@ -80,9 +80,9 @@ public class IdleUpNextPresenterImpl extends AutoPlayPresenterConfigured<IdleUpN
         List<SafeUri> bigScreenImages = new ArrayList<>();
         for (ImageDTO imageDTO : getSlideCtx().getEvent().getImages()) {
             final List<String> tags = imageDTO.getTags();
-            if (tags.contains(MediaTagConstants.BIGSCREEN)) {
+            if (tags.contains(MediaTagConstants.BIGSCREEN.getName())) {
                 bigScreenImages.add(UriUtils.fromString(imageDTO.getSourceRef()));
-            } else if (tags.contains(MediaTagConstants.TEASER) || tags.contains(MediaTagConstants.HIGHLIGHT)) {
+            } else if (tags.contains(MediaTagConstants.TEASER.getName()) || tags.contains(MediaTagConstants.HIGHLIGHT.getName())) {
                 teaserHighlight.add(UriUtils.fromString(imageDTO.getSourceRef()));
             }
         }

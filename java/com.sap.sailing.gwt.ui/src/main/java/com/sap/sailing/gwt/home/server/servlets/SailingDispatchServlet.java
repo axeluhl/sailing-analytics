@@ -17,14 +17,13 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.SailingDispatchContextImpl;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.news.EventNewsService;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.RequestWrapper;
 import com.sap.sse.gwt.dispatch.servlets.AbstractDispatchServlet;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.UserStore;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispatchContext> {
@@ -34,7 +33,6 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
     private final ServiceTracker<WindFinderTrackerFactory, WindFinderTrackerFactory> windFinderTrackerFactory;
     private final ServiceTracker<EventNewsService, EventNewsService> eventNewsServiceTracker;
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
-    private final ServiceTracker<UserStore, UserStore> userStoreTracker;
     private final ServiceTracker<TrackedRaceStatisticsCache, TrackedRaceStatisticsCache> trackedRaceStatisticsCacheTracker;
 
     public SailingDispatchServlet() {
@@ -43,7 +41,6 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
         windFinderTrackerFactory = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         eventNewsServiceTracker = ServiceTrackerFactory.createAndOpen(context, EventNewsService.class);
         securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
-        userStoreTracker = ServiceTrackerFactory.createAndOpen(context, UserStore.class);
         trackedRaceStatisticsCacheTracker = ServiceTrackerFactory.createAndOpen(context, TrackedRaceStatisticsCache.class);
     }
 
@@ -53,7 +50,7 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
         return new SailingDispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService(),
                 windFinderTrackerFactory.getService(),
                 eventNewsServiceTracker.getService(), securityServiceTracker.getService(),
-                userStoreTracker.getService(), trackedRaceStatisticsCacheTracker.getService(),
+                trackedRaceStatisticsCacheTracker.getService(),
                 request.getClientLocaleName(), getThreadLocalRequest());
     }
     
