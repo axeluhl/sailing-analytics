@@ -36,7 +36,8 @@ public class DistanceBasedTwdTransitionImporter {
                 .getIterator(); iterator.hasNext();) {
             long percent = windSourceNumber * 100 / numberOfWindSources;
             WindSourceWithFixes windSource = iterator.next();
-            LoggingUtil.logInfo("Processing " + windSourceNumber++ + "/" + numberOfWindSources + " (" + percent + "%)");
+            LoggingUtil.logInfo("Processing wind source " + windSourceNumber++ + "/" + numberOfWindSources + " ("
+                    + percent + "%) for distance dimension");
             List<SingleDimensionBasedTwdTransition> entries = new ArrayList<>();
             List<WindSourceWithFixes> otherWindSources = new ArrayList<>();
             for (PersistedElementsIterator<WindSourceWithFixes> otherWindSourcesIterator = windSourcesPersistenceManager
@@ -109,16 +110,17 @@ public class DistanceBasedTwdTransitionImporter {
                 } while (currentFix != null && currentOtherFix != null);
             }
             if (entries.isEmpty()) {
-                LoggingUtil.logInfo("No TWD transitions to import");
+                LoggingUtil.logInfo("No distance based TWD transitions to import");
             } else {
                 distanceBasedTwdTransitionPersistenceManager.add(entries);
                 int totalEntries = entries.size();
                 totalValuesCount += totalEntries;
-                LoggingUtil.logInfo(totalEntries + " TWD transitions imported, " + totalValuesCount + " in total");
+                LoggingUtil.logInfo(
+                        totalEntries + " distance based TWD transitions imported, " + totalValuesCount + " in total");
             }
         }
         LoggingUtil.logInfo("###################\r\nDistance based TWD transitions Import finished");
-        LoggingUtil.logInfo("Totally " + totalValuesCount + " TWD transitions imported");
+        LoggingUtil.logInfo("Totally " + totalValuesCount + " distance based TWD transitions imported");
     }
 
 }

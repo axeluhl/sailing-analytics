@@ -2,6 +2,7 @@ package com.sap.sailing.windestimation.integration;
 
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.windestimation.WindEstimationFactoryService;
+import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 
 /**
@@ -11,5 +12,7 @@ import com.sap.sse.replication.ReplicableWithObjectInputStream;
  *
  */
 public interface ReplicableWindEstimationFactoryService extends WindEstimationFactoryService,
-        ReplicableWithObjectInputStream<WindEstimationFactoryServiceImpl, WindEstimationModelsUpdateOperation> {
+        ReplicableWithObjectInputStream<ReplicableWindEstimationFactoryService, WindEstimationModelsUpdateOperation> {
+
+    void updateWindEstimationModels(ExportedModels exportedModels) throws ModelPersistenceException;
 }

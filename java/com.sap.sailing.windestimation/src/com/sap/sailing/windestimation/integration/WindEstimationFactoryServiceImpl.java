@@ -11,7 +11,7 @@ import java.util.Map;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
@@ -23,7 +23,7 @@ import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sse.mongodb.MongoDBService;
 
 public class WindEstimationFactoryServiceImpl extends
-        AbstractReplicableWithObjectInputStream<WindEstimationFactoryServiceImpl, WindEstimationModelsUpdateOperation>
+        AbstractReplicableWithObjectInputStream<ReplicableWindEstimationFactoryService, WindEstimationModelsUpdateOperation>
         implements ReplicableWindEstimationFactoryService {
 
     private static final boolean PRELOAD_ALL_MODELS = true;
@@ -52,6 +52,7 @@ public class WindEstimationFactoryServiceImpl extends
                 PRESERVE_LOADED_MODELS_MILLIS, MAX_MANEUVER_FEATURES);
         gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(MODEL_STORE,
                 PRELOAD_ALL_MODELS, PRESERVE_LOADED_MODELS_MILLIS);
+        modelsReady = maneuverClassifiersCache.isReady() && gaussianBasedTwdTransitionDistributionCache.isReady();
     }
 
     private boolean isMaster() {
@@ -59,8 +60,8 @@ public class WindEstimationFactoryServiceImpl extends
     }
 
     @Override
-    public IncrementalWindEstimationTrack createIncrementalWindEstimationTrack(TrackedRace trackedRace) {
-        IncrementalWindEstimationTrack windEstimation = new IncrementalMstHmmWindEstimationForTrackedRace(trackedRace,
+    public IncrementalWindEstimation createIncrementalWindEstimationTrack(TrackedRace trackedRace) {
+        IncrementalWindEstimation windEstimation = new IncrementalMstHmmWindEstimationForTrackedRace(trackedRace,
                 new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION), trackedRace.getPolarDataService(),
                 trackedRace.getMillisecondsOverWhichToAverageWind(), maneuverClassifiersCache,
                 gaussianBasedTwdTransitionDistributionCache);
@@ -79,15 +80,17 @@ public class WindEstimationFactoryServiceImpl extends
         updateWindEstimationModels(exportedModels);
     }
 
+    @Override
     public void updateWindEstimationModels(ExportedModels exportedModels) throws ModelPersistenceException {
         for (ModelDomainType domainType : modelDomainTypesRequiredByWindEstimation) {
             Map<String, byte[]> serializedModelsForDomainType = exportedModels
                     .getSerializedModelsForDomainType(domainType);
             if (serializedModelsForDomainType != null) {
+                MODEL_STORE.deleteAll(domainType);
                 MODEL_STORE.importPersistedModels(serializedModelsForDomainType, domainType);
             }
         }
-        clearState();
+        reloadWindEstimationModels();
     }
 
     @Override
@@ -135,15 +138,19 @@ public class WindEstimationFactoryServiceImpl extends
         for (ModelDomainType domainType : modelDomainTypesRequiredByWindEstimation) {
             MODEL_STORE.deleteAll(domainType);
         }
-        clearState();
+        reloadWindEstimationModels();
+    }
+
+    @Override
+    public void clearState() throws Exception {
+        clearReplicaState();
     }
 
     /**
      * Clears/Reloads all caches with machine learning models. Notifies ready state change listeners about the new ready
      * state of this wind estimation instance.
      */
-    @Override
-    public void clearState() {
+    public void reloadWindEstimationModels() {
         maneuverClassifiersCache.clearCache();
         gaussianBasedTwdTransitionDistributionCache.clearCache();
         List<WindEstimationModelsChangedListener> modelsChangedListeners;
@@ -166,7 +173,7 @@ public class WindEstimationFactoryServiceImpl extends
             MODEL_STORE.deleteAll(domainType);
             MODEL_STORE.importPersistedModels(exportedModels, domainType);
         }
-        clearState();
+        reloadWindEstimationModels();
     }
 
     /**

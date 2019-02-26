@@ -100,7 +100,6 @@ public class TwdTransitionClassifierTrainer {
             i++;
         }
         LoggingUtil.logInfo("Training with  " + numberOfTrainingInstances + " instances...");
-        classifierModel.resetTrainingStats();
         classifierModel.train(x, y);
         LoggingUtil.logInfo("Training finished. Validating on train dataset...");
         TwdTransitionClassifierScoring classifierScoring = new TwdTransitionClassifierScoring(classifierModel);

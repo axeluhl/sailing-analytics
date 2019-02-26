@@ -38,6 +38,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.windestimation.TimePointAndPositionWithToleranceComparator;
 import com.sap.sailing.windestimation.ManeuverBasedWindEstimationComponentImpl;
 import com.sap.sailing.windestimation.aggregator.ManeuverClassificationsAggregatorFactory;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
@@ -75,14 +76,14 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
             "SERIALIZATION.modelForManeuverClassifier.NeuralNetworkClassifier.ManeuverClassification-Basic-All.clf" };
 
     protected final SimpleDateFormat dateFormat;
-    private final WindEstimationFactoryServiceImpl windEstimationFactoryService;
+    private WindEstimationFactoryServiceImpl windEstimationFactoryService;
     private ClassPathReadOnlyModelStoreImpl modelStore;
 
-    public IncrementalMstHmmWindEstimationForTrackedRaceTest()
-            throws MalformedURLException, URISyntaxException, ModelPersistenceException {
+    public IncrementalMstHmmWindEstimationForTrackedRaceTest() throws Exception {
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+2")); // will result in CEST
         windEstimationFactoryService = new WindEstimationFactoryServiceImpl();
+        windEstimationFactoryService.clearState();
         modelStore = new ClassPathReadOnlyModelStoreImpl("trained_wind_estimation_models", getClass().getClassLoader(),
                 modelFilesNames);
         windEstimationFactoryService.importAllModelsFromModelStore(modelStore);

@@ -21,8 +21,7 @@ public class TwdTransitionManualTrainingDataInputRegressorTrainer {
             throws Exception {
         IncrementalSingleDimensionPolynomialRegressorTrainerHelper trainerHelper = new IncrementalSingleDimensionPolynomialRegressorTrainerHelper(
                 regressorModelStore, model);
-        LoggingUtil
-                .logInfo("########## Training of " + model.getModelContext().getId() + " started...");
+        LoggingUtil.logInfo("########## Training of " + model.getModelContext().getId() + " started...");
         double[] modelInput = new double[1];
         for (int i = 0; i < inputOutputPairs.length; i++) {
             double xi = inputOutputPairs[i][0];

@@ -46,8 +46,9 @@ public interface TrainableModel<InstanceType, MC extends ModelContext<InstanceTy
     long getNumberOfTrainingInstances();
 
     /**
-     * Sets the training statistics for this model and makes this model ready (see {@link #isModelReady()}) for
-     * prediction tasks. This method must be called only after model training has been successfully completed.
+     * Sets the training statistics for this model after successful training which should have been previously signaled
+     * with {@link #setModelAsReadyAfterSuccessfulTraining()}. This method must be called only after model training has
+     * been successfully completed.
      * 
      * @param trainScore
      *            Macro-averaged F2-Score with training data (see {@link #getTrainScore()})
@@ -57,6 +58,16 @@ public interface TrainableModel<InstanceType, MC extends ModelContext<InstanceTy
      *            The number of instances which was used during model training
      */
     void setStatsAfterSuccessfulTraining(double trainScore, double testScore, long numberOfTrainingInstances);
+
+    /**
+     * Marks this model as ready for prediction tasks. This method should be called after successful training of this
+     * model. Afterwards, model evaluation should be performed to determine the training and test score of the model and
+     * set it with {@link #setStatsAfterSuccessfulTraining(double, double, long)}.
+     * 
+     * @see #isModelReady()
+     * @see #setStatsAfterSuccessfulTraining(double, double, long)
+     */
+    void setModelAsReadyAfterSuccessfulTraining();
 
     /**
      * Resets the training stats and marks this model as not ready (see {@link #isModelReady()}). Should be called

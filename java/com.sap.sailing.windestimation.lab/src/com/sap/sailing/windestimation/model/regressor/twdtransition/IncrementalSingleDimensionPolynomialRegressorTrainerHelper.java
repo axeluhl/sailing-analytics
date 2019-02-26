@@ -41,6 +41,9 @@ public class IncrementalSingleDimensionPolynomialRegressorTrainerHelper {
     }
 
     public void incrementRmseCalculation(double[] x, double y) {
+        if (!model.isModelReady()) {
+            model.setModelAsReadyAfterSuccessfulTraining();
+        }
         double predictedStd = model.getValue(x);
         double diff = predictedStd - y;
         squareErrorSum += diff * diff;

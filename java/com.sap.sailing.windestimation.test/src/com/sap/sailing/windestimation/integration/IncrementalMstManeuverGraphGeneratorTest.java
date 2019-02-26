@@ -29,6 +29,7 @@ import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.windestimation.TimePointAndPositionWithToleranceComparator;
 import com.sap.sailing.windestimation.aggregator.msthmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstGraphLevel;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;

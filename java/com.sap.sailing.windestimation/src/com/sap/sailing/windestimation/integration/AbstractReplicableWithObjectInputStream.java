@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.integration;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -105,7 +106,7 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        ObjectInputStream ois = new ObjectInputStream(is);
+        ObjectInputStream ois = new ObjectInputStreamWithContextClassLoaderAsResolver(is);
         return ois;
     }
 
@@ -137,6 +138,32 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
     @Override
     public void addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper<S, ?> operation) {
         this.operationsSentToMasterForReplication.add(operation);
+    }
+
+    /**
+     * Custom {@link ObjectInputStream} which is necessary in OSGI context in order to load the class
+     * {@link WindEstimationModelsUpdateOperation} without {@link ClassNotFoundException}.
+     * 
+     * @author Vladislav Chumak (D069712)
+     *
+     */
+    private class ObjectInputStreamWithContextClassLoaderAsResolver extends ObjectInputStream {
+
+        public ObjectInputStreamWithContextClassLoaderAsResolver(InputStream in) throws IOException {
+            super(in);
+        }
+
+        @Override
+        protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+            String name = desc.getName();
+            try {
+                return Class.forName(name, /* initialize */true, Thread.currentThread().getContextClassLoader());
+            } catch (ClassNotFoundException ex) {
+                // fall back on super class in order to load primitive types
+                return super.resolveClass(desc);
+            }
+        }
+
     }
 
 }

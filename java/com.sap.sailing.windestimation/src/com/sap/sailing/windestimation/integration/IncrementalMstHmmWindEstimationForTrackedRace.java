@@ -17,9 +17,11 @@ import com.sap.sailing.domain.maneuverdetection.TrackTimeInfo;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
-import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
+import com.sap.sailing.domain.windestimation.TimePointAndPositionWithToleranceComparator;
+import com.sap.sailing.domain.windestimation.WindTrackWithConfidenceForEachWindFixImpl;
 import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelInference;
 import com.sap.sailing.windestimation.aggregator.msthmm.DistanceAndDurationAwareWindTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculator;
@@ -48,10 +50,8 @@ import com.sap.sse.common.Util.Pair;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
-        implements IncrementalWindEstimationTrack {
+public class IncrementalMstHmmWindEstimationForTrackedRace implements IncrementalWindEstimation {
 
-    private static final long serialVersionUID = 6654969432545619955L;
     private static final double WIND_COURSE_TOLERANCE_IN_DEGREES_TO_IGNORE_FOR_REUSE = 1.0;
     private static final double DEFAULT_BASE_CONFIDENCE = 0.01;
     private final IncrementalMstManeuverGraphGenerator mstManeuverGraphGenerator;
@@ -60,15 +60,17 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
     private final Map<Pair<Position, TimePoint>, WindWithConfidence<Pair<Position, TimePoint>>> windTrackWithConfidences = new TreeMap<>(
             new TimePointAndPositionWithToleranceComparator());
     private final TrackedRace trackedRace;
-    private WindSource windSource;
+    private final WindSource windSource;
+    private final WindTrackWithConfidenceForEachWindFixImpl estimatedWindTrack;
 
     public IncrementalMstHmmWindEstimationForTrackedRace(TrackedRace trackedRace, WindSource windSource,
             PolarDataService polarDataService, long millisecondsOverWhichToAverage,
             ManeuverClassifiersCache maneuverClassifiersCache,
             GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache) {
-        super(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE,
+        this.estimatedWindTrack = new WindTrackWithConfidenceForEachWindFixImpl(millisecondsOverWhichToAverage,
+                DEFAULT_BASE_CONFIDENCE,
                 WindSourceType.MANEUVER_BASED_ESTIMATION.useSpeed() && polarDataService != null,
-                IncrementalMstHmmWindEstimationForTrackedRace.class.getName(), false);
+                IncrementalMstHmmWindEstimationForTrackedRace.class.getName(), false, windTrackWithConfidences);
         this.trackedRace = trackedRace;
         this.windSource = windSource;
         DistanceAndDurationAwareWindTransitionProbabilitiesCalculator transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
@@ -83,10 +85,15 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
     }
 
     @Override
+    public WindTrack getWindTrack() {
+        return estimatedWindTrack;
+    }
+
+    @Override
     public void newManeuverSpotsDetected(Competitor competitor, Iterable<CompleteManeuverCurve> newManeuvers,
             TrackTimeInfo trackTimeInfo) {
         List<ManeuverWithEstimatedType> maneuversWithEstimatedType = new ArrayList<>();
-        lockForWrite();
+        estimatedWindTrack.lockForWrite();
         try {
             for (CompleteManeuverCurve newManeuverSpot : newManeuvers) {
                 mstManeuverGraphGenerator.add(competitor, newManeuverSpot, trackTimeInfo);
@@ -134,7 +141,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
                 }
             }
         } finally {
-            unlockAfterWrite();
+            estimatedWindTrack.unlockAfterWrite();
         }
     }
 
@@ -144,13 +151,6 @@ public class IncrementalMstHmmWindEstimationForTrackedRace extends WindTrackImpl
             return false;
         }
         return true;
-    }
-
-    @Override
-    protected double getConfidenceOfInternalWindFixUnsynchronized(Wind windFix) {
-        WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = windTrackWithConfidences
-                .get(new Pair<>(windFix.getPosition(), windFix.getTimePoint()));
-        return super.getConfidenceOfInternalWindFixUnsynchronized(windFix) * windWithConfidence.getConfidence();
     }
 
     @Override

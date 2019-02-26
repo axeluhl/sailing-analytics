@@ -51,10 +51,14 @@ public abstract class AbstractTrainableModel<InstanceType, MC extends ModelConte
 
     @Override
     public void setStatsAfterSuccessfulTraining(double trainScore, double testScore, long numberOfTrainingInstances) {
-        trainingFinished = true;
         this.trainScore = trainScore;
         this.testScore = testScore;
         this.numberOfTrainingInstances = numberOfTrainingInstances;
+    }
+
+    @Override
+    public void setModelAsReadyAfterSuccessfulTraining() {
+        trainingFinished = true;
     }
 
     @Override

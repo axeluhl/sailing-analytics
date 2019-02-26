@@ -53,7 +53,7 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
-import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -1152,6 +1152,6 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * {@code null}, the wind estimation will be disabled for the tracked race. After the call of this method, maneuver
      * cache and wind cache will be reset and its recalculation will be triggered.
      */
-    void setWindEstimation(IncrementalWindEstimationTrack windEstimation);
+    void setWindEstimation(IncrementalWindEstimation windEstimation);
 
 }

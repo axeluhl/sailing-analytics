@@ -38,7 +38,7 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.windestimation.IncrementalWindEstimationTrack;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -722,7 +722,7 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public void setWindEstimation(IncrementalWindEstimationTrack windEstimation) {
+    public void setWindEstimation(IncrementalWindEstimation windEstimation) {
     }
     
 }

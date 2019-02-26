@@ -7,11 +7,17 @@ import com.sap.sailing.windestimation.data.persistence.twdtransition.AggregatedS
 
 public class AggregatedDurationDimensionPlot {
 
+    private static SingleDimensionAggregatesPlottingFrame plot;
+
     public static void main(String[] args) throws UnknownHostException {
         AggregatedSingleDimensionBasedTwdTransitionPersistenceManager persistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
                 AggregatedSingleDimensionType.DURATION);
-        SingleDimensionAggregatesPlottingFrame plot = new SingleDimensionAggregatesPlottingFrame(persistenceManager);
+        plot = new SingleDimensionAggregatesPlottingFrame(persistenceManager);
         plot.renderChart();
+    }
+    
+    public static void awaitWindowClosed() throws InterruptedException {
+        plot.awaitWindowClosed();
     }
 
 }

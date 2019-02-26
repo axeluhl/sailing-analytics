@@ -35,7 +35,7 @@ public class SingleDimensionTwdTransitionAggregationImporter {
     public void runAggregation() throws UnknownHostException {
         long totalValuesCount = 0;
         List<AggregatedSingleDimensionBasedTwdTransition> aggregates = new ArrayList<>();
-        LoggingUtil.logInfo("Aggregating persisted entries");
+        LoggingUtil.logInfo("Aggregating persisted entries for dimension " + dimensionType);
         TDoubleList entries = new TDoubleArrayList();
         double currentBucketThreshold = thresholdCalculator.getInitialThresholdValue();
         double nextBucketThreshold = thresholdCalculator.getNextThresholdValue(currentBucketThreshold);
@@ -61,7 +61,8 @@ public class SingleDimensionTwdTransitionAggregationImporter {
             }
             entries.add(twdChange);
             if (entries.size() % 10000 == 0) {
-                LoggingUtil.logInfo((entries.size() + totalValuesCount) + " Entries aggregated");
+                LoggingUtil.logInfo(
+                        (entries.size() + totalValuesCount) + " Entries aggregated for dimension " + dimensionType);
             }
         }
         if (entries.size() >= MIN_NUMBER_OF_VALUES_PER_BUCKET) {
@@ -69,14 +70,16 @@ public class SingleDimensionTwdTransitionAggregationImporter {
             aggregates.add(aggregate);
             totalValuesCount += entries.size();
         }
-        LoggingUtil.logInfo("Persisting " + aggregates.size() + " aggregates");
+        LoggingUtil.logInfo("Persisting " + aggregates.size() + " aggregates  for dimension " + dimensionType);
         AggregatedSingleDimensionBasedTwdTransitionPersistenceManager aggregatedDurationBasedTwdTransitionPersistenceManager = new AggregatedSingleDimensionBasedTwdTransitionPersistenceManager(
                 dimensionType);
         aggregatedDurationBasedTwdTransitionPersistenceManager.dropCollection();
         aggregatedDurationBasedTwdTransitionPersistenceManager.add(aggregates);
         LoggingUtil.logInfo("###################\r\n" + dimensionType + " based TWD transitions Import finished");
-        LoggingUtil.logInfo("Totally " + totalValuesCount + " TWD transitions imported");
-        LoggingUtil.logInfo("Totally " + aggregates.size() + " TWD transition aggregates imported");
+        LoggingUtil.logInfo(
+                "Totally " + totalValuesCount + " " + dimensionType + " based TWD transitions have been processed");
+        LoggingUtil.logInfo(
+                "Totally " + aggregates.size() + " TWD transition aggregates imported for dimension " + dimensionType);
     }
 
     private double getFinalBucketThreshold(double currentBucketThreshold, double nextBucketThreshold) {

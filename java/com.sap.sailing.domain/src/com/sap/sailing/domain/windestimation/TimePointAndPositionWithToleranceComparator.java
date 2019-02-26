@@ -1,5 +1,6 @@
-package com.sap.sailing.windestimation.integration;
+package com.sap.sailing.domain.windestimation;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.common.Position;
@@ -13,8 +14,9 @@ import com.sap.sse.common.Util.Pair;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class TimePointAndPositionWithToleranceComparator implements Comparator<Pair<Position, TimePoint>> {
+public class TimePointAndPositionWithToleranceComparator implements Comparator<Pair<Position, TimePoint>>, Serializable {
 
+    private static final long serialVersionUID = -3240742353261384636L;
     private static final double DOUBLE_TOLERANCE = 0.0000001;
 
     @Override
