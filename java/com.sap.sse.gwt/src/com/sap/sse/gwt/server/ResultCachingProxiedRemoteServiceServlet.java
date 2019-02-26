@@ -1,11 +1,17 @@
 package com.sap.sse.gwt.server;
 
+import java.lang.management.ManagementFactory;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
@@ -16,7 +22,8 @@ import com.sap.sse.common.CacheableRPCResult;
  * implement {@link CacheableRPCResult}.
  */
 public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedRemoteServiceServlet {
-
+    private static final Logger logger = Logger.getLogger(ResultCachingProxiedRemoteServiceServlet.class.getName());
+    
     private static final long serialVersionUID = -4245484615349695611L;
     
     private Map<CacheKey, String> resultCache = new ConcurrentHashMap<>();
@@ -29,8 +36,32 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
      */
     final ReferenceQueue<CacheableRPCResult> dereferencedObjectsQueue;
     
+    private long callCount;
+    private long recalcCount;
+    public class RPCSerializedResultCacheMXBeanImpl implements RPCSerializedResultCacheMXBean {
+        @Override
+        public long getCallCount() {
+            return callCount;
+        }
+        
+        @Override
+        public long getRecalcCount() {
+            return recalcCount;
+        }
+    }
+    
     public ResultCachingProxiedRemoteServiceServlet() {
         dereferencedObjectsQueue = new ReferenceQueue<>();
+        // Add an MBean for the service to the JMX bean server:
+        final RPCSerializedResultCacheMXBean mbean = new RPCSerializedResultCacheMXBeanImpl();
+        final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        try {
+            final ObjectName mBeanName = new ObjectName("com.sap.sse:type=GWTRPCSerializedResultCache_"+
+                    getClass().getSimpleName()+"_"+(toString().substring(toString().indexOf('@')+1)));
+            mbs.registerMBean(mbean, mBeanName);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Couldn't register MXBean for result-caching proxy "+this, e);
+        }
     }
     
     @Override
@@ -40,8 +71,10 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
         if (result instanceof CacheableRPCResult) {
             final CacheableRPCResult cacheableResult = (CacheableRPCResult) result;
             try {
+                callCount++;
                 return resultCache.computeIfAbsent(new CacheKey(serializationPolicy, cacheableResult, dereferencedObjectsQueue),
                         key -> {
+                            recalcCount++;
                             try {
                                 return super.encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result);
                             } catch (SerializationException serializationException) {

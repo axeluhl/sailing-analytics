@@ -144,24 +144,24 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         super.service(req, resp);
-        final TimePoint afterResultSerialization = MillisecondsTimePoint.now();
+        final TimePoint afterSendingResultToResponse = MillisecondsTimePoint.now();
         final Triple<RPCRequest, TimePoint, TimePoint> startAndEndOfProcessing = processingStartAndFinishTime.get();
         if (startAndEndOfProcessing == null) {
             logger.warning("A non-POST request with method "+req.getMethod()+" from address "+req.getRemoteAddr()
                 +" was processed. No timing information available.");
         } else {
-            final Duration totalTime = startAndEndOfProcessing.getB().until(afterResultSerialization);
+            final Duration totalTime = startAndEndOfProcessing.getB().until(afterSendingResultToResponse);
             if (totalTime.compareTo(LOG_REQUESTS_TAKING_LONGER_THAN) > 0) {
-                logRequest(startAndEndOfProcessing.getA(), startAndEndOfProcessing.getB(), startAndEndOfProcessing.getC(), afterResultSerialization);
+                logRequest(startAndEndOfProcessing.getA(), startAndEndOfProcessing.getB(), startAndEndOfProcessing.getC(), afterSendingResultToResponse);
             }
             processingStartAndFinishTime.set(null);
         }
     }
 
-    private void logRequest(RPCRequest request, TimePoint startOfProcessing, TimePoint endOfProcessing, TimePoint afterResultSerialization) {
+    private void logRequest(RPCRequest request, TimePoint startOfProcessing, TimePoint endOfProcessing, TimePoint afterSendingResultToResponse) {
         final Duration processingDuration = startOfProcessing.until(endOfProcessing);
-        final Duration serializationDuration = endOfProcessing.until(afterResultSerialization);
-        final Duration totalDuration = startOfProcessing.until(afterResultSerialization);
+        final Duration sendingToResponseDuration = endOfProcessing.until(afterSendingResultToResponse);
+        final Duration totalDuration = startOfProcessing.until(afterSendingResultToResponse);
         final String username;
         final Subject subject = SecurityUtils.getSubject();
         if (subject != null) {
@@ -172,7 +172,7 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
         logger.log(Level.WARNING, "GWT RPC Request "+request.getMethod()+
                 " by user "+username+
                 " with parameters "+Arrays.toString(request.getParameters())+" on "+this+
-                " took "+processingDuration+" to process, "+serializationDuration+" to serialize the response, so "+
+                " took "+processingDuration+" to process, "+sendingToResponseDuration+" to send result into response, so "+
                 totalDuration+" in total.");
     }
 }
