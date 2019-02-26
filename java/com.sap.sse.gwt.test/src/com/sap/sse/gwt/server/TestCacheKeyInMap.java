@@ -45,7 +45,7 @@ public class TestCacheKeyInMap {
         final CacheKey key = new CacheKey(/* serialization policy */ null, cachedObject, queue);
         final String value = "abc";
         map.put(key, value);
-        key.cacheableResult.clear();
+        key.clear();
         assertSame(value, map.get(key));
     }
 
@@ -53,7 +53,7 @@ public class TestCacheKeyInMap {
     public void testClearingReferenceBeforeCaching() {
         final CacheableRPCResult cachedObject = new CacheableRPCResult() {};
         final CacheKey key = new CacheKey(/* serialization policy */ null, cachedObject, queue);
-        key.cacheableResult.clear();
+        key.clear();
         final String value = "abc";
         map.put(key, value);
         assertSame(value, map.get(key));
@@ -65,7 +65,7 @@ public class TestCacheKeyInMap {
         final CacheKey key = new CacheKey(/* serialization policy */ null, cachedObject, queue);
         final String value = "abc";
         map.put(key, value);
-        key.cacheableResult.clear();
+        key.clear();
         assertSame(value, map.remove(key));
         assertTrue(map.isEmpty());
     }

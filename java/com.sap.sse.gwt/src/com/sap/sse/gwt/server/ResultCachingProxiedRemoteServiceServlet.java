@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.server;
 
+import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -35,6 +36,7 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
     @Override
     protected String encodeResponseForSuccess(Method serviceMethod, SerializationPolicy serializationPolicy, int flags,
             Object result) throws SerializationException {
+        purgeCache();
         if (result instanceof CacheableRPCResult) {
             final CacheableRPCResult cacheableResult = (CacheableRPCResult) result;
             try {
@@ -53,6 +55,16 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
         return super.encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result);
     }
     
+    /**
+     * For all references enqueued in {@link #dereferencedObjectsQueue}, removes their key from the {@link #resultCache}.
+     */
+    private void purgeCache() {
+        Reference<? extends CacheableRPCResult> clearedReference;
+        while ((clearedReference = dereferencedObjectsQueue.poll()) != null) {
+            resultCache.remove(clearedReference);
+        }
+    }
+
     private class TemporaryWrapperException extends RuntimeException {
         private static final long serialVersionUID = 4720608117776979002L;
         private final SerializationException serializationException;
