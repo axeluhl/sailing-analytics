@@ -4,7 +4,7 @@ Bundle-Name: SAP Sailing Common
 Bundle-SymbolicName: com.sap.sailing.domain.common
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.abstractlog,

@@ -447,16 +447,8 @@ public class EventsResource extends AbstractSailingServerResource {
             public Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard> run() throws Exception {
                 Event event = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                         SecuredDomainType.EVENT, EventBaseImpl.getTypeRelativeObjectIdentifier(eventId),
-                        eventName, new ActionWithResult<Event>() {
-
-                            @Override
-                            public Event run() throws Exception {
-                                return getService()
-                                .apply(new CreateEvent(eventName, eventDescription, startDate, endDate, venueName, isPublic, eventId,
-                                        officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos, leaderboardGroupIds));
-                            }
-                        });
-
+                        eventName, ()->getService().apply(new CreateEvent(eventName, eventDescription, startDate, endDate, venueName, isPublic, eventId,
+                                        officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos, leaderboardGroupIds)));
                 CourseArea courseArea = addCourseArea(event, "Default");
                 final LeaderboardGroup leaderboardGroup;
                 if (createLeaderboardGroup) {

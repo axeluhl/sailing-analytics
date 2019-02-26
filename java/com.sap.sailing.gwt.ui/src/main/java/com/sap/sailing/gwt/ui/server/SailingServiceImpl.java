@@ -6893,6 +6893,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void addDeviceMappingToRegattaLog(String leaderboardName,
             DeviceMappingDTO dto) throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException {
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObject(
+                DefaultActions.UPDATE, getService().getRegattaByName(leaderboardName)));
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         DeviceMapping<?> mapping = convertToDeviceMapping(dto);
         TimePoint now = MillisecondsTimePoint.now();
