@@ -48,6 +48,20 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
         public long getRecalcCount() {
             return recalcCount;
         }
+        
+        @Override
+        public long getNumberOfCachedResults() {
+            return resultCache.size();
+        }
+        
+        @Override
+        public long getTotalCacheSize() {
+            long result = 0;
+            for (final String cachedString : resultCache.values()) {
+                result += cachedString.length();
+            }
+            return result;
+        }
     }
     
     public ResultCachingProxiedRemoteServiceServlet() {
