@@ -63,7 +63,7 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         fixes.clear();
         fixes.add(fix3);
         candidateDeltas = finder.getCandidateDeltas(ron, fixes);
-        assertEquals(2, Util.size(candidateDeltas.getA())); // CTE candidate
+        assertEquals(2, Util.size(candidateDeltas.getA())); // XTE candidate
         chooser.calculateMarkPassDeltas(ron, candidateDeltas.getA(), candidateDeltas.getB());
 
 
