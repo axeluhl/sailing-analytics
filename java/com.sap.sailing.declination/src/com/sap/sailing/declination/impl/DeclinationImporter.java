@@ -45,6 +45,9 @@ public abstract class DeclinationImporter {
                     }
                 } catch (IOException | ParserConfigurationException | SAXException e) {
                     logger.log(Level.FINE, "Exception while trying to load magnetic declination online", e);
+                    synchronized (result) {
+                        result.notifyAll(); // wake up waiter; no result will show up anymore
+                    }
                 }
             }
         };
