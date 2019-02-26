@@ -393,7 +393,6 @@ public class ExpeditionAllInOneImporter {
                     // First, create the session for the full log
                     final String raceColumnName = regatta.getRaceColumnByName(filename) == null ? filename : filenameWithDateTimeSuffix;
                     checkTrackedRacesCreationPermission(regattaNameAndleaderboardName, trackedRaceName, additionalTrackedRaceNames, ()->{});
-                    // TODO perform security checks: TRACKED_RACE:CREATE (for all splits, too, if requested)
                     final TimePointsOfFirstAndLastFix firstAndLastFixAt = importFixes(filenameWithSuffix, fileItem, jsonHolderForGpsFixImport, jsonHolderForSensorFixImport, errors);
                     ensureEventLongEnough(firstAndLastFixAt.getFirstFixAt(), firstAndLastFixAt.getLastFixAt(), eventId);
                     final Iterable<? extends Series> seriesInRegatta = regatta.getSeries();
