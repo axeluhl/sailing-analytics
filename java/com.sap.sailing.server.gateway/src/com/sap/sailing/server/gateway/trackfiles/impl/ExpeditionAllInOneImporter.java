@@ -212,7 +212,7 @@ public class ExpeditionAllInOneImporter {
 
     public ImporterResult importFiles(final String filenameWithSuffix, final FileItem fileItem,
             final String boatClassName, ImportMode importMode, String existingRegattaName, boolean importStartData)
-                    throws AllinOneImportException, IOException, FormatNotSupportedException {
+                    throws AllInOneImportException, IOException, FormatNotSupportedException {
         final List<ErrorImportDTO> errors = new ArrayList<>();
         final String importTimeString = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC));
         final String filename = ExpeditionImportFilenameUtils.truncateFilenameExtentions(filenameWithSuffix);
@@ -230,7 +230,7 @@ public class ExpeditionAllInOneImporter {
                     serverStringMessages.get(uiLocale, "allInOneErrorGPSDataImportFailed"));
         } catch (IOException e1) {
             errors.addAll(jsonHolderForGpsFixImport.getErrorList());
-            throw new AllinOneImportException(e1, errors);
+            throw new AllInOneImportException(e1, errors);
         }
         errors.addAll(jsonHolderForGpsFixImport.getErrorList());
         // Import Extended Sensor Data
@@ -245,7 +245,7 @@ public class ExpeditionAllInOneImporter {
                     serverStringMessages.get(uiLocale, "allInOneErrorSensorDataImportFailed"));
         } catch (IOException e1) {
             errors.addAll(jsonHolderForSensorFixImport.getErrorList());
-            throw new AllinOneImportException(e1, errors);
+            throw new AllInOneImportException(e1, errors);
         }
         errors.addAll(jsonHolderForSensorFixImport.getErrorList());
         TimePoint firstFixAt = null;
@@ -331,7 +331,7 @@ public class ExpeditionAllInOneImporter {
                                             raceColumn.getName(), fleet.getName()));
                         }
                     } catch (Exception e) {
-                        throw new AllinOneImportException(e, errors);
+                        throw new AllInOneImportException(e, errors);
                     }
                 } else if (importMode == ImportMode.NEW_RACE) {
                     final Iterable<? extends Series> seriesInRegatta = regatta.getSeries();
@@ -387,13 +387,13 @@ public class ExpeditionAllInOneImporter {
                     jsonHolderForGpsFixImport.getImportResult(), jsonHolderForSensorFixImport.getImportResult(),
                     sensorFixImporterType, errors, startData);
         } catch (Exception e) {
-            throw new AllinOneImportException(e, errors);
+            throw new AllInOneImportException(e, errors);
         }
     }
 
     private Triple<DynamicTrackedRace, String, String> createSessionForStartTime(TimePoint startTime,
             TimePoint firstFixAt, TimePoint lastFixAt, List<ErrorImportDTO> errors, Regatta regatta,
-            RegattaLeaderboard regattaLeaderboard) throws AllinOneImportException {
+            RegattaLeaderboard regattaLeaderboard) throws AllInOneImportException {
         final int sessionCounter = getNextAvailableStartBasedSessionCount(regatta);
         final String raceColumnName = START_PER_SESSION_RACE_COLUMN_NAME_PREFIX + sessionCounter;
         final Triple<DynamicTrackedRace, String, String> trackedRaceAndRaceColumnNameAndFleetName = addRace(
@@ -428,7 +428,7 @@ public class ExpeditionAllInOneImporter {
      */
     private Triple<DynamicTrackedRace, String, String> addRace(final List<ErrorImportDTO> errors, final Regatta regatta,
             final String raceColumnName, final String trackedRaceName, final RegattaLeaderboard regattaLeaderboard,
-            final TimePoint startOfTracking, final TimePoint endOfTracking, TimePoint startTime) throws AllinOneImportException {
+            final TimePoint startOfTracking, final TimePoint endOfTracking, TimePoint startTime) throws AllInOneImportException {
         final Iterable<? extends Series> seriesInRegatta = regatta.getSeries();
         assert !Util.isEmpty(seriesInRegatta);
         final Series series = Util.get(seriesInRegatta, Util.size(seriesInRegatta) - 1);
@@ -488,7 +488,7 @@ public class ExpeditionAllInOneImporter {
             final String filenameWithDateTimeSuffix, final String trackedRaceName, final int[] discardThresholds,
             TimePoint firstFixAt, TimePoint lastFixAt, final TimePoint eventStartDate, final TimePoint eventEndDate,
             final UUID eventId, final String leaderboardGroupName, final String regattaNameAndleaderboardName,
-            final String fleetName, final String raceColumnName, final ExpeditionStartData startData) throws AllinOneImportException {
+            final String fleetName, final String raceColumnName, final ExpeditionStartData startData) throws AllInOneImportException {
         final DynamicTrackedRace trackedRace;
         final String eventName = filenameWithDateTimeSuffix;
         final String description = MessageFormat.format("Event imported from expedition file ''{0}'' on {1}",
@@ -617,7 +617,7 @@ public class ExpeditionAllInOneImporter {
 
     private Regatta createRegattaWithOneRaceColumn(final String boatClassName, final String regattaNameAndleaderboardName, final String fleetName,
             final String raceColumnName, final RegattaIdentifier regattaIdentifier, final UUID courseAreaId,
-            final Double buoyZoneRadiusInHullLengths, final String seriesName) throws AllinOneImportException {
+            final Double buoyZoneRadiusInHullLengths, final String seriesName) throws AllInOneImportException {
         final ScoringSchemeType scoringSchemeType = ScoringSchemeType.LOW_POINT;
         final RankingMetrics rankingMetric = RankingMetrics.ONE_DESIGN;
         final Regatta regatta;
@@ -656,7 +656,7 @@ public class ExpeditionAllInOneImporter {
     private DynamicTrackedRace createTrackedRaceAndSetupRaceTimes(final List<ErrorImportDTO> errors,
             final String trackedRaceName, TimePoint firstFixAt, TimePoint lastFixAt, final Regatta regatta,
             final RegattaLeaderboard regattaLeaderboard, final RaceColumn raceColumn, final Fleet fleet)
-            throws AllinOneImportException {
+            throws AllInOneImportException {
         // TODO this could be where we evaluate the ExpeditionStartData to optionally create one additional race per start
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
         final AbstractLogEventAuthor author = service.getServerAuthor();
@@ -675,7 +675,7 @@ public class ExpeditionAllInOneImporter {
             raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
             return trackRace(regattaLeaderboard, raceColumn, fleet);
         } catch (Exception e) {
-            throw new AllinOneImportException(e, errors);
+            throw new AllInOneImportException(e, errors);
         }
     }
 
@@ -694,15 +694,15 @@ public class ExpeditionAllInOneImporter {
         return trackedRace;
     }
 
-    private void ensureSuccessfulImport(ImportResult result, String errorMessage) throws AllinOneImportException {
+    private void ensureSuccessfulImport(ImportResult result, String errorMessage) throws AllInOneImportException {
         if (!result.getErrorList().isEmpty()) {
-            throw new AllinOneImportException(errorMessage, result.getErrorList());
+            throw new AllInOneImportException(errorMessage, result.getErrorList());
         }
     }
 
-    private void ensureBoatClassDetermination(Regatta regatta) throws AllinOneImportException {
+    private void ensureBoatClassDetermination(Regatta regatta) throws AllInOneImportException {
         if (regatta.getBoatClass() == null) {
-            throw new AllinOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorBoatClassDeterminationFailed"));
+            throw new AllInOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorBoatClassDeterminationFailed"));
         }
     }
 }
