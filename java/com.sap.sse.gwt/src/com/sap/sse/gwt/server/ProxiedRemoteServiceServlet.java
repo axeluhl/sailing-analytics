@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.dispatch.servlets;
+package com.sap.sse.gwt.server;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -115,12 +115,30 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
         return Locale.ENGLISH;
     }
 
+    /**
+     * Subclasses overriding this method must either delegate to this method or, if they don't, call
+     * {@link #beforeProcessCall()} at the beginning and {@link #afterProcessCall(RPCRequest, TimePoint)} at the end of
+     * the method, ideally in a {@code finally} clause, passing the result of the {@link #beforeProcessCall()} call as
+     * the {@code startOfRequestProcessing} parameter.
+     */
     @Override
     public String processCall(RPCRequest rpcRequest) throws SerializationException {
+        final TimePoint startOfRequestProcessing = beforeProcessCall();
+        try {
+            final String result = super.processCall(rpcRequest);
+            return result;
+        } finally {
+            afterProcessCall(rpcRequest, startOfRequestProcessing);
+        }
+    }
+
+    protected TimePoint beforeProcessCall() {
         final TimePoint startOfRequestProcessing = MillisecondsTimePoint.now();
-        final String result = super.processCall(rpcRequest);
+        return startOfRequestProcessing;
+    }
+    
+    protected void afterProcessCall(RPCRequest rpcRequest, final TimePoint startOfRequestProcessing) {
         processingStartAndFinishTime.set(new Triple<>(rpcRequest, startOfRequestProcessing, MillisecondsTimePoint.now()));
-        return result;
     }
 
     @Override

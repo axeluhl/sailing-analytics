@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server;
+package com.sap.sse.gwt.server;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,32 +11,46 @@ import com.google.gwt.user.server.rpc.RPC;
 import com.google.gwt.user.server.rpc.RPCRequest;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
-import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
+import com.sap.sse.common.TimePoint;
 
 public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemoteServiceServlet {
     private static final long serialVersionUID = -5543378343472849437L;
 
     /**
-     * Overwritten version of {@link RemoteServiceServlet#processCall(RPCRequest)} that calls 
+     * Overwritten version of {@link RemoteServiceServlet#processCall(RPCRequest)} that calls
+     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)} instead of
+     * {@link RPC#invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)}.
+     * {@link #invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)} in turn calls
+     * {@link #encodeResponseForSuccess(Method, SerializationPolicy, int, Object)} which subclasses can override
+     * in order to customize result serialization, e.g., by picking a cached serialized version.
      */
     @Override
     public String processCall(RPCRequest rpcRequest) throws SerializationException {
-        final Object delegate = this;
-
+        final TimePoint startOfProcessCall = beforeProcessCall();
         try {
-            onAfterRequestDeserialized(rpcRequest);
-            return invokeAndEncodeResponse(delegate, rpcRequest.getMethod(), rpcRequest.getParameters(),
-                    rpcRequest.getSerializationPolicy(), rpcRequest.getFlags());
-        } catch (IncompatibleRemoteServiceException ex) {
-            log("An IncompatibleRemoteServiceException was thrown while processing this call.", ex);
-            return RPC.encodeResponseForFailedRequest(rpcRequest, ex);
-        } catch (RpcTokenException tokenException) {
-            log("An RpcTokenException was thrown while processing this call.", tokenException);
-            return RPC.encodeResponseForFailedRequest(rpcRequest, tokenException);
+            final Object delegate = this;
+            try {
+                onAfterRequestDeserialized(rpcRequest);
+                return invokeAndEncodeResponse(delegate, rpcRequest.getMethod(), rpcRequest.getParameters(),
+                        rpcRequest.getSerializationPolicy(), rpcRequest.getFlags());
+            } catch (IncompatibleRemoteServiceException ex) {
+                log("An IncompatibleRemoteServiceException was thrown while processing this call.", ex);
+                return RPC.encodeResponseForFailedRequest(rpcRequest, ex);
+            } catch (RpcTokenException tokenException) {
+                log("An RpcTokenException was thrown while processing this call.", tokenException);
+                return RPC.encodeResponseForFailedRequest(rpcRequest, tokenException);
+            }
+        } finally {
+            afterProcessCall(rpcRequest, startOfProcessCall);
         }
     }
 
-    public String invokeAndEncodeResponse(Object target, Method serviceMethod, Object[] args,
+    /**
+     * Similar to {@link RPC#invokeAndEncodeResponse(Object, Method, Object[], SerializationPolicy, int)}, but
+     * calls {@link #encodeResponseForSuccess(Method, SerializationPolicy, int, Object)}, giving subclasses
+     * a way to override result serialization.
+     */
+    private String invokeAndEncodeResponse(Object target, Method serviceMethod, Object[] args,
             SerializationPolicy serializationPolicy, int flags) throws SerializationException {
         if (serviceMethod == null) {
             throw new NullPointerException("serviceMethod");
@@ -82,15 +96,12 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
         sb.append("Blocked attempt to access inaccessible method '");
         sb.append(getSourceRepresentation(serviceMethod));
         sb.append("'");
-
         if (target != null) {
             sb.append(" on target '");
             sb.append(printTypeName(target.getClass()));
             sb.append("'");
         }
-
         sb.append("; this is either misconfiguration or a hack attempt");
-
         return sb.toString();
     }
 
@@ -102,19 +113,15 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
         sb.append("Blocked attempt to invoke method '");
         sb.append(getSourceRepresentation(serviceMethod));
         sb.append("'");
-
         if (target != null) {
             sb.append(" on target '");
             sb.append(printTypeName(target.getClass()));
             sb.append("'");
         }
-
         sb.append(" with invalid arguments");
-
         if (args != null && args.length > 0) {
             sb.append(Arrays.asList(args));
         }
-
         return sb.toString();
     }
 
@@ -127,7 +134,6 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
      */
     private String printTypeName(Class<?> type) {
         // Primitives
-        //
         if (type.equals(Integer.TYPE)) {
             return "int";
         } else if (type.equals(Long.TYPE)) {
@@ -145,16 +151,12 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
         } else if (type.equals(Double.TYPE)) {
             return "double";
         }
-
         // Arrays
-        //
         if (type.isArray()) {
             Class<?> componentType = type.getComponentType();
             return printTypeName(componentType) + "[]";
         }
-
         // Everything else
-        //
         return type.getName().replace('$', '.');
     }
 }

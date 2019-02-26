@@ -6,7 +6,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationService;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.server.interfaces.RacingEventService;
-import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
+import com.sap.sse.gwt.server.ProxiedRemoteServiceServlet;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 /**

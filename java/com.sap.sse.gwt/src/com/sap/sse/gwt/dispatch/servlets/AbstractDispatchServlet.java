@@ -11,6 +11,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.Action;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
+import com.sap.sse.gwt.server.ProxiedRemoteServiceServlet;
 
 /**
  * Abstract server-side part of the dispatch functionality. Needs to be subclassed in modules that want to use dispatch
