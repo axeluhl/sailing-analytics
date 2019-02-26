@@ -18,20 +18,26 @@ import com.sap.sse.common.Util.Pair;
  */
 public class CacheKey {
     private final SerializationPolicy serializationPolicy;
-    private final WeakReference<CacheableRPCResult> cacheableResult;
+    final WeakReference<CacheableRPCResult> cacheableResult; // package-protected to let test fragment see it
+    private final int hashCode;
 
     public CacheKey(SerializationPolicy serializationPolicy, CacheableRPCResult cacheableResult, ReferenceQueue<CacheableRPCResult> dereferencedObjectsQueue) {
         this.serializationPolicy = serializationPolicy;
         this.cacheableResult = new WeakReference<>(cacheableResult, dereferencedObjectsQueue);
+        this.hashCode = internalHashCode();
+    }
+
+    private int internalHashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((cacheableResult.get() == null) ? 0 : cacheableResult.get().hashCode());
+        result = prime * result + ((serializationPolicy == null) ? 0 : serializationPolicy.hashCode());
+        return result;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((cacheableResult == null) ? 0 : cacheableResult.hashCode());
-        result = prime * result + ((serializationPolicy == null) ? 0 : serializationPolicy.hashCode());
-        return result;
+        return hashCode;
     }
 
     @Override
