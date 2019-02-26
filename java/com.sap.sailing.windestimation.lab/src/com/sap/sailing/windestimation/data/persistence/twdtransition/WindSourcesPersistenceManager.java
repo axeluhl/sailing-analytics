@@ -21,15 +21,18 @@ import com.sap.sse.common.TimePoint;
 
 public class WindSourcesPersistenceManager extends AbstractPersistenceManager<WindSourceWithFixes> {
 
+    private static final String WIND_SOURCES_COLLECTION_NAME = "windSources";
+
     public WindSourcesPersistenceManager() throws UnknownHostException {
-        BasicDBObject indexes = new BasicDBObject(RaceWindJsonSerializer.START_TIME_POINT, 1);
+        BasicDBObject indexes = new BasicDBObject("_id", 1);
+        indexes.put(RaceWindJsonSerializer.START_TIME_POINT, 1);
         indexes.put(RaceWindJsonSerializer.END_TIME_POINT, -1);
         getCollection().createIndex(indexes);
     }
 
     @Override
     public String getCollectionName() {
-        return RaceWithWindSourcesPersistenceManager.getWindSourcesCollectionName();
+        return RaceWithWindSourcesPersistenceManager.COLLECTION_NAME + "." + WIND_SOURCES_COLLECTION_NAME;
     }
 
     @Override

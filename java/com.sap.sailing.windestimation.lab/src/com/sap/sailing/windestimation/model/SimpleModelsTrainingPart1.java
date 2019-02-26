@@ -48,10 +48,10 @@ public class SimpleModelsTrainingPart1 {
             PersistedManeuverClassifiersScorePrinter.main(args);
         });
         executeInThreadPool(() -> {
-            DurationBasedTwdTransitionImporter.main(args);
+            DistanceBasedTwdTransitionImporter.main(args);
         });
         executeInThreadPool(() -> {
-            DistanceBasedTwdTransitionImporter.main(args);
+            DurationBasedTwdTransitionImporter.main(args);
         });
         awaitThreadPoolCompletion();
         AggregatedDurationBasedTwdTransitionImporter.createPersistenceManagerAndEnsureIndex();
@@ -77,6 +77,7 @@ public class SimpleModelsTrainingPart1 {
         } while (JOptionPane.YES_OPTION != askDataCleaningFinished(AggregatedSingleDimensionType.DISTANCE));
         showInfoAboutIntervalAdjustments(DistanceBasedTwdTransitionRegressorModelContext.class,
                 DistanceValueRange.class);
+        showInfoAboutRunPart2();
     }
 
     private static int askDataCleaningFinished(AggregatedSingleDimensionType dimension) {
@@ -92,6 +93,11 @@ public class SimpleModelsTrainingPart1 {
             return JOptionPane.NO_OPTION;
         }
         return JOptionPane.CLOSED_OPTION;
+    }
+
+    private static void showInfoAboutRunPart2() {
+        JOptionPane.showMessageDialog(null, "Now, run the class \"" + SimpleModelsTrainingPart2.class.getName()
+                + "\".\nThis will complete the training process.");
     }
 
     private static void showInfoAboutDataCleaning(AggregatedSingleDimensionType dimension) {
