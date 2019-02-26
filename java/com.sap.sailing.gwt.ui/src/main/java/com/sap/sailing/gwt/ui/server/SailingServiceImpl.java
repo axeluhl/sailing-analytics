@@ -212,6 +212,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -352,7 +353,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
-import com.sap.sailing.domain.tracking.MailInvitationType;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -8160,5 +8160,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return raceTimesInfos;
+    }
+
+    @Override
+    public MailInvitationType getMailType() {
+        MailInvitationType type = MailInvitationType
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+        return type;
     }
 }
