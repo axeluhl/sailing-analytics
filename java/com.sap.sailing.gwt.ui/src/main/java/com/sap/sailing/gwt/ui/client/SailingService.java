@@ -147,6 +147,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<RegattaDTO> getRegattas();
 
+    List<RegattaDTO> getRegattasWithUpdatePermission();
+
     RegattaDTO getRegattaByName(String regattaName);
 
     List<EventDTO> getEvents() throws Exception;
