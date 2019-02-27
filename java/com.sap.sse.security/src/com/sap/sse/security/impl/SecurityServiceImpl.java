@@ -579,7 +579,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (tenantOwner == null) {
                 tenantOwner = getDefaultTenantForUser(userOwner);
             }
-            tenantId = tenantOwner.getId();
+            tenantId = tenantOwner==null?null:tenantOwner.getId();
         }
 
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
