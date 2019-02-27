@@ -15,7 +15,7 @@ import com.sap.sse.security.shared.WildcardPermission;
  */
 public class WildcardPermissionEncoder implements PermissionStringEncoder<WildcardPermission> {
     private static final char ESCAPE_CHARACTER = '\\';
-    private static final char PART_DIVIDER_ENCODED = '/';  
+    private static final char PART_DIVIDER_ENCODED = '/';
     private static final char SUBPART_DIVIDER_ENCODED = '|';
     
     @Override
