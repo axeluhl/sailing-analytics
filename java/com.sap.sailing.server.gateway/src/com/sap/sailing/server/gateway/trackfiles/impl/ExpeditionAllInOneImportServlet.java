@@ -150,8 +150,8 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
         json.put(ExpeditionAllInOneConstants.RESPONSE_GPS_DEVICE_IDS, ImportResultSerializer.serializeTrackList(importerResult.importGpsFixData));
         json.put(ExpeditionAllInOneConstants.RESPONSE_SENSOR_DEVICE_IDS, ImportResultSerializer.serializeTrackList(importerResult.importSensorFixData));
         json.put(ExpeditionAllInOneConstants.RESPONSE_SENSOR_FIX_IMPORTER_TYPE, importerResult.sensorFixImporterType);
-        json.put(ExpeditionAllInOneConstants.RESPONSE_START_TIMES, ImportResultSerializer.serializeIterable(importerResult.startData.getStartTimes(),
-                startTime->startTime.asMillis()));
+        json.put(ExpeditionAllInOneConstants.RESPONSE_START_TIMES, importerResult.startData==null ? null :
+            ImportResultSerializer.serializeIterable(importerResult.startData.getStartTimes(), startTime->startTime.asMillis()));
         return json;
     }
 }
