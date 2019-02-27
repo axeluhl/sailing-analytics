@@ -7,7 +7,7 @@ import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 public class TypeRelativeObjectIdentifier implements Serializable {
     private static final long serialVersionUID = 118021576560675686L;
 
-    private String typeRelativeIdentifer;
+    private final String typeRelativeIdentifer;
 
     /**
      * Only for DB restore, as the identifier is already escaped and would be double escaped
@@ -68,5 +68,4 @@ public class TypeRelativeObjectIdentifier implements Serializable {
             return false;
         return true;
     }
-
 }
