@@ -1099,4 +1099,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return successInfo;
     }
 
+    @Override
+    public TypeRelativeObjectIdentifier serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier) {
+        return null;
+    }
 }

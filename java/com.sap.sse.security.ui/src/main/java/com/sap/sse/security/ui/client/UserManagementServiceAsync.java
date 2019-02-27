@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
@@ -179,4 +180,6 @@ public interface UserManagementServiceAsync {
      */
     void removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permission,
             AsyncCallback<SuccessInfo> callback);
+    
+    void serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, AsyncCallback<TypeRelativeObjectIdentifier> callback);
 }

@@ -12,6 +12,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -175,4 +176,5 @@ public interface UserManagementService extends RemoteService {
     SuccessInfo removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permissions)
             throws UnauthorizedException;
 
+    TypeRelativeObjectIdentifier serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
 }

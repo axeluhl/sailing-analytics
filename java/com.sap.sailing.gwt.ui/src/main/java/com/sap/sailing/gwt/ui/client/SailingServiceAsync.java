@@ -87,6 +87,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
+import com.sap.sailing.gwt.ui.shared.SerializationDummy;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
@@ -119,6 +120,7 @@ import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
@@ -936,8 +938,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getTrackingTimes(Collection<Triple<String, String, String>> leaderboardRaceColumnFleetNames,
             AsyncCallback<Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>>> asyncCallback);
 
-    void serializationDummy(PersonDTO dummy, CountryCode ccDummy,
-			PreciseCompactPosition preciseCompactPosition, AsyncCallback<Pair<PersonDTO, CountryCode>> callback);
+    void serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, AsyncCallback<SerializationDummy> callback);
 
     /**
      * @param leaderboardName

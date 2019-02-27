@@ -100,6 +100,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
+import com.sap.sailing.gwt.ui.shared.SerializationDummy;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
@@ -136,6 +137,7 @@ import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationService;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
@@ -883,7 +885,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> getTrackingTimes(Collection<Triple<String, String, String>> raceColumnsAndFleets);
 
-    Pair<PersonDTO, CountryCode> serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition);
+    SerializationDummy serializationDummy(PersonDTO dummy,
+            CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
 
     Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName);
 
