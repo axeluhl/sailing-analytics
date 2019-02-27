@@ -19,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,6 +43,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.media.mp4.MP4MediaParser;
@@ -51,6 +54,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
     private String YOUTUBE_V3_API_KEY = "AIzaSyBzCJ9cxb9_PPzuYfrHIEdSRtR631b64Xs";
@@ -88,8 +92,15 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
 
     @Override
-    public Iterable<MediaTrack> getAllMediaTracks() {
-        return racingEventService().getAllMediaTracks();
+    public Iterable<MediaTrackWithSecurityDTO> getAllMediaTracks() {
+        Collection<MediaTrackWithSecurityDTO> result = new ArrayList<>();
+        for (MediaTrack mediaTrack : racingEventService().getAllMediaTracks()) {
+            MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
+            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
+                    mediaTrack.getIdentifier());
+            result.add(securedMediaTrack);
+        }
+        return result;
     }
     
     @Override

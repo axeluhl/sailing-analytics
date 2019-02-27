@@ -261,7 +261,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
         regattasDisplayers.add(windPanel);
 
-        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaService, this, getStringMessages());
+        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaService, this,
+                getStringMessages(), getUserService());
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<MediaPanel>(mediaPanel) {
             @Override
             public void refreshAfterBecomingVisible() {

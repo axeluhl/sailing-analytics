@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 
 public interface MediaServiceAsync {
 
@@ -13,7 +14,7 @@ public interface MediaServiceAsync {
     void getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
             AsyncCallback<Iterable<MediaTrack>> callback);
 
-    void getAllMediaTracks(AsyncCallback<Iterable<MediaTrack>> asyncCallback);
+    void getAllMediaTracks(AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> asyncCallback);
 
     void addMediaTrack(MediaTrack mediaTrack, AsyncCallback<String> asyncCallback);
 
