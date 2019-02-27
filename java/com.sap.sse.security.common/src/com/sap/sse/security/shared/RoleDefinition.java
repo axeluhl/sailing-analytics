@@ -37,6 +37,10 @@ public interface RoleDefinition extends NamedWithID, Renamable, WithQualifiedObj
     
     @Override
     UUID getId();
+    
+    default String getIdAsString() {
+        return getId().toString();
+    }
 
     void setPermissions(Iterable<WildcardPermission> permissions);
 }

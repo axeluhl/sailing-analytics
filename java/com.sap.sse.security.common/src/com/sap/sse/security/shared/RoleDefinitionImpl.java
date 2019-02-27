@@ -117,6 +117,6 @@ public class RoleDefinitionImpl implements RoleDefinition {
     }
 
     public static String getTypeRelativeObjectIdentifierAsString(RoleDefinition roleDefinition) {
-        return roleDefinition.getId().toString();
+        return roleDefinition.getIdAsString();
     }
 }

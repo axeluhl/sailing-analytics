@@ -29,9 +29,6 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
 
     /**
      * This should only be used from the db, as the TypeRelativeIdentifier is not escaped
-     * 
-     * @param rawId
-     * @return
      */
     public static QualifiedObjectIdentifier fromDBWithoutEscaping(String rawId) {
         return new QualifiedObjectIdentifierImpl(rawId);
