@@ -308,7 +308,7 @@ public class ExpeditionAllInOneImporter {
         final ExpeditionCourseInferrer expeditionCourseInferrer = new ExpeditionCourseInferrer(adapter);
         final ExpeditionStartData startData = expeditionCourseInferrer.getStartData(fileItem.getInputStream(), filenameWithSuffix);
         final Iterable<String> additionalTrackedRaceNames = importStartData ? getNextRaceColumnNames(/* start race index */ 1,
-                /* how many */ Util.size(startData.getStartTimes())-1) : Collections.emptySet();
+                /* how many */ Util.size(startData.getStartTimes())) : Collections.emptySet();
         if (importMode == ImportMode.NEW_EVENT) {
             leaderboardGroupName = filenameWithDateTimeSuffix;
             regattaNameAndleaderboardName = filenameWithDateTimeSuffix;
