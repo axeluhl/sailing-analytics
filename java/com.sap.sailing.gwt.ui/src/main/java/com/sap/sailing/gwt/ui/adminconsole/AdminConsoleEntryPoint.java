@@ -249,8 +249,12 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(getSailingService(), this,
                 this, getStringMessages(), getUserService());
         panel.addToTabPanel(racesTabPanel,
-                new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanel),
-                getStringMessages().courseLayout(),
+                new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        fillRegattas();
+                    }
+                }, getStringMessages().courseLayout(),
                 SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
         regattasDisplayers.add(raceCourseManagementPanel);
 
@@ -258,9 +262,12 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
 
         WindPanel windPanel = new WindPanel(getSailingService(), getUserService(), asyncActionsExecutor, this,
                 getStringMessages());
-        panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanel),
-                getStringMessages().wind(),
-                SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
+        panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanel) {
+            @Override
+            public void refreshAfterBecomingVisible() {
+                fillRegattas();
+            }
+        }, getStringMessages().wind(), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
 
         final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaService, this,
                 getStringMessages(), getUserService());
