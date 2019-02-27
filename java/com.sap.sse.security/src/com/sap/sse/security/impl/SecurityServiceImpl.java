@@ -1599,11 +1599,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             ActionWithResult<T> actionWithResult) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         T result = null;
-        boolean didSetOwnerShip = false;
+        boolean didSetOwnership = false;
         try {
             final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
             if (preexistingOwnership == null) {
-                didSetOwnerShip = true;
+                didSetOwnership = true;
                 setDefaultOwnership(identifier, securityDisplayName);
             } else {
                 logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
@@ -1615,7 +1615,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
             result = actionWithResult.run();
         } catch (AuthorizationException e) {
-            if (didSetOwnerShip) {
+            if (didSetOwnership) {
                 deleteOwnership(identifier);
             }
             throw e;
