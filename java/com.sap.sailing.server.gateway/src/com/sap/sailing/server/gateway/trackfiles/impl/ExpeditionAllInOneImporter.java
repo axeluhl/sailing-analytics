@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -25,6 +26,8 @@ import java.util.stream.StreamSupport;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.subject.Subject;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 
@@ -102,10 +105,10 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
-import com.sap.sse.security.Action;
+import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
@@ -339,6 +342,7 @@ public class ExpeditionAllInOneImporter {
                                     /* race column name */ i.getB(), /* fleet name */ i.getC()));
                         }
                         updateVenueName(filename, jsonHolderForGpsFixImport.getImportResult(), eventId);
+                        return null;
                                             }))));
         } else {
             regattaNameAndleaderboardName = existingRegattaName;
@@ -392,29 +396,35 @@ public class ExpeditionAllInOneImporter {
                     // When uploading files with identical name, the second RaceColumn will be named with the upload time in its name
                     // First, create the session for the full log
                     final String raceColumnName = regatta.getRaceColumnByName(filename) == null ? filename : filenameWithDateTimeSuffix;
-                    checkTrackedRacesCreationPermission(regattaNameAndleaderboardName, trackedRaceName, additionalTrackedRaceNames, ()->{});
-                    final TimePointsOfFirstAndLastFix firstAndLastFixAt = importFixes(filenameWithSuffix, fileItem, jsonHolderForGpsFixImport, jsonHolderForSensorFixImport, errors);
-                    ensureEventLongEnough(firstAndLastFixAt.getFirstFixAt(), firstAndLastFixAt.getLastFixAt(), eventId);
-                    final Iterable<? extends Series> seriesInRegatta = regatta.getSeries();
-                    if (Util.isEmpty(seriesInRegatta)) {
-                        return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidSeries"));
-                    }
-                    final Series series = Util.get(seriesInRegatta, Util.size(seriesInRegatta) - 1);
-                    final Iterable<? extends Fleet> fleets = series.getFleets();
-                    if (Util.size(fleets) != 1) {
-                        return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorMultiSeries"));
-                    }
-                    final Triple<DynamicTrackedRace, String, String> trackedRaceAndRaceColumnNameAndFleetName = addRace(
-                            errors, regatta, raceColumnName, trackedRaceName, regattaLeaderboard,
-                            firstAndLastFixAt.getFirstFixAt(), firstAndLastFixAt.getLastFixAt(), /* start time */ null);
-                    trackedRaces.add(trackedRaceAndRaceColumnNameAndFleetName.getA());
-                    raceNameRaceColumnNameFleetnameList.add(new Triple<>(trackedRaceAndRaceColumnNameAndFleetName.getA().getRace().getName(),
-                            /* race column name */ trackedRaceAndRaceColumnNameAndFleetName.getB(),
-                            /* fleet name */ trackedRaceAndRaceColumnNameAndFleetName.getC()));
-                    if (importStartData) {
-                        // then create another session per start time found:
-                        createSessionsForStartTimes(errors, raceNameRaceColumnNameFleetnameList, trackedRaces,
-                                startData, regatta, regattaLeaderboard, firstAndLastFixAt);
+                    ImporterResult trackedRacesResult = checkTrackedRacesCreationPermission(regattaNameAndleaderboardName,
+                            trackedRaceName, additionalTrackedRaceNames, ()->{
+                        final TimePointsOfFirstAndLastFix firstAndLastFixAt = importFixes(filenameWithSuffix, fileItem, jsonHolderForGpsFixImport, jsonHolderForSensorFixImport, errors);
+                        ensureEventLongEnough(firstAndLastFixAt.getFirstFixAt(), firstAndLastFixAt.getLastFixAt(), eventId);
+                        final Iterable<? extends Series> seriesInRegatta = regatta.getSeries();
+                        if (Util.isEmpty(seriesInRegatta)) {
+                            return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidSeries"));
+                        }
+                        final Series series = Util.get(seriesInRegatta, Util.size(seriesInRegatta) - 1);
+                        final Iterable<? extends Fleet> fleets = series.getFleets();
+                        if (Util.size(fleets) != 1) {
+                            return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorMultiSeries"));
+                        }
+                        final Triple<DynamicTrackedRace, String, String> trackedRaceAndRaceColumnNameAndFleetName = addRace(
+                                errors, regatta, raceColumnName, trackedRaceName, regattaLeaderboard,
+                                firstAndLastFixAt.getFirstFixAt(), firstAndLastFixAt.getLastFixAt(), /* start time */ null);
+                        trackedRaces.add(trackedRaceAndRaceColumnNameAndFleetName.getA());
+                        raceNameRaceColumnNameFleetnameList.add(new Triple<>(trackedRaceAndRaceColumnNameAndFleetName.getA().getRace().getName(),
+                                /* race column name */ trackedRaceAndRaceColumnNameAndFleetName.getB(),
+                                /* fleet name */ trackedRaceAndRaceColumnNameAndFleetName.getC()));
+                        if (importStartData) {
+                            // then create another session per start time found:
+                            createSessionsForStartTimes(errors, raceNameRaceColumnNameFleetnameList, trackedRaces,
+                                    startData, regatta, regattaLeaderboard, firstAndLastFixAt);
+                        }
+                        return null;
+                    });
+                    if (trackedRacesResult != null) {
+                        return trackedRacesResult;
                     }
                 } else {
                     return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidImportMode") + importMode);
@@ -442,19 +452,40 @@ public class ExpeditionAllInOneImporter {
         }
     }
     
-    private void checkTrackedRacesCreationPermission(String regattaName, String trackedRaceName,
-            Iterable<String> additionalTrackedRaceNames, Action action) {
-        checkTrackedRaceCreationPermission(regattaName, trackedRaceName, action);
-        for (final String additionalTrackedRaceName : additionalTrackedRaceNames) {
-            checkTrackedRaceCreationPermission(regattaName, additionalTrackedRaceName, action);
+    /**
+     * Checks whether the current {@link Subject} is permitted to created the {@link SecuredDomainType#TRACKED_RACE
+     * tracked races} named as specified by {@code trackedRaceName} and the additional strings in
+     * {@code additionalTrackedRaceNames} which may have resulted from an automated session split based on start times
+     * found in the Expedition log. For this, ownerships for those tracked races are tentatively created, and the
+     * created permission is then checked. If any of the create permission checks fails, all those tracked race
+     * ownerships tentatively created are removed again, the {@code action} is not executed, and this method fails for
+     * the original {@link AuthorizationException}. Otherwise, the {@code action} will be {@link ActionWithResult#run()
+     * run} and unless it fails with an {@link AuthorizationException}, the ownerships for the tracked races will
+     * persist and the result of the action is returned.
+     */
+    private <T> T checkTrackedRacesCreationPermission(final String regattaName, final String trackedRaceName,
+            final Iterable<String> additionalTrackedRaceNames, final ActionWithResult<T> action) {
+        Iterator<String> additionalTrackedRaceNamesIterator = additionalTrackedRaceNames.iterator();
+        return checkTrackedRaceCreationPermission(regattaName, trackedRaceName, ()->{
+            return checkTrackedRaceCreationPermissionRecursively(regattaName, additionalTrackedRaceNamesIterator, action);
+        });
+    }
+    
+    private <T> T checkTrackedRaceCreationPermissionRecursively(final String regattaName, final Iterator<String> additionalTrackedRaceNamesIterator,
+            final ActionWithResult<T> terminalAction) throws Exception {
+        if (additionalTrackedRaceNamesIterator.hasNext()) {
+            return checkTrackedRaceCreationPermission(regattaName, additionalTrackedRaceNamesIterator.next(),
+                    ()->checkTrackedRaceCreationPermissionRecursively(regattaName, additionalTrackedRaceNamesIterator, terminalAction));
+        } else {
+            return terminalAction.run();
         }
     }
 
-    private void checkTrackedRaceCreationPermission(String regattaName, String trackedRaceName, Action action) {
-        securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+    private <T> T checkTrackedRaceCreationPermission(String regattaName, String trackedRaceName, ActionWithResult<T> action) {
+        return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 TrackedRace.getSecuredDomainType(),
                 TrackedRace.getIdentifier(new RegattaNameAndRaceName(regattaName, trackedRaceName)).getTypeRelativeObjectIdentifier(),
-                trackedRaceName, ()->{});
+                trackedRaceName, action);
     }
 
     /**
