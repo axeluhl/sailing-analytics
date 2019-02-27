@@ -10,6 +10,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
+import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 /**
@@ -20,11 +21,25 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
  *
  */
 public class RoleIdentifierTest {
-    private RoleDefinition roleDefinition;
     
     @Test
     public void testRoleDefinitionIdentifier() {
-        roleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "Test Role") {
+        final RoleDefinition roleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "Test Role") {
+            private static final long serialVersionUID = 6504908715414284115L;
+            @Override
+            public String getIdAsString() {
+                return "abc'::\\\\://|\\?/\\///\\";
+            }
+        };
+        final QualifiedObjectIdentifier idFromPermission =
+                roleDefinition.getIdentifier().getPermission(DefaultActions.READ).getQualifiedObjectIdentifiers().iterator().next();
+        final QualifiedObjectIdentifier idFromRoleDefinition = roleDefinition.getIdentifier();
+        assertEquals(idFromRoleDefinition, idFromPermission);
+    }
+
+    @Test
+    public void testRolePrototypeIdentifier() {
+        final RoleDefinition roleDefinition = new RolePrototype("Test Role", UUID.randomUUID().toString()) {
             private static final long serialVersionUID = 6504908715414284115L;
             @Override
             public String getIdAsString() {

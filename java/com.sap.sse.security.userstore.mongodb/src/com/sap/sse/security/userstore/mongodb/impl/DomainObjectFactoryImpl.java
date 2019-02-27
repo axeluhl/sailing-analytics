@@ -106,8 +106,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private OwnershipAnnotation loadOwnership(Document ownershipDBObject, UserStore userStore) {
-        String rawId = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name());
-        final QualifiedObjectIdentifier idOfOwnedObject = QualifiedObjectIdentifierImpl.fromDBWithoutEscaping(rawId);
+        String escapedId = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name());
+        final QualifiedObjectIdentifier idOfOwnedObject = QualifiedObjectIdentifierImpl.fromDBWithoutEscaping(escapedId);
         final String displayNameOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
         final String userOwnerName = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
         final UUID tenantOwnerId = (UUID) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER_ID.name());

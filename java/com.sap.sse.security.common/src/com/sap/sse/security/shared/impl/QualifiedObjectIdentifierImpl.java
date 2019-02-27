@@ -30,8 +30,8 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
     /**
      * This should only be used from the db, as the TypeRelativeIdentifier is not escaped
      */
-    public static QualifiedObjectIdentifier fromDBWithoutEscaping(String rawId) {
-        return new QualifiedObjectIdentifierImpl(rawId);
+    public static QualifiedObjectIdentifier fromDBWithoutEscaping(String escapedId) {
+        return new QualifiedObjectIdentifierImpl(escapedId);
     }
 
     @Override

@@ -101,6 +101,6 @@ public abstract class RolePrototype implements RoleDefinition {
     }
 
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(RoleDefinition roleDefinition) {
-        return new TypeRelativeObjectIdentifier(roleDefinition.getId().toString());
+        return new TypeRelativeObjectIdentifier(roleDefinition.getIdAsString());
     }
 }

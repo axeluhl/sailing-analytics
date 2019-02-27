@@ -18,7 +18,7 @@ public class QualifiedObjectIdentifierImpl_CustomFieldSerializer extends CustomF
     public static void serialize(SerializationStreamWriter streamWriter, QualifiedObjectIdentifierImpl instance)
             throws SerializationException {
         streamWriter.writeString(instance.getTypeIdentifier());
-        streamWriter.writeString(instance.getTypeRelativeObjectIdentifier().toString());
+        streamWriter.writeObject(instance.getTypeRelativeObjectIdentifier());
     }
 
     @Override
@@ -33,7 +33,7 @@ public class QualifiedObjectIdentifierImpl_CustomFieldSerializer extends CustomF
 
     public static QualifiedObjectIdentifierImpl instantiate(SerializationStreamReader streamReader) throws SerializationException {
         final String typeIdentifier = streamReader.readString();
-        final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = new TypeRelativeObjectIdentifier(streamReader.readString());
+        final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = (TypeRelativeObjectIdentifier) streamReader.readObject();
         return new QualifiedObjectIdentifierImpl(typeIdentifier, typeRelativeObjectIdentifier);
     }
 

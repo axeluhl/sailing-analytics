@@ -51,7 +51,8 @@ public interface QualifiedObjectIdentifier extends Serializable {
     
     /**
      * @return the concatenation of {@link #getTypeIdentifier()}, {@link #QUALIFIER_SEPARATOR} and
-     *         {@link #getTypeRelativeObjectIdentifier()}
+     *         {@link #getTypeRelativeObjectIdentifier()}'s {@link TypeRelativeObjectIdentifier#toString() toString}
+     *         representation which is encoded such that it can be used as a part of a {@link WildcardPermission}.
      */
     @Override
     String toString();

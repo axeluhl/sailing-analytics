@@ -9,19 +9,36 @@ public class TypeRelativeObjectIdentifier implements Serializable {
 
     private String typeRelativeIdentifer;
 
-    public TypeRelativeObjectIdentifier() {}
-
     /**
      * Only for DB restore, as the identifier is already escaped and would be double escaped
      */
-    TypeRelativeObjectIdentifier(String rawIdentifier) {
-        typeRelativeIdentifer = rawIdentifier;
+    public static TypeRelativeObjectIdentifier fromEncodedString(String encodedIdentifier) {
+        return new TypeRelativeObjectIdentifier(encodedIdentifier);
     }
 
+    private TypeRelativeObjectIdentifier(String encodedIdentifier) {
+        typeRelativeIdentifer = encodedIdentifier;
+    }
+
+    /**
+     * @param identifers a sequence of {@link String}s identifying an object relative to a type. This means
+     * that this means of identification does not have to be unique across different types. For example,
+     * if a name is used to identify an object, equal-named objects of different types can still be kept
+     * apart. These identifiers can be arbitrary strings. They will be encoded internally such that they
+     * can be represented as part of a {@link WildcardPermission}. The {@link #toString()} representation
+     * will be the encoded version. Make sure not to pass an encoded version again to this constructor as
+     * it would duplicate the encoding.
+     */
     public TypeRelativeObjectIdentifier(String... identifers) {
         typeRelativeIdentifer = WildcardPermissionEncoder.encode(identifers);
     }
 
+    /**
+     * @return an encoded version of the identifiers as passed to the {@link #TypeRelativeObjectIdentifier(String...)
+     *         constructor} such that the result can be used as part of a {@link WildcardPermission}. Make sure not to
+     *         use the result again as argument to the {@link #TypeRelativeObjectIdentifier(String...) constructor}
+     *         because it would duplicate the encoding and lead to a different identifier as a result.
+     */
     @Override
     public String toString() {
         return typeRelativeIdentifer;
