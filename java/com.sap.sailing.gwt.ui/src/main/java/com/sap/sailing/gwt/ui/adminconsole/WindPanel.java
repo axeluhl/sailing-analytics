@@ -71,6 +71,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -121,7 +122,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private final Set<RegattasDisplayer> containedRegattaDisplayers;
     
     public WindPanel(final SailingServiceAsync sailingService, UserService userService, AsyncActionsExecutor asyncActionsExecutor, 
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
+            ErrorReporter errorReporter, final StringMessages stringMessages) {
         ensureDebugId("WindPanel");
         this.sailingService = sailingService;
         this.userService = userService;
@@ -132,9 +133,28 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSize("100%", "100%");
         this.setWidget(mainPanel);
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
-                regattaRefresher,
-                stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
+
+        final RegattaRefresher regattaRefresher = new RegattaRefresher() {
+            @Override
+            public void fillRegattas() {
+                sailingService.getRegattasWithUpdatePermission(
+                        new MarkedAsyncCallback<List<RegattaDTO>>(new AsyncCallback<List<RegattaDTO>>() {
+                            @Override
+                            public void onSuccess(List<RegattaDTO> result) {
+                                WindPanel.this.fillRegattas(result);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Remote Procedure Call getRegattasWithUpdatePermission() - Failure");
+                            }
+                        }));
+            }
+        };
+
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, userService,
+                errorReporter, regattaRefresher, stringMessages, /* multiselection */true,
+                /* actionButtonsEnabled */ false);
         containedRegattaDisplayers.add(trackedRacesListComposite);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         mainPanel.add(trackedRacesListComposite);
@@ -266,6 +286,9 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         final Pair<CaptionPanel, ExpeditionAllInOneImportPanel> expeditionAllInOneRootAndImportPanel = createExpeditionAllInOneImportPanel(regattaRefresher);
         mainPanel.add(expeditionAllInOneRootAndImportPanel.getA());
         containedRegattaDisplayers.add(expeditionAllInOneRootAndImportPanel.getB());
+
+        // refresh regattas for this panel manually
+        regattaRefresher.fillRegattas();
     }
 
     private CaptionPanel createIgtimiWindImportPanel(VerticalPanel mainPanel) {

@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * A panel that has a race selection (inherited from {@link AbstractRaceManagementPanel}) and which adds a table
@@ -28,8 +29,9 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     private final CourseManagementWidget courseManagementWidget;
 
     public RaceCourseManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
-        super(sailingService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false, stringMessages);
+            RegattaRefresher regattaRefresher, final StringMessages stringMessages, final UserService userService) {
+        super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false,
+                stringMessages);
         
         courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages) {
             @Override

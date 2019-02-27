@@ -128,6 +128,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
+    void getRegattasWithUpdatePermission(AsyncCallback<List<RegattaDTO>> callback);
+
     void getRegattaByName(String regattaName, AsyncCallback<RegattaDTO> asyncCallback);
 
     /**

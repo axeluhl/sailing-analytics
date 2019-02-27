@@ -1027,6 +1027,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public List<RegattaDTO> getRegattasWithUpdatePermission() {
+        return getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(SecuredDomainType.REGATTA,
+                new HasPermissions.Action[] { DefaultActions.READ, DefaultActions.UPDATE },
+                getService().getAllRegattas(), this::convertToRegattaDTO);
+    }
+
+    @Override
     public RegattaDTO getRegattaByName(String regattaName) {
         RegattaDTO result = null;
         if (regattaName != null && !regattaName.isEmpty()) {

@@ -246,7 +246,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             }
         }, getStringMessages().boats(), SecuredDomainType.BOAT.getPermission(CompetitorAndBoatActions.MUTATION_ACTIONS));
 
-        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(getSailingService(), this, this, getStringMessages());
+        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(getSailingService(), this,
+                this, getStringMessages(), getUserService());
         panel.addToTabPanel(racesTabPanel,
                 new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanel),
                 getStringMessages().courseLayout(),
@@ -255,13 +256,14 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
 
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
 
-        WindPanel windPanel = new WindPanel(getSailingService(), getUserService(), asyncActionsExecutor, this, this, getStringMessages());
+        WindPanel windPanel = new WindPanel(getSailingService(), getUserService(), asyncActionsExecutor, this,
+                getStringMessages());
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanel),
                 getStringMessages().wind(),
                 SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
-        regattasDisplayers.add(windPanel);
 
-        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaService, this, getStringMessages());
+        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, getSailingService(), this, mediaService, this,
+                getStringMessages(), getUserService());
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<MediaPanel>(mediaPanel) {
             @Override
             public void refreshAfterBecomingVisible() {
