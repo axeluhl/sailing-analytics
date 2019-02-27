@@ -152,9 +152,9 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             }
         };
 
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
-                regattaRefresher,
-                stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, userService,
+                errorReporter, regattaRefresher, stringMessages, /* multiselection */true,
+                /* actionButtonsEnabled */ false);
         containedRegattaDisplayers.add(trackedRacesListComposite);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         mainPanel.add(trackedRacesListComposite);
