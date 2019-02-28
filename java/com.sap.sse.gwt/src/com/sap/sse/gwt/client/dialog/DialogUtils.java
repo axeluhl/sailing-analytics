@@ -8,6 +8,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.SuggestBox;
 
 public abstract class DialogUtils {
     public static void linkEnterToButton(final Button button, HasAllKeyHandlers... widgets) {
@@ -42,6 +43,14 @@ public abstract class DialogUtils {
                 }
             });
         }
+    }
+
+    public static void addFocusUponKeyUpToggler(final SuggestBox focusable) {
+        // this ensures that the value is copied into the TextBox.getValue() result and a ChangeEvent is fired
+        focusable.addKeyUpHandler(e -> {
+            focusable.setFocus(false);
+            focusable.setFocus(true);
+        });
     }
 
     public static void addFocusUponKeyUpToggler(final FocusWidget focusable) {
