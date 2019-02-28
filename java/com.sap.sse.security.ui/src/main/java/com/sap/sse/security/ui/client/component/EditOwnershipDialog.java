@@ -232,8 +232,9 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
     @Override
     protected OwnershipDialogResult getResult() {
-        return new OwnershipDialogResult(suggestUserName.getText(), resolvedUserGroup.getName(), resolvingUsername,
-                resolvingUserGroupName, resolvedUserGroup.getId(), userExists);
+        return new OwnershipDialogResult(suggestUserName.getText(),
+                resolvedUserGroup == null ? "" : resolvedUserGroup.getName(), resolvingUsername,
+                resolvingUserGroupName, resolvedUserGroup == null ? null : resolvedUserGroup.getId(), userExists);
     }
 
     /**
