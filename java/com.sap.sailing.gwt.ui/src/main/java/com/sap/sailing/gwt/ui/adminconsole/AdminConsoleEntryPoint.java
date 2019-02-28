@@ -45,7 +45,6 @@ import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -378,12 +377,17 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
 
         LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(
                 getSailingService(), getUserService(), this, getStringMessages());
-        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(localServerInstancesManagementPanel),
+        panel.addToTabPanel(advancedTabPanel,
+                new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(
+                        localServerInstancesManagementPanel),
                 getStringMessages().localServer(),
-                WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER)
-                        .withActions(ServerActions.CONFIGURE_LOCAL_SERVER, DefaultActions.CHANGE_OWNERSHIP,
-                                DefaultActions.CHANGE_ACL)
-                        .withIds(serverInfo.getTypeRelativeObjectIdentifier()).build());
+                // We explicitly use a different permission check here.
+                // Most panels show a list of domain objects which means we check if the user has permissions for any
+                // potentially existing object to decide about the visibility.
+                // The local server tab is about the specific server object. This check needs to contain the ownership
+                // information to work as intended.
+                () -> getUserService().hasAnyServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER,
+                        DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL));
 
         final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanel<>(getUserService(), StringMessages.INSTANCE,
                 SecuredDomainType.getAllInstances(), this, tableResources);

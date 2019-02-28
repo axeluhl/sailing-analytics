@@ -416,6 +416,20 @@ public class UserService {
     public boolean hasServerPermission(Action action) {
         return hasPermission(this.serverInfo, action);
     }
+    
+    /**
+     * Checks whether the user has the permission to the given action for the ServerInfoDTO.
+     */
+    public boolean hasAnyServerPermission(Action... actions) {
+        boolean hasAnyPermission = false;
+        for (Action action : actions) {
+            if (hasCurrentUserAnyPermission(this.serverInfo.getIdentifier().getPermission(action), this.serverInfo.getOwnership())) {
+                hasAnyPermission = true;
+                break;
+            }
+        }
+        return hasAnyPermission;
+    }
 
     public boolean hasPermission(WildcardPermission permission, OwnershipDTO ownership) {
         return hasPermission(permission, ownership, /* acl */ null);
