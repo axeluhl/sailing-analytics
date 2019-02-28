@@ -17,6 +17,7 @@ import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class AccessControlStoreImpl implements AccessControlStore {
     private static final long serialVersionUID = 2165649781000936074L;
@@ -43,6 +44,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     private final ConcurrentHashMap<User, Set<OwnershipAnnotation>> userToOwnership;
     private final ConcurrentHashMap<UserGroup, Set<OwnershipAnnotation>> userGroupToOwnership;
     private final ConcurrentHashMap<UserGroup, Set<AccessControlListAnnotation>> userGroupToAccessControlListAnnotation;
+
+    private static final UserGroupImpl NULL_GROUP = new UserGroupImpl(null, "<null group>");
     /**
      * Currently this lock is somewhat coarse, it could be optimized a little, by being split for ACL and Ownership if
      * profiling deems this necessary
@@ -216,10 +219,12 @@ public class AccessControlStoreImpl implements AccessControlStore {
         });
     }
 
-    private void internalMapUserGroupToACL(final UserGroup userGroup, final AccessControlListAnnotation acl) {
+    private void internalMapUserGroupToACL(final UserGroup userGroup2, final AccessControlListAnnotation acl) {
         if (!lockForManagementMappings.isWriteLockedByCurrentThread()) {
             throw new IllegalStateException("Current thread has no write lock!");
         }
+
+        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
         Set<AccessControlListAnnotation> currentACLsContainingGroup = userGroupToAccessControlListAnnotation
                 .get(userGroup);
         if (currentACLsContainingGroup == null) {
@@ -230,10 +235,12 @@ public class AccessControlStoreImpl implements AccessControlStore {
         currentACLsContainingGroup.add(acl);
     }
 
-    private void internalRemoveUserGroupToACLMapping(final UserGroup userGroup, final AccessControlListAnnotation acl) {
+    private void internalRemoveUserGroupToACLMapping(final UserGroup userGroup2,
+            final AccessControlListAnnotation acl) {
         if (!lockForManagementMappings.isWriteLockedByCurrentThread()) {
             throw new IllegalStateException("Current thread has no write lock!");
         }
+        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
         Set<AccessControlListAnnotation> currentACLsContainingGroup = userGroupToAccessControlListAnnotation
                 .get(userGroup);
         if (currentACLsContainingGroup != null) {
@@ -245,8 +252,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public void removeAclDenial(final QualifiedObjectIdentifier idOfAccessControlledObject, final UserGroup userGroup,
+    public void removeAclDenial(final QualifiedObjectIdentifier idOfAccessControlledObject, final UserGroup userGroup2,
             final String action) {
+        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
@@ -420,7 +428,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public void removeAllOwnershipsFor(final UserGroup userGroup) {
+    public void removeAllOwnershipsFor(final UserGroup userGroup2) {
+        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
