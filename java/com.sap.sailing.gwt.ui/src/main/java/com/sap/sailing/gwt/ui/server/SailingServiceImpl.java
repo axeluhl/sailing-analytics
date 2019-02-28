@@ -1444,7 +1444,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) throws Exception {
-        for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {            
+        for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
+            getSecurityService().checkCurrentUserUpdatePermission(regattaAndRaceIdentifier);
             getService().apply(new StopTrackingRace(regattaAndRaceIdentifier));
         }
     }
@@ -1452,7 +1453,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void removeAndUntrackRaces(Iterable<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
         for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
-            getService().apply(new RemoveAndUntrackRace(regattaAndRaceIdentifier));
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(regattaAndRaceIdentifier,
+                    () -> getService().apply(new RemoveAndUntrackRace(regattaAndRaceIdentifier)));
         }
     }
 
