@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -191,10 +192,18 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                remove.setEnabled(!refreshableEventSelectionModel.getSelectedSet().isEmpty());
-                final int numberOfItemsSelected = refreshableEventSelectionModel.getSelectedSet().size();
+                final Set<EventDTO> selectedEvents = refreshableEventSelectionModel.getSelectedSet();
+                final int numberOfItemsSelected = selectedEvents.size();
                 remove.setText(numberOfItemsSelected <= 1 ? stringMessages.remove()
                         : stringMessages.removeNumber(numberOfItemsSelected));
+                boolean canDeleteAll = true;
+                for (EventDTO eventDTO : selectedEvents) {
+                    if (!userService.hasPermission(eventDTO, DefaultActions.DELETE)) {
+                        canDeleteAll = false;
+                    }
+                }
+                remove.setEnabled(!selectedEvents.isEmpty() && canDeleteAll);
+
             }
         });
         panel.add(filterTextbox);
