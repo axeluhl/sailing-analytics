@@ -230,8 +230,15 @@ public class AclEditPanel extends Composite {
                     allowedActions.add(action);
                 }
             }
+            if (combinedAction.getKey() == null) {
+                final StrippedUserGroupDTO nullGroup = new StrippedUserGroupDTO(null, "<null user group>");
+                userGroupsWithAllowedActions.put(nullGroup, allowedActions);
+                userGroupsWithDeniedActions.put(nullGroup, deniedActions);
+            }
+            else {
             userGroupsWithAllowedActions.put(combinedAction.getKey(), allowedActions);
             userGroupsWithDeniedActions.put(combinedAction.getKey(), deniedActions);
+            }
         }
 
         refreshUi();
@@ -271,15 +278,14 @@ public class AclEditPanel extends Composite {
             @Override
             public void onSuccess(StrippedUserGroupDTO result) {
                 if (result == null) {
-                    Notification.notify(stringMessages.errorMessageUserGroupNameNotFound(userGroupName), ERROR);
-                } else {
-                    Notification.notify(stringMessages.successMessageAddedUserGroup(userGroupName), SUCCESS);
-                    userGroupsWithAllowedActions.put(result, new HashSet<>());
-                    userGroupsWithDeniedActions.put(result, new HashSet<>());
-                    refreshUi();
-                    suggestUserGroupUi.setText("");
-                    userGroupSelectionModel.setSelected(result, true);
+                    result = new StrippedUserGroupDTO(null, "<null user group>");
                 }
+                Notification.notify(stringMessages.successMessageAddedUserGroup(userGroupName), SUCCESS);
+                userGroupsWithAllowedActions.put(result, new HashSet<>());
+                userGroupsWithDeniedActions.put(result, new HashSet<>());
+                refreshUi();
+                suggestUserGroupUi.setText("");
+                userGroupSelectionModel.setSelected(result, true);
             }
         });
     }
