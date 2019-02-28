@@ -31,12 +31,6 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
     private final List<RegattaDTO> availableRegattas;
     private final ListBox availableRegattasListBox;
     
-    public AbstractEventManagementPanel(SailingServiceAsync sailingService,
-            RegattaRefresher regattaRefresher, ErrorReporter errorReporter, boolean actionButtonsEnabled,
-            StringMessages stringMessages) {
-        this(sailingService, null, regattaRefresher, errorReporter, actionButtonsEnabled, stringMessages);
-    }
-    
     public AbstractEventManagementPanel(SailingServiceAsync sailingService, UserService userService,
             RegattaRefresher regattaRefresher, ErrorReporter errorReporter, boolean actionButtonsEnabled,
             StringMessages stringMessages) {

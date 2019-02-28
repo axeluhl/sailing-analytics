@@ -47,6 +47,7 @@ import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the SwissTiming connector.
@@ -66,10 +67,9 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
     private final Grid grid;
     private final List<SwissTimingReplayRaceDTO> availableSwissTimingRaces;
 
-    public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService,
-            ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, true, stringMessages);
+    public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService, UserService userService,
+            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages) {
+        super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
         availableSwissTimingRaces = new ArrayList<SwissTimingReplayRaceDTO>();
         previousConfigurationsComboBox = new ListBox();

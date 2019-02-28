@@ -48,6 +48,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Allows the user to start and stop tracking of races using the SwissTiming connector. In particular,
@@ -78,10 +79,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final String manage2sailUrlAppendix = "&mediaType=json&includeRaces=true";
     private final String eventIdPattern = "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}";
 
-    public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService,
+    public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, UserService userService,
             ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants) {
-        super(sailingService, regattaRefresher, errorReporter, true, stringConstants);
+        super(sailingService, userService, regattaRefresher, errorReporter, true, stringConstants);
         this.errorReporter = errorReporter;
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);

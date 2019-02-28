@@ -52,6 +52,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the TracTrac connector. In particular,
@@ -88,10 +89,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
     private FlushableCellTable<TracTracRaceRecordDTO> racesTable;
     
-    public TracTracEventManagementPanel(final SailingServiceAsync sailingService,
-            ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, true, stringMessages);
+    public TracTracEventManagementPanel(final SailingServiceAsync sailingService, UserService userService,
+            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages) {
+        super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
         this.previousConfigurations = new HashMap<String, TracTracConfigurationDTO>();
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
