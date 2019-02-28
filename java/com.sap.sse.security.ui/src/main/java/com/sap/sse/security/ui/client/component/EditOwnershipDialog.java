@@ -2,18 +2,22 @@ package com.sap.sse.security.ui.client.component;
 
 import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DialogUtils;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
@@ -21,6 +25,7 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -29,8 +34,8 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
     private final StringMessages stringMessages;
     private final UserManagementServiceAsync userManagementService;
-    private final TextBox usernameBox;
-    private final TextBox groupnameBox;
+    private final SuggestBox suggestUserName;
+    private final SuggestBox suggestUserGroupName;
     private boolean resolvingUsername;
     private boolean resolvingUserGroupName;
     private StrippedUserDTO resolvedUser;
@@ -107,17 +112,61 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         super(stringMessages.ownership(), stringMessages.editObjectOwnership(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator(stringMessages), callback);
         this.userManagementService = userManagementService;
+        this.stringMessages = stringMessages;
         resolvedUser = ownership.getUserOwner();
         resolvedUserGroup = ownership.getTenantOwner();
-        this.usernameBox = createTextBox(
-                ownership == null || ownership.getUserOwner() == null ? "" : ownership.getUserOwner().getName(),
-                /* visibleLength */ 20);
-        this.groupnameBox = createTextBox(
-                ownership == null || ownership.getTenantOwner() == null ? "" : ownership.getTenantOwner().getName(),
-                /* visibileLength */ 20);
-        this.usernameBox.addChangeHandler(e->resolveUser());
-        this.groupnameBox.addChangeHandler(e->resolveUserGroup());
-        this.stringMessages = stringMessages;
+
+        // User Suggest
+        final MultiWordSuggestOracle suggestUserOracle = new MultiWordSuggestOracle();
+        this.userManagementService.getUserList(new AsyncCallback<Collection<UserDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.errorObtainingUser(caught.getMessage()), NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(Collection<UserDTO> result) {
+                final Collection<String> userNames = result.stream().map(UserDTO::getName).collect(Collectors.toList());
+                suggestUserOracle.addAll(userNames);
+                suggestUserOracle.setDefaultSuggestionsFromText(userNames);
+            }
+        });
+
+        this.suggestUserName = createSuggestBox(suggestUserOracle);
+        this.suggestUserName.setText(
+                ownership == null || ownership.getUserOwner() == null ? "" : ownership.getUserOwner().getName());
+
+        // User Group Suggest
+        final MultiWordSuggestOracle suggestUserGroupOracle = new MultiWordSuggestOracle();
+        this.userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroupDTO>>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.errorObtainingUserGroup(caught.getMessage()),
+                        NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(Collection<UserGroupDTO> result) {
+                final Collection<String> userGroupNames = result.stream().map(UserGroupDTO::getName)
+                        .collect(Collectors.toList());
+                suggestUserGroupOracle.addAll(userGroupNames);
+                suggestUserGroupOracle.setDefaultSuggestionsFromText(userGroupNames);
+            }
+        });
+        this.suggestUserGroupName = createSuggestBox(suggestUserGroupOracle);
+        this.suggestUserGroupName.setText(
+                ownership == null || ownership.getTenantOwner() == null ? "" : ownership.getTenantOwner().getName());
+
+        this.suggestUserName.addValueChangeHandler(e -> resolveUser());
+        this.suggestUserGroupName.addValueChangeHandler(e -> resolveUserGroup());
+
+        this.suggestUserName.addSelectionHandler(e -> resolveUser());
+        this.suggestUserGroupName.addSelectionHandler(e -> resolveUserGroup());
+
+        DialogUtils.addFocusUponKeyUpToggler(this.suggestUserName);
+        DialogUtils.addFocusUponKeyUpToggler(this.suggestUserGroupName);
+
         resolveUser();
         resolveUserGroup();
     }
@@ -126,17 +175,17 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     protected Widget getAdditionalWidget() {
         final Grid result = new Grid(2, 2);
         result.setWidget(0, 0, new Label(stringMessages.user()));
-        result.setWidget(0, 1, usernameBox);
+        result.setWidget(0, 1, suggestUserName);
         result.setWidget(1, 0, new Label(stringMessages.group()));
-        result.setWidget(1, 1, groupnameBox);
+        result.setWidget(1, 1, suggestUserGroupName);
         return result;
     }
 
     private void resolveUserGroup() {
-        if (resolvedUserGroup == null || !groupnameBox.getText().equals(resolvedUserGroup.getName())) {
+        if (resolvedUserGroup == null || !suggestUserGroupName.getText().equals(resolvedUserGroup.getName())) {
             resolvedUserGroup = null;
             resolvingUserGroupName = true;
-            userManagementService.getStrippedUserGroupByName(groupnameBox.getText(),
+            userManagementService.getStrippedUserGroupByName(suggestUserGroupName.getText(),
                     new AsyncCallback<StrippedUserGroupDTO>() {
                         @Override
                         public void onSuccess(StrippedUserGroupDTO result) {
@@ -155,10 +204,10 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     }
 
     private void resolveUser() {
-        if (resolvedUser == null || !usernameBox.getText().equals(resolvedUser.getName())) {
+        if (resolvedUser == null || !suggestUserName.getText().equals(resolvedUser.getName())) {
             resolvedUser = null;
             resolvingUsername = true;
-            userManagementService.getUserByName(usernameBox.getText(), new AsyncCallback<UserDTO>() {
+            userManagementService.getUserByName(suggestUserName.getText(), new AsyncCallback<UserDTO>() {
                 @Override
                 public void onSuccess(UserDTO result) {
                     resolvedUser = result == null ? null : result.asStrippedUser();
@@ -176,8 +225,8 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
     @Override
     protected OwnershipDialogResult getResult() {
-        return new OwnershipDialogResult(new OwnershipDTO(resolvedUser, resolvedUserGroup), usernameBox.getText(),
-                groupnameBox.getText(), resolvingUsername, resolvingUserGroupName);
+        return new OwnershipDialogResult(new OwnershipDTO(resolvedUser, resolvedUserGroup), suggestUserName.getText(),
+                suggestUserGroupName.getText(), resolvingUsername, resolvingUserGroupName);
     }
 
     /**

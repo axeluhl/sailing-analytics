@@ -76,7 +76,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBList permissionMap = new BasicDBList();
         for (Entry<UserGroup, Set<String>> entry : acl.getAnnotation().getActionsByUserGroup().entrySet()) {
             Document permissionMapEntry = new Document();
-            permissionMapEntry.put(FieldNames.AccessControlList.PERMISSION_MAP_USER_GROUP_ID.name(), entry.getKey().getId());
+            permissionMapEntry.put(FieldNames.AccessControlList.PERMISSION_MAP_USER_GROUP_ID.name(),
+                    entry.getKey() == null ? null : entry.getKey().getId());
             final BasicDBList dbActions = new BasicDBList();
             dbActions.addAll(entry.getValue());
             permissionMapEntry.put(FieldNames.AccessControlList.PERMISSION_MAP_ACTIONS.name(), dbActions);
