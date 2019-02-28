@@ -31,8 +31,8 @@ import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementService extends RemoteService {
-    QualifiedObjectIdentifier setOwnership(OwnershipDTO ownership, QualifiedObjectIdentifier idOfOwnedObject,
-            String displayNameOfOwnedObject);
+    OwnershipDTO setOwnership(String username, UUID userGroupId,
+            QualifiedObjectIdentifier idOfOwnedObject, String displayNameOfOwnedObject);
     
     Collection<AccessControlListAnnotationDTO> getAccessControlLists() throws UnauthorizedException;
 
@@ -77,6 +77,8 @@ public interface UserManagementService extends RemoteService {
     void deleteRoleDefinition(String roleDefinitionIdAsString);
     
     void updateRoleDefinition(RoleDefinitionDTO roleWithNewProperties) throws UnauthorizedException;
+
+    Boolean userExists(String username);
     
     ArrayList<RoleDefinitionDTO> getRoleDefinitions();
 

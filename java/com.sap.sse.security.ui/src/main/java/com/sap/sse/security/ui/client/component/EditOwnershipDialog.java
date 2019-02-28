@@ -3,6 +3,7 @@ package com.sap.sse.security.ui.client.component;
 import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
 
 import java.util.Collection;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,27 +39,30 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     private final SuggestBox suggestUserGroupName;
     private boolean resolvingUsername;
     private boolean resolvingUserGroupName;
-    private StrippedUserDTO resolvedUser;
     private StrippedUserGroupDTO resolvedUserGroup;
+    private boolean userExists;
     
     static class OwnershipDialogResult {
-        private final OwnershipDTO ownership;
+        private final UUID userGroupId;
         private final String username;
         private final String userGroupName;
         private final boolean resolvingUsername;
         private final boolean resolvingUserGroupName;
+        private final boolean userExist;
 
-        private OwnershipDialogResult(final OwnershipDTO ownership, final String username, final String userGroupName,
-                final boolean resolvingUsername, final boolean resolvingUserGroupName) {
-            this.ownership = ownership;
+        private OwnershipDialogResult(final String username, final String userGroupName,
+                final boolean resolvingUsername, final boolean resolvingUserGroupName,
+                final UUID userGroupId, final boolean userExist) {
             this.username = username;
             this.userGroupName = userGroupName;
             this.resolvingUsername = resolvingUsername;
             this.resolvingUserGroupName = resolvingUserGroupName;
+            this.userGroupId = userGroupId;
+            this.userExist = userExist;
         }
 
-        private OwnershipDTO getOwnership() {
-            return ownership;
+        public UUID getUserGroupId() {
+            return userGroupId;
         }
 
         private boolean isResolvingUsername() {
@@ -76,6 +80,10 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         private String getUserGroupName() {
             return userGroupName;
         }
+
+        public boolean isUserExist() {
+            return userExist;
+        }
     }
     
     private static class Validator implements DataEntryDialog.Validator<OwnershipDialogResult> {
@@ -89,16 +97,16 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         @Override
         public String getErrorMessage(OwnershipDialogResult valueToValidate) {
             final String errorMessage;
-            final OwnershipDTO ownership = valueToValidate.getOwnership();
             if (valueToValidate.isResolvingUsername()) {
                 errorMessage = stringMessages.pleaseWaitUntilUsernameIsResolved();
             } else if (valueToValidate.isResolvingUserGroupName()) {
                 errorMessage = stringMessages.pleaseWaitUntilUserGroupNameIsResolved();
-            } else if (!valueToValidate.getUsername().trim().isEmpty() && ownership.getUserOwner() == null) {
+            } else if (!valueToValidate.getUsername().trim().isEmpty() && !valueToValidate.isUserExist()) {
                 errorMessage = stringMessages.userNotFound(valueToValidate.getUsername());
-            } else if (!valueToValidate.getUserGroupName().trim().isEmpty() && ownership.getTenantOwner() == null) {
+            } else if (!valueToValidate.getUserGroupName().trim().isEmpty() && valueToValidate.getUserGroupId() == null) {
                 errorMessage = stringMessages.usergroupNotFound(valueToValidate.getUserGroupName());
-            } else if (ownership.getUserOwner() == null && ownership.getTenantOwner() == null) {
+            } else if ((valueToValidate.getUsername() == null || valueToValidate.getUsername().isEmpty())
+                    && valueToValidate.getUserGroupId() == null) {
                 errorMessage = stringMessages.enterAtLeastOneOwner();
             } else {
                 errorMessage = null;
@@ -113,7 +121,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
                 stringMessages.cancel(), new Validator(stringMessages), callback);
         this.userManagementService = userManagementService;
         this.stringMessages = stringMessages;
-        resolvedUser = ownership.getUserOwner();
+        final StrippedUserDTO userOwner = ownership.getUserOwner();
         resolvedUserGroup = ownership.getTenantOwner();
 
         // User Suggest
@@ -134,7 +142,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
         this.suggestUserName = createSuggestBox(suggestUserOracle);
         this.suggestUserName.setText(
-                ownership == null || ownership.getUserOwner() == null ? "" : ownership.getUserOwner().getName());
+                ownership == null || userOwner == null ? "" : userOwner.getName());
 
         // User Group Suggest
         final MultiWordSuggestOracle suggestUserGroupOracle = new MultiWordSuggestOracle();
@@ -158,16 +166,16 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         this.suggestUserGroupName.setText(
                 ownership == null || ownership.getTenantOwner() == null ? "" : ownership.getTenantOwner().getName());
 
-        this.suggestUserName.addValueChangeHandler(e -> resolveUser());
+        this.suggestUserName.addValueChangeHandler(e -> checkIfUserExists());
         this.suggestUserGroupName.addValueChangeHandler(e -> resolveUserGroup());
 
-        this.suggestUserName.addSelectionHandler(e -> resolveUser());
+        this.suggestUserName.addSelectionHandler(e -> checkIfUserExists());
         this.suggestUserGroupName.addSelectionHandler(e -> resolveUserGroup());
 
         DialogUtils.addFocusUponKeyUpToggler(this.suggestUserName);
         DialogUtils.addFocusUponKeyUpToggler(this.suggestUserGroupName);
 
-        resolveUser();
+        checkIfUserExists();
         resolveUserGroup();
     }
     
@@ -203,21 +211,20 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         }
     }
 
-    private void resolveUser() {
-        if (resolvedUser == null || !suggestUserName.getText().equals(resolvedUser.getName())) {
-            resolvedUser = null;
+    private void checkIfUserExists() {
+        if (!resolvingUsername) {
             resolvingUsername = true;
-            userManagementService.getUserByName(suggestUserName.getText(), new AsyncCallback<UserDTO>() {
-                @Override
-                public void onSuccess(UserDTO result) {
-                    resolvedUser = result == null ? null : result.asStrippedUser();
-                    resolvingUsername = false;
-                    validateAndUpdate();
-                }
-
+            userManagementService.userExists(suggestUserName.getText(), new AsyncCallback<Boolean>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     Notification.notify(stringMessages.errorObtainingUser(caught.getMessage()), NotificationType.ERROR);
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    resolvingUsername = false;
+                    userExists = result;
+                    validateAndUpdate();
                 }
             });
         }
@@ -225,8 +232,9 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
     @Override
     protected OwnershipDialogResult getResult() {
-        return new OwnershipDialogResult(new OwnershipDTO(resolvedUser, resolvedUserGroup), suggestUserName.getText(),
-                suggestUserGroupName.getText(), resolvingUsername, resolvingUserGroupName);
+        return new OwnershipDialogResult(suggestUserName.getText(),
+                resolvedUserGroup == null ? "" : resolvedUserGroup.getName(), resolvingUsername,
+                resolvingUserGroupName, resolvedUserGroup == null ? null : resolvedUserGroup.getId(), userExists);
     }
 
     /**
@@ -289,25 +297,22 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
             @Override
             public void ok(OwnershipDialogResult editedObject) {
                 final QualifiedObjectIdentifier objectIdentifier = identifierFactory.apply(securedObject);
-                userManagementService.setOwnership(editedObject.getOwnership(), objectIdentifier,
-                        securedObject.getName(), new UpdateOwnershipAsyncCallback(editedObject));
+                userManagementService.setOwnership(editedObject.getUsername(), editedObject.getUserGroupId(),
+                        objectIdentifier, securedObject.getName(), new UpdateOwnershipAsyncCallback());
             }
 
             @Override
             public final void cancel() {
             }
 
-            private class UpdateOwnershipAsyncCallback implements AsyncCallback<QualifiedObjectIdentifier> {
+            private class UpdateOwnershipAsyncCallback implements AsyncCallback<OwnershipDTO> {
 
-                private final OwnershipDialogResult editResult;
-
-                private UpdateOwnershipAsyncCallback(final OwnershipDialogResult result) {
-                    this.editResult = result;
+                private UpdateOwnershipAsyncCallback() {
                 }
 
                 @Override
-                public final void onSuccess(QualifiedObjectIdentifier result) {
-                    securedObject.setOwnership(editResult.getOwnership());
+                public final void onSuccess(OwnershipDTO result) {
+                    securedObject.setOwnership(result);
                     updateCallback.accept(securedObject);
                 }
 

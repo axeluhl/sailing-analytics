@@ -194,16 +194,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public QualifiedObjectIdentifier setOwnership(OwnershipDTO ownershipDTO, QualifiedObjectIdentifier idOfOwnedObject,
+    public OwnershipDTO setOwnership(String username, UUID userGroupId,
+            QualifiedObjectIdentifier idOfOwnedObject,
             String displayNameOfOwnedObject) {
-        final QualifiedObjectIdentifier result;
-        SecurityUtils.getSubject().checkPermission(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
-        final Ownership ownership = SecurityDTOFactory.ownerFromDTO(ownershipDTO, getSecurityService());
-        final User userOwner = ownership.getUserOwner();
-        final UserGroup tenantOwner = ownership.getTenantOwner();
-        getSecurityService().setOwnership(idOfOwnedObject, userOwner, tenantOwner, displayNameOfOwnedObject);
-        result = idOfOwnedObject;
-        return result;
+
+        SecurityUtils.getSubject()
+                .checkPermission(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
+
+        final User user = getSecurityService().getUserByName(username);
+        // no security check if current user can see the user associated with the given username
+
+        final Ownership result = getSecurityService().setOwnership(idOfOwnedObject, user,
+                getSecurityService().getUserGroup(userGroupId));
+        return securityDTOFactory.createOwnershipDTO(result, new HashMap<>(), new HashMap<>());
     }
 
     @Override
@@ -1102,5 +1105,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public TypeRelativeObjectIdentifier serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier) {
         return null;
+    }
+
+    @Override
+    public Boolean userExists(String username) {
+        return getSecurityService().getUserByName(username) != null;
     }
 }

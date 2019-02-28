@@ -26,8 +26,9 @@ import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementServiceAsync {
-    void setOwnership(OwnershipDTO ownership, QualifiedObjectIdentifier idOfOwnedObject,
-            String displayNameOfOwnedObject, AsyncCallback<QualifiedObjectIdentifier> callback);
+    void setOwnership(String username, UUID userGroupId,
+            QualifiedObjectIdentifier idOfOwnedObject, String displayNameOfOwnedObject,
+            AsyncCallback<OwnershipDTO> callback);
     
     void getOwnership(QualifiedObjectIdentifier idOfOwnedObject, AsyncCallback<OwnershipAnnotationDTO> callback);
 
@@ -77,8 +78,13 @@ public interface UserManagementServiceAsync {
      * Returns those users the requesting user can read
      */
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
-    
+
     void getUserByName(String username, AsyncCallback<UserDTO> callback);
+    
+    /**
+     * Returns true if a user associated to the given username even if the current user cannot see the existing user.
+     */
+    void userExists(String username, AsyncCallback<Boolean> callback);
 
     void getCurrentUser(AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> callback);
 
