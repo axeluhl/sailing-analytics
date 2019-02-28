@@ -489,10 +489,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             setEmptyAccessControlList(idOfAccessControlledObject);
         }
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
-            final UUID userGroupId = entry.getKey().getId();
+            final UserGroup userGroup = entry.getKey();
+            final UUID userGroupId = userGroup == null ? null : userGroup.getId();
             final Set<String> actions = entry.getValue();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
-            apply(s->s.internalAclPutPermissions(idOfAccessControlledObject, userGroupId, actions));
+            apply(s -> s.internalAclPutPermissions(idOfAccessControlledObject, userGroupId, actions));
         }
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
