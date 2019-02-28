@@ -171,7 +171,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String addRole();
     String couldNotAddRoleToGroup(String role, String group);
     String roleName();
-    String enableRoleForAllUsers();
+    String enabledForAllUsers();
     String couldNotDeleteRole(String role);
     String couldNotLoadRoles();
     String enterUsername();

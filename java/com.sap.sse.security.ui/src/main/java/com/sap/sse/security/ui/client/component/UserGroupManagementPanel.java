@@ -5,7 +5,7 @@ import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.USER_GROUP;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
-import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -27,7 +27,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  * Shows a {@link UserGroupTableWrapper} with an overview over all existing user groups and allows them to be edited via
  * a {@link UserGroupDetailPanel}.
  */
-public class UserGroupManagementPanel extends DockPanel {
+public class UserGroupManagementPanel extends Composite {
     private final UserGroupListDataProvider userGroupListDataProvider;
     private UserGroupDetailPanel userGroupDetailPanel;
     private UserGroupRoleDefinitionPanel userGroupRoleDefinitionPanel;
@@ -38,30 +38,21 @@ public class UserGroupManagementPanel extends DockPanel {
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
             CellTableWithCheckboxResources tableResources) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
-        final VerticalPanel west = new VerticalPanel();
+        final VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.add(createButtonPanel(userService, stringMessages, userManagementService));
 
-        // create button bar
-        west.add(createButtonPanel(userService, stringMessages, userManagementService));
-
-        // create UserGroup Table
         userGroupListDataProvider = new UserGroupListDataProvider(userManagementService, new TextBox());
         userGroupTableWrapper = new UserGroupTableWrapper(userService, additionalPermissions, stringMessages,
                 errorReporter, /* enablePager */ true, tableResources, () -> updateUserGroups());
 
-        final ScrollPanel scrollPanel = new ScrollPanel(userGroupTableWrapper.asWidget());
         final LabeledAbstractFilterablePanel<UserGroupDTO> userGroupfilterBox = userGroupTableWrapper.getFilterField();
         userGroupfilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
+        mainPanel.add(userGroupfilterBox);
+        mainPanel.add(new ScrollPanel(userGroupTableWrapper.asWidget()));
 
-        west.add(userGroupfilterBox);
-        west.add(scrollPanel);
-
-        // create Details Panel
-        final HorizontalPanel listsWrapper = createUserGroupDetailsPanel(stringMessages, userManagementService,
-                userService, additionalPermissions, errorReporter, tableResources);
-        west.add(listsWrapper);
-
-        add(west, DockPanel.WEST);
-
+        mainPanel.add(createUserGroupDetailsPanel(stringMessages, userManagementService,
+                userService, additionalPermissions, errorReporter, tableResources));
+        initWidget(mainPanel);
     }
 
     /** Creates the button bar with add/remove/refresh buttons. */
@@ -102,7 +93,7 @@ public class UserGroupManagementPanel extends DockPanel {
     private HorizontalPanel createUserGroupDetailsPanel(final StringMessages stringMessages,
             final UserManagementServiceAsync userManagementService, UserService userService, Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter, CellTableWithCheckboxResources tableResources) {
         userGroupDetailPanel = new UserGroupDetailPanel(userGroupTableWrapper.getSelectionModel(),
-                userGroupListDataProvider, userService, stringMessages);
+                userGroupListDataProvider, userService, stringMessages, errorReporter, tableResources);
 
         
         userGroupRoleDefinitionPanel = new UserGroupRoleDefinitionPanel(userService,
