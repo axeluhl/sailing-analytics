@@ -177,7 +177,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Path("{name}")
     public Response getLeaderboard(@PathParam("name") String leaderboardName,
             @DefaultValue("Live") @QueryParam("resultState") ResultStates resultState,
-            @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
+            @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount,
+            @QueryParam("secret") String regattaSecret) {
         ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
         
         try {
@@ -189,7 +190,18 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
-                getSecurityService().checkCurrentUserReadPermission(leaderboard);
+                boolean secretWasCorrect = false;
+                if (leaderboard instanceof RegattaLeaderboard) {
+                    Regatta regatta = getService().getRegattaByName(leaderboard.getName());
+                    if (regatta != null) {
+                        secretWasCorrect = Util.equalStringsWithEmptyIsNull(regattaSecret,
+                                regatta.getRegistrationLinkSecret());
+                    }
+                }
+                if (!secretWasCorrect) {
+                    getSecurityService().checkCurrentUserReadPermission(leaderboard);
+                }
+
                 try {
                     TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
                     JSONObject jsonLeaderboard;
