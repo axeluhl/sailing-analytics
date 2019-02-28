@@ -82,6 +82,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
@@ -446,6 +447,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             }
         });
         mediaTracksTable.setColumnWidth(assignedRacesColumn, 100, Unit.PCT);
+
+        SecuredDTOOwnerColumn.configureOwnerColumns(mediaTracksTable, sortHandler, stringMessages);
 
         // start time
         Column<MediaTrackWithSecurityDTO, String> startTimeColumn = new Column<MediaTrackWithSecurityDTO, String>(
