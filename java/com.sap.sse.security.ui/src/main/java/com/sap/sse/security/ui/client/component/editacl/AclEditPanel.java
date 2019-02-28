@@ -82,10 +82,13 @@ public class AclEditPanel extends Composite {
     private final Map<StrippedUserGroupDTO, Set<String>> userGroupsWithDeniedActions = new HashMap<>();
     private final UserManagementServiceAsync userManagementService;
 
+    private final StrippedUserGroupDTO nullUserGroup;
+
     public AclEditPanel(final UserManagementServiceAsync userManagementService, final Action[] availableActions,
             final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
+        this.nullUserGroup = new StrippedUserGroupDTO(null, stringMessages.nullUserGroup());
         AclDialogResources.INSTANCE.css().ensureInjected();
 
         suggestUserGroupUi = createUserGroupSuggest(userManagementService);
@@ -140,6 +143,7 @@ public class AclEditPanel extends Composite {
             public void onSuccess(Collection<UserGroupDTO> result) {
                 final List<String> suggestionList = result.stream().map(UserGroupDTO::getName)
                         .collect(Collectors.toList());
+                suggestionList.add(stringMessages.nullUserGroup());
                 userGroupOracle.clear();
                 userGroupOracle.addAll(suggestionList);
                 userGroupOracle.setDefaultSuggestionsFromText(suggestionList);
@@ -231,9 +235,8 @@ public class AclEditPanel extends Composite {
                 }
             }
             if (combinedAction.getKey() == null) {
-                final StrippedUserGroupDTO nullGroup = new StrippedUserGroupDTO(null, "<null user group>");
-                userGroupsWithAllowedActions.put(nullGroup, allowedActions);
-                userGroupsWithDeniedActions.put(nullGroup, deniedActions);
+                userGroupsWithAllowedActions.put(nullUserGroup, allowedActions);
+                userGroupsWithDeniedActions.put(nullUserGroup, deniedActions);
             }
             else {
             userGroupsWithAllowedActions.put(combinedAction.getKey(), allowedActions);
@@ -278,7 +281,7 @@ public class AclEditPanel extends Composite {
             @Override
             public void onSuccess(StrippedUserGroupDTO result) {
                 if (result == null) {
-                    result = new StrippedUserGroupDTO(null, "<null user group>");
+                    result = nullUserGroup;
                 }
                 Notification.notify(stringMessages.successMessageAddedUserGroup(userGroupName), SUCCESS);
                 userGroupsWithAllowedActions.put(result, new HashSet<>());
