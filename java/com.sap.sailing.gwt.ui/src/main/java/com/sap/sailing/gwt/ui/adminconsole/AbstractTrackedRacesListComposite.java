@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
@@ -119,9 +118,6 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         this.multiSelection = hasMultiSelection;
         this.stringMessages = stringMessages;
         this.userService = userService;
-        if (userService == null) {
-            GWT.debugger();
-        }
     }
 
     public void setRegattaFilterValue(String regattaName) {
