@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.client.component.usergroup.roles;
+package com.sap.sse.security.ui.client.component.usergroup.users;
 
 import java.util.Arrays;
 
@@ -8,14 +8,14 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 /**
  * RoleDefinition ImagesBarCell for use in {@link RoleDefinitionTableWrapper} which contains just the delete action.
  */
-class RoleDefinitionImagesBarCell extends DefaultActionsImagesBarCell {
+class UserGroupUsersImagesBarCell extends DefaultActionsImagesBarCell {
 
-    RoleDefinitionImagesBarCell(StringMessages stringMessages) {
+    UserGroupUsersImagesBarCell(StringMessages stringMessages) {
         super(stringMessages);
     }
 
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
-        return Arrays.asList(getUpdateImageSpec(), getDeleteImageSpec());
+        return Arrays.asList(getDeleteImageSpec());
     }
 }
