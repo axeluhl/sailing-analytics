@@ -26,8 +26,9 @@ import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementServiceAsync {
-    void setOwnership(OwnershipDTO ownership, QualifiedObjectIdentifier idOfOwnedObject,
-            String displayNameOfOwnedObject, AsyncCallback<QualifiedObjectIdentifier> callback);
+    void setOwnership(String username, UUID userGroupId,
+            QualifiedObjectIdentifier idOfOwnedObject, String displayNameOfOwnedObject,
+            AsyncCallback<OwnershipDTO> callback);
     
     void getOwnership(QualifiedObjectIdentifier idOfOwnedObject, AsyncCallback<OwnershipAnnotationDTO> callback);
 
