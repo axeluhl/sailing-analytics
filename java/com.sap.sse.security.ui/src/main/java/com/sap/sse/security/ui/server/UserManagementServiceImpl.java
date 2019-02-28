@@ -497,18 +497,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                                     company,
                                     getLocaleFromLocaleName(localeName), validationBaseURL,
                                     getSecurityService().getDefaultTenantForCurrentUser());
-                            for (Role role : newUser.getRoles()) {
-                                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, newUser);
-                                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
-                                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
-
-                                User currentUser = getSecurityService().getCurrentUser();
-                                if (currentUser == null) {
-                                    currentUser = newUser;
-                                }
-                                UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
-                                getSecurityService().setOwnership(qualifiedTypeIdentifier, currentUser, tenant);
-                            }
                             return newUser;
                         } catch (UserManagementException | UserGroupManagementException e) {
                             logger.log(Level.SEVERE, "Error creating user " + username, e);

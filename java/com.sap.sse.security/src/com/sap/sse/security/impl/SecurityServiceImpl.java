@@ -302,12 +302,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
                 setOwnership(adminUser.getIdentifier(), adminUser, null);
                 Role adminRole = new Role(adminRoleDefinition);
-                addRoleForUser(adminUser, adminRole);
-                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(adminRole,
-                        adminUser);
-                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
-                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                setOwnership(qualifiedTypeIdentifier, adminUser, null);
+                addRoleForUserAndSetUserAsOwner(adminUser, adminRole);
                 final UserGroup defaultTenant = getDefaultTenant();
                 addUserToUserGroup(defaultTenant, adminUser);
                 setDefaultTenantForCurrentServerForUser(adminUser.getName(), defaultTenant.getId());
@@ -628,9 +623,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException {
-        logger.info("Creating user group "+name+" with ID "+id);
-        apply(s->s.internalCreateUserGroup(id, name));
-        return store.getUserGroup(id);
+        return createUserGroupWithInitialUser(id, name, getCurrentUser());
+    }
+    
+    private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser)
+            throws UserGroupManagementException {
+        logger.info("Creating user group " + name + " with ID " + id);
+        apply(s -> s.internalCreateUserGroup(id, name));
+        final UserGroup userGroup = store.getUserGroup(id);
+        if (initialUser != null) {
+            logger.info("Adding initial user " + initialUser + " to group " + userGroup);
+            addUserToUserGroup(userGroup, initialUser);
+            addUserRoleForGroupToUser(userGroup, initialUser);
+        }
+        return userGroup;
     }
 
     @Override
@@ -815,16 +821,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     private void addUserRoleToUser(final User user) {
-        addRoleForUser(user, new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ user));
+        addRoleForUserAndSetUserAsOwner(user,
+                new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ user));
+    }
+    
+    private void addUserRoleForGroupToUser(final UserGroup group, final User user) {
+        addRoleForUserAndSetUserAsOwner(user, new Role(UserRole.getInstance(), /* tenant qualifier */ group, /* user qualifier */ null));
     }
     
     private UserGroup getOrCreateTenantForUser(User user) throws UserGroupManagementException {
         final String username = user.getName();
         final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
-        final UserGroup tenant;
-        if (store.getUserGroupByName(defaultTenantNameForUsername) != null) {
+        UserGroup tenant = store.getUserGroupByName(defaultTenantNameForUsername);
+        if (tenant != null) {
             logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
-            tenant = store.getUserGroupByName(defaultTenantNameForUsername);
         } else {
             logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
             tenant = createTenantForUser(defaultTenantNameForUsername, user);
@@ -833,8 +843,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     private UserGroup createTenantForUser(String defaultTenantNameForUsername, User user) throws UserGroupManagementException {
-        final UserGroup tenant = createUserGroup(UUID.randomUUID(), defaultTenantNameForUsername);
-        addUserToUserGroup(tenant, user);
+        final UserGroup tenant = createUserGroupWithInitialUser(UUID.randomUUID(), defaultTenantNameForUsername, user);
         setOwnership(tenant.getIdentifier(), user, tenant);
         return tenant;
     }
@@ -1061,6 +1070,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         filterObjectsWithPermissionForCurrentUser(SecuredSecurityTypes.ROLE_DEFINITION, DefaultActions.READ,
                 store.getRoleDefinitions(), t -> result.add(t));
         return result;
+    }
+    
+    private void addRoleForUserAndSetUserAsOwner(User user, Role role) {
+        addRoleForUser(user.getName(), role);
+        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                .getQualifiedObjectIdentifier(associationTypeIdentifier);
+        setOwnership(qualifiedTypeIdentifier, user, null);
     }
 
     @Override
@@ -1665,7 +1682,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
             result = createActionReturningCreatedObject.run();
-            setOwnership(identifier, result, getDefaultTenantForCurrentUser());
         } catch (AuthorizationException e) {
             throw e;
         } catch (Exception e) {
