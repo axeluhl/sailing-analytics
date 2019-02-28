@@ -1103,4 +1103,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public TypeRelativeObjectIdentifier serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier) {
         return null;
     }
+
+    @Override
+    public Boolean userExists(String username) {
+        return getSecurityService().getUserByName(username) != null;
+    }
 }

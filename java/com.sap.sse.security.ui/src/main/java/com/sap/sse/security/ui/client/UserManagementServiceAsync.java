@@ -77,8 +77,13 @@ public interface UserManagementServiceAsync {
      * Returns those users the requesting user can read
      */
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
-    
+
     void getUserByName(String username, AsyncCallback<UserDTO> callback);
+    
+    /**
+     * Returns true if a user associated to the given username even if the current user cannot see the existing user.
+     */
+    void userExists(String username, AsyncCallback<Boolean> callback);
 
     void getCurrentUser(AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> callback);
 
