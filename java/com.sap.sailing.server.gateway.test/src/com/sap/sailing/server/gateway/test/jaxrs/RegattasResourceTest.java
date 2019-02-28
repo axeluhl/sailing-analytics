@@ -148,7 +148,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testGetRegatta() throws Exception {
-        Response regattaResponse = regattasResource.getRegatta(closedRegattaName);
+        Response regattaResponse = regattasResource.getRegatta(closedRegattaName, null);
         String jsonString = (String) regattaResponse.getEntity();
         assertNotNull(jsonString);
         String readRegattaName = (String) ((JSONObject) JSONValue.parse(jsonString)).get("name");

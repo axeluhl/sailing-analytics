@@ -175,7 +175,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
 
     private JSONObject getRegatta(String eventName) {
-        Response regattasResponse = regattasResource.getRegatta(eventName);
+        Response regattasResponse = regattasResource.getRegatta(eventName, null);
         return toJSONObject((String) regattasResponse.getEntity());
     }
 

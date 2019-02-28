@@ -236,13 +236,16 @@ public class RegattasResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}")
-    public Response getRegatta(@PathParam("regattaname") String regattaName) {
+    public Response getRegatta(@PathParam("regattaname") String regattaName,
+            @PathParam("secret") String regattaSecret) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
-            getSecurityService().checkCurrentUserReadPermission(regatta);
+            if (!Util.equalStringsWithEmptyIsNull(regattaSecret, regatta.getRegistrationLinkSecret())) {
+                getSecurityService().checkCurrentUserReadPermission(regatta);
+            }
             SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(new FleetJsonSerializer(
                     new ColorJsonSerializer()));
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null, getSecurityService());
