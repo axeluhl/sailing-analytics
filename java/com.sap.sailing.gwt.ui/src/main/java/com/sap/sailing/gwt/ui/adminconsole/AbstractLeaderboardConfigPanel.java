@@ -243,7 +243,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
 
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, userService,
+                errorReporter,
                 regattaRefresher, stringMessages, /* multiselection */false, isActionButtonsEnabled());
         refreshableTrackedRaceSelectionModel = trackedRacesListComposite.getSelectionModel();
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");

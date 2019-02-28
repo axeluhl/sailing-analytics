@@ -42,14 +42,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private boolean actionButtonsEnabled;
 
     public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection,
-            boolean actionButtonsEnabled) {
-        this(parent, context, sailingService, null, errorReporter, regattaRefresher, stringMessages, hasMultiSelection,
-                actionButtonsEnabled);
-    }
-    
-    public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService, UserService userService,
             final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {

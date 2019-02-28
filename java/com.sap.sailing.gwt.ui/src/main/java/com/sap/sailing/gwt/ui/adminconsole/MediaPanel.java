@@ -100,6 +100,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     private final MediaServiceAsync mediaService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
+    private final UserService userService;
     private Set<RegattasDisplayer> regattasDisplayers;
     private CellTable<MediaTrackWithSecurityDTO> mediaTracksTable;
     private ListDataProvider<MediaTrackWithSecurityDTO> mediaTrackListDataProvider = new ListDataProvider<>();
@@ -111,6 +112,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             StringMessages stringMessages, final UserService userService) {
         this.regattasDisplayers = regattasDisplayers;
         this.sailingService = sailingService;
+        this.userService = userService;
         this.regattaRefresher = regattaRefresher;
         this.mediaService = mediaService;  
         this.stringMessages = stringMessages;
@@ -591,7 +593,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
     private void addUrlMediaTrack() {
         NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaService,
-                getDefaultStartTime(), stringMessages, sailingService, errorReporter, regattaRefresher,
+                getDefaultStartTime(), stringMessages, sailingService, userService, errorReporter, regattaRefresher,
                 regattasDisplayers, new DialogCallback<MediaTrack>() {
 
                     @Override
@@ -684,7 +686,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     public void openAssignedRacesDialog(final Context context, final Element parent,
             final ValueUpdater<String> valueUpdater) {
         final MediaTrackWithSecurityDTO mediaTrack = (MediaTrackWithSecurityDTO) context.getKey();
-        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingService, mediaTrack, errorReporter,
+        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingService, userService, mediaTrack,
+                errorReporter,
                 regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
                     @Override

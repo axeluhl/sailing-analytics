@@ -98,7 +98,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     private ListBox listBoxRegattas;
 
-    private final UserService userService;
+    protected final UserService userService;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -411,25 +411,23 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         raceTable.addColumn(hasGPSDataColumn, stringMessages.gpsData());
         raceTable.addColumn(raceStatusColumn, stringMessages.status());
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
-        
-        if (userService != null) {
-            SecuredDTOOwnerColumn.configureOwnerColumns(raceTable, columnSortHandler, stringMessages);
 
-            final HasPermissions type = SecuredDomainType.TRACKED_RACE;
-            final AccessControlledActionsColumn<RaceDTO, DefaultActionsImagesBarCell> actionsColumn = create(
-                    new DefaultActionsImagesBarCell(stringMessages), userService);
-            final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                    race -> regattaRefresher.fillRegattas(), stringMessages);
-            actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
-            
-            final EditACLDialog.DialogConfig<RaceDTO> configACL = EditACLDialog.create(
-                    userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
-                    stringMessages);
-            actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                    configACL::openDialog);
-            
-            raceTable.addColumn(actionsColumn, stringMessages.actions());
-        }
+        SecuredDTOOwnerColumn.configureOwnerColumns(raceTable, columnSortHandler, stringMessages);
+
+        final HasPermissions type = SecuredDomainType.TRACKED_RACE;
+        final AccessControlledActionsColumn<RaceDTO, DefaultActionsImagesBarCell> actionsColumn = create(
+                new DefaultActionsImagesBarCell(stringMessages), userService);
+        final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
+                race -> regattaRefresher.fillRegattas(), stringMessages);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+
+        final EditACLDialog.DialogConfig<RaceDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
+                stringMessages);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                configACL::openDialog);
+
+        raceTable.addColumn(actionsColumn, stringMessages.actions());
     }
 
     @Override
