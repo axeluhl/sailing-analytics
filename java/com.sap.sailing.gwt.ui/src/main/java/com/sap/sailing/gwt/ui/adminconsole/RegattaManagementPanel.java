@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
@@ -93,6 +94,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                 return Window.confirm(stringMessages.doYouReallyWantToRemoveRegattas());
             }
         });
+        remove.setEnabled(false);
         regattasContentPanel.add(buttonPanel);
 
         regattaListComposite = new RegattaListComposite(sailingService, userService, regattaRefresher, errorReporter,
@@ -119,7 +121,14 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                     regattaDetailsComposite.setRegatta(null);
                     regattaDetailsComposite.setVisible(false);
                 }
-                remove.setEnabled(!selectedRegattas.isEmpty());
+                boolean canDeleteAllSelected = true;
+                for (RegattaDTO regatta : refreshableRegattaMultiSelectionModel.getSelectedSet()) {
+                    if (!userService.hasPermission(regatta, DefaultActions.DELETE)) {
+                        canDeleteAllSelected = false;
+                    }
+                }
+                remove.setEnabled(!selectedRegattas.isEmpty() && canDeleteAllSelected);
+
                 remove.setText(selectedRegattas.size() <= 1 ? stringMessages.remove()
                         : stringMessages.removeNumber(selectedRegattas.size()));
             }
