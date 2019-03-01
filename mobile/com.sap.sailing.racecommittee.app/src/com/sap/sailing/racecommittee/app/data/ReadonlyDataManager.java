@@ -11,7 +11,6 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
@@ -175,7 +174,7 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
     LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
-            DeviceConfigurationIdentifier identifier, LoadClient<DeviceConfiguration> callback);
+            String configurationName, LoadClient<DeviceConfiguration> callback);
 
     String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets,
             boolean showSimulation, boolean showMapControls);

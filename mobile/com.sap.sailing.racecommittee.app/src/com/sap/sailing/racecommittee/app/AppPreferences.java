@@ -157,11 +157,11 @@ public class AppPreferences {
         return RacingProcedureType.valueOf(defaultStartProcedureType);
     }
 
-    public String getDeviceIdentifier() {
-        return getDeviceIdentifier(Secure.getString(context.getContentResolver(), Secure.ANDROID_ID));
+    public String getDeviceConfigurationName() {
+        return getDeviceConfigurationName(Secure.getString(context.getContentResolver(), Secure.ANDROID_ID));
     }
 
-    public String getDeviceIdentifier(String defaultValue) {
+    public String getDeviceConfigurationName(String defaultValue) {
         String identifier = helper.getString(key(R.string.preference_identifier_key), "");
         return TextUtils.isEmpty(identifier) ? defaultValue : identifier;
     }

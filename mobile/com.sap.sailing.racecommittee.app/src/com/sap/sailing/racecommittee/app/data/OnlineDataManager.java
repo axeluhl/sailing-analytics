@@ -22,7 +22,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
@@ -338,7 +337,7 @@ public class OnlineDataManager extends DataManager {
 
     @Override
     public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
-            final DeviceConfigurationIdentifier identifier, LoadClient<DeviceConfiguration> callback) {
+            final String deviceConfigurationName, LoadClient<DeviceConfiguration> callback) {
         return new DataLoaderCallbacks<>(callback, new LoaderCreator<DeviceConfiguration>() {
             @Override
             public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
@@ -346,11 +345,9 @@ public class OnlineDataManager extends DataManager {
                 DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(
                         DeviceConfigurationJsonDeserializer.create());
-                String encodedIdentifier = identifier.getClientIdentifier();
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
-                params.add(new Util.Pair<String, Object>("client", encodedIdentifier));
-                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration",
-                        params);
+                params.add(new Util.Pair<String, Object>("client", deviceConfigurationName));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration", params);
                 return new OnlineDataLoader<>(context, url, parser, handler);
             }
         }, getContext());

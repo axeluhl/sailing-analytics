@@ -25,8 +25,6 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -74,11 +72,9 @@ public class MainPreferenceFragment extends LoggableFragment {
                     new Runnable() {
                         @Override
                         public void run() {
-                            DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
-                                    AppPreferences.on(getActivity()).getDeviceIdentifier());
-
+                            String configurationName = AppPreferences.on(getActivity()).getDeviceConfigurationName();
                             LoaderManager.LoaderCallbacks<?> configurationLoader = DataManager.create(getActivity())
-                                    .createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
+                                    .createConfigurationLoader(configurationName, new LoadClient<DeviceConfiguration>() {
 
                                         @Override
                                         public void onLoadFailed(Exception reason) {
