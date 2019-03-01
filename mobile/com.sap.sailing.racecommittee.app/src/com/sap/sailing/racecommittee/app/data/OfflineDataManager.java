@@ -277,7 +277,7 @@ public class OfflineDataManager extends DataManager {
 
     @Override
     public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
-            String deviceConfigurationName, LoadClient<DeviceConfiguration> callback) {
+            String deviceConfigurationName, UUID deviceConfigurationUuid, LoadClient<DeviceConfiguration> callback) {
         return new ImmediateDataLoaderCallbacks<DeviceConfiguration>(context, callback,
                 new Callable<DeviceConfiguration>() {
                     @Override

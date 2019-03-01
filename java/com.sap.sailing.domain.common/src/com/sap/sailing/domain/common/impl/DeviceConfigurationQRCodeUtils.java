@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.impl;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
@@ -16,19 +17,20 @@ public class DeviceConfigurationQRCodeUtils {
     public static class DeviceConfigurationDetails {
         private final String apkUrl;
         private final String deviceIdentifier;
+        private final UUID uuid;
         private final String accessToken;
-        public DeviceConfigurationDetails(String apkUrl, String deviceIdentifier, String accessToken) {
+        public DeviceConfigurationDetails(String apkUrl, UUID uuid, String deviceConfigurationName, String accessToken) {
             super();
             this.apkUrl = apkUrl;
-            this.deviceIdentifier = deviceIdentifier;
+            this.uuid = uuid;
+            this.deviceIdentifier = deviceConfigurationName;
             this.accessToken = accessToken;
         }
         public String getApkUrl() {
             return apkUrl;
         }
-        public String getDeviceIdentifier() {
-            return deviceIdentifier;
-        }
+        public UUID getUuid() { return uuid; }
+        public String getDeviceIdentifier() { return deviceIdentifier; }
         public String getAccessToken() {
             return accessToken;
         }
@@ -61,7 +63,10 @@ public class DeviceConfigurationQRCodeUtils {
             throw new IllegalArgumentException("Device identifier missing from QR code contents");
         }
         String apkUrl = qrCodeContent.substring(0, fragmentIndex);
-        return new DeviceConfigurationDetails(apkUrl, paramMap.get(deviceIdentifierKey), paramMap.get(accessTokenKey));
+        return new DeviceConfigurationDetails(apkUrl,
+                paramMap.get(deviceUuidKey) == null ? null : UUID.fromString(paramMap.get(deviceUuidKey)),
+                paramMap.get(deviceIdentifierKey) == null ? null : paramMap.get(deviceIdentifierKey),
+                paramMap.get(accessTokenKey));
     }
 
 }

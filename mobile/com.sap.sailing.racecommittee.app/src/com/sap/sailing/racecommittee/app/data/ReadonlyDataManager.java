@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.data;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
@@ -167,6 +168,8 @@ public interface ReadonlyDataManager {
     /**
      * Creates a new {@link LoaderCallbacks} object for loading a client's configuration.
      * 
+     *
+     * @param deviceConfigurationUuid
      * @param callback
      *            {@link LoadClient} implementing your data handling code.
      * @return {@link LoaderCallbacks} to be used in
@@ -174,7 +177,7 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
     LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
-            String configurationName, LoadClient<DeviceConfiguration> callback);
+            String deviceConfigurationName, UUID deviceConfigurationUuid, LoadClient<DeviceConfiguration> callback);
 
     String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets,
             boolean showSimulation, boolean showMapControls);

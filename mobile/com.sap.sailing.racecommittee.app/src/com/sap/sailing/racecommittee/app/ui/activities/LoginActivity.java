@@ -401,8 +401,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private void setupDataManager() {
         showProgressSpinner();
         String deviceConfigurationName = AppPreferences.on(getApplicationContext()).getDeviceConfigurationName();
+        UUID deviceConfigurationUuid = AppPreferences.on(getApplicationContext()).getDeviceConfigurationUuid();
         LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(deviceConfigurationName,
-                new LoadClient<DeviceConfiguration>() {
+                deviceConfigurationUuid, new LoadClient<DeviceConfiguration>() {
                     @Override
                     public void onLoadFailed(Exception reason) {
                         dismissProgressSpinner();

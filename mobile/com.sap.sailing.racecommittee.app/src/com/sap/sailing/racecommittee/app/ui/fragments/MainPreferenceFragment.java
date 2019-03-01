@@ -40,6 +40,7 @@ import com.sap.sailing.racecommittee.app.ui.views.decoration.PreferenceMarginIte
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class MainPreferenceFragment extends LoggableFragment {
 
@@ -72,9 +73,10 @@ public class MainPreferenceFragment extends LoggableFragment {
                     new Runnable() {
                         @Override
                         public void run() {
-                            String configurationName = AppPreferences.on(getActivity()).getDeviceConfigurationName();
+                            String deviceConfigurationName = AppPreferences.on(getActivity()).getDeviceConfigurationName();
+                            UUID deviceConfigurationUuid = AppPreferences.on(getActivity()).getDeviceConfigurationUuid();
                             LoaderManager.LoaderCallbacks<?> configurationLoader = DataManager.create(getActivity())
-                                    .createConfigurationLoader(configurationName, new LoadClient<DeviceConfiguration>() {
+                                    .createConfigurationLoader(deviceConfigurationName, deviceConfigurationUuid, new LoadClient<DeviceConfiguration>() {
 
                                         @Override
                                         public void onLoadFailed(Exception reason) {

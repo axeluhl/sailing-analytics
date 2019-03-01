@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -337,7 +338,7 @@ public class OnlineDataManager extends DataManager {
 
     @Override
     public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
-            final String deviceConfigurationName, LoadClient<DeviceConfiguration> callback) {
+            final String deviceConfigurationName, UUID deviceConfigurationUuid, LoadClient<DeviceConfiguration> callback) {
         return new DataLoaderCallbacks<>(callback, new LoaderCreator<DeviceConfiguration>() {
             @Override
             public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
@@ -346,7 +347,12 @@ public class OnlineDataManager extends DataManager {
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(
                         DeviceConfigurationJsonDeserializer.create());
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
-                params.add(new Util.Pair<String, Object>("client", deviceConfigurationName));
+                if (deviceConfigurationName != null) {
+                    params.add(new Util.Pair<String, Object>("client", deviceConfigurationName));
+                }
+                if (deviceConfigurationUuid != null) {
+                    params.add(new Util.Pair<String, Object>("uuid", deviceConfigurationUuid.toString()));
+                }
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration", params);
                 return new OnlineDataLoader<>(context, url, parser, handler);
             }
