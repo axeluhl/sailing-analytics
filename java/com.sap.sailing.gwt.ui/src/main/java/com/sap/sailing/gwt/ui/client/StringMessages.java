@@ -2234,4 +2234,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String copyMembersAndRoles();
     String invalidSecret();
     String warningSailInsightVersion();
+    String invalidState();
 }

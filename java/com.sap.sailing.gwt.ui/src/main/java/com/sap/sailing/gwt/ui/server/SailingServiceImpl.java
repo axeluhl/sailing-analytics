@@ -184,11 +184,9 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
@@ -405,7 +403,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureWithConfigurableStartModeFlagConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
@@ -6028,58 +6025,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers() {
-        List<DeviceConfigurationMatcherDTO> configs = new ArrayList<DeviceConfigurationMatcherDTO>();
-        for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : 
-            getService().getAllDeviceConfigurations().entrySet()) {
-            DeviceConfigurationMatcher matcher = entry.getKey();
-            configs.add(convertToDeviceConfigurationMatcherDTO(matcher));
+    public List<DeviceConfigurationDTO> getDeviceConfigurations() {
+        List<DeviceConfigurationDTO> configs = new ArrayList<DeviceConfigurationDTO>();
+        for (DeviceConfiguration config : getService().getAllDeviceConfigurations()) {
+            configs.add(convertToDeviceConfigurationDTO(config));
         }
         return configs;
     }
 
     @Override
-    public DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDto) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDto.clients);
-        DeviceConfiguration configuration = getService().getAllDeviceConfigurations().get(matcher);
-        if (configuration == null) {
-            return null;
-        } else {
-            return convertToDeviceConfigurationDTO(configuration);
-        }
+    public DeviceConfigurationDTO getDeviceConfiguration(UUID id) {
+        DeviceConfiguration configuration = getService().getDeviceConfigurationById(id);
+        return configuration == null ? null : convertToDeviceConfigurationDTO(configuration);
     }
 
     @Override
-    public DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDTO.clients);
+    public void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO) {
         DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
-        getService().createOrUpdateDeviceConfiguration(matcher, configuration);
-        return convertToDeviceConfigurationMatcherDTO(matcher);
+        getService().createOrUpdateDeviceConfiguration(configuration);
     }
 
     @Override
-    public boolean removeDeviceConfiguration(List<String> clientIds) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(clientIds);
-        getService().removeDeviceConfiguration(matcher);
+    public boolean removeDeviceConfiguration(UUID deviceConfigurationId) {
+        getService().removeDeviceConfiguration(deviceConfigurationId);
         return true;
-    }
-
-    private DeviceConfigurationMatcherDTO convertToDeviceConfigurationMatcherDTO(DeviceConfigurationMatcher matcher) {
-        List<String> clients = new ArrayList<String>();
-        if (matcher instanceof DeviceConfigurationMatcherSingle) {
-            clients.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
-        }
-        DeviceConfigurationMatcherDTO dto = new DeviceConfigurationMatcherDTO(
-                clients);
-        return dto;
-    }
-
-    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(List<String> clientIds) {
-        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(clientIds);
     }
 
     private DeviceConfigurationDTO convertToDeviceConfigurationDTO(DeviceConfiguration configuration) {
         DeviceConfigurationDTO dto = new DeviceConfigurationDTO();
+        dto.id = configuration.getId();
+        dto.name = configuration.getName();
         dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
         dto.resultsMailRecipient = configuration.getResultsMailRecipient();
         dto.byNameDesignerCourseNames = configuration.getByNameCourseDesignerCourseNames();
@@ -6142,7 +6117,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private DeviceConfigurationImpl convertToDeviceConfiguration(DeviceConfigurationDTO dto) {
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(convertToRegattaConfiguration(dto.regattaConfiguration));
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(convertToRegattaConfiguration(dto.regattaConfiguration), dto.id, dto.name);
         configuration.setAllowedCourseAreaNames(dto.allowedCourseAreaNames);
         configuration.setResultsMailRecipient(dto.resultsMailRecipient);
         configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);

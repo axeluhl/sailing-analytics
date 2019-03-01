@@ -43,8 +43,6 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
@@ -520,26 +518,31 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param identifier of the client (may include event)
      * @return the {@link DeviceConfiguration}
      */
-    DeviceConfiguration getDeviceConfiguration(DeviceConfigurationIdentifier identifier);
+    DeviceConfiguration getDeviceConfigurationById(UUID id);
+    
+    /**
+     * Returns a mobile device's configuration by its name. This was unique in the past, but this constraint will
+     * be removed in future releases, so using this method is considered deprecated.
+     */
+    DeviceConfiguration getDeviceConfigurationByName(String deviceConfigurationName);
     
     /**
      * Adds a device configuration.
      * @param matcher defining for which the configuration applies.
      * @param configuration of the device.
      */
-    void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
+    void createOrUpdateDeviceConfiguration(DeviceConfiguration configuration);
     
     /**
-     * Removes a configuration by its matching object.
-     * @param matcher
+     * Removes a configuration by its ID.
      */
-    void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
+    void removeDeviceConfiguration(UUID id);
 
     /**
      * Returns all configurations and their matching objects. 
      * @return the {@link DeviceConfiguration}s.
      */
-    Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations();
+    Iterable<DeviceConfiguration> getAllDeviceConfigurations();
 
     /**
      * Forces a new start time on the RaceLog identified by the passed parameters.

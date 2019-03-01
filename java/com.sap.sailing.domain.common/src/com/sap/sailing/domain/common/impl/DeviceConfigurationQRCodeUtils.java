@@ -11,6 +11,7 @@ import java.util.Map;
 public class DeviceConfigurationQRCodeUtils {
     public static final String deviceIdentifierKey = "identifier";
     public static final String accessTokenKey = "token";
+    public static final String deviceUuidKey = "uuid";
     
     public static class DeviceConfigurationDetails {
         private final String apkUrl;
@@ -37,8 +38,9 @@ public class DeviceConfigurationQRCodeUtils {
         String decode(String encodedURL);
     }
 
-    public static String composeQRContent(String urlEncodedDeviceIdentifier, String apkUrl, String accessToken) {
-        return apkUrl + "#" + deviceIdentifierKey + "=" + urlEncodedDeviceIdentifier + "&"+accessTokenKey + "=" + accessToken;
+    public static String composeQRContent(String urlEncodedDeviceConfigName, String apkUrl, String accessToken, String urlEncodedDeviceIdAsString) {
+        return apkUrl + "#" + deviceIdentifierKey + "=" + urlEncodedDeviceConfigName + "&" + deviceUuidKey + "="
+                + urlEncodedDeviceIdAsString + "&" + accessTokenKey + "=" + accessToken;
     }
 
     public static DeviceConfigurationDetails splitQRContent(String qrCodeContent, URLDecoder urlDecoder) {

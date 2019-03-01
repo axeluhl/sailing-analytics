@@ -63,7 +63,6 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -658,14 +657,13 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString, AsyncCallback<BoatDTO> asyncCallback); 
     
-    void getDeviceConfigurationMatchers(AsyncCallback<List<DeviceConfigurationMatcherDTO>> asyncCallback);
+    void getDeviceConfigurations(AsyncCallback<List<DeviceConfigurationDTO>> asyncCallback);
 
-    void getDeviceConfiguration(DeviceConfigurationMatcherDTO matcher, AsyncCallback<DeviceConfigurationDTO> callback);
+    void getDeviceConfiguration(UUID id, AsyncCallback<DeviceConfigurationDTO> callback);
 
-    void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO,
-            DeviceConfigurationDTO configurationDTO, AsyncCallback<DeviceConfigurationMatcherDTO> callback);
+    void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO, AsyncCallback<Void> callback);
 
-    void removeDeviceConfiguration(List<String> clientIds, AsyncCallback<Boolean> asyncCallback);
+    void removeDeviceConfiguration(UUID deviceConfigurationId, AsyncCallback<Boolean> asyncCallback);
 
     /**
      * Sets the a new start time.

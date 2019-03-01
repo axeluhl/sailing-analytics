@@ -1,16 +1,17 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import java.util.UUID;
+
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 
 public abstract class AbstractDeviceConfigurationOperation extends AbstractRacingEventServiceOperation<Void> {
     
     private static final long serialVersionUID = -4918619894046424881L;
     
-    protected DeviceConfigurationMatcher matcher;
+    protected UUID id;
 
-    public AbstractDeviceConfigurationOperation(DeviceConfigurationMatcher matcher) {
-        this.matcher = matcher;
+    public AbstractDeviceConfigurationOperation(UUID id) {
+        this.id = id;
     }
 
     /**

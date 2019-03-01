@@ -96,10 +96,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMapImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
@@ -440,10 +437,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final MediaLibrary mediaLibrary;
 
     /**
-     * Currently valid pairs of {@link DeviceConfigurationMatcher}s and {@link DeviceConfiguration}s. The contents of
-     * this map is persisted and replicated. See {@link DeviceConfigurationMapImpl}.
+     * {@link DeviceConfiguration}s have a {@link UUID} as their {@link DeviceConfiguration#getId() ID}, this map
+     * keys they by that ID.
      */
-    protected final DeviceConfigurationMapImpl configurationMap;
+    private final Map<UUID, DeviceConfiguration> raceManagerDeviceConfigurationsById;
+
+    /**
+     * For legacy name-based look-ups this map keys the {@link DeviceConfiguration}s from {@link #raceManagerDeviceConfigurationsById}
+     * by their {@link DeviceConfiguration#getName() name}. This name in the future won't need to be unique, so this
+     * feature is deprecated and will be removed in future releases.
+     */
+    private final Map<String, DeviceConfiguration> raceManagerDeviceConfigurationsByName;
 
     private final WindStore windStore;
     private final SensorFixStore sensorFixStore;
@@ -820,7 +824,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logger.log(Level.SEVERE, "Exception trying to obtain MongoDB sensor fix store", e);
             throw new RuntimeException(e);
         }
-        this.configurationMap = new DeviceConfigurationMapImpl();
+        this.raceManagerDeviceConfigurationsById = new HashMap<>();
+        this.raceManagerDeviceConfigurationsByName = new HashMap<>();
         this.serviceFinderFactory = serviceFinderFactory;
         this.trackedRegattaListener = trackedRegattaListener == null ? EmptyTrackedRegattaListener.INSTANCE : trackedRegattaListener;
         sailingServerConfiguration = domainObjectFactory.loadServerConfiguration();
@@ -973,6 +978,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // TODO clear user store? See bug 2430.
         this.competitorAndBoatStore.clear();
         this.windStore.clear();
+        raceManagerDeviceConfigurationsById.clear();
+        raceManagerDeviceConfigurationsByName.clear();
         getRaceLogStore().clear();
         getRegattaLogStore().clear();
         anniversaryRaceDeterminator.clear();
@@ -1102,9 +1109,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private void loadStoredDeviceConfigurations() {
-        for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : domainObjectFactory
-                .loadAllDeviceConfigurations()) {
-            configurationMap.put(entry.getKey(), entry.getValue());
+        for (DeviceConfiguration config : domainObjectFactory.loadAllDeviceConfigurations()) {
+            raceManagerDeviceConfigurationsById.put(config.getId(), config);
+            if (raceManagerDeviceConfigurationsByName.put(config.getName(), config) != null) {
+                logger.warning("DeviceConfiguration "+config.getId()+" with name "+config.getName()+
+                        " overwrote another config by that same name");
+            }
         }
     }
 
@@ -3124,10 +3134,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logoutput.append("Serialized " + competitorAndBoatStore.getCompetitorsCount() + " persisted competitors\n");
 
         logger.info("Serializing configuration map...");
-        oos.writeObject(configurationMap);
-        logoutput.append("Serialized " + configurationMap.size() + " configuration entries\n");
-        for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
-            logoutput.append(String.format("%3s\n", matcher.toString()));
+        oos.writeObject(raceManagerDeviceConfigurationsById);
+        logoutput.append("Serialized " + raceManagerDeviceConfigurationsById.size() + " device configuration entries\n");
+        for (DeviceConfiguration config : raceManagerDeviceConfigurationsById.values()) {
+            logoutput.append(String.format("%3s\n", config.getName()));
         }
 
         logger.info("Serializing anniversary races...");
@@ -3249,10 +3259,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         logoutput.append("Received " + competitorAndBoatStore.getCompetitorsCount() + " NEW competitors\n");
 
         logger.info("Reading device configurations...");
-        configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
-        logoutput.append("Received " + configurationMap.size() + " NEW configuration entries\n");
-        for (DeviceConfigurationMatcher matcher : configurationMap.keySet()) {
-            logoutput.append(String.format("%3s\n", matcher.toString()));
+        raceManagerDeviceConfigurationsById.putAll((Map<UUID, DeviceConfiguration>) ois.readObject());
+        logoutput.append("Received " + raceManagerDeviceConfigurationsById.size() + " NEW configuration entries\n");
+        for (DeviceConfiguration config : raceManagerDeviceConfigurationsById.values()) {
+            raceManagerDeviceConfigurationsByName.put(config.getName(), config);
+            logoutput.append(String.format("%3s\n", config.getName()));
         }
 
         logger.info("Reading anniversary races...");
@@ -3350,6 +3361,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         connectivityParametersByRace.clear();
         eventsById.clear();
         mediaLibrary.clear();
+        raceManagerDeviceConfigurationsById.clear();
+        raceManagerDeviceConfigurationsByName.clear();
         competitorAndBoatStore.clearCompetitors();
         remoteSailingServerSet.clear();
         if (notificationService != null) {
@@ -3691,27 +3704,36 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public DeviceConfiguration getDeviceConfiguration(DeviceConfigurationIdentifier identifier) {
-        return configurationMap.getByMatch(identifier);
+    public DeviceConfiguration getDeviceConfigurationById(UUID id) {
+        return raceManagerDeviceConfigurationsById.get(id);
     }
 
     @Override
-    public void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
-        configurationMap.put(matcher, configuration);
-        mongoObjectFactory.storeDeviceConfiguration(matcher, configuration);
-        replicate(new CreateOrUpdateDeviceConfiguration(matcher, configuration));
+    public DeviceConfiguration getDeviceConfigurationByName(String deviceConfigurationName) {
+        return raceManagerDeviceConfigurationsByName.get(deviceConfigurationName);
     }
 
     @Override
-    public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
-        configurationMap.remove(matcher);
-        mongoObjectFactory.removeDeviceConfiguration(matcher);
-        replicate(new RemoveDeviceConfiguration(matcher));
+    public void createOrUpdateDeviceConfiguration(DeviceConfiguration configuration) {
+        raceManagerDeviceConfigurationsById.put(configuration.getId(), configuration);
+        raceManagerDeviceConfigurationsByName.put(configuration.getName(), configuration);
+        mongoObjectFactory.storeDeviceConfiguration(configuration);
+        replicate(new CreateOrUpdateDeviceConfiguration(configuration));
     }
 
     @Override
-    public Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations() {
-        return new HashMap<DeviceConfigurationMatcher, DeviceConfiguration>(configurationMap);
+    public void removeDeviceConfiguration(UUID id) {
+        final DeviceConfiguration removedConfig = raceManagerDeviceConfigurationsById.remove(id);
+        if (removedConfig != null) {
+            raceManagerDeviceConfigurationsByName.remove(removedConfig.getName());
+        }
+        mongoObjectFactory.removeDeviceConfiguration(id);
+        replicate(new RemoveDeviceConfiguration(id));
+    }
+
+    @Override
+    public Iterable<DeviceConfiguration> getAllDeviceConfigurations() {
+        return raceManagerDeviceConfigurationsById.values();
     }
 
     @Override

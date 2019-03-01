@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,6 +17,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -27,52 +29,47 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.ui.client.UserService;
 
 public class DeviceConfigurationDetailComposite extends Composite {
-    
-    public interface DeviceConfigurationCloneListener {
-        void onCloneRequested(DeviceConfigurationMatcherDTO matcher, DeviceConfigurationDTO configuration);
-    }
-    
+
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
-    
-    private final DeviceConfigurationCloneListener cloneListener;
-    
     private CaptionPanel captionPanel;
     private VerticalPanel contentPanel;
     private Button cloneButton;
     private Button updateButton;
-    
-    private DeviceConfigurationMatcherDTO matcher;
-    private DeviceConfigurationDTO originalConfiguration;
-
+    protected DeviceConfigurationDTO originalConfiguration;
+    protected TextBox uuidBox;
     protected TextBox identifierBox;
     private ListEditorComposite<String> allowedCourseAreasList;
     private TextBox mailRecipientBox;
     private ListEditorComposite<String> courseNamesList;
-    
     private CheckBox overwriteRegattaConfigurationBox;
     private RegattaConfigurationDTO currentRegattaConfiguration;
-    
-    public DeviceConfigurationDetailComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages,
-            final DeviceConfigurationCloneListener listener) {
+    private final UserService userService;
+
+    public static interface DeviceConfigurationFactory {
+        void obtainAndSetNameForConfigurationAndAdd(final DeviceConfigurationDTO configurationToObtainAndSetNameForAndAdd);
+    }
+
+    public DeviceConfigurationDetailComposite(SailingServiceAsync sailingService, UserService userService,
+            ErrorReporter errorReporter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.cloneListener = listener;
-        this.matcher = null;
-        this.originalConfiguration = null;
         this.currentRegattaConfiguration = null;
         captionPanel = new CaptionPanel(stringMessages.configuration());
         VerticalPanel verticalPanel = new VerticalPanel();
@@ -82,7 +79,11 @@ public class DeviceConfigurationDetailComposite extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 updateConfiguration();
-                cloneListener.onCloneRequested(matcher, getResult());
+                // create a new, cloned configuration object and set a new UUID; then ask for a name,
+                // then send it to the server and add to the local list
+                final DeviceConfigurationDTO cloned = getResult();
+                cloned.id = UUID.randomUUID();
+                callbackInterface.obtainAndSetNameForConfigurationAndAdd(cloned);
             }
         });
         updateButton = new Button(stringMessages.save());
@@ -100,39 +101,30 @@ public class DeviceConfigurationDetailComposite extends Composite {
         verticalPanel.add(actionPanel);
         captionPanel.add(verticalPanel);
         initWidget(captionPanel);
+        setConfiguration(null);
+        this.userService = userService;
     }
-
-    public void setConfiguration(final DeviceConfigurationMatcherDTO matcher) {
-        if (matcher == null) {
+    
+    public void setConfiguration(final DeviceConfigurationDTO config) {
+        if (config == null) {
             clearUi();
+            setVisible(false);
         } else {
-            sailingService.getDeviceConfiguration(matcher, new AsyncCallback<DeviceConfigurationDTO>() {
-                @Override
-                public void onSuccess(DeviceConfigurationDTO result) {
-                    setupUi(matcher, result);
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(caught.getMessage());
-                }
-            });
+            setupUi(config);
+            setVisible(true);
         }
     }
     
-    private void setupUi(DeviceConfigurationMatcherDTO matcher, DeviceConfigurationDTO result) {
+    private void setupUi(DeviceConfigurationDTO config) {
         clearUi();
-        this.matcher = matcher;
-        this.originalConfiguration = result;
-        this.currentRegattaConfiguration = result.regattaConfiguration;
-        
+        this.originalConfiguration = config;
+        this.currentRegattaConfiguration = config.regattaConfiguration;
         setupGeneral();
         setupRegattaConfiguration();
     }
 
     private void setupRegattaConfiguration() {
         Grid grid = new Grid(1, 3);
-        
         final Button editButton = new Button(stringMessages.edit());
         overwriteRegattaConfigurationBox = new CheckBox(stringMessages.overwriteRacingProceduresConfiguration());
         overwriteRegattaConfigurationBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -143,7 +135,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
             }
         });
         grid.setWidget(0, 0, overwriteRegattaConfigurationBox);
-        
         editButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -161,49 +152,48 @@ public class DeviceConfigurationDetailComposite extends Composite {
                 }).show();
             }
         });
-        
         overwriteRegattaConfigurationBox.setValue(currentRegattaConfiguration != null);
         editButton.setEnabled(currentRegattaConfiguration != null);
-
         Image helpImage = new Image(resources.help());
         helpImage.setAltText(stringMessages.overwriteRacingProceduresConfigurationHelpText());
         helpImage.setTitle(stringMessages.overwriteRacingProceduresConfigurationHelpText());
-        
         grid.setWidget(0, 1, editButton);
         grid.setWidget(0, 2, helpImage);
         contentPanel.add(grid);
     }
 
     private void setupGeneral() {
-        Grid grid = new Grid(4, 2);
+        Grid grid = new Grid(5, 2);
         int row = 0;
-        setupIdentifier(grid, row++);
+        identifierBox = new TextBox();
+        identifierBox.setWidth("80%");
+        identifierBox.setText(originalConfiguration.name);
+        identifierBox.setReadOnly(true);
+        grid.setWidget(row, 0, new Label("Identifier"));
+        HorizontalPanel panel = new HorizontalPanel();
+        final Button qrCodeButton = getQrCodeButton();
+        panel.add(identifierBox);
+        panel.add(qrCodeButton);
+        grid.setWidget(row++, 1, panel);
+        uuidBox = new TextBox();
+        uuidBox.setWidth("80%");
+        uuidBox.setText(originalConfiguration.id.toString());
+        uuidBox.setReadOnly(true);
+        grid.setWidget(row, 0, new Label(stringMessages.id()));
+        grid.setWidget(row++, 1, uuidBox);
         setupCourseAreasBox(grid, row++);
         setupRecipientBox(grid, row++);
         setupCourseNameBox(grid, row++);
-        
         contentPanel.add(grid);
-    }
-
-    protected void setupIdentifier(Grid grid, int gridRow) {
-        identifierBox = new TextBox();
-        identifierBox.setWidth("80%");
-        identifierBox.setText(DeviceConfigurationPanel.renderIdentifiers(matcher.clients, stringMessages));
-        identifierBox.setReadOnly(true);
-        
-        grid.setWidget(gridRow, 0, new Label("Identifier"));
-        grid.setWidget(gridRow, 1, identifierBox);
     }
 
     private void setupCourseAreasBox(Grid grid, int gridRow) {
         List<String> initialValues = originalConfiguration.allowedCourseAreaNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.allowedCourseAreaNames;
-                
         allowedCourseAreasList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseAreas(), IconResources.INSTANCE.removeIcon(),
                 SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName());
         allowedCourseAreasList.setWidth("80%");
         allowedCourseAreasList.addValueChangeHandler(dirtyValueMarker);
-                
         grid.setWidget(gridRow, 0, new Label(stringMessages.allowedCourseAreas()));
         grid.setWidget(gridRow, 1, allowedCourseAreasList);
     }
@@ -211,7 +201,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private void setupCourseNameBox(Grid grid, int gridRow) {
         List<String> initialValues = originalConfiguration.byNameDesignerCourseNames == null ? Collections
                 .<String> emptyList() : originalConfiguration.byNameDesignerCourseNames;
-        
         List<String> suggestedCourseNames = Arrays.asList(stringMessages.upWind(), stringMessages.downWind());
         courseNamesList = new StringListEditorComposite(initialValues, stringMessages, stringMessages.courseNames(), IconResources.INSTANCE.removeIcon(), suggestedCourseNames,
                 stringMessages.enterCourseName());
@@ -233,7 +222,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
 
     private void clearUi() {
-        this.matcher = null;
         this.originalConfiguration = null;
         contentPanel.clear();
     }
@@ -252,36 +240,32 @@ public class DeviceConfigurationDetailComposite extends Composite {
     
     private DeviceConfigurationDTO getResult() {
         DeviceConfigurationDTO result = new DeviceConfigurationDTO();
-       
+        result.name = identifierBox.getValue();
+        result.id = UUID.fromString(uuidBox.getValue());
         if (!allowedCourseAreasList.getValue().isEmpty()) {
             result.allowedCourseAreaNames = allowedCourseAreasList.getValue();
         }
-        
         if (!mailRecipientBox.getText().isEmpty()) {
             result.resultsMailRecipient = mailRecipientBox.getText().isEmpty() ? null : mailRecipientBox.getText();
         }
-        
         if (!courseNamesList.getValue().isEmpty()) {
             result.byNameDesignerCourseNames = courseNamesList.getValue();
         }
-        
         if (overwriteRegattaConfigurationBox.getValue()) {
             result.regattaConfiguration = currentRegattaConfiguration;
         }
-        
         return result;
     }
     
     private void updateConfiguration() {
-        if (matcher == null || originalConfiguration == null) {
-            errorReporter.reportError("Invalid state.");
+        if (originalConfiguration == null) {
+            errorReporter.reportError(stringMessages.invalidState());
             return;
         }
         DeviceConfigurationDTO dto = getResult();
-        sailingService.createOrUpdateDeviceConfiguration(matcher, dto, 
-                new MarkedAsyncCallback<>(new AsyncCallback<DeviceConfigurationMatcherDTO>() {
+        sailingService.createOrUpdateDeviceConfiguration(dto, new MarkedAsyncCallback<>(new AsyncCallback<Void>() {
             @Override
-            public void onSuccess(DeviceConfigurationMatcherDTO matcher) {
+            public void onSuccess(Void result) {
                 markAsDirty(false);
             }
             
@@ -306,4 +290,40 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
     };
 
+    private Button getQrCodeButton() {
+        Button qrCodeButton = new Button(stringMessages.qrSync());
+        qrCodeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (identifierBox.getValue() == null || identifierBox.getValue().isEmpty()) {
+                    Notification.notify(stringMessages.thereIsNoIdentifierSet(), NotificationType.ERROR);
+                } else {
+                    UserDTO currentUser = userService.getCurrentUser();
+                    if (currentUser == null) {
+                        createAndShowDialogForAccessToken(/* accessToken */ null);
+                    } else {
+                        userService.getUserManagementService().getOrCreateAccessToken(currentUser.getName(),
+                                new MarkedAsyncCallback<>(new AsyncCallback<String>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.couldNotObtainAccessTokenForUser(caught.getMessage()), /* silentMode */ true);
+                            }
+    
+                            @Override
+                            public void onSuccess(String accessToken) {
+                                createAndShowDialogForAccessToken(accessToken);
+                            }
+                        }));
+                    }
+                }
+            }
+        });
+        return qrCodeButton;
+    }
+    
+    private void createAndShowDialogForAccessToken(String accessToken) {
+        final DialogBox dialog = new DeviceConfigurationQRIdentifierDialog(uuidBox.getValue(), identifierBox.getValue(), stringMessages, accessToken);
+        dialog.show();
+        dialog.center();
+    }
 }

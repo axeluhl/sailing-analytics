@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -147,7 +146,7 @@ public class MediaMasterDataExportTest {
         SensorFixStore sensorFixStore = mock(SensorFixStore.class);
         boolean exportWind = false;
         TopLevelMasterData topLevelMasterData = new TopLevelMasterData(groupsToExport, allEvents,
-                regattaForRaceIdString, allMediaTracks, sensorFixStore, exportWind, new HashMap<>());
+                regattaForRaceIdString, allMediaTracks, sensorFixStore, exportWind, /* race manager device configs */ new HashSet<>());
         return topLevelMasterData;
     }
 }

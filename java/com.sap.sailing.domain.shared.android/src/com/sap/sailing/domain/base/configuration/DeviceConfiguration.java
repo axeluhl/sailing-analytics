@@ -1,12 +1,17 @@
 package com.sap.sailing.domain.base.configuration;
 
-import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
+
+import com.sap.sse.common.Named;
+import com.sap.sse.common.WithID;
 
 /**
  * Interface holding information about tablet's (RCApp) configuration.
  */
-public interface DeviceConfiguration extends Serializable {
+public interface DeviceConfiguration extends WithID, Named {
+    @Override
+    UUID getId();
     
     /**
      * Course area names this tablet is allowed to log on.
