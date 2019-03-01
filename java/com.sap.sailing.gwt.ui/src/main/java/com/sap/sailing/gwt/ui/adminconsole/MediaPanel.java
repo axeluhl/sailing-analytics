@@ -25,25 +25,24 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
@@ -80,6 +79,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
@@ -118,32 +118,28 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         this.mediaService = mediaService;  
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        HorizontalPanel buttonAndFilterPanel = new HorizontalPanel();
+        AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
+                SecuredDomainType.MEDIA_TRACK);
+        add(buttonAndFilterPanel);
         allMediaTracks = new ArrayList<>();
-        Button refreshButton = new Button(stringMessages.refresh());
-        refreshButton.addClickHandler(new ClickHandler() {
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
+
             @Override
-            public void onClick(ClickEvent event) {
+            public void execute() {
                 loadMediaTracks();
             }
-
         });
-        buttonAndFilterPanel.add(refreshButton);
-        Button addUrlButton = new Button(stringMessages.addMediaTrack());
-        addUrlButton.addClickHandler(new ClickHandler() {
+        buttonAndFilterPanel.addCreateAction(stringMessages.addMediaTrack(), new Command() {
             @Override
-            public void onClick(ClickEvent event) {
+            public void execute() {
                 addUrlMediaTrack();
             }
         });
-        buttonAndFilterPanel.add(addUrlButton);
-        
-        Button multiVideo = new Button(stringMessages.multiVideoLinking());
-        multiVideo.addClickHandler(new ClickHandler() {
+        buttonAndFilterPanel.addCreateAction(stringMessages.multiVideoLinking(), new Command() {
             @Override
-            public void onClick(ClickEvent event) {
+            public void execute() {
                 new MultiVideoDialog(sailingService, mediaService, stringMessages, errorReporter, new Runnable() {
-                    
+
                     @Override
                     public void run() {
                         loadMediaTracks();
@@ -151,36 +147,30 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                 }).center();
             }
         });
-        buttonAndFilterPanel.add(multiVideo);
-        
-        
-        Button multiVideoRename = new Button(this.stringMessages.multiUrlChangeMediaTrack());
-        multiVideoRename.addClickHandler(new ClickHandler() {
+
+        Button multiURLChange = buttonAndFilterPanel.addUnsecuredAction(stringMessages.multiUrlChangeMediaTrack(),
+                new Command() {
             @Override
-            public void onClick(ClickEvent event) {
+            public void execute() {
                 Set<MediaTrackWithSecurityDTO> selected = refreshableSelectionModel.getSelectedSet();
                 if (selected.isEmpty()) {
                     Notification.notify(stringMessages.noSelection(), NotificationType.ERROR);
                 } else {
-                    new MultiURLChangeDialog(mediaService, stringMessages, selected, errorReporter,
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    loadMediaTracks();
-                                }
-                            }).center();
+                    new MultiURLChangeDialog(mediaService, stringMessages, selected, errorReporter, new Runnable() {
+                        @Override
+                        public void run() {
+                            loadMediaTracks();
+                        }
+                    }).center();
                 }
             }
         });
-        buttonAndFilterPanel.add(multiVideoRename);
-        
-        add(buttonAndFilterPanel);
-        
+        multiURLChange.setEnabled(false);
+
         Label lblFilterRaces = new Label(stringMessages.filterMediaByName() + ":");
         lblFilterRaces.setWordWrap(false);
-        buttonAndFilterPanel.setSpacing(5);
-        buttonAndFilterPanel.add(lblFilterRaces);
-        buttonAndFilterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
+        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
+
         this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrackWithSecurityDTO>(lblFilterRaces,
                 allMediaTracks,
                 mediaTrackListDataProvider) {
@@ -204,7 +194,21 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         };
         createMediaTracksTable(userService);
         filterableMediaTracks.getTextBox().ensureDebugId("MediaTracksFilterTextBox");
-        buttonAndFilterPanel.add(filterableMediaTracks);
+        buttonAndFilterPanel.addUnsecuredWidget(filterableMediaTracks);
+
+        refreshableSelectionModel.addSelectionChangeHandler(new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                boolean canUpdateAll = true;
+                for (MediaTrackWithSecurityDTO track : refreshableSelectionModel.getSelectedSet()) {
+                    if (!userService.hasPermission(track, DefaultActions.UPDATE)) {
+                        canUpdateAll = false;
+                    }
+                }
+                multiURLChange.setEnabled(!refreshableSelectionModel.getSelectedSet().isEmpty() && canUpdateAll);
+            }
+        });
+
     }
 
     @Override
@@ -341,6 +345,10 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         mediaTracksTable.addColumn(titleColumn, stringMessages.title());
         titleColumn.setFieldUpdater(new FieldUpdater<MediaTrackWithSecurityDTO, String>() {
             public void update(int index, MediaTrackWithSecurityDTO mediaTrack, String newTitle) {
+                if (Util.equalStringsWithEmptyIsNull(newTitle, mediaTrack.title)) {
+                    return;
+                }
+                String oldtitle = mediaTrack.title;
                 // Called when the user changes the value.
                 mediaTrack.title = newTitle;
                 mediaService.updateTitle(mediaTrack, new AsyncCallback<Void>() {
@@ -348,6 +356,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError(t.toString());
+                        mediaTrack.title = oldtitle;
                     }
 
                     @Override
@@ -377,6 +386,9 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         urlColumn.setFieldUpdater(new FieldUpdater<MediaTrackWithSecurityDTO, String>() {
             public void update(int index, MediaTrackWithSecurityDTO mediaTrack, String newUrl) {
                 // Called when the user changes the value.
+                if (Util.equalStringsWithEmptyIsNull(newUrl, mediaTrack.url = newUrl)) {
+                    return;
+                }
                 mediaTrack.url = newUrl;
                 mediaService.updateUrl(mediaTrack, new AsyncCallback<Void>() {
 

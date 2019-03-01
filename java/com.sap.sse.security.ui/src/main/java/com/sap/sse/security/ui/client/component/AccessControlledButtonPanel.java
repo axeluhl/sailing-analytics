@@ -126,4 +126,9 @@ public class AccessControlledButtonPanel extends Composite {
         this.panel.insert(widget, index);
     }
 
+    public void addUnsecuredWidget(Widget widget) {
+        widget.getElement().getStyle().setMarginRight(5, Unit.PX);
+        panel.add(widget);
+    }
+
 }

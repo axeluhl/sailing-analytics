@@ -515,4 +515,5 @@ public class UserService {
     public ServerInfoDTO getServerInfo() {
         return serverInfo;
     }
+
 }
