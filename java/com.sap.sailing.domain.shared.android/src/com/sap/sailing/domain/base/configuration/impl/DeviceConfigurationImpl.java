@@ -5,7 +5,11 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class DeviceConfigurationImpl extends NamedImpl implements DeviceConfiguration {
 
@@ -73,4 +77,21 @@ public class DeviceConfigurationImpl extends NamedImpl implements DeviceConfigur
         return copyConfiguration;
     }
 
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getId());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID id) {
+        return new TypeRelativeObjectIdentifier(id.toString());
+    }
 }

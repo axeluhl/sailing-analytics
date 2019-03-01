@@ -5,11 +5,12 @@ import java.util.UUID;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * Interface holding information about tablet's (RCApp) configuration.
  */
-public interface DeviceConfiguration extends WithID, Named {
+public interface DeviceConfiguration extends WithID, WithQualifiedObjectIdentifier, Named {
     @Override
     UUID getId();
     
