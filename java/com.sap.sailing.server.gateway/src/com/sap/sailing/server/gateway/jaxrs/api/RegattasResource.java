@@ -243,7 +243,8 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
-            if (!Util.equalStringsWithEmptyIsNull(regattaSecret, regatta.getRegistrationLinkSecret())) {
+            boolean skip = skipChecksDueToCorrectSecret(regattaName, regattaSecret);
+            if (!skip) {
                 getSecurityService().checkCurrentUserReadPermission(regatta);
             }
             SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(new FleetJsonSerializer(

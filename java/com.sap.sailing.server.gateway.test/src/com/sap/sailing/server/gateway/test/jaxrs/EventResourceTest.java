@@ -243,7 +243,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     }
 
     private String getEventAsString(String eventId) {
-        return (String) eventsResource.getEvent(eventId).getEntity();
+        return (String) eventsResource.getEvent(eventId, null).getEntity();
     }
 
 }

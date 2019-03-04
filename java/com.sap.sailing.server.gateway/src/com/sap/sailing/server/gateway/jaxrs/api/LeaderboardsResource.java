@@ -190,18 +190,10 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
-                boolean secretWasCorrect = false;
-                if (leaderboard instanceof RegattaLeaderboard) {
-                    Regatta regatta = getService().getRegattaByName(leaderboard.getName());
-                    if (regatta != null) {
-                        secretWasCorrect = Util.equalStringsWithEmptyIsNull(regattaSecret,
-                                regatta.getRegistrationLinkSecret());
-                    }
-                }
-                if (!secretWasCorrect) {
+                boolean skip = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
+                if (!skip) {
                     getSecurityService().checkCurrentUserReadPermission(leaderboard);
                 }
-
                 try {
                     TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
                     JSONObject jsonLeaderboard;
@@ -649,11 +641,16 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
             @QueryParam(RaceLogServletConstants.PARAMS_TRACK_WIND) Boolean trackWind,
-            @QueryParam(RaceLogServletConstants.PARAMS_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION) Boolean correctWindDirectionByMagneticDeclination)
+            @QueryParam(RaceLogServletConstants.PARAMS_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION) Boolean correctWindDirectionByMagneticDeclination,
+            @QueryParam("secret") String secret)
                     throws NotDenotedForRaceLogTrackingException, Exception {
-        final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
-                DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
+        final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(
+                leaderboardName, raceColumnName, fleetName);
+        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+        if (!skip) {
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
+                    DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
+        }
         final ActionWithResult<Response> innerAction = () -> {
             final Response result;
             if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {

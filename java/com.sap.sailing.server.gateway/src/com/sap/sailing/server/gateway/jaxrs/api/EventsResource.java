@@ -279,7 +279,7 @@ public class EventsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{eventId}")
-    public Response getEvent(@PathParam("eventId") String eventId) {
+    public Response getEvent(@PathParam("eventId") String eventId, @QueryParam("secret") String secret) {
         Response response;
         UUID eventUuid;
         try {
@@ -291,7 +291,17 @@ public class EventsResource extends AbstractSailingServerResource {
         if (event == null) {
             response = getBadEventErrorResponse(eventId);
         } else {
-            getSecurityService().checkCurrentUserReadPermission(event);
+            boolean skip = false;
+            for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+                for (Leaderboard l : lg.getLeaderboards()) {
+                    if (skipChecksDueToCorrectSecret(l.getName(), secret)) {
+                        skip = true;
+                    }
+                }
+            }
+            if (!skip) {
+                getSecurityService().checkCurrentUserReadPermission(event);
+            }
             JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
                     new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
             JSONObject eventJson = eventSerializer.serialize(event);
