@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -176,12 +177,25 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 btnRemoveRace.setText(stringMessages.remove());
                 btnUntrack.setEnabled(false);
                 btnExport.setEnabled(false);
+                btnSetDelayToLive.setEnabled(false);
             } else {
-                btnRemoveRace.setEnabled(true);
-                final int numberOfItemsSelected = refreshableSelectionModel.getSelectedSet().size();
+                final int numberOfItemsSelected = selectedRaces.size();
                 btnRemoveRace.setText(numberOfItemsSelected <= 1 ? stringMessages.remove() : stringMessages.removeNumber(numberOfItemsSelected));
-                btnUntrack.setEnabled(true);
-                btnExport.setEnabled(true);
+
+                boolean canUpdateAll = true;
+                boolean canDeleteAll = true;
+                for (RaceDTO race : selectedRaces) {
+                    if (!userService.hasPermission(race, DefaultActions.UPDATE)) {
+                        canUpdateAll = false;
+                    }
+                    if (!userService.hasPermission(race, DefaultActions.DELETE)) {
+                        canDeleteAll = false;
+                    }
+                }
+                btnSetDelayToLive.setEnabled(canUpdateAll);
+                btnRemoveRace.setEnabled(canDeleteAll);
+                btnUntrack.setEnabled(canUpdateAll);
+                btnExport.setEnabled(numberOfItemsSelected > 0);
             }
         }
     }
