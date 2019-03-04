@@ -5972,6 +5972,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void allowBoatResetToDefaults(Iterable<BoatDTO> boats) {
         List<String> boatIdsAsStrings = new ArrayList<String>();
         for (BoatDTO boat : boats) {
+            getSecurityService().checkCurrentUserUpdatePermission(boat);
             boatIdsAsStrings.add(boat.getIdAsString());
         }
         getService().apply(new AllowBoatResetToDefaults(boatIdsAsStrings));
