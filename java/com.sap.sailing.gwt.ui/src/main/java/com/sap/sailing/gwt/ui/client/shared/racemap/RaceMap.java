@@ -20,6 +20,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -67,6 +69,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -90,8 +93,10 @@ import com.sap.sailing.gwt.ui.actions.GetPolarAction;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ClientResources;
+import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
@@ -445,6 +450,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private final String leaderboardName;
     private final String leaderboardGroupName;
+    
+    private List<DetailType> sortedAvailableDetailTypes;
+    private DetailType selectedDetailType;
+    private boolean selectedDetailTypeChanged;
 
     private final MultiHashSet<Date> remoteCallsInExecution = new MultiHashSet<>();
     private final MultiHashSet<Date> remoteCallsToSkipInExecution = new MultiHashSet<>();
@@ -576,6 +585,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         coordinateSystem = new DelegateCoordinateSystem(new IdentityCoordinateSystem());
         fixesAndTails = new FixesAndTails(coordinateSystem);
         updateCoordinateSystemFromSettings();
+        loadAvailableDetailTypes();
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
         mapInitializedListener = new ArrayList<>();
@@ -600,7 +610,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         initWidget(rootPanel);
         this.setSize("100%", "100%");
     }
-    
+
     ManagedInfoWindow getManagedInfoWindow() {
         return managedInfoWindow;
     }
@@ -691,6 +701,40 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             });
         }
         return redrawn;
+    }
+    
+    private void loadAvailableDetailTypes() {
+        sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, raceIdentifier,
+                new AsyncCallback<Iterable<DetailType>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorLoadingAvailableDetailTypes());
+                    }
+                    @Override
+                    public void onSuccess(Iterable<DetailType> result) {
+                        sortedAvailableDetailTypes = new ArrayList<DetailType>();
+                        Util.addAll(result, sortedAvailableDetailTypes);
+                        Collections.sort(sortedAvailableDetailTypes, new Comparator<DetailType>() {
+                            @Override
+                            public int compare(DetailType o1, DetailType o2) {
+                                final boolean o1Expedition = o1.isExpeditionType();
+                                final boolean o2Expedition = o2.isExpeditionType();
+                                if ((o1Expedition && o2Expedition) || (!o1Expedition && !o2Expedition)) {
+                                    final String o1Name = DetailTypeFormatter.format(o1);
+                                    final String o2Name = DetailTypeFormatter.format(o2);
+                                    return Collator.getInstance().compare(o1Name, o2Name);
+                                }
+                                if (o1Expedition && !o2Expedition) {
+                                    return 1;
+                                }
+                                if (o2Expedition && !o1Expedition) {
+                                    return -1;
+                                }
+                                return 0;
+                            }
+                        });
+                    }
+        });
     }
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {
@@ -1054,10 +1098,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void refreshMap(final Date newTime, final long transitionTimeInMillis, boolean isRedraw) {
         final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
         final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = fixesAndTails
-                .computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
+                .computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds(), selectedDetailTypeChanged);
+        if (selectedDetailTypeChanged) selectedDetailTypeChanged = false;
         // Request map data update, possibly in two calls; see method details
         callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(fromAndToAndOverlap,
-                raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw, DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+                raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw, selectedDetailType);
         // draw the wind into the map, get the combined wind
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
@@ -2431,7 +2476,35 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
         }
+        ListBox lb = new ListBox();
+        lb.addItem(stringMessages.none(), "none");
+        if (sortedAvailableDetailTypes != null) {
+            for (int i = 0; i < sortedAvailableDetailTypes.size(); i++) {
+                DetailType detail = sortedAvailableDetailTypes.get(i);
+                lb.addItem(DetailTypeFormatter.format(detail), detail.name());
+                if (detail == selectedDetailType) {
+                    lb.setSelectedIndex(i + 1);
+                }
+            }
+        }
+        lb.setVisibleItemCount(1);
+        lb.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                String value = lb.getSelectedValue();
+                DetailType previous = selectedDetailType;
+                if (value == null || value.equals("none")) {
+                    selectedDetailType = null;
+                } else {
+                    selectedDetailType = DetailType.valueOfString(value);
+                }
+                if (selectedDetailType != previous) {
+                    selectedDetailTypeChanged = true;
+                }
+            }
+        });
         
+        vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), lb));
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {

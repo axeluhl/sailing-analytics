@@ -539,7 +539,7 @@ public class FixesAndTails {
      *         those requested (<code>true</code>) or need to be replaced (<code>false</code>)
      */
     protected Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
-            Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds) {
+            Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds, boolean detailTypeChanged) {
         Date tailstart = new Date(upTo.getTime() - effectiveTailLengthInMilliseconds);
         Map<CompetitorDTO, Date> from = new HashMap<>();
         Map<CompetitorDTO, Date> to = new HashMap<>();
@@ -551,9 +551,9 @@ public class FixesAndTails {
             Date toDate;
             Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
             Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
-            boolean overlap = timepointOfFirstKnownFix != null && timepointOfLastKnownFix != null &&
+            boolean overlap = !detailTypeChanged && (timepointOfFirstKnownFix != null && timepointOfLastKnownFix != null &&
                     new TimeRangeImpl(new MillisecondsTimePoint(tailstart), new MillisecondsTimePoint(upTo)).intersects(
-                            new TimeRangeImpl(new MillisecondsTimePoint(timepointOfFirstKnownFix), new MillisecondsTimePoint(timepointOfLastKnownFix)));
+                            new TimeRangeImpl(new MillisecondsTimePoint(timepointOfFirstKnownFix), new MillisecondsTimePoint(timepointOfLastKnownFix))));
             if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
                     && !tailstart.after(timepointOfLastKnownFix)) {
