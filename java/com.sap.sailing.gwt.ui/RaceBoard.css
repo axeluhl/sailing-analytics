@@ -97,12 +97,6 @@ table {
 	padding-left: 45px;
 }
 
-.MapSimulationLegendParentDiv {
-	padding-bottom: 10px;
-	padding-right: 10px;
-	pointer-events: none;
-}
-
 .MapSimulationLegend {
 	pointer-events: all;
 }
