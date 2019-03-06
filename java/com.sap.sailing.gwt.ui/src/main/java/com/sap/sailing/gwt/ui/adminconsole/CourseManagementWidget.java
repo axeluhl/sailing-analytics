@@ -1,14 +1,17 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -20,6 +23,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SetSelectionModel;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.adminconsole.WaypointCreationDialog.DefaultPassingInstructionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,14 +31,19 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 
 public abstract class CourseManagementWidget implements IsWidget {
     protected final MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>> marks;
@@ -57,13 +66,15 @@ public abstract class CourseManagementWidget implements IsWidget {
     
     protected final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     
+    private SecuredDTO securedDtoForWaypointsPermissionCheck;
+
     @Override
     public Widget asWidget() {
         return mainPanel;
     }
     
     public CourseManagementWidget(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages) {
+            final StringMessages stringMessages, final UserService userService) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -103,18 +114,14 @@ public abstract class CourseManagementWidget implements IsWidget {
         mainPanel.setWidget(1, 1, controlPointsBtnsPanel);
         mainPanel.setWidget(1, 2, marksBtnsPanel);
         
-        ImagesBarColumn<WaypointDTO, CourseManagementWidgetWaypointsImagesBarCell> waypointsActionColumn =
-                new ImagesBarColumn<WaypointDTO, CourseManagementWidgetWaypointsImagesBarCell>(
-                new CourseManagementWidgetWaypointsImagesBarCell(stringMessages));
-        waypointsActionColumn.setFieldUpdater(new FieldUpdater<WaypointDTO, String>() {
-            @Override
-            public void update(int index, WaypointDTO waypoint, String value) {
-                if (CourseManagementWidgetWaypointsImagesBarCell.ACTION_DELETE.equals(value)) {
-                    removeWaypoint(waypoint);
-                }
-            }
-        });
-        
+        final AccessControlledActionsColumn<WaypointDTO, DefaultActionsImagesBarCell> waypointsActionColumn = create(
+                new DefaultActionsImagesBarCell(stringMessages), userService,
+                s -> securedDtoForWaypointsPermissionCheck);
+
+        // update permission for tracked race is required for deleting waypoints
+        waypointsActionColumn.addAction(DefaultActions.DELETE.name(), DefaultActions.UPDATE,
+                waypoint -> removeWaypoint(waypoint));
+
         waypoints.getTable().addColumn(waypointsActionColumn);
         
         waypoints.getSelectionModel().addSelectionChangeHandler(new Handler() {
@@ -276,7 +283,28 @@ public abstract class CourseManagementWidget implements IsWidget {
 
     public void refresh(){};
 
-    protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO) {
+    protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO, String leaderboardName) {
+        this.sailingService.getLeaderboardWithSecurity(leaderboardName,
+                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                        Window.alert(caught.getMessage());
+            }
+
+            @Override
+                    public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                        securedDtoForWaypointsPermissionCheck = result;
+                        updateWaypointsAndContorlPoints(raceCourseDTO);
+            }
+        });
+    }
+
+    protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO, RaceDTO raceDTO) {
+        updateWaypointsAndContorlPoints(raceCourseDTO);
+        securedDtoForWaypointsPermissionCheck = raceDTO;
+    }
+
+    private void updateWaypointsAndContorlPoints(RaceCourseDTO raceCourseDTO) {
         waypoints.getDataProvider().getList().clear();
         multiMarkControlPoints.getDataProvider().getList().clear();
         waypoints.getDataProvider().getList().addAll(raceCourseDTO.waypoints);

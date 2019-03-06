@@ -33,7 +33,8 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false,
                 stringMessages);
         
-        courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages) {
+        courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages,
+                userService) {
             @Override
             protected void save() {
                 sailingService.updateRaceCourse(singleSelectedRace, createWaypointPairs(), new AsyncCallback<Void>() {
@@ -58,7 +59,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
                         @Override
                         public void onSuccess(RaceCourseDTO raceCourseDTO) {
-                            updateWaypointsAndControlPoints(raceCourseDTO);
+                            updateWaypointsAndControlPoints(raceCourseDTO, selectedRaceDTO);
                             marks.refresh(raceCourseDTO.getMarks());
                         }
             

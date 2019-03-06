@@ -383,7 +383,7 @@ public class SmartphoneTrackingEventManagementPanel
                                     }
                                 });
                     }
-                }).show();
+                }, userService).show();
     }
 
     private void handleCompetitorRegistration(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
