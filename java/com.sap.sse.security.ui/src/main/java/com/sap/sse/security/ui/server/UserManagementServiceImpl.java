@@ -1107,7 +1107,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (user == null) {
             throw new UserManagementException("User '" + username + "'not found.");
         }
-        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+        final UserDTO userDTO = getUserDTOWithFilteredRolesAndPermissions(user);
         Collection<WildcardPermissionWithSecurityDTO> permissions = new ArrayList<>();
         for (WildcardPermission p : userDTO.getPermissions()) {
             if (p instanceof WildcardPermissionWithSecurityDTO) {
@@ -1115,5 +1115,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }
         return new RolesAndPermissionsForUserDTO(userDTO.getRoles(), permissions);
+    }
+
+    private UserDTO getUserDTOWithFilteredRolesAndPermissions(final User user) {
+        return securityDTOFactory.createUserDTOFromUser(user, getSecurityService(), permission -> {
+            final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = PermissionAndRoleAssociation
+                    .get(permission, user);
+            return SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                    .getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ, typeRelativeObjectIdentifier));
+        }, role -> {
+            final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = PermissionAndRoleAssociation.get(role,
+                    user);
+            return SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ROLE_ASSOCIATION
+                    .getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ, typeRelativeObjectIdentifier));
+        });
     }
 }
