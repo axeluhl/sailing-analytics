@@ -10,7 +10,6 @@ import java.util.Map;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -36,6 +35,8 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -62,9 +63,11 @@ public abstract class CourseManagementWidget implements IsWidget {
     
     protected final Button insertWaypointBefore;
     protected final Button insertWaypointAfter;
+    protected final Button addControlPoint;
     private PassingInstruction lastSingleMarkPassingInstruction = PassingInstruction.Port; // the usual default
     
     protected final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    private final UserService userService;
     
     private SecuredDTO securedDtoForWaypointsPermissionCheck;
 
@@ -78,6 +81,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+        this.userService = userService;
         
         mainPanel = new Grid(3, 3);
         mainPanel.setCellPadding(5);
@@ -165,7 +169,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         insertWaypointAfter.setEnabled(false);
         waypointsBtnsPanel.add(insertWaypointAfter);
         
-        final Button addControlPoint = new Button(stringMessages.add(stringMessages.twoMarkControlPoint()));
+        addControlPoint = new Button(stringMessages.add(stringMessages.twoMarkControlPoint()));
         addControlPoint.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -286,29 +290,28 @@ public abstract class CourseManagementWidget implements IsWidget {
     protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO, String leaderboardName) {
         this.sailingService.getLeaderboardWithSecurity(leaderboardName,
                 new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                        Window.alert(caught.getMessage());
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Notification.notify(caught.getMessage(), NotificationType.ERROR);
+                    }
 
-            @Override
+                    @Override
                     public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
-                        securedDtoForWaypointsPermissionCheck = result;
-                        updateWaypointsAndContorlPoints(raceCourseDTO);
-            }
-        });
+                        updateWaypointsAndContorlPoints(raceCourseDTO, result);
+                    }
+                });
     }
 
     protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO, RaceDTO raceDTO) {
-        updateWaypointsAndContorlPoints(raceCourseDTO);
-        securedDtoForWaypointsPermissionCheck = raceDTO;
+        updateWaypointsAndContorlPoints(raceCourseDTO, raceDTO);
     }
 
-    private void updateWaypointsAndContorlPoints(RaceCourseDTO raceCourseDTO) {
+    private void updateWaypointsAndContorlPoints(RaceCourseDTO raceCourseDTO, SecuredDTO securedDTO) {
+        securedDtoForWaypointsPermissionCheck = securedDTO;
         waypoints.getDataProvider().getList().clear();
         multiMarkControlPoints.getDataProvider().getList().clear();
         waypoints.getDataProvider().getList().addAll(raceCourseDTO.waypoints);
-        
+
         Map<String, ControlPointDTO> noDuplicateCPs = new HashMap<>();
         for (ControlPointDTO controlPoint : raceCourseDTO.getControlPoints()) {
             if (controlPoint instanceof GateDTO) {
@@ -316,8 +319,13 @@ public abstract class CourseManagementWidget implements IsWidget {
             }
         }
         multiMarkControlPoints.getDataProvider().getList().addAll(noDuplicateCPs.values());
-        
+
         updateWaypointButtons();
+
+        final boolean hasUpdatePermission = userService.hasPermission(securedDTO, DefaultActions.UPDATE);
+        insertWaypointAfter.setVisible(hasUpdatePermission);
+        insertWaypointBefore.setVisible(hasUpdatePermission);
+        addControlPoint.setVisible(hasUpdatePermission);
     }
     
     protected List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> createWaypointPairs() {

@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -99,6 +100,10 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 }
             });
         
+        trackedRacesListComposite.getSelectionModel().addSelectionChangeHandler(h -> {
+            saveBtn.setVisible(userService.hasPermission(selectedRaceDTO, DefaultActions.UPDATE));
+        });
+
         buttonsPanel.add(saveBtn);
         this.selectedRaceContentPanel.add(courseManagementWidget);
         this.selectedRaceContentPanel.add(buttonsPanel);
