@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.SecurityService;
@@ -66,7 +69,8 @@ public class SecurityDTOFactory {
 
     private UserDTO createUserDTOFromUser(User user, Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
             Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup,
-            SecurityService securityService) {
+            SecurityService securityService, Predicate<WildcardPermission> permissionFilter,
+            Predicate<Role> roleFilter) {
         UserDTO userDTO;
         Map<AccountType, Account> accounts = user.getAllAccounts();
         List<AccountDTO> accountDTOs = new ArrayList<>();
@@ -82,12 +86,17 @@ public class SecurityDTOFactory {
                 break;
             }
         }
+        final List<WildcardPermission> filteredPermissions = StreamSupport
+                .stream(user.getPermissions().spliterator(), false).filter(permissionFilter)
+                .collect(Collectors.toList());
+        final List<Role> filteredRoles = StreamSupport.stream(user.getRoles().spliterator(), false).filter(roleFilter)
+                .collect(Collectors.toList());
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
                 user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
-                accountDTOs, createRolesDTOs(user.getRoles(), fromOriginalToStrippedDownUser,
+                accountDTOs, createRolesDTOs(filteredRoles, fromOriginalToStrippedDownUser,
                         fromOriginalToStrippedDownUserGroup, securityService, user),
                 /* default tenant filled in later */ null,
-                getSecuredPermissions(user.getPermissions(), user, securityService),
+                getSecuredPermissions(filteredPermissions, user, securityService),
                 createStrippedUserGroupDTOsFromUserGroups(securityService.getUserGroupsOfUser(user),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         userDTO.setDefaultTenantForCurrentServer(createStrippedUserGroupDTOFromUserGroup(
@@ -190,8 +199,13 @@ public class SecurityDTOFactory {
         return socialUserDTO;
     }
 
+    public UserDTO createUserDTOFromUser(User user, SecurityService securityService,
+            Predicate<WildcardPermission> permissionFilter, Predicate<Role> roleFilter) {
+        return createUserDTOFromUser(user, new HashMap<>(), new HashMap<>(), securityService, permissionFilter,
+                roleFilter);
+    }
     public UserDTO createUserDTOFromUser(User user, SecurityService securityService) {
-        return createUserDTOFromUser(user, new HashMap<>(), new HashMap<>(), securityService);
+        return createUserDTOFromUser(user, new HashMap<>(), new HashMap<>(), securityService, v -> true, v -> true);
     }
 
     private Iterable<StrippedUserGroupDTO> createStrippedUserGroupDTOsFromUserGroups(
