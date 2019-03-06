@@ -182,4 +182,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filterPermission();
     String permission();
     String nullUserGroup();
+
+    String editRolesAndPermissionsForUser();
 }

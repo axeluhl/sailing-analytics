@@ -16,12 +16,14 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -41,6 +43,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
     
     private final UserTableWrapper<RefreshableMultiSelectionModel<UserDTO>, TR> userList;
     private final RefreshableMultiSelectionModel<UserDTO> userSelectionModel;
+    private final TextBox userNameTextbox;
 
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             ErrorReporter errorReporter, TR tableResources) {
@@ -57,6 +60,10 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         buttonPanel.addCreateAction(stringMessages.createUser(),
                 () -> new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService)
                         .show());
+
+        userNameTextbox = buttonPanel.addUnsecuredTextBox(stringMessages.username());
+        buttonPanel.addUnsecuredAction(stringMessages.editRolesAndPermissionsForUser(),
+                () -> showRolesAndPermissionsEditDialog(userService, tableResources, errorReporter));
 
         userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
                 /* multiSelection */ true, /* enablePager */ true, tableResources);
@@ -139,6 +146,23 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         west.add(detailsPanel);
     }
     
+    /** shows the edit dialog */
+    private void showRolesAndPermissionsEditDialog(UserService userService,
+            final CellTableWithCheckboxResources tableResources, final ErrorReporter errorReporter) {
+        new EditUserPermissionsAndRolesDialog(userNameTextbox.getText(), userService, errorReporter, tableResources,
+                new DialogCallback<Void>() {
+                    @Override
+                    public void ok(Void editedObject) {
+                        updateUsers();
+                    }
+
+                    @Override
+                    public void cancel() {
+                        updateUsers();
+                    }
+                }).show();
+    }
+
     public void updateUsers() {
         userList.refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null);
     }
