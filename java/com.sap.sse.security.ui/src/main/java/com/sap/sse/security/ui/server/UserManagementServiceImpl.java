@@ -51,6 +51,7 @@ import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -1098,5 +1099,21 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public Boolean userExists(String username) {
         return getSecurityService().getUserByName(username) != null;
+    }
+
+    @Override
+    public RolesAndPermissionsForUserDTO getRolesAndPermissionsForUser(String username) throws UserManagementException {
+        final User user = getSecurityService().getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException("User '" + username + "'not found.");
+        }
+        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+        Collection<WildcardPermissionWithSecurityDTO> permissions = new ArrayList<>();
+        for (WildcardPermission p : userDTO.getPermissions()) {
+            if (p instanceof WildcardPermissionWithSecurityDTO) {
+                permissions.add((WildcardPermissionWithSecurityDTO) p);
+            }
+        }
+        return new RolesAndPermissionsForUserDTO(userDTO.getRoles(), permissions);
     }
 }

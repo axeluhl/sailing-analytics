@@ -22,6 +22,7 @@ import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -179,4 +180,6 @@ public interface UserManagementService extends RemoteService {
             throws UnauthorizedException;
 
     TypeRelativeObjectIdentifier serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
+
+    RolesAndPermissionsForUserDTO getRolesAndPermissionsForUser(String username) throws UserManagementException;
 }

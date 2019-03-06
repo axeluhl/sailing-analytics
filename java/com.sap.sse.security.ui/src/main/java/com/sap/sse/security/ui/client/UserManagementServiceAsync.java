@@ -18,6 +18,7 @@ import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -188,4 +189,6 @@ public interface UserManagementServiceAsync {
             AsyncCallback<SuccessInfo> callback);
     
     void serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, AsyncCallback<TypeRelativeObjectIdentifier> callback);
+
+    void getRolesAndPermissionsForUser(String username, AsyncCallback<RolesAndPermissionsForUserDTO> callback);
 }
