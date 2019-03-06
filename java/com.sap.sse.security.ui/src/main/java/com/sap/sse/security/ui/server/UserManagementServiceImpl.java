@@ -440,7 +440,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         List<UserDTO> users = new ArrayList<>();
         for (User u : getSecurityService().getUserList()) {
             if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObject(DefaultActions.READ, u))) {
-                UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
+                final UserDTO userDTO = getUserDTOWithFilteredRolesAndPermissions(u);
                 users.add(userDTO);
             }
         }
@@ -1117,6 +1117,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return new RolesAndPermissionsForUserDTO(userDTO.getRoles(), permissions);
     }
 
+    /**
+     * @return The UserDTO for the given {@link User user} with his permissions and roles filtered to those the current
+     *         user can actually see.
+     */
     private UserDTO getUserDTOWithFilteredRolesAndPermissions(final User user) {
         return securityDTOFactory.createUserDTOFromUser(user, getSecurityService(), permission -> {
             final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = PermissionAndRoleAssociation
