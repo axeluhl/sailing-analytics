@@ -460,8 +460,6 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         });
         mediaTracksTable.setColumnWidth(assignedRacesColumn, 100, Unit.PCT);
 
-        SecuredDTOOwnerColumn.configureOwnerColumns(mediaTracksTable, sortHandler, stringMessages);
-
         // start time
         Column<MediaTrackWithSecurityDTO, String> startTimeColumn = new Column<MediaTrackWithSecurityDTO, String>(
                 new EditTextCell()) {
@@ -566,6 +564,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         sortHandler.setComparator(mimeTypeColumn, (mt1, mt2)->
             (mt1.mimeType == null ? "" : mt1.mimeType.toString()).compareTo(
                     mt2.mimeType == null ? "" : mt2.mimeType.toString()));
+
+        SecuredDTOOwnerColumn.configureOwnerColumns(mediaTracksTable, sortHandler, stringMessages);
 
         final HasPermissions type = SecuredDomainType.MEDIA_TRACK;
 
