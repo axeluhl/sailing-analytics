@@ -317,7 +317,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 removeLeaderboard(leaderboardDTO);
             }
         });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EDIT_SCORES, leaderboardDTO -> {
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EDIT_SCORES, UPDATE, leaderboardDTO -> {
             String leaderboardEditingUrl = EntryPointWithSettingsLinkFactory
                     .createLeaderboardEditingLink(leaderboardDTO.getName());
             Window.open(leaderboardEditingUrl, "_blank", null);
@@ -337,7 +337,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                             });
                     editCompetitorsDialog.show();
                 });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL, leaderboardDTO -> {
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL, UPDATE,
+                leaderboardDTO -> {
             sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.getName(), null,
                     new AsyncCallback<Iterable<DetailType>>() {
 
@@ -352,21 +353,21 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                         }
                     });
         });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML,
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML, UPDATE,
                 leaderboardDTO -> Window.open(UriUtils
                         .fromString("/export/xml?domain=leaderboard&name=" + leaderboardDTO.getName()).asString(), "",
                         null));
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD,
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD, UPDATE,
                 leaderboardDTO -> {
                     Map<String, String> dashboardURLParameters = new HashMap<String, String>();
                     dashboardURLParameters.put("leaderboardName", leaderboardDTO.getName());
                     Window.open(EntryPointLinkFactory.createDashboardLink(dashboardURLParameters), "", null);
                 });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_SHOW_REGATTA_LOG,
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_SHOW_REGATTA_LOG, UPDATE,
                 leaderboardDTO -> showRegattaLog());
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CREATE_PAIRINGLIST,
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CREATE_PAIRINGLIST, UPDATE,
                 this::createPairingListTemplate);
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST,
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST, UPDATE,
                 this::openPairingListEntryPoint);
 
         final DialogConfig<StrippedLeaderboardDTOWithSecurity> config = EditOwnershipDialog.create(
