@@ -39,6 +39,7 @@ import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {
@@ -87,7 +88,8 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         } else {
             boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
             if (!skip) {
-                getSecurityService().checkCurrentUserReadPermission(competitor);
+                getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             String jsonString = getCompetitorJSON(competitor).toJSONString();
             response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
