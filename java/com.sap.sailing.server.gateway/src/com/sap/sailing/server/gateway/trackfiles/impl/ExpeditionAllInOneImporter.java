@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -105,7 +106,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -464,7 +464,7 @@ public class ExpeditionAllInOneImporter {
      * persist and the result of the action is returned.
      */
     private <T> T checkTrackedRacesCreationPermission(final String regattaName, final String trackedRaceName,
-            final Iterable<String> additionalTrackedRaceNames, final ActionWithResult<T> action) {
+            final Iterable<String> additionalTrackedRaceNames, final Callable<T> action) {
         Iterator<String> additionalTrackedRaceNamesIterator = additionalTrackedRaceNames.iterator();
         return checkTrackedRaceCreationPermission(regattaName, trackedRaceName, ()->{
             return checkTrackedRaceCreationPermissionRecursively(regattaName, additionalTrackedRaceNamesIterator, action);
@@ -472,16 +472,16 @@ public class ExpeditionAllInOneImporter {
     }
     
     private <T> T checkTrackedRaceCreationPermissionRecursively(final String regattaName, final Iterator<String> additionalTrackedRaceNamesIterator,
-            final ActionWithResult<T> terminalAction) throws Exception {
+            final Callable<T> terminalAction) throws Exception {
         if (additionalTrackedRaceNamesIterator.hasNext()) {
             return checkTrackedRaceCreationPermission(regattaName, additionalTrackedRaceNamesIterator.next(),
                     ()->checkTrackedRaceCreationPermissionRecursively(regattaName, additionalTrackedRaceNamesIterator, terminalAction));
         } else {
-            return terminalAction.run();
+            return terminalAction.call();
         }
     }
 
-    private <T> T checkTrackedRaceCreationPermission(String regattaName, String trackedRaceName, ActionWithResult<T> action) {
+    private <T> T checkTrackedRaceCreationPermission(String regattaName, String trackedRaceName, Callable<T> action) {
         return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 TrackedRace.getSecuredDomainType(),
                 TrackedRace.getIdentifier(new RegattaNameAndRaceName(regattaName, trackedRaceName)).getTypeRelativeObjectIdentifier(),

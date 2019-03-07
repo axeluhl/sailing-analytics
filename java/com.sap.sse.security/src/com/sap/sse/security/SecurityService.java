@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -354,7 +355,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier,
-            String securityDisplayName, ActionWithResult<T> createActionReturningCreatedObject);
+            String securityDisplayName, Callable<T> createActionReturningCreatedObject);
 
     void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName, Action actionToCreateObject);
@@ -365,7 +366,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             Action actionToDeleteObject);
 
     <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
-            ActionWithResult<T> actionToDeleteObject);
+            Callable<T> actionToDeleteObject);
     
     void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier);
 
@@ -516,16 +517,16 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback);
 
     User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
-            ActionWithResult<User> createActionReturningCreatedObject);
+            Callable<User> createActionReturningCreatedObject);
 
     /**
      * Do only use this, if it is not possible to get the actual instance of the object to delete using the
      * WithQualifiedObjectIdentifier variant
      */
     <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
-            ActionWithResult<T> actionToDeleteObject);
+            Callable<T> actionToDeleteObject);
     
-    <T> T doWithTemporaryDefaultTenant(UserGroup tenant, ActionWithResult<T> action);
+    <T> T doWithTemporaryDefaultTenant(UserGroup tenant, Callable<T> action);
 
     /**
      * Before using a SecuritySystem, it is necessary to initialize the service, to ensure roles and acls are correctly

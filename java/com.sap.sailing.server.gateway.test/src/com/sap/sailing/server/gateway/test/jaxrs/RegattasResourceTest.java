@@ -15,6 +15,7 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -47,7 +48,6 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.shared.Account;
@@ -86,9 +86,9 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         series.add(testSeries);
         final UUID closedRegattaUuid = UUID.randomUUID();
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.REGATTA,
-                Regatta.getTypeRelativeObjectIdentifier(closedRegattaName), closedRegattaName, new ActionWithResult<Regatta>() {
+                Regatta.getTypeRelativeObjectIdentifier(closedRegattaName), closedRegattaName, new Callable<Regatta>() {
                     @Override
-                    public Regatta run() throws Exception {
+                    public Regatta call() throws Exception {
                         return racingEventService.createRegatta(closedRegattaName, boatClassName,
                                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                                 /* registrationLinkSecret */ null, startDate, endDate, closedRegattaUuid, series,
@@ -99,9 +99,9 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                     }
                 });
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.REGATTA,
-                Regatta.getTypeRelativeObjectIdentifier(openRegattaName), openRegattaName, new ActionWithResult<Regatta>() {
+                Regatta.getTypeRelativeObjectIdentifier(openRegattaName), openRegattaName, new Callable<Regatta>() {
                     @Override
-                    public Regatta run() throws Exception {
+                    public Regatta call() throws Exception {
                         return racingEventService.createRegatta(openRegattaName, boatClassName,
                                 /* canBoatsOfCompetitorsChangePerRace */ true,
                                 CompetitorRegistrationType.OPEN_MODERATED, secret, startDate, endDate,
