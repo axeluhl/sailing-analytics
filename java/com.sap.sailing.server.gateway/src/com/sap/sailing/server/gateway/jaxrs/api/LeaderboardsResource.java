@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -134,7 +135,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
@@ -635,7 +635,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
                     DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
         }
-        final ActionWithResult<Response> innerAction = () -> {
+        final Callable<Response> innerAction = () -> {
             final Response result;
             if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
                 JSONObject jsonResult = new JSONObject();
@@ -670,7 +670,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
 
         final Response result;
         if (groupOwner == null) {
-            result = innerAction.run();
+            result = innerAction.call();
         } else {
             result = getSecurityService().doWithTemporaryDefaultTenant(groupOwner, innerAction);
         }

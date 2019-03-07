@@ -1,6 +1,7 @@
 package com.sap.sse.security.jaxrs.api;
 
 import java.util.Locale;
+import java.util.concurrent.Callable;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -23,7 +24,6 @@ import org.json.simple.JSONObject;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
@@ -115,10 +115,10 @@ public class SecurityResource extends AbstractSecurityResource {
 
         try {
             User user = getService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(username,
-                    new ActionWithResult<User>() {
+                    new Callable<User>() {
 
                         @Override
-                        public User run() throws Exception {
+                        public User call() throws Exception {
                             final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
                             User newUser = getService().createSimpleUser(username, email, password, fullName, company,
                                     Locale.ENGLISH, validationBaseURL, getService().getDefaultTenantForCurrentUser());

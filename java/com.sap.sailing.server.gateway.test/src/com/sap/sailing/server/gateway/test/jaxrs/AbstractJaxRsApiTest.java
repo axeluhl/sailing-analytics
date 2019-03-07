@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import javax.ws.rs.core.Response;
 
@@ -39,7 +40,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.Action;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
@@ -81,7 +81,7 @@ public abstract class AbstractJaxRsApiTest {
         Mockito.doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArgumentAt(4, ActionWithResult.class).run();
+                return invocation.getArgumentAt(4, Callable.class).call();
             }
         }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(Action.class));
@@ -90,14 +90,14 @@ public abstract class AbstractJaxRsApiTest {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 for (Object arg : invocation.getArguments()) {
-                    if (arg instanceof ActionWithResult) {
-                        return ((ActionWithResult) arg).run();
+                    if (arg instanceof Callable) {
+                        return ((Callable) arg).call();
                     }
                 }
                 return null;
             }
         }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.any(),
-                Mockito.any(), Mockito.any(), Mockito.any(ActionWithResult.class));
+                Mockito.any(), Mockito.any(), Mockito.any(Callable.class));
 
         Mockito.doReturn(true).when(securityService)
                 .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));

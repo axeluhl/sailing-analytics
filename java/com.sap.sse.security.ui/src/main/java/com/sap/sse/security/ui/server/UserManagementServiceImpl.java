@@ -33,7 +33,6 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.Action;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -124,10 +123,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name) {
         RoleDefinition role = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString), name,
-                new ActionWithResult<RoleDefinition>() {
+                new Callable<RoleDefinition>() {
 
                     @Override
-                    public RoleDefinition run() throws Exception {
+                    public RoleDefinition call() throws Exception {
                         return getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString),
                                 name);
                     }
@@ -490,9 +489,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throws UserManagementException, MailException, UnauthorizedException {
 
         User user = getSecurityService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(username,
-                new ActionWithResult<User>() {
+                new Callable<User>() {
                     @Override
-                    public User run() throws Exception {
+                    public User call() throws Exception {
                         try {
                             User newUser = getSecurityService().createSimpleUser(username, email, password, fullName,
                                     company,
@@ -908,10 +907,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
-                    new ActionWithResult<Void>() {
+                    new Callable<Void>() {
 
                         @Override
-                        public Void run() throws Exception {
+                        public Void call() throws Exception {
                             getSecurityService().removeRoleFromUser(user, role);
                             logger.info(message);
                             return null;
@@ -1051,9 +1050,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
 
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
-                    new ActionWithResult<Void>() {
+                    new Callable<Void>() {
                         @Override
-                        public Void run() throws Exception {
+                        public Void call() throws Exception {
                             getSecurityService().removePermissionFromUser(username, permission);
                             logger.info(message);
                             return null;

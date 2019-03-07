@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -85,7 +86,6 @@ import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.Action;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;
@@ -111,6 +111,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
@@ -325,11 +326,30 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 // Permission association is owned by the server tenant.
                 // This typically ensures that the server admin is able to remove the association.
                 setOwnership(qualifiedTypeIdentifierForPermission, null, getDefaultTenant());
+                
+                // All users may read the initial set of RoleDefinition to be able to assign those roles to other users
+                for (UUID predefinedRoleId : getPredefinedRoleIds()) {
+                    final RoleDefinition predefinedRole = getRoleDefinition(predefinedRoleId);
+                    if (predefinedRole != null) {
+                        addPermissionForUserAndSetUserAsOwner(allUser,
+                                predefinedRole.getIdentifier().getPermission(DefaultActions.READ));
+                    }
+                }
             }
         } catch (UserManagementException | MailException | UserGroupManagementException e) {
             logger.log(Level.SEVERE,
                     "Exception while creating default " + UserStore.ADMIN_USERNAME + " and " + SecurityService.ALL_USERNAME + " user", e);
         }
+    }
+    
+    private Iterable<UUID> getPredefinedRoleIds() {
+        final Set<UUID> predefinedRoleIds = new HashSet<>();
+        predefinedRoleIds.add(AdminRole.getInstance().getId());
+        predefinedRoleIds.add(UserRole.getInstance().getId());
+        for (final PredefinedRoles otherPredefinedRole : PredefinedRoles.values()) {
+            predefinedRoleIds.add(otherPredefinedRole.getId());
+        }
+        return predefinedRoleIds;
     }
     
     private void initEmptyAccessControlStore() {
@@ -1079,6 +1099,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 .getQualifiedObjectIdentifier(associationTypeIdentifier);
         setOwnership(qualifiedTypeIdentifier, user, null);
     }
+    
+    public void addPermissionForUserAndSetUserAsOwner(User user, WildcardPermission permission) {
+        addPermissionForUser(user.getName(), permission);
+        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission, user);
+        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                .getQualifiedObjectIdentifier(associationTypeIdentifier);
+        setOwnership(qualifiedTypeIdentifier, user, null);
+    }
 
     @Override
     public void addRoleForUser(User user, Role role) {
@@ -1614,7 +1642,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
             HasPermissions type, TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName,
-            ActionWithResult<T> actionWithResult) {
+            Callable<T> actionWithResult) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         T result = null;
         boolean didSetOwnership = false;
@@ -1631,7 +1659,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                             ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
             SecurityUtils.getSubject()
                     .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
-            result = actionWithResult.run();
+            result = actionWithResult.call();
         } catch (AuthorizationException e) {
             if (didSetOwnership) {
                 deleteOwnership(identifier);
@@ -1675,13 +1703,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     @Override
     public User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
-            ActionWithResult<User> createActionReturningCreatedObject) {
+            Callable<User> createActionReturningCreatedObject) {
         QualifiedObjectIdentifier identifier = SecuredSecurityTypes.USER
                 .getQualifiedObjectIdentifier(UserImpl.getTypeRelativeObjectIdentifier(username));
         User result = null;
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
-            result = createActionReturningCreatedObject.run();
+            result = createActionReturningCreatedObject.call();
         } catch (AuthorizationException e) {
             throw e;
         } catch (Exception e) {
@@ -1701,17 +1729,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
-            ActionWithResult<T> actionToDeleteObject) {
+            Callable<T> actionToDeleteObject) {
         QualifiedObjectIdentifier identifier = object.getIdentifier();
         return checkPermissionAndDeleteOwnershipForObjectRemoval(identifier, actionToDeleteObject);
     }
 
     @Override
     public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
-            ActionWithResult<T> actionToDeleteObject) {
+            Callable<T> actionToDeleteObject) {
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
-            final T result = actionToDeleteObject.run();
+            final T result = actionToDeleteObject.call();
             deleteAllDataForRemovedObject(identifier);
             return result;
         } catch (Exception e) {
@@ -2219,11 +2247,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public <T> T doWithTemporaryDefaultTenant(UserGroup tenant, ActionWithResult<T> action) {
+    public <T> T doWithTemporaryDefaultTenant(UserGroup tenant, Callable<T> action) {
         final UserGroup previousValue = temporaryDefaultTenant.get();
         temporaryDefaultTenant.set(tenant);
         try {
-            return action.run();
+            return action.call();
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
