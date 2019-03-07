@@ -5752,7 +5752,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean filterCompetitorsWithoutBoat) {
         Iterable<CompetitorDTO> result;
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
-        final HasPermissions.Action[] requiredActionsForRead = SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS;
+        final HasPermissions.Action[] requiredActionsForRead = SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS;
         if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
             @SuppressWarnings("unchecked")
             Iterable<Competitor> competitors = (Iterable<Competitor>) competitorStore.getAllCompetitors();
@@ -5923,7 +5923,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Iterable<BoatDTO> getAllBoats() {
-        final HasPermissions.Action[] requiredActionsForRead = SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS;
+        final HasPermissions.Action[] requiredActionsForRead = SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS;
         Iterable<BoatDTO> result = getSecurityService().mapAndFilterByAnyExplicitPermissionForCurrentUser(
                 SecuredDomainType.BOAT, requiredActionsForRead,
                 getService().getBaseDomainFactory().getCompetitorAndBoatStore().getBoats(),
@@ -5935,7 +5935,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public Iterable<BoatDTO> getStandaloneBoats() {
         List<BoatDTO> result = new ArrayList<>();
         getSecurityService().filterObjectsWithAnyPermissionForCurrentUser(SecuredDomainType.BOAT,
-                SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS,
+                SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS,
                 getService().getBaseDomainFactory().getCompetitorAndBoatStore().getStandaloneBoats(),
                 filteredObject -> result.add(convertToBoatDTO(filteredObject)));
         return result;

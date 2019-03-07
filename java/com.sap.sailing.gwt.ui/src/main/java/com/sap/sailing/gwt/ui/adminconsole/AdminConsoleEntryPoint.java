@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.domain.common.security.SecuredDomainType.CompetitorAndBoatActions;
 import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
@@ -234,7 +233,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                 getWidget().refreshCompetitorList();
             }
         }, getStringMessages().competitors(),
-                SecuredDomainType.COMPETITOR.getPermission(CompetitorAndBoatActions.MUTATION_ACTIONS));
+                SecuredDomainType.COMPETITOR.getPermission(DefaultActions.MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES));
 
         final BoatPanel boatPanel = new BoatPanel(getSailingService(), getUserService(), getStringMessages(), this);
         boatPanel.ensureDebugId("BoatPanel");
@@ -243,7 +242,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             public void refreshAfterBecomingVisible() {
                 getWidget().refreshBoatList();
             }
-        }, getStringMessages().boats(), SecuredDomainType.BOAT.getPermission(CompetitorAndBoatActions.MUTATION_ACTIONS));
+        }, getStringMessages().boats(),
+                SecuredDomainType.BOAT.getPermission(DefaultActions.MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES));
 
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(getSailingService(), this,
                 this, getStringMessages(), getUserService());

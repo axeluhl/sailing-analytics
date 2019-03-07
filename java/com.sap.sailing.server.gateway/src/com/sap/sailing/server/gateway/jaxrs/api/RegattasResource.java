@@ -142,6 +142,7 @@ import com.sap.sse.common.util.RoundingUtil;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 
 @Path("/v1/regattas")
@@ -331,7 +332,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             final JSONArray result = new JSONArray();
             for (final Competitor competitor : regatta.getAllCompetitors()) {
                 if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
-                        SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                     result.add(competitorSerializer.serialize(competitor));
                 }
             }
@@ -364,7 +365,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
                 getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
-                        SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS);
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
                 regatta.registerCompetitor(competitor);
                 response = Response.ok().build();
             }
@@ -609,7 +610,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = Response.status(Status.NOT_FOUND).entity("Boat is not valid").type(MediaType.TEXT_PLAIN).build();
         } else {
             getSecurityService().checkCurrentUserAnyExplicitPermissions(boat,
-                    SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS);
+                    SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, displayColor,
                     timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName,
                     competitorShortName, competitorEmail, flagImageURI, teamImageURI, t -> boat, deviceUuid,
@@ -665,7 +666,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
                 getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
-                        SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS);
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
                 regatta.deregisterCompetitor(competitor);
                 response = Response.ok().build();
             }
@@ -728,7 +729,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONArray jsonCompetitors = new JSONArray();
                 for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                     if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
-                            SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                            SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                         if (competitorIds == null || competitorIds.isEmpty()
                                 || competitorIds.contains(competitor.getId().toString())) {
                             JSONObject jsonCompetitor = new JSONObject();
@@ -1405,7 +1406,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
                     for (Competitor competitor : competitors) {
                         if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
-                                SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                                SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                             if (competitorFilter == null || competitor.getId().equals(competitorFilter)) {
                                 Iterable<Maneuver> maneuversForCompetitor = trackedRace.getManeuvers(competitor, startTime, endTime, false);
                                 data.add(new Pair<Competitor, Iterable<Maneuver>>(competitor, maneuversForCompetitor));
@@ -1601,7 +1602,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         Map<Competitor, Integer> ranks = leg.getRanks(timePoint);
                         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                             if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
-                                    SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                                    SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                                 JSONObject jsonCompetitorInLeg = new JSONObject();
                                 TrackedLegOfCompetitor trackedLegOfCompetitor = leg.getTrackedLeg(competitor);
                                 if (trackedLegOfCompetitor != null) {
@@ -1769,7 +1770,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     Integer overallRank = 1;
                     for (Competitor competitor : overallRanking) {
                         if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
-                                SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                                SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                             overallRankPerCompetitor.put(competitor, overallRank++);
                         }
                     }
@@ -1777,7 +1778,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 Integer rank = 1;
                 for (Competitor competitor : competitorsFromBestToWorst) {
                     if (getSecurityService().hasCurrentUserAnyExplicitPermissions(competitor,
-                            SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                            SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                         JSONObject jsonCompetitorInLeg = new JSONObject();
 
                         if (topN != null && topN > 0 && rank > topN) {

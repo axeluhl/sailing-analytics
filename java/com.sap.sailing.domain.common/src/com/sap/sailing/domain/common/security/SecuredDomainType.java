@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.impl.HasPermissionsImpl;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 /**
  * Logical domain types in the "sailing" domain that require the user to have certain permissions
@@ -61,22 +62,15 @@ public class SecuredDomainType extends HasPermissionsImpl {
                 DefaultActions.CHANGE_ACL };
     }
 
-    public static enum CompetitorAndBoatActions implements Action {
-        READ_PUBLIC;
-        
-        public static final Action[] READ_AND_READ_PUBLIC_ACTIONS = new Action[] { READ_PUBLIC, DefaultActions.READ };
-
-        private static final Action[] ALL_ACTIONS = new Action[] { READ_PUBLIC, DefaultActions.READ,
+    private static final Action[] ALL_ACTIONS_FOR_COMPETITOR_AND_BOAT = new Action[] {
+            SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC, DefaultActions.READ,
                 DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,
                 DefaultActions.CHANGE_ACL };
 
-        public static final Action[] MUTATION_ACTIONS = new Action[] { DefaultActions.CREATE, DefaultActions.UPDATE,
-                DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL };
-    };
+    public static final HasPermissions COMPETITOR = new SecuredDomainType("COMPETITOR",
+            ALL_ACTIONS_FOR_COMPETITOR_AND_BOAT);
 
-    public static final HasPermissions COMPETITOR = new SecuredDomainType("COMPETITOR", CompetitorAndBoatActions.ALL_ACTIONS);
-
-    public static final HasPermissions BOAT = new SecuredDomainType("BOAT", CompetitorAndBoatActions.ALL_ACTIONS);
+    public static final HasPermissions BOAT = new SecuredDomainType("BOAT", ALL_ACTIONS_FOR_COMPETITOR_AND_BOAT);
 
     public static final HasPermissions MEDIA_TRACK = new SecuredDomainType("MEDIA_TRACK");
 
