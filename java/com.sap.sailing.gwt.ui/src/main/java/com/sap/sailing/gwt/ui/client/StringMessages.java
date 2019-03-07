@@ -2235,4 +2235,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String invalidSecret();
     String warningSailInsightVersion();
     String invalidState();
+
+    String doYouReallyWantToRemoveDeviceConfiguration(String name);
 }

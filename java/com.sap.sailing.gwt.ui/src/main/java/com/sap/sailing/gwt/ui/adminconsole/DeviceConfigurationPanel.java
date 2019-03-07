@@ -38,7 +38,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     private DeviceConfigurationListComposite listComposite;
     private DeviceConfigurationDetailComposite detailComposite;
     
-    private final RefreshableMultiSelectionModel<DeviceConfigurationDTO> refreshableMultiSelectionModel;
+    private final RefreshableMultiSelectionModel<DeviceConfigurationWithSecurityDTO> refreshableMultiSelectionModel;
     
     public DeviceConfigurationPanel(SailingServiceAsync sailingService, UserService userService,
             StringMessages stringMessages, ErrorReporter reporter) {
@@ -51,7 +51,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         refreshableMultiSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                Set<DeviceConfigurationDTO> selectedConfigurations = refreshableMultiSelectionModel.getSelectedSet();
+                Set<DeviceConfigurationWithSecurityDTO> selectedConfigurations = refreshableMultiSelectionModel.getSelectedSet();
                 if (selectedConfigurations.size() == 1 && selectedConfigurations.iterator().hasNext()) {
                     detailComposite.setConfiguration(selectedConfigurations.iterator().next());
                 } else {
@@ -108,7 +108,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     private void setupConfigurationPanels(VerticalPanel mainPanel) {
         Grid grid = new Grid(1 ,2);
         mainPanel.add(grid);
-        listComposite = new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages);
+        listComposite = new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages, userService);
         grid.setWidget(0, 0, listComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
@@ -132,7 +132,8 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
      * that the {@link DeviceConfigurationDTO.id ID} of the {@code configurationToObtainAndSetNameForAndAdd} is unique.
      */
     @Override
-    public void obtainAndSetNameForConfigurationAndAdd(final DeviceConfigurationDTO configurationToObtainAndSetNameForAndAdd) {
+    public void obtainAndSetNameForConfigurationAndAdd(
+            final DeviceConfigurationDTO configurationToObtainAndSetNameForAndAdd) {
         sailingService.getDeviceConfigurations(
                 new MarkedAsyncCallback<>(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
             @Override
@@ -147,7 +148,12 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                             public void onSuccess(Void result) {
                                 listComposite.refreshTable();
                                 refreshableMultiSelectionModel.clear();
-                                refreshableMultiSelectionModel.setSelected(configurationToObtainAndSetNameForAndAdd, true);
+                                                        if (configurationToObtainAndSetNameForAndAdd instanceof DeviceConfigurationWithSecurityDTO) {
+                                                            // TODO: fix generic
+                                                            refreshableMultiSelectionModel.setSelected(
+                                                                    (DeviceConfigurationWithSecurityDTO) configurationToObtainAndSetNameForAndAdd,
+                                                                    true);
+                                }
                             }
                             
                             @Override
