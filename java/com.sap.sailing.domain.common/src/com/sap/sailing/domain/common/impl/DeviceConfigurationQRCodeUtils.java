@@ -59,10 +59,9 @@ public class DeviceConfigurationQRCodeUtils {
                 paramMap.put(keyValue[0], urlDecoder.decode(keyValue[1]));
             }
         }
-        if (!paramMap.containsKey(deviceIdentifierKey)
-        && !paramMap.containsKey(deviceUuidKey)) {
-            throw new IllegalArgumentException("Device identifier parameter "+deviceIdentifierKey+
-                     " and device UUID parameter "+deviceUuidKey+" are both missing from QR code contents");
+        if (!paramMap.containsKey(deviceIdentifierKey) && !paramMap.containsKey(deviceUuidKey)) {
+            throw new IllegalArgumentException("Device identifier parameter " + deviceIdentifierKey
+                    + " and device UUID parameter " + deviceUuidKey + " are both missing from QR code contents");
         }
         String apkUrl = qrCodeContent.substring(0, fragmentIndex);
         return new DeviceConfigurationDetails(apkUrl,
