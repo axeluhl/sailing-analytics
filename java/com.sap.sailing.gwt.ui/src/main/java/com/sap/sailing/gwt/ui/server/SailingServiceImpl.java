@@ -6043,6 +6043,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public DeviceConfigurationDTO getDeviceConfiguration(UUID id) {
         DeviceConfiguration configuration = getService().getDeviceConfigurationById(id);
+        getSecurityService().checkCurrentUserReadPermission(configuration);
         return configuration == null ? null : convertToDeviceConfigurationDTO(configuration);
     }
 
@@ -6060,6 +6061,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public boolean removeDeviceConfiguration(UUID deviceConfigurationId) {
+        final DeviceConfiguration configuration = getService().getDeviceConfigurationById(deviceConfigurationId);
+        getSecurityService().checkCurrentUserDeletePermission(configuration);
         getService().removeDeviceConfiguration(deviceConfigurationId);
         return true;
     }
