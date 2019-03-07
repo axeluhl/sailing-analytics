@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -184,6 +185,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
 
                 boolean canUpdateAll = true;
                 boolean canDeleteAll = true;
+                boolean canExportAll = true;
                 for (RaceDTO race : selectedRaces) {
                     if (!userService.hasPermission(race, DefaultActions.UPDATE)) {
                         canUpdateAll = false;
@@ -191,11 +193,15 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                     if (!userService.hasPermission(race, DefaultActions.DELETE)) {
                         canDeleteAll = false;
                     }
+                    if (!userService.hasPermission(race, SecuredDomainType.TrackedRaceActions.EXPORT)) {
+                        canExportAll = false;
+                    }
+
                 }
                 btnSetDelayToLive.setEnabled(canUpdateAll);
                 btnRemoveRace.setEnabled(canDeleteAll);
                 btnUntrack.setEnabled(canUpdateAll);
-                btnExport.setEnabled(numberOfItemsSelected > 0);
+                btnExport.setEnabled(canExportAll);
             }
         }
     }
