@@ -111,6 +111,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
@@ -325,11 +326,30 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 // Permission association is owned by the server tenant.
                 // This typically ensures that the server admin is able to remove the association.
                 setOwnership(qualifiedTypeIdentifierForPermission, null, getDefaultTenant());
+                
+                // All users may read the initial set of RoleDefinition to be able to assign those roles to other users
+                for (UUID predefinedRoleId : getPredefinedRoleIds()) {
+                    final RoleDefinition predefinedRole = getRoleDefinition(predefinedRoleId);
+                    if (predefinedRole != null) {
+                        addPermissionForUserAndSetUserAsOwner(allUser,
+                                predefinedRole.getIdentifier().getPermission(DefaultActions.READ));
+                    }
+                }
             }
         } catch (UserManagementException | MailException | UserGroupManagementException e) {
             logger.log(Level.SEVERE,
                     "Exception while creating default " + UserStore.ADMIN_USERNAME + " and " + SecurityService.ALL_USERNAME + " user", e);
         }
+    }
+    
+    private Iterable<UUID> getPredefinedRoleIds() {
+        final Set<UUID> predefinedRoleIds = new HashSet<>();
+        predefinedRoleIds.add(AdminRole.getInstance().getId());
+        predefinedRoleIds.add(UserRole.getInstance().getId());
+        for (final PredefinedRoles otherPredefinedRole : PredefinedRoles.values()) {
+            predefinedRoleIds.add(otherPredefinedRole.getId());
+        }
+        return predefinedRoleIds;
     }
     
     private void initEmptyAccessControlStore() {
@@ -1076,6 +1096,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         addRoleForUser(user.getName(), role);
         TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
         QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                .getQualifiedObjectIdentifier(associationTypeIdentifier);
+        setOwnership(qualifiedTypeIdentifier, user, null);
+    }
+    
+    public void addPermissionForUserAndSetUserAsOwner(User user, WildcardPermission permission) {
+        addPermissionForUser(user.getName(), permission);
+        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission, user);
+        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
                 .getQualifiedObjectIdentifier(associationTypeIdentifier);
         setOwnership(qualifiedTypeIdentifier, user, null);
     }
