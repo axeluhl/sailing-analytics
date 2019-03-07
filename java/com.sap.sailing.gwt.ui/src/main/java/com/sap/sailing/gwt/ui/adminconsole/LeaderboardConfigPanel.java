@@ -856,7 +856,14 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     @Override
     protected void leaderboardSelectionChanged() {
         Set<StrippedLeaderboardDTOWithSecurity> selectedLeaderboards = leaderboardSelectionModel.getSelectedSet();
-        leaderboardRemoveButton.setEnabled(!selectedLeaderboards.isEmpty());
+        boolean canDeleteAllSelected = true;
+        for (StrippedLeaderboardDTOWithSecurity leaderboard : selectedLeaderboards) {
+            if (!userService.hasPermission(leaderboard, DefaultActions.DELETE)) {
+                canDeleteAllSelected = false;
+            }
+        }
+
+        leaderboardRemoveButton.setEnabled(!selectedLeaderboards.isEmpty() && canDeleteAllSelected);
         leaderboardRemoveButton.setText(selectedLeaderboards.size() <= 1 ? stringMessages.remove()
                 : stringMessages.removeNumber(selectedLeaderboards.size()));
 

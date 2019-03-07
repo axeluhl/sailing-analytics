@@ -11,6 +11,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
@@ -56,6 +57,21 @@ public class AccessControlledButtonPanel extends Composite {
      */
     public Button addUnsecuredAction(final String text, final Command callback) {
         return addAction(text, () -> true, callback);
+    }
+
+    /**
+     * Adds an unsecured textbox, which's visibility is independent from the current user's permissions.
+     * 
+     * @param label
+     *            the {@link String label} displayed as a placeholder in the textbox
+     * @return the created {@link TextBox} instance
+     */
+    public TextBox addUnsecuredTextBox(final String label) {
+        final TextBox textBox = new TextBox();
+        textBox.getElement().setAttribute("placeholder", label);
+        textBox.getElement().getStyle().setMarginRight(5, Unit.PX);
+        this.panel.add(textBox);
+        return textBox;
     }
 
     /**
@@ -124,6 +140,11 @@ public class AccessControlledButtonPanel extends Composite {
      */
     public void insertWidgetAtPosition(Widget widget, int index) {
         this.panel.insert(widget, index);
+    }
+
+    public void addUnsecuredWidget(Widget widget) {
+        widget.getElement().getStyle().setMarginRight(5, Unit.PX);
+        panel.add(widget);
     }
 
 }

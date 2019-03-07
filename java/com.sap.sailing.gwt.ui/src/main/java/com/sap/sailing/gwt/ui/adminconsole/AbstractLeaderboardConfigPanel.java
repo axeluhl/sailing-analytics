@@ -304,7 +304,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                     refreshRaceLog(column, fleet, false);
                 }
             }
-            Notification.notify(stringMessages.raceLogReloaded(), NotificationType.ERROR);
+            Notification.notify(stringMessages.raceLogReloaded(), NotificationType.SUCCESS);
         });
         vPanel.add(reloadAllRaceLogs);
         Label lblRaceNamesIn = new Label(stringMessages.races());

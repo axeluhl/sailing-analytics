@@ -31,7 +31,7 @@ public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testGetCompetitorAsJson() throws Exception {
-        String jsonString = competitorsResource.getCompetitor(id).getEntity().toString();
+        String jsonString = competitorsResource.getCompetitor(id, null, null).getEntity().toString();
         JSONObject json = Helpers.toJSONObjectSafe(JSONValue.parse(jsonString));
         assertTrue(json.get("id").equals(id));
         assertTrue(json.get("name").equals(name));

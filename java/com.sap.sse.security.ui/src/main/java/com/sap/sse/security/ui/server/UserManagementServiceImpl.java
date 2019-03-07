@@ -51,6 +51,7 @@ import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -439,7 +440,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         List<UserDTO> users = new ArrayList<>();
         for (User u : getSecurityService().getUserList()) {
             if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObject(DefaultActions.READ, u))) {
-                UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
+                final UserDTO userDTO = getUserDTOWithFilteredRolesAndPermissions(u);
                 users.add(userDTO);
             }
         }
@@ -497,18 +498,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                                     company,
                                     getLocaleFromLocaleName(localeName), validationBaseURL,
                                     getSecurityService().getDefaultTenantForCurrentUser());
-                            for (Role role : newUser.getRoles()) {
-                                TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, newUser);
-                                QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
-                                        .getQualifiedObjectIdentifier(associationTypeIdentifier);
-
-                                User currentUser = getSecurityService().getCurrentUser();
-                                if (currentUser == null) {
-                                    currentUser = newUser;
-                                }
-                                UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
-                                getSecurityService().setOwnership(qualifiedTypeIdentifier, currentUser, tenant);
-                            }
                             return newUser;
                         } catch (UserManagementException | UserGroupManagementException e) {
                             logger.log(Level.SEVERE, "Error creating user " + username, e);
@@ -1110,5 +1099,39 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public Boolean userExists(String username) {
         return getSecurityService().getUserByName(username) != null;
+    }
+
+    @Override
+    public RolesAndPermissionsForUserDTO getRolesAndPermissionsForUser(String username) throws UserManagementException {
+        final User user = getSecurityService().getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException("User '" + username + "'not found.");
+        }
+        final UserDTO userDTO = getUserDTOWithFilteredRolesAndPermissions(user);
+        Collection<WildcardPermissionWithSecurityDTO> permissions = new ArrayList<>();
+        for (WildcardPermission p : userDTO.getPermissions()) {
+            if (p instanceof WildcardPermissionWithSecurityDTO) {
+                permissions.add((WildcardPermissionWithSecurityDTO) p);
+            }
+        }
+        return new RolesAndPermissionsForUserDTO(userDTO.getRoles(), permissions);
+    }
+
+    /**
+     * @return The UserDTO for the given {@link User user} with his permissions and roles filtered to those the current
+     *         user can actually see.
+     */
+    private UserDTO getUserDTOWithFilteredRolesAndPermissions(final User user) {
+        return securityDTOFactory.createUserDTOFromUser(user, getSecurityService(), permission -> {
+            final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = PermissionAndRoleAssociation
+                    .get(permission, user);
+            return SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                    .getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ, typeRelativeObjectIdentifier));
+        }, role -> {
+            final TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = PermissionAndRoleAssociation.get(role,
+                    user);
+            return SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ROLE_ASSOCIATION
+                    .getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ, typeRelativeObjectIdentifier));
+        });
     }
 }

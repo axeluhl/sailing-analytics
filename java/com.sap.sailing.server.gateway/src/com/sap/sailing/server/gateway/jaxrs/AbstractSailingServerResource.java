@@ -16,9 +16,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.SecurityService;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.DateParser;
 import com.sun.jersey.api.core.ResourceContext;
 
@@ -109,5 +110,16 @@ public abstract class AbstractSailingServerResource {
         BigDecimal bigDecimal = new BigDecimal(value);
         bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
         return bigDecimal.doubleValue();
+    }
+
+    /**
+     * If the leaderboard can be resolved to a regatta, and the given secret is correct, return true
+     */
+    protected boolean skipChecksDueToCorrectSecret(String leaderboardName, String secret) {
+        Regatta regatta = getService().getRegattaByName(leaderboardName);
+        if(regatta == null) {
+            return false;
+        }
+        return Util.equalStringsWithEmptyIsNull(regatta.getRegistrationLinkSecret(), secret);
     }
 }

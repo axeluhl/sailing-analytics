@@ -212,7 +212,7 @@ public class SmartphoneTrackingEventManagementPanel
                 DefaultActions.UPDATE, t -> openChooseEventDialogAndSendMails(t.getName()));
 
         leaderboardActionColumn.addAction(RaceLogTrackingEventManagementImagesBarCell.ACTION_SHOW_REGATTA_LOG,
-                DefaultActions.UPDATE, configOwnership::openDialog);
+                DefaultActions.UPDATE, t -> showRegattaLog());
 
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.UPDATE,
                 configOwnership::openDialog);
@@ -383,7 +383,7 @@ public class SmartphoneTrackingEventManagementPanel
                                     }
                                 });
                     }
-                }).show();
+                }, userService).show();
     }
 
     private void handleCompetitorRegistration(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {

@@ -899,14 +899,19 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     private void groupSelectionChanged() {
         Set<LeaderboardGroupDTO> selectedLeaderboardGroups = refreshableGroupsSelectionModel.getSelectedSet();
         isSingleGroupSelected = selectedLeaderboardGroups.size() == 1;
-        final LeaderboardGroupDTO selectedGroup = getSelectedGroup();
-       
-        removeButton.setEnabled(selectedGroup != null);
-        removeButton.setEnabled(!selectedLeaderboardGroups.isEmpty());
+
         removeButton.setText(selectedLeaderboardGroups.size() <= 1 ? stringMessages.remove() : stringMessages.removeNumber(selectedLeaderboardGroups.size()));
+        boolean canDeleteAllSelected = true;
+        for (LeaderboardGroupDTO group : selectedLeaderboardGroups) {
+            if (userService.hasPermission(group, DefaultActions.DELETE)) {
+                canDeleteAllSelected = false;
+            }
+        }
+        removeButton.setEnabled(!selectedLeaderboardGroups.isEmpty() && canDeleteAllSelected);
         
-        splitPanel.setVisible(isSingleGroupSelected && selectedGroup != null);
-        if (isSingleGroupSelected && selectedGroup != null) {
+        splitPanel.setVisible(isSingleGroupSelected);
+        if (isSingleGroupSelected) {
+            LeaderboardGroupDTO selectedGroup = selectedLeaderboardGroups.iterator().next();
             //Display details of the group
             groupDetailsCaptionPanel.setCaptionText(stringMessages.detailsOfLeaderboardGroup() + " '" + selectedGroup.getName() + "'");
             idLabel.setText(selectedGroup.getId().toString());

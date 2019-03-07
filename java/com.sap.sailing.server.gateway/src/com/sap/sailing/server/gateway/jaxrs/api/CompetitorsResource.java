@@ -15,6 +15,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -73,7 +74,10 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{competitorId}")
-    public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString) {
+    public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString,
+            @QueryParam("secret") String secret, @QueryParam("leaderboardname") String leaderboardName) {
+        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+
         Response response;
         Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
                 competitorIdAsString);

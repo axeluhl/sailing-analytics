@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Arrays;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
@@ -19,11 +18,6 @@ public class BoatConfigImagesBarCell extends ImagesBarCell {
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     public BoatConfigImagesBarCell(StringMessages stringMessages) {
-        super();
-        this.stringMessages = stringMessages;
-    }
-
-    public BoatConfigImagesBarCell(SafeHtmlRenderer<String> renderer, StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
     }
