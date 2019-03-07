@@ -299,25 +299,9 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
 
         boolean allowedViaPermission = getSecurityService().hasCurrentUserUpdatePermission(leaderboard);
-        boolean allowedViaSecret = false;
+        boolean allowedViaSecret = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
 
         HasRegattaLike hasRegattaLike = (HasRegattaLike) leaderboard;
-        Regatta correspondingRegatta = getService().getRegattaByName(leaderboard.getName());
-        if (regattaSecret != null && !regattaSecret.isEmpty()) {
-            if (correspondingRegatta == null) {
-                logger.warning(() -> "Attempt to checkin using regatta secret \"" + regattaSecret
-                        + "\" for leaderboard \"" + leaderboard.getName() + "\", but there is no associated regatta.");
-            } else {
-                final String secretOfRegatta = correspondingRegatta.getRegistrationLinkSecret();
-                if (secretOfRegatta == null) {
-                    logger.warning(
-                            () -> "Attempt to checkin using regatta secret \"" + regattaSecret + "\" for regatta \""
-                                    + correspondingRegatta.getName() + "\", but there is no secret configured.");
-                } else {
-                    allowedViaSecret = secretOfRegatta.equals(regattaSecret);
-                }
-            }
-        }
 
         DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,

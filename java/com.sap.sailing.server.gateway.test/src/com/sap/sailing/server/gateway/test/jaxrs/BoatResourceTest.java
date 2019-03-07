@@ -28,7 +28,7 @@ public class BoatResourceTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testGetBoatAsJson() throws Exception {
-        String jsonString = boatsResource.getBoat(id).getEntity().toString();
+        String jsonString = boatsResource.getBoat(id, null, null).getEntity().toString();
         
         BoatJsonDeserializer boatJsonDeserializer = BoatJsonDeserializer.create(racingEventService.getBaseDomainFactory());
         JSONObject jsonObject = Helpers.toJSONObjectSafe(JSONValue.parse(jsonString));
