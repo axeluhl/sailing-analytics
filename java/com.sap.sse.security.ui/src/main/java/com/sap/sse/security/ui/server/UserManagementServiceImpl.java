@@ -852,7 +852,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
             // check permissions
             getSecurityService().checkCurrentUserUpdatePermission(user);
-            getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.GRANT_PERMISSION);
 
             // get user for which the role is qualified, if one exists
             getOrThrowQualifiedUser(userQualifierName);
@@ -900,7 +899,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
             // check permissions
             getSecurityService().checkCurrentUserUpdatePermission(user);
-            getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.REVOKE_PERMISSION);
 
             // get user for which the role is qualified, if one exists
             getOrThrowQualifiedUser(userQualifierName);
@@ -997,15 +995,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     /**
-     * Checks, whether the current user has the required permissions to add or remove a WildcardPermission with the
-     * given action ({@link UserActions.GRANT_PERMISSION} or {@link UserActions.REVOKE_PERMISSION}) for the specific
-     * user
+     * Checks, whether the current user has the required permissions to add or remove a WildcardPermission for the
+     * specific user
      */
-    private void checkPermissionForPermissionUpdate(User user, UserActions action, WildcardPermission permission)
+    private void checkPermissionForPermissionUpdate(User user, WildcardPermission permission)
             throws UnauthorizedException {
         // check permissions
         getSecurityService().checkCurrentUserUpdatePermission(user);
-        getSecurityService().checkCurrentUserAnyExplicitPermissions(user, action);
 
         if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
             throw new UnauthorizedException(
@@ -1023,7 +1019,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             User user = getOrThrowUser(username);
 
             // check permissions
-            checkPermissionForPermissionUpdate(user, UserActions.GRANT_PERMISSION, permission);
+            checkPermissionForPermissionUpdate(user, permission);
 
             // grant permission
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
@@ -1060,7 +1056,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             User user = getOrThrowUser(username);
 
             // check permissions
-            checkPermissionForPermissionUpdate(user, UserActions.REVOKE_PERMISSION, permission);
+            checkPermissionForPermissionUpdate(user, permission);
 
             // revoke permission
             final String message = "Revoked permission " + permission + " for user " + username;
