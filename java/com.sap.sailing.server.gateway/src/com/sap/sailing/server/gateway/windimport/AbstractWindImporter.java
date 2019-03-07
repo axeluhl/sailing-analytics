@@ -159,9 +159,6 @@ public abstract class AbstractWindImporter {
     public void importWindToWindSourceAndTrackedRaces(RacingEventService service, WindImportResult windImportResult, WindSource windSource,
             List<DynamicTrackedRace> trackedRaces, final Map<InputStream, String> streamsWithFilenames)
             throws IOException, InterruptedException, FormatNotSupportedException {
-        for (DynamicTrackedRace trackedRace : trackedRaces) {
-            service.getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
-        }
         Iterable<Wind> windFixes = importWind(streamsWithFilenames);
         if (!Util.isEmpty(windFixes)) {
             for (DynamicTrackedRace trackedRace : trackedRaces) {
