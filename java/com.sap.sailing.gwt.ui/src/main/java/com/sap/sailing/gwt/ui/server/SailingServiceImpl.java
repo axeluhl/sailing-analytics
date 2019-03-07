@@ -1861,6 +1861,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO) {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
             Position p = null;
             if (windDTO.position != null) {
                 p = windDTO.position;
@@ -2543,16 +2544,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind) {
+        getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
         getService().apply(new SetRaceIsKnownToStartUpwind(raceIdentifier, raceIsKnownToStartUpwind));
     }
 
     @Override
     public void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude) {
+        getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
         getService().apply(new SetWindSourcesToExclude(raceIdentifier, windSourcesToExclude));
     }
 
     @Override
     public WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier) {
+        getSecurityService().checkCurrentUserReadPermission(raceIdentifier);
         WindInfoForRaceDTO result = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
@@ -2578,6 +2582,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO) {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
             Position p = null;
             if (windDTO.position != null) {
                 p = windDTO.position;
