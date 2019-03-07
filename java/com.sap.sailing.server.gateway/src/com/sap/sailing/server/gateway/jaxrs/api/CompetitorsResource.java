@@ -76,8 +76,6 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @Path("{competitorId}")
     public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString,
             @QueryParam("secret") String secret, @QueryParam("leaderboardname") String leaderboardName) {
-        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
-
         Response response;
         Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
                 competitorIdAsString);
@@ -86,6 +84,10 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                     .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
+            boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+            if (!skip) {
+                getSecurityService().checkCurrentUserReadPermission(competitor);
+            }
             String jsonString = getCompetitorJSON(competitor).toJSONString();
             response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }

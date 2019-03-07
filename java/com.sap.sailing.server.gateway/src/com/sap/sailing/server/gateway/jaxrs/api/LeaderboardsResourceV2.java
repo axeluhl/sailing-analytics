@@ -82,7 +82,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             @QueryParam("columnNames") final List<String> raceColumnNames,
             @QueryParam("raceDetails") final List<String> raceDetails,
             @QueryParam("time") String time, @QueryParam("timeasmillis") Long timeasmillis,
-            @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
+            @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount,
+            @QueryParam("secret") String regattaSecret) {
         ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
         
         try {
@@ -94,7 +95,10 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 try {
-                    getSecurityService().checkCurrentUserReadPermission(leaderboard);
+                    boolean skip = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
+                    if (!skip) {
+                        getSecurityService().checkCurrentUserReadPermission(leaderboard);
+                    }
                     TimePoint timePoint;
                     try {
                         timePoint = parseTimePoint(time, timeasmillis, calculateTimePointForResultState(leaderboard, resultState));

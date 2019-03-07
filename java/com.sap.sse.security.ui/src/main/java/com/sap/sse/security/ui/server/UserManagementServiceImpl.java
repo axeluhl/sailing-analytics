@@ -850,10 +850,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             // get user for which to add a role
             final User user = getOrThrowUser(username);
 
-            // check permissions
-            getSecurityService().checkCurrentUserUpdatePermission(user);
-            getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.GRANT_PERMISSION);
-
             // get user for which the role is qualified, if one exists
             getOrThrowQualifiedUser(userQualifierName);
 
@@ -897,10 +893,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         try {
             // get user for which to remove role
             final User user = getOrThrowUser(username);
-
-            // check permissions
-            getSecurityService().checkCurrentUserUpdatePermission(user);
-            getSecurityService().checkCurrentUserAnyExplicitPermissions(user, UserActions.REVOKE_PERMISSION);
 
             // get user for which the role is qualified, if one exists
             getOrThrowQualifiedUser(userQualifierName);
@@ -996,23 +988,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return user;
     }
 
-    /**
-     * Checks, whether the current user has the required permissions to add or remove a WildcardPermission with the
-     * given action ({@link UserActions.GRANT_PERMISSION} or {@link UserActions.REVOKE_PERMISSION}) for the specific
-     * user
-     */
-    private void checkPermissionForPermissionUpdate(User user, UserActions action, WildcardPermission permission)
-            throws UnauthorizedException {
-        // check permissions
-        getSecurityService().checkCurrentUserUpdatePermission(user);
-        getSecurityService().checkCurrentUserAnyExplicitPermissions(user, action);
-
-        if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
-            throw new UnauthorizedException(
-                    "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
-        }
-    }
-
     @Override
     public SuccessInfo addPermissionForUser(String username, WildcardPermission permission)
             throws UnauthorizedException {
@@ -1023,7 +998,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             User user = getOrThrowUser(username);
 
             // check permissions
-            checkPermissionForPermissionUpdate(user, UserActions.GRANT_PERMISSION, permission);
+            if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
+                throw new UnauthorizedException(
+                        "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
+            }
 
             // grant permission
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
@@ -1060,7 +1038,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             User user = getOrThrowUser(username);
 
             // check permissions
-            checkPermissionForPermissionUpdate(user, UserActions.REVOKE_PERMISSION, permission);
+            if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
+                throw new UnauthorizedException(
+                        "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
+            }
 
             // revoke permission
             final String message = "Revoked permission " + permission + " for user " + username;

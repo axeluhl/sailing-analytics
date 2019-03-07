@@ -21,7 +21,7 @@ import com.sap.sse.security.ui.client.usermanagement.roles.UserRoleDefinitionPan
  * <br/>
  * This is to enable the current user to grant/revoke permissions and roles to a different user he does not see.
  */
-public class EditUserPermissionsAndRolesDialog extends DataEntryDialog<Void> {
+public class EditUserRolesAndPermissionsDialog extends DataEntryDialog<Void> {
 
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
 
@@ -29,10 +29,11 @@ public class EditUserPermissionsAndRolesDialog extends DataEntryDialog<Void> {
 
     private UserRoleDefinitionPanel userRoleDefinitionPanel;
 
-    public EditUserPermissionsAndRolesDialog(final String selectedUsername, final UserService userService,
+    public EditUserRolesAndPermissionsDialog(final String selectedUsername, final UserService userService,
             final ErrorReporter errorReporter, final CellTableWithCheckboxResources tableResources,
             final DialogCallback<Void> callback) {
-        super(stringMessages.editUser(), null, stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
+        super(stringMessages.editRolesAndPermissionsForUser(selectedUsername), null, stringMessages.ok(),
+                stringMessages.cancel(), /* validator */ null,
                 /* animationEnabled */true, callback);
         final MultiSelectionModel<UserDTO> selectionAdapter = new MultiSelectionModel<>();
 

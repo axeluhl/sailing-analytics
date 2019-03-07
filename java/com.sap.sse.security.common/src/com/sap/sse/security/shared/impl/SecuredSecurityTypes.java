@@ -33,7 +33,6 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
     }
 
     public static enum UserActions implements Action {
-        GRANT_PERMISSION, REVOKE_PERMISSION,
         /** Update a user's password without knowing the old password. */
         FORCE_OVERWRITE_PASSWORD
     };
@@ -41,7 +40,7 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
      * type-relative identifier is the {@link User#getName() username}.
      */
     public static final HasPermissions USER = new SecuredSecurityTypes("USER", DefaultActions
-            .plus(UserActions.GRANT_PERMISSION, UserActions.REVOKE_PERMISSION, UserActions.FORCE_OVERWRITE_PASSWORD));
+            .plus(UserActions.FORCE_OVERWRITE_PASSWORD));
 
     /**
      * type-relative identifier is the {@link RoleDefinition#getId() role ID's} string representation

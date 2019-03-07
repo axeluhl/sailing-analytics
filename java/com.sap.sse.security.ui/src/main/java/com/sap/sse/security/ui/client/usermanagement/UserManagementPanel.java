@@ -62,7 +62,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                         .show());
 
         userNameTextbox = buttonPanel.addUnsecuredTextBox(stringMessages.username());
-        buttonPanel.addUnsecuredAction(stringMessages.editRolesAndPermissionsForUser(),
+        buttonPanel.addUnsecuredAction(stringMessages.editRolesAndPermissionsForUser(""),
                 () -> showRolesAndPermissionsEditDialog(userService, tableResources, errorReporter));
 
         userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
@@ -149,7 +149,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
     /** shows the edit dialog */
     private void showRolesAndPermissionsEditDialog(UserService userService,
             final CellTableWithCheckboxResources tableResources, final ErrorReporter errorReporter) {
-        new EditUserPermissionsAndRolesDialog(userNameTextbox.getText(), userService, errorReporter, tableResources,
+        new EditUserRolesAndPermissionsDialog(userNameTextbox.getText(), userService, errorReporter, tableResources,
                 new DialogCallback<Void>() {
                     @Override
                     public void ok(Void editedObject) {

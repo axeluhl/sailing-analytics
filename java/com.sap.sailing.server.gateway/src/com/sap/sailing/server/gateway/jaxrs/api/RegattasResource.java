@@ -1524,7 +1524,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races")
-    public Response getRaces(@PathParam("regattaname") String regattaName) {
+    public Response getRaces(@PathParam("regattaname") String regattaName, @PathParam("secret") String regattaSecret) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1532,7 +1532,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         } else {
-            getSecurityService().checkCurrentUserReadPermission(regatta);
+            boolean skip = skipChecksDueToCorrectSecret(regattaName, regattaSecret);
+            if (!skip) {
+                getSecurityService().checkCurrentUserReadPermission(regatta);
+            }
             JSONObject jsonRaceResults = new JSONObject();
             jsonRaceResults.put("regatta", regatta.getName());
             JSONArray jsonRaces = new JSONArray();

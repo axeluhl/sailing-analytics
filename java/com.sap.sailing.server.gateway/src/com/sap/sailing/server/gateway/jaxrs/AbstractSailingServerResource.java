@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.jaxrs;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
@@ -24,6 +25,7 @@ import com.sap.sse.util.DateParser;
 import com.sun.jersey.api.core.ResourceContext;
 
 public abstract class AbstractSailingServerResource {
+    private static final Logger logger = Logger.getLogger(AbstractSailingServerResource.class.getName());
     private static final String SLASH_ENCODING = "__";
     @Context ServletContext servletContext;
     @Context ResourceContext resourceContext;
@@ -117,7 +119,9 @@ public abstract class AbstractSailingServerResource {
      */
     protected boolean skipChecksDueToCorrectSecret(String leaderboardName, String secret) {
         Regatta regatta = getService().getRegattaByName(leaderboardName);
-        if(regatta == null) {
+        if (regatta == null && secret != null) {
+            logger.warning("Attempt to skip security checks using regatta secret \"" + secret + "\" for leaderboard \""
+                    + leaderboardName + "\", but a regatta with the same name could not be resolved");
             return false;
         }
         return Util.equalStringsWithEmptyIsNull(regatta.getRegistrationLinkSecret(), secret);

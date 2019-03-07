@@ -23,6 +23,7 @@ import com.sap.sse.security.ui.client.usermanagement.roles.UserRoleDefinitionPan
 public class RoleDefinitionSuggestOracle extends MultiWordSuggestOracle {
 
     private final Map<String, StrippedRoleDefinitionDTO> allRoles = new HashMap<>();
+    private boolean initialized = false;
 
     public RoleDefinitionSuggestOracle(final UserManagementServiceAsync userManagementService,
             final StringMessages stringMessages) {
@@ -36,6 +37,7 @@ public class RoleDefinitionSuggestOracle extends MultiWordSuggestOracle {
                 RoleDefinitionSuggestOracle.super.clear();
                 RoleDefinitionSuggestOracle.super.setDefaultSuggestionsFromText(allRoles.keySet());
                 RoleDefinitionSuggestOracle.super.addAll(allRoles.keySet());
+                initialized = true;
             }
 
             @Override
@@ -50,7 +52,7 @@ public class RoleDefinitionSuggestOracle extends MultiWordSuggestOracle {
      *          associated with the role name.
      */
     public StrippedRoleDefinitionDTO fromString(final String roleName) {
-        if (allRoles.isEmpty()) {
+        if (!initialized) {
             throw new NullPointerException("Role definitions are not loaded yet or could not be loaded.");
         }
         return allRoles.get(roleName);
