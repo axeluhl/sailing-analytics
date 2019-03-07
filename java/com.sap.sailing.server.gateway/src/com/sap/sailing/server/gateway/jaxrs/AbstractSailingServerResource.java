@@ -118,6 +118,9 @@ public abstract class AbstractSailingServerResource {
      * If the leaderboard can be resolved to a regatta, and the given secret is correct, return true
      */
     protected boolean skipChecksDueToCorrectSecret(String leaderboardName, String secret) {
+        if (leaderboardName == null && secret == null) {
+            return false;
+        }
         Regatta regatta = getService().getRegattaByName(leaderboardName);
         if (regatta == null && secret != null) {
             logger.warning("Attempt to skip security checks using regatta secret \"" + secret + "\" for leaderboard \""
