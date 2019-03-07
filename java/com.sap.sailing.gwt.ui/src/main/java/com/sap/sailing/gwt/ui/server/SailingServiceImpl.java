@@ -6392,7 +6392,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 myTrackedRaces.add(trackedRace);
             }
         } else {
-            trackedRaces = getAllTrackedRaces();
+            trackedRaces = new ArrayList<>();
+            for (DynamicTrackedRace race : getAllTrackedRaces()) {
+                if (getSecurityService().hasCurrentUserUpdatePermission(race)) {
+                    ((List<DynamicTrackedRace>) trackedRaces).add(race);
+                }
+            }
         }
         Map<RegattaAndRaceIdentifier, Integer> numberOfWindFixesImportedPerRace = new HashMap<RegattaAndRaceIdentifier, Integer>();
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
