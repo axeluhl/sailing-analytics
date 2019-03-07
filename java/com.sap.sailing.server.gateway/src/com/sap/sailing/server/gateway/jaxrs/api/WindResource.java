@@ -6,7 +6,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -24,7 +23,6 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 @Path("/v1/wind")
 public class WindResource extends AbstractSailingServerResource {
@@ -47,7 +45,7 @@ public class WindResource extends AbstractSailingServerResource {
             String raceName = (String) regattaNameAndRaceNameObject.get("raceName");
             RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, raceName);
             // add wind only to those races the subject is permitted to update
-            if (SecurityUtils.getSubject().isPermitted(identifier.getIdentifier().getStringPermission(DefaultActions.UPDATE))) {
+            if (getSecurityService().hasCurrentUserUpdatePermission(identifier)) {
                 JSONObject answerForRace = new JSONObject();
                 answerForRace.put("regattaNameAndRaceName", regattaNameAndRaceName);
                 if (windSourceType == WindSourceType.EXPEDITION || windSourceType == WindSourceType.WEB) {
