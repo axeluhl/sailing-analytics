@@ -25,25 +25,27 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class DeviceConfigurationDetailComposite extends Composite {
 
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-    
+
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
@@ -54,9 +56,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
     protected DeviceConfigurationDTO originalConfiguration;
     protected TextBox uuidBox;
     protected TextBox identifierBox;
-    private ListEditorComposite<String> allowedCourseAreasList;
+    private StringListEditorComposite allowedCourseAreasList;
     private TextBox mailRecipientBox;
-    private ListEditorComposite<String> courseNamesList;
+    private StringListEditorComposite courseNamesList;
     private CheckBox overwriteRegattaConfigurationBox;
     private RegattaConfigurationDTO currentRegattaConfiguration;
     private final UserService userService;
@@ -74,7 +76,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         captionPanel = new CaptionPanel(stringMessages.configuration());
         VerticalPanel verticalPanel = new VerticalPanel();
         contentPanel = new VerticalPanel();
-        cloneButton = new Button(stringMessages.save() + " + " +  stringMessages.clone());
+        cloneButton = new Button(stringMessages.save() + " + " + stringMessages.clone());
         cloneButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -104,8 +106,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
         setConfiguration(null);
         this.userService = userService;
     }
-    
-    public void setConfiguration(final DeviceConfigurationDTO config) {
+
+    public void setConfiguration(final DeviceConfigurationWithSecurityDTO config) {
         if (config == null) {
             clearUi();
             setVisible(false);
@@ -114,13 +116,22 @@ public class DeviceConfigurationDetailComposite extends Composite {
             setVisible(true);
         }
     }
-    
-    private void setupUi(DeviceConfigurationDTO config) {
+
+    private void setupUi(DeviceConfigurationWithSecurityDTO config) {
         clearUi();
         this.originalConfiguration = config;
         this.currentRegattaConfiguration = config.regattaConfiguration;
         setupGeneral();
         setupRegattaConfiguration();
+
+        final boolean hasUpdatePermission = userService.hasPermission(config, DefaultActions.UPDATE);
+        final boolean hasUpdateAndCreatePermission = hasUpdatePermission
+                && userService.hasCreatePermission(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION);
+        cloneButton.setVisible(hasUpdateAndCreatePermission);
+        updateButton.setVisible(hasUpdatePermission);
+        allowedCourseAreasList.setEnabled(hasUpdatePermission);
+        courseNamesList.setEnabled(hasUpdatePermission);
+        overwriteRegattaConfigurationBox.setEnabled(hasUpdatePermission);
     }
 
     private void setupRegattaConfiguration() {
@@ -140,16 +151,16 @@ public class DeviceConfigurationDetailComposite extends Composite {
             public void onClick(ClickEvent event) {
                 new RegattaConfigurationDialog(currentRegattaConfiguration == null ? new RegattaConfigurationDTO() : currentRegattaConfiguration, 
                         stringMessages, new DialogCallback<DeviceConfigurationDTO.RegattaConfigurationDTO>() {
-                    @Override
-                    public void ok(RegattaConfigurationDTO newConfiguration) {
-                        currentRegattaConfiguration = newConfiguration;
-                        markAsDirty(true);
-                    }
+                            @Override
+                            public void ok(RegattaConfigurationDTO newConfiguration) {
+                                currentRegattaConfiguration = newConfiguration;
+                                markAsDirty(true);
+                            }
 
-                    @Override
-                    public void cancel() {
-                    }
-                }).show();
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
             }
         });
         overwriteRegattaConfigurationBox.setValue(currentRegattaConfiguration != null);
@@ -225,11 +236,11 @@ public class DeviceConfigurationDetailComposite extends Composite {
         this.originalConfiguration = null;
         contentPanel.clear();
     }
-    
+
     private void markAsDirty(boolean dirty) {
         if (dirty) {
             if (captionPanel.getCaptionText().equals(stringMessages.configuration())) {
-                captionPanel.setCaptionText(stringMessages.configuration() + "* ("+stringMessages.changed()+")");
+                captionPanel.setCaptionText(stringMessages.configuration() + "* (" + stringMessages.changed() + ")");
             }
         } else {
             if (!captionPanel.getCaptionText().equals(stringMessages.configuration())) {
@@ -237,7 +248,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             }
         }
     }
-    
+
     private DeviceConfigurationDTO getResult() {
         DeviceConfigurationDTO result = new DeviceConfigurationDTO();
         result.name = identifierBox.getValue();
@@ -256,7 +267,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
         return result;
     }
-    
+
     private void updateConfiguration() {
         if (originalConfiguration == null) {
             errorReporter.reportError(stringMessages.invalidState());
@@ -268,7 +279,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             public void onSuccess(Void result) {
                 markAsDirty(false);
             }
-            
+
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
@@ -282,7 +293,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             markAsDirty(true);
         }
     };
-    
+
     private ValueChangeHandler<Iterable<String>> dirtyValueMarker = new ValueChangeHandler<Iterable<String>>() {
         @Override
         public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
@@ -304,23 +315,23 @@ public class DeviceConfigurationDetailComposite extends Composite {
                     } else {
                         userService.getUserManagementService().getOrCreateAccessToken(currentUser.getName(),
                                 new MarkedAsyncCallback<>(new AsyncCallback<String>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
                                 errorReporter.reportError(stringMessages.couldNotObtainAccessTokenForUser(caught.getMessage()), /* silentMode */ true);
-                            }
-    
-                            @Override
-                            public void onSuccess(String accessToken) {
-                                createAndShowDialogForAccessToken(accessToken);
-                            }
-                        }));
+                                    }
+
+                                    @Override
+                                    public void onSuccess(String accessToken) {
+                                        createAndShowDialogForAccessToken(accessToken);
+                                    }
+                                }));
                     }
                 }
             }
         });
         return qrCodeButton;
     }
-    
+
     private void createAndShowDialogForAccessToken(String accessToken) {
         final DialogBox dialog = new DeviceConfigurationQRIdentifierDialog(uuidBox.getValue(), identifierBox.getValue(), stringMessages, accessToken);
         dialog.show();

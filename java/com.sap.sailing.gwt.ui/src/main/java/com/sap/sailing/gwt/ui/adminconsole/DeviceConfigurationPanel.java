@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
@@ -84,7 +85,9 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                 createConfiguration();
             }
         });
-        deviceManagementControlPanel.add(addConfigurationButton);
+        if (userService.hasCreatePermission(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION)) {
+            deviceManagementControlPanel.add(addConfigurationButton);
+        }
         removeConfigurationButton = new Button(stringMessages.remove());
         removeConfigurationButton.setEnabled(false);
         removeConfigurationButton.addClickHandler(new ClickHandler() {
