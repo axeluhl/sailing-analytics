@@ -6079,7 +6079,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private DeviceConfigurationWithSecurityDTO convertToDeviceConfigurationWithSecurityDTO(
             DeviceConfiguration configuration) {
-        DeviceConfigurationWithSecurityDTO dto = new DeviceConfigurationWithSecurityDTO();
+        DeviceConfigurationWithSecurityDTO dto = new DeviceConfigurationWithSecurityDTO(configuration.getIdentifier());
         dto.id = configuration.getId();
         dto.name = configuration.getName();
         dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();

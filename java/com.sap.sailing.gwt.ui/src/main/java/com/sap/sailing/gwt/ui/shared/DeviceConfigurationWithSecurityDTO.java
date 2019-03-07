@@ -15,6 +15,14 @@ public class DeviceConfigurationWithSecurityDTO extends DeviceConfigurationDTO i
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
     private QualifiedObjectIdentifier identifier;
 
+    @Deprecated
+    DeviceConfigurationWithSecurityDTO() {
+    }
+
+    public DeviceConfigurationWithSecurityDTO(QualifiedObjectIdentifier identifier) {
+        this.identifier = identifier;
+    }
+
     @Override
     public AccessControlListDTO getAccessControlList() {
         return securityInformation.getAccessControlList();
