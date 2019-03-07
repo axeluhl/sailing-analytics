@@ -6049,14 +6049,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO) {
-        DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
-        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(configuration.getType(),
-                configuration.getIdentifier().getTypeRelativeObjectIdentifier(), configuration.getName(), new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        getService().createOrUpdateDeviceConfiguration(configuration);
-                    }
-                });
+        if (getService().getDeviceConfigurationById(configurationDTO.id) == null) {
+            final DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(configuration.getType(),
+                    configuration.getIdentifier().getTypeRelativeObjectIdentifier(), configuration.getName(),
+                    new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            getService().createOrUpdateDeviceConfiguration(configuration);
+                        }
+                    });
+        } else {
+            final DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
+            getSecurityService().checkCurrentUserUpdatePermission(configuration);
+            getService().createOrUpdateDeviceConfiguration(configuration);
+        }
     }
 
     @Override
