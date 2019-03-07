@@ -77,6 +77,7 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -524,7 +525,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     BoatDTO getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString);
     
-    List<DeviceConfigurationDTO> getDeviceConfigurations();
+    List<DeviceConfigurationWithSecurityDTO> getDeviceConfigurations();
     
     DeviceConfigurationDTO getDeviceConfiguration(UUID id);
     

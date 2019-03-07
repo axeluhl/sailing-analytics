@@ -403,6 +403,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureWithConfigurableStartModeFlagConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
@@ -6029,10 +6030,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<DeviceConfigurationDTO> getDeviceConfigurations() {
-        List<DeviceConfigurationDTO> configs = new ArrayList<DeviceConfigurationDTO>();
+    public List<DeviceConfigurationWithSecurityDTO> getDeviceConfigurations() {
+        List<DeviceConfigurationWithSecurityDTO> configs = new ArrayList<DeviceConfigurationWithSecurityDTO>();
         for (DeviceConfiguration config : getService().getAllDeviceConfigurations()) {
-            configs.add(convertToDeviceConfigurationDTO(config));
+            if (getSecurityService().hasCurrentUserReadPermission(config)) {
+                configs.add(convertToDeviceConfigurationWithSecurityDTO(config));
+            }
         }
         return configs;
     }
@@ -6046,7 +6049,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO) {
         DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
-        getService().createOrUpdateDeviceConfiguration(configuration);
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(configuration.getType(),
+                configuration.getIdentifier().getTypeRelativeObjectIdentifier(), configuration.getName(), new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        getService().createOrUpdateDeviceConfiguration(configuration);
+                    }
+                });
     }
 
     @Override
@@ -6065,6 +6074,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (configuration.getRegattaConfiguration() != null) {
             dto.regattaConfiguration = convertToRegattaConfigurationDTO(configuration.getRegattaConfiguration());
         }
+        return dto;
+    }
+
+    private DeviceConfigurationWithSecurityDTO convertToDeviceConfigurationWithSecurityDTO(
+            DeviceConfiguration configuration) {
+        DeviceConfigurationWithSecurityDTO dto = new DeviceConfigurationWithSecurityDTO();
+        dto.id = configuration.getId();
+        dto.name = configuration.getName();
+        dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
+        dto.resultsMailRecipient = configuration.getResultsMailRecipient();
+        dto.byNameDesignerCourseNames = configuration.getByNameCourseDesignerCourseNames();
+        if (configuration.getRegattaConfiguration() != null) {
+            dto.regattaConfiguration = convertToRegattaConfigurationDTO(configuration.getRegattaConfiguration());
+        }
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), dto, configuration.getIdentifier());
         return dto;
     }
 

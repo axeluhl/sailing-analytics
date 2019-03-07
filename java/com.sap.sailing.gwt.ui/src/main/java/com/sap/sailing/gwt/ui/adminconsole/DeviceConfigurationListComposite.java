@@ -6,16 +6,17 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -71,9 +72,9 @@ public class DeviceConfigurationListComposite extends Composite  {
     }
 
     public void refreshTable() {
-        sailingService.getDeviceConfigurations(new AsyncCallback<List<DeviceConfigurationDTO>>() {
+        sailingService.getDeviceConfigurations(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
             @Override
-            public void onSuccess(List<DeviceConfigurationDTO> result) {
+            public void onSuccess(List<DeviceConfigurationWithSecurityDTO> result) {
                 if (configurationsDataProvider.getList().isEmpty()) {
                     configurationTable.getColumnSortList().clear();
                     configurationTable.getColumnSortList().push(configurationTable.getColumn(0));

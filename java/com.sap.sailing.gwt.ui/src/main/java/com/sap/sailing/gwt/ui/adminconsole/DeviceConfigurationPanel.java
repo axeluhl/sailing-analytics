@@ -19,6 +19,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -132,9 +133,10 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
      */
     @Override
     public void obtainAndSetNameForConfigurationAndAdd(final DeviceConfigurationDTO configurationToObtainAndSetNameForAndAdd) {
-        sailingService.getDeviceConfigurations(new MarkedAsyncCallback<>(new AsyncCallback<List<DeviceConfigurationDTO>>() {
+        sailingService.getDeviceConfigurations(
+                new MarkedAsyncCallback<>(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
             @Override
-            public void onSuccess(List<DeviceConfigurationDTO> allConfigurations) {
+                    public void onSuccess(List<DeviceConfigurationWithSecurityDTO> allConfigurations) {
                 new SelectNameForNewDeviceConfigurationDialog(stringMessages, new SelectNameForNewDeviceConfigurationDialog.MatcherValidator(allConfigurations, stringMessages), new DialogCallback<String>() {
                     @Override
                     public void ok(String nameForNewDeviceConfiguration) {

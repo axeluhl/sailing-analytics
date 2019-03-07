@@ -63,6 +63,7 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -657,7 +658,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString, AsyncCallback<BoatDTO> asyncCallback); 
     
-    void getDeviceConfigurations(AsyncCallback<List<DeviceConfigurationDTO>> asyncCallback);
+    void getDeviceConfigurations(AsyncCallback<List<DeviceConfigurationWithSecurityDTO>> asyncCallback);
 
     void getDeviceConfiguration(UUID id, AsyncCallback<DeviceConfigurationDTO> callback);
 

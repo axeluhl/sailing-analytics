@@ -12,10 +12,11 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SelectNameForNewDeviceConfigurationDialog extends DataEntryDialog<String> {
     public static class MatcherValidator implements Validator<String> {
-        private List<DeviceConfigurationDTO> allConfigurations;
+        private List<? extends DeviceConfigurationDTO> allConfigurations;
         private final StringMessages stringMessages;
     
-        public MatcherValidator(List<DeviceConfigurationDTO> allConfigurations, StringMessages stringMessages) {
+        public MatcherValidator(List<? extends DeviceConfigurationDTO> allConfigurations,
+                StringMessages stringMessages) {
             this.allConfigurations = allConfigurations;
             this.stringMessages = stringMessages;
         }
