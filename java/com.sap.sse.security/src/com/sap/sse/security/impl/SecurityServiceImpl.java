@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -85,7 +86,6 @@ import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.Action;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;
@@ -1614,7 +1614,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
             HasPermissions type, TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName,
-            ActionWithResult<T> actionWithResult) {
+            Callable<T> actionWithResult) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         T result = null;
         boolean didSetOwnership = false;
@@ -1631,7 +1631,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                             ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
             SecurityUtils.getSubject()
                     .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
-            result = actionWithResult.run();
+            result = actionWithResult.call();
         } catch (AuthorizationException e) {
             if (didSetOwnership) {
                 deleteOwnership(identifier);
@@ -1675,13 +1675,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     @Override
     public User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
-            ActionWithResult<User> createActionReturningCreatedObject) {
+            Callable<User> createActionReturningCreatedObject) {
         QualifiedObjectIdentifier identifier = SecuredSecurityTypes.USER
                 .getQualifiedObjectIdentifier(UserImpl.getTypeRelativeObjectIdentifier(username));
         User result = null;
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
-            result = createActionReturningCreatedObject.run();
+            result = createActionReturningCreatedObject.call();
         } catch (AuthorizationException e) {
             throw e;
         } catch (Exception e) {
@@ -1701,17 +1701,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
-            ActionWithResult<T> actionToDeleteObject) {
+            Callable<T> actionToDeleteObject) {
         QualifiedObjectIdentifier identifier = object.getIdentifier();
         return checkPermissionAndDeleteOwnershipForObjectRemoval(identifier, actionToDeleteObject);
     }
 
     @Override
     public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
-            ActionWithResult<T> actionToDeleteObject) {
+            Callable<T> actionToDeleteObject) {
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
-            final T result = actionToDeleteObject.run();
+            final T result = actionToDeleteObject.call();
             deleteAllDataForRemovedObject(identifier);
             return result;
         } catch (Exception e) {
@@ -2219,11 +2219,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public <T> T doWithTemporaryDefaultTenant(UserGroup tenant, ActionWithResult<T> action) {
+    public <T> T doWithTemporaryDefaultTenant(UserGroup tenant, Callable<T> action) {
         final UserGroup previousValue = temporaryDefaultTenant.get();
         temporaryDefaultTenant.set(tenant);
         try {
-            return action.run();
+            return action.call();
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {

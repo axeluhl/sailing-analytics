@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -139,7 +140,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.util.RoundingUtil;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.impl.User;
@@ -498,9 +498,9 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (subject.isAuthenticated()) {
                 competitor = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                         SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUuid), name,
-                        new ActionWithResult<CompetitorWithBoat>() {
+                        new Callable<CompetitorWithBoat>() {
                                 @Override
-                                public CompetitorWithBoat run() throws Exception {
+                                public CompetitorWithBoat call() throws Exception {
                                     return getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
                                         competitorUuid, name, shortName, color, email, flagImageURI, team,
                                         timeOnTimeFactor,
@@ -575,10 +575,10 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (SecurityUtils.getSubject().isAuthenticated()) {
             boat = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), name,
-                    new ActionWithResult<DynamicBoat>() {
+                    new Callable<DynamicBoat>() {
 
                     @Override
-                    public DynamicBoat run() throws Exception {
+                    public DynamicBoat call() throws Exception {
                         return new BoatImpl(boatUUID, name, getService().getBaseDomainFactory()
                                 .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
                     }

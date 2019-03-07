@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -94,7 +95,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.impl.User;
@@ -391,10 +391,10 @@ public class EventsResource extends AbstractSailingServerResource {
         UUID regattaId = UUID.randomUUID();
         Regatta regatta = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName), 
-                regattaName, new ActionWithResult<Regatta>() {
+                regattaName, new Callable<Regatta>() {
 
                     @Override
-                    public Regatta run() throws Exception {
+                    public Regatta call() throws Exception {
                         return getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
                                 canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, competitorRegistrationSecret, null, null, regattaId, regattaCreationParametersDTO,
                                 /* isPersistent */ true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths,
@@ -452,9 +452,9 @@ public class EventsResource extends AbstractSailingServerResource {
                     StringUtils.join(CompetitorRegistrationType.values(), ", ")));
         }
         
-        ActionWithResult<Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard>> doCreationAction = new ActionWithResult<Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard>>() {
+        Callable<Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard>> doCreationAction = new Callable<Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard>>() {
             @Override
-            public Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard> run() throws Exception {
+            public Util.Triple<Event, LeaderboardGroup, RegattaLeaderboard> call() throws Exception {
                 Event event = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                         SecuredDomainType.EVENT, EventBaseImpl.getTypeRelativeObjectIdentifier(eventId),
                         eventName, ()->getService().apply(new CreateEvent(eventName, eventDescription, startDate, endDate, venueName, isPublic, eventId,
@@ -513,7 +513,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 getSecurityService().addUserToUserGroup(ownerGroup, getCurrentUser());
                 return getSecurityService().doWithTemporaryDefaultTenant(ownerGroup, doCreationAction);
             } else {
-                return doCreationAction.run();
+                return doCreationAction.call();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -529,10 +529,10 @@ public class EventsResource extends AbstractSailingServerResource {
         LeaderboardGroup leaderboardGroup = getSecurityService()
                 .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD_GROUP,
                         LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(leaderboardGroupId), leaderboardGroupName,
-                        new ActionWithResult<LeaderboardGroup>() {
+                        new Callable<LeaderboardGroup>() {
 
             @Override
-            public LeaderboardGroup run() throws Exception {
+            public LeaderboardGroup call() throws Exception {
                 ScoringSchemeType overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeTypeParam == null
                         ? null : getScoringSchemeType(overallLeaderboardScoringSchemeTypeParam);
                 int[] overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholdsParam == null ? new int[0] : overallLeaderboardDiscardThresholdsParam.stream().mapToInt(i -> i).toArray();
@@ -654,10 +654,10 @@ public class EventsResource extends AbstractSailingServerResource {
     private RegattaLeaderboard createRegattaLeaderboard(String regattaName, int[] discardThresholds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaName), regattaName,
-                new ActionWithResult<RegattaLeaderboard>() {
+                new Callable<RegattaLeaderboard>() {
 
                     @Override
-                    public RegattaLeaderboard run() throws Exception {
+                    public RegattaLeaderboard call() throws Exception {
                         return getService()
                 .apply(new CreateRegattaLeaderboard(new RegattaName(regattaName), regattaName, discardThresholds));
                     }

@@ -600,7 +600,6 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.Action;
-import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -2664,9 +2663,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             UUID courseAreaId) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName),
-                leaderboardDisplayName, new ActionWithResult<StrippedLeaderboardDTOWithSecurity>() {
+                leaderboardDisplayName, new Callable<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
-                    public StrippedLeaderboardDTOWithSecurity run() throws Exception {
+                    public StrippedLeaderboardDTOWithSecurity call() throws Exception {
                         return createStrippedLeaderboardDTOWithSecurity(
                                 getService().apply(new CreateFlexibleLeaderboard(leaderboardName,
                                         leaderboardDisplayName, discardThresholds,
@@ -2681,9 +2680,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             int[] discardThresholds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(regattaIdentifier), leaderboardDisplayName,
-                new ActionWithResult<StrippedLeaderboardDTOWithSecurity>() {
+                new Callable<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
-                    public StrippedLeaderboardDTOWithSecurity run() throws Exception {
+                    public StrippedLeaderboardDTOWithSecurity call() throws Exception {
                         return createStrippedLeaderboardDTOWithSecurity(getService().apply(new CreateRegattaLeaderboard(
                                 regattaIdentifier, leaderboardDisplayName, discardThresholds)), false, false);
                     }
@@ -2696,9 +2695,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String fullRegattaLeaderboardName) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(name), displayName,
-                new ActionWithResult<StrippedLeaderboardDTOWithSecurity>() {
+                new Callable<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
-                    public StrippedLeaderboardDTOWithSecurity run() throws Exception {
+                    public StrippedLeaderboardDTOWithSecurity call() throws Exception {
                         return createStrippedLeaderboardDTOWithSecurity(
                                 getService().apply(new CreateRegattaLeaderboardWithEliminations(name, displayName,
                                         fullRegattaLeaderboardName)),
@@ -4113,9 +4112,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         UUID newLeaderboardGroupId = UUID.randomUUID();
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD_GROUP, LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(newLeaderboardGroupId),
-                displayName, new ActionWithResult<LeaderboardGroupDTO>() {
+                displayName, new Callable<LeaderboardGroupDTO>() {
                     @Override
-                    public LeaderboardGroupDTO run() throws Exception {
+                    public LeaderboardGroupDTO call() throws Exception {
                         CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(
                                 newLeaderboardGroupId, groupName, description, displayName, displayGroupsInReverseOrder,
                                 leaderBoards, overallLeaderboardDiscardThresholds,
@@ -4303,9 +4302,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.EVENT, EventBaseImpl.getTypeRelativeObjectIdentifier(eventUuid),
-                eventName, new ActionWithResult<EventDTO>() {
+                eventName, new Callable<EventDTO>() {
                     @Override
-                    public EventDTO run() throws Exception {
+                    public EventDTO call() throws Exception {
                         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
                         TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
                         URL officialWebsiteURL = officialWebsiteURLAsString != null
@@ -4871,10 +4870,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName),
-                regattaName, new ActionWithResult<RegattaDTO>() {
+                regattaName, new Callable<RegattaDTO>() {
 
                     @Override
-                    public RegattaDTO run() throws Exception {
+                    public RegattaDTO call() throws Exception {
                         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
                         TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
                         Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
@@ -5003,10 +5002,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 });
                     } else {
                         getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
-                                new ActionWithResult<Void>() {
+                                new Callable<Void>() {
                             
                             @Override
-                            public Void run() throws Exception {
+                            public Void call() throws Exception {
                                 getSecurityService().removePermissionFromUser(allUser.getName(),
                                         createObjectOnCurrentServerPermission);
                                 return null;
@@ -5822,9 +5821,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUUID),
-                    competitor.getName(), new ActionWithResult<CompetitorWithBoat>() {
+                    competitor.getName(), new Callable<CompetitorWithBoat>() {
                         @Override
-                        public CompetitorWithBoat run() throws Exception {
+                        public CompetitorWithBoat call() throws Exception {
                             return getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
                                     competitorUUID, competitor.getName(), competitor.getShortName(),
                                     competitor.getColor(), competitor.getEmail(),
@@ -5866,10 +5865,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUUID),
-                    competitor.getName(), new ActionWithResult<Competitor>() {
+                    competitor.getName(), new Callable<Competitor>() {
 
                         @Override
-                        public Competitor run() throws Exception {
+                        public Competitor call() throws Exception {
                             return getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(),
                                     competitor.getShortName(), competitor.getColor(), competitor.getEmail(),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
@@ -5955,10 +5954,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             UUID boatUUID = UUID.randomUUID();
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(boat.getBoatClass().getName());
             result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(), new ActionWithResult<Boat>() {
+                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), boat.getName(), new Callable<Boat>() {
 
                         @Override
-                        public Boat run() throws Exception {
+                        public Boat call() throws Exception {
                             return getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass,
                                     boat.getSailId(), boat.getColor());
                         }
@@ -8010,9 +8009,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
         QualifiedObjectIdentifier identifier = deviceConfiguration.getType().getQualifiedObjectIdentifier(deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()));
         getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier,
-                new ActionWithResult<Void>() {
+                new Callable<Void>() {
                     @Override
-                    public Void run() throws Exception {
+                    public Void call() throws Exception {
                         // TODO consider replication
                         final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
                         if (expeditionConnector != null) {
