@@ -33,6 +33,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -430,7 +431,25 @@ public class EventsResource extends AbstractSailingServerResource {
         String eventName = eventNameParam == null ? getDefaultEventName() : eventNameParam;
         String venueName = venueNameParam == null ? getDefaultVenueName(venueLat, venueLng) : venueNameParam;
         if (createRegatta && boatClassName == null) {
-            throw new IllegalArgumentException(ExceptionManager.parameterRequiredMsg("boatClassName"));
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                    .entity(ExceptionManager.parameterRequiredMsg("boatClassName")).type(MediaType.TEXT_PLAIN).build());
+        }
+        if (createLeaderboardGroup && getService().getLeaderboardGroupByName(createLeaderboardGroupParam) != null) {
+            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                    .entity(ExceptionManager.objectAlreadyExists("leaderboard group", createLeaderboardGroupParam))
+                    .type(MediaType.TEXT_PLAIN).build());
+        }
+        if (createRegatta) {
+            if (getService().getRegattaByName(createRegattaParam) != null) {
+                throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                        .entity(ExceptionManager.objectAlreadyExists("regatta", createRegattaParam))
+                        .type(MediaType.TEXT_PLAIN).build());
+            }
+            if (getService().getLeaderboardByName(createRegattaParam) != null) {
+                throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
+                        .entity(ExceptionManager.objectAlreadyExists("leaderboard", createRegattaParam))
+                        .type(MediaType.TEXT_PLAIN).build());
+            }
         }
         String eventDescription = eventDescriptionParam == null ? eventName : eventDescriptionParam;
         final TimePoint startDate = parseTimePoint(startDateParam, startDateAsMillis, now());
