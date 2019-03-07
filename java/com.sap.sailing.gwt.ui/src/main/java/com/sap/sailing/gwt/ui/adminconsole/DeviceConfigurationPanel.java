@@ -151,12 +151,6 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                             public void onSuccess(Void result) {
                                 listComposite.refreshTable();
                                 refreshableMultiSelectionModel.clear();
-                                                        if (configurationToObtainAndSetNameForAndAdd instanceof DeviceConfigurationWithSecurityDTO) {
-                                                            // TODO: fix generic
-                                                            refreshableMultiSelectionModel.setSelected(
-                                                                    (DeviceConfigurationWithSecurityDTO) configurationToObtainAndSetNameForAndAdd,
-                                                                    true);
-                                }
                             }
                             
                             @Override
