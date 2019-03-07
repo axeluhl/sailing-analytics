@@ -7,9 +7,9 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
     public static final String FIELD_NAME = "name";
@@ -65,7 +65,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
             JSONArray competitorsJson = new JSONArray();
             for (Competitor competitor : regatta.getAllCompetitors()) {
                 if (securityService.hasCurrentUserAnyExplicitPermissions(competitor,
-                        SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                     competitorsJson.add(competitorSerializer.serialize(competitor));
                 }
             }
@@ -75,7 +75,7 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
             JSONArray boatsJson = new JSONArray();
             for (Boat boat : regatta.getAllBoats()) {
                 if (securityService.hasCurrentUserAnyExplicitPermissions(boat,
-                        SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                     boatsJson.add(boatSerializer.serialize(boat));
                 }
             }

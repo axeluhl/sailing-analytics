@@ -42,7 +42,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.sharding.ShardingContext;
@@ -54,6 +53,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/v2/leaderboards")
 public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
@@ -148,7 +148,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             List<CompetitorDTO> filteredCompetitorsFromBestToWorst = new ArrayList<>();
             competitorsFromBestToWorst.forEach(competitor -> {
                 if (SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
-                        .getStringPermission(SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC))
+                        .getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
                         || SecurityUtils.getSubject()
                                 .isPermitted(competitor.getIdentifier().getStringPermission(DefaultActions.READ))) {
                     filteredCompetitorsFromBestToWorst.add(competitor);
@@ -178,7 +178,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         leaderboardDTO.competitors.forEach(competitor -> {
             if (SecurityUtils.getSubject()
                     .isPermitted(competitor.getIdentifier()
-                            .getStringPermission(SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC))
+                            .getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
                     || SecurityUtils.getSubject()
                             .isPermitted(competitor.getIdentifier().getStringPermission(DefaultActions.READ))) {
                 filteredCompetitors.add(competitor);

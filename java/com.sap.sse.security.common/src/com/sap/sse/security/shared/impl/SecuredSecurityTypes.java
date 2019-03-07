@@ -32,6 +32,13 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         return Collections.unmodifiableSet(allInstances);
     }
 
+    public static enum PublicReadableActions implements Action {
+        READ_PUBLIC;
+
+        public static final Action[] READ_AND_READ_PUBLIC_ACTIONS = new Action[] { READ_PUBLIC, DefaultActions.READ };
+    };
+
+
     public static enum UserActions implements Action {
         /** Update a user's password without knowing the old password. */
         FORCE_OVERWRITE_PASSWORD
