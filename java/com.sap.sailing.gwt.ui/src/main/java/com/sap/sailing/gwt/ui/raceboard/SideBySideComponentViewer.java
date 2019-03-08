@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaManagementControl;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
@@ -320,8 +319,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
             final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
             final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
             boolean forceLayout = false;
-            if (userService.hasPermission(SecuredDomainType.MANAGE_MARK_PASSINGS.getPermission(),
-                    /* TODO race ownership */ null, /* TODO race acl */ null)) {
+            if (userService.hasPermission(leaderboard, DefaultActions.UPDATE)) {
                 if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
                     markPassingsSplitter.getToggleButton().setVisible(true);
                 }

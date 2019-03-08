@@ -35,8 +35,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
     }
     
     // AdminConsole permissions
-    public static final HasPermissions MANAGE_MARK_PASSINGS = new SecuredDomainType("MANAGE_MARK_PASSINGS");
-    
     public static final HasPermissions EVENT = new SecuredDomainType("EVENT");
 
     public static final HasPermissions REGATTA = new SecuredDomainType("REGATTA");
