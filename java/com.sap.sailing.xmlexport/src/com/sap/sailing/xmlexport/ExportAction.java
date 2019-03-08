@@ -35,6 +35,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.security.SecurityService;
 
 public abstract class ExportAction {
     private HttpServletRequest req;
@@ -44,11 +45,14 @@ public abstract class ExportAction {
     private Leaderboard leaderboard;
     protected final boolean useProvidedLeaderboard;
     private String resultingXMLData;
+    private final SecurityService securityService;
     
-    public ExportAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
+    public ExportAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service,
+            final SecurityService securityService) {
         this.req = req;
         this.res = res;
         this.service = service;
+        this.securityService = securityService;
         this.leaderboard = null;
         this.useProvidedLeaderboard = false;
     }
@@ -56,6 +60,8 @@ public abstract class ExportAction {
     public ExportAction(Leaderboard leaderboard) {
         this.leaderboard = leaderboard;
         this.useProvidedLeaderboard = true;
+        // no permission check needed since we already got a leaderboard
+        this.securityService = null;
     }
 
     public String getAttribute(String name) {
@@ -76,7 +82,8 @@ public abstract class ExportAction {
             if (leaderboardName == null) {
                 throw new ServletException("Use the name= parameter to specify the leaderboard");
             }
-            leaderboard = getService().getLeaderboardByName(leaderboardName); 
+            leaderboard = getService().getLeaderboardByName(leaderboardName);
+            securityService.checkCurrentUserReadPermission(leaderboard);
             if (leaderboard == null) {
                 throw new ServletException("Leaderboard " + leaderboardName + " not found.");
             }

@@ -17,7 +17,8 @@ public class XmlExportServlet extends SailingServerHttpServlet {
         try {
             if ((action != null) && !"".equals(action)) {
                 if ("leaderboard".equalsIgnoreCase(action)) {
-                    final LeaderboardData leaderboardData = new LeaderboardData(req, res, getService());
+                    final LeaderboardData leaderboardData = new LeaderboardData(req, res, getService(),
+                            getSecurityService());
                     leaderboardData.perform();
                     return;
                 } else if ("foiling".equalsIgnoreCase(action)) {

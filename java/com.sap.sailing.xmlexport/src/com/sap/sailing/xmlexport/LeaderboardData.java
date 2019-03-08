@@ -61,6 +61,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
 
 /**
  * Exports all data from a leaderboard into XML format.
@@ -81,9 +82,10 @@ public class LeaderboardData extends ExportAction {
     private static final String VERY_STRONG_WIND_DESCRIPTION = "Very Strong";
     
     private final Map<RaceColumn, List<Competitor>> raceColumnToCompetitors;
-    
-    public LeaderboardData(HttpServletRequest req, HttpServletResponse res, RacingEventService service) {
-        super(req, res, service);
+
+    public LeaderboardData(HttpServletRequest req, HttpServletResponse res, RacingEventService service,
+            final SecurityService securityService) {
+        super(req, res, service, securityService);
         this.raceColumnToCompetitors = new HashMap<>();
     }
     
