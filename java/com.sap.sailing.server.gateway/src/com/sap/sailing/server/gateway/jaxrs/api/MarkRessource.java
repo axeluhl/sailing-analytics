@@ -53,6 +53,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
@@ -109,7 +110,6 @@ public class MarkRessource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addMarkFix(String json)
             throws DoesNotHaveRegattaLogException, ParseException, JsonDeserializationException {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MANAGE_MARK_POSITIONS.getStringPermission(DefaultActions.CREATE));
 
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -126,6 +126,15 @@ public class MarkRessource extends AbstractSailingServerResource {
                 .getAdapter(getService().getBaseDomainFactory());
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
+            // check leaderboard update permission
+            SecurityUtils.getSubject()
+                    .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.UPDATE));
+            // if leaderboard is regatta leaderboard, check regatta update permission
+            if (leaderboard instanceof RegattaLeaderboard) {
+                final Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+                SecurityUtils.getSubject()
+                        .checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
+            }
             getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {

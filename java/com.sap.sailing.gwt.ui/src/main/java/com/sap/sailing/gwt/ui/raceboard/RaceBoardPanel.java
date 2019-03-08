@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -75,6 +76,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
+import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardWithSecurityFetcher;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
@@ -456,8 +458,28 @@ public class RaceBoardPanel
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, mediaPlayerSettings);
+
+        final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
+            @Override
+            public void getLeaderboardWithSecurity(Consumer<StrippedLeaderboardDTOWithSecurity> consumer) {
+                sailingService.getLeaderboardWithSecurity(leaderboardName,
+                        new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(
+                                        stringMessages.errorCommunicatingWithServer() + " " + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                                consumer.accept(result);
+                            }
+                        });
+            }
+        };
         mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingPanel, mediaPlayerManagerComponent,
-                componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel, maneuverTablePanel);
+                componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel,
+                maneuverTablePanel, asyncFetcher);
         
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
             
