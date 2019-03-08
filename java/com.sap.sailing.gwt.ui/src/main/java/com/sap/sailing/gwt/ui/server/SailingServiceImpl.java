@@ -5513,6 +5513,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RegattaLogDTO getRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
         RegattaLogDTO result = null;
+        Leaderboard l = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(l);
+
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         if (regattaLog != null) {
             List<RegattaLogEventDTO> entries = new ArrayList<>();
