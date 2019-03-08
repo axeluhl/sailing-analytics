@@ -15,7 +15,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -82,15 +84,23 @@ public class MarkRessource extends AbstractSailingServerResource {
         Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName);
         String regattaName = (String) requestObject.get("regattaName");
         Regatta regatta = getService().getRegattaByName(regattaName);
-        SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
-        RegattaLog regattaLog = getRegattaLogInternal(regattaName);
-        RegattaLogDefineMarkEventImpl event = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
-                getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), mark);
-        regattaLog.add(event);
-        JSONObject answer = new JSONObject();
-        answer.put("markId", markId.toString());
-        return Response.ok(answer.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                .build();
+        Response response;
+        if (regatta == null) {
+            response = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        } else {
+            getSecurityService().checkCurrentUserUpdatePermission(regatta);
+            RegattaLog regattaLog = getRegattaLogInternal(regattaName);
+            RegattaLogDefineMarkEventImpl event = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
+                    getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), mark);
+            regattaLog.add(event);
+            JSONObject answer = new JSONObject();
+            answer.put("markId", markId.toString());
+            response = Response.ok(answer.toJSONString())
+                    .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
+        return response;
     }
 
     @POST
@@ -221,36 +231,46 @@ public class MarkRessource extends AbstractSailingServerResource {
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
 
         String leaderboardName = (String) requestObject.get("leaderboardName");
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(
-                DefaultActions.UPDATE, Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
-        String raceColumnName = (String) requestObject.get("raceColumnName");
-        String fleetName = (String) requestObject.get("fleetName");
+        Leaderboard leaderBoard = getService().getLeaderboardByName(leaderboardName);
+        Response response;
+        if (leaderBoard == null) {
+            response = Response.status(Status.NOT_FOUND).entity(
+                    "Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        } else {
+            SecurityUtils.getSubject().checkPermission(
+                    SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                            Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
+            String raceColumnName = (String) requestObject.get("raceColumnName");
+            String fleetName = (String) requestObject.get("fleetName");
 
-        JSONArray competitorsRaw = (JSONArray) requestObject.get("competitors");
-        Map<Competitor, Boat> competitorsToRegister = new HashMap<>();
-        for (int i = 0; i < competitorsRaw.size(); i++) {
-            JSONObject competitorRaw = (JSONObject) competitorsRaw.get(i);
-            String competitorId = (String) competitorRaw.get("competitorId");
-            String boatId = (String) competitorRaw.get("boatId");
-            Competitor competitor = getService().getCompetitorAndBoatStore()
-                    .getExistingCompetitorByIdAsString(competitorId);
-            Boat boat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
-            competitorsToRegister.put(competitor, boat);
+            JSONArray competitorsRaw = (JSONArray) requestObject.get("competitors");
+            Map<Competitor, Boat> competitorsToRegister = new HashMap<>();
+            for (int i = 0; i < competitorsRaw.size(); i++) {
+                JSONObject competitorRaw = (JSONObject) competitorsRaw.get(i);
+                String competitorId = (String) competitorRaw.get("competitorId");
+                String boatId = (String) competitorRaw.get("boatId");
+                Competitor competitor = getService().getCompetitorAndBoatStore()
+                        .getExistingCompetitorByIdAsString(competitorId);
+                Boat boat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
+                competitorsToRegister.put(competitor, boat);
+            }
+            RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+            Fleet fleet = getFleetByName(raceColumn, fleetName);
+            Map<Competitor, Boat> competitorsRegisteredInRaceLog = new HashMap<>();
+            for (final Entry<Competitor, Boat> e : raceColumn.getCompetitorsRegisteredInRacelog(fleet).entrySet()) {
+                competitorsRegisteredInRaceLog.put((CompetitorWithBoat) e.getKey(), e.getValue());
+            }
+            final Iterable<Competitor> competitorSetToRemove = filterCompetitorDuplicates(competitorsToRegister,
+                    competitorsRegisteredInRaceLog);
+            raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
+            // we assume that the competitors id of type Competitor here, so we need to find the corresponding boat
+            for (Entry<Competitor, Boat> competitorToRegister : competitorsToRegister.entrySet()) {
+                raceColumn.registerCompetitor(competitorToRegister.getKey(), competitorToRegister.getValue(), fleet);
+            }
+            response = Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
-        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
-        Fleet fleet = getFleetByName(raceColumn, fleetName);
-        Map<Competitor, Boat> competitorsRegisteredInRaceLog = new HashMap<>();
-        for (final Entry<Competitor, Boat> e : raceColumn.getCompetitorsRegisteredInRacelog(fleet).entrySet()) {
-            competitorsRegisteredInRaceLog.put((CompetitorWithBoat) e.getKey(), e.getValue());
-        }
-        final Iterable<Competitor> competitorSetToRemove = filterCompetitorDuplicates(competitorsToRegister,
-                competitorsRegisteredInRaceLog);
-        raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
-        // we assume that the competitors id of type Competitor here, so we need to find the corresponding boat
-        for (Entry<Competitor, Boat> competitorToRegister : competitorsToRegister.entrySet()) {
-            raceColumn.registerCompetitor(competitorToRegister.getKey(), competitorToRegister.getValue(), fleet);
-        }
-        return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return response;
     }
 
     private Iterable<Competitor> filterCompetitorDuplicates(Map<Competitor, Boat> competitorToBoatMappingsToRegister,

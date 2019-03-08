@@ -119,6 +119,9 @@ public interface HasPermissions {
         
         public static final Action[] MUTATION_ACTIONS = new Action[] { CREATE, UPDATE, DELETE, CHANGE_OWNERSHIP,
                 CHANGE_ACL };
+
+        public static final Action[] MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES = new Action[] { DefaultActions.CREATE,
+                DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL };
         
         /**
          * Returns all {@link DefaultActions} plus the {@code actions} passed, combined in one new array

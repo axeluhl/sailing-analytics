@@ -55,6 +55,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -75,7 +76,10 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 
 /**
  * Displays a table of currently tracked races. The user can configure whether a race
@@ -120,6 +124,18 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
      * will be forwarded to those objects contained in this collection.
      */
     private final Set<RegattasDisplayer> containedRegattaDisplayers;
+
+    private CaptionPanel expeditionImportPanel;
+
+    private CaptionPanel gribImportPanel;
+
+    private CaptionPanel nmeaImportPanel;
+
+    private CaptionPanel bravoImportPanel;
+
+    private CaptionPanel igtimiImportPanel;
+
+    private CaptionPanel expeditionAllInOneImporterPanel;
     
     public WindPanel(final SailingServiceAsync sailingService, UserService userService, AsyncActionsExecutor asyncActionsExecutor, 
             ErrorReporter errorReporter, final StringMessages stringMessages) {
@@ -163,6 +179,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 updateWindDisplay();
+                updateVisibilityStateForPanels();
             }
         });
         windCaptionPanel = new CaptionPanel(stringMessages.wind());
@@ -278,17 +295,71 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         rawWindFixesTable.addColumnSortHandler(columnSortHandler);
         rawWindFixesTable.getColumnSortList().push(timeColumn);
         windFixesDisplayPanel.add(rawWindFixesTable);
-        mainPanel.add(createExpeditionWindImportPanel());
-        mainPanel.add(createGribWindImportPanel());
-        mainPanel.add(createNmeaWindImportPanel());
-        mainPanel.add(createBravoWindImportPanel());
-        mainPanel.add(createIgtimiWindImportPanel(mainPanel));
+
+        expeditionImportPanel = createExpeditionWindImportPanel();
+        gribImportPanel = createGribWindImportPanel();
+        nmeaImportPanel = createNmeaWindImportPanel();
+        bravoImportPanel = createBravoWindImportPanel();
+        igtimiImportPanel = igtimiImportPanel(mainPanel);
+        mainPanel.add(expeditionImportPanel);
+        mainPanel.add(gribImportPanel);
+        mainPanel.add(nmeaImportPanel);
+        mainPanel.add(bravoImportPanel);
+        mainPanel.add(igtimiImportPanel);
+
         final Pair<CaptionPanel, ExpeditionAllInOneImportPanel> expeditionAllInOneRootAndImportPanel = createExpeditionAllInOneImportPanel(regattaRefresher);
-        mainPanel.add(expeditionAllInOneRootAndImportPanel.getA());
+        expeditionAllInOneImporterPanel = expeditionAllInOneRootAndImportPanel.getA();
+        mainPanel.add(expeditionAllInOneImporterPanel);
         containedRegattaDisplayers.add(expeditionAllInOneRootAndImportPanel.getB());
+
+        updateVisibilityStateForPanels();
+
+        this.userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                updateVisibilityStateForPanels();
+            }
+        });
 
         // refresh regattas for this panel manually
         regattaRefresher.fillRegattas();
+    }
+
+    private void updateVisibilityStateForPanels() {
+        Set<RaceDTO> selectedRaces = refreshableRaceSelectionModel.getSelectedSet();
+        if (selectedRaces.isEmpty()) {
+            // they could potentially hit all races, we don't have enough information to check here
+            expeditionImportPanel.setVisible(true);
+            gribImportPanel.setVisible(true);
+            nmeaImportPanel.setVisible(true);
+            bravoImportPanel.setVisible(true);
+            igtimiImportPanel.setVisible(true);
+        } else {
+            boolean canUpdateAll = true;
+            for (RaceDTO race : refreshableRaceSelectionModel.getSelectedSet()) {
+                if (!userService.hasPermission(race, DefaultActions.UPDATE)) {
+                    canUpdateAll = false;
+                }
+            }
+            expeditionImportPanel.setVisible(canUpdateAll);
+            gribImportPanel.setVisible(canUpdateAll);
+            nmeaImportPanel.setVisible(canUpdateAll);
+            bravoImportPanel.setVisible(canUpdateAll);
+            igtimiImportPanel.setVisible(canUpdateAll);
+        }
+
+        boolean canCreateEvent = userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.EVENT);
+        boolean canCreateRegatta = userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.REGATTA);
+        boolean canCreateRace = userService
+                .hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.TRACKED_RACE);
+        boolean canCreateLeaderboard = userService
+                .hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.LEADERBOARD);
+        expeditionAllInOneImporterPanel
+                .setVisible(canCreateEvent && canCreateLeaderboard && canCreateRace && canCreateRegatta);
+    }
+
+    private CaptionPanel igtimiImportPanel(VerticalPanel mainPanel) {
+        return createIgtimiWindImportPanel(mainPanel);
     }
 
     private CaptionPanel createIgtimiWindImportPanel(VerticalPanel mainPanel) {

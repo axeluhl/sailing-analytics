@@ -39,6 +39,7 @@ import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {
@@ -77,19 +78,22 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString,
             @QueryParam("secret") String secret, @QueryParam("leaderboardname") String leaderboardName) {
         Response response;
-        Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
-                competitorIdAsString);
+        Competitor competitor = getService().getCompetitorAndBoatStore()
+                .getExistingCompetitorByIdAsString(competitorIdAsString);
         if (competitor == null) {
             response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
+                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorIdAsString)
+                            + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
             if (!skip) {
-                getSecurityService().checkCurrentUserReadPermission(competitor);
+                getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             String jsonString = getCompetitorJSON(competitor).toJSONString();
-            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
+                    .build();
         }
         return response;
     }

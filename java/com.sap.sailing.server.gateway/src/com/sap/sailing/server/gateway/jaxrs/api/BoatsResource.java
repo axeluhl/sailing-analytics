@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/v1/boats")
 public class BoatsResource extends AbstractSailingServerResource {
@@ -32,7 +33,8 @@ public class BoatsResource extends AbstractSailingServerResource {
         } else {
             boolean skip = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
             if (!skip) {
-                getSecurityService().checkCurrentUserReadPermission(boat);
+                getSecurityService().checkCurrentUserAnyExplicitPermissions(boat,
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             BoatJsonSerializer boatJsonSerializer = BoatJsonSerializer.create();
             String jsonString = boatJsonSerializer.serialize(boat).toJSONString();

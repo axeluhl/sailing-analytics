@@ -975,9 +975,17 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName)
             throws MalformedURLException, IOException, InterruptedException {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
-                DefaultActions.UPDATE, getService().getLeaderboardByName(leaderboardName)));
-        return stopOrRemoveTrackedRace(leaderboardName, raceColumnName, fleetName, true);
+        Leaderboard leaderBoard = getService().getLeaderboardByName(leaderboardName);
+        Response result = null;
+        if(leaderBoard == null) {
+            result = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        } else {
+            getSecurityService().checkCurrentUserUpdatePermission(leaderBoard);
+            result = stopOrRemoveTrackedRace(leaderboardName, raceColumnName, fleetName, true);
+        }
+        return result;
     }
 
     @POST

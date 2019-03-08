@@ -10,7 +10,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverDetectorImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.TrackTimeInfo;
@@ -23,6 +22,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 /**
  * 
@@ -84,7 +84,7 @@ public class CompetitorTrackWithEstimationDataJsonSerializer extends AbstractTra
         result.put(BYCOMPETITOR, byCompetitorJson);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             if (securityService.hasCurrentUserAnyExplicitPermissions(competitor,
-                    SecuredDomainType.CompetitorAndBoatActions.READ_AND_READ_PUBLIC_ACTIONS)) {
+                    SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
                 ManeuverDetectorImpl maneuverDetector = new ManeuverDetectorImpl(trackedRace, competitor);
                 TrackTimeInfo trackTimeInfo = maneuverDetector.getTrackTimeInfo();
                 if (trackTimeInfo != null) {

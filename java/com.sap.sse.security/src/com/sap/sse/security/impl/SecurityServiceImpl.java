@@ -1789,7 +1789,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             HasPermissions permittedObject, HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
-            boolean isPermitted = actions.length > 0;
+            boolean isPermitted = false;
             for (int i = 0; i < actions.length; i++) {
                 if (SecurityUtils.getSubject()
                         .isPermitted(permittedObject.getStringPermissionForObject(actions[i], objectToCheck))) {

@@ -322,10 +322,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public UserDTO getUserByName(String username) throws UnauthorizedException {
         final User user = getSecurityService().getUserByName(username);
-        if (user == null || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObject(DefaultActions.READ, user))) {
-            return user==null?null:securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+        if (user == null
+                || SecurityUtils.getSubject()
+                        .isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObject(DefaultActions.READ, user))
+                || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
+                        .getStringPermissionForObject(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC, user))) {
+            // TODO: pruning when current user only has READ_PUBLIC permission
+            return user == null ? null : securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
         } else {
-            throw new UnauthorizedException("Not permitted to read user "+username);
+            throw new UnauthorizedException("Not permitted to read user " + username);
         }
     }
 
@@ -438,7 +443,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public Collection<UserDTO> getUserList() throws UnauthorizedException {
         List<UserDTO> users = new ArrayList<>();
         for (User u : getSecurityService().getUserList()) {
-            if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObject(DefaultActions.READ, u))) {
+            if (SecurityUtils.getSubject()
+                    .isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObject(DefaultActions.READ, u))
+                    || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
+                            .getStringPermissionForObject(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC, u))) {
+                // TODO: pruning if subject only has READ_PUBLIC permission
                 final UserDTO userDTO = getUserDTOWithFilteredRolesAndPermissions(u);
                 users.add(userDTO);
             }
