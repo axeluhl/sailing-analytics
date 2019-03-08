@@ -8,12 +8,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class ConfigurationJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;
@@ -40,6 +42,8 @@ public class ConfigurationJsonGetServlet extends AbstractJsonHttpServlet {
                 configuration = getService().getDeviceConfigurationById(UUID.fromString(configurationUuidAsString));
             }
             if (configuration != null) {
+                SecurityUtils.getSubject()
+                        .checkPermission(configuration.getIdentifier().getStringPermission(DefaultActions.READ));
                 JsonSerializer<DeviceConfiguration> serializer = DeviceConfigurationJsonSerializer.create();
                 JSONObject json = serializer.serialize(configuration);
                 response.setCharacterEncoding("UTF-8");
