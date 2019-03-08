@@ -82,7 +82,7 @@ public class MarkPositionsJsonExportServlet extends AbstractJsonHttpServlet {
         
         if (trackedRace != null) {
             SecurityUtils.getSubject()
-                    .checkPermission(trackedRace.getIdentifier().getStringPermission(DefaultActions.UPDATE));
+                    .checkPermission(trackedRace.getIdentifier().getStringPermission(DefaultActions.READ));
 
             MarkJsonSerializer markSerializer = new MarkJsonSerializer();
             PositionJsonSerializer positionSerializer = new PositionJsonSerializer();
