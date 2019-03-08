@@ -22,7 +22,7 @@ public class XmlExportServlet extends SailingServerHttpServlet {
                     leaderboardData.perform();
                     return;
                 } else if ("foiling".equalsIgnoreCase(action)) {
-                	final FoilingData foilingData = new FoilingData(req, res, getService());
+                    final FoilingData foilingData = new FoilingData(req, res, getService(), getSecurityService());
                 	foilingData.perform();
                 	return;
                 }
