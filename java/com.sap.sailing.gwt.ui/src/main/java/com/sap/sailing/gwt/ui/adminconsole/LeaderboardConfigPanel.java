@@ -337,7 +337,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                             });
                     editCompetitorsDialog.show();
                 });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL, UPDATE,
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL, READ,
                 leaderboardDTO -> {
             sailingService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.getName(), null,
                     new AsyncCallback<Iterable<DetailType>>() {
@@ -353,21 +353,21 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                         }
                     });
         });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML, UPDATE,
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML, READ,
                 leaderboardDTO -> Window.open(UriUtils
                         .fromString("/export/xml?domain=leaderboard&name=" + leaderboardDTO.getName()).asString(), "",
                         null));
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD, UPDATE,
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD, READ,
                 leaderboardDTO -> {
                     Map<String, String> dashboardURLParameters = new HashMap<String, String>();
                     dashboardURLParameters.put("leaderboardName", leaderboardDTO.getName());
                     Window.open(EntryPointLinkFactory.createDashboardLink(dashboardURLParameters), "", null);
                 });
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_SHOW_REGATTA_LOG, UPDATE,
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_SHOW_REGATTA_LOG, READ,
                 leaderboardDTO -> showRegattaLog());
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CREATE_PAIRINGLIST, UPDATE,
                 this::createPairingListTemplate);
-        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST, UPDATE,
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST, READ,
                 this::openPairingListEntryPoint);
 
         final DialogConfig<StrippedLeaderboardDTOWithSecurity> config = EditOwnershipDialog.create(
