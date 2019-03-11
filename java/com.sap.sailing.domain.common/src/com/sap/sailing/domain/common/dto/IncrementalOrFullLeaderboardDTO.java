@@ -3,6 +3,8 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.sap.sse.common.CacheableRPCResult;
+
 /**
  * Allows for incremental serialization of a {@link LeaderboardDTO} by providing an implementation that refers to a previous
  * version and provides only updates, or alternatively sending the full leaderboard.
@@ -10,7 +12,7 @@ import java.util.Date;
  * @author Axel Uhl (d043530)
  *
  */
-public interface IncrementalOrFullLeaderboardDTO extends Serializable {
+public interface IncrementalOrFullLeaderboardDTO extends Serializable, CacheableRPCResult {
     /**
      * Produces the leaderboard DTO by providing the previous version relative to which a delta was requested.
      * If <code>null</code> was used to identify the previous version, <code>null</code> may be passed for

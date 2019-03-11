@@ -22,8 +22,8 @@ public abstract class DeclinationImportTest<I extends DeclinationImporter> exten
     public void importSimpleDeclination() throws IOException, ParseException, ParserConfigurationException, SAXException {
         Declination record = importer.importRecord(new DegreePosition(53, 3),
                 new MillisecondsTimePoint(simpleDateFormat.parse("2016-05-27").getTime()));
-        assertEquals(0.26307, record.getBearing().getDegrees(), 0.001);
-        assertEquals(0.14795, record.getAnnualChange().getDegrees(), 0.001);
+        assertEquals(0.26307, record.getBearing().getDegrees(), 0.05);
+        assertEquals(0.14795, record.getAnnualChange().getDegrees(), 0.05);
     }
 
     @Test
@@ -32,8 +32,8 @@ public abstract class DeclinationImportTest<I extends DeclinationImporter> exten
         Declination record = importer.importRecord(new DegreePosition(-10, 3),
                 new MillisecondsTimePoint(simpleDateFormat.parse("2017-05-27").getTime()));
         System.out.println("took "+(System.currentTimeMillis()-start)+"ms");
-        assertEquals(-8.44581, record.getBearing().getDegrees(), 0.001);
-        assertEquals(0.17712, record.getAnnualChange().getDegrees(), 0.001);
+        assertEquals(-8.44581, record.getBearing().getDegrees(), 0.2);
+        assertEquals(0.17712, record.getAnnualChange().getDegrees(), 0.2);
     }
     
     @Test
