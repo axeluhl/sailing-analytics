@@ -151,24 +151,25 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
      */
     private void findNewAndRemovedCandidates(SortedSet<Candidate> contiguousCandidateSequence, Set<Candidate> candidatesAddedToFiltered,
             Set<Candidate> candidatesRemovedFromFiltered) {
-        assert !contiguousCandidateSequence.isEmpty();
-        final SortedSet<Candidate> candidatesPreviouslyPassingFilter = filteredCandidates.subSet(contiguousCandidateSequence.first(),
-                /* fromInclusive */ true, contiguousCandidateSequence.last(), /* toInclusive */ true);
-        ArrayList<Candidate> sortedByProbabilityFromLowToHigh = new ArrayList<>(contiguousCandidateSequence);
-        Collections.sort(sortedByProbabilityFromLowToHigh, (c1, c2)->Double.compare(c1.getProbability(), c2.getProbability()));
-        double maxProbability = sortedByProbabilityFromLowToHigh.get(sortedByProbabilityFromLowToHigh.size()-1).getProbability();
-        Set<Candidate> candidatesAcceptedFromSequence = new HashSet<>();
-        Candidate currentCandidate;
-        for (int i=sortedByProbabilityFromLowToHigh.size()-1; i>=0 &&
-                (currentCandidate=sortedByProbabilityFromLowToHigh.get(i)).getProbability()+MAX_PROBABILITY_DELTA >= maxProbability; i--) {
-            candidatesAcceptedFromSequence.add(currentCandidate);
-            if (!candidatesPreviouslyPassingFilter.contains(currentCandidate)) {
-                candidatesAddedToFiltered.add(currentCandidate);
+        if (!contiguousCandidateSequence.isEmpty()) {
+            final SortedSet<Candidate> candidatesPreviouslyPassingFilter = filteredCandidates.subSet(contiguousCandidateSequence.first(),
+                    /* fromInclusive */ true, contiguousCandidateSequence.last(), /* toInclusive */ true);
+            ArrayList<Candidate> sortedByProbabilityFromLowToHigh = new ArrayList<>(contiguousCandidateSequence);
+            Collections.sort(sortedByProbabilityFromLowToHigh, (c1, c2)->Double.compare(c1.getProbability(), c2.getProbability()));
+            double maxProbability = sortedByProbabilityFromLowToHigh.get(sortedByProbabilityFromLowToHigh.size()-1).getProbability();
+            Set<Candidate> candidatesAcceptedFromSequence = new HashSet<>();
+            Candidate currentCandidate;
+            for (int i=sortedByProbabilityFromLowToHigh.size()-1; i>=0 &&
+                    (currentCandidate=sortedByProbabilityFromLowToHigh.get(i)).getProbability()+MAX_PROBABILITY_DELTA >= maxProbability; i--) {
+                candidatesAcceptedFromSequence.add(currentCandidate);
+                if (!candidatesPreviouslyPassingFilter.contains(currentCandidate)) {
+                    candidatesAddedToFiltered.add(currentCandidate);
+                }
             }
-        }
-        for (final Candidate candidateThatPreviouslyPassedFilter : candidatesPreviouslyPassingFilter) {
-            if (!candidatesAcceptedFromSequence.contains(candidateThatPreviouslyPassedFilter)) {
-                candidatesRemovedFromFiltered.add(candidateThatPreviouslyPassedFilter);
+            for (final Candidate candidateThatPreviouslyPassedFilter : candidatesPreviouslyPassingFilter) {
+                if (!candidatesAcceptedFromSequence.contains(candidateThatPreviouslyPassedFilter)) {
+                    candidatesRemovedFromFiltered.add(candidateThatPreviouslyPassedFilter);
+                }
             }
         }
     }
@@ -200,13 +201,14 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
 
     private void removeAllRemovedCandidatesInOrNearSequence(NavigableSet<Candidate> contiguousSequenceForNextNewCandidate,
             Set<Candidate> removedCandidatesModifiableCopy) {
-        assert !contiguousSequenceForNextNewCandidate.isEmpty();
-        final TimeRange sequenceTimeRange = new TimeRangeImpl(
-                contiguousSequenceForNextNewCandidate.first().getTimePoint(), contiguousSequenceForNextNewCandidate.last().getTimePoint());
-        for (final Iterator<Candidate> removedCandidateIter = removedCandidatesModifiableCopy.iterator(); removedCandidateIter.hasNext(); ) {
-            final Candidate removedCandidate = removedCandidateIter.next();
-            if (sequenceTimeRange.timeDifference(removedCandidate.getTimePoint()).compareTo(CANDIDATE_FILTER_TIME_WINDOW) <= 0) {
-                removedCandidateIter.remove();
+        if (!contiguousSequenceForNextNewCandidate.isEmpty()) {
+            final TimeRange sequenceTimeRange = new TimeRangeImpl(
+                    contiguousSequenceForNextNewCandidate.first().getTimePoint(), contiguousSequenceForNextNewCandidate.last().getTimePoint());
+            for (final Iterator<Candidate> removedCandidateIter = removedCandidatesModifiableCopy.iterator(); removedCandidateIter.hasNext(); ) {
+                final Candidate removedCandidate = removedCandidateIter.next();
+                if (sequenceTimeRange.timeDifference(removedCandidate.getTimePoint()).compareTo(CANDIDATE_FILTER_TIME_WINDOW) <= 0) {
+                    removedCandidateIter.remove();
+                }
             }
         }
     }

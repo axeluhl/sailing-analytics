@@ -31,6 +31,28 @@
 			    a typical league set-up (focus on reducing the number of boat changes while
 			    sacrificing a bit of boat assignment fairness).
 			</li>
+			<li>The built-in mark passing calculator that is primarily used for smartphone
+			    tracking has been improved. In particular, it now recognizes trackers left behind,
+			    e.g., on a committee boat, and avoids performance issues incurred by these scenarios
+			    by filtering possible mark passing candidates using a bounding box-based approach:
+			    if a tracker hardly moves over some time, only the most promising candidates from
+			    that time interval are considered. This avoids compute time and memory issues
+			    seen in the past.
+			</li>
+			<li>When during a server re-start with the <tt>-Drestore.tracked.races=true</tt> parameter
+			    restoring a race fails with an exception, that race is now removed from the restore list,
+			    a corresponding <tt>SEVERE</tt> log entry is written, and the server will no longer try
+			    to restore that race upon future restarts. This way, races that have been removed at
+			    their source will not keep causing permanent restore trouble, and manual database
+			    intervention is no longer necessary.
+			</li>
+			<li>A new status REST endpoint has been added: <tt>/gwt/status</tt>. It combines the status
+			    checks of <tt>/sailingserver/api/v1/status</tt> and <tt>/replication/replication?action=STATUS</tt>,
+			    and because it is offered by the same module hosting the web UI of the server, its availability
+			    indicates that the corresponding module has started and has registered with the web server
+			    successfully. It reports a 200 HTTP response if itself and the status reports it syndicates
+			    report availability, a non-2XX status otherwise.
+			</li>
                     </ul>
 
                     <h2 class="articleSubheadline">January 2019</h2>

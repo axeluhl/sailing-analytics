@@ -847,7 +847,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 int newNumberOfTrackedRacesRestored = numberOfTrackedRacesRestored.incrementAndGet();
                 logger.info("Added race to restore #"+newNumberOfTrackedRacesRestored+"/"+numberOfTrackedRacesToRestore);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Exception trying to restore race "+params, e);
+                logger.log(Level.SEVERE, "Exception trying to restore race "+params+
+                        ". Removing from the restore list. This server will no longer try to load this race automatically upon server restart.", e);
+                try {
+                    getMongoObjectFactory().removeConnectivityParametersForRaceToRestore(params);
+                } catch (MalformedURLException e1) {
+                    logger.log(Level.SEVERE, "Dang... even that failed. Couldn't remove connectivity params for "+
+                            params+" from restore list", e1);
+                }
             }
         }).getNumberOfParametersToLoad();
     }
