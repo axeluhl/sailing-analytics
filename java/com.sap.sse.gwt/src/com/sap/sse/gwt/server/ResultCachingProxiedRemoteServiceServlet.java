@@ -7,6 +7,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,17 +37,17 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
      */
     final ReferenceQueue<CacheableRPCResult> dereferencedObjectsQueue;
     
-    private long callCount;
-    private long recalcCount;
+    private final AtomicLong callCount;
+    private final AtomicLong recalcCount;
     public class RPCSerializedResultCacheMXBeanImpl implements RPCSerializedResultCacheMXBean {
         @Override
         public long getCallCount() {
-            return callCount;
+            return callCount.get();
         }
         
         @Override
         public long getRecalcCount() {
-            return recalcCount;
+            return recalcCount.get();
         }
         
         @Override
@@ -65,6 +66,8 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
     }
     
     public ResultCachingProxiedRemoteServiceServlet() {
+        callCount = new AtomicLong();
+        recalcCount = new AtomicLong();
         dereferencedObjectsQueue = new ReferenceQueue<>();
         // Add an MBean for the service to the JMX bean server:
         final RPCSerializedResultCacheMXBean mbean = new RPCSerializedResultCacheMXBeanImpl();
@@ -85,10 +88,10 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
         if (result instanceof CacheableRPCResult) {
             final CacheableRPCResult cacheableResult = (CacheableRPCResult) result;
             try {
-                callCount++;
+                callCount.incrementAndGet();
                 return resultCache.computeIfAbsent(new CacheKey(serializationPolicy, cacheableResult, dereferencedObjectsQueue),
                         key -> {
-                            recalcCount++;
+                            recalcCount.incrementAndGet();
                             try {
                                 return super.encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result);
                             } catch (SerializationException serializationException) {
