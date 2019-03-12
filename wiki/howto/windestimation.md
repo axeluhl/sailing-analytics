@@ -3,7 +3,9 @@
 This document describes the generation process of Machine Learning (ML) models which are used internally by wind estimation. It is highly recommended to proceed this howto step by step considering the order of sections. At the end of this howto, you will generate a file containing the representation of internal models used by ``com.sap.sailing.windestimation`` bundle. You can use this file to update the wind estimation models of a running server instance. If you are interested in a more advanced tutorial which requires all the execution steps contained in ``SimpleModelsTrainingPart...`` classes to be executed manually, then you might be interested in [Advanced Guide for training of internal Wind Estimation models](./windestimationAdvanced.md)
 
 ## Prerequisites
+
 To complete the training process successfully, you need to make sure that you have the following stuff:
+
 * A complete onboarding setup for SAP Sailing Analytics development
 * MongoDB (**3.4 or higher!**) is up and running (can be the same MongoDB instance as required in onboarding howto)
 * At least 100 GB free space on the partition, where MongoDB is operating
@@ -12,6 +14,7 @@ To complete the training process successfully, you need to make sure that you ha
 * 24+ operating hours of your computer
 
 ## Model training process
+
 1. Run ``com.sap.sailing.windestimation.model.SimpleModelsTrainingPart1`` as a normal Java Application. After this, all the necessary maneuver and wind data will be downloaded, pre-processed and maneuver classifiers get trained.
 2. Make sure that the launched program does not get terminated by an uncaught exception. Wait until graphical info dialog shows up which requests you to perform data cleansing for duration dimension.
    ![Screenshot of graphical info dialog requesting to perform data cleansing for duration dimension](../images/windestimation/dialogRequestingDataCleansingForDurationDimension.jpg "Screenshot of graphical info dialog requesting to perform data cleansing for duration dimension")

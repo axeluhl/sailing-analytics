@@ -3,16 +3,18 @@
 This document describes the generation process of Machine Learning (ML) models which are used internally by wind estimation. It is highly recommended to proceed this howto step by step considering the order of sections. At the end of this howto, you will generate a file containing the representation of internal models used by ``com.sap.sailing.windestimation`` bundle. You can use this file to update the wind estimation models of a running server instance. If you are interested in a simpler tutorial with less execution steps thanks to automation, then check out [Simple Guide for training of internal Wind Estimation models](./windestimation.md)
 
 ## Overview
+
 In total, there are the following three categories of ML models used by wind estimation:
+
 1. **Maneuver Classifiers**
 2. **Regressors** of TWD delta standard deviation for the dimension **duration**
 3. **Regressors** of TWD delta standard deviation for the dimension **distance**
 
 Each of the model categories are composed of multiple models where each model targets a specific context. A context for a maneuver classifier is determined by the following attributes:
 * Maneuver features
-	* Polar features enabled: yes/no
-	* Mark features enabled: yes/no
-	* Scaled speed features enabled: yes/no
+   * Polar features enabled: yes/no
+   * Mark features enabled: yes/no
+   * Scaled speed features enabled: yes/no
 * Boat class filtering for the data on which the classifier is trained, such as a specific boat class, or with all boat classes included
 
 The context of regressor models is represented by its assigned input interval responsibility, e.g. [0 seconds; 62 seconds) for duration, or [80 meters; 1368 meters) for distance.
@@ -27,18 +29,23 @@ For each of the steps, appropriate Java classes must be executed per *Run with..
 The details of the training process for each model category are described in the following sections.
 
 ## Prerequisites
+
 To complete the training process successfully, you need to make sure that you have the following stuff:
+
 * A complete onboarding setup for SAP Sailing Analytics development
 * MongoDB (**3.4 or higher!**) is up and running
 * At least 100 GB free space on the partition, where MongoDB is operating
 * Installed graphical MongoDB client such as MongoDB Compass (Community version)
 
 ## Get the training data from sapsailing.com
+
 The following steps import all the data required from sapsailing.com into the local MongoDB. These steps constitute a preprequisite for training of all ML model categories:
+
 1. Run *com.sap.sailing.windestimation.data.importer.ManeuverAndWindImporter*
 2. Run *com.sap.sailing.windestimation.data.importer.PolarDataImporter*
 
 ## Maneuver classifiers training
+
 1. Run *com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierTrainer*. Within this step, the maneuver data is preprocessed and all maneuver classifiers are trained for each supported context.
 2. Optionally run *com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifierScoring* to print the performance of the trained classifiers. After this step, a list with macro-averaged F2-score of each trained classifier will be stored in *./maneuverClassifierScores.csv*
 
