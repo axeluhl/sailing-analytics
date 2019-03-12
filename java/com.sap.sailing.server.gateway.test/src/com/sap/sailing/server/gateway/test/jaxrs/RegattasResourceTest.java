@@ -104,7 +104,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                     public Regatta call() throws Exception {
                         return racingEventService.createRegatta(openRegattaName, boatClassName,
                                 /* canBoatsOfCompetitorsChangePerRace */ true,
-                                CompetitorRegistrationType.OPEN_MODERATED, secret, startDate, endDate,
+                                CompetitorRegistrationType.OPEN_UNMODERATED, secret, startDate, endDate,
                                 UUID.randomUUID(), series, /* persistent */ true,
                                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
