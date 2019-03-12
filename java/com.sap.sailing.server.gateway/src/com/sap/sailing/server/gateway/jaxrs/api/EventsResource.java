@@ -430,22 +430,24 @@ public class EventsResource extends AbstractSailingServerResource {
         boolean createLeaderboardGroup = createLeaderboardGroupParam == null ? true : Boolean.parseBoolean(createLeaderboardGroupParam);
         String eventName = eventNameParam == null ? getDefaultEventName() : eventNameParam;
         String venueName = venueNameParam == null ? getDefaultVenueName(venueLat, venueLng) : venueNameParam;
+        String leaderboardGroupName = eventName;
+        String regattaAndLeaderboardName = eventName;
         if (createRegatta && boatClassName == null) {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                     .entity(ExceptionManager.parameterRequiredMsg("boatClassName")).type(MediaType.TEXT_PLAIN).build());
         }
-        if (createLeaderboardGroup && getService().getLeaderboardGroupByName(createLeaderboardGroupParam) != null) {
+        if (createLeaderboardGroup && getService().getLeaderboardGroupByName(leaderboardGroupName) != null) {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                     .entity(ExceptionManager.objectAlreadyExists("leaderboard group", createLeaderboardGroupParam))
                     .type(MediaType.TEXT_PLAIN).build());
         }
         if (createRegatta) {
-            if (getService().getRegattaByName(createRegattaParam) != null) {
+            if (getService().getRegattaByName(regattaAndLeaderboardName) != null) {
                 throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                         .entity(ExceptionManager.objectAlreadyExists("regatta", createRegattaParam))
                         .type(MediaType.TEXT_PLAIN).build());
             }
-            if (getService().getLeaderboardByName(createRegattaParam) != null) {
+            if (getService().getLeaderboardByName(regattaAndLeaderboardName) != null) {
                 throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                         .entity(ExceptionManager.objectAlreadyExists("leaderboard", createRegattaParam))
                         .type(MediaType.TEXT_PLAIN).build());
@@ -481,7 +483,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 CourseArea courseArea = addCourseArea(event, "Default");
                 final LeaderboardGroup leaderboardGroup;
                 if (createLeaderboardGroup) {
-                    leaderboardGroup = validateAndAddLeaderboardGroup(event.getId(), event.getName(), event.getDescription(), /* leaderboardGroupDisplayNameParam */ null,
+                    leaderboardGroup = validateAndAddLeaderboardGroup(event.getId(), leaderboardGroupName, event.getDescription(), /* leaderboardGroupDisplayNameParam */ null,
                             /* displayGroupsInReverseOrderParam */ false, /* leaderboardNamesParam */ null,
                             /* overallLeaderboardDiscardThresholdsParam */ null, /* overallLeaderboardScoringSchemeTypeParam */ null);
                 } else {
@@ -495,7 +497,7 @@ public class EventsResource extends AbstractSailingServerResource {
                         logger.warning(
                                 "Got request that created a new Regatta without a registrationSecret, generated a new one");
                     }
-                    leaderboard = validateAndCreateRegatta(event.getName(), boatClassName,
+                    leaderboard = validateAndCreateRegatta(regattaAndLeaderboardName, boatClassName,
                             /* scoringSchemeParam */ null, courseArea.getId(), /* buoyZoneRadiusInHullLengthsParam */ null,
                             /* useStartTimeInterferenceParam */ null, /* controlTrackingFromStartAndFinishTimesParam */ null,
                             /* rankingMetricParam */ null, /* leaderboardDiscardThresholdsParam */ null,
