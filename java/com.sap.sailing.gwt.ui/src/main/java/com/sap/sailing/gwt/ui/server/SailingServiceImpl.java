@@ -6331,14 +6331,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public Iterable<String> getAllIgtimiAccountEmailAddresses() {
-        List<String> result = new ArrayList<String>();
-        for (Account account : getIgtimiConnectionFactory().getAllAccounts()) {
-            final String email = account.getUser().getEmail();
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObject(DefaultActions.READ, account))) {
-                result.add(email);
-            }
-        }
-        return result;
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.IGTIMI_ACCOUNT,
+                getIgtimiConnectionFactory().getAllAccounts(), acc -> acc.getUser().getEmail());
     }
 
     private IgtimiConnectionFactory getIgtimiConnectionFactory() {
@@ -6377,9 +6371,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void removeIgtimiAccount(String eMailOfAccountToRemove) {
         final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailOfAccountToRemove);
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObject(
-                DefaultActions.DELETE, existingAccount));
-        getIgtimiConnectionFactory().removeAccount(existingAccount);
+        if (existingAccount != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(existingAccount, () -> {
+                getIgtimiConnectionFactory().removeAccount(existingAccount);
+            });
+        }
     }
 
     @Override
