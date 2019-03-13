@@ -19,14 +19,14 @@ import com.google.gwt.maps.client.overlays.Polyline;
  * 
  * @author Tim Hessenmüller (D062243)
  */
-public class MultiColorPolyline implements PathChangeHandler {
+public class MultiColorPolyline {
     private MultiColorPolylineOptions options;
     
     private List<Polyline> polylines;
     
     private MapWidget map;
     
-    private Set<PathChangeHandler> pathChangeHandlers;
+    private Set<MultiColorPolyline> pathChangeListeners;
     
     private Set<ClickMapHandler> clickMapHandlers;
     private Set<MouseOverMapHandler> mouseOverMapHandlers;
@@ -41,7 +41,7 @@ public class MultiColorPolyline implements PathChangeHandler {
         this.options = options;
         polylines = new ArrayList<>();
         
-        pathChangeHandlers = new HashSet<>();
+        pathChangeListeners = new HashSet<>();
         
         clickMapHandlers = new HashSet<>();
         mouseOverMapHandlers = new HashSet<>();
@@ -82,10 +82,10 @@ public class MultiColorPolyline implements PathChangeHandler {
     }
     
     public void setPath(final MVCArray<LatLng> path) {
-        for (PathChangeHandler handler : pathChangeHandlers) {
-            handler.setPath(path);
+        for (MultiColorPolyline line : pathChangeListeners) {
+            line.setPath(path);
         }
-        clear();
+        clearPolylines();
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
             polylines.add(createPolyline(path, 0));
@@ -103,8 +103,8 @@ public class MultiColorPolyline implements PathChangeHandler {
     
     public void insertAt(int index, LatLng position) {
         if (position == null) throw new IllegalArgumentException("Cannot insert value: null");
-        for (PathChangeHandler handler : pathChangeHandlers) {
-            handler.insertAt(index, position);
+        for (MultiColorPolyline line : pathChangeListeners) {
+            line.insertAt(index, position);
         }
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
@@ -158,8 +158,8 @@ public class MultiColorPolyline implements PathChangeHandler {
         if (index < 0 || index >= getLength()) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + getLength());
         }
-        for (PathChangeHandler handler : pathChangeHandlers) {
-            handler.removeAt(index);
+        for (MultiColorPolyline line : pathChangeListeners) {
+            line.removeAt(index);
         }
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
@@ -200,8 +200,8 @@ public class MultiColorPolyline implements PathChangeHandler {
     }
     
     public void setAt(int index, LatLng position) {
-        for (PathChangeHandler handler : pathChangeHandlers) {
-            handler.setAt(index, position);
+        for (MultiColorPolyline line : pathChangeListeners) {
+            line.setAt(index, position);
         }
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
@@ -232,9 +232,13 @@ public class MultiColorPolyline implements PathChangeHandler {
     }
     
     public void clear() {
-        for (PathChangeHandler handler : pathChangeHandlers) {
-            handler.clear();
+        for (MultiColorPolyline line : pathChangeListeners) {
+            line.clear();
         }
+        clearPolylines();
+    }
+
+    private void clearPolylines() {
         for (Polyline l : polylines) {
             l.setMap(null);
         }
@@ -282,11 +286,11 @@ public class MultiColorPolyline implements PathChangeHandler {
         return line;
     }
     
-    public void addPathChangeHandler(PathChangeHandler handler) {
-        pathChangeHandlers.add(handler);
+    public void addPathChangeListener(MultiColorPolyline listener) {
+        pathChangeListeners.add(listener);
     }
-    public boolean removePathChangeHandler(PathChangeHandler handler) {
-        return pathChangeHandlers.remove(handler);
+    public boolean removePathChangeListener(MultiColorPolyline listener) {
+        return pathChangeListeners.remove(listener);
     }
     
     public void addClickHandler(ClickMapHandler handler) {

@@ -89,7 +89,7 @@ public class Hoverline {
         hoverline = new MultiColorPolyline(options);
         hoverline.setMap(multiColorPolyline.getMap());
         hoverline.setPath(MVCArray.newInstance(multiColorPolyline.getPath().toArray(new LatLng[0])));
-        multiColorPolyline.addPathChangeHandler(hoverline);
+        multiColorPolyline.addPathChangeListener(hoverline);
         
         options.setVisible(false);
         multiColorPolyline.addMouseOverHandler(new MouseOverMapHandler() {

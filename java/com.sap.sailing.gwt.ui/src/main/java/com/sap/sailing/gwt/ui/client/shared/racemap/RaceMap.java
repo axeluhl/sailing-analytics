@@ -704,7 +704,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
     
     private void loadAvailableDetailTypes() {
-        sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, raceIdentifier,
+        sailingService.determineDetailTypesForCompetitorChart(leaderboardGroupName, raceIdentifier,
+        //sailingService.getAvailableDetailTypesForLeaderboard(leaderboardName, raceIdentifier,
                 new AsyncCallback<Iterable<DetailType>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -2497,6 +2498,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     selectedDetailType = null;
                 } else {
                     selectedDetailType = DetailType.valueOfString(value);
+                    if (!competitorSelection.isSelected(competitorDTO)) {
+                        competitorSelection.setSelected(competitorDTO, true);
+                    }
                 }
                 if (selectedDetailType != previous) {
                     selectedDetailTypeChanged = true;
@@ -3033,7 +3037,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
         switch(displayMode){
         case DEFAULT:
-            //options.setColorProvider((p) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
             options.setColorMode(MultiColorPolylineColorMode.MONOCHROMATIC);
             options.setColorProvider((i) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
             options.setStrokeWeight(1);
