@@ -29,8 +29,8 @@
     </tr>
     <tr>
         <td>Optional parameters:</td>
-        <td>leaderboardname: the leaderboardName, required for evaluation of the secret <br>
-         secret: in case the given secret is equal to the one stored in a regatta with the same name as the leaderboardName, further security checks will be skipped</td>
+        <td>leaderboardName: The name of a regatta leaderboard to be used for the secret check. The secret check will only succeed if the requested boat is part of the regatta. No secret check will happen, if the leaderboardName is not given.<br>
+         secret: In case the given secret is equal to the one stored in the regatta defined by the leaderboardName, the current user does not need to be authenticated or have the required read permission.</td>
     </tr>
     <tr>
         <td>Request method:</td>
