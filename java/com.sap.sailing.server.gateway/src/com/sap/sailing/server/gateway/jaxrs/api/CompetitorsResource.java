@@ -29,6 +29,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
@@ -37,6 +38,7 @@ import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializ
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.common.Util;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -76,18 +78,23 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{competitorId}")
     public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString,
-            @QueryParam("secret") String secret, @QueryParam("leaderboardname") String leaderboardName) {
+            @QueryParam("secret") String secret, @QueryParam("leaderboardName") String leaderboardName) {
         Response response;
         Competitor competitor = getService().getCompetitorAndBoatStore()
                 .getExistingCompetitorByIdAsString(competitorIdAsString);
         if (competitor == null) {
-            response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorIdAsString)
-                            + "'.")
+            response = Response
+                    .status(Status.NOT_FOUND).entity("Could not find a competitor with id '"
+                            + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
-            if (!skip) {
+            boolean competitorInRegatta = false;
+            if (skip) {
+                Regatta regatta = getService().getRegattaByName(leaderboardName);
+                competitorInRegatta = Util.contains(regatta.getAllCompetitors(), competitor);
+            }
+            if (!(skip && competitorInRegatta)) {
                 getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }

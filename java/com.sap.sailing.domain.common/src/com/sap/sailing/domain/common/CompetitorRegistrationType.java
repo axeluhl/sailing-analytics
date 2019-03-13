@@ -18,7 +18,8 @@ public enum CompetitorRegistrationType {
     CLOSED(false, false),
 
     /** Competitors are registering themselve, but the regatta owner has to confirm the registration. */
-    OPEN_MODERATED(true, true),
+    // TODO Currently not supported -> implement later
+    // OPEN_MODERATED(true, true),
 
     /** Competitors are registering themselves without the need of confirmation. */
     OPEN_UNMODERATED(true, false);
@@ -103,8 +104,9 @@ public enum CompetitorRegistrationType {
             return stringMessages.competitorRegistrationTypeClosed();
         case OPEN_UNMODERATED:
             return stringMessages.competitorRegistrationTypeOpenUnmoderated();
-        case OPEN_MODERATED:
-            return stringMessages.competitorRegistrationTypeOpenModerated();
+            // TODO activate when OPEN_MODERATED type is implemented
+//        case OPEN_MODERATED:
+//            return stringMessages.competitorRegistrationTypeOpenModerated();
         default:
             return this.name();
         }

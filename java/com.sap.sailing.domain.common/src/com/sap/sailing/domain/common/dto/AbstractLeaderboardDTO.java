@@ -356,7 +356,7 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
         } else {
             List<String> raceNames = new ArrayList<String>();
             for (RaceColumnDTO race : races) {
-                raceNames.add(race.getName());
+                raceNames.add(race != null ? race.getName() : null);
             }
             result = prime * result + raceNames.hashCode();
         }
@@ -402,11 +402,11 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
             List<String> raceColumnNames = new ArrayList<String>(races.size());
             List<String> otherRaceColumnNames = new ArrayList<String>(races.size());
             for (RaceColumnDTO race : races) {
-                raceColumnNames.add(race.getName());
+                raceColumnNames.add(race != null ? race.getName() : null);
             }
             if (other.races != null) {
                 for (RaceColumnDTO otherRace : other.races) {
-                    otherRaceColumnNames.add(otherRace.getName());
+                    otherRaceColumnNames.add(otherRace != null ? otherRace.getName() : null);
                 }
             }
             if (!raceColumnNames.equals(otherRaceColumnNames))

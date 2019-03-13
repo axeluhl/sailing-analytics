@@ -12,8 +12,10 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/v1/boats")
@@ -22,8 +24,8 @@ public class BoatsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{boatId}")
-    public Response getBoat(@PathParam("boatId") String boatIdAsString, @PathParam("secret") String regattaSecret,
-            @QueryParam("leaderboardname") String leaderboardName) {
+    public Response getBoat(@PathParam("boatId") String boatIdAsString, @QueryParam("secret") String regattaSecret,
+            @QueryParam("leaderboardName") String leaderboardName) {
         Response response;
         Boat boat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatIdAsString);
         if (boat == null) {
@@ -32,13 +34,19 @@ public class BoatsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             boolean skip = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
-            if (!skip) {
+            boolean boatInRegatta = false;
+            if (skip) {
+                Regatta regatta = getService().getRegattaByName(leaderboardName);
+                boatInRegatta = Util.contains(regatta.getAllBoats(), boat);
+            }
+            if (!(skip && boatInRegatta)) {
                 getSecurityService().checkCurrentUserAnyExplicitPermissions(boat,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             BoatJsonSerializer boatJsonSerializer = BoatJsonSerializer.create();
             String jsonString = boatJsonSerializer.serialize(boat).toJSONString();
-            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
+                    .build();
         }
         return response;
     }

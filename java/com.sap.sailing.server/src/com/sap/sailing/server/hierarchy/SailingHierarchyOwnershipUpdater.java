@@ -88,7 +88,7 @@ public class SailingHierarchyOwnershipUpdater {
         SailingHierarchyWalker.walkFromEvent(event, false, new EventHierarchyVisitor() {
             @Override
             public void visit(Leaderboard leaderboard, Set<LeaderboardGroup> leaderboardGroups) {
-                updateGroupOwnershipForLeaderboardHierarchy(leaderboard);
+                updateGroupOwnershipForLeaderboardHierarchyInternal(leaderboard);
             }
 
             @Override
@@ -104,13 +104,13 @@ public class SailingHierarchyOwnershipUpdater {
         commitChanges();
     }
 
-    public void updateGroupOwnershipForLeaderboardGroupHierarchyInternal(LeaderboardGroup leaderboardGroup) {
+    private void updateGroupOwnershipForLeaderboardGroupHierarchyInternal(LeaderboardGroup leaderboardGroup) {
         updateGroupOwner(leaderboardGroup.getIdentifier());
         SailingHierarchyWalker.walkFromLeaderboardGroup(service, leaderboardGroup, true,
                 new LeaderboardGroupHierarchyVisitor() {
                     @Override
                     public void visit(Leaderboard leaderboard) {
-                        updateGroupOwnershipForLeaderboardHierarchy(leaderboard);
+                        updateGroupOwnershipForLeaderboardHierarchyInternal(leaderboard);
                     }
 
                     @Override
@@ -123,6 +123,11 @@ public class SailingHierarchyOwnershipUpdater {
     }
 
     public void updateGroupOwnershipForLeaderboardHierarchy(Leaderboard leaderboard) {
+        updateGroupOwnershipForLeaderboardHierarchyInternal(leaderboard);
+        commitChanges();
+    }
+    
+    private void updateGroupOwnershipForLeaderboardHierarchyInternal(Leaderboard leaderboard) {
         updateGroupOwner(leaderboard.getIdentifier());
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;

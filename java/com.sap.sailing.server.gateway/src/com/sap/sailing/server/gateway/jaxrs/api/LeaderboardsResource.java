@@ -120,6 +120,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
+import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
@@ -1042,7 +1043,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Path("{leaderboardName}/marks")
     public Response getMarksForRace(@PathParam("leaderboardName") String leaderboardName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
-            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) {
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
+            @QueryParam("secret") String secret) {
         // TODO also look for defined marks in RegattaLog?
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
@@ -1056,7 +1058,10 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Leaderboard with name '" + leaderboardName + "'does not contain a RegattaLog'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+        if (!skip) {
+            getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        }
         final Set<Mark> marks = new HashSet<Mark>();
         if (raceColumnName == null) {
             if (fleetName != null) {
@@ -1221,7 +1226,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{leaderboardName}/marks/{markId}")
     public Response getMark(@PathParam("leaderboardName") String leaderboardName,
-            @PathParam("markId") String markId) {
+            @PathParam("markId") String markId,
+            @QueryParam("secret") String secret) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             return Response.status(Status.NOT_FOUND)
@@ -1234,7 +1240,10 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Leaderboard with name '" + leaderboardName + "'does not contain a RegattaLog'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        getSecurityService().hasCurrentUserReadPermission(leaderboard);
+        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+        if (!skip) {
+            getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        }
         Mark mark = null;
         for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (final Mark availableMark : raceColumn.getAvailableMarks()) {
@@ -1460,6 +1469,23 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 UUID.randomUUID(), passId));
         return (raceColumn.isCompetitorRegistrationInRacelogEnabled(fleet) ? Response.ok() : Response.notModified())
                 .build();
+    }
+
+    @POST
+    @Path("/{name}/migrate")
+    public Response migrateOwnershipForLeaderboard(@PathParam("name") String leaderboardName,
+            @QueryParam("createNewGroup") Boolean createNewGroup,
+            @QueryParam("existingGroupId") UUID existingGroupIdOrNull, @QueryParam("newGroupName") String newGroupName,
+            @QueryParam("migrateCompetitors") Boolean migrateCompetitors,
+            @QueryParam("migrateBoats") Boolean migrateBoats,
+            @QueryParam("copyMembersAndRoles") Boolean copyMembersAndRoles)
+            throws ParseException, JsonDeserializationException {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        SailingHierarchyOwnershipUpdater updater = SailingHierarchyOwnershipUpdater.createOwnershipUpdater(
+                createNewGroup, existingGroupIdOrNull, newGroupName, migrateCompetitors, migrateBoats,
+                copyMembersAndRoles == null ? true : copyMembersAndRoles, getService());
+        updater.updateGroupOwnershipForLeaderboardHierarchy(leaderboard);
+        return Response.ok().build();
     }
 
 }
