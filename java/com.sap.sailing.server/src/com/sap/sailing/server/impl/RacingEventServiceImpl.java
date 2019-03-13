@@ -1003,9 +1003,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     public void ensureOwnerships() {
         SecurityService securityService = getSecurityService();
-        securityService.assumeOwnershipMigrated(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION.getName());
         securityService.assumeOwnershipMigrated(SecuredDomainType.RESULT_IMPORT_URL.getName());
         securityService.assumeOwnershipMigrated(SecuredDomainType.REPLICATOR.getName());
+
+        for (DeviceConfiguration device : getAllDeviceConfigurations()) {
+            securityService.migrateOwnership(device);
+        }
+        securityService.assumeOwnershipMigrated(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION.getName());
 
         for (Event event : getAllEvents()) {
             securityService.migrateOwnership(event);
