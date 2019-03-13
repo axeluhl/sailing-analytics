@@ -15,10 +15,11 @@ public class QRCodePlace extends AbstractBasePlace {
     private static final String PARAM_EVENT_ID = "event_id";
     private static final String PARAM_LEADERBOARD_NAME = "leaderboard_name";
     private static final String PARAM_COMPETITOR_ID = "competitor_id";
-    private static final String PARAM_REGATTA_NAME = "regatta_name";
-    private static final String PARAM_REGATTA_SECRET = "secret";
+    public static final String PARAM_REGATTA_NAME = "regatta_name";
+    public static final String PARAM_REGATTA_SECRET = "secret";
     private static final String PARAM_CHECKIN_URL = "checkinUrl";
     private static final String PARAM_MODE = "mode";
+    public static final String PARAM_SERVER = "server";
 
     private UUID eventId;
     private UUID competitorId;
@@ -28,6 +29,7 @@ public class QRCodePlace extends AbstractBasePlace {
     private String checkInUrl;
     private InvitationMode mode;
     private String rawCheckInUrl;
+    private String server;
 
     public QRCodePlace(UUID eventId, UUID competitorId, String leaderboardName, String regattaName,
             String regattaRegistrationLinkSecret, String checkInUrl) {
@@ -54,7 +56,6 @@ public class QRCodePlace extends AbstractBasePlace {
             if (rawCheckInUrl != null) {
                 checkInUrl = decodeUrl(rawCheckInUrl);
                 parseUrl(checkInUrl);
-
                 if (mode == InvitationMode.PUBLIC_INVITE) {
                     if (regattaName == null) {
                         GWT.log("No parameter " + PARAM_REGATTA_NAME + " found");
@@ -66,8 +67,8 @@ public class QRCodePlace extends AbstractBasePlace {
                     if (leaderboardName == null) {
                         GWT.log("No parameter " + PARAM_LEADERBOARD_NAME + " found!");
                     }
-                if (competitorId == null
-                        && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
+                    if (competitorId == null
+                            && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
                         GWT.log("No parameter " + PARAM_COMPETITOR_ID + " found!");
                     }
                     if (competitorId != null && mode == InvitationMode.BOUY_TENDER) {
@@ -78,7 +79,17 @@ public class QRCodePlace extends AbstractBasePlace {
                     }
                 }
             } else {
-                GWT.log("No parameter " + PARAM_CHECKIN_URL + " found!");
+                // alternative direct link version
+                if (mode == InvitationMode.PUBLIC_INVITE) {
+                    regattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
+                    regattaRegistrationLinkSecret = Window.Location.getParameter(PARAM_REGATTA_SECRET);
+                    server = Window.Location.getParameter(PARAM_SERVER);
+                    if (regattaName == null || regattaRegistrationLinkSecret == null || server == null) {
+                        GWT.log("Missing parameter for regatta, secret or server");
+                    }
+                } else {
+                    GWT.log("No parameter " + PARAM_CHECKIN_URL + " found!");
+                }
             }
         } catch (Exception e) {
             GWT.log("No parameter " + PARAM_MODE + " found, or value not valid");
@@ -163,6 +174,10 @@ public class QRCodePlace extends AbstractBasePlace {
 
     public String getRegattaRegistrationLinkSecret() {
         return regattaRegistrationLinkSecret;
+    }
+
+    public String getServer() {
+        return server;
     }
 
     public static class Tokenizer implements PlaceTokenizer<QRCodePlace> {
