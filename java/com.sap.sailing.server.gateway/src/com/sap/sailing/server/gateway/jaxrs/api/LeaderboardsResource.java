@@ -120,6 +120,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
+import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
@@ -1460,6 +1461,23 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 UUID.randomUUID(), passId));
         return (raceColumn.isCompetitorRegistrationInRacelogEnabled(fleet) ? Response.ok() : Response.notModified())
                 .build();
+    }
+
+    @POST
+    @Path("/{name}/migrate")
+    public Response migrateOwnershipForLeaderboard(@PathParam("name") String leaderboardName,
+            @QueryParam("createNewGroup") Boolean createNewGroup,
+            @QueryParam("existingGroupId") UUID existingGroupIdOrNull, @QueryParam("newGroupName") String newGroupName,
+            @QueryParam("migrateCompetitors") Boolean migrateCompetitors,
+            @QueryParam("migrateBoats") Boolean migrateBoats,
+            @QueryParam("copyMembersAndRoles") Boolean copyMembersAndRoles)
+            throws ParseException, JsonDeserializationException {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        SailingHierarchyOwnershipUpdater updater = SailingHierarchyOwnershipUpdater.createOwnershipUpdater(
+                createNewGroup, existingGroupIdOrNull, newGroupName, migrateCompetitors, migrateBoats,
+                copyMembersAndRoles == null ? true : copyMembersAndRoles, getService());
+        updater.updateGroupOwnershipForLeaderboardHierarchy(leaderboard);
+        return Response.ok().build();
     }
 
 }
