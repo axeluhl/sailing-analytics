@@ -24,8 +24,8 @@ public class BoatsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{boatId}")
-    public Response getBoat(@PathParam("boatId") String boatIdAsString, @QueryParam("secret") String regattaSecret,
-            @QueryParam("leaderboardname") String leaderboardName) {
+    public Response getBoat(@PathParam("boatId") String boatIdAsString, @PathParam("secret") String regattaSecret,
+            @QueryParam("leaderboardName") String leaderboardName) {
         Response response;
         Boat boat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatIdAsString);
         if (boat == null) {

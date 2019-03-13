@@ -78,7 +78,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{competitorId}")
     public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString,
-            @QueryParam("secret") String secret, @QueryParam("leaderboardname") String leaderboardName) {
+            @QueryParam("secret") String secret, @QueryParam("leaderboardName") String leaderboardName) {
         Response response;
         Competitor competitor = getService().getCompetitorAndBoatStore()
                 .getExistingCompetitorByIdAsString(competitorIdAsString);

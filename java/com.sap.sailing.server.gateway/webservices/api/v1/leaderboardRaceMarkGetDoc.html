@@ -2,17 +2,17 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
 	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
 	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
 	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
 </head>
 <body>
 <h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
-<h2>URL: /api/v1/events/{eventId}</h2>
+<h2>URL: /api/v1/leaderboards/{name}/marks/{id}</h2>
 
 <b>Description:</b>
-<p>The service gets the details of an sailing event</p>
+<p>Gets the mark with the given id that is associated to the given leaderboard.</p>
 <br/>
 <table>
 	<tr>
@@ -29,7 +29,7 @@
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>secret: in case the given secret is equal to the one stored in a regatta that is part of the event, further security checks will be skipped</td>
+		<td>secret: In case the given secret is equal to the one stored in the regatta associated to the leaderboard, the current user does not need to be authenticated or have the required read permission.</td>
 	</tr>
 	<tr>
 		<td>Request method:</td>
@@ -37,7 +37,7 @@
 	</tr>
 	<tr>
 		<td>Example:</td>
-		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/events/41de25fd-0f22-4200-bdac-5574e7d5225d">http://www.sapsailing.com/sailingserver/api/v1/events/41de25fd-0f22-4200-bdac-5574e7d5225d</a></td>
+		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/leaderboards/{name}/marks/{markId}">http://www.sapsailing.com/sailingserver/api/v1/leaderboards/{name}/mark/{markId}</a></td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>
