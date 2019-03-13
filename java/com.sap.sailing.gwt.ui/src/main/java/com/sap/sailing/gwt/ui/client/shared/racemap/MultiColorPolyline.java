@@ -22,10 +22,16 @@ import com.google.gwt.maps.client.overlays.Polyline;
 public class MultiColorPolyline {
     private MultiColorPolylineOptions options;
     
+    /**
+     * Container for {@link Polyline}s which together build up the {@code MultiColorPolyline}.
+     */
     private List<Polyline> polylines;
     
     private MapWidget map;
     
+    /**
+     * A {@link Set} of {@code MultiColorPolylines} which will receive all path changes applied to this object.
+     */
     private Set<MultiColorPolyline> pathChangeListeners;
     
     private Set<ClickMapHandler> clickMapHandlers;
@@ -55,23 +61,32 @@ public class MultiColorPolyline {
     }*/
     public void setOptions(final MultiColorPolylineOptions options) {
         if (this.options.getColorMode() != options.getColorMode()) {
+            // If colorMode changed the path needs to change from one polyline to multiple polylines and vice versa
             MVCArray<LatLng> path = MVCArray.newInstance(getPath().toArray(new LatLng[0]));
             this.options = options;
             setPath(path);
         } else {
             this.options = options;
         }
+        // Since colorMode and/or options have changed it's best to update the colors of all polylines
         for (int i = 0; i < polylines.size(); i++) {
             String color = options.getColorProvider().getColor(i);
             polylines.get(i).setOptions(options.newPolylineOptionsInstance(color));
         }
     }
     
+    /**
+     * Creates an ordered {@link List} of all {@link LatLng} vertices in this {@code MultiColorPolyline}.
+     * @return ordered {@link List} of {@link LatLng}.
+     */
     public List<LatLng> getPath() {
         final int cap = getLength();
         List<LatLng> path = new ArrayList<>(cap);
         if (cap > 0) {
+            // In POLYCHROMATIC mode it is possible to have a single invisible vertex if the total path length is 1
             path.add(polylines.get(0).getPath().get(0));
+            // In POLYCHROMATIC mode the last vertex of polyline n will be the same as the first vertex of polyline n+1
+            // In MONOCHROMATIC mode there will be only 1 polyline and its first vertex was already added to path
             for (Polyline line : polylines) {
                 for (int i = 1; i < line.getPath().getLength(); i++) {
                     path.add(line.getPath().get(i));
@@ -81,6 +96,10 @@ public class MultiColorPolyline {
         return path;
     }
     
+    /**
+     * Sets the displayed path.
+     * @param path ordered {@link MVCArray} of {@link LatLng}.
+     */
     public void setPath(final MVCArray<LatLng> path) {
         for (MultiColorPolyline line : pathChangeListeners) {
             line.setPath(path);
@@ -101,7 +120,14 @@ public class MultiColorPolyline {
         }
     }
     
-    public void insertAt(int index, LatLng position) {
+    /**
+     * Inserts a vertex at a specified position in the path.
+     * @param index {@code int} indicating the insertion position.
+     * @param position {@link LatLng} the vertex to insert.
+     * @throws IllegalArgumentException if {@code position} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code index} is not in bounds of path.
+     */
+    public void insertAt(int index, LatLng position) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (position == null) throw new IllegalArgumentException("Cannot insert value: null");
         for (MultiColorPolyline line : pathChangeListeners) {
             line.insertAt(index, position);
@@ -154,7 +180,15 @@ public class MultiColorPolyline {
         }
     }
     
-    public LatLng removeAt(int index) {
+    /**
+     * Removes a vertex at a specified position from the displayed path.
+     * If the removed vertex was not at one of the ends the two adjacent vertices will now
+     * directly connect to each other.
+     * @param index {@code int} indication the vertex to be removed from path.
+     * @return {@link LatLng} vertex that was removed.
+     * @throws IndexOutOfBoundsException if {@code index} is not in bounds of path.
+     */
+    public LatLng removeAt(int index) throws IndexOutOfBoundsException {
         if (index < 0 || index >= getLength()) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + getLength());
         }
@@ -199,7 +233,13 @@ public class MultiColorPolyline {
         return null;
     }
     
-    public void setAt(int index, LatLng position) {
+    /**
+     * Sets a specified vertex.
+     * @param index {@code int} vertex to set.
+     * @param position {@link LatLng} to set vertex to.
+     * @throws IndexOutOfBoundsException if {@code index} is not in bounds of path.
+     */
+    public void setAt(int index, LatLng position) throws IndexOutOfBoundsException {
         for (MultiColorPolyline line : pathChangeListeners) {
             line.setAt(index, position);
         }
@@ -208,11 +248,11 @@ public class MultiColorPolyline {
             polylines.get(0).getPath().setAt(index, position);
             break;
         case POLYCHROMATIC:
-            if (index == 0) {
+            if (index == 0) { // Set the very first vertex
                 polylines.get(0).getPath().setAt(0, position);
-            } else if (index == getLength() - 1) {
+            } else if (index == getLength() - 1) { // Set the very last vertex
                 polylines.get(index - 1).getPath().setAt(1, position);
-            } else {
+            } else { // Set a vertex somewhere in the middle which affects 2 polylines
                 polylines.get(index - 1).getPath().setAt(1, position);
                 polylines.get(index).getPath().setAt(0, position);
             }
@@ -220,10 +260,18 @@ public class MultiColorPolyline {
         }
     }
     
+    /**
+     * Gets the map this {@code MultiColorPolyline} is displayed on.
+     * @return {@link MapWidget}
+     */
     public MapWidget getMap() {
         return map;
     }
     
+    /**
+     * Sets the map this {@code MultiColorPolyline} is displayed on.
+     * @param map {@link MapWidget}
+     */
     public void setMap(MapWidget map) {
         this.map = map;
         for (int i = 0; i < polylines.size(); i++) {
@@ -231,6 +279,9 @@ public class MultiColorPolyline {
         }
     }
     
+    /**
+     * Clears the {@code MultiColorPolyline} and all its {@link #pathChangeListeners}.
+     */
     public void clear() {
         for (MultiColorPolyline line : pathChangeListeners) {
             line.clear();
@@ -245,6 +296,10 @@ public class MultiColorPolyline {
         polylines.clear();
     }
     
+    /**
+     * Gets the amount of individual vertices in path.
+     * @return {@code int} amount.
+     */
     public int getLength() {
         switch (options.getColorMode()) {
         case MONOCHROMATIC:
