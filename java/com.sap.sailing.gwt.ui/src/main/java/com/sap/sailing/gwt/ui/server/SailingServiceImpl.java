@@ -581,7 +581,7 @@ import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
-import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
+import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
@@ -634,7 +634,7 @@ import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 /**
  * The server side implementation of the RPC service.
  */
-public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
+public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
     private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
 
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
@@ -5513,6 +5513,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RegattaLogDTO getRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
         RegattaLogDTO result = null;
+        Leaderboard l = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(l);
+
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         if (regattaLog != null) {
             List<RegattaLogEventDTO> entries = new ArrayList<>();
@@ -6328,14 +6331,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Iterable<String> getAllIgtimiAccountEmailAddresses() {
-        List<String> result = new ArrayList<String>();
-        for (Account account : getIgtimiConnectionFactory().getAllAccounts()) {
-            final String email = account.getUser().getEmail();
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObject(DefaultActions.READ, account))) {
-                result.add(email);
-            }
-        }
-        return result;
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.IGTIMI_ACCOUNT,
+                getIgtimiConnectionFactory().getAllAccounts(), acc -> acc.getUser().getEmail());
     }
 
     private IgtimiConnectionFactory getIgtimiConnectionFactory() {
@@ -6374,9 +6371,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void removeIgtimiAccount(String eMailOfAccountToRemove) {
         final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailOfAccountToRemove);
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObject(
-                DefaultActions.DELETE, existingAccount));
-        getIgtimiConnectionFactory().removeAccount(existingAccount);
+        if (existingAccount != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(existingAccount, () -> {
+                getIgtimiConnectionFactory().removeAccount(existingAccount);
+            });
+        }
     }
 
     @Override

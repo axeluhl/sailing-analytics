@@ -227,7 +227,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String regattaBaseName = "Kieler Woche";
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         Regatta regatta = createRegatta(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.OPEN_MODERATED, regattaStartDate, regattaEndDate, /* persistent */ true,
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, regattaStartDate, regattaEndDate, /* persistent */ true,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), courseArea, OneDesignRankingMetric::new);
         mof.storeRegatta(regatta);
         
@@ -241,7 +241,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(loadedRegatta.getDefaultCourseArea().getName(), courseArea.getName());
         assertEquals(loadedRegatta.getStartDate(), regattaStartDate);
         assertEquals(loadedRegatta.getEndDate(), regattaEndDate);
-        assertTrue(loadedRegatta.getCompetitorRegistrationType() == CompetitorRegistrationType.OPEN_MODERATED);
+        assertTrue(loadedRegatta.getCompetitorRegistrationType() == CompetitorRegistrationType.CLOSED);
     }
 
     @Test

@@ -1154,7 +1154,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
 
         @Override
         protected void ensureExpansionDataIsLoaded(final Runnable callWhenExpansionDataIsLoaded) {
-
             if (getLegCount(getLeaderboard(), getRaceColumnName()) != -1) {
                 callWhenExpansionDataIsLoaded.run();
             } else {

@@ -171,9 +171,7 @@
         <module>com.sap.sailing.domain.test</module>
         <module>com.sap.sse.replication.testsupport</module>
         <module>com.sap.sailing.server.testsupport</module>
-        <!-- The following test fragment doesn't yet do what it should in the Maven context... -->
         <module>com.sap.sse.gwt.test</module>
-        <!-- -->
         <module>com.sap.sse.datamining.test</module>
         <module>com.sap.sse.security.replication.test</module>
         <module>com.sap.sse.security.test</module>

@@ -41,6 +41,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Util;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {
@@ -82,9 +83,9 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         Competitor competitor = getService().getCompetitorAndBoatStore()
                 .getExistingCompetitorByIdAsString(competitorIdAsString);
         if (competitor == null) {
-            response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorIdAsString)
-                            + "'.")
+            response = Response
+                    .status(Status.NOT_FOUND).entity("Could not find a competitor with id '"
+                            + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
@@ -94,7 +95,8 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                 competitorInRegatta = Util.contains(regatta.getAllCompetitors(), competitor);
             }
             if (!(skip && competitorInRegatta)) {
-                getSecurityService().checkCurrentUserReadPermission(competitor);
+                getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             String jsonString = getCompetitorJSON(competitor).toJSONString();
             response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")

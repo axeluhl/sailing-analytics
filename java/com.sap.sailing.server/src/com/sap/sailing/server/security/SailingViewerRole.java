@@ -20,9 +20,7 @@ public class SailingViewerRole extends RolePrototype {
                 WildcardPermission.builder().withTypes(SecuredDomainType.EVENT, SecuredDomainType.LEADERBOARD_GROUP,
                         SecuredDomainType.LEADERBOARD, SecuredDomainType.REGATTA, SecuredDomainType.TRACKED_RACE)
                         .withActions(DefaultActions.READ).build(), WildcardPermission.builder().withTypes(SecuredDomainType.COMPETITOR, SecuredDomainType.BOAT)
-                        .withActions(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC).build(),
-                WildcardPermission.builder().withTypes(SecuredDomainType.COMPETITOR, SecuredDomainType.BOAT)
-                        .withActions(DefaultActions.READ).build());
+                        .withActions(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC).build());
     }
 
     public static SailingViewerRole getInstance() {

@@ -14,8 +14,8 @@ import com.sap.sse.common.TimePoint;
 
 public interface DeclinationService {
     /**
-     * A default implementation with a spatial default precision of 1 {@link Mile#METERS_PER_GEOGRAPHICAL_MILE
-     * geographical mile} which equals the length of an arc with one degree on a meridian.
+     * A default implementation with a spatial default precision of 60 {@link Mile#METERS_PER_GEOGRAPHICAL_MILE
+     * nautical miles} which equals the length of an arc with one degree on a meridian.
      */
     DeclinationService INSTANCE = new DeclinationServiceImpl(new CentralAngleDistance(1./180.*Math.PI), new NOAAImporter());
     

@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
@@ -36,6 +37,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdent
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;
@@ -69,7 +71,6 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
                     String.format("Missing parameter '%s'.", RaceLogServletConstants.PARAMS_LEADERBOARD_NAME));
             return;
         }
-        //SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
 
         String raceColumnName = request.getParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME);
         if (raceColumnName == null) {
@@ -93,6 +94,8 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Leaderboard "+StringEscapeUtils.escapeHtml(leaderboardName)+" not found.");
             return;
         }
+        SecurityUtils.getSubject()
+                .checkPermission(leaderboard.getIdentifier().getStringPermission(DefaultActions.UPDATE));
 
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null) {

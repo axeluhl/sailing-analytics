@@ -157,17 +157,17 @@ public class SecurityResource extends AbstractSecurityResource {
         final User user = getService().getUserByName(username == null ? subject.getPrincipal().toString() : username);
         if (user == null) {
             return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
-        } else if (!(getService().hasCurrentUserReadPermission(user) && getService()
-                .hasCurrentUserAnyExplicitPermissions(user, SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))) {
+        } else if (getService().hasCurrentUserReadPermission(user) || getService()
+                .hasCurrentUserAnyExplicitPermissions(user, SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC)) {
             // TODO: pruning when current user only has READ_PUBLIC
-            return Response.status(Status.UNAUTHORIZED).build();
-        } else {
             JSONObject result = new JSONObject();
             result.put("username", user.getName());
             result.put("fullName", user.getFullName());
             result.put("email", user.getEmail());
             result.put("company", user.getCompany());
             return Response.ok(result.toJSONString()).build();
+        } else {
+            return Response.status(Status.UNAUTHORIZED).build();
         }
     }
     
