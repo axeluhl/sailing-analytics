@@ -12,8 +12,10 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
+import com.sap.sse.common.Util;
 
 @Path("/v1/boats")
 public class BoatsResource extends AbstractSailingServerResource {
@@ -31,7 +33,12 @@ public class BoatsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             boolean skip = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
-            if (!skip) {
+            boolean boatInRegatta = false;
+            if (skip) {
+                Regatta regatta = getService().getRegattaByName(leaderboardName);
+                boatInRegatta = Util.contains(regatta.getAllBoats(), boat);
+            }
+            if (!(skip && boatInRegatta)) {
                 getSecurityService().checkCurrentUserReadPermission(boat);
             }
             BoatJsonSerializer boatJsonSerializer = BoatJsonSerializer.create();
