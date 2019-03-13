@@ -116,7 +116,7 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource Delphia24Icon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/F16.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/F_16.png")
     @ImageOptions(preventInlining = true)
     ImageResource F16Icon();
     
@@ -296,7 +296,7 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource SonarIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SKUD18.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SKUD_18.png")
     @ImageOptions(preventInlining = true)
     ImageResource Skud18Icon();
 
