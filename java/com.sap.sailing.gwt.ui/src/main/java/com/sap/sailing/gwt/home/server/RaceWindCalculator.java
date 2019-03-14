@@ -19,11 +19,10 @@ import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
 import com.sap.sse.common.TimePoint;
 
 public class RaceWindCalculator {
-    private RaceWindCalculator() {
-
-    }
+    private RaceWindCalculator() {}
     
-    public static WindStatisticsDTO getWindStatisticsOrNull(TrackedRace trackedRace,TimePoint toTimePoint,TimePoint startTime,RaceLog racelog) {
+    public static WindStatisticsDTO getWindStatisticsOrNull(TrackedRace trackedRace, TimePoint toTimePoint,
+            TimePoint startTime, RaceLog racelog) {
         final WindStatisticsDTO result;
         if (trackedRace != null) {
             final BearingWithConfidenceCluster<TimePoint> bwcc = new BearingWithConfidenceCluster<TimePoint>(
