@@ -21,10 +21,13 @@ public class QRCodePresenter {
     private final QRCodeClientFactory clientFactory;
     private DataCollector dataCollector;
     private InvitationMode invitationMode;
+    private String serverForPublic;
 
     public QRCodePresenter(UUID eventId, UUID competitorId, String leaderboardName,
             String regattaName, String regattaRegistrationLinkSecret,
-            String checkInUrl, QRCodeClientFactory clientFactory, InvitationMode invitationMode) {
+            String checkInUrl, QRCodeClientFactory clientFactory, InvitationMode invitationMode,
+            String serverForPublic) {
+        this.serverForPublic = serverForPublic;
         this.eventId = eventId;
         this.checkInUrl = checkInUrl;
         this.competitorId = competitorId;
@@ -143,7 +146,13 @@ public class QRCodePresenter {
 
         private void proceedIfFinished() {
             if (invitationMode == InvitationMode.PUBLIC_INVITE) {
-                if (checkInUrl != null) {
+                if (serverForPublic != null) {
+                    String branchIoUrl = BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?"
+                            + QRCodePlace.PARAM_REGATTA_NAME + "=" + regattaName + "&"
+                            + QRCodePlace.PARAM_REGATTA_SECRET + "=" + regattaRegistrationLinkSecret + "&"
+                            + QRCodePlace.PARAM_SERVER + "=" + serverForPublic;
+                    view.setData(null, null, "", regatta, branchIoUrl, invitationMode);
+                } else if (checkInUrl != null) {
                     String branchIoUrl = BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?"
                             + BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO_PATH + "="
                             + QRCodePresenter.this.checkInUrl;

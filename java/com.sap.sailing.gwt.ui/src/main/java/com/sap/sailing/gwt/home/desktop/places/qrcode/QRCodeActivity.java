@@ -18,7 +18,7 @@ public class QRCodeActivity extends AbstractActivity {
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
         QRCodePresenter presenter = new QRCodePresenter(place.getEventId(), place.getCompetitorId(),
                 place.getLeaderboardName(), place.getRegattaName(), place.getRegattaRegistrationLinkSecret(),
-                place.getEncodedCheckInUrl(), clientFactory, place.getMode());
+                place.getEncodedCheckInUrl(), clientFactory, place.getMode(), place.getServer());
         QRCodeView qrCodeWidget = new QRCodeView();
         panel.setWidget(qrCodeWidget);
         presenter.setView(qrCodeWidget);

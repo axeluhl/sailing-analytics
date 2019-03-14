@@ -36,8 +36,12 @@ public class GetOpenRegattaByRegattaNameAction implements SailingAction<SimpleRe
     @GwtIncompatible
     public SimpleRegattaDTO execute(SailingDispatchContext ctx) throws DispatchException {
         Regatta regatta = ctx.getRacingEventService().getRegattaByName(regattaName);
-        if (regatta == null || !regatta.getCompetitorRegistrationType().isOpen()
-                || secret.equals(regatta.getRegistrationLinkSecret())) {
+        if (regatta == null) {
+            throw new DispatchException("Regatta \"" + regattaName + "\" not found or not allowed for this action");
+        } else if (!regatta.getCompetitorRegistrationType().isOpen()) {
+                throw new DispatchException("Regatta \"" + regattaName + "\" not found or not allowed for this action");
+        }
+        if (!secret.equals(regatta.getRegistrationLinkSecret())) {
             throw new DispatchException("Regatta \"" + regattaName + "\" not found or not allowed for this action");
         }
         return new SimpleRegattaDTO(regatta.getName());
