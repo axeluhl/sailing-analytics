@@ -75,7 +75,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
@@ -95,6 +97,7 @@ public class SmartphoneTrackingEventManagementPanel
     private CheckBox trackWind;
     protected boolean regattaHasCompetitors = false; 
     private Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> raceWithStartAndEndOfTrackingTime = new HashMap<>();
+    private CaptionPanel importPanel;
     
     public SmartphoneTrackingEventManagementPanel(SailingServiceAsync sailingService, UserService userService,
             RegattaRefresher regattaRefresher,
@@ -103,7 +106,8 @@ public class SmartphoneTrackingEventManagementPanel
         super(sailingService, userService, regattaRefresher, leaderboardsRefresher, errorReporter,
                 stringMessages, /* multiSelection */ true);
         // add upload panel
-        CaptionPanel importPanel = new CaptionPanel(stringMessages.importFixes());
+        importPanel = new CaptionPanel(stringMessages.importFixes());
+        importPanel.setVisible(false);
         VerticalPanel importContent = new VerticalPanel();
         mainPanel.add(importPanel);
         deviceIdentifierTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
@@ -124,6 +128,15 @@ public class SmartphoneTrackingEventManagementPanel
                 loadAndRefreshLeaderboard(getSelectedLeaderboard().getName()); 
             }
         });
+
+        this.userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                boolean couldPotentitallyChangeAnyLeaderboard = userService.hasCurrentUserAnyPermission(
+                        SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.UPDATE), null);
+                importPanel.setVisible(couldPotentitallyChangeAnyLeaderboard);
+            }
+        }, true);
     }
 
     /**

@@ -6487,32 +6487,36 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Boolean denoteForRaceLogTracking(String leaderboardName,
-    		String raceColumnName, String fleetName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
-        // FIXME security
+    public Boolean denoteForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
+            throws NotFoundException, NotDenotableForRaceLogTrackingException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-    	RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
-    	Fleet fleet = getFleetByName(raceColumn, fleetName);
-    	return getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn, fleet, null);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
+        return getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn, fleet,
+                null);
     }
-    
+
     @Override
-    public void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
-        // FIXME security
+    public void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
+            throws NotFoundException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         getRaceLogTrackingAdapter().removeDenotationForRaceLogTracking(getService(), raceLog);
     }
-    
+
     @Override
     public void denoteForRaceLogTracking(String leaderboardName) throws Exception {
-        // FIXME security
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         denoteForRaceLogTracking(leaderboardName, /* race name prefix */ null);
     }
-    
+
     @Override
     public void denoteForRaceLogTracking(String leaderboardName, String prefix) throws Exception {
-        // FIXME security
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);        
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         getRaceLogTrackingAdapter().denoteAllRacesForRaceLogTracking(getService(), leaderboard, prefix);
     }
     
