@@ -6397,11 +6397,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             trackedRaces = myTrackedRaces;
             for (RaceDTO raceDTO : selectedRaces) {
                 DynamicTrackedRace trackedRace = getTrackedRace(raceDTO.getRaceIdentifier());
+                // In case the user selected a distinct set of races, we want the call to completely fail if
+                // tracking wind isn't allowed for at least one race
+                getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
                 myTrackedRaces.add(trackedRace);
             }
         } else {
             trackedRaces = new ArrayList<>();
             for (DynamicTrackedRace race : getAllTrackedRaces()) {
+                // In case the user likes to track wind for all races, we silently filter for the ones
+                // for which the user has sufficient permissions
                 if (getSecurityService().hasCurrentUserUpdatePermission(race)) {
                     ((List<DynamicTrackedRace>) trackedRaces).add(race);
                 }
