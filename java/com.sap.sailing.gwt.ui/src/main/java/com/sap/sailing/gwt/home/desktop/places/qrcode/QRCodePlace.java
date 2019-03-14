@@ -52,40 +52,40 @@ public class QRCodePlace extends AbstractBasePlace {
         super(token);
         try {
             mode = InvitationMode.valueOf(getParameter(PARAM_MODE));
-            rawCheckInUrl = Window.Location.getParameter(PARAM_CHECKIN_URL);
-            if (rawCheckInUrl != null) {
-                checkInUrl = decodeUrl(rawCheckInUrl);
-                parseUrl(checkInUrl);
-                if (mode == InvitationMode.PUBLIC_INVITE) {
-                    if (regattaName == null) {
-                        GWT.log("No parameter " + PARAM_REGATTA_NAME + " found");
-                    }
-                    if (regattaRegistrationLinkSecret == null) {
-                        GWT.log("No parameter " + PARAM_REGATTA_SECRET + " found");
-                    }
-                } else {
-                    if (leaderboardName == null) {
-                        GWT.log("No parameter " + PARAM_LEADERBOARD_NAME + " found!");
-                    }
-                    if (competitorId == null
-                            && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
-                        GWT.log("No parameter " + PARAM_COMPETITOR_ID + " found!");
-                    }
-                    if (competitorId != null && mode == InvitationMode.BOUY_TENDER) {
-                        GWT.log("Found parameter " + PARAM_COMPETITOR_ID + " but is not required!");
-                    }
-                    if (eventId == null) {
-                        GWT.log("No parameter " + PARAM_EVENT_ID + " found!");
-                    }
+            if (mode == InvitationMode.PUBLIC_INVITE) {
+                // alternative direct link version
+                regattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
+                regattaRegistrationLinkSecret = Window.Location.getParameter(PARAM_REGATTA_SECRET);
+                server = Window.Location.getParameter(PARAM_SERVER);
+                if (regattaName == null || regattaRegistrationLinkSecret == null || server == null) {
+                    GWT.log("Missing parameter for regatta, secret or server");
                 }
             } else {
-                // alternative direct link version
-                if (mode == InvitationMode.PUBLIC_INVITE) {
-                    regattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
-                    regattaRegistrationLinkSecret = Window.Location.getParameter(PARAM_REGATTA_SECRET);
-                    server = Window.Location.getParameter(PARAM_SERVER);
-                    if (regattaName == null || regattaRegistrationLinkSecret == null || server == null) {
-                        GWT.log("Missing parameter for regatta, secret or server");
+                rawCheckInUrl = Window.Location.getParameter(PARAM_CHECKIN_URL);
+                if (rawCheckInUrl != null) {
+                    checkInUrl = decodeUrl(rawCheckInUrl);
+                    parseUrl(checkInUrl);
+                    if (mode == InvitationMode.PUBLIC_INVITE) {
+                        if (regattaName == null) {
+                            GWT.log("No parameter " + PARAM_REGATTA_NAME + " found");
+                        }
+                        if (regattaRegistrationLinkSecret == null) {
+                            GWT.log("No parameter " + PARAM_REGATTA_SECRET + " found");
+                        }
+                    } else {
+                        if (leaderboardName == null) {
+                            GWT.log("No parameter " + PARAM_LEADERBOARD_NAME + " found!");
+                        }
+                        if (competitorId == null
+                                && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
+                            GWT.log("No parameter " + PARAM_COMPETITOR_ID + " found!");
+                        }
+                        if (competitorId != null && mode == InvitationMode.BOUY_TENDER) {
+                            GWT.log("Found parameter " + PARAM_COMPETITOR_ID + " but is not required!");
+                        }
+                        if (eventId == null) {
+                            GWT.log("No parameter " + PARAM_EVENT_ID + " found!");
+                        }
                     }
                 } else {
                     GWT.log("No parameter " + PARAM_CHECKIN_URL + " found!");

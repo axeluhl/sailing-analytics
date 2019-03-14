@@ -146,18 +146,10 @@ public class QRCodePresenter {
 
         private void proceedIfFinished() {
             if (invitationMode == InvitationMode.PUBLIC_INVITE) {
-                if (serverForPublic != null) {
-                    String branchIoUrl = BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?"
-                            + QRCodePlace.PARAM_REGATTA_NAME + "=" + regattaName + "&"
-                            + QRCodePlace.PARAM_REGATTA_SECRET + "=" + regattaRegistrationLinkSecret + "&"
-                            + QRCodePlace.PARAM_SERVER + "=" + serverForPublic;
-                    view.setData(null, null, "", regatta, branchIoUrl, invitationMode);
-                } else if (checkInUrl != null) {
-                    String branchIoUrl = BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?"
-                            + BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO_PATH + "="
-                            + QRCodePresenter.this.checkInUrl;
-                    view.setData(null, null, "", regatta, branchIoUrl, invitationMode);
-                }
+                String branchIoUrl = BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?"
+                        + QRCodePlace.PARAM_REGATTA_NAME + "=" + regattaName + "&" + QRCodePlace.PARAM_REGATTA_SECRET
+                        + "=" + regattaRegistrationLinkSecret + "&" + QRCodePlace.PARAM_SERVER + "=" + serverForPublic;
+                view.setData(null, null, "", regatta, branchIoUrl, invitationMode);
             } else {
                 if (competitorIsSet && eventIsSet) {
                     if (checkInUrl != null) {
