@@ -6391,27 +6391,28 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination) throws IllegalStateException,
             ClientProtocolException, IOException, org.json.simple.parser.ParseException {
         final IgtimiConnectionFactory igtimiConnectionFactory = getIgtimiConnectionFactory();
-        final Iterable<DynamicTrackedRace> trackedRaces;
+        final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            List<DynamicTrackedRace> myTrackedRaces = new ArrayList<DynamicTrackedRace>();
-            trackedRaces = myTrackedRaces;
             for (RaceDTO raceDTO : selectedRaces) {
                 DynamicTrackedRace trackedRace = getTrackedRace(raceDTO.getRaceIdentifier());
-                myTrackedRaces.add(trackedRace);
+                // In case the user selected a distinct set of races, we want the call to completely fail if
+                // tracking wind isn't allowed for at least one race
+                getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
+                trackedRaces.add(trackedRace);
             }
         } else {
-            trackedRaces = new ArrayList<>();
             for (DynamicTrackedRace race : getAllTrackedRaces()) {
+                // In case the user likes to track wind for all races, we silently filter for the ones
+                // for which the user has sufficient permissions
                 if (getSecurityService().hasCurrentUserUpdatePermission(race)) {
-                    ((List<DynamicTrackedRace>) trackedRaces).add(race);
+                    trackedRaces.add(race);
                 }
             }
         }
         Map<RegattaAndRaceIdentifier, Integer> numberOfWindFixesImportedPerRace = new HashMap<RegattaAndRaceIdentifier, Integer>();
         for (Account account : igtimiConnectionFactory.getAllAccounts()) {
             // filter account based on used permissions to read account:
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObject(
-                    DefaultActions.READ, account))) {
+            if (getSecurityService().hasCurrentUserReadPermission(account)) {
                 IgtimiConnection conn = igtimiConnectionFactory.connect(account);
                 Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces, correctByDeclination);
                 for (Entry<TrackedRace, Integer> resultForAccount : resultsForAccounts.entrySet()) {

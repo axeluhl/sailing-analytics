@@ -1811,10 +1811,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 // ensure that as soon as the RaceDefinition becomes available, the connectivity params are linked to it in connectivityParametersByRace
                 tracker.add((RaceTracker t) -> rememberConnectivityParametersForRace(t));
                 if (params.isTrackWind()) {
+                    final Subject currentSubject = SecurityUtils.getSubject();
                     // start wind tracking if requested, as soon as the RaceDefinition becomes available
                     tracker.add((RaceTracker t) ->
-                        new Thread(()->startTrackingWind(regattaWithName, t.getRace(), params.isCorrectWindDirectionByMagneticDeclination()),
-                                   "Starting wind trackers for race "+t.getRace()).start());
+                    new Thread(
+                            currentSubject.associateWith((Runnable) (() -> startTrackingWind(regattaWithName,
+                                    t.getRace(), params.isCorrectWindDirectionByMagneticDeclination()))),
+                            "Starting wind trackers for race " + t.getRace()).start());
                 }
             } else {
                 logger.warning("Race tracker with ID "+trackerID+" already found; not tracking twice to avoid race duplication");
