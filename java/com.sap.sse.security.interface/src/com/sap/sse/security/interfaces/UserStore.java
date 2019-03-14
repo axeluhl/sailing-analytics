@@ -5,6 +5,7 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 /**
@@ -94,4 +95,8 @@ public interface UserStore extends BasicUserStore {
     void loadAndMigrateUsers() throws UserGroupManagementException, UserManagementException;
 
     void ensureDefaultTenantExists() throws UserGroupManagementException;
+
+    void removeAllQualifiedRolesForUser(User user);
+
+    void removeAllQualifiedRolesForUserGroup(UserGroup userGroup);
 }

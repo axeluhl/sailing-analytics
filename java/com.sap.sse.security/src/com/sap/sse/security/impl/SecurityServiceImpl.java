@@ -744,6 +744,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
         } else {
             accessControlStore.removeAllOwnershipsFor(userGroup);
+            store.removeAllQualifiedRolesForUserGroup(userGroup);
             store.deleteUserGroup(userGroup);
         }
         return null;
@@ -1192,6 +1193,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userToDelete != null) {
             // remove all permissions the user has
             accessControlStore.removeAllOwnershipsFor(userToDelete);
+            store.removeAllQualifiedRolesForUser(userToDelete);
 
             final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
             UserGroup defaultTenantUserGroup = getUserGroupByName(defaultTenantNameForUsername);
