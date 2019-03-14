@@ -1,18 +1,18 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<DeviceConfiguration> {
     public static DeviceConfigurationJsonDeserializer create() {
@@ -30,7 +30,7 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
         RegattaConfiguration proceduresConfiguration = null;
         final String name = (String) object.get(DeviceConfigurationJsonSerializer.FIELD_NAME);
         final String idAsString = (String) object.get(DeviceConfigurationJsonSerializer.FIELD_ID_AS_STRING);
-        final UUID uuid = UUID.fromString(idAsString);
+        final UUID uuid = idAsString == null ? null : UUID.fromString(idAsString);
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_REGATTA_CONFIGURATION)) {
             JSONObject proceduresObject = Helpers.getNestedObjectSafe(object,
                     DeviceConfigurationJsonSerializer.FIELD_REGATTA_CONFIGURATION);
