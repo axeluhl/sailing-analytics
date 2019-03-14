@@ -280,10 +280,10 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
 
         /* RACE COMMITTEE APP */
         final HorizontalTabLayoutPanel raceCommitteeTabPanel = panel.addVerticalTab(getStringMessages().raceCommitteeApp(), "RaceCommiteeAppPanel");
-        final DeviceConfigurationUserPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(
+        final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationPanel(
                 getSailingService(), getUserService(), getStringMessages(), this);
         panel.addToTabPanel(raceCommitteeTabPanel,
-                new DefaultRefreshableAdminConsolePanel<DeviceConfigurationUserPanel>(deviceConfigurationUserPanel),
+                new DefaultRefreshableAdminConsolePanel<DeviceConfigurationPanel>(deviceConfigurationUserPanel),
                 getStringMessages().deviceConfiguration(),
                 SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION.getPermission(DefaultActions.MUTATION_ACTIONS));
         

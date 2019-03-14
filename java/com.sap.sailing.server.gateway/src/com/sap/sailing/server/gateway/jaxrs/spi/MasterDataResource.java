@@ -30,7 +30,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -102,12 +101,11 @@ public class MasterDataResource extends AbstractSailingServerResource {
                 }
             }
         }
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations = new HashMap<>();
+        Set<DeviceConfiguration> raceManagerDeviceConfigurations = new HashSet<>();
         if (exportDeviceConfigs) {
-            for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> deviceconfig : getAllDeviceConfigs()
-                    .entrySet()) {
+            for (DeviceConfiguration deviceConfig : getAllDeviceConfigs()) {
                 // FIXME here permission check?
-                deviceConfigurations.put(deviceconfig.getKey(), deviceconfig.getValue());
+                raceManagerDeviceConfigurations.add(deviceConfig);
             }
         }
 
@@ -133,7 +131,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 events, regattaRaceIds, mediaTracks,
-                getService().getSensorFixStore(), exportWind, deviceConfigurations);
+                getService().getSensorFixStore(), exportWind, raceManagerDeviceConfigurations);
         final StreamingOutput streamingOutput;
         if (compress) {
             streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime);
@@ -150,9 +148,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
         return builtResponse;
     }
     
-    private Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigs() {
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> configs = getService().getAllDeviceConfigurations();
-        return configs;
+    private Iterable<DeviceConfiguration> getAllDeviceConfigs() {
+        return getService().getAllDeviceConfigurations();
     }
 
     private abstract class AbstractStreamingOutput implements StreamingOutput {

@@ -25,7 +25,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
@@ -168,27 +167,23 @@ public class ImportMasterDataOperation extends
     }
 
     private void importDeviceConfigurations(RacingEventService toState) {
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> existingConfigs = toState.getAllDeviceConfigurations();
-        Set<DeviceConfigurationMatcher> existingKeys = existingConfigs.keySet();
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> newConfigs = masterData.getDeviceConfigurations();
-        for(Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : newConfigs.entrySet()) {
-            DeviceConfigurationMatcher key = entry.getKey();
-            DeviceConfiguration value = entry.getValue();
-            if (existingKeys.contains(key)) {
+        Iterable<DeviceConfiguration> newConfigs = masterData.getDeviceConfigurations();
+        for (DeviceConfiguration config : newConfigs) {
+            if (toState.getDeviceConfigurationById(config.getId()) != null) {
                 if (override) {
                     logger.info(String.format(
-                            "Device configuration [%s] already exists. Overwrite because override flag is set.",
-                            key.getMatcherIdentifier()));
-                    toState.removeDeviceConfiguration(key);
-                    toState.createOrUpdateDeviceConfiguration(key, value);
+                            "Device configuration [%s] with name \"%s\" already exists. Overwrite because override flag is set.",
+                            config.getId(), config.getName()));
+                    toState.removeDeviceConfiguration(config.getId());
+                    toState.createOrUpdateDeviceConfiguration(config);
                     // FIXME ownership here!
                 } else {
                     logger.info(String
-                            .format("Device configuration [%s] already exists. Not overwriting because override flag is not set.",
-                                    key.getMatcherIdentifier()));
+                            .format("Device configuration [%s] with name \"%s\" already exists. Not overwriting because override flag is not set.",
+                                    config.getId(), config.getName()));
                 }
             } else {
-                toState.createOrUpdateDeviceConfiguration(key, value);
+                toState.createOrUpdateDeviceConfiguration(config);
             }
         }
     }

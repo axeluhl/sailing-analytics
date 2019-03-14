@@ -184,11 +184,9 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
@@ -405,7 +403,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureWithConfigurableStartModeFlagConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
@@ -6039,64 +6037,75 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers() {
-        List<DeviceConfigurationMatcherDTO> configs = new ArrayList<DeviceConfigurationMatcherDTO>();
-        for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : 
-            getService().getAllDeviceConfigurations().entrySet()) {
-            DeviceConfigurationMatcher matcher = entry.getKey();
-            configs.add(convertToDeviceConfigurationMatcherDTO(matcher));
+    public List<DeviceConfigurationWithSecurityDTO> getDeviceConfigurations() {
+        List<DeviceConfigurationWithSecurityDTO> configs = new ArrayList<DeviceConfigurationWithSecurityDTO>();
+        for (DeviceConfiguration config : getService().getAllDeviceConfigurations()) {
+            if (getSecurityService().hasCurrentUserReadPermission(config)) {
+                configs.add(convertToDeviceConfigurationWithSecurityDTO(config));
+            }
         }
         return configs;
     }
 
     @Override
-    public DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDto) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDto.clients);
-        DeviceConfiguration configuration = getService().getAllDeviceConfigurations().get(matcher);
-        if (configuration == null) {
-            return null;
+    public DeviceConfigurationDTO getDeviceConfiguration(UUID id) {
+        DeviceConfiguration configuration = getService().getDeviceConfigurationById(id);
+        getSecurityService().checkCurrentUserReadPermission(configuration);
+        return configuration == null ? null : convertToDeviceConfigurationDTO(configuration);
+    }
+
+    @Override
+    public void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO) {
+        if (getService().getDeviceConfigurationById(configurationDTO.id) == null) {
+            final DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(configuration.getType(),
+                    configuration.getIdentifier().getTypeRelativeObjectIdentifier(), configuration.getName(),
+                    new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            getService().createOrUpdateDeviceConfiguration(configuration);
+                        }
+                    });
         } else {
-            return convertToDeviceConfigurationDTO(configuration);
+            final DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
+            getSecurityService().checkCurrentUserUpdatePermission(configuration);
+            getService().createOrUpdateDeviceConfiguration(configuration);
         }
     }
 
     @Override
-    public DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDTO.clients);
-        DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
-        getService().createOrUpdateDeviceConfiguration(matcher, configuration);
-        return convertToDeviceConfigurationMatcherDTO(matcher);
-    }
-
-    @Override
-    public boolean removeDeviceConfiguration(List<String> clientIds) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(clientIds);
-        getService().removeDeviceConfiguration(matcher);
+    public boolean removeDeviceConfiguration(UUID deviceConfigurationId) {
+        final DeviceConfiguration configuration = getService().getDeviceConfigurationById(deviceConfigurationId);
+        getSecurityService().checkCurrentUserDeletePermission(configuration);
+        getService().removeDeviceConfiguration(deviceConfigurationId);
         return true;
-    }
-
-    private DeviceConfigurationMatcherDTO convertToDeviceConfigurationMatcherDTO(DeviceConfigurationMatcher matcher) {
-        List<String> clients = new ArrayList<String>();
-        if (matcher instanceof DeviceConfigurationMatcherSingle) {
-            clients.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
-        }
-        DeviceConfigurationMatcherDTO dto = new DeviceConfigurationMatcherDTO(
-                clients);
-        return dto;
-    }
-
-    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(List<String> clientIds) {
-        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(clientIds);
     }
 
     private DeviceConfigurationDTO convertToDeviceConfigurationDTO(DeviceConfiguration configuration) {
         DeviceConfigurationDTO dto = new DeviceConfigurationDTO();
+        dto.id = configuration.getId();
+        dto.name = configuration.getName();
         dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
         dto.resultsMailRecipient = configuration.getResultsMailRecipient();
         dto.byNameDesignerCourseNames = configuration.getByNameCourseDesignerCourseNames();
         if (configuration.getRegattaConfiguration() != null) {
             dto.regattaConfiguration = convertToRegattaConfigurationDTO(configuration.getRegattaConfiguration());
         }
+        return dto;
+    }
+
+    private DeviceConfigurationWithSecurityDTO convertToDeviceConfigurationWithSecurityDTO(
+            DeviceConfiguration configuration) {
+        DeviceConfigurationWithSecurityDTO dto = new DeviceConfigurationWithSecurityDTO(configuration.getIdentifier());
+        dto.id = configuration.getId();
+        dto.name = configuration.getName();
+        dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
+        dto.resultsMailRecipient = configuration.getResultsMailRecipient();
+        dto.byNameDesignerCourseNames = configuration.getByNameCourseDesignerCourseNames();
+        if (configuration.getRegattaConfiguration() != null) {
+            dto.regattaConfiguration = convertToRegattaConfigurationDTO(configuration.getRegattaConfiguration());
+        }
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), dto, configuration.getIdentifier());
         return dto;
     }
 
@@ -6153,7 +6162,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private DeviceConfigurationImpl convertToDeviceConfiguration(DeviceConfigurationDTO dto) {
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(convertToRegattaConfiguration(dto.regattaConfiguration));
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(convertToRegattaConfiguration(dto.regattaConfiguration), dto.id, dto.name);
         configuration.setAllowedCourseAreaNames(dto.allowedCourseAreaNames);
         configuration.setResultsMailRecipient(dto.resultsMailRecipient);
         configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);

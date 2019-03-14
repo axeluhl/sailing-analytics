@@ -77,7 +77,7 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -525,13 +525,13 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     BoatDTO getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString);
     
-    List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers();
+    List<DeviceConfigurationWithSecurityDTO> getDeviceConfigurations();
     
-    DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcher);
+    DeviceConfigurationDTO getDeviceConfiguration(UUID id);
     
-    DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO);
+    void createOrUpdateDeviceConfiguration(DeviceConfigurationDTO configurationDTO);
 
-    boolean removeDeviceConfiguration(List<String> clientIds);
+    boolean removeDeviceConfiguration(UUID deviceConfigurationId);
 
     boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto);
     
