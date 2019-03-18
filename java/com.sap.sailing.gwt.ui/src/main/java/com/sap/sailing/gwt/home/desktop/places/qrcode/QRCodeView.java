@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.regatta.SimpleRegattaDTO;
 import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace.InvitationMode;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeWrapper;
@@ -51,7 +50,8 @@ public class QRCodeView extends Composite {
 
     }
 
-    public void setData(EventViewDTO event, SimpleCompetitorWithIdDTO competitor, String leaderboardName, SimpleRegattaDTO regatta, String url,
+    public void setData(EventViewDTO event, SimpleCompetitorWithIdDTO competitor, String leaderboardName,
+            String regattaName, String url,
             InvitationMode invitationMode) {
         switch (invitationMode) {
         case COMPETITOR:
@@ -63,7 +63,7 @@ public class QRCodeView extends Composite {
             }
             break;
         case PUBLIC_INVITE:
-            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRegatta(regatta.getName()));
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRegatta(regattaName));
             if (event != null) {
                 subtitleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeSubtitleOpenRegatta());
             }

@@ -8,8 +8,6 @@ import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.gwt.home.communication.event.GetEventViewAction;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.regatta.GetOpenRegattaByRegattaNameAction;
-import com.sap.sailing.gwt.home.communication.regatta.SimpleRegattaDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorAction;
 import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace.InvitationMode;
 
@@ -40,8 +38,9 @@ public class QRCodePresenter {
 
     public void setView(QRCodeView view) {
         if (invitationMode == InvitationMode.PUBLIC_INVITE) {
+            // as the event is most likely displayed on a different server anyway, do not load additional data
             dataCollector = new DataCollector(view);
-            retrieveRegatta(regattaName, regattaRegistrationLinkSecret);
+            dataCollector.proceedIfFinished();
         } else {
         if (eventId == null
                 || (invitationMode == InvitationMode.COMPETITOR || invitationMode == InvitationMode.COMPETITOR_2)
@@ -94,32 +93,12 @@ public class QRCodePresenter {
                 });
     }
 
-    private void retrieveRegatta(String regattaName, String secret) {
-        GWT.log("retrieving regatta: " + regattaName);
-        clientFactory.getDispatch().execute(new GetOpenRegattaByRegattaNameAction(regattaName, secret),
-                new AsyncCallback<SimpleRegattaDTO>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        dataCollector.setRegatta(null);
-                    }
-
-                    @Override
-                    public void onSuccess(SimpleRegattaDTO result) {
-                        GWT.log("FOUND REGATTA  " + result.getName());
-                        dataCollector.setRegatta(result);
-                    }
-
-                });
-    }
-
     private final class DataCollector {
         private boolean eventIsSet = false;
         private boolean competitorIsSet = false;
 
         private SimpleCompetitorWithIdDTO competitor;
         private EventViewDTO event;
-        private SimpleRegattaDTO regatta;
 
         private final QRCodeView view;
 
@@ -139,17 +118,12 @@ public class QRCodePresenter {
             proceedIfFinished();
         }
 
-        public void setRegatta(SimpleRegattaDTO regatta) {
-            this.regatta = regatta;
-            this.proceedIfFinished();
-        }
-
         private void proceedIfFinished() {
             if (invitationMode == InvitationMode.PUBLIC_INVITE) {
                 String branchIoUrl = BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?"
                         + QRCodePlace.PARAM_REGATTA_NAME + "=" + regattaName + "&" + QRCodePlace.PARAM_REGATTA_SECRET
                         + "=" + regattaRegistrationLinkSecret + "&" + QRCodePlace.PARAM_SERVER + "=" + serverForPublic;
-                view.setData(null, null, "", regatta, branchIoUrl, invitationMode);
+                view.setData(null, null, "", regattaName, branchIoUrl, invitationMode);
             } else {
                 if (competitorIsSet && eventIsSet) {
                     if (checkInUrl != null) {
