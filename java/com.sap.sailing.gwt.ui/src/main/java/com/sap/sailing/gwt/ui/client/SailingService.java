@@ -795,13 +795,16 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds) throws NotRevokableException, DoesNotHaveRegattaLogException;
 
-    void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint) throws TransformationException, DoesNotHaveRegattaLogException, UnableToCloseDeviceMappingException;
+    void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint)
+            throws TransformationException, DoesNotHaveRegattaLogException, UnableToCloseDeviceMappingException,
+            NotFoundException;
 
     void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto)
             throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException;
     
     void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto)
-            throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException;
+            throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException,
+            NotFoundException;
 
     boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
 

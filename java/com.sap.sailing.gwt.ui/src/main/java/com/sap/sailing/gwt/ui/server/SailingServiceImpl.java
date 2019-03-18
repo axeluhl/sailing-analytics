@@ -5066,6 +5066,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public RemoteSailingServerReferenceDTO addRemoteSailingServerReference(RemoteSailingServerReferenceDTO sailingServer) throws MalformedURLException {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
         final String expandedURL;
         if (sailingServer.getUrl().contains("//")) {
             expandedURL = sailingServer.getUrl();
@@ -5917,6 +5918,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors) {
         List<String> competitorIdsAsStrings = new ArrayList<String>();
         for (CompetitorDTO competitor : competitors) {
+            getSecurityService().checkCurrentUserUpdatePermission(competitor);
             competitorIdsAsStrings.add(competitor.getIdAsString());
         }
         getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
@@ -6689,6 +6691,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     @Override
     public void addMarkToRegattaLog(String leaderboardName, MarkDTO markDTO) throws DoesNotHaveRegattaLogException {
+        getSecurityService().checkCurrentUserUpdatePermission(getService().getLeaderboardByName(leaderboardName));
         Mark mark = convertToMark(markDTO, false);
 
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
@@ -6715,6 +6718,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO, int priority) throws NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         String courseName = "Course of " + raceColumnName;
         if (!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
@@ -6814,6 +6818,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void copyCourseToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
             Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples, int priority) throws NotFoundException {
+        getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(fromTriple.getA()));
+        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+            getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(toTriple.getA()));
+        }
         RaceLog fromRaceLog = getRaceLog(fromTriple);
         Set<RaceLog> toRaceLogs = new HashSet<>();
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
@@ -6825,6 +6833,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void copyCompetitorsToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
             Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) throws NotFoundException {
+        getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(fromTriple.getA()));
+        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+            getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(toTriple.getA()));
+        }
         final RaceColumn raceColumn = getRaceColumn(fromTriple.getA(), fromTriple.getB());
         final Set<Pair<RaceColumn, Fleet>> toRaces = new HashSet<>();
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
@@ -6965,7 +6977,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     @Override
     public void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto)
-            throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException {
+            throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException,
+            NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         DeviceMapping<?> mapping = convertToDeviceMapping(dto);
         TimePoint now = MillisecondsTimePoint.now();
@@ -7474,7 +7488,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException, DoesNotHaveRegattaLogException, UnableToCloseDeviceMappingException {
+    public void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDTO, Date closingTimePoint)
+            throws TransformationException, DoesNotHaveRegattaLogException, UnableToCloseDeviceMappingException,
+            NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         closeOpenEndedDeviceMapping(regattaLog, mappingDTO, closingTimePoint);
     }
@@ -7835,6 +7852,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             String markIdAsString, GPSFixDTO fix) {
         boolean result = false;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
@@ -8278,6 +8296,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
         final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
+        getSecurityService().checkCurrentUserUpdatePermission(regattaLeaderboard);
+        getSecurityService().checkCurrentUserUpdatePermission(regatta);
+
         final boolean result;
         if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null
                 || trackedRace.getStartOfTracking() == null || !isSmartphoneTrackingEnabled(trackedRace)) {
@@ -8613,6 +8635,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race) {
+        getSecurityService().checkCurrentUserReadPermission(race);
         boolean result = false;
         DynamicTrackedRace trace = getService().getTrackedRace(race);
         if (trace != null) {
