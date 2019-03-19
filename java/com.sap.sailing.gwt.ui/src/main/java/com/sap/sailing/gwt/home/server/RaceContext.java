@@ -180,7 +180,7 @@ public class RaceContext {
     private TimePoint getWindToTimePoint() {
         final TimePoint finishTime = getFinishTime();
         TimePoint toTimePoint = finishTime == null ? getLiveTimePoint() : finishTime;
-        if(trackedRace != null) {
+        if (trackedRace != null) {
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             if (newestEvent != null && newestEvent.before(toTimePoint)) {
                 toTimePoint = newestEvent;
@@ -346,15 +346,14 @@ public class RaceContext {
             raceListRaceDTO.setWindSourcesCount(getWindSourceCount());
             raceListRaceDTO.setVideoCount(getVideoCount());
             raceListRaceDTO.setAudioCount(getAudioCount());
-            raceListRaceDTO.setWind(RaceWindCalculator.getWindStatisticsOrNull(trackedRace,getWindToTimePoint(),getStartTime(),raceLog));
+            raceListRaceDTO.setWind(RaceWindCalculator.getWindStatisticsOrNull(trackedRace, getWindToTimePoint(), getStartTime(), raceLog));
             return raceListRaceDTO;
         }
         return null;
     }
     
     public SimpleRaceMetadataDTO getRaceCompetitionFormat() {
-        SimpleRaceMetadataDTO raceDTO = new SimpleRaceMetadataDTO(getLeaderboardName(), 
-                getRaceIdentifierOrNull(), getRaceName());
+        SimpleRaceMetadataDTO raceDTO = new SimpleRaceMetadataDTO(getLeaderboardName(), getRaceIdentifierOrNull(), getRaceName());
         fillSimpleRaceMetadata(raceDTO);
         return raceDTO;
     }
