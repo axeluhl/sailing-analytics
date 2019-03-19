@@ -16,6 +16,7 @@ public interface UserGroup extends SecurityUserGroup<RoleDefinition>, WithQualif
 
     boolean contains(User user);
 
+    @Override
     Map<RoleDefinition, Boolean> getRoleDefinitionMap();
 
     void put(RoleDefinition roleDefinition, boolean forAll);
