@@ -8168,6 +8168,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public PairingListDTO getPairingListFromRaceLogs(final String leaderboardName) throws NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         List<List<List<Pair<CompetitorDTO, BoatDTO>>>> result = new ArrayList<>();
         List<String> raceColumnNames = new ArrayList<>();
         PairingListLeaderboardAdapter adapter = new PairingListLeaderboardAdapter();
