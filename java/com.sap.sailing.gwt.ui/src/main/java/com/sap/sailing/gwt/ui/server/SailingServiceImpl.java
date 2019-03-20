@@ -2644,7 +2644,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     @Override
     public List<String> getLeaderboardNames() {
-        return new ArrayList<String>(getService().getLeaderboards().keySet());
+        return getLeaderboardNamesFilteredForCurrentUser();
+    }
+
+    private ArrayList<String> getLeaderboardNamesFilteredForCurrentUser() {
+        final ArrayList<String> result = new ArrayList<>();
+        getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.LEADERBOARD,
+                DefaultActions.READ, getService().getLeaderboards().values(), l -> result.add(l.getName()));
+        return result;
     }
 
     @Override
