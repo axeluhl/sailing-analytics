@@ -7288,6 +7288,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName());
         DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
+        getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
         trackedRace.setStartTimeReceived(
                 newStartTimeReceived == null ? null : new MillisecondsTimePoint(newStartTimeReceived));
         return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
