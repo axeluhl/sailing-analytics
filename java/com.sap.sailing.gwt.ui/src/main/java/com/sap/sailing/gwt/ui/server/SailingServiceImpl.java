@@ -7208,8 +7208,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, final boolean trackWind, final boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
+        getSecurityService().checkCurrentUserUpdatePermission(raceColumn.getTrackedRace(fleet));
         getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination,
                 new PermissionAwareRaceTrackingHandler(getSecurityService()));
     }
