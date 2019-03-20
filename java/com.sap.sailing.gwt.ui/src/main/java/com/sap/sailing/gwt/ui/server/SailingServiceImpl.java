@@ -5504,6 +5504,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopReplicatingFromMaster() {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
         try {
             getReplicationService().stopToReplicateFromMaster();
         } catch (IOException e) {
