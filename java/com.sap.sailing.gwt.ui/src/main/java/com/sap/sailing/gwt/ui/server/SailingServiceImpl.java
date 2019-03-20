@@ -3929,6 +3929,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             Map<CompetitorDTO, TimeRange> competitorTimeRanges) throws NoWindException {
         final Map<CompetitorDTO, List<ManeuverDTO>> result = new HashMap<>();
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
             final Map<CompetitorDTO, Future<List<ManeuverDTO>>> futures = new HashMap<>();
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
