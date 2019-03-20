@@ -6333,6 +6333,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(dto.leaderboardName));
         RaceLog raceLog = getRaceLog(dto.leaderboardName, dto.raceColumnName, dto.fleetName);
         // the tracking start/end time events are not revoked; updates with null as TimePoint may be added instead
         final LogEventAuthorImpl author = new LogEventAuthorImpl(dto.authorName, dto.authorPriority);
