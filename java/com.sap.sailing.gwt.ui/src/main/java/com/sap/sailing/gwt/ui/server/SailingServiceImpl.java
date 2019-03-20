@@ -8242,6 +8242,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final Set<DetailType> allowed = new HashSet<>();
         allowed.addAll(DetailType.getAllNonRestrictedDetailTypes());
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         if (leaderboard != null) {
             boolean hasBravoTrack = false;
             boolean hasExtendedBravoFixes = false;
