@@ -766,7 +766,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO);
 
     void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName,
-            Integer indexOfWaypoint, Date dateOfMarkPassing, CompetitorDTO competitorDTO);
+            Integer indexOfWaypoint, Date dateOfMarkPassing, CompetitorDTO competitorDTO) throws NotFoundException;
 
     void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<? extends CompetitorDTO> competitors)
             throws DoesNotHaveRegattaLogException, NotFoundException;
