@@ -5194,6 +5194,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, Duration clientTimeZoneOffset, final List<String> visibleRegattas)
             throws NoWindException, InterruptedException, ExecutionException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         return getRaceStateEntriesForLeaderboard(leaderboard, showOnlyCurrentlyRunningRaces, showOnlyRacesOfSameDay, clientTimeZoneOffset, visibleRegattas);
     }
 
