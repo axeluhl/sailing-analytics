@@ -746,12 +746,14 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     /**
      * Obtains fixed mark passings and mark passing suppressions from the race log identified by
-     * <code>leaderboardName</code>, <code>raceColumnDTO</code> and <code>fleet</code>. The result contains
-     * pairs of zero-based waypoint numbers and times where <code>null</code> represents a suppressed mark
-     * passing and a valid {@link Date} objects represents a fixed mark passing.
+     * <code>leaderboardName</code>, <code>raceColumnDTO</code> and <code>fleet</code>. The result contains pairs of
+     * zero-based waypoint numbers and times where <code>null</code> represents a suppressed mark passing and a valid
+     * {@link Date} objects represents a fixed mark passing.
+     * 
+     * @throws NotFoundException
      */
     Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName, String fleetName,
-            CompetitorDTO competitor);
+            CompetitorDTO competitor) throws NotFoundException;
 
     void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO);

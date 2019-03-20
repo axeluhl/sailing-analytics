@@ -7216,8 +7216,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName, String fleetName, CompetitorDTO competitor) {
+    public Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName,
+            String fleetName, CompetitorDTO competitor) throws NotFoundException {
         Map<Integer, Date> result = new HashMap<>();
+        getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(leaderboardName));
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         for (Triple<Competitor, Integer, TimePoint> fixedEvent : new MarkPassingDataFinder(raceLog).analyze()) {
             if (fixedEvent.getA().getName().equals(competitor.getName())) {
