@@ -7989,6 +7989,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName) {
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         if (leaderboard == null || !(leaderboard instanceof RegattaLeaderboardWithEliminations)) {
             throw new IllegalArgumentException(leaderboardName+" does not match a regatta leaderboard with eliminations");
         }
