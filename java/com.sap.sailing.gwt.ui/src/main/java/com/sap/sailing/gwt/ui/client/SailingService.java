@@ -539,7 +539,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto);
     
-    Util.Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
+    Util.Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName,
+            String raceColumnName, String fleetName) throws NotFoundException;
     
     Util.Triple<Date, Date, Integer> getFinishingAndFinishTime(String leaderboardName, String raceColumnName,
             String fleetName) throws NotFoundException;
