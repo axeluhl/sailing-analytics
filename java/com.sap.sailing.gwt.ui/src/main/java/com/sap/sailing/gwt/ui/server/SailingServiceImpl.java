@@ -7313,6 +7313,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO, boolean waitForCalculations) {
         Map<Integer, Date> result = new HashMap<>();
         final TrackedRace trackedRace = getExistingTrackedRace(race);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
             Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(), competitorDTO.getIdAsString());
             Set<MarkPassing> competitorMarkPassings;
