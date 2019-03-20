@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -36,7 +37,7 @@ public class PingMarkViaRegattaLogTest {
     }
     
     @Test
-    public void testPinging() throws DoesNotHaveRegattaLogException {
+    public void testPinging() throws DoesNotHaveRegattaLogException, NotFoundException {
         service.getMongoObjectFactory().getDatabase().drop();
         Series series = new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet),
                 Collections.singletonList(columnName), service);
