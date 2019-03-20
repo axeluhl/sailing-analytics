@@ -541,7 +541,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     Util.Triple<Date, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
     
-    Util.Triple<Date, Date, Integer> getFinishingAndFinishTime(String leaderboardName, String raceColumnName, String fleetName);
+    Util.Triple<Date, Date, Integer> getFinishingAndFinishTime(String leaderboardName, String raceColumnName,
+            String fleetName) throws NotFoundException;
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 
