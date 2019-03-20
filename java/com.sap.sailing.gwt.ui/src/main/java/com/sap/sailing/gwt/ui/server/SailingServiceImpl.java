@@ -1040,6 +1040,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         RegattaDTO result = null;
         if (regattaName != null && !regattaName.isEmpty()) {
             Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             if (regatta != null) {
                 result = convertToRegattaDTO(regatta);
             }
