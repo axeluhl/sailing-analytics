@@ -2759,16 +2759,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         for (Leaderboard leaderboard : leaderboards.values()) {
-            if (leaderboard instanceof RegattaLeaderboard && ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier().equals(regattaIdentifier)) {
-                Iterable<RaceColumn> races = leaderboard.getRaceColumns();
-                for (RaceColumn raceInLeaderboard : races) {
-                    for (Fleet fleet : raceInLeaderboard.getFleets()) {
-                        TrackedRace trackedRace = raceInLeaderboard.getTrackedRace(fleet);
-                        if (trackedRace != null) {
-                            RaceDefinition trackedRaceDef = trackedRace.getRace();
-                            if (trackedRaceDef.getName().equals(raceName)) {
-                                results.add(createStrippedLeaderboardDTO(leaderboard, false, false));
-                                break;
+            if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                if (leaderboard instanceof RegattaLeaderboard && ((RegattaLeaderboard) leaderboard).getRegatta()
+                        .getRegattaIdentifier().equals(regattaIdentifier)) {
+                    Iterable<RaceColumn> races = leaderboard.getRaceColumns();
+                    for (RaceColumn raceInLeaderboard : races) {
+                        for (Fleet fleet : raceInLeaderboard.getFleets()) {
+                            TrackedRace trackedRace = raceInLeaderboard.getTrackedRace(fleet);
+                            if (getSecurityService().hasCurrentUserReadPermission(trackedRace)) {
+                                if (trackedRace != null) {
+                                    RaceDefinition trackedRaceDef = trackedRace.getRace();
+                                    if (trackedRaceDef.getName().equals(raceName)) {
+                                        results.add(createStrippedLeaderboardDTO(leaderboard, false, false));
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
