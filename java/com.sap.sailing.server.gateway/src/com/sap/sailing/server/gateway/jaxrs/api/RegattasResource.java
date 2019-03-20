@@ -36,10 +36,13 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.datamining.SailingPredefinedQueries;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -64,13 +67,14 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.RaceWindCalculator;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -1025,7 +1029,8 @@ public class RegattasResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/windsummary")
-    public Response getWindSummary(@PathParam("regattaname") String regattaName) {
+    public Response getWindSummary(@PathParam("regattaname") String regattaName,
+            @QueryParam("racecolumn") String raceColumnName, @QueryParam("fleet") String fleetName) {
         final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1034,15 +1039,51 @@ public class RegattasResource extends AbstractSailingServerResource {
                 .build();
         } else {
             final JSONArray result = new JSONArray();
-            final DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
-            if (trackedRegatta != null) {
-                for (final TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-                    
+            final Iterable<? extends RaceColumn> raceColumns;
+            if (raceColumnName != null) {
+                final RaceColumn raceColumn = regatta.getRaceColumnByName(raceColumnName);
+                if (raceColumn == null) {
+                    return Response.status(Status.NOT_FOUND)
+                            .entity("Could not find a race column with name '" + StringEscapeUtils.escapeHtml(raceColumnName) + "'.").type(MediaType.TEXT_PLAIN)
+                            .build();
+                }
+                raceColumns = Collections.singleton(raceColumn);
+            } else {
+                raceColumns = regatta.getRaceColumns();
+            }
+            for (final RaceColumn raceColumn : raceColumns) {
+                final Iterable<? extends Fleet> fleets;
+                if (fleetName != null) {
+                    final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                    if (fleet == null) {
+                        return Response.status(Status.NOT_FOUND)
+                                .entity("Could not find a fleet with name '" + StringEscapeUtils.escapeHtml(fleetName) +
+                                        "' in race column '"+raceColumn.getName()+"'.").type(MediaType.TEXT_PLAIN).build();
+                    }
+                    fleets = Collections.singleton(fleet);
+                } else {
+                    fleets = raceColumn.getFleets();
+                }
+                for (final Fleet fleet : fleets) {
+                    final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                    final WindSummary windSummary = new RaceWindCalculator().getWindSummary(trackedRace, raceLog);
+                    result.add(toJson(raceColumn, fleet, windSummary));
                 }
             }
             response = Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
+    }
+
+    private JSONObject toJson(RaceColumn raceColumn, Fleet fleet, WindSummary windSummary) {
+        final JSONObject result = new JSONObject();
+        result.put("racecolumn", raceColumn.getName());
+        result.put("fleet", fleet.getName());
+        result.put("trueLowerboundWindInKnots", windSummary == null ? null : windSummary.getTrueLowerboundWind().getKnots());
+        result.put("trueUppwerboundWindInKnots", windSummary == null ? null : windSummary.getTrueUpperboundWind().getKnots());
+        result.put("trueWindDirectionInDegrees", windSummary == null ? null : windSummary.getTrueWindDirection().getDegrees());
+        return result;
     }
 
     @GET
