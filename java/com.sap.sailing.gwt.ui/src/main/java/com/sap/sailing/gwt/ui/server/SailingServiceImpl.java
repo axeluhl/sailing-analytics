@@ -6886,7 +6886,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     @Override
     public void pingMark(String leaderboardName,
-            MarkDTO markDTO, TimePoint timePoint, Position positionDTO) throws DoesNotHaveRegattaLogException {
+            MarkDTO markDTO, TimePoint timePoint, Position positionDTO)
+            throws DoesNotHaveRegattaLogException, NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         final RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         final Mark mark = convertToMark(markDTO, true);
         final TimePoint time = timePoint == null ? MillisecondsTimePoint.now() : timePoint;

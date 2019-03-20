@@ -715,8 +715,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      *            the time point for the fix; if {@code null}, the current time is used
      * 
      * @throws DoesNotHaveRegattaLogException
+     * @throws NotFoundException
      */
-    void pingMark(String leaderboardName, MarkDTO mark, TimePoint timePoint, Position position) throws DoesNotHaveRegattaLogException;
+    void pingMark(String leaderboardName, MarkDTO mark, TimePoint timePoint, Position position)
+            throws DoesNotHaveRegattaLogException, NotFoundException;
     
     List<String> getDeserializableDeviceIdentifierTypes();
     
