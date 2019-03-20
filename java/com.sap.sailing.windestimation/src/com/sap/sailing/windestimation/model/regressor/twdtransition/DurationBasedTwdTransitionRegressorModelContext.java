@@ -36,8 +36,8 @@ public final class DurationBasedTwdTransitionRegressorModelContext
     /**
      * Input value intervals with corresponding model configurations for the duration dimension which is treated in
      * seconds. For each enum element, a separate model will be trained with polynomial degree and bias as specified by
-     * the enum element. Feel free to add/delete/modify enum elements as it is desired. The model training and discovery
-     * will still work. However, make sure that the specified intervals do not include holes between its transitions.
+     * the enum element. Feel free to add/delete/modify enum elements as desired. The model training and discovery will
+     * still work. However, make sure that the specified intervals do not include holes between its transitions.
      * 
      * @author Vladislav Chumak (D069712)
      *
