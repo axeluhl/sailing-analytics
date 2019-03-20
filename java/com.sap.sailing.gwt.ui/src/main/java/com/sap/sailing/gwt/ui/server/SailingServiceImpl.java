@@ -2396,6 +2396,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Map<Serializable, ControlPointDTO> controlPointCache = new HashMap<>();
         TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         List<MarkDTO> allMarks = new ArrayList<>();
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
