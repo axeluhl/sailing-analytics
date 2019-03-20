@@ -5103,6 +5103,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void removeSailingServers(Set<String> namesOfSailingServersToRemove) throws Exception {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
         for (String serverName : namesOfSailingServersToRemove) {
             getService().apply(new RemoveRemoteSailingServerReference(serverName));
         }
