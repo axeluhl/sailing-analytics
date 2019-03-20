@@ -6027,9 +6027,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public BoatDTO getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString) {
+    public BoatDTO getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName,
+            String competitorIdAsString) throws NotFoundException {
         BoatDTO result = null;
+        getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(leaderboardName));
         Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdAsString);
+        getSecurityService().checkCurrentUserReadPermission(existingCompetitor);
         Map<Competitor, Boat> competitorToBoatMappingsForRace = getService().getCompetitorToBoatMappingsForRace(leaderboardName, raceColumnName, fleetName);
         if (existingCompetitor != null) {
             Boat boatOfCompetitor = competitorToBoatMappingsForRace.get(existingCompetitor);
