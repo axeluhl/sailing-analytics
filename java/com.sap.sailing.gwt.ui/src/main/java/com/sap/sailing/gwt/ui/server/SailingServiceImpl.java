@@ -7676,6 +7676,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void enableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws IllegalArgumentException, NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         if (!areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
             RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
             raceColumn.enableCompetitorRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
