@@ -7521,7 +7521,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }   
 
-    public boolean doesRegattaLogContainCompetitors(String leaderboardName) throws DoesNotHaveRegattaLogException {
+    public boolean doesRegattaLogContainCompetitors(String leaderboardName)
+            throws DoesNotHaveRegattaLogException, NotFoundException {
+        getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(leaderboardName));
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         List<RegattaLogEvent> comeptitorRegistrationEvents = new AllEventsOfTypeFinder<>(regattaLog,
                 /* only unrevoked */ true, RegattaLogRegisterCompetitorEvent.class).analyze();
