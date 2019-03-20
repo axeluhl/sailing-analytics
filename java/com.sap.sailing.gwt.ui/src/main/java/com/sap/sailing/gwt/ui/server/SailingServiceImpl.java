@@ -6642,12 +6642,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Map<? extends CompetitorDTO, BoatDTO> competitorAndBoatDTOs)
             throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
+        getSecurityService().checkCurrentUserUpdatePermission(raceColumn.getTrackedRace(fleet));
+
         Map<Competitor, Boat> competitorToBoatMappingsToRegister = new HashMap<>();
         for (Entry<? extends CompetitorDTO, BoatDTO> competitorAndBoatEntry : competitorAndBoatDTOs.entrySet()) {
             competitorToBoatMappingsToRegister.put(getCompetitor(competitorAndBoatEntry.getKey()), getBoat(competitorAndBoatEntry.getValue()));
         }
-        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
-        Fleet fleet = getFleetByName(raceColumn, fleetName);
+
         final Iterable<Competitor> competitorRegistrationsToRemove = filterCompetitorDuplicates(competitorToBoatMappingsToRegister, raceColumn.getCompetitorsRegisteredInRacelog(fleet));
         raceColumn.deregisterCompetitors(competitorRegistrationsToRemove, fleet);
         // we assume that the competitors id of type Competitor here, so we need to find the corresponding boat
@@ -6659,12 +6663,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorWithBoatDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
+
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
+        getSecurityService().checkCurrentUserUpdatePermission(raceColumn.getTrackedRace(fleet));
+
         Map<CompetitorWithBoat, Boat> competitorsToRegister = new HashMap<>();
         for (CompetitorWithBoatDTO dto : competitorDTOs) {
             competitorsToRegister.put(getCompetitor(dto), getBoat(dto.getBoat()));
         }
-        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
-        Fleet fleet = getFleetByName(raceColumn, fleetName);
+
         Map<CompetitorWithBoat, Boat> competitorsRegisteredInRaceLog = new HashMap<>();
         for (final Entry<Competitor, Boat> e : raceColumn.getCompetitorsRegisteredInRacelog(fleet).entrySet()) {
             competitorsRegisteredInRaceLog.put((CompetitorWithBoat) e.getKey(), e.getValue());
