@@ -143,7 +143,7 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
         if [[ $SERVER_PORT == "" ]] || [[ $SERVER_ACTIVE == "" ]]; then
             echo "Something went wrong with startup. Please check the logs..."
             if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
-                echo "Startup of java server $SERVER_NAME on $INSTANCE_ID failed - check the logs ($SERVER_ACTIVE)\n\n$NETSTAT\n$PROCESS_INFO" | mail -r simon.marcel.pamies@sap.com -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
+                echo "Startup of java server $SERVER_NAME on $INSTANCE_ID failed - check the logs ($SERVER_ACTIVE)\n\n$NETSTAT\n$PROCESS_INFO" | mail -s "Server $INSTANCE_ID startup failed!" $SERVER_STARTUP_NOTIFY
             fi
             exit
         fi
