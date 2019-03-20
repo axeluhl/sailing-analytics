@@ -8124,6 +8124,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final Iterable<String> selectedRaceColumnNames, PairingListTemplateDTO templateDTO) 
             throws NotFoundException, PairingListCreationException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         List<RaceColumn> selectedRaces = new ArrayList<RaceColumn>();
         for (String raceColumnName : selectedRaceColumnNames) {
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
