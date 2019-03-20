@@ -7495,6 +7495,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void setFileStorageServiceProperties(String serviceName, Map<String, String> properties) {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
         for (Entry<String, String> p : properties.entrySet()) {
             try {
                 getService().getFileStorageManagementService()
