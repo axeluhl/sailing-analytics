@@ -5150,12 +5150,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (leaderboard == null) {
             throw new IllegalArgumentException("Couldn't find leaderboard named "+leaderboardName);
         }
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         List<String> result = new ArrayList<String>();
         for (Map.Entry<String, Leaderboard> leaderboardEntry : getService().getLeaderboards().entrySet()) {
             if (leaderboardEntry.getValue() instanceof MetaLeaderboard) {
                 MetaLeaderboard metaLeaderboard = (MetaLeaderboard) leaderboardEntry.getValue();
                 if (Util.contains(metaLeaderboard.getLeaderboards(), leaderboard)) {
-                    result.add(leaderboardEntry.getKey());
+                    if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                        result.add(leaderboardEntry.getKey());
+                    }
                 }
             }
         }
