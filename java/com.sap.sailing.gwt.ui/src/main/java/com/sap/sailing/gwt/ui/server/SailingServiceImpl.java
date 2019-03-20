@@ -7774,6 +7774,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public Iterable<MarkDTO> getMarksInTrackedRace(String leaderboardName, String raceColumnName, String fleetName) {
         final List<MarkDTO> marks = new ArrayList<>();
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
