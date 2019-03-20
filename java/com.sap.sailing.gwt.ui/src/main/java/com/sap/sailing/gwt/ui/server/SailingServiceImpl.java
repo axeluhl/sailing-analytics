@@ -6695,6 +6695,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<? extends CompetitorDTO> competitorDTOs)
             throws DoesNotHaveRegattaLogException, NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         if (!(leaderboard instanceof HasRegattaLike)){
             throw new DoesNotHaveRegattaLogException();
         }
