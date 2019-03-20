@@ -5146,6 +5146,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
