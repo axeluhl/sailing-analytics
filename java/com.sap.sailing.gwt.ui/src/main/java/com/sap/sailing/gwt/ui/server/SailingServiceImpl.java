@@ -3997,6 +3997,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier) {
         Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
+        getSecurityService().checkCurrentUserReadPermission(regatta);
         RaceDefinition race = getRaceByName(regatta, raceIdentifier.getRaceName());
         return race;
     }
