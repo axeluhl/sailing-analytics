@@ -7988,6 +7988,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void removeMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO fix) throws NotRevokableException {
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
