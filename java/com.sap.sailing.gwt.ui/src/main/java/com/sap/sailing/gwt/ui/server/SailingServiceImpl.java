@@ -5366,14 +5366,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Calendar dayToCheck = Calendar.getInstance();
         dayToCheck.setTime(new Date());
         Event event = getService().getEvent(eventId);
+        getSecurityService().checkCurrentUserReadPermission(event);
         if (event != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 if (visibleCourseAreaIds.contains(courseArea.getId())) {
                     for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
                         final CourseArea leaderboardDefaultCourseArea = leaderboard.getDefaultCourseArea();
-                        if (leaderboardDefaultCourseArea != null && leaderboardDefaultCourseArea.equals(courseArea)) {
-                            result.addAll(getRaceStateEntriesForLeaderboard(leaderboard.getName(),
-                                    showOnlyCurrentlyRunningRaces, showOnlyRacesOfSameDay, clientTimeZoneOffset, visibleRegattas));
+                        if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                            if (leaderboardDefaultCourseArea != null
+                                    && leaderboardDefaultCourseArea.equals(courseArea)) {
+                                result.addAll(getRaceStateEntriesForLeaderboard(leaderboard.getName(),
+                                        showOnlyCurrentlyRunningRaces, showOnlyRacesOfSameDay, clientTimeZoneOffset,
+                                        visibleRegattas));
+                            }
                         }
                     }
                 }
