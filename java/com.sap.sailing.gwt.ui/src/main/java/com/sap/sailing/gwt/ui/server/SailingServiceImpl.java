@@ -7710,13 +7710,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void setBoatRegistrationsInRegattaLog(String leaderboardName, Set<BoatDTO> boatDTOs)
             throws DoesNotHaveRegattaLogException, NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         if (!(leaderboard instanceof HasRegattaLike)){
             throw new DoesNotHaveRegattaLogException();
         }
         
         Set<Boat> boatsToRegister = new HashSet<Boat>();
         for (BoatDTO dto : boatDTOs) {
-            boatsToRegister.add(getBoat(dto));
+            final Boat boat = getBoat(dto);
+            getSecurityService().checkCurrentUserReadPermission(boat);
+            boatsToRegister.add(boat);
         }
         
         HasRegattaLike hasRegattaLike = (HasRegattaLike) leaderboard;
