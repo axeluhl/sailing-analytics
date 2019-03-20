@@ -1774,6 +1774,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier) {
         final boolean result;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         final PolarDataService polarData = getService().getPolarDataService();
         if (trackedRace == null || polarData == null) {
             result = false;
