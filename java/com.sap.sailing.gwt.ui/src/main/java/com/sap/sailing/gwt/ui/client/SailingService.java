@@ -536,7 +536,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     boolean removeDeviceConfiguration(UUID deviceConfigurationId);
 
-    boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto);
+    boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto) throws NotFoundException;
     
     Pair<Boolean, Boolean> setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO dto) throws NotFoundException;
     
