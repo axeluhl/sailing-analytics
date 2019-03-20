@@ -8098,10 +8098,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     @Override
-    public void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> newEliminatedCompetitorDTOs) {
+    public void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> newEliminatedCompetitorDTOs)
+            throws NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         Set<Competitor> newEliminatedCompetitors = new HashSet<>();
         for (final CompetitorDTO cDTO : newEliminatedCompetitorDTOs) {
-            newEliminatedCompetitors.add(getCompetitor(cDTO));
+            final Competitor competitor = getCompetitor(cDTO);
+            getSecurityService().checkCurrentUserReadPermission(competitor);
+            newEliminatedCompetitors.add(competitor);
         }
         getService().apply(new UpdateEliminatedCompetitorsInLeaderboard(leaderboardName, newEliminatedCompetitors));
     }

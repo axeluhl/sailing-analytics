@@ -906,7 +906,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName);
 
-    void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors);
+    void setEliminatedCompetitors(String leaderboardName, Set<CompetitorDTO> eliminatedCompetitors)
+            throws NotFoundException;
     
     /**
      * Used to determine for a Chart the available Detailtypes. This is for example used to only show the RideHeight as
