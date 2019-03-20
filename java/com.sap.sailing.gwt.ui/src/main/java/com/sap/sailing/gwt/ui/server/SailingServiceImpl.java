@@ -4623,41 +4623,51 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId) {
         List<RaceGroupDTO> raceGroups = new ArrayList<RaceGroupDTO>();
         Event event = getService().getEvent(eventId);
+        getSecurityService().checkCurrentUserReadPermission(event);
         Map<Leaderboard, LeaderboardGroup> leaderboardWithLeaderboardGroups = new HashMap<Leaderboard, LeaderboardGroup>();
         for(LeaderboardGroup leaderboardGroup: event.getLeaderboardGroups()) {
             for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
-                leaderboardWithLeaderboardGroups.put(leaderboard, leaderboardGroup);
+                if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                    leaderboardWithLeaderboardGroups.put(leaderboard, leaderboardGroup);
+                }
             }
         }
         if (event != null) {
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
-                    if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea() == courseArea) {
-                        RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
-                        raceGroup.courseAreaIdAsString = courseArea.getId().toString();
-                        raceGroup.displayName = getRegattaNameFromLeaderboard(leaderboard);
-                        if(leaderboardWithLeaderboardGroups.containsKey(leaderboard)) {
-                            raceGroup.leaderboardGroupName = leaderboardWithLeaderboardGroups.get(leaderboard).getName(); 
-                        }
-                        if (leaderboard instanceof RegattaLeaderboard) {
-                            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
-                            for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
-                                RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(series.getName());
-                                raceGroup.getSeries().add(seriesDTO);
-                                for (Fleet fleet : series.getFleets()) {
-                                    FleetDTO fleetDTO = new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor());
-                                    seriesDTO.getFleets().add(fleetDTO);
-                                }
-                                seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(series.getRaceColumns()));
+                    if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                        if (leaderboard.getDefaultCourseArea() != null
+                                && leaderboard.getDefaultCourseArea() == courseArea) {
+                            RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
+                            raceGroup.courseAreaIdAsString = courseArea.getId().toString();
+                            raceGroup.displayName = getRegattaNameFromLeaderboard(leaderboard);
+                            if (leaderboardWithLeaderboardGroups.containsKey(leaderboard)) {
+                                raceGroup.leaderboardGroupName = leaderboardWithLeaderboardGroups.get(leaderboard)
+                                        .getName();
                             }
-                        } else {
-                            RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(LeaderboardNameConstants.DEFAULT_SERIES_NAME);
-                            raceGroup.getSeries().add(seriesDTO);
-                            FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null);
-                            seriesDTO.getFleets().add(fleetDTO);
-                            seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
+                            if (leaderboard instanceof RegattaLeaderboard) {
+                                RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                                for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
+                                    RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(series.getName());
+                                    raceGroup.getSeries().add(seriesDTO);
+                                    for (Fleet fleet : series.getFleets()) {
+                                        FleetDTO fleetDTO = new FleetDTO(fleet.getName(), fleet.getOrdering(),
+                                                fleet.getColor());
+                                        seriesDTO.getFleets().add(fleetDTO);
+                                    }
+                                    seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(series.getRaceColumns()));
+                                }
+                            } else {
+                                RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(
+                                        LeaderboardNameConstants.DEFAULT_SERIES_NAME);
+                                raceGroup.getSeries().add(seriesDTO);
+                                FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null);
+                                seriesDTO.getFleets().add(fleetDTO);
+                                seriesDTO.getRaceColumns()
+                                        .addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
+                            }
+                            raceGroups.add(raceGroup);
                         }
-                        raceGroups.add(raceGroup);
                     }
                 }
             }
