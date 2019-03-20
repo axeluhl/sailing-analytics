@@ -705,4 +705,8 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
         return null;
     }
 
+    @Override
+    public WindSummary getWindSummary() {
+        return null;
+    }
 }
