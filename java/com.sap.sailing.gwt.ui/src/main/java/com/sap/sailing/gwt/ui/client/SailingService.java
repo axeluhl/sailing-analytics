@@ -850,7 +850,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void addMarkToRegattaLog(String leaderboardName, MarkDTO mark) throws DoesNotHaveRegattaLogException;
 
-    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO) throws DoesNotHaveRegattaLogException;
+    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO)
+            throws DoesNotHaveRegattaLogException, NotFoundException;
 
     Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException, NotFoundException;
 

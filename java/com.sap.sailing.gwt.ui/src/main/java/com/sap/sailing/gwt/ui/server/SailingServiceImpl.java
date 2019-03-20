@@ -6782,7 +6782,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     @Override
-    public void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO) throws DoesNotHaveRegattaLogException {
+    public void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO)
+            throws DoesNotHaveRegattaLogException, NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         final List<RegattaLogEvent> regattaLogDefineMarkEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogDefineMarkEvent.class).analyze();
         RegattaLogDefineMarkEvent eventToRevoke = null;
