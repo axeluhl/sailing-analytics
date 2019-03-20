@@ -6073,9 +6073,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public boolean unlinkBoatFromCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString) {
+    public boolean unlinkBoatFromCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName,
+            String competitorIdAsString) throws NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         boolean result = false;
         Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdAsString);
+        getSecurityService().checkCurrentUserReadPermission(existingCompetitor);
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null && existingCompetitor != null) {
             List<RaceLogRegisterCompetitorEvent> linkEventsToRevoke = new ArrayList<>();

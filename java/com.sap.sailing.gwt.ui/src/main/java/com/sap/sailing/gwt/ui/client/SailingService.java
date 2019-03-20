@@ -523,7 +523,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     boolean linkBoatToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName,
             String competitorIdAsString, String boatIdAsString) throws NotFoundException;
 
-    boolean unlinkBoatFromCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString);
+    boolean unlinkBoatFromCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName,
+            String competitorIdAsString) throws NotFoundException;
 
     BoatDTO getBoatLinkedToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName,
             String competitorIdAsString) throws NotFoundException;
