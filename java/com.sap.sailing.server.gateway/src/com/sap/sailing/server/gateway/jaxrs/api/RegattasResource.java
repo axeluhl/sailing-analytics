@@ -238,7 +238,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}")
     public Response getRegatta(@PathParam("regattaname") String regattaName,
-            @PathParam("secret") String regattaSecret) {
+            @QueryParam("secret") String regattaSecret) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1525,7 +1525,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races")
-    public Response getRaces(@PathParam("regattaname") String regattaName, @PathParam("secret") String regattaSecret) {
+    public Response getRaces(@PathParam("regattaname") String regattaName, @QueryParam("secret") String regattaSecret) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
