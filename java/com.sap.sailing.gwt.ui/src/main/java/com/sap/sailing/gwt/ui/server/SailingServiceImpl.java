@@ -7494,6 +7494,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             String leaderboardName, Collection<CompetitorDTO> competitorDtos, String iOSAppUrl, String androidAppUrl,
             String localeInfoName) throws MailException {
         Event event = getService().getEvent(eventDto.id);
+        getSecurityService().checkCurrentUserReadPermission(event);
         Set<Competitor> competitors = new HashSet<>();
         for (CompetitorDTO c : competitorDtos) {
             competitors.add(getCompetitor(c));
@@ -7501,7 +7502,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         MailInvitationType type = MailInvitationType
                 .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         Regatta regatta = getService().getRegattaByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(regatta);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, regatta,
                 serverUrlWithoutTrailingSlash,
                 competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
