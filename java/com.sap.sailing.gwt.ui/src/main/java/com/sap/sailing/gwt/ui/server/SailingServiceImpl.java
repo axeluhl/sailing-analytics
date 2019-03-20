@@ -7155,7 +7155,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     @Override
     public void revokeRaceAndRegattaLogEvents(String leaderboardName,
-        List<UUID> eventIds) throws NotRevokableException, DoesNotHaveRegattaLogException {
+            List<UUID> eventIds) throws NotRevokableException, DoesNotHaveRegattaLogException, NotFoundException {
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         List<AbstractLog<?, ?>> logs = getLogHierarchy(leaderboardName);
         revokeEventsFromLogs(logs, eventIds);
     }
