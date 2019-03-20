@@ -7521,7 +7521,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }   
 
-    public boolean doesRegattaLogContainCompetitors(String leaderboardName) throws DoesNotHaveRegattaLogException {
+    public boolean doesRegattaLogContainCompetitors(String leaderboardName)
+            throws DoesNotHaveRegattaLogException, NotFoundException {
+        getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(leaderboardName));
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         List<RegattaLogEvent> comeptitorRegistrationEvents = new AllEventsOfTypeFinder<>(regattaLog,
                 /* only unrevoked */ true, RegattaLogRegisterCompetitorEvent.class).analyze();
@@ -7665,7 +7667,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void disableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException, NotFoundException {
-        if (areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
+        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
+        if (areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)) {
             RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
             raceColumn.disableCompetitorRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
         }
@@ -7921,6 +7924,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void editMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
             GPSFixDTO oldFix, Position newPosition) throws NotRevokableException {
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {

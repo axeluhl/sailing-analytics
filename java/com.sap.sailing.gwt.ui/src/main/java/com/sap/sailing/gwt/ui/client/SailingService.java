@@ -806,7 +806,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException,
             NotFoundException;
 
-    boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
+    boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException, NotFoundException;
 
     RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName);
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException;
