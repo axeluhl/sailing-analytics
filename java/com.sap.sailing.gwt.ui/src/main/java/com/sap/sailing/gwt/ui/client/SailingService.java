@@ -520,7 +520,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void allowBoatResetToDefaults(Iterable<BoatDTO> boats);
 
-    boolean linkBoatToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString, String boatIdAsString);
+    boolean linkBoatToCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName,
+            String competitorIdAsString, String boatIdAsString) throws NotFoundException;
 
     boolean unlinkBoatFromCompetitorForRace(String leaderboardName, String raceColumnName, String fleetName, String competitorIdAsString);
 
