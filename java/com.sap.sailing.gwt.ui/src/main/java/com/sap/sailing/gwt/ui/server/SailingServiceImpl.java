@@ -3862,6 +3862,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             throws NoWindException {
         final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
             final MeterDistance maxDistance = new MeterDistance(meters);
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
