@@ -1,11 +1,14 @@
 package com.sap.sse.security.ui.client.component;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -29,6 +32,8 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
     private final PasswordTextBox pwBox;
     private final PasswordTextBox pwRepeat;
     private final UserManagementServiceAsync userManagementService;
+    private boolean resolvingUsername = false;
+    private boolean usernameUnavailable = true;
     
     public static class UserData {
         private final String username;
@@ -76,19 +81,22 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
      * callers to specify distinct title and message strings.
      */
     public AbstractUserDialog(final StringMessages stringMessages, final String title, final String message,
-            final UserManagementServiceAsync userManagementService,
-            final UserDTO user,
+            final UserManagementServiceAsync userManagementService, final UserDTO user,
             final DialogCallback<UserData> callback) {
-        this(stringMessages, title, message, userManagementService, user, new DataEntryDialog.Validator<UserData>() {
+        this(stringMessages, title, message, userManagementService, user, null, callback);
+        super.setValidator(new DataEntryDialog.Validator<UserData>() {
             private final NewAccountValidator validator = new NewAccountValidator(stringMessages);
+
             @Override
             public String getErrorMessage(UserData valueToValidate) {
-                return validator.validateUsernameAndPassword(valueToValidate.getUsername(), valueToValidate.getPassword(),
-                        valueToValidate.getPasswordRepeat());
+                return resolvingUsername ? stringMessages.pleaseWaitUntilUsernameIsResolved()
+                        : (usernameUnavailable ? stringMessages.userAlreadyExists(nameBox.getText())
+                                : validator.validateUsernameAndPassword(valueToValidate.getUsername(),
+                                        valueToValidate.getPassword(), valueToValidate.getPasswordRepeat()));
             }
-        }, callback);
+        });
     }
-    
+
     /**
      * Allows the caller to provide their own validator, e.g., in order to skip password or username validation or to
      * add validation for the current password
@@ -111,6 +119,27 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
         }
         this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
+
+        nameBox.addKeyUpHandler(e -> checkIfUsernameExists());
+    }
+
+    private void checkIfUsernameExists() {
+        resolvingUsername = true;
+        validateAndUpdate();
+        final String username = nameBox.getText();
+        userManagementService.userExists(username, new AsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                usernameUnavailable = result != null ? result : false;
+                resolvingUsername = false;
+                validateAndUpdate();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
+            }
+        });
     }
     
     protected UserManagementServiceAsync getUserManagementService() {
