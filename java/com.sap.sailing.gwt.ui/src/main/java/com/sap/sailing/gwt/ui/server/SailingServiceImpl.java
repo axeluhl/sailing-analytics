@@ -7523,6 +7523,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void setActiveFileStorageService(String serviceName, String localeInfoName) {
+        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
         getService().getFileStorageManagementService().setActiveFileStorageService(getFileStorageService(serviceName));
     }
 
