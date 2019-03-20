@@ -1557,6 +1557,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Position position = new DegreePosition(latDeg, lngDeg);
         WindInfoForRaceDTO result = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
@@ -1623,6 +1624,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     throws NoWindException {
         assert from != null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
                 windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent FIXME why not pass through onlyUpToNewestEvent here??? */ true, includeCombinedWindForAllLegMiddles);
         return result;
