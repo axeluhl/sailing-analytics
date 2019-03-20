@@ -7512,8 +7512,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             String leaderboardName, String emails, String iOSAppUrl, String androidAppUrl, String localeInfoName)
             throws MailException {
         Event event = getService().getEvent(eventDto.id);
+        getSecurityService().checkCurrentUserReadPermission(event);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         Regatta regatta = getService().getRegattaByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(regatta);
         MailInvitationType type = MailInvitationType
                 .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
         getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, regatta, serverUrlWithoutTrailingSlash,
