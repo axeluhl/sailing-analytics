@@ -94,14 +94,11 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         if (secretOrNull != null) {
             json.put(DeviceMappingConstants.JSON_REGISTER_SECRET, secretOrNull);
         }
-        
         Response response = leaderboardsResource.postCheckin(json.toString(), leaderboard.getName());
         assertThat("checkin returns OK", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
-        
         Iterable<Competitor> registeredCompetitors = new CompetitorsInLogAnalyzer<>(log).analyze();
         Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = new RegattaLogDeviceCompetitorMappingFinder(
                 log).analyze();
-        
         assertThat("competitor was registered", Util.size(registeredCompetitors), equalTo(1));
         assertThat("device mappings for competitor exist", mappings.size(), equalTo(1));
         List<DeviceMappingWithRegattaLogEvent<Competitor>> mappingsForC = mappings.get(competitor);
@@ -112,17 +109,17 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         assertThat("that mapping starts at the correct timepoint", mappingForC.getTimeRange().from().asMillis(),
                 equalTo(fromMillis));
         assertThat("that mapping is open-ended", mappingForC.getTimeRange().hasOpenEnd(), equalTo(true));
-        
         // checkout
         long toMillis = 1000;
         json = new JSONObject();
         json.put(DeviceMappingConstants.JSON_TO_MILLIS, toMillis);
         json.put(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING, competitor.getId().toString());
         json.put(DeviceMappingConstants.JSON_DEVICE_UUID, deviceUuid.toString());
-        
+        if (secretOrNull != null) {
+            json.put(DeviceMappingConstants.JSON_REGISTER_SECRET, secretOrNull);
+        }
         response = leaderboardsResource.postCheckout(json.toString(), leaderboard.getName());
         assertThat("checkout returns OK", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
-        
         mappings = new RegattaLogDeviceCompetitorMappingFinder(log).analyze();
         mappingForC = mappings.get(competitor).get(0);
         assertTrue("mapping now ends at checkout timepoint", mappingForC.getTimeRange().includes(new MillisecondsTimePoint(toMillis)));
