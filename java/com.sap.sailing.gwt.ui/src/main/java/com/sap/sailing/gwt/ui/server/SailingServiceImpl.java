@@ -1459,6 +1459,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public WindInfoForRaceDTO getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources) {
         WindInfoForRaceDTO result = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
