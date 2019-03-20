@@ -2319,6 +2319,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date) {
         CoursePositionsDTO result = new CoursePositionsDTO();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         if (trackedRace != null) {
             getSecurityService().checkCurrentUserReadPermission(trackedRace);
             final TimePoint dateAsTimePoint;
