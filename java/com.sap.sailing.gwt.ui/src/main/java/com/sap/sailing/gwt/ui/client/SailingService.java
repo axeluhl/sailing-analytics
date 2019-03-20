@@ -763,7 +763,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             CompetitorDTO competitor) throws NotFoundException;
 
     void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
-            Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO);
+            Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) throws NotFoundException;
 
     void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName,
             Integer indexOfWaypoint, Date dateOfMarkPassing, CompetitorDTO competitorDTO) throws NotFoundException;
