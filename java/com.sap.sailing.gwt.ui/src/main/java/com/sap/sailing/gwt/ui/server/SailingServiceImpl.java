@@ -7573,12 +7573,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName) {
         RegattaAndRaceIdentifier result = null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(regattaLikeName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
                     final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    getSecurityService().checkCurrentUserReadPermission(trackedRace);
                     if (trackedRace != null) {
                         result = trackedRace.getRaceIdentifier();
                     }
