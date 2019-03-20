@@ -7801,6 +7801,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     private MarkTrackDTO getMarkTrack(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet,
             String markIdAsString) {
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         MarkDTO markDTO = null;
         Mark mark = null;
         for (final Mark currMark : raceColumn.getAvailableMarks(fleet)) {
