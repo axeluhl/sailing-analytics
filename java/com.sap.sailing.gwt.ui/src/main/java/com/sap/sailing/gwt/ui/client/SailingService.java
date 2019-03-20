@@ -795,7 +795,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
 
-    List<DeviceMappingDTO> getDeviceMappings(String leaderboardName) throws DoesNotHaveRegattaLogException, TransformationException;
+    List<DeviceMappingDTO> getDeviceMappings(String leaderboardName)
+            throws DoesNotHaveRegattaLogException, TransformationException, NotFoundException;
 
     void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds) throws NotRevokableException, DoesNotHaveRegattaLogException;
 

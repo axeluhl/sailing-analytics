@@ -7746,7 +7746,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public List<DeviceMappingDTO> getDeviceMappings(String leaderboardName)
-            throws DoesNotHaveRegattaLogException, TransformationException {
+            throws DoesNotHaveRegattaLogException, TransformationException, NotFoundException {
+        getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(leaderboardName));
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         return getDeviceMappings(regattaLog);
     }
