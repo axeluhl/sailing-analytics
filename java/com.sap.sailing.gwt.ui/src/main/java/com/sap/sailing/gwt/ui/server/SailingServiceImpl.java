@@ -8247,15 +8247,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     public List<String> getRaceDisplayNamesFromLeaderboard(String leaderboardName,List<String> raceColumnNames) throws NotFoundException {
         Leaderboard leaderboard = this.getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         List<String> result = new ArrayList<>();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if (raceColumn.hasTrackedRaces()) {
                 if (raceColumnNames.contains(raceColumn.getName())) {
                     for (Fleet fleet : raceColumn.getFleets()) {
-                        if(raceColumn.getTrackedRace(fleet) != null && raceColumn.getTrackedRace(fleet).getRaceIdentifier()!=null) {
-                            result.add(raceColumn.getTrackedRace(fleet).getRaceIdentifier().getRaceName());
-                        } else {
-                            break;
+                        final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                        if (getSecurityService().hasCurrentUserReadPermission(trackedRace)) {
+                            if (trackedRace != null && trackedRace.getRaceIdentifier() != null) {
+                                result.add(trackedRace.getRaceIdentifier().getRaceName());
+                            } else {
+                                break;
+                            }
                         }
                     }
                 }
