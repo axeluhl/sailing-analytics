@@ -104,21 +104,34 @@ public class CheckinManager {
         urlData.hostWithPort = urlData.server + (urlData.port == -1 ? "" : (":" + urlData.port));
         String leaderboardNameFromQR = "";
         try {
+            String defaultCharset = "UTF-8";
+            // Secret
+            String secretFromQR = uri.getQueryParameter(DeviceMappingConstants.URL_SECRET);
             leaderboardNameFromQR = URLEncoder
-                    .encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
+                    .encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), defaultCharset)
                     .replace("+", "%20");
+            urlData.secret = secretFromQR;
+            urlData.leaderboardName = leaderboardNameFromQR;
+            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(
+                    UUID.fromString(UniqueDeviceUuid.getUniqueId(mContext)));
+            Uri.Builder leaderboardBuilder = Uri.parse(urlData.hostWithPort).buildUpon()
+                    .encodedPath(prefs.getServerLeaderboardPath(urlData.leaderboardName));
+            if (secretFromQR != null) {
+                leaderboardBuilder.appendQueryParameter(DeviceMappingConstants.URL_SECRET, secretFromQR);
+            }
+            urlData.getLeaderboardUrl = leaderboardBuilder.build().toString();
+            Uri.Builder markBuilder = Uri.parse(urlData.hostWithPort).buildUpon()
+                    .encodedPath(prefs.getServerMarkPath(urlData.leaderboardName));
+            if (secretFromQR != null) {
+                markBuilder.appendQueryParameter(DeviceMappingConstants.URL_SECRET, secretFromQR);
+            }
+            urlData.getMarkUrl = markBuilder.build().toString();
         } catch (UnsupportedEncodingException e) {
             ExLog.e(mContext, TAG, "Failed to encode leaderboard name: " + e.getMessage());
         } catch (NullPointerException e) {
             ExLog.e(mContext, TAG, "Invalid Barcode (no leaderboard-name set): " + e.getMessage());
             Toast.makeText(mContext, mContext.getString(R.string.error_invalid_qr_code), Toast.LENGTH_LONG).show();
             urlData = null;
-        }
-        if (urlData != null) {
-            urlData.leaderboardName = leaderboardNameFromQR;
-            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(
-                    UUID.fromString(UniqueDeviceUuid.getUniqueId(mContext)));
-            urlData.getLeaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
         }
         return urlData;
     }
@@ -131,7 +144,6 @@ public class CheckinManager {
                         final String leaderboardName;
                         try {
                             leaderboardName = response.getString("name");
-                            urlData.getMarkUrl = urlData.hostWithPort + prefs.getServerMarkPath(leaderboardName);
                         } catch (JSONException e) {
                             ExLog.e(mContext, TAG, "Error getting data from call on URL: " + urlData.getLeaderboardUrl
                                     + ", Error: " + e.getMessage());
@@ -339,6 +351,7 @@ public class CheckinManager {
         public String server;
         public int port;
         public String hostWithPort;
+        public String secret;
         public List<MarkInfo> marks;
         public List<MarkPingInfo> pings;
         public String leaderboardName;
