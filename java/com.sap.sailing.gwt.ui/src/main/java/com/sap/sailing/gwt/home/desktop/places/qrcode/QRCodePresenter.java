@@ -5,59 +5,63 @@ import java.util.UUID;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.BranchIOConstants;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.home.communication.event.GetEventViewAction;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorAction;
 import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace.InvitationMode;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
 
 public class QRCodePresenter {
-
-    private UUID eventId, competitorId;
-    private String regattaName, regattaRegistrationLinkSecret;
-    private String leaderboardNameFromUrl, checkInUrl;
     private final QRCodeClientFactory clientFactory;
     private DataCollector dataCollector;
-    private InvitationMode invitationMode;
-    private String serverForPublic;
+    private QRCodePlace place;
 
-    public QRCodePresenter(UUID eventId, UUID competitorId, String leaderboardName,
-            String regattaName, String regattaRegistrationLinkSecret,
-            String checkInUrl, QRCodeClientFactory clientFactory, InvitationMode invitationMode,
-            String serverForPublic) {
-        this.serverForPublic = serverForPublic;
-        this.eventId = eventId;
-        this.checkInUrl = checkInUrl;
-        this.competitorId = competitorId;
-        this.leaderboardNameFromUrl = leaderboardName;
-        this.regattaName = regattaName;
-        this.regattaRegistrationLinkSecret = regattaRegistrationLinkSecret;
+    public QRCodePresenter(QRCodeClientFactory clientFactory, QRCodePlace place) {
         this.clientFactory = clientFactory;
-        this.invitationMode = invitationMode;
+        this.place = place;
     }
 
     public void setView(QRCodeView view) {
-        if (invitationMode == InvitationMode.PUBLIC_INVITE) {
+        if (place.getMode() == InvitationMode.PUBLIC_INVITE) {
             // as the event is most likely displayed on a different server anyway, do not load additional data
             dataCollector = new DataCollector(view);
             dataCollector.proceedIfFinished();
         } else {
-        if (eventId == null
-                || (invitationMode == InvitationMode.COMPETITOR || invitationMode == InvitationMode.COMPETITOR_2)
-                        && competitorId == null
-                    || leaderboardNameFromUrl == null || leaderboardNameFromUrl.equals("") || checkInUrl == null
-                    || checkInUrl.equals("")) {
+            if (place.getMode() == InvitationMode.COMPETITOR
+                    && (place.getEncodedCheckInUrl() == null || place.getEncodedCheckInUrl().equals(""))) {
                 view.setError();
             } else {
                 dataCollector = new DataCollector(view);
-                if (competitorId != null) {
-                    retrieveCompetitor(competitorId);
+                if (place.getCompetitorId() != null) {
+                    retrieveCompetitor(place.getCompetitorId());
                 } else {
                     dataCollector.setCompetitor(null);
                 }
-                retrieveEvent(eventId);
+                if (place.getBoatId() != null) {
+                    retrieveBoat(place.getBoatId());
+                } else {
+                    dataCollector.setBoat(null);
+                }
+                if (place.getMarkId() != null) {
+                    retrieveMark(place.getMarkId());
+                } else {
+                    dataCollector.setMark(null);
+                }
+                retrieveEvent(place.getEventId());
             }
         }
+    }
+
+    private void retrieveMark(UUID markId) {
+        // FIXME after it is decided, how the mark will be resolved on the archive server for races on an eventserver
+        dataCollector.setMark(null);
+    }
+
+    private void retrieveBoat(UUID boatId) {
+        // FIXME after it is decided, how the boat will be resolved on the archive server for races on an eventserver
+        dataCollector.setBoat(null);
     }
 
     private void retrieveEvent(UUID eventId) {
@@ -95,10 +99,12 @@ public class QRCodePresenter {
 
     private final class DataCollector {
         private boolean eventIsSet = false;
-        private boolean competitorIsSet = false;
+        private boolean participantIsSet = false;
 
         private SimpleCompetitorWithIdDTO competitor;
         private EventViewDTO event;
+        private BoatDTO boat;
+        private MarkDTO mark;
 
         private final QRCodeView view;
 
@@ -106,9 +112,21 @@ public class QRCodePresenter {
             this.view = view;
         }
 
+        public void setMark(MarkDTO mark) {
+            participantIsSet = true;
+            this.mark = mark;
+            proceedIfFinished();
+        }
+
         public void setCompetitor(SimpleCompetitorWithIdDTO competitor) {
-            competitorIsSet = true;
+            participantIsSet = true;
             this.competitor = competitor;
+            proceedIfFinished();
+        }
+
+        public void setBoat(BoatDTO boat) {
+            participantIsSet = true;
+            this.boat = boat;
             proceedIfFinished();
         }
 
@@ -119,39 +137,55 @@ public class QRCodePresenter {
         }
 
         private void proceedIfFinished() {
+            InvitationMode invitationMode = place.getMode();
+            String regattaName = place.getRegattaName();
+            String regattaRegistrationLinkSecret = place.getRegattaRegistrationLinkSecret();
+            String serverForPublic = place.getServer();
+            String checkInUrl = place.getEncodedCheckInUrl();
+            String leaderBoardName = place.getLeaderboardName();
+            UUID eventId = place.getEventId();
+            UUID competitorId = place.getCompetitorId();
             if (invitationMode == InvitationMode.PUBLIC_INVITE) {
                 String branchIoUrl = BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?"
                         + QRCodePlace.PARAM_REGATTA_NAME + "=" + regattaName + "&" + QRCodePlace.PARAM_REGATTA_SECRET
                         + "=" + regattaRegistrationLinkSecret + "&" + QRCodePlace.PARAM_SERVER + "=" + serverForPublic;
-                view.setData(null, null, "", regattaName, branchIoUrl, invitationMode);
+                view.setData(null, null, regattaName, branchIoUrl, invitationMode);
             } else {
-                if (competitorIsSet && eventIsSet) {
+                if (participantIsSet && eventIsSet) {
                     if (checkInUrl != null) {
                         String branchIoUrl = null;
                         switch (invitationMode) {
                         case BOUY_TENDER:
                             branchIoUrl = BranchIOConstants.BUOYPINGER_APP_BRANCHIO + "?"
-                                    + BranchIOConstants.BUOYPINGER_APP_BRANCHIO_PATH + "="
-                                    + QRCodePresenter.this.checkInUrl;
+                                    + BranchIOConstants.BUOYPINGER_APP_BRANCHIO_PATH + "=" + checkInUrl;
                             break;
                         case COMPETITOR:
                             branchIoUrl = BranchIOConstants.SAILINSIGHT_APP_BRANCHIO + "?"
-                                    + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
-                                    + QRCodePresenter.this.checkInUrl;
+                                    + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "=" + checkInUrl;
                             break;
                         case COMPETITOR_2:
                             branchIoUrl = BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO + "?"
-                                    + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
-                                    + QRCodePresenter.this.checkInUrl;
+                                    + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "=" + checkInUrl;
                             break;
                         default:
                             break;
                         }
-                        view.setData(event, competitor, leaderboardNameFromUrl, null, branchIoUrl, invitationMode);
+                        String participant = "";
+                        if (competitor != null) {
+                            participant = competitor.getName();
+                        }
+                        if (boat != null) {
+                            participant = boat.getDisplayName();
+                        }
+                        if (mark != null) {
+                            participant = mark.getName();
+                        }
+                        view.setData(event, participant, leaderBoardName, branchIoUrl, invitationMode);
                     } else {
                         view.setError();
                         GWT.log("checkInUrl " + checkInUrl);
                         GWT.log("competitorId " + competitorId);
+                        GWT.log("boatId " + boat);
                         GWT.log("invitationMode " + invitationMode);
                         GWT.log("eventId " + eventId);
                     }
