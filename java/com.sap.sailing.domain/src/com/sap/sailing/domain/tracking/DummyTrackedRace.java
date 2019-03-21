@@ -707,6 +707,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
+    public WindSummary getWindSummary() {
+        return null;
+    }
+    
+    @Override
     public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
         return false;
     }
