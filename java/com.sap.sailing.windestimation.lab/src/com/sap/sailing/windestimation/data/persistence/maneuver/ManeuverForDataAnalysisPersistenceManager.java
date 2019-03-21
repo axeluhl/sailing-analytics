@@ -1,6 +1,10 @@
 package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
 
 public class ManeuverForDataAnalysisPersistenceManager
         extends AbstractTransformedManeuversForDataAnalysisPersistenceManager {
@@ -18,16 +22,20 @@ public class ManeuverForDataAnalysisPersistenceManager
 
     //TODO repair if required
     @Override
-    protected String getMongoDbEvalStringForTransformation() {
-        return "db.getCollection('" + RaceWithManeuverForDataAnalysisPersistenceManager.COLLECTION_NAME + "." + AbstractRaceWithEstimationDataPersistenceManager.COMPETITOR_TRACKS_COLLECTION_NAME_EXTENSION + "').aggregate([\r\n"
-                + "{$addFields: {\"competitorTracks.elements.regattaName\": '$regattaName'}},\r\n"
-                + "{$addFields: {\"competitorTracks.elements.windQuality\": '$windQuality'}},\r\n"
-                + "{$addFields: {\"competitorTracks.trackId\": {$concat: ['$regattaName', ' - ', '$trackedRaceName']}}},\r\n"
-                + "{$unwind: '$competitorTracks'},\r\n" + "{$addFields: {\r\n"
-                + "    \"competitorTracks.elements.trackId\": {$concat: ['$competitorTracks.trackId', ' # ', '$competitorTracks.competitorName']},\r\n"
-                + "    'competitorTracks.avgTrackSpeedInKnots': {$divide: [\r\n" + "        {$divide:\r\n"
-                + "            ['$competitorTracks.distanceTravelledInMeters',\r\n" + "                {$divide: \r\n"
-                + "                    [ {$subtract: ['$competitorTracks.endUnixTime', '$competitorTracks.startUnixTime']},\r\n"
+    protected Bson getMongoDbEvalStringForTransformation() {
+        return new Document().append("aggregate", RaceWithManeuverForDataAnalysisPersistenceManager.COLLECTION_NAME + "." + AbstractRaceWithEstimationDataPersistenceManager.COMPETITOR_TRACKS_COLLECTION_NAME_EXTENSION).
+                              append("pipeline", Arrays.asList(
+                new Document("$addFields", new Document().append("competitorTracks.elements.regattaName", "$regattaName")),
+                new Document("$addFields", new Document().append("competitorTracks.elements.windQuality", "$windQuality")),
+                new Document("$addFields", new Document().append("competitorTracks.trackId",
+                        new Document("$concat", Arrays.asList("$regattaName", " - ", "$trackedRaceName")))),
+                new Document("$unwind", "$competitorTracks").
+                new Document("$addFields", new Document()
+                .append("competitorTracks.elements.trackId", new Document("$concat", Arrays.asList("$competitorTracks.trackId", " # ", "$competitorTracks.competitorName")))
+                .append("competitorTracks.avgTrackSpeedInKnots", new Document("$divide", new Document("$divide",
+                        Arrays.asList("$competitorTracks.distanceTravelledInMeters", new Document("$divide",
+                                Arrays.asList(new Document("$subtract",
+                                        Arrays.asList("$competitorTracks.endUnixTime", "$competitorTracks.startUnixTime")))),
                 + "                        1000.0\r\n" + "                ]}\r\n" + "            ]\r\n"
                 + "        },\r\n" + "        0.5144444444444\r\n" + "        ]},\r\n"
                 + "    'markPassingsCountMatchesWaypointsCount': {$eq: ['$competitorTracks.markPassingsCount', '$competitorTracks.waypointsCount']},\r\n"

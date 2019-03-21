@@ -2,6 +2,8 @@ package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
 
+import org.bson.conversions.Bson;
+
 public class RegularManeuverWithoutMarkPassingForDataAnalysisPersistenceManager
         extends AbstractTransformedManeuversForDataAnalysisPersistenceManager {
 
@@ -15,7 +17,7 @@ public class RegularManeuverWithoutMarkPassingForDataAnalysisPersistenceManager
     }
 
     @Override
-    protected String getMongoDbEvalStringForTransformation() {
+    protected Bson getMongoDbEvalStringForTransformation() {
         return "db.getCollection('regularManeuversWithMarkPassingsForDataAnalysis').aggregate([\r\n" + "{$match: {\r\n"
                 + "    $and: [\r\n" + "        {'category': {\r\n" + "            $ne: 'MARK_PASSING'\r\n"
                 + "        }}\r\n" + "    ]\r\n" + "}},\r\n"

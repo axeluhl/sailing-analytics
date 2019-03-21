@@ -10,8 +10,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.mongodb.DB;
-import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -20,6 +18,8 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBService;
 
 /**
  * 
@@ -27,22 +27,14 @@ import com.sap.sse.common.Util.Pair;
  *
  */
 public abstract class AbstractPersistenceManager<T> implements PersistenceManager<T> {
-
-    public static final int DB_PORT = 27017;
-    public static final String DB_HOST = "127.0.0.1";
-    public static final String DB_NAME = "windEstimation";
     public static final String FIELD_DB_ID = "_id";
     private final MongoDatabase database;
     private final JSONParser jsonParser = new JSONParser();
     private final JsonDeserializer<T> deserializer;
-    private final MongoClient mongoClient;
-    private final DB db;
 
-    @SuppressWarnings("deprecation")
     public AbstractPersistenceManager() throws UnknownHostException {
-        mongoClient = new MongoClient(DB_HOST, DB_PORT);
-        database = mongoClient.getDatabase(DB_NAME);
-        db = mongoClient.getDB(DB_NAME);
+        MongoDBService mongoDbService = MongoDBConfiguration.getDefaultConfiguration().getService();
+        database = mongoDbService.getDB();
         deserializer = getNewJsonDeserializer();
     }
 
@@ -157,10 +149,6 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     @Override
     public MongoDatabase getDb() {
         return database;
-    }
-
-    public DB getDbOld() {
-        return db;
     }
 
     protected class PersistedElementsIteratorImpl implements PersistedElementsIterator<T> {
