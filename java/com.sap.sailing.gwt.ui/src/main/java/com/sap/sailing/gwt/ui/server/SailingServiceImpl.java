@@ -564,7 +564,7 @@ import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
-import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
+import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
@@ -599,7 +599,7 @@ import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 /**
  * The server side implementation of the RPC service.
  */
-public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
+public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
     private static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
 
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
