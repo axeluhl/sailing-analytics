@@ -11,6 +11,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
@@ -20,8 +21,10 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
+import com.sap.sse.common.ColorMapper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.util.Trigger;
@@ -74,6 +77,18 @@ public class FixesAndTails {
      */
     private final Map<CompetitorDTO, Trigger<Integer>> lastShownFix;
 
+    private final Map<CompetitorDTO, Integer> minDetailValueFix;
+    private final Map<CompetitorDTO, Integer> maxDetailValueFix;
+
+    /**
+     * Keeps track of detailValues (stored in {@link GPSFixDTOWithSpeedWindTackAndLegType} in {@link #fixes})
+     * boundaries so that a {@link ColorMapper} can be used.
+     */
+    private ValueRangeFlexibleBoundaries detailValueBoundaries;
+    private Double previousMin = null; //TODO Remove or rename
+    private Double previousMax = null; //TODO Same as previousMin
+    private ColorMapper colorMapper;
+
     private final CoordinateSystem coordinateSystem;
 
     public FixesAndTails(CoordinateSystem coordinateSystem) {
@@ -82,6 +97,8 @@ public class FixesAndTails {
         tails = new HashMap<>();
         firstShownFix = new HashMap<>();
         lastShownFix = new HashMap<>();
+        minDetailValueFix = new HashMap<>();
+        maxDetailValueFix = new HashMap<>();
     }
 
     /**
@@ -226,7 +243,11 @@ public class FixesAndTails {
      * 
      */
     protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> fixesForCompetitors,
-            Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
+            Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory,
+            long timeForPositionTransitionMillis, boolean detailTypeChanged) {
+        if (detailTypeChanged) {
+            maxDetailValueFix.clear();
+        }
         for (final Map.Entry<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
                 final CompetitorDTO competitor = e.getKey();
@@ -244,11 +265,18 @@ public class FixesAndTails {
                     registerTriggerable(competitor, triggerable);
                     fixesForCompetitor.addAll(e.getValue());
                     overlapsWithKnownFixes.put(competitor, true); // In case this was only one part of a split request, the next request *does* have an overlap
+
+                    minDetailValueFix.remove(competitor);
+                    maxDetailValueFix.remove(competitor);
+                    int search = lastShownFix.containsKey(competitor) && lastShownFix.get(competitor) != null
+                            && lastShownFix.get(competitor).get() != null ? Math.max(lastShownFix.get(competitor).get(), 0) : 0;
+                    searchMinMaxDetailValue(competitor, search);
                 } else {
                     mergeFixes(competitor, e.getValue(), timeForPositionTransitionMillis);
                 }
             }
         }
+        updateDetailValueBoundaries();
     }
 
     /**
@@ -310,6 +338,7 @@ public class FixesAndTails {
         int indexOfLastShownFix = (lastShownFixForCompetitor == null || lastShownFixForCompetitor.get() == null) ? -1 : lastShownFixForCompetitor.get();
         final MultiColorPolyline tail = getTail(competitorDTO);
         int intoThisIndex = 0;
+        int earliestMergeIndex = -1;
         final Comparator<GPSFixDTOWithSpeedWindTackAndLegType> fixByTimePointComparator = new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
             @Override
             public int compare(GPSFixDTOWithSpeedWindTackAndLegType o1, GPSFixDTOWithSpeedWindTackAndLegType o2) {
@@ -320,6 +349,9 @@ public class FixesAndTails {
             intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, fixByTimePointComparator);
             if (intoThisIndex < 0) {
                 intoThisIndex = -intoThisIndex-1;
+            }
+            if (earliestMergeIndex == -1 || intoThisIndex < earliestMergeIndex) {
+                earliestMergeIndex = intoThisIndex;
             }
             if (intoThisIndex < intoThis.size() && intoThis.get(intoThisIndex).timepoint.equals(mergeThisFix.timepoint)) {
                 // exactly same time point; replace with fix from mergeThis unless the new fix is extrapolated and there is a later fix in intoThis;
@@ -353,6 +385,23 @@ public class FixesAndTails {
                     if (intoThisIndex <= indexOfLastShownFix) {
                         indexOfLastShownFix--;
                     }
+                    // Make sure that minDetailValueFix and maxDetailValueFix still track the correct fixes
+                    if (minDetailValueFix.containsKey(competitorDTO)) {
+                        if (intoThisIndex < minDetailValueFix.get(competitorDTO)) {
+                            minDetailValueFix.put(competitorDTO, minDetailValueFix.get(competitorDTO) - 1);
+                        } else if (intoThisIndex == minDetailValueFix.get(competitorDTO)) {
+                            // The fix with the highest value was removed so re-search
+                            minDetailValueFix.remove(competitorDTO);
+                        }
+                    }
+                    if (maxDetailValueFix.containsKey(competitorDTO)) {
+                        if (intoThisIndex < maxDetailValueFix.get(competitorDTO)) {
+                            maxDetailValueFix.put(competitorDTO, maxDetailValueFix.get(competitorDTO) - 1);
+                        } else if (intoThisIndex == maxDetailValueFix.get(competitorDTO)) {
+                            // The fix with the highest value was removed so re-search
+                            maxDetailValueFix.remove(competitorDTO);
+                        }
+                    }
                     intoThisIndex--;
                 }
             } else {
@@ -369,6 +418,12 @@ public class FixesAndTails {
                     }
                     if (intoThisIndex <= indexOfLastShownFix) {
                         indexOfLastShownFix++;
+                    }
+                    if (minDetailValueFix.containsKey(competitorDTO) && intoThisIndex <= minDetailValueFix.get(competitorDTO)) {
+                        minDetailValueFix.put(competitorDTO, minDetailValueFix.get(competitorDTO) + 1);
+                    }
+                    if (maxDetailValueFix.containsKey(competitorDTO) && intoThisIndex <= maxDetailValueFix.get(competitorDTO)) {
+                        maxDetailValueFix.put(competitorDTO, maxDetailValueFix.get(competitorDTO) + 1);
                     }
                     // If there is a fix prior to the one added and that prior fix was obtained by extrapolation, remove it now because
                     // extrapolated fixes can only be the last in the list
@@ -393,6 +448,12 @@ public class FixesAndTails {
                         if (intoThisIndex-1 <= indexOfLastShownFix) {
                             indexOfLastShownFix--;
                         }
+                        if (minDetailValueFix.containsKey(competitorDTO) && intoThisIndex - 1 <= minDetailValueFix.get(competitorDTO)) {
+                            minDetailValueFix.put(competitorDTO, minDetailValueFix.get(competitorDTO) - 1);
+                        }
+                        if (maxDetailValueFix.containsKey(competitorDTO) && intoThisIndex - 1 <= maxDetailValueFix.get(competitorDTO)) {
+                            maxDetailValueFix.put(competitorDTO, maxDetailValueFix.get(competitorDTO) - 1);
+                        }
                         intoThisIndex--;
                     }
                 } else {
@@ -408,6 +469,10 @@ public class FixesAndTails {
         }
         if (indexOfLastShownFix != -1) {
             lastShownFix.put(competitorDTO, new Trigger<>(indexOfLastShownFix));
+        }
+
+        if (earliestMergeIndex != -1) {
+            searchMinMaxDetailValue(competitorDTO, earliestMergeIndex);
         }
     }
 
@@ -603,13 +668,109 @@ public class FixesAndTails {
         return null;
     }
     
+    protected boolean isIndexShown(CompetitorDTO competitor, int index) {
+        if (!firstShownFix.containsKey(competitor) || firstShownFix.get(competitor) == null || firstShownFix.get(competitor).get() == null
+                || lastShownFix.get(competitor) == null || lastShownFix.get(competitor).get() == null) {
+            return false;
+        }
+        final int first = firstShownFix.get(competitor).get();
+        final int last  = lastShownFix.get(competitor).get();
+        if (index >= first && index <= last && first != -1 && last != -1) {
+            return true;
+        }
+        return false;
+    }
+
+    protected void searchMinMaxDetailValue(CompetitorDTO competitor, int startIndex) {
+        Double min = null;
+        // Check if the previously found minimum is still shown and use its value
+        if (minDetailValueFix.containsKey(competitor)) {
+            int minFix = minDetailValueFix.get(competitor);
+            if (minFix < 0 || !isIndexShown(competitor, minFix)) {
+                minDetailValueFix.remove(competitor);
+                startIndex = firstShownFix.get(competitor).get();
+            } else if (minFix < fixes.get(competitor).size() && fixes.get(competitor).get(minFix).detailValue != null) {
+                min = fixes.get(competitor).get(minFix).detailValue;
+            }
+        }
+
+        Double max = null;
+        // Check if the previously found maximum is still shown and use its value
+        if (maxDetailValueFix.containsKey(competitor)) {
+            int maxFix = maxDetailValueFix.get(competitor);
+            if (maxFix < 0 || !isIndexShown(competitor, maxFix)) {
+                maxDetailValueFix.remove(competitor);
+                startIndex = Math.min(startIndex, firstShownFix.get(competitor).get());
+            } else if (maxFix < fixes.get(competitor).size() && fixes.get(competitor).get(maxFix).detailValue != null) {
+                max = fixes.get(competitor).get(maxFix).detailValue;
+            }
+        }
+
+        int end = lastShownFix.containsKey(competitor) && lastShownFix.get(competitor) != null
+                && lastShownFix.get(competitor).get() != null && lastShownFix.get(competitor).get() != -1 ?
+                Math.min(lastShownFix.get(competitor).get() + 1, fixes.get(competitor).size()) : fixes.get(competitor).size();
+        for (int i = startIndex; i < end; i++) {
+            Double value = fixes.get(competitor).get(i).detailValue;
+            if (value != null) {
+                if (min == null) min = value;
+                if (max == null) max = value;
+                if (value < min) {
+                    min = value;
+                    minDetailValueFix.put(competitor, i);
+                } else if (value > max) {
+                    max = value;
+                    maxDetailValueFix.put(competitor, i);
+                }
+            }
+        }
+    }
+
+    protected void updateDetailValueBoundaries() {
+        Double min = null;
+        for (Map.Entry<CompetitorDTO, Integer> e : minDetailValueFix.entrySet()) {
+            assert e.getValue() != null;
+            if (!fixes.containsKey(e.getKey()) || fixes.get(e.getKey()) == null || e.getValue() >= fixes.get(e.getKey()).size()) {
+                minDetailValueFix.remove(e.getKey());
+                continue;
+            }
+            if (min == null || fixes.get(e.getKey()).get(e.getValue()).detailValue > min) {
+                min = fixes.get(e.getKey()).get(e.getValue()).detailValue;
+            }
+        }
+
+        Double max = null;
+        for (Map.Entry<CompetitorDTO, Integer> e : maxDetailValueFix.entrySet()) {
+            assert e.getValue() != null;
+            if (!fixes.containsKey(e.getKey()) || fixes.get(e.getKey()) == null || e.getValue() >= fixes.get(e.getKey()).size()) {
+                maxDetailValueFix.remove(e.getKey());
+                continue;
+            }
+            if (max == null || fixes.get(e.getKey()).get(e.getValue()).detailValue > max) {
+                max = fixes.get(e.getKey()).get(e.getValue()).detailValue;
+            }
+        }
+
+        if (min != null && max != null && (min != previousMin || max != previousMax)) {
+            previousMin = min;
+            previousMax = max;
+            detailValueBoundaries.setMinMax(min, max);
+            GWT.log("Updating min/max: " + min.toString() + ", " + max.toString());
+        }
+    }
+
+    protected void resetColorMapper(ValueRangeFlexibleBoundaries boundaries) {
+        detailValueBoundaries = boundaries;
+        colorMapper = new ColorMapper(detailValueBoundaries, false);
+    }
+
+    protected ColorMapper getColorMapper() {
+        return colorMapper;
+    }
+
     //TODO Temporary
     protected Double getDetailValueAt(CompetitorDTO competitorDTO, int index) {
         final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
         int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1 : firstShownFixForCompetitor.get();
-        
-        //TODO Update ValueRangeFlexibleBoundaries
-        
         
         try {
             return getFixes(competitorDTO).get(indexOfFirstShownFix + index).detailValue;

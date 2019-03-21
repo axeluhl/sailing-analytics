@@ -453,6 +453,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private List<DetailType> sortedAvailableDetailTypes;
     private DetailType selectedDetailType;
+    /**
+     * Indicates if {@link #selectedDetailType} has changed. If that is the case {@link FixesAndTails} needs to
+     * overwrite its cache with new data and needs to reset its internal {@link ValueRangeFlexibleBoundaries} tracking
+     * the {@link DetailType} values.
+     * If set to {@code true} {@link #refreshMap(Date, long, boolean)} will pass the information along and set it back
+     * to {@code false}.
+     */
     private boolean selectedDetailTypeChanged;
 
     private final MultiHashSet<Date> remoteCallsInExecution = new MultiHashSet<>();
@@ -1100,10 +1107,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
         final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = fixesAndTails
                 .computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds(), selectedDetailTypeChanged);
-        if (selectedDetailTypeChanged) selectedDetailTypeChanged = false;
         // Request map data update, possibly in two calls; see method details
         callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(fromAndToAndOverlap,
-                raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw, selectedDetailType);
+                raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw, selectedDetailType,
+                selectedDetailTypeChanged);
+        if (selectedDetailTypeChanged) selectedDetailTypeChanged = false;
         // draw the wind into the map, get the combined wind
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
@@ -1185,7 +1193,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(
             final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap,
             RegattaAndRaceIdentifier race, final Date newTime, final long transitionTimeInMillis,
-            final Iterable<CompetitorDTO> competitorsToShow, boolean isRedraw, DetailType detailType) {
+            final Iterable<CompetitorDTO> competitorsToShow, boolean isRedraw, DetailType detailType, boolean detailTypeChanged) {
         final Map<CompetitorDTO, Date> fromTimesForQuickCall = new HashMap<>();
         final Map<CompetitorDTO, Date> toTimesForQuickCall = new HashMap<>();
         final Map<CompetitorDTO, Date> fromTimesForNonOverlappingTailsCall = new HashMap<>();
@@ -1221,7 +1229,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     newTime, settings.isShowEstimatedDuration(), detailType, leaderboardName, leaderboardGroupName),
             GET_RACE_MAP_DATA_CATEGORY,
                 getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
-                        ++boatPositionRequestIDCounter, isRedraw));
+                        ++boatPositionRequestIDCounter, isRedraw, detailTypeChanged));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
             asyncActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race, fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall,
@@ -1240,8 +1248,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             // overlap if it happens after this update.
                             updateBoatPositions(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(),
                                     competitorsToShow, result.getBoatPositionsForCompetitors(
-                                            competitorsByIdAsString), /* updateTailsOnly */
-                                    true);
+                                            competitorsByIdAsString), /* updateTailsOnly */ true, detailTypeChanged);
                         }
                     }));
         }
@@ -1253,7 +1260,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final Date newTime,
             final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
-            final Iterable<CompetitorDTO> competitorsToShow, final int requestID, boolean isRedraw) {
+            final Iterable<CompetitorDTO> competitorsToShow, final int requestID, boolean isRedraw, boolean detailTypeChanged) {
         remoteCallsInExecution.add(newTime);
         return new MarkedAsyncCallback<>(new AsyncCallback<RaceMapDataDTO>() {
             @Override
@@ -1284,7 +1291,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         // Do boat specific actions
                         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData = raceMapDataDTO.boatPositions;
                         updateBoatPositions(newTime, transitionTimeInMillis, hasTailOverlapForCompetitor,
-                                competitorsToShow, boatData, /* updateTailsOnly */ false);
+                                competitorsToShow, boatData, /* updateTailsOnly */ false, detailTypeChanged);
                         
                         if (!isRedraw) {
                             // only remove markers if the time is actually changed
@@ -1378,9 +1385,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private void updateBoatPositions(final Date newTime, final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
-            final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData, boolean updateTailsOnly) {
+            final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData,
+            boolean updateTailsOnly, boolean detailTypeChanged) {
         if (zoomingAnimationsInProgress == 0) {
-            fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
+            fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis, detailTypeChanged);
             showBoatsOnMap(newTime, transitionTimeInMillis,
                     /* re-calculate; it could have changed since the asynchronous request was made: */
                     getCompetitorsToShow(), updateTailsOnly);
@@ -2503,7 +2511,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 }
                 if (selectedDetailType != previous) {
-                    selectedDetailTypeChanged = true;
+                    selectedDetailTypeChanged = true; // Causes an overwrite of what are now wrong detailValues
+                    fixesAndTails.resetColorMapper(new ValueRangeFlexibleBoundaries(0, 1, 0.3, 1));
+                    redraw(); //TODO Somehow doesn't redraw any MultiColorPolylines
                 }
             }
         });
@@ -3042,12 +3052,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             options.setStrokeWeight(1);
             break;
         case SELECTED:
-            ColorMapper colorMapper = new ColorMapper(new ValueRangeFlexibleBoundaries(0, 15, 0.1, 0.5), false);
+            ColorMapper colorMapper = fixesAndTails.getColorMapper();
             options.setColorMode(MultiColorPolylineColorMode.POLYCHROMATIC);
             options.setColorProvider(i -> {
                 Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
                 if (detailValue != null) {
-                    return colorMapper.getColor(detailValue);
+                    String color = colorMapper.getColor(detailValue);
+                    if (color.equals("hsl(0, 100%, 50%") || color.equals("hsl(240, 100%, 50%)")) {
+                        GWT.log("Limiter: " + detailValue); //TODO Remove
+                    }
+                    return color;
                 }
                 return competitorSelection.getColor(competitor, raceIdentifier).getAsHtml();
             });
