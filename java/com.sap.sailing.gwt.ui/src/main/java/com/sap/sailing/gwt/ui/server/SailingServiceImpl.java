@@ -5625,12 +5625,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 Object tokenObj = json.get("access_token");
                 if (tokenObj instanceof String) {
                     token = (String) tokenObj;
+                    logger.info("Obtained access token for user "+username);
+                } else {
+                    logger.warning("Did not find access token for user "+username);
                 }
-                System.out.println(json);
             } else {
                 throw new RuntimeException("Could not obtain token for server");
             }
-            System.out.println(jsonToken);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
