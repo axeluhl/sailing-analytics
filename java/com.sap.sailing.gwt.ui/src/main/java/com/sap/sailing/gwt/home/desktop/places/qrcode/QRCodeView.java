@@ -11,7 +11,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace.InvitationMode;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -50,20 +49,19 @@ public class QRCodeView extends Composite {
 
     }
 
-    public void setData(EventViewDTO event, SimpleCompetitorWithIdDTO competitor, String leaderboardName,
-            String regattaName, String url,
+    public void setData(EventViewDTO event, String participantTitle, String leaderboardName, String url,
             InvitationMode invitationMode) {
         switch (invitationMode) {
         case COMPETITOR:
         case COMPETITOR_2:
-            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitle(competitor.getName(), leaderboardName));
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitle(participantTitle, leaderboardName));
             if (event != null) {
                 subtitleDivUi.setInnerText(
                         StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
             }
             break;
         case PUBLIC_INVITE:
-            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRegatta(regattaName));
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRegatta(leaderboardName));
             if (event != null) {
                 subtitleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeSubtitleOpenRegatta());
             }

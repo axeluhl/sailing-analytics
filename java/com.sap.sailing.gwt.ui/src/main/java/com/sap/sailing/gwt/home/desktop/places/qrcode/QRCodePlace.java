@@ -7,22 +7,21 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.user.client.Window;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sse.common.Util.Pair;
 
 public class QRCodePlace extends AbstractBasePlace {
 
-    private static final String PARAM_EVENT_ID = "event_id";
-    private static final String PARAM_LEADERBOARD_NAME = "leaderboard_name";
-    private static final String PARAM_COMPETITOR_ID = "competitor_id";
     public static final String PARAM_REGATTA_NAME = "regatta_name";
     public static final String PARAM_REGATTA_SECRET = "secret";
-    private static final String PARAM_CHECKIN_URL = "checkinUrl";
     private static final String PARAM_MODE = "mode";
     public static final String PARAM_SERVER = "server";
 
     private UUID eventId;
     private UUID competitorId;
+    private UUID boatId;
+    private UUID markId;
     private String leaderboardName;
     private String regattaName;
     private String regattaRegistrationLinkSecret;
@@ -61,7 +60,7 @@ public class QRCodePlace extends AbstractBasePlace {
                     GWT.log("Missing parameter for regatta, secret or server");
                 }
             } else {
-                rawCheckInUrl = Window.Location.getParameter(PARAM_CHECKIN_URL);
+                rawCheckInUrl = Window.Location.getParameter(DeviceMappingConstants.URL_CHECKIN_URL);
                 if (rawCheckInUrl != null) {
                     checkInUrl = decodeUrl(rawCheckInUrl);
                     parseUrl(checkInUrl);
@@ -74,21 +73,30 @@ public class QRCodePlace extends AbstractBasePlace {
                         }
                     } else {
                         if (leaderboardName == null) {
-                            GWT.log("No parameter " + PARAM_LEADERBOARD_NAME + " found!");
+                            GWT.log("No parameter " + DeviceMappingConstants.URL_LEADERBOARD_NAME + " found!");
                         }
                         if (competitorId == null
                                 && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
-                            GWT.log("No parameter " + PARAM_COMPETITOR_ID + " found!");
+                            GWT.log("No parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING + " found!");
+                        }
+                        if (boatId == null
+                                && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
+                            GWT.log("No parameter " + DeviceMappingConstants.URL_BOAT_ID_AS_STRING + " found!");
+                        }
+                        if (markId == null
+                                && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
+                            GWT.log("No parameter " + DeviceMappingConstants.URL_MARK_ID_AS_STRING + " found!");
                         }
                         if (competitorId != null && mode == InvitationMode.BOUY_TENDER) {
-                            GWT.log("Found parameter " + PARAM_COMPETITOR_ID + " but is not required!");
+                            GWT.log("Found parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING
+                                    + " but is not required!");
                         }
                         if (eventId == null) {
-                            GWT.log("No parameter " + PARAM_EVENT_ID + " found!");
+                            GWT.log("No parameter " + DeviceMappingConstants.URL_EVENT_ID + " found!");
                         }
                     }
                 } else {
-                    GWT.log("No parameter " + PARAM_CHECKIN_URL + " found!");
+                    GWT.log("No parameter " + DeviceMappingConstants.URL_CHECKIN_URL + " found!");
                 }
             }
         } catch (Exception e) {
@@ -107,21 +115,35 @@ public class QRCodePlace extends AbstractBasePlace {
     private void parseUrl(String checkInUrl) {
         Iterable<Pair<String, String>> parameters = parseUrlParameters(checkInUrl);
         for (Pair<String, String> parameter : parameters) {
-            if (PARAM_EVENT_ID.equals(parameter.getA())) {
+            if (DeviceMappingConstants.URL_EVENT_ID.equals(parameter.getA())) {
                 try {
                     eventId = UUID.fromString(parameter.getB());
                 } catch (IllegalArgumentException e) {
                     GWT.log("Invalid event_id");
                     eventId = null;
                 }
-            } else if (PARAM_COMPETITOR_ID.equals(parameter.getA())) {
+            } else if (DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING.equals(parameter.getA())) {
                 try {
                     competitorId = UUID.fromString(parameter.getB());
                 } catch (IllegalArgumentException e) {
                     GWT.log("Invalid competitor_id");
                     competitorId = null;
                 }
-            } else if (PARAM_LEADERBOARD_NAME.equals(parameter.getA())) {
+            } else if (DeviceMappingConstants.URL_BOAT_ID_AS_STRING.equals(parameter.getA())) {
+                try {
+                    boatId = UUID.fromString(parameter.getB());
+                } catch (IllegalArgumentException e) {
+                    GWT.log("Invalid boatId");
+                    boatId = null;
+                }
+            } else if (DeviceMappingConstants.URL_MARK_ID_AS_STRING.equals(parameter.getA())) {
+                try {
+                    markId = UUID.fromString(parameter.getB());
+                } catch (IllegalArgumentException e) {
+                    GWT.log("Invalid markId");
+                    boatId = null;
+                }
+            } else if (DeviceMappingConstants.URL_LEADERBOARD_NAME.equals(parameter.getA())) {
                 leaderboardName = parameter.getB().replace("+", " ");
             } else if (PARAM_REGATTA_NAME.equals(parameter.getA())) {
                 regattaName = parameter.getB().replace("+", " ");
@@ -164,12 +186,20 @@ public class QRCodePlace extends AbstractBasePlace {
         return competitorId;
     }
 
+    public UUID getBoatId() {
+        return boatId;
+    }
+
     public String getLeaderboardName() {
         return leaderboardName;
     }
 
     public String getRegattaName() {
         return regattaName;
+    }
+
+    public UUID getMarkId() {
+        return markId;
     }
 
     public String getRegattaRegistrationLinkSecret() {
