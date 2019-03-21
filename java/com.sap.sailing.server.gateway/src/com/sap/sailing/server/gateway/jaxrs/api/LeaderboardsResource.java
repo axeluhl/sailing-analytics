@@ -823,6 +823,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     private Waypoint inferStartLine(TrackedRace trackedRace, RegattaLog regattaLog) {
         final TimePoint startTime = getStartTime(trackedRace);
         // search backwards for last valid fixes
+        // TODO avoid duplication of marks if equal-named marks already exist
         return createLineEnclosingTracks(trackedRace, regattaLog, /* time point for mark fixes */ startTime, /* extrapolate */ true,
                 /* waypoint name */ "Start", /* time point to start searching for valid fixes */ startTime, /* searchForward */ true);
     }
@@ -857,6 +858,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     regattaLog.add(definePinEndEvent);
                     getRaceLogTrackingAdapter().pingMark(regattaLog, startBoat, new GPSFixImpl(startBoatPosition, timePointForMarkFixes), getService());
                     getRaceLogTrackingAdapter().pingMark(regattaLog, pinEnd, new GPSFixImpl(pinEndPosition, timePointForMarkFixes), getService());
+                    // TODO identify existing automatically-created equal-named marks and re-use. The "Auto..." pattern should be sufficiently unique for this application
                     final ControlPoint startLineControlPoint = getService().getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
                             UUID.randomUUID(), "Auto "+waypointName+" Line", pinEnd, startBoat);
                     result = getService().getBaseDomainFactory().createWaypoint(startLineControlPoint, PassingInstruction.Line);
