@@ -60,7 +60,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
             mainElement.addClassName(getRaceLiveStyleName());
             getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.live() : I18N.actionWatch());
         } else if (race.isFinished()) {
-            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.raceIsFinished() : I18N.actionAnalyze());
+            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.raceIsFinished() : I18N.tracking());
         } else {
             mainElement.addClassName(getRacePlannedStyleName());
             if (race.isScheduled()) {

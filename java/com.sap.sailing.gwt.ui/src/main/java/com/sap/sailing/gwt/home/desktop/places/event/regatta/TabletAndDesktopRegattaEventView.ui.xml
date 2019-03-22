@@ -12,7 +12,7 @@
  			<c:tabcontent title="{i18n.overview}">
  				<e:overviewtab.RegattaOverviewTabView ui:field="regattaOverviewTabUi" />
  			</c:tabcontent>
-			<c:tabcontent title="{i18n.races}">
+			<c:tabcontent title="{i18n.racesAndTracking}">
 				<e:racestab.RegattaRacesTabView ui:field="racesTabUi" />
 			</c:tabcontent>
 			<c:tabcontent title="{i18n.leaderboard}">
