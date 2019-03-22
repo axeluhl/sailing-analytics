@@ -69,7 +69,7 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
                 filterSet.setEditable(filterSetIsEditableValue.booleanValue());
                 result.addFilterSet(filterSet);
                 JSONArray filterArray = (JSONArray) filterSetValue.get(FIELD_FILTERS); 
-                for(int j = 0; j < filterArray.size(); j++) {
+                for (int j = 0; j < filterArray.size(); j++) {
                     JSONObject filterObject = (JSONObject) filterArray.get(j);
                     JSONString filterType = (JSONString) filterObject.get(ValueFilterJsonDeSerializerUtil.FIELD_FILTER_TYPE);
                     if (filterType != null && ValueFilterJsonDeSerializerUtil.VALUE_FILTER_TYPE.equals(filterType.stringValue())) {
