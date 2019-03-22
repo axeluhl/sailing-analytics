@@ -2,8 +2,6 @@ package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
 
-import org.bson.conversions.Bson;
-
 public class ManeuverForEstimationPersistenceManager
         extends AbstractTransformedManeuversForEstimationPersistenceManager {
 
@@ -19,8 +17,10 @@ public class ManeuverForEstimationPersistenceManager
     }
 
     @Override
-    protected Bson getMongoDbEvalStringForTransformation() {
-        return "db.getCollection('" + RaceWithManeuverForEstimationPersistenceManager.COLLECTION_NAME + "." + AbstractRaceWithEstimationDataPersistenceManager.COMPETITOR_TRACKS_COLLECTION_NAME_EXTENSION + "').aggregate([\r\n" + 
+    protected String getMongoDbEvalStringForTransformation() {
+        return "{" +
+                "aggregate: '" + RaceWithManeuverForEstimationPersistenceManager.COLLECTION_NAME + "." + AbstractRaceWithEstimationDataPersistenceManager.COMPETITOR_TRACKS_COLLECTION_NAME_EXTENSION + "',\r\n" +
+                "pipeline: [\r\n" + 
                 "{$match: {\r\n" + 
                 "    'clean': true\r\n" + 
                 "}},\r\n" + 
@@ -30,7 +30,9 @@ public class ManeuverForEstimationPersistenceManager
                 "{$unwind: '$elements'},\r\n" + 
                 "{$replaceRoot: {newRoot : '$elements'}},\r\n" + 
                 "{$out: '" + COLLECTION_NAME + "'}\r\n" + 
-                "])";
+                "],\r\n" +
+                "cursor: {}\r\n" +
+                "}";
     }
 
 }

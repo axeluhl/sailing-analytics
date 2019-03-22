@@ -2,8 +2,6 @@ package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
 
-import org.bson.conversions.Bson;
-
 public class PenaltyCircleManeuverForEstimationPersistenceManager
         extends AbstractTransformedManeuversForEstimationPersistenceManager {
 
@@ -19,15 +17,19 @@ public class PenaltyCircleManeuverForEstimationPersistenceManager
     }
 
     @Override
-    protected Bson getMongoDbEvalStringForTransformation() {
-        return "db.getCollection('" + ManeuverForEstimationPersistenceManager.COLLECTION_NAME + "').aggregate([\r\n" + 
+    protected String getMongoDbEvalStringForTransformation() {
+        return "{" +
+                "aggregate: '" + ManeuverForEstimationPersistenceManager.COLLECTION_NAME + "',\r\n" +
+                "pipeline: [\r\n" +  
                 "{$match: {\r\n" + 
                 "        {'category': {\r\n" + 
                 "                $eq: '_360'\r\n" + 
                 "        }}\r\n" + 
                 "}},\r\n" + 
-                "{$out: 'penaltyCirclesForEstimation'}\r\n" + 
-                "])";
+                "{$out: '" + COLLECTION_NAME + "'}\r\n" + 
+                "],\r\n" +
+                "cursor: {}\r\n" +
+                "}";
     }
 
 }

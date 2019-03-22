@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
 
-import org.bson.conversions.Bson;
+import org.bson.Document;
 
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
@@ -16,7 +16,7 @@ public abstract class AbstractTransformedManeuversPersistenceManager<T> extends 
         this.dependencyOnOtherPersistenceManagers = dependencyToOtherPersistenceManagers;
     }
 
-    protected abstract Bson getMongoDbEvalStringForTransformation();
+    protected abstract String getMongoDbEvalStringForTransformation();
 
     public void createIfNotExistsCollectionWithTransformedManeuvers() {
         boolean collectionExists = collectionExists();
@@ -48,7 +48,7 @@ public abstract class AbstractTransformedManeuversPersistenceManager<T> extends 
         }
         dropCollection();
         LoggingUtil.logInfo("Transformation for \"" + getCollectionName() + "\" collection started.");
-        Object result = getDb().runCommand(getMongoDbEvalStringForTransformation());
+        Object result = getDb().runCommand(Document.parse(getMongoDbEvalStringForTransformation()));
         long numberOfElements = countElements();
         if (numberOfElements < 1) {
             dropCollection();
