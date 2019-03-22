@@ -35,9 +35,9 @@ public class CompetitorsFilterSetsJsonDeSerializer implements GwtJsonDeSerialize
                 JSONArray filterArray = new JSONArray();
                 filterSetObject.put(FIELD_FILTERS, filterArray);
                 int j = 0;
-                for (FilterWithUI<CompetitorDTO> filter: filterSet.getFilters()) {
+                for (FilterWithUI<CompetitorDTO> filter : filterSet.getFilters()) {
                     // Remark: other filter types than ValueFilter's are not stored right now
-                    if(filter instanceof ValueFilter<?,?>) {
+                    if (filter instanceof ValueFilter<?,?>) {
                         ValueFilter<?,?> valueFilter = (ValueFilter<?,?>) filter;
                         JSONObject filterObject = ValueFilterJsonDeSerializerUtil.serialize(valueFilter);
                         filterArray.set(j++, filterObject);
