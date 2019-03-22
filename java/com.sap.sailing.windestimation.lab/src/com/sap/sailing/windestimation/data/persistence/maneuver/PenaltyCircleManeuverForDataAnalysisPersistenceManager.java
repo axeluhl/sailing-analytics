@@ -20,7 +20,7 @@ public class PenaltyCircleManeuverForDataAnalysisPersistenceManager
     protected String getMongoDbEvalStringForTransformation() {
         return "db.getCollection('" + ManeuverForDataAnalysisPersistenceManager.COLLECTION_NAME + "').aggregate([\r\n" + "{$match: {\r\n" + "    $and: [\r\n"
                 + "        {'category': {\r\n" + "            $eq: '_360'\r\n" + "        }}\r\n" + "    ]\r\n"
-                + "}},\r\n" + "{$out: 'penaltyCirclesForDataAnalysis'}\r\n" + "])\r\n";
+                + "}},\r\n" + "{$out: '" + COLLECTION_NAME + "'}\r\n" + "])\r\n";
     }
 
 }
