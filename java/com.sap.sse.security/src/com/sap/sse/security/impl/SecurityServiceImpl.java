@@ -529,7 +529,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (getAccessControlList(idOfAccessControlledObject) == null) {
             setEmptyAccessControlList(idOfAccessControlledObject);
         }
-        final UUID groupId = group.getId();
+        final UUID groupId = group == null ? null : group.getId();
         apply(s->s.internalAclAddPermission(idOfAccessControlledObject, groupId, action));
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
