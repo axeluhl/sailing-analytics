@@ -141,7 +141,8 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @Path("{competitor-id}/team/image")
     @Produces("application/json;charset=UTF-8")
     public String setTeamImage(@PathParam("competitor-id") String competitorId, InputStream uploadedInputStream,
-            @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) throws IOException {
+            @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes,
+            @QueryParam("secret") String secret, @QueryParam("leaderboardName") String leaderboardName) throws IOException {
         RacingEventService service = getService();
         CompetitorAndBoatStore store = service.getCompetitorAndBoatStore();
         Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
@@ -150,6 +151,15 @@ public class CompetitorsResource extends AbstractSailingServerResource {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                     .entity("Could not find competitor with id " +
                             StringEscapeUtils.escapeHtml(competitorId)).type(MediaType.TEXT_PLAIN).build());
+        }
+        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+        boolean competitorInRegatta = false;
+        if (skip) {
+            Regatta regatta = getService().getRegattaByName(leaderboardName);
+            competitorInRegatta = Util.contains(regatta.getAllCompetitors(), competitor);
+        }
+        if (!(skip && competitorInRegatta)) {
+            getSecurityService().checkCurrentUserUpdatePermission(competitor);
         }
         String fileExtension = "";
         if (fileType.equals("image/jpeg")) {

@@ -61,7 +61,7 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
         // URL has the bundleresource:// scheme instead of file:, which File() can't handle
         long length = stream.available();
         
-        String jsonString = competitorsResource.setTeamImage(id, stream, fileExtension, length);
+        String jsonString = competitorsResource.setTeamImage(id, stream, fileExtension, length, null, null);
         
         //now download and compare
         JSONObject json = (JSONObject) JSONValue.parseWithException(jsonString);
