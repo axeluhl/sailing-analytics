@@ -32,6 +32,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String map();
     String race();
     String races();
+    String racesAndTracking();
     String tracked();
     String time();
     String playSpeed();
@@ -151,6 +152,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showEstimatedWind();
     String timing();
     String raceDetailsToShow();
+    String tracking();
     String legDetailsToShow();
     String columnMoveUp();
     String columnMoveDown();

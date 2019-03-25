@@ -1,7 +1,7 @@
 package com.sap.sailing.android.tracking.app.utils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
 import com.sap.sailing.android.shared.util.PrefUtils;
@@ -10,8 +10,8 @@ import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 public class AppPreferences extends BaseAppPreferences {
 
@@ -24,11 +24,6 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public static final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl("Tracking App", 0);
-
-    public String getServerUploadTeamImagePath() {
-        return PrefUtils.getString(context, R.string.preference_server_team_image_upload_path,
-                R.string.preference_server_team_image_upload_path);
-    }
 
     public String getServerGpsFixesPostPath() {
         return PrefUtils.getString(context, R.string.preference_server_gps_fixes_post_path,
@@ -60,6 +55,11 @@ public class AppPreferences extends BaseAppPreferences {
 
     public String getServerCompetitorPath(String competitorId) throws UnsupportedEncodingException {
         return context.getString(R.string.preference_server_competitor_path).replace("{competitor_id}",
+                URLEncoder.encode(competitorId, "UTF-8").replaceAll("\\+", "%20"));
+    }
+
+    public String getServerUploadTeamImagePath(String competitorId) throws UnsupportedEncodingException {
+        return context.getString(R.string.preference_server_team_image_upload_path).replace("{competitor_id}",
                 URLEncoder.encode(competitorId, "UTF-8").replaceAll("\\+", "%20"));
     }
 
