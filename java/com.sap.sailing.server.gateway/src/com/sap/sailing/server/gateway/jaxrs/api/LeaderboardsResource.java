@@ -139,6 +139,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.impl.UUIDHelper;
 
@@ -483,10 +484,9 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{leaderboardName}/competitors/{competitorId}")
     public Response getCompetitor(@PathParam("leaderboardName") String leaderboardName,
-            @PathParam("competitorId") String competitorIdAsString) {
+            @PathParam("competitorId") String competitorIdAsString, @QueryParam("secret") String secret) {
         Response response;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         Competitor competitor = getService().getCompetitorAndBoatStore()
                 .getExistingCompetitorByIdAsString(competitorIdAsString);
 
@@ -500,6 +500,12 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     "Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
+            boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+            if (!skip) {
+                getSecurityService().checkCurrentUserReadPermission(leaderboard);
+                getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
+            }
             JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);
             json.put("displayName", leaderboard.getDisplayName(competitor));
             response = Response.ok(json.toJSONString())
