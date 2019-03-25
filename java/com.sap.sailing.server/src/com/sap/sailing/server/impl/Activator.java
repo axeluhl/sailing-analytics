@@ -62,15 +62,9 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.PreferenceConverter;
-import com.sap.sse.security.shared.HasPermissionsProvider;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.HasPermissionsProvider;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -221,15 +215,8 @@ public class Activator implements BundleActivator {
                         securityService.putRoleDefinitionToUserGroup(securityService.getDefaultTenant(),
                                 sailingViewerRoleDefinition, true);
                         
-                        WildcardPermission permission = sailingViewerRoleDefinition.getIdentifier()
-                                .getPermission(DefaultActions.READ);
-                        final User allUser = securityService.getAllUser();
-                        securityService.addPermissionForUser(allUser.getName(), permission);
-                        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
-                                .get(permission, allUser);
-                        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
-                                .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                        securityService.setOwnership(qualifiedTypeIdentifier, allUser, null);
+                        // sailing_viewer role is publicly readable
+                        securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(), null, DefaultActions.READ.name());
                     }
                 }, null));
 

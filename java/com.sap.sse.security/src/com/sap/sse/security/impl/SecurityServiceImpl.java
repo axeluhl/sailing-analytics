@@ -326,13 +326,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 // Permission association is owned by the server tenant.
                 // This typically ensures that the server admin is able to remove the association.
                 setOwnership(qualifiedTypeIdentifierForPermission, null, getDefaultTenant());
-                
-                // All users may read the initial set of RoleDefinition to be able to assign those roles to other users
+            }
+            
+            if (isInitialOrMigration) {
+                // predefined roles are meant to be publicly readable
                 for (UUID predefinedRoleId : getPredefinedRoleIds()) {
                     final RoleDefinition predefinedRole = getRoleDefinition(predefinedRoleId);
                     if (predefinedRole != null) {
-                        addPermissionForUserAndSetUserAsOwner(allUser,
-                                predefinedRole.getIdentifier().getPermission(DefaultActions.READ));
+                        addToAccessControlList(predefinedRole.getIdentifier(), null, DefaultActions.READ.name());
                     }
                 }
             }
@@ -1097,14 +1098,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         addRoleForUser(user.getName(), role);
         TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
         QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
-                .getQualifiedObjectIdentifier(associationTypeIdentifier);
-        setOwnership(qualifiedTypeIdentifier, user, null);
-    }
-    
-    public void addPermissionForUserAndSetUserAsOwner(User user, WildcardPermission permission) {
-        addPermissionForUser(user.getName(), permission);
-        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission, user);
-        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
                 .getQualifiedObjectIdentifier(associationTypeIdentifier);
         setOwnership(qualifiedTypeIdentifier, user, null);
     }
