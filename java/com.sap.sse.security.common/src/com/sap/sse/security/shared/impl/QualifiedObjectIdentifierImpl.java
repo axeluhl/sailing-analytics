@@ -18,7 +18,7 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
         }
         typeIdentifier = qualifiedObjectIdentifierAsString.substring(0, indexOfSeparator);
         String typeRelativeIdentifier = qualifiedObjectIdentifierAsString.substring(indexOfSeparator + 1);
-        typeRelativeObjectIdentifier = new TypeRelativeObjectIdentifier(typeRelativeIdentifier);
+        typeRelativeObjectIdentifier = TypeRelativeObjectIdentifier.fromEncodedString(typeRelativeIdentifier);
     }
 
     public QualifiedObjectIdentifierImpl(String typeIdentifier, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier) {
