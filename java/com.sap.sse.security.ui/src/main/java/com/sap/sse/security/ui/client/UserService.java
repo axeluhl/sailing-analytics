@@ -512,6 +512,11 @@ public class UserService {
         return this.hasCurrentUserAnyPermission(createPermission, null);
     }
     
+    public boolean hasCurrentUserPermissionToUpdateAnyObjectOfType(HasPermissions type) {
+        final WildcardPermission createPermission = type.getPermission(DefaultActions.UPDATE);
+        return this.hasCurrentUserAnyPermission(createPermission, null);
+    }
+    
     public ServerInfoDTO getServerInfo() {
         return serverInfo;
     }

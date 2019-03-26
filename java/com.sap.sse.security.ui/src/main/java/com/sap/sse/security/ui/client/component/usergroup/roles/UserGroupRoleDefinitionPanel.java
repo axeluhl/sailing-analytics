@@ -99,7 +99,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
     private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
-        buttonPanel.addCreateAction(stringMessages.addRole(), () -> {
+        buttonPanel.addUpdateAction(stringMessages.addRole(), () -> {
             final UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
             if (selectedObject != null) {
                 StrippedRoleDefinitionDTO role = ((RoleDefinitionSuggestOracle) suggestRole.getSuggestOracle())
