@@ -83,7 +83,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         this.stringMessages = stringMessages;
         this.userService = userService;
         
-        mainPanel = new Grid(3, 3);
+        mainPanel = new Grid(2, 3);
         mainPanel.setCellPadding(5);
         mainPanel.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         
