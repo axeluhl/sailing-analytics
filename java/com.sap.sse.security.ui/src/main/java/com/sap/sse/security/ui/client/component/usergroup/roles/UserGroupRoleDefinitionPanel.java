@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client.component.usergroup.roles;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.USER_GROUP;
 
 import com.google.gwt.core.shared.GWT;
@@ -46,10 +47,10 @@ public class UserGroupRoleDefinitionPanel extends Composite
             final SingleSelectionModel<UserGroupDTO> userGroupSelectionModel,
             UserGroupListDataProvider userGroupListDataProvider) {
         this.userGroupSelectionModel = userGroupSelectionModel;
-        final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         final VerticalPanel mainPanel = new VerticalPanel();
 
-        suggestRole = new SuggestBox(new RoleDefinitionSuggestOracle(userManagementService, stringMessages));
+        suggestRole = new SuggestBox(
+                new RoleDefinitionSuggestOracle(userService.getUserManagementService(), stringMessages));
         userGroupRoleResources.css().ensureInjected();
         suggestRole.addStyleName(userGroupRoleResources.css().roleDefinitionSuggest());
         suggestRole.getElement().setPropertyString("placeholder", stringMessages.enterRoleName());
@@ -62,7 +63,12 @@ public class UserGroupRoleDefinitionPanel extends Composite
                 userGroupSelectionModel);
 
         // create button bar
-        mainPanel.add(createButtonPanel(userService, stringMessages, userManagementService));
+        final Widget buttonPanel = createButtonPanel(userService, stringMessages);
+        this.userGroupSelectionModel.addSelectionChangeHandler(event -> {
+            final UserGroupDTO selectedUserGroup = this.userGroupSelectionModel.getSelectedObject();
+            buttonPanel.setVisible(userService.hasPermission(selectedUserGroup, UPDATE));
+        });
+        mainPanel.add(buttonPanel);
 
         final ScrollPanel scrollPanel = new ScrollPanel(roleDefinitionTableWrapper.asWidget());
         final LabeledAbstractFilterablePanel<Pair<StrippedRoleDefinitionDTO, Boolean>> userGroupfilterBox = roleDefinitionTableWrapper
@@ -90,9 +96,9 @@ public class UserGroupRoleDefinitionPanel extends Composite
     }
 
     /** Creates the button bar with add/remove/refresh buttons and the SuggestBox. */
-    private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages,
-            final UserManagementServiceAsync userManagementService) {
+    private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
+        final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         buttonPanel.addCreateAction(stringMessages.addRole(), () -> {
             final UserGroupDTO selectedObject = userGroupSelectionModel.getSelectedObject();
             if (selectedObject != null) {

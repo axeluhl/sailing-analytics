@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client.component.usergroup.users;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.USER_GROUP;
 
 import java.util.ArrayList;
@@ -118,7 +119,12 @@ public class UserGroupDetailPanel extends Composite
 
         // add buttons, filter and listbox to panel
         final VerticalPanel addUserToGroupPanel = new VerticalPanel();
-        addUserToGroupPanel.add(createButtonPanel(userService, stringMessages, userService.getUserManagementService()));
+        final Widget buttonPanel = createButtonPanel(userService, stringMessages);
+        this.userGroupSelectionModel.addSelectionChangeHandler(event -> {
+            final UserGroupDTO selectedUserGroup = this.userGroupSelectionModel.getSelectedObject();
+            buttonPanel.setVisible(userService.hasPermission(selectedUserGroup, UPDATE));
+        });
+        addUserToGroupPanel.add(buttonPanel);
         addUserToGroupPanel.add(filterPanel);
         // addUserToGroupPanel.add(tenantUsersPanelCaption);
         addUserToGroupPanel.add(tenantUsersTable);
@@ -127,10 +133,9 @@ public class UserGroupDetailPanel extends Composite
     }
 
     /** Creates the button bar with add/remove/refresh buttons and the SuggestBox. */
-    private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages,
-            final UserManagementServiceAsync userManagementService) {
+    private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
-
+        final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         // setup suggest
         this.oracle = new UserGroupSuggestOracle(userManagementService, stringMessages);
         final SuggestBox suggestUser = new SuggestBox(oracle);
