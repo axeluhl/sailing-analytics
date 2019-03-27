@@ -4939,7 +4939,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 final RegattaScoreCorrections scoreCorrections = scp.getScoreCorrections(eventName, boatClassName,
                         new MillisecondsTimePoint(timePointWhenResultPublished));
                 final RegattaDTO regatta = getRegattaByName(scoreCorrections.getRegattaName());
-                getSecurityService().checkCurrentUserUpdatePermission(regatta);
+                getSecurityService().checkCurrentUserReadPermission(regatta);
                 result = createScoreCorrection(scoreCorrections);
                 break;
             }
