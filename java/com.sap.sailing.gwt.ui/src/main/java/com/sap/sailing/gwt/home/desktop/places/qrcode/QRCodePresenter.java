@@ -64,7 +64,7 @@ public class QRCodePresenter {
         final String host;
         final Integer port;
         String[] protocolAndHostPort = rawTargetServer.split("://");
-        protocol = protocolAndHostPort[0];
+        protocol = protocolAndHostPort[0] + ":";
 
         if (protocolAndHostPort[1].contains(":")) {
             String[] parts = protocolAndHostPort[1].split(":");
@@ -88,8 +88,8 @@ public class QRCodePresenter {
 
     private boolean isCorrectServer(Triple<String, String, Integer> correctServerHost) {
         boolean protocolSame = Util.equalsWithNull(correctServerHost.getA(), Window.Location.getProtocol());
-        boolean hostSame = Util.equalsWithNull(correctServerHost.getB(), Window.Location.getHost());
-        boolean portSame = Util.equalsWithNull(correctServerHost.getC(), Window.Location.getPort());
+        boolean hostSame = Util.equalsWithNull(correctServerHost.getB(), Window.Location.getHostName());
+        boolean portSame = Util.equalsWithNull("" + correctServerHost.getC(), Window.Location.getPort());
         return protocolSame && hostSame && portSame;
     }
 
