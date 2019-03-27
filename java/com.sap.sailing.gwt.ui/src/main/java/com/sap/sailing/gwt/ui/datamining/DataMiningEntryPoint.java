@@ -65,7 +65,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         session = new UUIDDataMiningSession(UUID.randomUUID());
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService,
                 RemoteServiceMappingConstants.dataMiningServiceRemotePath);
-        runWithServerInfo(serverInfo -> createDataminingPanel(serverInfo, Window.Location.getParameter("q")));
+        getUserService().executeWithServerInfo(s -> createDataminingPanel(s, Window.Location.getParameter("q")));
     }
 
     private void createDataminingPanel(ServerInfoDTO serverInfo, final String queryIdentifier) {

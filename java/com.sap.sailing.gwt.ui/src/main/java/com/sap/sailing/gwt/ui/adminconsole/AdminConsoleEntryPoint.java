@@ -72,7 +72,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
-        runWithServerInfo(serverInfo->createUI(serverInfo));
+        getUserService().executeWithServerInfo(this::createUI);
     }
      
     private void createUI(final ServerInfoDTO serverInfo) {

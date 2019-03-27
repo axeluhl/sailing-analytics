@@ -1,11 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.function.Consumer;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
-import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.ServiceRoutingProvider;
 import com.sap.sse.security.ui.client.AbstractSecureEntryPoint;
 
@@ -33,20 +29,6 @@ public abstract class AbstractSailingEntryPoint extends AbstractSecureEntryPoint
             }
         }
         return sailingService;
-    }
-    
-    protected void runWithServerInfo(final Consumer<ServerInfoDTO> serverInfoConsumer) {
-        getSailingService().getServerInfo(new AsyncCallback<ServerInfoDTO>() {
-            @Override
-            public void onSuccess(ServerInfoDTO result) {
-                serverInfoConsumer.accept(result);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                serverInfoConsumer.accept(null);
-            }
-        });
     }
     
     @Override

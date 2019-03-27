@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -257,6 +258,16 @@ public class UserService {
         if (userInitiallyLoaded && fireIfUserIsAlreadyAvailable) {
             handler.onUserStatusChange(currentUser, preAuthenticated);
         }
+    }
+
+    public void executeWithServerInfo(Consumer<ServerInfoDTO> consumer) {
+        this.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO u, boolean p) {
+                consumer.accept(getServerInfo());
+                removeUserStatusEventHandler(this);
+            }
+        }, true);
     }
 
     public void removeUserStatusEventHandler(UserStatusEventHandler handler) {
