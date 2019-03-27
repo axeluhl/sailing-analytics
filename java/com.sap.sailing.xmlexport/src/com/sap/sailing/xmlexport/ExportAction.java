@@ -45,7 +45,7 @@ public abstract class ExportAction {
     private Leaderboard leaderboard;
     protected final boolean useProvidedLeaderboard;
     private String resultingXMLData;
-    private final SecurityService securityService;
+    protected final SecurityService securityService;
     
     public ExportAction(HttpServletRequest req, HttpServletResponse res, RacingEventService service,
             final SecurityService securityService) {

@@ -1033,6 +1033,7 @@ public class LeaderboardData extends ExportAction {
     
     public void perform() throws Exception {
         final Leaderboard leaderboard = getLeaderboard();
+        securityService.checkCurrentUserReadPermission(leaderboard);
         TimePoint timeSpent = MillisecondsTimePoint.now();
         log.info("Starting XML export of " + leaderboard.getName());
         Util.Pair<Double, Vector<String>> leaderboardConfidenceAndErrorMessages = checkData(leaderboard);
@@ -1052,6 +1053,9 @@ public class LeaderboardData extends ExportAction {
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null) {
+                    if (!securityService.hasCurrentUserReadPermission(trackedRace)) {
+                        continue;
+                    }
                     sameDayGroupIndex += getSameDayGroupIndex(raceColumn.getTrackedRace(fleet), raceBefore);
                 }
                 TimePoint timeSpentForRace = MillisecondsTimePoint.now();
