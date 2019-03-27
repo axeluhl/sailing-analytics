@@ -438,18 +438,18 @@ public class EventsResource extends AbstractSailingServerResource {
         }
         if (createLeaderboardGroup && getService().getLeaderboardGroupByName(leaderboardGroupName) != null) {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                    .entity(ExceptionManager.objectAlreadyExists("leaderboard group", createLeaderboardGroupParam))
+                    .entity(ExceptionManager.objectAlreadyExists("leaderboard group", leaderboardGroupName))
                     .type(MediaType.TEXT_PLAIN).build());
         }
         if (createRegatta) {
             if (getService().getRegattaByName(regattaAndLeaderboardName) != null) {
                 throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                        .entity(ExceptionManager.objectAlreadyExists("regatta", createRegattaParam))
+                        .entity(ExceptionManager.objectAlreadyExists("regatta", regattaAndLeaderboardName))
                         .type(MediaType.TEXT_PLAIN).build());
             }
             if (getService().getLeaderboardByName(regattaAndLeaderboardName) != null) {
                 throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                        .entity(ExceptionManager.objectAlreadyExists("leaderboard", createRegattaParam))
+                        .entity(ExceptionManager.objectAlreadyExists("leaderboard", regattaAndLeaderboardName))
                         .type(MediaType.TEXT_PLAIN).build());
             }
         }
