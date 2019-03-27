@@ -6095,7 +6095,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         boolean result = false;
         Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdAsString);
-        getSecurityService().checkCurrentUserReadPermission(existingCompetitor);
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog != null && existingCompetitor != null) {
             List<RaceLogRegisterCompetitorEvent> linkEventsToRevoke = new ArrayList<>();
