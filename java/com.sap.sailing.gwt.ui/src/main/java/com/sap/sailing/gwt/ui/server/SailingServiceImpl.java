@@ -874,6 +874,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<CompetitorDescriptor> getCompetitorDescriptors(String competitorProviderName, String eventName,
             String regattaName) throws Exception {
+        final Regatta regatta = getService().getRegattaByName(regattaName);
+        getSecurityService().checkCurrentUserReadPermission(regatta);
         for (CompetitorProvider cp : getAllCompetitorProviders()) {
             if (cp.getName().equals(competitorProviderName)) {
                 final List<CompetitorDescriptor> result = new ArrayList<>();
