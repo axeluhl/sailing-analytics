@@ -95,7 +95,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                 competitorInRegatta = Util.contains(regatta.getAllCompetitors(), competitor);
             }
             if (!(skip && competitorInRegatta)) {
-                getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
+                getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             String jsonString = getCompetitorJSON(competitor).toJSONString();

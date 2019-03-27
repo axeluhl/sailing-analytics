@@ -435,7 +435,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      *         ({@code actions} is an empty array), {@code false} is returned because the user has none of the
      *         permissions from this empty set.
      */
-    boolean hasCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+    boolean hasCurrentUserOneOfExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
 
     /**
      * Checks if the current user has the {@link DefaultActions#READ READ} permission on the {@code object} identified.
@@ -474,7 +474,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * the current user formally has no permission for any action provided, so consequently an {@link AuthorizationException}
      * results. Checks for a {@code null} value for {@code object} always pass without exception.
      */
-    void checkCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+    void checkCurrentUserHasOneOfExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
 
     /**
      * Since there are some HasPermission objects, that have no Ownership, this method is used to explicitly mention

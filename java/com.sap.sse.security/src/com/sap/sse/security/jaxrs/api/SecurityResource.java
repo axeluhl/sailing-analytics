@@ -158,7 +158,7 @@ public class SecurityResource extends AbstractSecurityResource {
         if (user == null) {
             return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
         } else if (getService().hasCurrentUserReadPermission(user) || getService()
-                .hasCurrentUserAnyExplicitPermissions(user, SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC)) {
+                .hasCurrentUserOneOfExplicitPermissions(user, SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC)) {
             // TODO: pruning when current user only has READ_PUBLIC
             JSONObject result = new JSONObject();
             result.put("username", user.getName());

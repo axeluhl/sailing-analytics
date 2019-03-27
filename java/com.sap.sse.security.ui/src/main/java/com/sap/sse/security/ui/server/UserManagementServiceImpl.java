@@ -521,7 +521,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public void updateSimpleUserPassword(final String username, String oldPassword, String passwordResetSecret, String newPassword) throws UserManagementException {
         final User user = getSecurityService().getUserByName(username);
         getSecurityService().checkCurrentUserUpdatePermission(user);
-        if (getSecurityService().hasCurrentUserAnyExplicitPermissions(user, UserActions.FORCE_OVERWRITE_PASSWORD)) {
+        if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(user, UserActions.FORCE_OVERWRITE_PASSWORD)) {
             // e.g. admin is allowed to update the password without knowing the old password and/or secret
             getSecurityService().updateSimpleUserPassword(username, newPassword);
             sendPasswordChangedMailAsync(username);

@@ -89,17 +89,17 @@ public class SecurityResourceTest {
     
     @Test
     public void testCheckCurrentUserAnyExplicitPermissionsForNullObject() {
-        assertTrue(authenticatedAdmin.execute(()->service.hasCurrentUserAnyExplicitPermissions(/* object */ null, HasPermissions.DefaultActions.READ)));
-        authenticatedAdmin.execute(()->service.checkCurrentUserAnyExplicitPermissions(/* object */ null, HasPermissions.DefaultActions.READ));
+        assertTrue(authenticatedAdmin.execute(()->service.hasCurrentUserOneOfExplicitPermissions(/* object */ null, HasPermissions.DefaultActions.READ)));
+        authenticatedAdmin.execute(()->service.checkCurrentUserHasOneOfExplicitPermissions(/* object */ null, HasPermissions.DefaultActions.READ));
     }
     
     @Test
     public void testCheckCurrentUserAnyExplicitPermissionsForEmptyActionsList() {
         final MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.dbId = "Humba";
-        assertFalse(authenticatedAdmin.execute(()->service.hasCurrentUserAnyExplicitPermissions(mediaTrack /* and an empty list of actions */)));
+        assertFalse(authenticatedAdmin.execute(()->service.hasCurrentUserOneOfExplicitPermissions(mediaTrack /* and an empty list of actions */)));
         try {
-            authenticatedAdmin.execute(()->service.checkCurrentUserAnyExplicitPermissions(mediaTrack /* and an empty list of actions */));
+            authenticatedAdmin.execute(()->service.checkCurrentUserHasOneOfExplicitPermissions(mediaTrack /* and an empty list of actions */));
             fail("Expected AuthorizationException due to empty actions list; user cannot have any of no exceptions");
         } catch (AuthorizationException e) {
             // expected
@@ -111,9 +111,9 @@ public class SecurityResourceTest {
         final MediaTrack mediaTrack = new MediaTrack();
         mediaTrack.dbId = "Humba";
         authenticatedAdmin.logout();
-        assertFalse(authenticatedAdmin.execute(()->service.hasCurrentUserAnyExplicitPermissions(mediaTrack, HasPermissions.DefaultActions.READ)));
+        assertFalse(authenticatedAdmin.execute(()->service.hasCurrentUserOneOfExplicitPermissions(mediaTrack, HasPermissions.DefaultActions.READ)));
         try {
-            authenticatedAdmin.execute(()->service.checkCurrentUserAnyExplicitPermissions(mediaTrack, HasPermissions.DefaultActions.READ));
+            authenticatedAdmin.execute(()->service.checkCurrentUserHasOneOfExplicitPermissions(mediaTrack, HasPermissions.DefaultActions.READ));
             fail("Expected AuthorizationException");
         } catch (AuthorizationException e) {
             // expected
@@ -123,8 +123,8 @@ public class SecurityResourceTest {
     @Test
     public void testCheckCurrentUserAnyExplicitPermissionsForLoggedOutUserOnNullObject() {
         authenticatedAdmin.logout();
-        assertTrue(authenticatedAdmin.execute(()->service.hasCurrentUserAnyExplicitPermissions(null, HasPermissions.DefaultActions.READ)));
-        authenticatedAdmin.execute(()->service.checkCurrentUserAnyExplicitPermissions(null, HasPermissions.DefaultActions.READ));
+        assertTrue(authenticatedAdmin.execute(()->service.hasCurrentUserOneOfExplicitPermissions(null, HasPermissions.DefaultActions.READ)));
+        authenticatedAdmin.execute(()->service.checkCurrentUserHasOneOfExplicitPermissions(null, HasPermissions.DefaultActions.READ));
     }
     
     @Test

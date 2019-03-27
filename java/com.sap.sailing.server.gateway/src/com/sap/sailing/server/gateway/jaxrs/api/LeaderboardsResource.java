@@ -503,7 +503,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
             if (!skip) {
                 getSecurityService().checkCurrentUserReadPermission(leaderboard);
-                getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
+                getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);

@@ -2118,7 +2118,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return isPermitted;
     }
 
-    public boolean hasCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+    public boolean hasCurrentUserOneOfExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
         boolean result = object == null;
         if (object != null) {
             for (com.sap.sse.security.shared.HasPermissions.Action action : actions) {
@@ -2169,7 +2169,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void checkCurrentUserAnyExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+    public void checkCurrentUserHasOneOfExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
         if (object != null) {
             boolean isPermitted = false;
             for (int i = 0; i < actions.length; i++) {

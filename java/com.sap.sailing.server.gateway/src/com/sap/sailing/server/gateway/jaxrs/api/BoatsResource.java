@@ -40,7 +40,7 @@ public class BoatsResource extends AbstractSailingServerResource {
                 boatInRegatta = Util.contains(regatta.getAllBoats(), boat);
             }
             if (!(skip && boatInRegatta)) {
-                getSecurityService().checkCurrentUserAnyExplicitPermissions(boat,
+                getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(boat,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             BoatJsonSerializer boatJsonSerializer = BoatJsonSerializer.create();

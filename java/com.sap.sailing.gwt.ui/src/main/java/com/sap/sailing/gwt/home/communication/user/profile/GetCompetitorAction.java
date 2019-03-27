@@ -39,7 +39,7 @@ public class GetCompetitorAction implements SailingAction<SimpleCompetitorWithId
             CompetitorAndBoatStore competitorStore = ctx.getRacingEventService().getCompetitorAndBoatStore();
             Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(id.toString());
             if (competitor != null) {
-                ctx.getSecurityService().checkCurrentUserAnyExplicitPermissions(competitor,
+                ctx.getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             return (competitor == null ? new SimpleCompetitorWithIdDTO(id.toString(), id.toString(), "", null, null)
