@@ -30,16 +30,6 @@ public class QRCodePlace extends AbstractBasePlace {
     private String rawCheckInUrl;
     private String targetServer;
 
-    public QRCodePlace(UUID eventId, UUID competitorId, String leaderboardName, String regattaName,
-            String regattaRegistrationLinkSecret, String checkInUrl) {
-        this.eventId = eventId;
-        this.competitorId = competitorId;
-        this.leaderboardName = leaderboardName;
-        this.regattaName = regattaName;
-        this.regattaRegistrationLinkSecret = regattaRegistrationLinkSecret;
-        this.checkInUrl = checkInUrl;
-    }
-
     public enum InvitationMode {
         COMPETITOR_2,
         COMPETITOR,
