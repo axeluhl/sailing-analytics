@@ -41,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         setup()
         Branch.getInstance().initSession(launchOptions: launchOptions) { (params, error) in
             guard let data = params as? [String: AnyObject] else { return }
-            if let checkinUrl = data["checkin_url"] as? String {
+            if let checkinUrl = data["checkinUrl"] as? String {
                 Preferences.newCheckInURL = checkinUrl.removingPercentEncoding
             }
         }
@@ -50,7 +50,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
         let branchQueryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
-        if (branchQueryItems?.first(where: {$0.name == "checkin_url"})) != nil {
+        if (branchQueryItems?.first(where: {$0.name == "checkinUrl"})) != nil {
             Branch.getInstance().application(app, open: url, options: options)
         } else {
             Preferences.newCheckInURL = urlStringForDeeplink(url: url)

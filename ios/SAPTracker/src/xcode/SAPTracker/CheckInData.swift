@@ -125,7 +125,7 @@ class CheckInData: NSObject {
 
         // handle the case where a user uses the app to scan a QR code containing a branch.io deeplink
         let branchQueryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
-        let checkinUrl = branchQueryItems?.first(where: {$0.name == "checkin_url"}).map { URL(string: $0.value!)! }
+        let checkinUrl = branchQueryItems?.first(where: {$0.name == "checkinUrl"}).map { URL(string: $0.value!)! }
 
         let unwrappedUrl = checkinUrl ?? url
 
