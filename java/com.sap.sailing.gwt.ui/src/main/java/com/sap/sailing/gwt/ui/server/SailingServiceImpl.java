@@ -8137,7 +8137,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Set<Competitor> newEliminatedCompetitors = new HashSet<>();
         for (final CompetitorDTO cDTO : newEliminatedCompetitorDTOs) {
             final Competitor competitor = getCompetitor(cDTO);
-            getSecurityService().checkCurrentUserReadPermission(competitor);
             newEliminatedCompetitors.add(competitor);
         }
         getService().apply(new UpdateEliminatedCompetitorsInLeaderboard(leaderboardName, newEliminatedCompetitors));
