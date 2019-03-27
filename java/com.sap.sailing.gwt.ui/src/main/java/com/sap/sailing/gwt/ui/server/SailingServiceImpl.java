@@ -6668,7 +6668,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        getSecurityService().checkCurrentUserUpdatePermission(raceColumn.getTrackedRace(fleet));
 
         Map<Competitor, Boat> competitorToBoatMappingsToRegister = new HashMap<>();
         for (Entry<? extends CompetitorDTO, BoatDTO> competitorAndBoatEntry : competitorAndBoatDTOs.entrySet()) {
@@ -6690,7 +6689,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        getSecurityService().checkCurrentUserUpdatePermission(raceColumn.getTrackedRace(fleet));
 
         Map<CompetitorWithBoat, Boat> competitorsToRegister = new HashMap<>();
         for (CompetitorWithBoatDTO dto : competitorDTOs) {
