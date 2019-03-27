@@ -130,7 +130,6 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.filestorage.FileStorageService;
-import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
@@ -411,8 +410,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             String regattaName) throws Exception;
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
-
-    ServerInfoDTO getServerInfo();
 
     ServerConfigurationDTO getServerConfiguration();
 

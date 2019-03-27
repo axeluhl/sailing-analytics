@@ -4991,8 +4991,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }
 
-    @Override
-    public ServerInfoDTO getServerInfo() {
+    private ServerInfoDTO getServerInfo() {
         ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, result.getIdentifier());
         return result;

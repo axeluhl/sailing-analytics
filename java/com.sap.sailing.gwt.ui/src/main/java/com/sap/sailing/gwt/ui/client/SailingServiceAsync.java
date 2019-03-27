@@ -112,7 +112,6 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
@@ -126,7 +125,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 /**
  * The async counterpart of {@link SailingService}
  */
-public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageManagementGwtServiceAsync, RemoteReplicationServiceAsync {
+public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsync, RemoteReplicationServiceAsync {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
