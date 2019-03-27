@@ -11,11 +11,13 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace.InvitationMode;
+import com.sap.sailing.gwt.home.shared.partials.dialog.confirm.ConfirmDialogFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeWrapper;
+import com.sap.sse.common.Util.Triple;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class QRCodeView extends Composite {
     private static QRCodeViewUiBinder uiBinder = GWT.create(QRCodeViewUiBinder.class);
@@ -50,19 +52,29 @@ public class QRCodeView extends Composite {
 
     }
 
-    public void setData(EventViewDTO event, SimpleCompetitorWithIdDTO competitor, String leaderboardName, String url,
+    public void setData(EventViewDTO event, String participantTitle, String leaderboardName, String url,
             InvitationMode invitationMode) {
         switch (invitationMode) {
         case COMPETITOR:
         case COMPETITOR_2:
-            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitle(competitor.getName(), leaderboardName));
-            subtitleDivUi.setInnerText(
-                    StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitle(participantTitle, leaderboardName));
+            if (event != null) {
+                subtitleDivUi.setInnerText(
+                        StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
+            }
+            break;
+        case PUBLIC_INVITE:
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRegatta(leaderboardName));
+            if (event != null) {
+                subtitleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeSubtitleOpenRegatta());
+            }
             break;
         case BOUY_TENDER:
             titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleBouy(leaderboardName));
-            subtitleDivUi.setInnerText(
-                    StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
+            if (event != null) {
+                subtitleDivUi.setInnerText(
+                        StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
+            }
             break;
         }
 
@@ -83,14 +95,32 @@ public class QRCodeView extends Composite {
                     }
                 }).inject();
 
-        eventImageUi.getStyle().setBackgroundImage("url('" + event.getLogoImage().getSourceRef() + "')");
-        eventImageUi.getStyle().setWidth(event.getLogoImage().getWidthInPx(), Unit.PX);
-        eventImageUi.getStyle().setHeight(event.getLogoImage().getHeightInPx(), Unit.PX);
+        if (event != null) {
+            eventImageUi.getStyle().setBackgroundImage("url('" + event.getLogoImage().getSourceRef() + "')");
+            eventImageUi.getStyle().setWidth(event.getLogoImage().getWidthInPx(), Unit.PX);
+            eventImageUi.getStyle().setHeight(event.getLogoImage().getHeightInPx(), Unit.PX);
+        }
     }
 
     public void setError() {
         errorDivUi.setInnerText(StringMessages.INSTANCE.qrCodeErrorMessage());
         infoDivUi.removeFromParent();
+    }
+
+    public void showRedirectionDialog(Triple<String, String, Integer> correctServerHost, Runnable runnable) {
+        ConfirmDialogFactory.showConfirmDialog(
+                StringMessages.INSTANCE.qrCodeUnsecureServerRedirect(correctServerHost.getB()),
+                StringMessages.INSTANCE.qrCodeUnsecureServerRedirectTitle(correctServerHost.getB()),
+                new DialogCallback<Void>() {
+                    @Override
+                    public void ok(Void editedObject) {
+                        runnable.run();
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                });
     }
 
 }

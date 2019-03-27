@@ -65,8 +65,9 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<QRCodePlace> getQRCodeNavigation(UUID eventId, UUID competitorId, String leaderboardName,
-            String checkInUrl) {
-        return createGlobalPlaceNavigation(new QRCodePlace(eventId, competitorId, leaderboardName, checkInUrl));
+            String regattaName, String regattaRegistrationLinkSecret, String checkInUrl) {
+        return createGlobalPlaceNavigation(new QRCodePlace(eventId, competitorId, leaderboardName, regattaName,
+                regattaRegistrationLinkSecret, checkInUrl));
     }
 
     public PlaceNavigation<ImprintPlace> getImprintNavigation() {
