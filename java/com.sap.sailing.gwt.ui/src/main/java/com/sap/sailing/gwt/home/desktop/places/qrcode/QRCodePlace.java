@@ -54,36 +54,25 @@ public class QRCodePlace extends AbstractBasePlace {
                 if (rawCheckInUrl != null) {
                     checkInUrl = decodeUrl(rawCheckInUrl);
                     parseUrl(checkInUrl);
-                    if (mode == InvitationMode.PUBLIC_INVITE) {
-                        if (regattaName == null) {
-                            GWT.log("No parameter " + PARAM_REGATTA_NAME + " found");
-                        }
-                        if (regattaRegistrationLinkSecret == null) {
-                            GWT.log("No parameter " + PARAM_REGATTA_SECRET + " found");
-                        }
-                    } else {
-                        if (leaderboardName == null) {
-                            GWT.log("No parameter " + DeviceMappingConstants.URL_LEADERBOARD_NAME + " found!");
-                        }
-                        if (competitorId == null
-                                && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
-                            GWT.log("No parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING + " found!");
-                        }
-                        if (boatId == null
-                                && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
-                            GWT.log("No parameter " + DeviceMappingConstants.URL_BOAT_ID_AS_STRING + " found!");
-                        }
-                        if (markId == null
-                                && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
-                            GWT.log("No parameter " + DeviceMappingConstants.URL_MARK_ID_AS_STRING + " found!");
-                        }
-                        if (competitorId != null && mode == InvitationMode.BOUY_TENDER) {
-                            GWT.log("Found parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING
-                                    + " but is not required!");
-                        }
-                        if (eventId == null) {
-                            GWT.log("No parameter " + DeviceMappingConstants.URL_EVENT_ID + " found!");
-                        }
+                    if (leaderboardName == null) {
+                        GWT.log("No parameter " + DeviceMappingConstants.URL_LEADERBOARD_NAME + " found!");
+                    }
+                    if (competitorId == null
+                            && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
+                        GWT.log("No parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING + " found!");
+                    }
+                    if (boatId == null && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
+                        GWT.log("No parameter " + DeviceMappingConstants.URL_BOAT_ID_AS_STRING + " found!");
+                    }
+                    if (markId == null && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
+                        GWT.log("No parameter " + DeviceMappingConstants.URL_MARK_ID_AS_STRING + " found!");
+                    }
+                    if (competitorId != null && mode == InvitationMode.BOUY_TENDER) {
+                        GWT.log("Found parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING
+                                + " but is not required!");
+                    }
+                    if (eventId == null) {
+                        GWT.log("No parameter " + DeviceMappingConstants.URL_EVENT_ID + " found!");
                     }
                 } else {
                     GWT.log("No parameter " + DeviceMappingConstants.URL_CHECKIN_URL + " found!");
@@ -134,13 +123,11 @@ public class QRCodePlace extends AbstractBasePlace {
                     boatId = null;
                 }
             } else if (DeviceMappingConstants.URL_LEADERBOARD_NAME.equals(parameter.getA())) {
-                leaderboardName = parameter.getB().replace("+", " ");
+                leaderboardName = parameter.getB();
             } else if (PARAM_REGATTA_NAME.equals(parameter.getA())) {
-                regattaName = parameter.getB().replace("+", " ");
+                regattaName = parameter.getB();
             } else if (PARAM_REGATTA_SECRET.equals(parameter.getA())) {
-                regattaRegistrationLinkSecret = parameter.getB().replace("+", " ");
-            } else if (PARAM_REGATTA_SECRET.equals(parameter.getA())) {
-                regattaRegistrationLinkSecret = parameter.getB().replace("+", " ");
+                regattaRegistrationLinkSecret = parameter.getB();
             }
         }
     }
