@@ -6067,16 +6067,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             String competitorIdAsString, String boatIdAsString) throws NotFoundException {
         final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
-        if (leaderboard != null) {
-            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-            if (raceColumn != null) {
-                final Fleet fleet = raceColumn.getFleetByName(fleetName);
-                if (fleet != null) {
-                    final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                    getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
-                }
-            }
-        }
         boolean result = false;
         Boat existingBoat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatIdAsString);
         Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdAsString);
