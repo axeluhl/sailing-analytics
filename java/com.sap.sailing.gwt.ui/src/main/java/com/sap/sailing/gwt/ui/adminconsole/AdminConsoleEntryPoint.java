@@ -341,7 +341,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         }, getStringMessages().expeditionDeviceConfigurations(),
                 SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getPermission(DefaultActions.values()));
 
-        ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(getSailingService(), this, getStringMessages());
+        ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(
+                getSailingService(), getUserService(), this, getStringMessages());
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ResultImportUrlsManagementPanel>(resultImportUrlsManagementPanel),
                 getStringMessages().resultImportUrls(),
                 SecuredDomainType.RESULT_IMPORT_URL.getPermission(DefaultActions.values()));

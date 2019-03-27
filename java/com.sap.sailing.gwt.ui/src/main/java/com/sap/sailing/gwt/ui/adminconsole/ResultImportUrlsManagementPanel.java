@@ -6,8 +6,6 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -16,6 +14,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
@@ -25,6 +24,8 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 public class ResultImportUrlsManagementPanel extends FlowPanel {
     private final ListBox urlProviderSelectionListBox;
@@ -38,7 +39,7 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
     private final Button removeButton;
     private final Button refreshButton;
 
-    public ResultImportUrlsManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public ResultImportUrlsManagementPanel(SailingServiceAsync sailingService, UserService userService, ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         final Label sampleURLLabel = new Label();
         this.sailingService = sailingService;
@@ -63,27 +64,12 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
                 refreshUrlList();
             }
         });
-        addButton = new Button(stringMessages.add());
-        removeButton = new Button(stringMessages.remove());
-        refreshButton = new Button(stringMessages.refresh());
-        addButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addUrl();
-            }
-        });
-        removeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                removeSelectedUrls();
-            }
-        });
-        refreshButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                refreshUrlList();
-            }
-        });
+        
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredDomainType.RESULT_IMPORT_URL);
+        addButton = buttonPanel.addCreateAction(stringMessages.add(), this::addUrl);
+        removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), this::removeSelectedUrls);
+        refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::refreshUrlList);
+        
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel providerSelectionPanel = new HorizontalPanel();
         providerSelectionPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -106,11 +92,8 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
         });
         vp.add(urlListBox);
         vp.add(sampleURLLabel);
-        HorizontalPanel buttonPanel = new HorizontalPanel();
+        
         vp.add(buttonPanel);
-        buttonPanel.add(addButton);
-        buttonPanel.add(removeButton);
-        buttonPanel.add(refreshButton);
         add(vp);
         refreshUrlList();
     }
