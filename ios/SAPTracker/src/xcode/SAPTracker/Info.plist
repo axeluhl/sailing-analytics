@@ -25,12 +25,6 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>comsailtrackssailinginsight</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
 				<string>comsapsailingtracker</string>
 			</array>
 		</dict>
@@ -81,8 +75,8 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>branch_app_domain</key>
-	<string>sailinsight20-app.sapsailing.com</string>
+	<string>sailinsight-app.sapsailing.com</string>
 	<key>branch_key</key>
-	<string>key_live_dfPlye3KB3UqKx6h9FhdAmbbytkpdUuA</string>
+	<string>key_live_ges90RzIjjgM0vg8wbTtYcdmtCeYJMAZ</string>
 </dict>
 </plist>
