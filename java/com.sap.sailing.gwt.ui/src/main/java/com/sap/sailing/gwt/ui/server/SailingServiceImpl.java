@@ -4936,8 +4936,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         RegattaScoreCorrectionDTO result = null;
         for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
             if (scp.getName().equals(scoreCorrectionProviderName)) {
-                result = createScoreCorrection(scp.getScoreCorrections(eventName, boatClassName,
-                        new MillisecondsTimePoint(timePointWhenResultPublished)));
+                final RegattaScoreCorrections scoreCorrections = scp.getScoreCorrections(eventName, boatClassName,
+                        new MillisecondsTimePoint(timePointWhenResultPublished));
+                final RegattaDTO regatta = getRegattaByName(scoreCorrections.getRegattaName());
+                getSecurityService().checkCurrentUserUpdatePermission(regatta);
+                result = createScoreCorrection(scoreCorrections);
                 break;
             }
         }
