@@ -1869,6 +1869,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
+    public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck) {
+        if (hasPermissionsProvider == null) {
+            logger.warning(
+                    "Missing HasPermissionsProvider for any permission check. Using basic permission check that will produce false negatives in some cases.");
+            // In case we can not resolve all available HasPermissions instances, an any permission check will not be
+            // able to produce the expected results.
+            // A basic permission check is done instead. This will potentially produce false negatives but never false
+            // positives.
+            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), null, null);
+        } else {
+            return PermissionChecker.hasUserAnyPermission(permissionToCheck, hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), null);
+        }
+    }
+    
+    @Override
     public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(final RoleDefinition roleDefinition, final Ownership qualificationForGrantedPermissions) {
         boolean result = true;
         for (WildcardPermission permissionToCheck : roleDefinition.getPermissions()) {

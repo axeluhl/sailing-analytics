@@ -4967,9 +4967,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<Pair<String, String>> getUrlResultProviderNamesAndOptionalSampleURL() {
         List<Pair<String, String>> result = new ArrayList<>();
-        for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
-            if (scp instanceof ResultUrlProvider) {
-                result.add(new Pair<>(scp.getName(), ((ResultUrlProvider) scp).getOptionalSampleURL()));
+        // In case a user may not read any result import URL, just an empty result is returned because
+        // selecting a type will never show an entry.
+        if (getSecurityService()
+                .hasCurrentUserAnyPermission(SecuredDomainType.RESULT_IMPORT_URL.getPermission(DefaultActions.READ))) {
+            for (ScoreCorrectionProvider scp : getAllScoreCorrectionProviders()) {
+                if (scp instanceof ResultUrlProvider) {
+                    result.add(new Pair<>(scp.getName(), ((ResultUrlProvider) scp).getOptionalSampleURL()));
+                }
             }
         }
         return result;

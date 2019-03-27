@@ -28,6 +28,7 @@ import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
@@ -554,4 +555,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     /** Sets the default ownership based on the current user. */
     void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description);
+
+    /**
+     * Checks if a user has at least one permission implied by the given {@link WildcardPermission}.
+     * 
+     * @see PermissionChecker#hasUserAnyPermission(WildcardPermission, Iterable,
+     *      com.sap.sse.security.shared.SecurityUser, com.sap.sse.security.shared.SecurityUser,
+     *      com.sap.sse.security.shared.AbstractOwnership)
+     */
+    boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck);
 }
