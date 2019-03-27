@@ -526,6 +526,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
             Callable<T> actionToDeleteObject);
     
+    /**
+     * Do only use this, if it is not possible to get the actual instance of the object to delete using the
+     * WithQualifiedObjectIdentifier variant
+     */
+    void checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
+            Action actionToDeleteObject);
+    
     <T> T doWithTemporaryDefaultTenant(UserGroup tenant, Callable<T> action);
 
     /**

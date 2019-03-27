@@ -5148,12 +5148,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
         if (urlBasedScoreCorrectionProvider != null) {
             for (String urlToRemove : toRemove) {
-                resultUrlRegistry.unregisterResultUrl(resultProviderName, new URL(urlToRemove));
+                getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
+                        SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
+                                new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(),
+                                        urlToRemove)),
+                        () -> resultUrlRegistry.unregisterResultUrl(resultProviderName, new URL(urlToRemove)));
             }
         }
     }
@@ -5163,7 +5166,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         ResultUrlProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
         if (urlBasedScoreCorrectionProvider != null) {
             ResultUrlRegistry resultUrlRegistry = getResultUrlRegistry();
-            resultUrlRegistry.registerResultUrl(resultProviderName, new URL(url));
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.RESULT_IMPORT_URL,
+                    new TypeRelativeObjectIdentifier(urlBasedScoreCorrectionProvider.getName(), url), url,
+                    () -> resultUrlRegistry.registerResultUrl(resultProviderName, new URL(url)));
         }
     }
 

@@ -1741,6 +1741,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new RuntimeException(e);
         }
     }
+    
+    @Override
+    public void checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
+            Action actionToDeleteObject) {
+        checkPermissionAndDeleteOwnershipForObjectRemoval(identifier, () -> {
+            actionToDeleteObject.run();
+            return null;
+        });
+    }
 
     @Override
     public void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier) {
