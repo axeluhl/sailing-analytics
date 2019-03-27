@@ -22,7 +22,7 @@ public class HasPermissionsTest {
 
     @Test
     public void getQualifiedObjectIdentifierFromTypedObjectIdentifer() {
-        final QualifiedObjectIdentifier q = QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("type/" + OBJECT_NAME);
+        final QualifiedObjectIdentifier q = QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("type/" + OBJECT_NAME_ENCODED);
         final HasPermissions h = new HasPermissionsImpl("type");
         final TypeRelativeObjectIdentifier t = new TypeRelativeObjectIdentifier(OBJECT_NAME);
         assertEquals(q, h.getQualifiedObjectIdentifier(t));
