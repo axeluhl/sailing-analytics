@@ -27,7 +27,8 @@ public class IgtimiWindTrackerFactory implements WindTrackerFactory {
     public WindTracker createWindTracker(DynamicTrackedRegatta trackedRegatta, RaceDefinition race,
             boolean correctByDeclination, SecurityService optionalSecurityService) throws Exception {
         DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
-        IgtimiWindTracker windTracker = new IgtimiWindTracker(trackedRace, connectionFactory, this, correctByDeclination);
+        IgtimiWindTracker windTracker = new IgtimiWindTracker(trackedRace, connectionFactory, this,
+                correctByDeclination, optionalSecurityService);
         trackersForRace.put(race, windTracker);
         return windTracker;
     }
