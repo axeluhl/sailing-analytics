@@ -73,7 +73,7 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
     public void testCheckinAndCheckout() throws Exception {
         {
             Response response = leaderboardsResource.pingMark(PING_MARK_JSON, leaderboard.getName(),
-                    mark.getId().toString());
+                    mark.getId().toString(), null);
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
             Map<Mark, List<DeviceMappingWithRegattaLogEvent<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(
                     log).analyze();
@@ -85,7 +85,7 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         // now produce a second ping; this should produce also only one fix; no additional artificial fixes are
         // created (anymore; they used to be before bug2851)
             Response response = leaderboardsResource.pingMark(PING2_MARK_JSON, leaderboard.getName(),
-                    mark.getId().toString());
+                    mark.getId().toString(), null);
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
             Map<Mark, List<DeviceMappingWithRegattaLogEvent<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(
                     log).analyze();

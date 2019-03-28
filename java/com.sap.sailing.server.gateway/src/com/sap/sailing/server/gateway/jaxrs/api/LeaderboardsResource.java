@@ -1247,10 +1247,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Leaderboard with name '" + leaderboardName + "'does not contain a RegattaLog'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
-        if (!skip) {
-            getSecurityService().checkCurrentUserReadPermission(leaderboard);
-        }
         Mark mark = null;
         for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (final Mark availableMark : raceColumn.getAvailableMarks()) {
@@ -1263,6 +1259,10 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         if (mark == null) {
             return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + StringEscapeUtils.escapeHtml(markId) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
+        }
+        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+        if (!skip) {
+            getSecurityService().checkCurrentUserReadPermission(leaderboard);
         }
         final TimePoint now = MillisecondsTimePoint.now();
         Position lastKnownPosition = getService().getMarkPosition(mark, (LeaderboardThatHasRegattaLike) leaderboard, now);
@@ -1290,7 +1290,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     @Path("{leaderboardName}/marks/{markId}/gps_fixes")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response pingMark(String json, @PathParam("leaderboardName") String leaderboardName,
-            @PathParam("markId") String markId) throws HTTPException {
+            @PathParam("markId") String markId, @QueryParam("secret") String regattaSecret) throws HTTPException {
         logger.fine("Post issued to " + this.getClass().getName());
         final RacingEventService service = getService();
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -1312,6 +1312,9 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         if (mark == null) {
             return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + StringEscapeUtils.escapeHtml(markId) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
+        }
+        if (!skipChecksDueToCorrectSecret(leaderboardName, regattaSecret)) {
+            getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         }
         // grab the position as found in TrackedRaces attached to the leaderboard
         final GPSFix fix;
