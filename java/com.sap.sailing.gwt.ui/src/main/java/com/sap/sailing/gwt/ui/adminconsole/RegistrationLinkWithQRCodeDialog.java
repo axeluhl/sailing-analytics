@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
@@ -20,6 +23,11 @@ import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.controls.GenericListBox;
+import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<RegistrationLinkWithQRCode> {
@@ -37,6 +45,7 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
     private final TextBox urlTextBox;
     private final Image qrCodeImage;
     private final String secret;
+    private final GenericListBox<EventDTO> events;
 
     private RegistrationLinkWithQRCode registrationLinkWithQRCode;
     private MailInvitationType invitationType;
@@ -59,6 +68,40 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         registrationLinkPanel = new CaptionPanel(stringMessages.registrationLinkUrl());
         registrationLinkPanelContent = new VerticalPanel();
         registrationLinkPanel.add(registrationLinkPanelContent);
+
+        final Label eventExplain = new Label(stringMessages.event());
+
+        events = createGenericListBox(new ValueBuilder<EventDTO>() {
+            @Override
+            public String getValue(EventDTO item) {
+                if (item == null) {
+                    return "";
+                }
+                return item.getName();
+            }
+        }, false);
+        sailingService.getEventsForLeaderboard(regattaName, new AsyncCallback<Collection<EventDTO>>() {
+            @Override
+            public void onSuccess(Collection<EventDTO> result) {
+                events.addItems(result);
+                updateDisplayWidgets();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify("Could not load events: " + caught.getMessage(), NotificationType.ERROR);
+            }
+        });
+        events.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                updateDisplayWidgets();
+            }
+        });
+
+        registrationLinkPanelContent.add(eventExplain);
+        registrationLinkPanelContent.add(events);
+
         registrationLinkExplain = new Label(stringMessages.registrationLinkUrlExplain());
         registrationLinkPanelContent.add(registrationLinkExplain);
         urlTextBox = createTextBox("URL", 100);
@@ -104,20 +147,28 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
 
         dialogPanel.add(registrationLinkPanel);
         dialogPanel.add(barcodePanel);
-        updateDisplayWidgets();
         return panel;
     }
 
     private void updateDisplayWidgets() {
+        if (events.getValue() == null) {
+            Notification.notify(stringMessages.noEventSelected(), NotificationType.ERROR);
+            return;
+        }
+
         String baseUrl = GWT.getHostPageBaseURL();
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/"));
             baseUrl = baseUrl.substring(0, baseUrl.indexOf("/gwt"));
         }
+
+        final String eventIdAsString = events.getValue().id.toString();
+
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("regatta_name", regattaName);
         parameters.put("secret", secret);
         parameters.put("server", baseUrl);
+        parameters.put("event_id", eventIdAsString);
         String deeplinkUrl = BranchIO.generateLink(BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO, parameters,
                 URL::encodeQueryString);
         urlTextBox.setText(deeplinkUrl);
