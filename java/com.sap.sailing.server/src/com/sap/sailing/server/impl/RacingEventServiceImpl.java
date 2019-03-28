@@ -2750,7 +2750,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) {
         for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
             try {
-                windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+                windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination,
+                        getSecurityService());
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to track wind using wind tracker factory "+windTrackerFactory, e);
             }

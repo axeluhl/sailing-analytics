@@ -30,6 +30,7 @@ import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdenti
 import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIdentifierImpl;
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
+import com.sap.sse.security.SecurityService;
 
 public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegistry {
     private static Logger logger = Logger.getLogger(ExpeditionTrackerFactory.class.getName());
@@ -140,7 +141,7 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     
     @Override
     public WindTracker createWindTracker(DynamicTrackedRegatta trackedRegatta, RaceDefinition race,
-            boolean correctByDeclination) throws SocketException {
+            boolean correctByDeclination, SecurityService optionalSecurityService) throws SocketException {
         WindTracker result = getExistingWindTracker(race);
         if (result == null) {
             DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
