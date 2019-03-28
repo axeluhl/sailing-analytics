@@ -40,6 +40,7 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
 import org.apache.shiro.crypto.RandomNumberGenerator;
@@ -1737,6 +1738,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final T result = actionToDeleteObject.call();
             deleteAllDataForRemovedObject(identifier);
             return result;
+        } catch (UnauthorizedException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
