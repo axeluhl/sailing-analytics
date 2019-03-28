@@ -2,6 +2,14 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sailing.domain.common.security.SecuredDomainType.LEADERBOARD;
 import static com.sap.sailing.domain.common.security.SecuredDomainType.REGATTA;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_EDIT;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_REMOVE;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_FINISHING_AND_FINISH_TIME;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG;
+import static com.sap.sailing.gwt.ui.adminconsole.LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.READ;
@@ -84,7 +92,6 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
-import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
@@ -516,34 +523,30 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             }
         };
 
-        ImagesBarColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, LeaderboardRaceConfigImagesBarCell> raceActionColumn = new ImagesBarColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, LeaderboardRaceConfigImagesBarCell>(
-                new LeaderboardRaceConfigImagesBarCell(this, stringMessages));
-        raceActionColumn.setFieldUpdater((index, object, value) -> {
-            if (LeaderboardRaceConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                if (Window.confirm(stringMessages.reallyRemoveRace(object.getA().getRaceColumnName()))) {
-                    removeRaceColumn(object.getA());
-                }
-            } else if (LeaderboardRaceConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                editRaceColumnOfLeaderboard(object);
-            } else if (LeaderboardRaceConfigImagesBarCell.ACTION_UNLINK.equals(value)) {
-                unlinkRaceColumnFromTrackedRace(object.getA().getRaceColumnName(), object.getB());
-            } else if (LeaderboardRaceConfigImagesBarCell.ACTION_REFRESH_RACELOG.equals(value)) {
-                refreshRaceLog(object.getA(), object.getB(), true);
-            } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SET_STARTTIME.equals(value)) {
-                setStartTime(object.getA(), object.getB());
-            } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SET_FINISHING_AND_FINISH_TIME.equals(value)) {
-                setEndTime(object.getA(), object.getB());
-            } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
-                showRaceLog(object.getA(), object.getB());
-            } else if (LeaderboardRaceConfigImagesBarCell.ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS.equals(value)) {
-                editCompetitorToBoatMappings(object.getA(), object.getB());
+        final AccessControlledActionsColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, LeaderboardRaceConfigImagesBarCell> actionsColumn = create(
+                new LeaderboardRaceConfigImagesBarCell(this, stringMessages), userService,
+                item -> getSelectedLeaderboard());
+        actionsColumn.addAction(ACTION_EDIT, UPDATE, this::editRaceColumnOfLeaderboard);
+        actionsColumn.addAction(ACTION_UNLINK, UPDATE,
+                object -> unlinkRaceColumnFromTrackedRace(object.getA().getRaceColumnName(), object.getB()));
+        actionsColumn.addAction(ACTION_REMOVE, UPDATE, object -> {
+            if (Window.confirm(stringMessages.reallyRemoveRace(object.getA().getRaceColumnName()))) {
+                removeRaceColumn(object.getA());
             }
         });
+        actionsColumn.addAction(ACTION_REFRESH_RACELOG, UPDATE,
+                object -> refreshRaceLog(object.getA(), object.getB(), true));
+        actionsColumn.addAction(ACTION_SET_STARTTIME, UPDATE, object -> setStartTime(object.getA(), object.getB()));
+        actionsColumn.addAction(ACTION_SET_FINISHING_AND_FINISH_TIME, UPDATE,
+                object -> setEndTime(object.getA(), object.getB()));
+        actionsColumn.addAction(ACTION_SHOW_RACELOG, UPDATE, object -> showRaceLog(object.getA(), object.getB()));
+        actionsColumn.addAction(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, UPDATE,
+                object -> editCompetitorToBoatMappings(object.getA(), object.getB()));
 
         racesTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
         racesTable.addColumn(isLinkedRaceColumn, stringMessages.islinked());
         racesTable.addColumn(explicitFactorColumn, stringMessages.factor());
-        racesTable.addColumn(raceActionColumn, stringMessages.actions());
+        racesTable.addColumn(actionsColumn, stringMessages.actions());
 
         racesTable.ensureDebugId("RacesCellTable");
     }
