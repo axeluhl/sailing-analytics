@@ -12,8 +12,9 @@
 <h2>URL: /api/v1/leaderboards/{name}/marks/{id}/gps_fixes</h2>
 
 <b>Description:</b>
-<p>Adds an arbitrary number GPS-fixes that originated from a device with a unique identifier as fixes for the mark.
-This is done by adding the fixes to the GPSFixStore, and creating device-mappings in the RegattaLog attached to the Leaderboard.</p>
+<p>Adds a single GPS fix as fixe for the mark.
+This is done by adding the fix to the GPSFixStore and creating a millisecond-long device-mapping
+in the RegattaLog attached to the Leaderboard for an artificial device ID used only for this fix.</p>
 <br/>
 <table>
 	<tr>
@@ -44,25 +45,11 @@ This is done by adding the fixes to the GPSFixStore, and creating device-mapping
 		<td>Example:</td>
 		<td>POST <a href="http://www.sapsailing.com/sailingserver/api/v1/leaderboards/{name}/marks/{id}/gps_fixes">http://www.sapsailing.com/sailingserver/api/v1/leaderboards/{name}/marks/{id}/gps_fixes</a>
 			<pre><code>
-{
-  "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
-  "fixes" : [
     {
       "timestamp" : 14144160080000,
       "latitude" : 54.325246,
-      "longitude" : 10.148556,
-      "speed" : 3.61,
-      "course" : 258.11,
-    },
-    {
-      "timestamp" : 14144168490000,
-      "latitude" : 55.12456,
-      "longitude" : 8.03456,
-      "speed" : 5.1,
-      "course" : 14.2,
+      "longitude" : 10.148556
     }
-  ]
-}
 			</code></pre>
 		</td>
 	</tr>
