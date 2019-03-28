@@ -1,9 +1,8 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
-import java.util.UUID;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.content.Context;
+import android.location.Location;
+import android.net.Uri;
 
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
@@ -15,22 +14,34 @@ import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
 import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 
-import android.content.Context;
-import android.location.Location;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.UUID;
+
+import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_SECRET;
 
 public class PingHelper {
     private static String TAG = PingHelper.class.getName();
 
     public void sendPingToServer(final Context context, Location location, LeaderboardInfo leaderBoard, MarkInfo mark,
-            Class<? extends ServerReplyCallback> callback) {
+            String secret, Class<? extends ServerReplyCallback> callback) {
         AppPreferences prefs = new AppPreferences(context);
         try {
             JSONObject fixJson = new JSONObject();
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, location.getTime());
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
-            String postUrlStr = leaderBoard.serverUrl
-                    + prefs.getServerMarkPingPath(leaderBoard.name, mark.getId().toString());
+
+            Uri uri = Uri.parse(leaderBoard.serverUrl);
+            Uri.Builder builder = new Uri.Builder()
+                    .scheme(uri.getScheme())
+                    .authority(uri.getAuthority())
+                    .appendEncodedPath(prefs.getServerMarkPingPath(leaderBoard.name, mark.getId().toString()));
+            if (secret != null) {
+                builder.appendQueryParameter(URL_SECRET, secret);
+            }
+            String postUrlStr = builder.build().toString();
             context.startService(MessageSendingService.createMessageIntent(context, postUrlStr, null, UUID.randomUUID(),
                     fixJson.toString(), callback));
 
