@@ -182,4 +182,6 @@ public interface UserManagementService extends RemoteService {
     TypeRelativeObjectIdentifier serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier);
 
     RolesAndPermissionsForUserDTO getRolesAndPermissionsForUser(String username) throws UserManagementException;
+
+    Boolean userGroupExists(String userGroupName);
 }

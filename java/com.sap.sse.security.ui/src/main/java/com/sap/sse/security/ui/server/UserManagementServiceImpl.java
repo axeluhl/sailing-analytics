@@ -1097,6 +1097,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
+    public Boolean userGroupExists(String userGroupName) {
+        return getSecurityService().getUserGroupByName(userGroupName) != null;
+    }
+
+    @Override
     public RolesAndPermissionsForUserDTO getRolesAndPermissionsForUser(String username) throws UserManagementException {
         final User user = getSecurityService().getUserByName(username);
         if (user == null) {

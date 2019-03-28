@@ -191,4 +191,6 @@ public interface UserManagementServiceAsync {
     void serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, AsyncCallback<TypeRelativeObjectIdentifier> callback);
 
     void getRolesAndPermissionsForUser(String username, AsyncCallback<RolesAndPermissionsForUserDTO> callback);
+
+    void userGroupExists(String userGroupName, AsyncCallback<Boolean> callback);
 }

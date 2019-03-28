@@ -20,6 +20,9 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
     private final TextBox nameBox;
     private final UserManagementServiceAsync userManagementService;
     
+    private boolean resolvingUserGroupname = false;
+    private boolean userGroupnameUnavailable = true;
+
     public static class UserGroupData {
         private final String name;
         
@@ -60,15 +63,17 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
     }
     
     private CreateUserGroupDialog(final StringMessages stringMessages, final String title, final String message,
-            final UserManagementServiceAsync userManagementService, final UserGroupDTO tenant
-                , final DialogCallback<UserGroupData> callback) {
-        super(title, message, stringMessages.ok(), stringMessages.cancel(),
-                new DataEntryDialog.Validator<UserGroupData>() {
-                    @Override
-                    public String getErrorMessage(UserGroupData valueToValidate) {
-                        return null; // TODO: Check if owner is really a tenant and name is unique?
-                    }
-                }, callback);
+            final UserManagementServiceAsync userManagementService, final UserGroupDTO tenant,
+            final DialogCallback<UserGroupData> callback) {
+        super(title, message, stringMessages.ok(), stringMessages.cancel(), null, callback);
+        DataEntryDialog.Validator<UserGroupData> validator = new DataEntryDialog.Validator<UserGroupData>() {
+            @Override
+            public String getErrorMessage(UserGroupData valueToValidate) {
+                return resolvingUserGroupname ? stringMessages.pleaseWaitUntilUsernameIsResolved()
+                        : (userGroupnameUnavailable ? stringMessages.userAlreadyExists(nameBox.getText()) : null);
+            }
+        };
+        super.setValidator(validator);
         nameBox = createTextBox("", 30);
         nameBox.setName("name");
         if (tenant != null) {
@@ -76,6 +81,27 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
         }
         this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
+
+        nameBox.addKeyUpHandler(e -> checkIfUserGroupnameExists());
+    }
+
+    private void checkIfUserGroupnameExists() {
+        resolvingUserGroupname = true;
+        validateAndUpdate();
+        final String usergroupname = nameBox.getText();
+        userManagementService.userGroupExists(usergroupname, new AsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                userGroupnameUnavailable = result != null ? result : false;
+                resolvingUserGroupname = false;
+                validateAndUpdate();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
+            }
+        });
     }
     
     protected UserManagementServiceAsync getUserManagementService() {
