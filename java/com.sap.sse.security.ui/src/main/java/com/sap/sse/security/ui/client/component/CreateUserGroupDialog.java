@@ -1,12 +1,13 @@
 package com.sap.sse.security.ui.client.component;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -31,28 +32,31 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
         }
     }
     
-    public CreateUserGroupDialog(final StringMessages stringMessages, UserService userService, 
+    public CreateUserGroupDialog(final StringMessages stringMessages, final UserService userService,
             final UserManagementServiceAsync userManagementService,
-            final UserGroupListDataProvider userGroupListDataProvider, Runnable runOnSuccess) {
-        this(stringMessages, stringMessages.createUserGroup(), stringMessages.enterUserGroupName(), userManagementService, null, new DialogCallback<UserGroupData>() {
-            @Override
-            public void ok(UserGroupData userGroupData) {
+            final UserGroupListDataProvider userGroupListDataProvider, final Runnable runOnSuccess) {
+        this(stringMessages, stringMessages.createUserGroup(), stringMessages.enterUserGroupName(),
+                userManagementService, null, new DialogCallback<UserGroupData>() {
+                    @Override
+                    public void ok(UserGroupData userGroupData) {
                         userManagementService.createUserGroup(userGroupData.name, new AsyncCallback<UserGroupDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Error creating tenant.");
-                    }
-                    @Override
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Notification.notify(caught.getMessage(), NotificationType.ERROR);
+                            }
+
+                            @Override
                             public void onSuccess(UserGroupDTO result) {
-                        userGroupListDataProvider.updateDisplays();
+                                userGroupListDataProvider.updateDisplays();
                                 runOnSuccess.run();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
                     }
                 });
-            }
-            @Override
-            public void cancel() {
-            }
-        });
     }
     
     private CreateUserGroupDialog(final StringMessages stringMessages, final String title, final String message,
