@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.io.Serializable;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -11,4 +13,5 @@ public class SerializationDummy implements Serializable {
     PersonDTO personDTO;
     CountryCode countryCode;
     TypeRelativeObjectIdentifier typeRelativeObjectIdentifier;
+    UnauthorizedException execp;
 }
