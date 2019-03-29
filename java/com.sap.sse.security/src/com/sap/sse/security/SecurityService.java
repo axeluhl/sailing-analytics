@@ -567,4 +567,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     <T> T setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult);
+
+    void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
+            Action actionToCreateObject);
 }

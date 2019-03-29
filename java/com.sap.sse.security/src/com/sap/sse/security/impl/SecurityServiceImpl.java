@@ -1701,6 +1701,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
+            Action actionToCreateObject) {
+        setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(type, typeRelativeObjectIdentifier,
+                securityDisplayName, () -> {
+                    actionToCreateObject.run();
+                    return null;
+                });
+    }
+
+    @Override
     public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User user, UserGroup tenantOwner) {
         final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
         if (preexistingOwnership == null) {
