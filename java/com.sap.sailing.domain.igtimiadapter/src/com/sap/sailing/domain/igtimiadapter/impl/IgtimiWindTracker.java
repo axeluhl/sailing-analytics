@@ -85,13 +85,11 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
         final boolean isPermittedToUseAccount;
         final WildcardPermission permissionToCheck = account.getIdentifier().getPermission(DefaultActions.READ);
         final String stringPermissionToCheck = permissionToCheck.toString();
-        if (optionalSecurityService == null
-                || SecurityUtils.getSubject().isPermitted(stringPermissionToCheck.toString())) {
+        if (optionalSecurityService == null || SecurityUtils.getSubject().isPermitted(stringPermissionToCheck)) {
             isPermittedToUseAccount = true;
         } else if (!SecurityUtils.getSubject().isAuthenticated()) {
             // This is most probably a server reload where no security information is available
-            final OwnershipAnnotation ownershipOfRace = optionalSecurityService
-                    .getOwnership(trackedRace.getIdentifier());
+            final OwnershipAnnotation ownershipOfRace = optionalSecurityService.getOwnership(trackedRace.getIdentifier());
             final User userOwnerOfRace = ownershipOfRace == null ? null
                     : ownershipOfRace.getAnnotation().getUserOwner();
             if (userOwnerOfRace != null && SecurityUtils.getSecurityManager().isPermitted(
