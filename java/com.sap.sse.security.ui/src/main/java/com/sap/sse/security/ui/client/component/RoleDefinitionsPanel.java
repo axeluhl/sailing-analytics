@@ -98,7 +98,8 @@ public class RoleDefinitionsPanel extends VerticalPanel {
 
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, ROLE_DEFINITION);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateRoleDefinitions);
-        buttonPanel.addCreateAction(stringMessages.add(), this::createRoleDefinition);
+        buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.add(),
+                this::createRoleDefinition);
         buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
             final String roles = String.join(", ", Util.map(getSelectedRoleDefinitions(), RoleDefinitionDTO::getName));
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roles))) {
