@@ -343,7 +343,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     String.format("A user group with the name '%s' already exists.", name));
         }
 
-        UserGroup group = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+        UserGroup group = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER_GROUP, UserGroupImpl.getTypeRelativeObjectIdentifier(newTenantId), name, () -> {
                     
                     UserGroup userGroup;
