@@ -8835,6 +8835,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (resizingTask.getResizingTask() == null || resizingTask.getResizingTask().size() == 0) {
             throw new InvalidAttributeValueException("Resizing Task can not be null or empty");
         }
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(
+                        DefaultActions.UPDATE,
+                        new TypeRelativeObjectIdentifier(resizingTask.getImage().getSourceRef())));
+
         final ImageConverter converter = new ImageConverter();
         // calculating the fileType of the image by its uri
         final String sourceRef = resizingTask.getImage().getSourceRef();
