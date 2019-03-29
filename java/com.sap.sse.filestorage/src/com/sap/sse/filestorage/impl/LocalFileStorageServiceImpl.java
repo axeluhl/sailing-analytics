@@ -27,8 +27,11 @@ import com.sap.sse.filestorage.InvalidPropertiesException;
  * The accessibility of the files is ensured prior to activating the local file storage service by saving a testfile in
  * localPath, which is then accessed via basePath.
  * 
- * For testing purposes the baseUrl can be set to a file url: e.g. file://localhost/home/jan/sailing_test
- * and the local path subsequently: /home/jan/sailing_test
+ * For testing purposes the baseUrl can be set to a file url: e.g. file://localhost/home/jan/sailing_test and the local
+ * path subsequently: /home/jan/sailing_test
+ * 
+ * For Windows, this could be e.g. file:///C://Data/projects/sap-sailing/local-file-storage as baseUrl and
+ * C:\Data\projects\sap-sailing\local-file-storage as localPath
  * 
  * @author Jan Broß
  *
