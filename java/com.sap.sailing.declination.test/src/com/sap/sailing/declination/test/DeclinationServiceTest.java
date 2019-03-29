@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.declination.Declination;
@@ -19,7 +20,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class DeclinationServiceTest<I extends DeclinationImporter> extends AbstractDeclinationTest<I> {
-    private DeclinationService service;
+    protected DeclinationService service;
     
     @Before
     public void setUp() {
@@ -34,6 +35,7 @@ public abstract class DeclinationServiceTest<I extends DeclinationImporter> exte
         assertEquals(0.+09./60., result.getAnnualChange().getDegrees(), 0.0000001);
     }
 
+    @Ignore("Currently NOAA service ends Dec 2019; this test for now is only available for the Colorado importer")
     @Test
     public void testDeclinationQueryNotMatchedInStore() throws IOException, ClassNotFoundException, ParseException {
         Declination result = service.getDeclination(new MillisecondsTimePoint(simpleDateFormat.parse("2020-02-03").getTime()),

@@ -1,4 +1,4 @@
-FROM donaldduck70/sapjvm8:8.1.050
+FROM donaldduck70/sapjvm8:8.1.051
 LABEL maintainer=axel.uhl@sap.com
 # Download and extract the release
 WORKDIR /home/sailing/servers/server
@@ -14,6 +14,5 @@ RUN wget -O /tmp/RELEASE.tar.gz http://releases.sapsailing.com/RELEASE/RELEASE.t
 COPY env.sh .
 COPY start .
 COPY JavaSE-11.profile .
-RUN echo "alias tailf=\"tail -f\"" >>/root/.bashrc
 EXPOSE 8888 14888 8000 7091 6666
 CMD [ "/home/sailing/servers/server/start", "fg" ]

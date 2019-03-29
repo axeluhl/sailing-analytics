@@ -29,6 +29,7 @@ public class DeviceMappingConstants {
     public static final String URL_COMPETITOR_ID_AS_STRING = "competitor_id";
     public static final String URL_BOAT_ID_AS_STRING = "boat_id";
     public static final String URL_MARK_ID_AS_STRING = "mark_id";
+    public static final String URL_SECRET = "secret";
     public static final String URL_FROM_MILLIS = "from_millis";
     public static final String URL_TO_MILLIS = "to_millis";
 
@@ -38,6 +39,7 @@ public class DeviceMappingConstants {
     public static final String JSON_DEVICE_UUID = "deviceUuid";
     public static final String JSON_DEVICE_TYPE = "deviceType";
     public static final String JSON_PUSH_DEVICE_ID = "pushDeviceId";
+    public static final String JSON_REGISTER_SECRET = "secret";
     public static final String JSON_FROM_MILLIS = "fromMillis";
     
     /**

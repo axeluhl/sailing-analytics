@@ -7,7 +7,9 @@
 # of this file as there could be overwritten ones!
 # *******************************************************
 
-SERVER_NAME=MASTER
+if [ -z $SERVER_NAME ]; then
+  SERVER_NAME=MASTER
+fi
 
 # This is a default heap size only; the boot script of an instance (see
 # configuration/sailing) will add a MEMORY assignment to this file in the
@@ -22,12 +24,18 @@ MEMORY="6000m"
 
 # Message Queue hostname where to
 # send messages for replicas (this server is master)
-REPLICATION_HOST=localhost
+if [ -z $REPLICATION_HOST ]; then
+  REPLICATION_HOST=localhost
+fi
 # For the port, use 0 for the RabbitMQ default or a specific port that your RabbitMQ server is listening on
-REPLICATION_PORT=0
+if [ -z $REPLICATION_PORT ]; then
+  REPLICATION_PORT=0
+fi
 # The name of the message queuing fan-out exchange that this server will use in its role as replication master.
 # Make sure this is unique so that no other master is writing to this exchange at any time.
-REPLICATION_CHANNEL=sapsailinganalytics-master
+if [ -z $REPLICATION_CHANNEL ]; then
+  REPLICATION_CHANNEL=sapsailinganalytics-master
+fi
 
 if [ -z $TELNET_PORT ]; then
   TELNET_PORT=14888
@@ -85,11 +93,13 @@ CODE_DIRECTORY=code
 
 # Specify an email adress that should be notified
 # whenever a build or install has been completed
-BUILD_COMPLETE_NOTIFY=
+#
+# BUILD_COMPLETE_NOTIFY=
 
 # Specify an email address that should be notified
 # whenever the server has been started
-SERVER_STARTUP_NOTIFY=
+#
+# SERVER_STARTUP_NOTIFY=
 
 # Specify filename that is usually located at
 # http://release.sapsailing.com/ that should

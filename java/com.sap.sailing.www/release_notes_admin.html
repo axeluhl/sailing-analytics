@@ -21,6 +21,18 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+                    <h2 class="articleSubheadline">March 2019</h2>
+                    <ul class="bulletList">
+			<li>By caching serialized results of leaderboard requests the server now requires
+			    significantly less CPU power during live situations. Instead of computing the
+			    serialized representation of a leaderboard again and again, the serialized version
+			    is maintained in the cache as long as the original object from which the serialized
+			    version was produced is referenced. This way, the cache cleans itself. It can be
+			    observed through JMX, e.g., using JConsole, by looking at the JMX bean
+			    <tt>com.sap.sse:type=GWTRPCSerializedResultCache_*</tt>.
+			</li>
+                    </ul>
+                    
                     <h2 class="articleSubheadline">February 2019</h2>
                     <ul class="bulletList">
 			<li>The pairing list construction supports a new parameter that can be used

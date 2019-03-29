@@ -8,6 +8,7 @@ public abstract class UrlData {
     public int port;
     public String hostWithPort;
     public String checkinURLStr;
+    public String secret;
     public String eventId;
     public String leaderboardName;
     public DeviceIdentifier deviceUuid;

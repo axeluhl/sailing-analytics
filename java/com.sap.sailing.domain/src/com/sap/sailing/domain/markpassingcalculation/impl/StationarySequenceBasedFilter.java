@@ -347,6 +347,9 @@ public class StationarySequenceBasedFilter {
                     // within the sequence; remove:
                     latestStationarySequenceStartingAtOrBeforeRemovedCandidate.remove(removedCandidate,
                             candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                    if (Util.size(latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getAllCandidates()) <= 1) {
+                        stationarySequences.remove(latestStationarySequenceStartingAtOrBeforeRemovedCandidate);
+                    }
                     addToEffectivelyRemoved = false; // already taken care of by the remove call above
                 } else {
                     // candidate not in any sequence

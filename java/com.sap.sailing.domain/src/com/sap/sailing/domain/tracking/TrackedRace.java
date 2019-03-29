@@ -1132,4 +1132,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     SpeedWithBearing getVelocityMadeGood(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode,
             WindLegTypeAndLegBearingCache cache);
 
+    /**
+     * Obtains a quick, rough summary of the wind conditions during this race, based on a few wind samples at the
+     * beginning, in the middle and at the end of the race. This is summarized in a min and max wind speed as well
+     * as a single average wind direction.
+     */
+    WindSummary getWindSummary();
 }
