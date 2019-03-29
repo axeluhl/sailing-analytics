@@ -1668,6 +1668,33 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public <T> T setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult) {
+        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
+        T result = null;
+        boolean didSetOwnership = false;
+        try {
+            final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
+            if (preexistingOwnership == null) {
+                didSetOwnership = true;
+                setDefaultOwnership(identifier, securityDisplayName);
+            } else {
+                logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
+            }
+            SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
+            result = actionWithResult.call();
+        } catch (AuthorizationException e) {
+            if (didSetOwnership) {
+                deleteOwnership(identifier);
+            }
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    @Override
     public void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description) {
         setOwnership(identifier, getCurrentUser(), getDefaultTenantForCurrentUser(), description);
     }
