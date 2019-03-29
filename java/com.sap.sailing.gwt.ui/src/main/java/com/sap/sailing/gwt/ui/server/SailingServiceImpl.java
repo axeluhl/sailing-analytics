@@ -1797,6 +1797,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) {
+        if (!getSecurityService()
+                .hasCurrentUserAnyPermission(SecuredDomainType.SIMULATOR.getPermission(DefaultActions.READ))) {
+            throw new UnauthorizedException("Not permitted to see simulator results.");
+        }
+
         // get simulation-results from smart-future-cached simulation-service
         SimulatorResultsDTO result = null;
         SimulationService simulationService = getService().getSimulationService();
