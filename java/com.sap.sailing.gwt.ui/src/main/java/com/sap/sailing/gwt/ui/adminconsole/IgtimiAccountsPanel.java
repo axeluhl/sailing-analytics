@@ -167,7 +167,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                refresh(sailingService, errorReporter, stringMessages);
+                refresh();
             }
         });
         add(refreshButton);
@@ -188,7 +188,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 final Button addIgtimiUserButton = new Button(stringMessages.addIgtimiUser() + " (OAuth)");
                 addIgtimiUserButton.addClickHandler(clickEvent -> {
                     Frame frame = new Frame(UriUtils.fromString(result).asString());
-                    frame.addLoadHandler(loadEvent -> refresh(sailingService, errorReporter, stringMessages));
+                    frame.addLoadHandler(loadEvent -> refresh());
                     frame.setPixelSize(520, 770);
                     final CaptionImpl caption = new CaptionImpl();
                     caption.setText(stringMessages.addIgtimiUser());
@@ -206,7 +206,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                     panel.add(frame);
                     panel.add(closeButton);
                     dialogBox.addCloseHandler(event -> {
-                        refresh(sailingService, errorReporter, stringMessages);
+                        refresh();
                     });
                     dialogBox.center();
                 });
@@ -215,8 +215,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         });
     }
     
-    private void refresh(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final StringMessages stringMessages) {
+    public void refresh() {
         updateAllAccounts(sailingService, filterAccountsPanel, stringMessages, errorReporter);
     }
 

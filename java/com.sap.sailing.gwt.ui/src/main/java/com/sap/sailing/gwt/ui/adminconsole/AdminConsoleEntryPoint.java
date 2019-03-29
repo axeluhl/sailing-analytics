@@ -329,7 +329,13 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
 
         IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(getSailingService(), this, getStringMessages());
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
-        panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<IgtimiAccountsPanel>(igtimiAccountsPanel),
+        panel.addToTabPanel(connectorsTabPanel,
+                new DefaultRefreshableAdminConsolePanel<IgtimiAccountsPanel>(igtimiAccountsPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        igtimiAccountsPanel.refresh();
+                    }
+                },
                 getStringMessages().igtimiAccounts(),
                 SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
         ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages());
