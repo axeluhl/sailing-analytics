@@ -2127,7 +2127,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String swissTimingUpdatePassword();
     String allowResizing();
     String resizeSuccessfull();
-    String resizeUnsuccessfull();
+    String resizeUnsuccessful(String cause);
     String automaticResizeNeedsStorageService();
     String qrCodeTitle(String competitorName, String leaderName);
     String qrCodeSubtitle(String eventName, String eventLocationAndVenue);
