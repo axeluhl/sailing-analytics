@@ -60,7 +60,8 @@ public class UserGroupManagementPanel extends Composite {
             final UserManagementServiceAsync userManagementService) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> updateUserGroups());
-        buttonPanel.addCreateAction(stringMessages.createUserGroup(), () -> new CreateUserGroupDialog(stringMessages,
+        buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUserGroup(),
+                () -> new CreateUserGroupDialog(stringMessages,
                 userService, userManagementService, userGroupListDataProvider, () -> updateUserGroups()).show());
         buttonPanel.addRemoveAction(stringMessages.removeUserGroup(), () -> {
             UserGroupDTO userGroup = userGroupTableWrapper.getSelectionModel().getSelectedObject();
