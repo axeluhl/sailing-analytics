@@ -35,8 +35,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -51,7 +49,7 @@ import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -100,6 +98,8 @@ public class IgtimiAccountsPanel extends FlowPanel {
         this.stringMessages = stringMessages;
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+
+        // setup table
         final FlushableCellTable<AccountWithSecurityDTO> cellTable = new FlushableCellTable<>(/* pageSize */ 50,
                 tableRes);
         final ListDataProvider<AccountWithSecurityDTO> filteredAccounts = new ListDataProvider<>();
@@ -117,28 +117,29 @@ public class IgtimiAccountsPanel extends FlowPanel {
             }
         };
         createIgtimiAccountsTable(cellTable, tableRes, userService, filteredAccounts, filterAccountsPanel);
+        // refreshableAccountsSelectionModel will be of correct type, see below in createIgtimiAccountsTable
+        @SuppressWarnings("unchecked")
+        final RefreshableMultiSelectionModel<AccountWithSecurityDTO> refreshableAccountsSelectionModel = (RefreshableMultiSelectionModel<AccountWithSecurityDTO>) cellTable
+                .getSelectionModel();
 
-        final RefreshableSingleSelectionModel<AccountWithSecurityDTO> refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<>(
-                null, filterAccountsPanel.getAllListDataProvider());
+        // setup controls
         final Panel controlsPanel = new HorizontalPanel();
         final Button removeAccountButton = new Button(stringMessages.remove());
         removeAccountButton.setEnabled(false);
         removeAccountButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (refreshableAccountsSelectionModel.getSelectedObject() != null) {
+                if (refreshableAccountsSelectionModel.getSelectedSet().size() > 0) {
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiAccounts())) {
-                        removeAccount(refreshableAccountsSelectionModel.getSelectedObject(), filteredAccounts);
+                        for (AccountWithSecurityDTO account : refreshableAccountsSelectionModel.getSelectedSet()) {
+                            removeAccount(account, filteredAccounts);
+                        }
                     }
                 }
             }
         });
-        refreshableAccountsSelectionModel.addSelectionChangeHandler(new Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                removeAccountButton.setEnabled(refreshableAccountsSelectionModel.getSelectedObject() != null);
-            }
-        });
+        refreshableAccountsSelectionModel.addSelectionChangeHandler(
+                e -> removeAccountButton.setEnabled(refreshableAccountsSelectionModel.getSelectedSet().size() > 0));
         controlsPanel.add(filterAccountsPanel);
         controlsPanel.add(removeAccountButton);
         add(controlsPanel);
