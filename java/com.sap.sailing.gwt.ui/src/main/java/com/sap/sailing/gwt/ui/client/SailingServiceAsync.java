@@ -54,6 +54,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
+import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -1077,4 +1078,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             MigrateGroupOwnerForHierarchyDTO migrateGroupOwnerForHierarchyDTO, AsyncCallback<Void> callback);
 
     void getSecretForRegattaByName(String leaderboardName, AsyncCallback<String> asyncCallback);
+
+    void getAllIgtimiAccountsWithSecurity(AsyncCallback<Iterable<AccountWithSecurityDTO>> callback);
 }

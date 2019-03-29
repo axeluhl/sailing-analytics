@@ -70,6 +70,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
+import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -1134,4 +1135,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             MigrateGroupOwnerForHierarchyDTO migrateGroupOwnerForHierarchyDTO) throws UnauthorizedException;
 
     String getSecretForRegattaByName(String regattaName) throws UnauthorizedException;
+
+    Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() throws UnauthorizedException;
 }

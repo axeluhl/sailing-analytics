@@ -390,6 +390,7 @@ import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
+import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -6447,6 +6448,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public Iterable<String> getAllIgtimiAccountEmailAddresses() {
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.IGTIMI_ACCOUNT,
                 getIgtimiConnectionFactory().getAllAccounts(), acc -> acc.getUser().getEmail());
+    }
+
+    @Override
+    public Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.IGTIMI_ACCOUNT,
+                getIgtimiConnectionFactory().getAllAccounts(), acc -> addSecurityInformationToIgtimiAccountDTO(acc));
+    }
+
+    private AccountWithSecurityDTO addSecurityInformationToIgtimiAccountDTO(final Account igtimiAccount) {
+        final AccountWithSecurityDTO securedAccount = new AccountWithSecurityDTO(igtimiAccount.getUser());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedAccount, igtimiAccount.getIdentifier());
+        return securedAccount;
     }
 
     private IgtimiConnectionFactory getIgtimiConnectionFactory() {
