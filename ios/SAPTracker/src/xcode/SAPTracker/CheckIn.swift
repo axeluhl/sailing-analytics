@@ -17,6 +17,7 @@ class CheckIn: NSManagedObject {
         serverURL = checkInData.serverURL
         event.updateWithEventData(eventData: checkInData.eventData)
         leaderboard.updateWithLeaderboardData(leaderboardData: checkInData.leaderboardData)
+        secret = checkInData.secret
     }
 
     func eventURL() -> URL? {

@@ -614,6 +614,7 @@
 		10080BA7220C5DD200C6E0A2 /* FABKitProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FABKitProtocol.h; sourceTree = "<group>"; };
 		10080BA8220C5DD200C6E0A2 /* Fabric+FABKits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Fabric+FABKits.h"; sourceTree = "<group>"; };
 		10080BA9220C5DD200C6E0A2 /* FABAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FABAttributes.h; sourceTree = "<group>"; };
+		10C76537224BA455003254D8 /* CoreData 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 5.xcdatamodel"; sourceTree = "<group>"; };
 		64FDEBD220D12C390086C2F4 /* AFImageDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFImageDownloader.h; sourceTree = "<group>"; };
 		64FDEBD320D12C390086C2F4 /* AFAutoPurgingImageCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFAutoPurgingImageCache.h; sourceTree = "<group>"; };
 		64FDEBDA20D12DCE0086C2F4 /* AFAutoPurgingImageCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AFAutoPurgingImageCache.m; sourceTree = "<group>"; };
@@ -2855,12 +2856,13 @@
 		7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				10C76537224BA455003254D8 /* CoreData 5.xcdatamodel */,
 				C843D522201F1F17003725F0 /* CoreData 4.xcdatamodel */,
 				C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */,
 				C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */,
 				7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */,
 			);
-			currentVersion = C843D522201F1F17003725F0 /* CoreData 4.xcdatamodel */;
+			currentVersion = 10C76537224BA455003254D8 /* CoreData 5.xcdatamodel */;
 			path = CoreData.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
