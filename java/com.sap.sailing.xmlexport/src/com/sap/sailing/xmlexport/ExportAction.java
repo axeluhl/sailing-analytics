@@ -57,11 +57,10 @@ public abstract class ExportAction {
         this.useProvidedLeaderboard = false;
     }
     
-    public ExportAction(Leaderboard leaderboard) {
+    public ExportAction(Leaderboard leaderboard, SecurityService securityService) {
         this.leaderboard = leaderboard;
         this.useProvidedLeaderboard = true;
-        // no permission check needed since we already got a leaderboard
-        this.securityService = null;
+        this.securityService = securityService;
     }
 
     public String getAttribute(String name) {

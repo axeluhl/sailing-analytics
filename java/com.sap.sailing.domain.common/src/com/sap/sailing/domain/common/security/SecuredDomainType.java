@@ -33,6 +33,8 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static Iterable<HasPermissions> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
+
+    public static final HasPermissions SIMULATOR = new SecuredDomainType("SIMULATOR");
     
     // AdminConsole permissions
     public static final HasPermissions EVENT = new SecuredDomainType("EVENT");

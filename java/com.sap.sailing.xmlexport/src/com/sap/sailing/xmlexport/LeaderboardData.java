@@ -89,8 +89,8 @@ public class LeaderboardData extends ExportAction {
         this.raceColumnToCompetitors = new HashMap<>();
     }
     
-    public LeaderboardData(Leaderboard leaderboard) {
-        super(leaderboard);
+    public LeaderboardData(Leaderboard leaderboard, SecurityService securityService) {
+        super(leaderboard, securityService);
         this.raceColumnToCompetitors = new HashMap<>();
     }
 
