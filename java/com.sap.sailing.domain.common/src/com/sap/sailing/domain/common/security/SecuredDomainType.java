@@ -35,6 +35,8 @@ public class SecuredDomainType extends HasPermissionsImpl {
     }
 
     public static final HasPermissions SIMULATOR = new SecuredDomainType("SIMULATOR");
+
+    public static final HasPermissions FILE_STORAGE = new SecuredDomainType("FILE_STORAGE");
     
     // AdminConsole permissions
     public static final HasPermissions EVENT = new SecuredDomainType("EVENT");
