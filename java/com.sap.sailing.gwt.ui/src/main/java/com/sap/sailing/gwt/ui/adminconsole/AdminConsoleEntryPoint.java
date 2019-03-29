@@ -327,7 +327,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         regattasDisplayers.add(raceLogTrackingEventManagementPanel);
         leaderboardsDisplayers.add(raceLogTrackingEventManagementPanel);
 
-        IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(getSailingService(), this, getStringMessages());
+        IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(getSailingService(), this,
+                getStringMessages(), getUserService());
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
         panel.addToTabPanel(connectorsTabPanel,
                 new DefaultRefreshableAdminConsolePanel<IgtimiAccountsPanel>(igtimiAccountsPanel) {
