@@ -27,7 +27,8 @@ public class AccessControlledButtonPanel extends Composite {
     private final HorizontalPanel panel = new HorizontalPanel();
     private final Map<Button, Supplier<Boolean>> buttonToPermissions = new HashMap<>();
 
-    private final Supplier<Boolean> createPermissionCheck, removePermissionCheck, updatePermissionCheck;
+    private final Supplier<Boolean> createPermissionCheck, createPermissionCheckWithoutServerCreateObjectCheck,
+            removePermissionCheck, updatePermissionCheck;
     private final BiConsumer<Button, Supplier<Boolean>> visibilityUpdater = (btn, check) -> btn.setVisible(check.get());
 
     /**
@@ -41,6 +42,8 @@ public class AccessControlledButtonPanel extends Composite {
      */
     public AccessControlledButtonPanel(final UserService userService, final HasPermissions type) {
         this.createPermissionCheck = () -> userService.hasCurrentUserPermissionToCreateObjectOfType(type);
+        this.createPermissionCheckWithoutServerCreateObjectCheck = () -> userService
+                .hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
         this.removePermissionCheck = () -> userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(type);
         this.updatePermissionCheck = () -> userService.hasCurrentUserPermissionToUpdateAnyObjectOfType(type);
         userService.addUserStatusEventHandler((user, preAuth) -> updateVisibility(), true);
@@ -88,6 +91,13 @@ public class AccessControlledButtonPanel extends Composite {
      */
     public Button addCreateAction(final String text, final Command callback) {
         return addAction(text, createPermissionCheck, callback);
+    }
+
+    /**
+     * @see addCreateAction but here the User does not need to require the SERVER:CREATE_OBJECT permission
+     */
+    public Button addCreateActionWithoutServerCreateObjectPermissionCheck(final String text, final Command callback) {
+        return addAction(text, createPermissionCheckWithoutServerCreateObjectCheck, callback);
     }
 
     /**
