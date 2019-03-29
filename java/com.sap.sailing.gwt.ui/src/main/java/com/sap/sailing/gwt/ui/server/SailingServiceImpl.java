@@ -6453,11 +6453,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() {
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.IGTIMI_ACCOUNT,
-                getIgtimiConnectionFactory().getAllAccounts(), acc -> addSecurityInformationToIgtimiAccountDTO(acc));
+                getIgtimiConnectionFactory().getAllAccounts(), this::toSecuredIgtimiAccountDTO);
     }
 
-    private AccountWithSecurityDTO addSecurityInformationToIgtimiAccountDTO(final Account igtimiAccount) {
-
+    private AccountWithSecurityDTO toSecuredIgtimiAccountDTO(final Account igtimiAccount) {
         final com.sap.sailing.domain.igtimiadapter.User user = igtimiAccount.getUser();
         final String email = user.getEmail();
         final String name = user.getFirstName() + " " + user.getSurname();

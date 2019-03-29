@@ -17,6 +17,8 @@ public class AccountWithSecurityDTO implements SecuredDTO {
     private String name;
 
     public AccountWithSecurityDTO(String email, String name) {
+        this.email = email;
+        this.name = name;
     }
 
     public AccountWithSecurityDTO() {
@@ -28,6 +30,10 @@ public class AccountWithSecurityDTO implements SecuredDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     @Override
