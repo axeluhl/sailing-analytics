@@ -880,7 +880,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
 
             final String message = "added role " + role.getName() + " for user " + username;
-            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+            getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
                     associationTypeIdentifier.toString(), new Action() {
 
