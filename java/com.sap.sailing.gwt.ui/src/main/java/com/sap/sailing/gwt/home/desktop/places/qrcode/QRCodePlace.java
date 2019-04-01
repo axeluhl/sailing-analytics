@@ -134,7 +134,7 @@ public class QRCodePlace extends AbstractBasePlace {
         String[] urlArguments = checkInUrl.split("\\?");
         String targetServerWithPath = urlArguments[0];
         targetServer = targetServerWithPath.replace("/tracking/checkin", "");
-        targetServer = targetServerWithPath.replace("/buoy-tender/checkin", "");
+        targetServer = targetServer.replace("/buoy-tender/checkin", "");
 
         Collection<Pair<String, String>> pairs = new ArrayList<Pair<String, String>>();
         if (urlArguments.length < 2) {
