@@ -600,16 +600,15 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
-import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
-import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
@@ -5026,52 +5025,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         getService().apply(new UpdateServerConfiguration(
                 new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
         if (serverConfiguration.isSelfService() != null) {
-            final User allUser = getSecurityService().getAllUser();
-            if (allUser != null) {
-                final TypeRelativeObjectIdentifier typeRelativeServerObjectIdentifier = new TypeRelativeObjectIdentifier(ServerInfo.getName());
-                final QualifiedObjectIdentifier qualifiedServerObjectIdentifier = SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(typeRelativeServerObjectIdentifier);
-                final WildcardPermission createObjectOnCurrentServerPermission = qualifiedServerObjectIdentifier
-                        .getPermission(ServerActions.CREATE_OBJECT);
-                final boolean isCurrentlySelfService = Util.contains(allUser.getPermissions(), createObjectOnCurrentServerPermission);
-                final boolean shouldBeSelfService = serverConfiguration.isSelfService();
-                if (isCurrentlySelfService != shouldBeSelfService) {
-                    // value changed
-                    OwnershipAnnotation serverOwnership = getSecurityService().getOwnership(qualifiedServerObjectIdentifier);
-                    boolean userHasPermissionToChangeServerSelfService = getSecurityService().hasCurrentUserMetaPermission(
-                            createObjectOnCurrentServerPermission,
-                            serverOwnership == null ? null : serverOwnership.getAnnotation());
-                    if (!userHasPermissionToChangeServerSelfService) {
-                        throw new AuthorizationException("No permission to make the server self service");
-                    }
-                    TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation
-                            .get(createObjectOnCurrentServerPermission, allUser);
-                    QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
-                            .getQualifiedObjectIdentifier(associationTypeIdentifier);
-                    if (shouldBeSelfService) {
-                        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                                SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
-                                associationTypeIdentifier.toString(), new Action() {
-                                    @Override
-                                    public void run() throws Exception {
-                                        getSecurityService().addPermissionForUser(allUser.getName(),
-                                                createObjectOnCurrentServerPermission);
-                                    }
-                                });
-                    } else {
-                        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(qualifiedTypeIdentifier,
-                                new Callable<Void>() {
-                            
-                            @Override
-                            public Void call() throws Exception {
-                                getSecurityService().removePermissionFromUser(allUser.getName(),
-                                        createObjectOnCurrentServerPermission);
-                                return null;
-                            }
-                        });
-                    }
+            final boolean isCurrentlySelfService = isSelfServiceServer();
+            final boolean shouldBeSelfService = serverConfiguration.isSelfService();
+            if (isCurrentlySelfService != shouldBeSelfService) {
+                SecurityUtils.getSubject().checkPermission(getServerInfo().getIdentifier().getStringPermission(DefaultActions.CHANGE_ACL));
+                if (shouldBeSelfService) {
+                    getSecurityService().addToAccessControlList(getServerInfo().getIdentifier(), null, ServerActions.CREATE_OBJECT.name());
+                } else {
+                    getSecurityService().removeFromAccessControlList(getServerInfo().getIdentifier(), null, ServerActions.CREATE_OBJECT.name());
                 }
-            } else {
-                throw new IllegalArgumentException("<all> user does not exist");
             }
         }
         
@@ -9141,14 +9103,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private Boolean isSelfServiceServer() {
+        final AccessControlListAnnotation serverAclOrNull = getSecurityService().getAccessControlList(getServerInfo().getIdentifier());
         final Boolean result;
-        final User allUser = getSecurityService().getAllUser();
-        if (allUser != null) {
-            result = Util.contains(allUser.getPermissions(),
-                    SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT,
-                            new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        if (serverAclOrNull == null) {
+            result = false;
         } else {
-            result = null;
+            final AccessControlList acl = serverAclOrNull.getAnnotation();
+            final Set<String> grantedActionsForNullGroup = acl.getActionsByUserGroup().get(null);
+            if (grantedActionsForNullGroup == null) {
+                result = false;
+            } else {
+                result = grantedActionsForNullGroup.contains(ServerActions.CREATE_OBJECT.name());
+            }
         }
         return result;
     }
