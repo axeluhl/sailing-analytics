@@ -8170,11 +8170,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public BoatDTO getBoat(UUID boatId, String regattaName, String regattaRegistrationLinkSecret) {
         BoatDTO result = null;
-        Regatta regatta = getService().getRegattaByName(regattaName);
-        for(Boat boat:regatta.getAllBoats()) {
-            // TODO add visibility check on permission-vertical here
-            if (Util.equalsWithNull(boatId, boat.getId())) {
-                result = getBaseDomainFactory().convertToBoatDTO(boat);
+        Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
+        if (leaderboard != null && leaderboard instanceof RegattaLeaderboard) {
+            for (Boat boat : leaderboard.getAllBoats()) {
+                // TODO add visibility check on permission-vertical here
+                if (Util.equalsWithNull(boatId, boat.getId())) {
+                    result = getBaseDomainFactory().convertToBoatDTO(boat);
+                }
             }
         }
         return result;
