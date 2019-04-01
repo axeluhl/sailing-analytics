@@ -653,8 +653,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     private static final int LEADERBOARD_DIFFERENCE_CACHE_SIZE = 50;
 
-    private static final String MAILTYPE_PROPERTY = "com.sap.sailing.domain.tracking.MailInvitationType";
-
     private ResourceBundleStringMessages serverStringMessages;
 
     private final LinkedHashMap<String, LeaderboardDTO> leaderboardByNameResultsCacheById;
@@ -6724,7 +6722,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             competitors.add(getCompetitor(c));
         }
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+                .valueOf(System.getProperty(MailInvitationType.SYSTEM_PROPERTY_NAME, MailInvitationType.LEGACY.name()));
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
                 competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
@@ -6737,7 +6735,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Event event = getService().getEvent(eventDto.id);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+                .valueOf(System.getProperty(MailInvitationType.SYSTEM_PROPERTY_NAME, MailInvitationType.LEGACY.name()));
         getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash, emails,
                 iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
     }
@@ -8165,7 +8163,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public MailInvitationType getMailType() {
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+                .valueOf(System.getProperty(MailInvitationType.SYSTEM_PROPERTY_NAME, MailInvitationType.LEGACY.name()));
         return type;
     }
 
