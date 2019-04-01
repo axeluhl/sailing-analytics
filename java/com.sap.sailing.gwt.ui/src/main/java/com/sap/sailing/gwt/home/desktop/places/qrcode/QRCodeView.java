@@ -95,7 +95,7 @@ public class QRCodeView extends Composite {
                     }
                 }).inject();
 
-        if (event != null) {
+        if (event != null && event.getLogoImage() != null) {
             eventImageUi.getStyle().setBackgroundImage("url('" + event.getLogoImage().getSourceRef() + "')");
             eventImageUi.getStyle().setWidth(event.getLogoImage().getWidthInPx(), Unit.PX);
             eventImageUi.getStyle().setHeight(event.getLogoImage().getHeightInPx(), Unit.PX);
