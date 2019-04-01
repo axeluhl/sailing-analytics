@@ -1026,4 +1026,16 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void resizeImage(ImageResizingTaskDTO imageResizingTask, AsyncCallback<Set<ImageDTO>> asyncCallback);
 
     void getMailType(AsyncCallback<MailInvitationType> callback);
+
+    /**
+     * Allows reading public Boats, or Boats that are registered in races belonging to the given regatta
+     */
+    void getBoat(UUID boatId, String regattaName, String regattaRegistrationLinkSecret,
+            AsyncCallback<BoatDTO> asyncCallback);
+
+    /**
+     * Allows reading public Marks, or Marks that are registered in races belonging to the given regatta
+     */
+    void getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret,
+            AsyncCallback<MarkDTO> asyncCallback);
 }
