@@ -550,7 +550,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             UserGroup group, String permission) {
         final AccessControlList result;
         if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
-            final UUID groupId = group.getId();
+            final UUID groupId = group == null ? null : group.getId();
             apply(s->s.internalAclRemovePermission(idOfAccessControlledObjectAsString, groupId, permission));
             result = accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString).getAnnotation();
         } else {
