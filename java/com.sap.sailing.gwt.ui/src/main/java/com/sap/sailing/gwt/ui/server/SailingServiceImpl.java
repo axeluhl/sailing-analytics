@@ -8188,7 +8188,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (leaderboard != null && leaderboard instanceof RegattaLeaderboard) {
             for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 for (final Mark availableMark : raceColumn.getAvailableMarks()) {
-                    if (availableMark.getId().toString().equals(markId)) {
+                    if (Util.equalsWithNull(availableMark.getId(), markId)) {
                         result = convertToMarkDTO((RegattaLeaderboard) leaderboard, availableMark);
                         break;
                     }
