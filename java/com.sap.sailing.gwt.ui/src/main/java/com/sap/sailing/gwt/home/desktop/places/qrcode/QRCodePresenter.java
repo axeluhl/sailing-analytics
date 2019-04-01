@@ -106,18 +106,13 @@ public class QRCodePresenter {
                 dataCollector = new DataCollector(view);
                 if (place.getCompetitorId() != null) {
                     retrieveCompetitor(place.getCompetitorId());
-                } else {
-                    dataCollector.setCompetitor(null);
-                }
-                if (place.getBoatId() != null) {
+                } else if (place.getBoatId() != null) {
                     retrieveBoat(place.getBoatId());
-                } else {
-                    dataCollector.setBoat(null);
-                }
-                if (place.getMarkId() != null) {
+                } else if (place.getMarkId() != null) {
                     retrieveMark(place.getMarkId());
                 } else {
-                    dataCollector.setMark(null);
+                    // try to display anyway
+                    dataCollector.setCompetitor(null);
                 }
                 retrieveEvent(place.getEventId());
             }
@@ -125,7 +120,7 @@ public class QRCodePresenter {
     }
 
     private void retrieveMark(UUID markId) {
-        clientFactory.getSailingService().getMark(markId, place.getRegattaName(),
+        clientFactory.getSailingService().getMark(markId, place.getLeaderboardName(),
                 place.getRegattaRegistrationLinkSecret(), new AsyncCallback<MarkDTO>() {
 
                     @Override
@@ -141,7 +136,7 @@ public class QRCodePresenter {
     }
 
     private void retrieveBoat(UUID boatId) {
-        clientFactory.getSailingService().getBoat(boatId, place.getRegattaName(),
+        clientFactory.getSailingService().getBoat(boatId, place.getLeaderboardName(),
                 place.getRegattaRegistrationLinkSecret(), new AsyncCallback<BoatDTO>() {
 
                     @Override
@@ -272,6 +267,7 @@ public class QRCodePresenter {
                         if (mark != null) {
                             participant = mark.getName();
                         }
+                        GWT.log("Participant is resolved to " + participant);
                         view.setData(event, participant, leaderBoardName, branchIoUrl, invitationMode);
                     } else {
                         view.setError();
