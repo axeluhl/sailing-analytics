@@ -125,13 +125,35 @@ public class QRCodePresenter {
     }
 
     private void retrieveMark(UUID markId) {
-        // FIXME after it is decided, how the mark will be resolved on the archive server for races on an eventserver
-        dataCollector.setMark(null);
+        clientFactory.getSailingService().getMark(markId, place.getRegattaName(),
+                place.getRegattaRegistrationLinkSecret(), new AsyncCallback<MarkDTO>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        dataCollector.setMark(null);
+                    }
+
+                    @Override
+                    public void onSuccess(MarkDTO result) {
+                        dataCollector.setMark(result);
+                    }
+                });
     }
 
     private void retrieveBoat(UUID boatId) {
-        // FIXME after it is decided, how the boat will be resolved on the archive server for races on an eventserver
-        dataCollector.setBoat(null);
+        clientFactory.getSailingService().getBoat(boatId, place.getRegattaName(),
+                place.getRegattaRegistrationLinkSecret(), new AsyncCallback<BoatDTO>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        dataCollector.setBoat(null);
+                    }
+
+                    @Override
+                    public void onSuccess(BoatDTO result) {
+                        dataCollector.setBoat(result);
+                    }
+                });
     }
 
     private void retrieveEvent(UUID eventId) {
