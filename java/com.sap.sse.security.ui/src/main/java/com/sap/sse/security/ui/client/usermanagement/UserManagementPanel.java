@@ -57,7 +57,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER);
         west.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateUsers);
-        buttonPanel.addCreateAction(stringMessages.createUser(),
+        buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),
                 () -> new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService)
                         .show());
 
