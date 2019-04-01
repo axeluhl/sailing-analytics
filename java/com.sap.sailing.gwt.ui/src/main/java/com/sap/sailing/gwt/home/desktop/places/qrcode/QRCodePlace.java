@@ -25,7 +25,6 @@ public class QRCodePlace extends AbstractBasePlace {
     private String leaderboardName;
     private String regattaName;
     private String regattaRegistrationLinkSecret;
-    private String checkInUrl;
     private InvitationMode mode;
     private String rawCheckInUrl;
     private String targetServer;
@@ -52,8 +51,7 @@ public class QRCodePlace extends AbstractBasePlace {
             } else {
                 rawCheckInUrl = Window.Location.getParameter(DeviceMappingConstants.URL_CHECKIN_URL);
                 if (rawCheckInUrl != null) {
-                    checkInUrl = decodeUrl(rawCheckInUrl);
-                    parseUrl(checkInUrl);
+                    parseUrl(rawCheckInUrl);
                     if (leaderboardName == null) {
                         GWT.log("No parameter " + DeviceMappingConstants.URL_LEADERBOARD_NAME + " found!");
                     }
@@ -144,7 +142,7 @@ public class QRCodePlace extends AbstractBasePlace {
             String[] urlParams = urlArguments[1].split("&");
             for (String urlParam : urlParams) {
                 String[] param = urlParam.split("=");
-                Pair<String, String> pair = new Pair<String, String>(param[0], param[1]);
+                Pair<String, String> pair = new Pair<String, String>(param[0], decodeUrl(param[1].replace("+", "%20")));
                 pairs.add(pair);
             }
         }
