@@ -124,7 +124,7 @@ public class UserGroupRoleDefinitionPanel extends Composite
                 }
             }
         });
-        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.removeRole(), () -> {
+        final Button removeButton = buttonPanel.addUpdateAction(stringMessages.removeRole(), () -> {
             Pair<StrippedRoleDefinitionDTO, Boolean> selectedRole = roleDefinitionTableWrapper.getSelectionModel()
                     .getSelectedObject();
             if (selectedRole == null) {

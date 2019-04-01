@@ -146,7 +146,7 @@ public class UserGroupDetailPanel extends Composite
         buttonPanel.insertWidgetAtPosition(suggestUser, 0);
 
         // add add button
-        buttonPanel.addCreateAction(stringMessages.addUser(), () -> {
+        buttonPanel.addUpdateAction(stringMessages.addUser(), () -> {
             final String selectedUsername = suggestUser.getValue();
             if (!getSelectedUserGroupUsernames().contains(selectedUsername)) {
                 final UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
@@ -170,7 +170,7 @@ public class UserGroupDetailPanel extends Composite
         });
 
         // add remove button
-        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.removeRole(), () -> {
+        final Button removeButton = buttonPanel.addUpdateAction(stringMessages.actionRemove(), () -> {
             UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
             Set<StrippedUserDTO> users = tenantUsersTable.getSelectionModel().getSelectedSet();
             if (tenant == null) {
