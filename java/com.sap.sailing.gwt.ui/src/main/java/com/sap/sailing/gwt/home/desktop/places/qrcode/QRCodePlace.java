@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.user.client.Window;
+import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sse.common.Util.Pair;
@@ -23,7 +24,7 @@ public class QRCodePlace extends AbstractBasePlace {
     private UUID boatId;
     private UUID markId;
     private String leaderboardName;
-    private String regattaName;
+    private String publicRegattaName;
     private String regattaRegistrationLinkSecret;
     private InvitationMode mode;
     private String rawCheckInUrl;
@@ -43,9 +44,9 @@ public class QRCodePlace extends AbstractBasePlace {
             if (mode == InvitationMode.PUBLIC_INVITE) {
                 // alternative direct link version
                 targetServer = Window.Location.getParameter(PARAM_SERVER);
-                regattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
+                publicRegattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
                 regattaRegistrationLinkSecret = Window.Location.getParameter(PARAM_REGATTA_SECRET);
-                if (regattaName == null || regattaRegistrationLinkSecret == null || targetServer == null) {
+                if (publicRegattaName == null || regattaRegistrationLinkSecret == null || targetServer == null) {
                     GWT.log("Missing parameter for regatta, secret or server");
                 }
             } else {
@@ -97,34 +98,32 @@ public class QRCodePlace extends AbstractBasePlace {
                 try {
                     eventId = UUID.fromString(parameter.getB());
                 } catch (IllegalArgumentException e) {
-                    GWT.log("Invalid event_id");
+                    GWT.log("Invalid " + DeviceMappingConstants.URL_EVENT_ID);
                     eventId = null;
                 }
             } else if (DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING.equals(parameter.getA())) {
                 try {
                     competitorId = UUID.fromString(parameter.getB());
                 } catch (IllegalArgumentException e) {
-                    GWT.log("Invalid competitor_id");
+                    GWT.log("Invalid " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
                     competitorId = null;
                 }
             } else if (DeviceMappingConstants.URL_BOAT_ID_AS_STRING.equals(parameter.getA())) {
                 try {
                     boatId = UUID.fromString(parameter.getB());
                 } catch (IllegalArgumentException e) {
-                    GWT.log("Invalid boatId");
+                    GWT.log("Invalid " + DeviceMappingConstants.URL_BOAT_ID_AS_STRING);
                     boatId = null;
                 }
             } else if (DeviceMappingConstants.URL_MARK_ID_AS_STRING.equals(parameter.getA())) {
                 try {
                     markId = UUID.fromString(parameter.getB());
                 } catch (IllegalArgumentException e) {
-                    GWT.log("Invalid markId");
+                    GWT.log("Invalid " + DeviceMappingConstants.URL_MARK_ID_AS_STRING);
                     boatId = null;
                 }
             } else if (DeviceMappingConstants.URL_LEADERBOARD_NAME.equals(parameter.getA())) {
                 leaderboardName = parameter.getB();
-            } else if (PARAM_REGATTA_NAME.equals(parameter.getA())) {
-                regattaName = parameter.getB();
             } else if (PARAM_REGATTA_SECRET.equals(parameter.getA())) {
                 regattaRegistrationLinkSecret = parameter.getB();
             }
@@ -151,6 +150,13 @@ public class QRCodePlace extends AbstractBasePlace {
         return pairs;
     }
 
+    public String getPublicInviteBranchIOUrl() {
+        return BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?" + QRCodePlace.PARAM_REGATTA_NAME + "="
+                + encodeUrl(publicRegattaName) + "&" + QRCodePlace.PARAM_REGATTA_SECRET + "="
+                + encodeUrl(regattaRegistrationLinkSecret) + "&" + QRCodePlace.PARAM_SERVER + "="
+                + encodeUrl(targetServer);
+    }
+
     public InvitationMode getMode() {
         return mode;
     }
@@ -175,8 +181,8 @@ public class QRCodePlace extends AbstractBasePlace {
         return leaderboardName;
     }
 
-    public String getRegattaName() {
-        return regattaName;
+    public String getPublicRegattaName() {
+        return publicRegattaName;
     }
 
     public UUID getMarkId() {

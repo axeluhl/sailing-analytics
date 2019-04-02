@@ -225,20 +225,12 @@ public class QRCodePresenter {
 
         private void proceedIfFinished() {
             InvitationMode invitationMode = place.getMode();
-            String regattaName = place.getRegattaName();
-            String regattaRegistrationLinkSecret = place.getRegattaRegistrationLinkSecret();
-            String serverForPublic = place.getTargetServer();
-            String checkInUrl = place.getEncodedCheckInUrl();
-            String leaderBoardName = place.getLeaderboardName();
-            UUID eventId = place.getEventId();
-            UUID competitorId = place.getCompetitorId();
             if (invitationMode == InvitationMode.PUBLIC_INVITE) {
-                String branchIoUrl = BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?"
-                        + QRCodePlace.PARAM_REGATTA_NAME + "=" + regattaName + "&" + QRCodePlace.PARAM_REGATTA_SECRET
-                        + "=" + regattaRegistrationLinkSecret + "&" + QRCodePlace.PARAM_SERVER + "=" + serverForPublic;
-                view.setData(null, null, null, null, regattaName, branchIoUrl, invitationMode);
+                view.setData(null, null, null, null, place.getPublicRegattaName(), place.getPublicInviteBranchIOUrl(),
+                        invitationMode);
             } else {
                 if (participantIsSet && eventIsSet) {
+                    String checkInUrl = place.getEncodedCheckInUrl();
                     if (checkInUrl != null) {
                         String branchIoUrl = null;
                         switch (invitationMode) {
@@ -257,14 +249,16 @@ public class QRCodePresenter {
                         default:
                             break;
                         }
-                        view.setData(event, competitor, boat, mark, leaderBoardName, branchIoUrl, invitationMode);
+                        view.setData(event, competitor, boat, mark, place.getLeaderboardName(), branchIoUrl,
+                                invitationMode);
                     } else {
                         view.setError();
-                        GWT.log("checkInUrl " + checkInUrl);
-                        GWT.log("competitorId " + competitorId);
-                        GWT.log("boatId " + boat);
                         GWT.log("invitationMode " + invitationMode);
-                        GWT.log("eventId " + eventId);
+                        GWT.log("checkInUrl " + place.getEncodedCheckInUrl());
+                        GWT.log("competitorId " + place.getCompetitorId());
+                        GWT.log("boatId " + place.getBoatId());
+                        GWT.log("markId " + place.getMarkId());
+                        GWT.log("eventId " + place.getEventId());
                     }
                 }
             }
