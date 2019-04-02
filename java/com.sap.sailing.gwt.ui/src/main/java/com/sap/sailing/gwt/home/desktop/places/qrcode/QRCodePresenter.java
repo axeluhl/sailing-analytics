@@ -94,13 +94,18 @@ public class QRCodePresenter {
     }
 
     private void showQrCode(QRCodeView view) {
-        if (place.getMode() == InvitationMode.PUBLIC_INVITE) {
-            // as the event is most likely displayed on a different server anyway, do not load additional data
-            dataCollector = new DataCollector(view);
-            dataCollector.proceedIfFinished();
-        } else {
-            if (place.getMode() == InvitationMode.COMPETITOR
-                    && (place.getEncodedCheckInUrl() == null || place.getEncodedCheckInUrl().equals(""))) {
+        switch (place.getMode()) {
+        case BOUY_TENDER:
+            if (place.getEncodedCheckInUrl() == null || place.getEncodedCheckInUrl().isEmpty()) {
+                view.setError();
+            } else {
+                dataCollector = new DataCollector(view);
+                retrieveEvent(place.getEventId());
+            }
+            break;
+        case COMPETITOR:
+        case COMPETITOR_2:
+            if (place.getEncodedCheckInUrl() == null || place.getEncodedCheckInUrl().isEmpty()) {
                 view.setError();
             } else {
                 dataCollector = new DataCollector(view);
@@ -111,11 +116,17 @@ public class QRCodePresenter {
                 } else if (place.getMarkId() != null) {
                     retrieveMark(place.getMarkId());
                 } else {
-                    // try to display anyway
+                    // bouytenders work without additional, proceed without participant
                     dataCollector.setCompetitor(null);
                 }
                 retrieveEvent(place.getEventId());
             }
+            break;
+        case PUBLIC_INVITE:
+            // as the event is most likely displayed on a different server anyway, do not load additional data
+            dataCollector = new DataCollector(view);
+            dataCollector.proceedIfFinished();
+            break;
         }
     }
 
@@ -224,43 +235,29 @@ public class QRCodePresenter {
         }
 
         private void proceedIfFinished() {
-            InvitationMode invitationMode = place.getMode();
-            if (invitationMode == InvitationMode.PUBLIC_INVITE) {
-                view.setData(null, null, null, null, place.getPublicRegattaName(), place.getPublicInviteBranchIOUrl(),
-                        invitationMode);
-            } else {
-                if (participantIsSet && eventIsSet) {
-                    String checkInUrl = place.getEncodedCheckInUrl();
-                    if (checkInUrl != null) {
-                        String branchIoUrl = null;
-                        switch (invitationMode) {
-                        case BOUY_TENDER:
-                            branchIoUrl = BranchIOConstants.BUOYPINGER_APP_BRANCHIO + "?"
-                                    + BranchIOConstants.BUOYPINGER_APP_BRANCHIO_PATH + "=" + checkInUrl;
-                            break;
-                        case COMPETITOR:
-                            branchIoUrl = BranchIOConstants.SAILINSIGHT_APP_BRANCHIO + "?"
-                                    + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "=" + checkInUrl;
-                            break;
-                        case COMPETITOR_2:
-                            branchIoUrl = BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO + "?"
-                                    + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "=" + checkInUrl;
-                            break;
-                        default:
-                            break;
-                        }
-                        view.setData(event, competitor, boat, mark, place.getLeaderboardName(), branchIoUrl,
-                                invitationMode);
-                    } else {
-                        view.setError();
-                        GWT.log("invitationMode " + invitationMode);
-                        GWT.log("checkInUrl " + place.getEncodedCheckInUrl());
-                        GWT.log("competitorId " + place.getCompetitorId());
-                        GWT.log("boatId " + place.getBoatId());
-                        GWT.log("markId " + place.getMarkId());
-                        GWT.log("eventId " + place.getEventId());
-                    }
+            switch (place.getMode()) {
+            case BOUY_TENDER:
+                if (eventIsSet) {
+                    String branchIoUrl = BranchIOConstants.BUOYPINGER_APP_BRANCHIO + "?"
+                            + BranchIOConstants.BUOYPINGER_APP_BRANCHIO_PATH + "=" + place.getEncodedCheckInUrl();
+                    view.showBouyTender(event, place.getLeaderboardName(), branchIoUrl);
                 }
+                break;
+            case COMPETITOR:
+            case COMPETITOR_2:
+                if (participantIsSet && eventIsSet) {
+                    String sailInsightBranch = place.getMode() == InvitationMode.COMPETITOR
+                            ? BranchIOConstants.SAILINSIGHT_APP_BRANCHIO
+                            : BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO;
+                    String branchIoUrl = sailInsightBranch + "?"
+                            + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "=" + place.getEncodedCheckInUrl();
+                    view.showCompetitor(event, competitor, boat, mark, place.getLeaderboardName(), branchIoUrl);
+                }
+                break;
+            case PUBLIC_INVITE:
+                view.showPublic(place.getPublicRegattaName(), place.getPublicInviteBranchIOUrl());
+                break;
+
             }
         }
     }

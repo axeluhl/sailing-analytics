@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace.InvitationMode;
 import com.sap.sailing.gwt.home.shared.partials.dialog.confirm.ConfirmDialogFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeWrapper;
@@ -55,45 +54,52 @@ public class QRCodeView extends Composite {
 
     }
 
-    public void setData(EventViewDTO event, SimpleCompetitorWithIdDTO competitor, BoatDTO boat, MarkDTO mark,
-            String leaderboardName, String url,
-            InvitationMode invitationMode) {
-        switch (invitationMode) {
-        case COMPETITOR:
-        case COMPETITOR_2:
-            if (boat != null) {
-                titleDivUi.setInnerText(
-                        StringMessages.INSTANCE.qrCodeBoatInviteTitle(boat.getDisplayName(),
-                        leaderboardName));
-            } else if (mark != null) {
-                titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeMarkInviteTitle(mark.getName(), leaderboardName));
-            } else if (competitor != null) {
-                titleDivUi
-                        .setInnerText(StringMessages.INSTANCE.qrCodeCompetitorInviteTitle(competitor.getName(),
-                                leaderboardName));
-            } else {
-                titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitle(leaderboardName));
-            }
-            if (event != null) {
-                subtitleDivUi.setInnerText(
-                        StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
-            }
-            break;
-        case PUBLIC_INVITE:
-            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRegatta(leaderboardName));
-            if (event != null) {
-                subtitleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeSubtitleOpenRegatta());
-            }
-            break;
-        case BOUY_TENDER:
-            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleBouy(leaderboardName));
-            if (event != null) {
-                subtitleDivUi.setInnerText(
-                        StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
-            }
-            break;
+    public void showCompetitor(EventViewDTO event, SimpleCompetitorWithIdDTO competitor, BoatDTO boat, MarkDTO mark,
+            String leaderboardName, String branchIoUrl) {
+        if (boat != null) {
+            titleDivUi.setInnerText(
+                    StringMessages.INSTANCE.qrCodeBoatInviteTitle(boat.getDisplayName(), leaderboardName));
+        } else if (mark != null) {
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeMarkInviteTitle(mark.getName(), leaderboardName));
+        } else if (competitor != null) {
+            titleDivUi.setInnerText(
+                    StringMessages.INSTANCE.qrCodeCompetitorInviteTitle(competitor.getName(), leaderboardName));
+        } else {
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitle(leaderboardName));
         }
+        if (event != null) {
+            subtitleDivUi.setInnerText(
+                    StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
+        }
+        showQrCodeForURL(branchIoUrl);
+        showEventImageIfPossible(event);
+    }
 
+    public void showPublic(String publicRegattaName, String publicInviteBranchIOUrl) {
+        titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRegatta(publicRegattaName));
+        showQrCodeForURL(publicInviteBranchIOUrl);
+    }
+
+    public void showBouyTender(EventViewDTO event, String leaderboardName, String branchIoUrl) {
+        GWT.debugger();
+        titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleBouy(leaderboardName));
+        if (event != null) {
+            subtitleDivUi.setInnerText(
+                    StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
+        }
+        showQrCodeForURL(branchIoUrl);
+        showEventImageIfPossible(event);
+    }
+
+    private void showEventImageIfPossible(EventViewDTO event) {
+        if (event != null && event.getLogoImage() != null) {
+            eventImageUi.getStyle().setBackgroundImage("url('" + event.getLogoImage().getSourceRef() + "')");
+            eventImageUi.getStyle().setWidth(event.getLogoImage().getWidthInPx(), Unit.PX);
+            eventImageUi.getStyle().setHeight(event.getLogoImage().getHeightInPx(), Unit.PX);
+        }
+    }
+
+    private void showQrCodeForURL(String url) {
         urlAnchor.setHref(url);
         ScriptInjector.fromUrl("qrcode/qrcode.min.js").setWindow(ScriptInjector.TOP_WINDOW)
                 .setCallback(new Callback<Void, Exception>() {
@@ -110,12 +116,6 @@ public class QRCodeView extends Composite {
                         Window.alert("could not load qrcode library " + reason.getMessage());
                     }
                 }).inject();
-
-        if (event != null && event.getLogoImage() != null) {
-            eventImageUi.getStyle().setBackgroundImage("url('" + event.getLogoImage().getSourceRef() + "')");
-            eventImageUi.getStyle().setWidth(event.getLogoImage().getWidthInPx(), Unit.PX);
-            eventImageUi.getStyle().setHeight(event.getLogoImage().getHeightInPx(), Unit.PX);
-        }
     }
 
     public void setError() {
@@ -138,6 +138,4 @@ public class QRCodeView extends Composite {
                     }
                 });
     }
-
-
 }
