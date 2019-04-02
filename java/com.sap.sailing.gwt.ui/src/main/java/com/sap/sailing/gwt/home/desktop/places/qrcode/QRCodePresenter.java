@@ -236,7 +236,7 @@ public class QRCodePresenter {
                 String branchIoUrl = BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO + "?"
                         + QRCodePlace.PARAM_REGATTA_NAME + "=" + regattaName + "&" + QRCodePlace.PARAM_REGATTA_SECRET
                         + "=" + regattaRegistrationLinkSecret + "&" + QRCodePlace.PARAM_SERVER + "=" + serverForPublic;
-                view.setData(null, null, regattaName, branchIoUrl, invitationMode);
+                view.setData(null, null, null, null, regattaName, branchIoUrl, invitationMode);
             } else {
                 if (participantIsSet && eventIsSet) {
                     if (checkInUrl != null) {
@@ -257,18 +257,7 @@ public class QRCodePresenter {
                         default:
                             break;
                         }
-                        String participant = "";
-                        if (competitor != null) {
-                            participant = competitor.getName();
-                        }
-                        if (boat != null) {
-                            participant = boat.getDisplayName();
-                        }
-                        if (mark != null) {
-                            participant = mark.getName();
-                        }
-                        GWT.log("Participant is resolved to " + participant);
-                        view.setData(event, participant, leaderBoardName, branchIoUrl, invitationMode);
+                        view.setData(event, competitor, boat, mark, leaderBoardName, branchIoUrl, invitationMode);
                     } else {
                         view.setError();
                         GWT.log("checkInUrl " + checkInUrl);
