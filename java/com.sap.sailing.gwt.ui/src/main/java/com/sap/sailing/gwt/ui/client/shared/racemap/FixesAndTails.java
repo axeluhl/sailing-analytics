@@ -745,7 +745,7 @@ public class FixesAndTails {
                 }
             }
         }
-        lastSearchedFix.put(competitor, end);
+        lastSearchedFix.put(competitor, end - 1);
     }
 
     private void debugDetailValueSearch(CompetitorDTO competitor) {
@@ -792,7 +792,7 @@ public class FixesAndTails {
                     minDetailValueFix.put(competitor, -1);
                 } else if (min == null || fixes.get(competitor).get(index).detailValue < min) {
                     min = fixes.get(competitor).get(index).detailValue;
-                    strMin = competitor.getName() + " " + fixes.get(competitor).get(index).timepoint.toString() + " " + fixes.get(competitor).get(index).detailValue;
+                    strMin = competitor.getName() + " " + fixes.get(competitor).get(index).timepoint.toString() + "\n<" + firstShownFix.get(competitor).get() + "-" + index + "-" + lastShownFix.get(competitor).get() + "> " + lastSearchedFix.get(competitor) + "\n" + fixes.get(competitor).get(index).detailValue;
                 }
             }
             // Find maximum value across all boats
@@ -802,7 +802,7 @@ public class FixesAndTails {
                     maxDetailValueFix.put(competitor, -1);
                 } else if (max == null || fixes.get(competitor).get(index).detailValue > max) {
                     max = fixes.get(competitor).get(index).detailValue;
-                    strMax = competitor.getName() + " " + fixes.get(competitor).get(index).timepoint.toString() + " " + fixes.get(competitor).get(index).detailValue;
+                    strMax = competitor.getName() + " " + fixes.get(competitor).get(index).timepoint.toString() + "\n<" + firstShownFix.get(competitor).get() + "-" + index + "-" + lastShownFix.get(competitor).get() + "> " + lastSearchedFix.get(competitor) + "\n" + fixes.get(competitor).get(index).detailValue;
                 }
             }
         }
@@ -812,6 +812,7 @@ public class FixesAndTails {
         
         if (min != null && max != null) {
             detailValueBoundaries.setMinMax(min, max);
+            GWT.log("Updated: " + detailValueBoundaries.getMinLeft() + " <-> " + detailValueBoundaries.getMaxRight());
         }
     }
 

@@ -1636,11 +1636,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 competitorDTOsOfUnusedTails.addAll(fixesAndTails.getCompetitorsWithTails());
                 competitorDTOsOfUnusedBoatCanvases.addAll(boatOverlays.keySet());
             }
+            if (timeForPositionTransitionMillis > 3 * timer.getRefreshInterval()) {
+                fixesAndTails.clearTails();
+            }
+            fixesAndTails.updateDetailValueBoundaries(competitorsToShow);
             for (CompetitorDTO competitorDTO : competitorsToShow) {
-                boolean hasTimeJumped = timeForPositionTransitionMillis > 3 * timer.getRefreshInterval();
-                if (hasTimeJumped) {
-                    fixesAndTails.clearTails();
-                }
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
                     if (!fixesAndTails.hasTail(competitorDTO)) {
                         fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
@@ -1659,7 +1659,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 }
             }
-            fixesAndTails.updateDetailValueBoundaries(competitorsToShow);
             if (!updateTailsOnly) {
                 for (CompetitorDTO unusedBoatCanvasCompetitorDTO : competitorDTOsOfUnusedBoatCanvases) {
                     CanvasOverlayV3 boatCanvas = boatOverlays.get(unusedBoatCanvasCompetitorDTO);
@@ -2513,7 +2512,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 }
                 if (selectedDetailType != previous) {
                     selectedDetailTypeChanged = true; // Causes an overwrite of what are now wrong detailValues
-                    fixesAndTails.resetColorMapper(new ValueRangeFlexibleBoundaries(0, 1, 0.3, 1));
+                    fixesAndTails.resetColorMapper(new ValueRangeFlexibleBoundaries(0, 1, 0.2, 0.5));
                     redraw(); //TODO Somehow doesn't redraw any MultiColorPolylines
                 }
             }
