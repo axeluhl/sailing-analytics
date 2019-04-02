@@ -81,7 +81,6 @@ public class QRCodeView extends Composite {
     }
 
     public void showBouyTender(EventViewDTO event, String leaderboardName, String branchIoUrl) {
-        GWT.debugger();
         titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleBouy(leaderboardName));
         if (event != null) {
             subtitleDivUi.setInnerText(
