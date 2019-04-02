@@ -65,9 +65,10 @@ public class QRCodePlace extends AbstractBasePlace {
                     if (markId == null && (mode == InvitationMode.COMPETITOR || mode == InvitationMode.COMPETITOR_2)) {
                         GWT.log("No parameter " + DeviceMappingConstants.URL_MARK_ID_AS_STRING + " found!");
                     }
-                    if (competitorId != null && mode == InvitationMode.BOUY_TENDER) {
+                    if ((competitorId != null || boatId != null || markId != null)
+                            && mode == InvitationMode.BOUY_TENDER) {
                         GWT.log("Found parameter " + DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING
-                                + " but is not required!");
+                                + " will be ignored in bouy tender mode!");
                     }
                     if (eventId == null) {
                         GWT.log("No parameter " + DeviceMappingConstants.URL_EVENT_ID + " found!");
