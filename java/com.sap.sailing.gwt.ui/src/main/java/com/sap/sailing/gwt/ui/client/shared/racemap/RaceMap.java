@@ -1659,6 +1659,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 }
             }
+            fixesAndTails.updateDetailValueBoundaries(competitorsToShow);
             if (!updateTailsOnly) {
                 for (CompetitorDTO unusedBoatCanvasCompetitorDTO : competitorDTOsOfUnusedBoatCanvases) {
                     CanvasOverlayV3 boatCanvas = boatOverlays.get(unusedBoatCanvasCompetitorDTO);
@@ -3058,9 +3059,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
                 if (detailValue != null) {
                     String color = colorMapper.getColor(detailValue);
-                    if (color.equals("hsl(0, 100%, 50%") || color.equals("hsl(240, 100%, 50%)")) {
-                        GWT.log("Limiter: " + detailValue); //TODO Remove
-                    }
                     return color;
                 }
                 return competitorSelection.getColor(competitor, raceIdentifier).getAsHtml();
