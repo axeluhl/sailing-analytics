@@ -9171,4 +9171,37 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     }
+
+    @Override
+    public BoatDTO getBoat(UUID boatId, String regattaName, String regattaRegistrationLinkSecret) {
+        BoatDTO result = null;
+        Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
+        if (leaderboard != null && leaderboard instanceof RegattaLeaderboard) {
+            for (Boat boat : leaderboard.getAllBoats()) {
+                // TODO add visibility check on permission-vertical here
+                if (Util.equalsWithNull(boatId, boat.getId())) {
+                    result = getBaseDomainFactory().convertToBoatDTO(boat);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public MarkDTO getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret) {
+        // TODO add visibility check on permission-vertical here
+        MarkDTO result = null;
+        Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
+        if (leaderboard != null && leaderboard instanceof RegattaLeaderboard) {
+            for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                for (final Mark availableMark : raceColumn.getAvailableMarks()) {
+                    if (Util.equalsWithNull(availableMark.getId(), markId)) {
+                        result = convertToMarkDTO((RegattaLeaderboard) leaderboard, availableMark);
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
+    }
 }

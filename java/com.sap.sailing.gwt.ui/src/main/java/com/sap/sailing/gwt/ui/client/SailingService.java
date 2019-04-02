@@ -1137,4 +1137,14 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     String getSecretForRegattaByName(String regattaName) throws UnauthorizedException;
 
     Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() throws UnauthorizedException;
+
+    /**
+     * Allows reading public Boats, or Boats that are registered in races belonging to the given regatta
+     */
+    BoatDTO getBoat(UUID boatId, String regattaName, String regattaRegistrationLinkSecret);
+
+    /**
+     * Allows reading public Marks, or Marks that are registered in races belonging to the given regatta
+     */
+    MarkDTO getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret);
 }

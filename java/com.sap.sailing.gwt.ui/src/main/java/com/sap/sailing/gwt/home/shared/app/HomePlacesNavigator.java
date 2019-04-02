@@ -1,12 +1,9 @@
 package com.sap.sailing.gwt.home.shared.app;
 
-import java.util.UUID;
-
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
-import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
@@ -62,12 +59,6 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<ContactPlace> getContactNavigation() {
         return createGlobalPlaceNavigation(new ContactPlace());
-    }
-
-    public PlaceNavigation<QRCodePlace> getQRCodeNavigation(UUID eventId, UUID competitorId, String leaderboardName,
-            String regattaName, String regattaRegistrationLinkSecret, String checkInUrl) {
-        return createGlobalPlaceNavigation(new QRCodePlace(eventId, competitorId, leaderboardName, regattaName,
-                regattaRegistrationLinkSecret, checkInUrl));
     }
 
     public PlaceNavigation<ImprintPlace> getImprintNavigation() {
