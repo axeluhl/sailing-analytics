@@ -555,7 +555,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     protected void addSelectedLeaderboardRacesControls(Panel racesPanel) {
         addRaceColumnsButton = new Button(stringMessages.actionAddRaces() + "...");
         addRaceColumnsButton.ensureDebugId("AddRacesButton");
-        racesPanel.add(addRaceColumnsButton);
         addRaceColumnsButton.addClickHandler(event -> {
             if (getSelectedLeaderboard().type.isRegattaLeaderboard()) {
                 Notification.notify(stringMessages.cannotAddRacesToRegattaLeaderboardButOnlyToRegatta(),
@@ -567,13 +566,11 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         racesPanel.add(addRaceColumnsButton);
 
         columnMoveUpButton = new Button(stringMessages.columnMoveUp());
-        racesPanel.add(columnMoveUpButton);
         columnMoveUpButton.ensureDebugId("MoveRaceUpButton");
         columnMoveUpButton.addClickHandler(event -> moveSelectedRaceColumnUp());
         racesPanel.add(columnMoveUpButton);
 
         columnMoveDownButton = new Button(stringMessages.columnMoveDown());
-        racesPanel.add(columnMoveDownButton);
         columnMoveDownButton.ensureDebugId("MoveRaceDownButton");
         columnMoveDownButton.addClickHandler(event -> moveSelectedRaceColumnDown());
         racesPanel.add(columnMoveDownButton);
@@ -871,13 +868,13 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardRemoveButton.setText(selectedLeaderboards.size() <= 1 ? stringMessages.remove()
                 : stringMessages.removeNumber(selectedLeaderboards.size()));
 
-        StrippedLeaderboardDTOWithSecurity selectedLeaderboard = getSelectedLeaderboard();
+        final StrippedLeaderboardDTOWithSecurity selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
                     raceColumnTable.getDataProvider().getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(
-                            raceColumn, fleet, getSelectedLeaderboard()));
+                            raceColumn, fleet, selectedLeaderboard));
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);
@@ -886,9 +883,12 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 trackedRacesListComposite.setRegattaFilterValue(selectedLeaderboard.regattaName);
                 trackedRacesCaptionPanel.setVisible(true);
             }
-            addRaceColumnsButton.setVisible(!selectedLeaderboard.type.isRegattaLeaderboard());
-            columnMoveUpButton.setVisible(!selectedLeaderboard.type.isRegattaLeaderboard());
-            columnMoveDownButton.setVisible(!selectedLeaderboard.type.isRegattaLeaderboard());
+
+            final boolean hasPermission = userService.hasPermission(selectedLeaderboard, UPDATE);
+            final boolean isRegattaLeaderboard = selectedLeaderboard.type.isRegattaLeaderboard();
+            addRaceColumnsButton.setVisible(hasPermission && !isRegattaLeaderboard);
+            columnMoveUpButton.setVisible(hasPermission && !isRegattaLeaderboard);
+            columnMoveDownButton.setVisible(hasPermission && !isRegattaLeaderboard);
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
