@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -31,6 +30,10 @@ import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
 import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 /**
  * Allows administrators to manage all aspects of server instance replication such as showing whether the instance
@@ -62,7 +65,7 @@ public class ReplicationPanel extends FlowPanel {
      */
     private final Set<String> replicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica;
     
-    public ReplicationPanel(RemoteReplicationServiceAsync replicationService, ErrorReporter errorReporter, final StringMessages stringMessages) {
+    public ReplicationPanel(RemoteReplicationServiceAsync replicationService, UserService userService, ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.replicationServiceAsync = replicationService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -92,49 +95,35 @@ public class ReplicationPanel extends FlowPanel {
         
         final CaptionPanel mastergroup = new CaptionPanel(stringMessages.explainReplicasRegistered());
         final VerticalPanel masterpanel = new VerticalPanel();
+        final AccessControlledButtonPanel masterPanelButtons = new AccessControlledButtonPanel(userService, SecuredSecurityTypes.SERVER);
         
         registeredReplicas = new Grid();
         registeredReplicas.resizeColumns(3);
         masterpanel.add(registeredReplicas);
         
-        removeAllReplicas = new Button(stringMessages.stopAllReplicas());
-        removeAllReplicas.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                stopAllReplicas();
-              };
-        });
+        removeAllReplicas = masterPanelButtons.addAction(stringMessages.stopAllReplicas(),
+                () -> userService.hasServerPermission(ServerActions.REPLICATE), this::stopAllReplicas);
         removeAllReplicas.setEnabled(false);
-        masterpanel.add(removeAllReplicas);
+        masterpanel.add(masterPanelButtons);
         
         mastergroup.add(masterpanel);
         add(mastergroup);
         
         final CaptionPanel replicagroup = new CaptionPanel(stringMessages.explainConnectionsToMaster());
         final VerticalPanel replicapanel = new VerticalPanel();
-        final HorizontalPanel replicapanelbuttons = new HorizontalPanel();
+        final AccessControlledButtonPanel replicapanelbuttons = new AccessControlledButtonPanel(userService, SecuredSecurityTypes.SERVER);
         
         registeredMasters = new Grid();
         registeredMasters.resizeColumns(3);
         replicapanel.add(registeredMasters);
         
-        addButton = new Button(stringMessages.connectToMaster());
-        addButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addReplication();
-            }
-        });
-        replicapanelbuttons.add(addButton);
-        stopReplicationButton = new Button(stringMessages.stopConnectionToMaster());
-        stopReplicationButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                stopReplication();
-              };
-        });
+        addButton = replicapanelbuttons.addAction(stringMessages.connectToMaster(),
+                () -> userService.hasServerPermission(ServerActions.START_REPLICATION), this::addReplication);
+        
+        stopReplicationButton = replicapanelbuttons.addAction(stringMessages.stopConnectionToMaster(),
+                () -> userService.hasServerPermission(ServerActions.START_REPLICATION), this::stopReplication);
+        
         stopReplicationButton.setEnabled(false);
-        replicapanelbuttons.add(stopReplicationButton);
         
         replicapanel.add(replicapanelbuttons);
         replicagroup.add(replicapanel);

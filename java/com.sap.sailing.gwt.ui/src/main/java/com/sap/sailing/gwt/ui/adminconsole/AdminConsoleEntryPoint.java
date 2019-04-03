@@ -363,7 +363,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         /* ADVANCED */
         final HorizontalTabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(),
                 "AdvancedTab");
-        final ReplicationPanel replicationPanel = new ReplicationPanel(getSailingService(), this, getStringMessages());
+        final ReplicationPanel replicationPanel = new ReplicationPanel(getSailingService(), getUserService(), this,
+                getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanel) {
             @Override
             public void refreshAfterBecomingVisible() {
