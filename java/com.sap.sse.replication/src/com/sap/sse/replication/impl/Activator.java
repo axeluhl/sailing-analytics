@@ -41,8 +41,9 @@ import com.sap.sse.security.util.RemoteServerUtil;
  * server:
  * <ul>
  * <li><code>replicate.on.start</code>: use a comma-separated list of fully-qualified class names of the
- * {@link Replicable} objects you want to replicate from a master server to start replication from a specific master when this
- * instance is started; the following parameters are only evaluated if this property is present and not empty.</li>
+ * {@link Replicable} objects you want to replicate from a master server to start replication from a specific master
+ * when this instance is started; the following parameters are only evaluated if this property is present and not
+ * empty.</li>
  * <li><code>replicate.master.servlet.host</code>: the host name to use for the HTTP connection through which the
  * request to register this replica with the master is sent to the master and the queue name for receiving the initial
  * load is requested</li>
@@ -56,6 +57,9 @@ import com.sap.sse.security.util.RemoteServerUtil;
  * own master exchange name, as described above, based on the <code>replication.exchangeName</code> property, the
  * <code>REPLICATION_CHANNEL</code> environment variable and the ultimate default name
  * <code>"sapsailinganalytics"</code>.</li>
+ * <li><code>replicate.master.username</code> and <code>replicate.master.password</code>: define the credentials to
+ * login to the master instance. The given user needs to have the permission {@code SERVER:REPLICATE:<server-name>}
+ * granted to be able to initiate the replication.
  * </ul>
  * Note that there are no default values for the properties that control automatic replication. If you provide the
  * <code>replicate.on.start</code> property with <code>true</code> as the value, all other
