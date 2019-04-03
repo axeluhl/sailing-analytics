@@ -6,6 +6,8 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Locale;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
@@ -24,7 +26,7 @@ public interface FileStorageService extends IsManagedByCache<FileStorageServiceR
      *            may be {@code null}
      */
     URI storeFile(InputStream is, String fileExtension, long lengthInBytes) throws IOException,
-            OperationFailedException, InvalidPropertiesException;
+            OperationFailedException, InvalidPropertiesException, UnauthorizedException;
 
     /**
      * From the given {@code uri} it should be possible to determine the file to remove.
