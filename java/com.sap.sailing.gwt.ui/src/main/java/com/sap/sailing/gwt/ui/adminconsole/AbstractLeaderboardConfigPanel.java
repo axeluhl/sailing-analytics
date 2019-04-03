@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sailing.domain.common.security.SecuredDomainType.LEADERBOARD;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -257,26 +258,38 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName = getSelectedRaceColumnWithFleet();
                 // if no leaderboard column is selected, ignore the race selection change
                 if (selectedRaceColumnAndFleetName != null) {
-                    RaceColumnDTO selectedRaceColumn = selectedRaceColumnAndFleetName.getA();
-                    FleetDTO selectedRaceColumnFleet = selectedRaceColumnAndFleetName.getB();
-                    if (selectedRaces.isEmpty()) {
-                        if (hasLink(selectedRaceColumnAndFleetName)) {
-                            unlinkRaceColumnFromTrackedRace(selectedRaceColumn.getRaceColumnName(),
-                                    selectedRaceColumnFleet);
-                        }
-                    } else {
-                        RaceDTO selectedRace = selectedRaces.iterator().next();
-                        if (hasLink(selectedRaceColumnAndFleetName)
-                                && !isLinkedToRace(selectedRaceColumnAndFleetName, selectedRace)) {
-                            if (Window.confirm(stringMessages.trackedRaceAlreadyLinked())) {
-                                linkTrackedRaceToSelectedRaceColumn(selectedRaceColumn, selectedRaceColumnFleet,
-                                        selectedRace.getRaceIdentifier());
-                            } else {
-                                selectTrackedRaceInRaceList();
+                    final StrippedLeaderboardDTOWithSecurity selectedLeaderboard = getSelectedLeaderboard();
+                    if (userService.hasPermission(selectedLeaderboard, UPDATE)) {
+                        RaceColumnDTO selectedRaceColumn = selectedRaceColumnAndFleetName.getA();
+                        FleetDTO selectedRaceColumnFleet = selectedRaceColumnAndFleetName.getB();
+                        if (selectedRaces.isEmpty()) {
+                            if (hasLink(selectedRaceColumnAndFleetName)) {
+                                unlinkRaceColumnFromTrackedRace(selectedRaceColumn.getRaceColumnName(),
+                                        selectedRaceColumnFleet);
                             }
                         } else {
-                            linkTrackedRaceToSelectedRaceColumn(selectedRaceColumn, selectedRaceColumnFleet,
-                                    selectedRace.getRaceIdentifier());
+                            RaceDTO selectedRace = selectedRaces.iterator().next();
+                            if (hasLink(selectedRaceColumnAndFleetName)
+                                    && !isLinkedToRace(selectedRaceColumnAndFleetName, selectedRace)) {
+                                if (Window.confirm(stringMessages.trackedRaceAlreadyLinked())) {
+                                    linkTrackedRaceToSelectedRaceColumn(selectedRaceColumn, selectedRaceColumnFleet,
+                                            selectedRace.getRaceIdentifier());
+                                } else {
+                                    selectTrackedRaceInRaceList();
+                                }
+                            } else {
+                                linkTrackedRaceToSelectedRaceColumn(selectedRaceColumn, selectedRaceColumnFleet,
+                                        selectedRace.getRaceIdentifier());
+                            }
+                        }
+                    } else {
+                        removeTrackedRaceListHandlerTemporarily();
+                        raceColumnTableSelectionModel.clear();
+                        if (!selectedRaces.isEmpty()) {
+                            Scheduler.get().scheduleDeferred(() -> {
+                                final RaceDTO race = selectedRaces.iterator().next();
+                                trackedRacesListComposite.selectRaceByIdentifier(race.getRaceIdentifier());
+                            });
                         }
                     }
                 }
