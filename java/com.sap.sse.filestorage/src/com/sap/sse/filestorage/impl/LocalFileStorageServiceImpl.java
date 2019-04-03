@@ -110,13 +110,20 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     }
 
     @Override
-    public void removeFile(URI uri) throws IOException {
+    public void removeFile(URI uri) throws IOException, UnauthorizedException {
         String filePath = uri.getPath();
         String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-        File file = new File(localPath.getValue() + "/" + fileName);
+        final String pathToFile = localPath.getValue() + "/" + fileName;
+        File file = new File(pathToFile);
         if (!file.exists()) {
             throw new FileNotFoundException(uri.toString());
         }
+
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(
+                        DefaultActions.DELETE,
+                        new TypeRelativeObjectIdentifier(pathToFile)));
+
         if (!file.delete()) {
             logger.warning("Could not delete file with path " + filePath);
             throw new IOException("Could not delete file with path "+filePath);
