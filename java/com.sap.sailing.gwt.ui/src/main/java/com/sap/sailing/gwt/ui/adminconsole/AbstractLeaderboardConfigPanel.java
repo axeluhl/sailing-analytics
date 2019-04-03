@@ -102,6 +102,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     protected HandlerRegistration trackedRaceListHandlerRegistration;
 
     private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
+    private final Button reloadAllRaceLogs;
 
     protected UserService userService;
 
@@ -214,6 +215,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                     trackedRacesListComposite.setRegattaFilterValue(getSelectedLeaderboardName());
                 }
                 leaderboardSelectionChanged();
+                reloadAllRaceLogs.setVisible(userService.hasPermission(getSelectedLeaderboard(), UPDATE));
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
             }
         });
@@ -308,7 +310,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         };
         trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel
                 .addSelectionChangeHandler(trackedRaceListHandler);
-        Button reloadAllRaceLogs = new Button(stringMessages.reloadAllRaceLogs());
+        this.reloadAllRaceLogs = new Button(stringMessages.reloadAllRaceLogs());
         reloadAllRaceLogs.ensureDebugId("ReloadAllRaceLogsButton");
         reloadAllRaceLogs.addClickHandler(event -> {
             StrippedLeaderboardDTOWithSecurity leaderboard = getSelectedLeaderboard();
