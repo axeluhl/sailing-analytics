@@ -822,9 +822,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
 
     @Override
     public ReplicationMasterDescriptor createReplicationMasterDescriptor(String messagingHostname, String hostname,
-            String exchangeName, int servletPort, int messagingPort, String queueName,
+            String exchangeName, int servletPort, int messagingPort, String queueName, String bearerToken,
             Iterable<Replicable<?, ?>> replicables) {
-        return new ReplicationMasterDescriptorImpl(messagingHostname, exchangeName, messagingPort, queueName, hostname, servletPort, replicables);
+        return new ReplicationMasterDescriptorImpl(messagingHostname, exchangeName, messagingPort, queueName, hostname,
+                servletPort, bearerToken, replicables);
     }
 
     @Override

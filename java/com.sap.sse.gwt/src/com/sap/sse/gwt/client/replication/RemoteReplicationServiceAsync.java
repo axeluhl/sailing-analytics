@@ -7,7 +7,7 @@ public interface RemoteReplicationServiceAsync {
     void getReplicaInfo(AsyncCallback<ReplicationStateDTO> callback);
     
     void startReplicatingFromMaster(String messagingHost, String masterName, String exchangeName, int servletPort,
-            int messagingPort, AsyncCallback<Void> callback);
+            int messagingPort, String usernameOrNull, String passwordOrNull, AsyncCallback<Void> callback);
 
     void stopAllReplicas(AsyncCallback<Void> asyncCallback);
 

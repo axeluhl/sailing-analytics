@@ -23,43 +23,57 @@ public final class RemoteServerUtil {
     /**
      * Using the given credentials, this method calls the remote server to create a valid bearer token.
      */
-    public static String resolveBearerTokenForRemoteServer(String hostname, String username, String password) {
-        String token = "";
+    public static String resolveBearerTokenForRemoteServer(String remoteServerUrl, String username, String password) {
         try {
-            URL base = createBaseUrl(hostname);
-            if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
-                String path = "/security/api/restsecurity/access_token";
-                URL serverAddress = createRemoteServerUrl(base, path, null);
-                URLConnection connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_MINUTE,
-                        t -> {
-                            String auth = username + ":" + password;
-                            String base64 = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
-                            t.setRequestProperty("Authorization", "Basic " + base64);
-                        });
-    
-                ByteArrayOutputStream result = new ByteArrayOutputStream();
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = connection.getInputStream().read(buffer)) != -1) {
-                    result.write(buffer, 0, length);
-                }
-                String jsonToken = result.toString("UTF-8");
-                Object requestBody = JSONValue.parseWithException(jsonToken);
-                if (requestBody instanceof JSONObject) {
-                    JSONObject json = (JSONObject) requestBody;
-                    Object tokenObj = json.get("access_token");
-                    if (tokenObj instanceof String) {
-                        token = (String) tokenObj;
-                        logger.info("Obtained access token for user "+username);
-                    } else {
-                        logger.warning("Did not find access token for user "+username);
-                    }
-                } else {
-                    throw new RuntimeException("Could not obtain token for server");
-                }
-            }
+            return resolveBearerTokenForRemoteServer(createBaseUrl(remoteServerUrl), username, password);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+    
+    /**
+     * Using the given credentials, this method calls the remote server to create a valid bearer token.
+     */
+    public static String resolveBearerTokenForRemoteServer(String hostname, int port, String username, String password) {
+        try {
+            return resolveBearerTokenForRemoteServer(new URL("http", hostname, port, ""), username, password);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private static String resolveBearerTokenForRemoteServer(URL base, String username, String password) throws Exception {
+        String token = "";
+        if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
+            String path = "/security/api/restsecurity/access_token";
+            URL serverAddress = createRemoteServerUrl(base, path, null);
+            URLConnection connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_MINUTE,
+                    t -> {
+                        String auth = username + ":" + password;
+                        String base64 = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+                        t.setRequestProperty("Authorization", "Basic " + base64);
+                    });
+            
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = connection.getInputStream().read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+            String jsonToken = result.toString("UTF-8");
+            Object requestBody = JSONValue.parseWithException(jsonToken);
+            if (requestBody instanceof JSONObject) {
+                JSONObject json = (JSONObject) requestBody;
+                Object tokenObj = json.get("access_token");
+                if (tokenObj instanceof String) {
+                    token = (String) tokenObj;
+                    logger.info("Obtained access token for user "+username);
+                } else {
+                    logger.warning("Did not find access token for user "+username);
+                }
+            } else {
+                throw new RuntimeException("Could not obtain token for server");
+            }
         }
         return token;
     }

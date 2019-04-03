@@ -193,7 +193,8 @@ public class ReplicationPanel extends FlowPanel {
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getC(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getC(),
-                                masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getB(), new AsyncCallback<Void>() {
+                                masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getB(),
+                                /* TODO username */ null, /* TODO password */ null, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable e) {
                                 addButton.setEnabled(true);

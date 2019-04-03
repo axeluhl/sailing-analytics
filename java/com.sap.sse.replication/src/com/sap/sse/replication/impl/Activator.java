@@ -13,6 +13,7 @@ import org.osgi.framework.BundleContext;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.security.util.RemoteServerUtil;
 
 /**
  * Initializes the replication sub-system. A hierarchy of parameter specifications is evaluated to configure this
@@ -80,6 +81,8 @@ public class Activator implements BundleActivator {
     public static final String PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST = "replicate.master.queue.host";
     public static final String PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT = "replicate.master.queue.port";
     public static final String PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME = "replicate.master.exchange.name";
+    public static final String PROPERTY_NAME_REPLICATE_MASTER_USERNAME = "replicate.master.username";
+    public static final String PROPERTY_NAME_REPLICATE_MASTER_PASSWORD = "replicate.master.password";
 
     private ReplicationInstancesManager replicationInstancesManager;
 
@@ -165,13 +168,17 @@ public class Activator implements BundleActivator {
                 if (replicateFromExchangeName == null) {
                     replicateFromExchangeName = masterExchangeName;
                 }
+                final String servletHost = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST);
+                final int servletPort = Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim());
+                final String bearerToken = RemoteServerUtil.resolveBearerTokenForRemoteServer(servletHost, servletPort,
+                        System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_USERNAME),
+                        System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_PASSWORD));
                 ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
                         System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST),
                         replicateFromExchangeName,
                         Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT).trim()), 
                         serverReplicationMasterService.getServerIdentifier().toString(), 
-                        System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
-                        Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()), replicables);
+                        servletHost, servletPort, bearerToken, replicables);
                 try {
                     serverReplicationMasterService.startToReplicateFrom(master);
                     serverReplicationMasterService.setReplicationStarting(false);

@@ -19,6 +19,7 @@ Bundle-ClassPath: .
 Comment: The Web-ContextPath is referred to by ReplicationMasterDescriptorImpl.REPLICATION_SERVLET
 Web-ContextPath: /replication
 Import-Package: com.rabbitmq.client;version="2.8.4",
+ com.sap.sse.security.util,
  javax.servlet;version="2.6.0",
  javax.servlet.http;version="2.6.0",
  org.osgi.framework;version="1.6.0",

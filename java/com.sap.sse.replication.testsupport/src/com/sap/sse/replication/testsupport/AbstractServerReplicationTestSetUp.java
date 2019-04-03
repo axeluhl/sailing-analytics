@@ -264,7 +264,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                 replicablesToReplicate.add(getReplicablesProvider().getReplicable(replicableIdAsString, /* wait */ false));
             }
             this.masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, exchangeName, /* messagingPort */ 0,
-                    UUID.randomUUID().toString(), "localhost", ss.getLocalPort(), replicablesToReplicate);
+                    UUID.randomUUID().toString(), "localhost", ss.getLocalPort(), /* bearerToken */ null, replicablesToReplicate);
         }
         
         ReplicationMasterDescriptor getMasterDescriptor() {
