@@ -32,10 +32,9 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationStatus;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ReplicatorActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.util.impl.CountingOutputStream;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -119,17 +118,17 @@ public class ReplicationServlet extends AbstractHttpServlet {
         switch (Action.valueOf(action)) {
         case REGISTER:
             logger.info("Received replica registration request");
-            checkReplicatorPermission(ReplicatorActions.REPLICATE);
+            checkReplicatorPermission(ServerActions.REPLICATE);
             registerClientWithReplicationService(req, resp);
             break;
         case DEREGISTER:
             logger.info("Received replica deregistration request");
-            checkReplicatorPermission(ReplicatorActions.REPLICATE);
+            checkReplicatorPermission(ServerActions.REPLICATE);
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
             logger.info("Received replication initial load request");
-            checkReplicatorPermission(ReplicatorActions.REPLICATE);
+            checkReplicatorPermission(ServerActions.REPLICATE);
             replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
             Channel channel = getReplicationService().createMasterChannel();
             try {
@@ -167,7 +166,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                 channel.getConnection().close();
             }
         case STATUS:
-            checkReplicatorPermission(DefaultActions.READ);
+            checkReplicatorPermission(ServerActions.READ_REPLICATOR);
             try {
                 reportStatus(resp);
             } catch (IllegalAccessException e) {
@@ -185,7 +184,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
     
     private void checkReplicatorPermission(com.sap.sse.security.shared.HasPermissions.Action action) {
         SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.REPLICATOR.getStringPermissionForTypeRelativeIdentifier(action,
+                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(action,
                         new TypeRelativeObjectIdentifier(ServerInfo.getName())));
     }
 
@@ -247,7 +246,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
             if (replicable != null) {
                 logger.info("Received request to apply and replicate an operation from a replica for replicable "+replicable);
-                checkReplicatorPermission(ReplicatorActions.REPLICATE);
+                checkReplicatorPermission(ServerActions.REPLICATE);
                 applyOperationToReplicable(replicable, is);
             } else {
                 logger.warning("Received operation for replicable "+replicableIdAsString+

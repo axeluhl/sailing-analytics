@@ -238,11 +238,6 @@ public class Activator implements BundleActivator {
                 .getQualifiedObjectIdentifier(
                         new TypeRelativeObjectIdentifier(ServerInfo.getName()));
         securityService.migrateOwnership(serverIdentifier, serverIdentifier.toString());
-        
-        final QualifiedObjectIdentifier replicatorIdentifier = SecuredSecurityTypes.REPLICATOR
-                .getQualifiedObjectIdentifier(
-                        new TypeRelativeObjectIdentifier(ServerInfo.getName()));
-        securityService.migrateOwnership(replicatorIdentifier, serverIdentifier.toString());
 
         securityService.checkMigration(SecuredSecurityTypes.getAllInstances());
     }

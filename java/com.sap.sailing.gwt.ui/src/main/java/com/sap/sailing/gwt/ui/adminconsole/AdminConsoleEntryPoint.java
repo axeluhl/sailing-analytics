@@ -369,7 +369,9 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
             public void refreshAfterBecomingVisible() {
                 replicationPanel.updateReplicaList();
             }
-        }, getStringMessages().replication(), SecuredSecurityTypes.REPLICATOR.getPermission()); // TODO bug4754 use server name as type-relative object identifier
+                }, getStringMessages().replication(),
+                () -> getUserService().hasAnyServerPermission(ServerActions.REPLICATE, ServerActions.START_REPLICATION,
+                        ServerActions.READ_REPLICATOR));
 
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), getSailingService(),
                 this, eventManagementPanel, this, this, mediaPanel);

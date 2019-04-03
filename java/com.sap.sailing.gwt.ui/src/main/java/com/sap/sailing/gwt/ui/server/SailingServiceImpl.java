@@ -606,7 +606,6 @@ import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ReplicatorActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -4166,7 +4165,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public ReplicationStateDTO getReplicaInfo() {
         SecurityUtils.getSubject().checkPermission(
-                SecuredSecurityTypes.REPLICATOR.getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ,
+                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.READ_REPLICATOR,
                         new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         ReplicationService service = getReplicationService();
         Set<ReplicaDTO> replicaDTOs = new HashSet<ReplicaDTO>();
@@ -4209,8 +4208,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             int servletPort, int messagingPort, String usernameOrNull, String passwordOrNull)
             throws IOException, ClassNotFoundException, InterruptedException {
         SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.REPLICATOR.getStringPermissionForTypeRelativeIdentifier(
-                        ReplicatorActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                        ServerActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         // The queue name must always be the same for this server. In order to achieve
         // this we're using the unique server identifier
         final ReplicationService replicationService = getReplicationService();
@@ -5495,8 +5494,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void stopReplicatingFromMaster() {
         SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.REPLICATOR.getStringPermissionForTypeRelativeIdentifier(
-                        ReplicatorActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                        ServerActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         try {
             getReplicationService().stopToReplicateFromMaster();
         } catch (IOException e) {
@@ -5508,8 +5507,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void stopAllReplicas() {
         SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.REPLICATOR.getStringPermissionForTypeRelativeIdentifier(
-                        ReplicatorActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                        ServerActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         try {
             getReplicationService().stopAllReplicas();
         } catch (IOException e) {
@@ -5521,8 +5520,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void stopSingleReplicaInstance(String identifier) {
         SecurityUtils.getSubject()
-                .checkPermission(SecuredSecurityTypes.REPLICATOR.getStringPermissionForTypeRelativeIdentifier(
-                        ReplicatorActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                        ServerActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         UUID uuid = UUID.fromString(identifier);
         try {
             getReplicationService().unregisterReplica(uuid);

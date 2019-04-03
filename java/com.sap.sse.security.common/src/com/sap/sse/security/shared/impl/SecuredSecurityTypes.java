@@ -83,10 +83,23 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
          */
         DATA_MINING,
 
-        CAN_IMPORT_MASTERDATA;
+        CAN_IMPORT_MASTERDATA,
+        /**
+         * Secures replication actions on the master side.
+         */
+        REPLICATE,
+        /**
+         * Secures replication actions on the replica side.
+         */
+        START_REPLICATION,
+        /**
+         * Secures the replication information provided through ReplicationServlet as well as AdminConsole.
+         */
+        READ_REPLICATOR;
 
         private static final Action[] ALL_ACTIONS = new Action[] { CONFIGURE_FILE_STORAGE, CONFIGURE_LOCAL_SERVER,
                 CONFIGURE_REMOTE_INSTANCES, IMPORT_MASTER_DATA, CREATE_OBJECT, CAN_IMPORT_MASTERDATA, DATA_MINING,
+                REPLICATE, START_REPLICATION, READ_REPLICATOR,
                 DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL, DefaultActions.UPDATE };
     }
 
@@ -95,19 +108,4 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
      * type-relative identifier is the server name
      */
     public static final HasPermissions SERVER = new SecuredSecurityTypes("SERVER", ServerActions.ALL_ACTIONS);
-
-    public static enum ReplicatorActions implements Action {
-        /**
-         * Secures replication actions on the master side.
-         */
-        REPLICATE,
-        /**
-         * Secures replication actions on the replica side.
-         */
-        START_REPLICATION;
-        private static final Action[] ALL_ACTIONS = new Action[] { DefaultActions.READ, REPLICATE, START_REPLICATION };
-    };
-
-    public static final HasPermissions REPLICATOR = new SecuredSecurityTypes("REPLICATOR", ReplicatorActions.ALL_ACTIONS);
-
 }
