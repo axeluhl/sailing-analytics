@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.impl.FileUploadServlet;
@@ -57,7 +59,7 @@ public class FileStorageResource extends AbstractSailingServerResource {
     
     // Example test use:
     //     curl -d "uri=file:///c:/tmp/c7b821e1-ebab-4a96-a71d-28ac192b3e69.jpg" http://127.0.0.1:8888/sailingserver/api/v1/file
-    @POST
+    @DELETE
     @Produces("application/json;charset=UTF-8")
     public Response deleteFile(@QueryParam("uri") String uri) {
         final JSONObject result = new JSONObject();
@@ -68,7 +70,7 @@ public class FileStorageResource extends AbstractSailingServerResource {
             result.put("status", Status.OK.name());
             response = Response.ok().entity(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
-                | URISyntaxException | IOException e) {
+                | URISyntaxException | IOException | UnauthorizedException e) {
             final String errorMessage = "Could not delete file with URI "+uri+": "+e.getMessage();
             logger.log(Level.WARNING, "Could not delete file with URI "+uri, e);
             result.put("status", Status.BAD_REQUEST.name());
@@ -76,5 +78,11 @@ public class FileStorageResource extends AbstractSailingServerResource {
             response = Response.status(Status.BAD_REQUEST).entity(result.toJSONString()).build();
         }
         return response;
+    }
+
+    @POST
+    @Produces("application/json;charset=UTF-8")
+    public Response postDeleteFile(@QueryParam("uri") String uri) {
+        return deleteFile(uri);
     }
 }
