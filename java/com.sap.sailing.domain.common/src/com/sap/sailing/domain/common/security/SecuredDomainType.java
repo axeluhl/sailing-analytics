@@ -77,12 +77,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
 
     public static final HasPermissions RESULT_IMPORT_URL = new SecuredDomainType("RESULT_IMPORT_URL");
 
-    public static enum ReplicatorActions implements Action {
-        START, STOP, DROP_CONNECTION
-    };
-
-    public static final HasPermissions REPLICATOR = new SecuredDomainType("REPLICATOR", ReplicatorActions.values());
-
     public static final HasPermissions RACE_MANAGER_APP_DEVICE_CONFIGURATION = new SecuredDomainType(
             "RACE_MANAGER_APP_DEVICE_CONFIGURATION");
 
