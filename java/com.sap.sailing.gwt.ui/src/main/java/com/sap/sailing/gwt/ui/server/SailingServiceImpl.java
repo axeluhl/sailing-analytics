@@ -417,6 +417,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
+import com.sap.sailing.gwt.ui.shared.QRCodeEvent;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRanksDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
@@ -9120,30 +9121,84 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         BoatDTO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
         if (leaderboard != null && leaderboard instanceof RegattaLeaderboard) {
-            for (Boat boat : leaderboard.getAllBoats()) {
-                // TODO add visibility check on permission-vertical here
-                if (Util.equalsWithNull(boatId, boat.getId())) {
-                    result = getBaseDomainFactory().convertToBoatDTO(boat);
+            boolean skipSecuritychecks = getService().skipChecksDueToCorrectSecret(regattaName,
+                    regattaRegistrationLinkSecret);
+            if (skipSecuritychecks || getService().getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                for (Boat boat : leaderboard.getAllBoats()) {
+                    if (skipSecuritychecks || getService().getSecurityService().hasCurrentUserReadPermission(boat)) {
+                        if (Util.equalsWithNull(boatId, boat.getId())) {
+                            result = getBaseDomainFactory().convertToBoatDTO(boat);
+                        }
+                    }
+
                 }
             }
+
         }
         return result;
     }
 
     @Override
     public MarkDTO getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret) {
-        // TODO add visibility check on permission-vertical here
         MarkDTO result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
         if (leaderboard != null && leaderboard instanceof RegattaLeaderboard) {
-            for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                for (final Mark availableMark : raceColumn.getAvailableMarks()) {
-                    if (Util.equalsWithNull(availableMark.getId(), markId)) {
-                        result = convertToMarkDTO((RegattaLeaderboard) leaderboard, availableMark);
-                        break;
+            boolean skipSecuritychecks = getService().skipChecksDueToCorrectSecret(regattaName,
+                    regattaRegistrationLinkSecret);
+            if (skipSecuritychecks || getService().getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                    for (final Mark availableMark : raceColumn.getAvailableMarks()) {
+                        if (Util.equalsWithNull(availableMark.getId(), markId)) {
+                            result = convertToMarkDTO((RegattaLeaderboard) leaderboard, availableMark);
+                            break;
+                        }
                     }
                 }
             }
+
+        }
+        return result;
+    }
+
+    @Override
+    public QRCodeEvent getEvent(UUID eventId, String regattaName, String regattaRegistrationLinkSecret) {
+        QRCodeEvent result = null;
+        Event event = getService().getEvent(eventId);
+        if (event != null) {
+            boolean skipSecuritychecks = getService().skipChecksDueToCorrectSecret(regattaName,
+                    regattaRegistrationLinkSecret);
+            if (skipSecuritychecks || getService().getSecurityService().hasCurrentUserReadPermission(event)) {
+                ImageDescriptor logoImage = event.findImageWithTag(MediaTagConstants.LOGO.getName());
+                ImageDTO logo = logoImage != null ? HomeServiceUtil.convertToImageDTO(logoImage) : null;
+                String name = HomeServiceUtil.getEventDisplayName(event, getService());
+                String location = HomeServiceUtil.getLocation(event, getService());
+                if ((location == null || location.isEmpty()) && event.getVenue() != null) {
+                    location = event.getVenue().getName();
+                }
+                result = new QRCodeEvent(name, location, logo);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public CompetitorDTO getCompetitor(UUID competitorId, String regattaName, String regattaRegistrationLinkSecret) {
+        CompetitorDTO result = null;
+        Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
+        if (leaderboard != null && leaderboard instanceof RegattaLeaderboard) {
+            boolean skipSecuritychecks = getService().skipChecksDueToCorrectSecret(regattaName,
+                    regattaRegistrationLinkSecret);
+            if (skipSecuritychecks || getService().getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                for (Competitor competitor : leaderboard.getAllCompetitors()) {
+                    if (skipSecuritychecks
+                            || getService().getSecurityService().hasCurrentUserReadPermission(competitor)) {
+                        if (Util.equalsWithNull(competitorId, competitor.getId())) {
+                            result = getBaseDomainFactory().convertToCompetitorDTO(competitor);
+                        }
+                    }
+                }
+            }
+
         }
         return result;
     }

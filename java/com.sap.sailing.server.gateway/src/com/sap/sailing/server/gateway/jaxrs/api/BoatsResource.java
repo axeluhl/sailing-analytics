@@ -33,7 +33,7 @@ public class BoatsResource extends AbstractSailingServerResource {
                     .entity("Could not find a boat with id '" + StringEscapeUtils.escapeHtml(boatIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
-            boolean skip = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
+            boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
             boolean boatInRegatta = false;
             if (skip) {
                 Regatta regatta = getService().getRegattaByName(leaderboardName);

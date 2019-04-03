@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.jaxrs;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
@@ -17,7 +16,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
@@ -25,7 +23,6 @@ import com.sap.sse.util.DateParser;
 import com.sun.jersey.api.core.ResourceContext;
 
 public abstract class AbstractSailingServerResource {
-    private static final Logger logger = Logger.getLogger(AbstractSailingServerResource.class.getName());
     private static final String SLASH_ENCODING = "__";
     @Context ServletContext servletContext;
     @Context ResourceContext resourceContext;
@@ -112,25 +109,5 @@ public abstract class AbstractSailingServerResource {
         BigDecimal bigDecimal = new BigDecimal(value);
         bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
         return bigDecimal.doubleValue();
-    }
-
-    /**
-     * If the leaderboard can be resolved to a regatta, and the given secret is correct, return true
-     */
-    protected boolean skipChecksDueToCorrectSecret(String leaderboardName, String secret) {
-        final boolean result;
-        if (leaderboardName == null && secret == null) {
-            result = false;
-        } else {
-            Regatta regatta = getService().getRegattaByName(leaderboardName);
-            if (regatta == null && secret != null) {
-                logger.warning("Attempt to skip security checks using regatta secret \"" + secret + "\" for leaderboard \""
-                        + leaderboardName + "\", but a regatta with the same name could not be resolved");
-                result = false;
-            } else {
-                result = Util.equalStringsWithEmptyIsNull(regatta.getRegistrationLinkSecret(), secret);
-            }
-        }
-        return result;
     }
 }

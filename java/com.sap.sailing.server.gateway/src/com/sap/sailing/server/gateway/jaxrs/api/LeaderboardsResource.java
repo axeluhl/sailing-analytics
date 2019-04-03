@@ -192,7 +192,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
-                boolean skip = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
+                boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
                 if (!skip) {
                     getSecurityService().checkCurrentUserReadPermission(leaderboard);
                 }
@@ -300,7 +300,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         String regattaSecret = (String) requestObject.get(DeviceMappingConstants.JSON_REGISTER_SECRET);
         Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
         boolean allowedViaPermission = getSecurityService().hasCurrentUserUpdatePermission(leaderboard);
-        boolean allowedViaSecret = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
+        boolean allowedViaSecret = getService().skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
         HasRegattaLike hasRegattaLike = (HasRegattaLike) leaderboard;
         DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
@@ -416,7 +416,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         String regattaSecret = (String) requestObject.get(DeviceMappingConstants.JSON_REGISTER_SECRET);
         TimePoint closingTimePointInclusive = new MillisecondsTimePoint(toMillis);
         boolean allowedViaPermission = getSecurityService().hasCurrentUserUpdatePermission(leaderboard);
-        boolean allowedViaSecret = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
+        boolean allowedViaSecret = getService().skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
         if (allowedViaPermission || allowedViaSecret) {
             if (toMillis == null || deviceUuid == null || closingTimePointInclusive == null
                     || (competitorId == null && boatId == null && markId == null)) {
@@ -500,7 +500,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     "Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
-            boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+            boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
             if (!skip) {
                 getSecurityService().checkCurrentUserReadPermission(leaderboard);
                 getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
@@ -636,7 +636,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     throws NotDenotedForRaceLogTrackingException, Exception {
         final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(
                 leaderboardName, raceColumnName, fleetName);
-        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+        boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
         if (!skip) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
                     DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
@@ -1065,7 +1065,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Leaderboard with name '" + leaderboardName + "'does not contain a RegattaLog'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+        boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
         if (!skip) {
             getSecurityService().checkCurrentUserReadPermission(leaderboard);
         }
@@ -1260,7 +1260,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + StringEscapeUtils.escapeHtml(markId) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+        boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
         if (!skip) {
             getSecurityService().checkCurrentUserReadPermission(leaderboard);
         }
@@ -1313,7 +1313,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + StringEscapeUtils.escapeHtml(markId) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        if (!skipChecksDueToCorrectSecret(leaderboardName, regattaSecret)) {
+        if (!getService().skipChecksDueToCorrectSecret(leaderboardName, regattaSecret)) {
             getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         }
         // grab the position as found in TrackedRaces attached to the leaderboard
