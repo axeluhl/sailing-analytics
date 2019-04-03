@@ -136,6 +136,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                         /* queueName */ "initialLoad-for-"+req.getRemoteHost()+"@"+new Date()+"-"+UUID.randomUUID(),
                         /* syncAfterTimeout */ false);
                 PrintWriter br = new PrintWriter(new OutputStreamWriter(resp.getOutputStream()));
+                resp.setContentType("text/plain");
                 br.println(ros.getQueueName());
                 br.flush();
                 final CountingOutputStream countingOutputStream = new CountingOutputStream(
