@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.AuthorizationException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.util.tracker.ServiceTracker;
@@ -112,74 +113,79 @@ public class ReplicationServlet extends AbstractHttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter(ACTION);
-        logger.fine("Received replication request, action is "+action);
-        String[] replicableIdsAsStrings;
-        switch (Action.valueOf(action)) {
-        case REGISTER:
-            logger.info("Received replica registration request");
-            checkReplicatorPermission(ServerActions.REPLICATE);
-            registerClientWithReplicationService(req, resp);
-            break;
-        case DEREGISTER:
-            logger.info("Received replica deregistration request");
-            checkReplicatorPermission(ServerActions.REPLICATE);
-            deregisterClientWithReplicationService(req, resp);
-            break;
-        case INITIAL_LOAD:
-            logger.info("Received replication initial load request");
-            checkReplicatorPermission(ServerActions.REPLICATE);
-            replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
-            Channel channel = getReplicationService().createMasterChannel();
-            try {
-                RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
-                        /* queueName */ "initialLoad-for-"+req.getRemoteHost()+"@"+new Date()+"-"+UUID.randomUUID(),
-                        /* syncAfterTimeout */ false);
-                PrintWriter br = new PrintWriter(new OutputStreamWriter(resp.getOutputStream()));
-                resp.setContentType("text/plain");
-                br.println(ros.getQueueName());
-                br.flush();
-                final CountingOutputStream countingOutputStream = new CountingOutputStream(
-                        ros, /* log every megabyte */1024l * 1024l, Level.INFO,
-                        "HTTP output for initial load for " + req.getRemoteHost());
-                final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(countingOutputStream);
-                for (String replicableIdAsString : replicableIdsAsStrings) {
-                    Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
-                    if (replicable == null) {
-                        final String msg = "Couldn't find replicable with ID "+replicableIdAsString+". Aborting serialization of initial load.";
-                        logger.severe(msg);
-                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, StringEscapeUtils.escapeHtml(msg));
-                        break; // causing an error on the replica which is expecting the replica's initial load
-                    }
-                    try {
-                        replicable.serializeForInitialReplication(compressingOutputStream);
-                    } catch (Exception e) {
-                        logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
-                        logger.log(Level.SEVERE, "doGet", e);
-                        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        e.printStackTrace(resp.getWriter());
-                    }
-                }
-                compressingOutputStream.finish();
-                countingOutputStream.close();
+        try {
+            String action = req.getParameter(ACTION);
+            logger.fine("Received replication request, action is "+action);
+            String[] replicableIdsAsStrings;
+            switch (Action.valueOf(action)) {
+            case REGISTER:
+                logger.info("Received replica registration request");
+                checkReplicatorPermission(ServerActions.REPLICATE);
+                registerClientWithReplicationService(req, resp);
                 break;
-            } finally {
-                channel.getConnection().close();
+            case DEREGISTER:
+                logger.info("Received replica deregistration request");
+                checkReplicatorPermission(ServerActions.REPLICATE);
+                deregisterClientWithReplicationService(req, resp);
+                break;
+            case INITIAL_LOAD:
+                logger.info("Received replication initial load request");
+                checkReplicatorPermission(ServerActions.REPLICATE);
+                replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
+                Channel channel = getReplicationService().createMasterChannel();
+                try {
+                    RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
+                            /* queueName */ "initialLoad-for-"+req.getRemoteHost()+"@"+new Date()+"-"+UUID.randomUUID(),
+                            /* syncAfterTimeout */ false);
+                    PrintWriter br = new PrintWriter(new OutputStreamWriter(resp.getOutputStream()));
+                    resp.setContentType("text/plain");
+                    br.println(ros.getQueueName());
+                    br.flush();
+                    final CountingOutputStream countingOutputStream = new CountingOutputStream(
+                            ros, /* log every megabyte */1024l * 1024l, Level.INFO,
+                            "HTTP output for initial load for " + req.getRemoteHost());
+                    final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(countingOutputStream);
+                    for (String replicableIdAsString : replicableIdsAsStrings) {
+                        Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
+                        if (replicable == null) {
+                            final String msg = "Couldn't find replicable with ID "+replicableIdAsString+". Aborting serialization of initial load.";
+                            logger.severe(msg);
+                            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, StringEscapeUtils.escapeHtml(msg));
+                            break; // causing an error on the replica which is expecting the replica's initial load
+                        }
+                        try {
+                            replicable.serializeForInitialReplication(compressingOutputStream);
+                        } catch (Exception e) {
+                            logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
+                            logger.log(Level.SEVERE, "doGet", e);
+                            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                            e.printStackTrace(resp.getWriter());
+                        }
+                    }
+                    compressingOutputStream.finish();
+                    countingOutputStream.close();
+                    break;
+                } finally {
+                    channel.getConnection().close();
+                }
+            case STATUS:
+                checkReplicatorPermission(ServerActions.READ_REPLICATOR);
+                try {
+                    reportStatus(resp);
+                } catch (IllegalAccessException e) {
+                    logger.info("Error obtaining replication status: " + e.getMessage());
+                    logger.log(Level.SEVERE, "doGet", e);
+                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    e.printStackTrace(resp.getWriter());
+                }
+                break;
+            default:
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + StringEscapeUtils.escapeHtml(action) + " not understood. Must be one of "
+                        + Arrays.toString(Action.values()));
             }
-        case STATUS:
-            checkReplicatorPermission(ServerActions.READ_REPLICATOR);
-            try {
-                reportStatus(resp);
-            } catch (IllegalAccessException e) {
-                logger.info("Error obtaining replication status: " + e.getMessage());
-                logger.log(Level.SEVERE, "doGet", e);
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                e.printStackTrace(resp.getWriter());
-            }
-            break;
-        default:
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + StringEscapeUtils.escapeHtml(action) + " not understood. Must be one of "
-                    + Arrays.toString(Action.values()));
+        } catch (AuthorizationException e) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                    "The user is not authenticated or not permitted to manage replication. Details: " + e.getMessage());
         }
     }
     
