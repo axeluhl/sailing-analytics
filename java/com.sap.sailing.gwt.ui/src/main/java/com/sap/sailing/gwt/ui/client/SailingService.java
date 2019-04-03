@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
- 
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -937,4 +937,14 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Set<ImageDTO> resizeImage(ImageResizingTaskDTO imageResizingTask) throws Exception;
 
     MailInvitationType getMailType();
+
+    /**
+     * Allows reading public Boats, or Boats that are registered in races belonging to the given regatta
+     */
+    BoatDTO getBoat(UUID boatId, String regattaName, String regattaRegistrationLinkSecret);
+
+    /**
+     * Allows reading public Marks, or Marks that are registered in races belonging to the given regatta
+     */
+    MarkDTO getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret);
 }
