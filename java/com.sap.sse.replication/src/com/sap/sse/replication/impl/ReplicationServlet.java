@@ -18,11 +18,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.rabbitmq.client.Channel;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.gateway.AbstractHttpServlet;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicaDescriptor;
@@ -30,6 +32,10 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationStatus;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ReplicatorActions;
 import com.sap.sse.util.impl.CountingOutputStream;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
@@ -72,7 +78,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
     private final ReplicablesProvider replicablesProvider;
-    
+
     public ReplicationServlet() throws Exception {
         this(new OSGiReplicableTracker(Activator.getDefaultContext()),
                 new ServiceTracker<ReplicationService, ReplicationService>(Activator.getDefaultContext(),
@@ -113,14 +119,17 @@ public class ReplicationServlet extends AbstractHttpServlet {
         switch (Action.valueOf(action)) {
         case REGISTER:
             logger.info("Received replica registration request");
+            checkReplicatorPermission(ReplicatorActions.REPLICATE);
             registerClientWithReplicationService(req, resp);
             break;
         case DEREGISTER:
             logger.info("Received replica deregistration request");
+            checkReplicatorPermission(ReplicatorActions.REPLICATE);
             deregisterClientWithReplicationService(req, resp);
             break;
         case INITIAL_LOAD:
             logger.info("Received replication initial load request");
+            checkReplicatorPermission(ReplicatorActions.REPLICATE);
             replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
             Channel channel = getReplicationService().createMasterChannel();
             try {
@@ -158,6 +167,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                 channel.getConnection().close();
             }
         case STATUS:
+            checkReplicatorPermission(DefaultActions.READ);
             try {
                 reportStatus(resp);
             } catch (IllegalAccessException e) {
@@ -171,6 +181,12 @@ public class ReplicationServlet extends AbstractHttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + StringEscapeUtils.escapeHtml(action) + " not understood. Must be one of "
                     + Arrays.toString(Action.values()));
         }
+    }
+    
+    private void checkReplicatorPermission(com.sap.sse.security.shared.HasPermissions.Action action) {
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredSecurityTypes.REPLICATOR.getStringPermissionForTypeRelativeIdentifier(action,
+                        new TypeRelativeObjectIdentifier(ServerInfo.getName())));
     }
 
     /**
@@ -231,6 +247,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
             if (replicable != null) {
                 logger.info("Received request to apply and replicate an operation from a replica for replicable "+replicable);
+                checkReplicatorPermission(ReplicatorActions.REPLICATE);
                 applyOperationToReplicable(replicable, is);
             } else {
                 logger.warning("Received operation for replicable "+replicableIdAsString+
