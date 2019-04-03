@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -69,8 +67,6 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -617,6 +613,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOFactory;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -4168,6 +4165,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public ReplicationStateDTO getReplicaInfo() {
+        SecurityUtils.getSubject().checkPermission(
+                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.READ_REPLICATOR,
+                        new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         ReplicationService service = getReplicationService();
         Set<ReplicaDTO> replicaDTOs = new HashSet<ReplicaDTO>();
         for (ReplicaDescriptor replicaDescriptor : service.getReplicaInfo()) {
@@ -4205,14 +4205,21 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     @Override
-    public void startReplicatingFromMaster(String messagingHost, String masterHost, String exchangeName, int servletPort, int messagingPort) throws IOException, ClassNotFoundException, InterruptedException {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+    public void startReplicatingFromMaster(String messagingHost, String masterHostName, String exchangeName,
+            int servletPort, int messagingPort, String usernameOrNull, String passwordOrNull)
+            throws IOException, ClassNotFoundException, InterruptedException {
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                        ServerActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         // The queue name must always be the same for this server. In order to achieve
         // this we're using the unique server identifier
         final ReplicationService replicationService = getReplicationService();
-        replicationService.startToReplicateFrom(
-                replicationService.createReplicationMasterDescriptor(messagingHost, masterHost, exchangeName, servletPort, messagingPort, 
-                        /* use local server identifier as queue name */ replicationService.getServerIdentifier().toString(), replicationService.getAllReplicables()));
+        replicationService.startToReplicateFrom(replicationService.createReplicationMasterDescriptor(messagingHost,
+                masterHostName, exchangeName, servletPort, messagingPort,
+                /* use local server identifier as queue name */ replicationService.getServerIdentifier().toString(),
+                RemoteServerUtil.resolveBearerTokenForRemoteServer(masterHostName, servletPort, usernameOrNull,
+                        passwordOrNull),
+                replicationService.getAllReplicables()));
     }
 
     @Override
@@ -5487,7 +5494,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopReplicatingFromMaster() {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                        ServerActions.START_REPLICATION, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         try {
             getReplicationService().stopToReplicateFromMaster();
         } catch (IOException e) {
@@ -5498,7 +5507,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopAllReplicas() {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                        ServerActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         try {
             getReplicationService().stopAllReplicas();
         } catch (IOException e) {
@@ -5509,7 +5520,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void stopSingleReplicaInstance(String identifier) {
-        getSecurityService().checkCurrentUserUpdatePermission(getServerInfo());
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                        ServerActions.REPLICATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         UUID uuid = UUID.fromString(identifier);
         try {
             getReplicationService().unregisterReplica(uuid);
@@ -5582,48 +5595,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }
 
-    private String getTokenForServer(String hostname, String username, String password) {
-        String token = "";
-        try {
-            URL base = createBaseUrl(hostname);
-            String path = "/security/api/restsecurity/access_token";
-            URL serverAddress = createUrl(base, path, null);
-            URLConnection connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_MINUTE,
-                    t -> {
-                        String auth = username + ":" + password;
-                        String base64 = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
-                        t.setRequestProperty("Authorization", "Basic " + base64);
-                    });
-
-            ByteArrayOutputStream result = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = connection.getInputStream().read(buffer)) != -1) {
-                result.write(buffer, 0, length);
-            }
-            String jsonToken = result.toString("UTF-8");
-            Object requestBody = JSONValue.parseWithException(jsonToken);
-            if (requestBody instanceof JSONObject) {
-                JSONObject json = (JSONObject) requestBody;
-                Object tokenObj = json.get("access_token");
-                if (tokenObj instanceof String) {
-                    token = (String) tokenObj;
-                    logger.info("Obtained access token for user "+username);
-                } else {
-                    logger.warning("Did not find access token for user "+username);
-                }
-            } else {
-                throw new RuntimeException("Could not obtain token for server");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return token;
-    }
-
     @Override
     public List<String> getLeaderboardGroupNamesFromRemoteServer(String url, String username, String password) {
-        String token = getTokenForServer(url, username, password);
+        String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(url, username, password);
         // FIXME: Add checks here that ensure that the current use is allowed to do MDI
         final String path = "/sailingserver/api/v1/leaderboardgroups";
         final String query = null;
@@ -5631,10 +5605,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         InputStream inputStream = null;
         URLConnection connection = null;
         try {
-            URL base = createBaseUrl(url);
-            serverAddress = createUrl(base, path, query);
-            connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_MINUTE,
-                    t -> t.setRequestProperty("Authorization", "Bearer " + token));
+            URL base = RemoteServerUtil.createBaseUrl(url);
+            serverAddress = RemoteServerUtil.createRemoteServerUrl(base, path, query);
+            connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(serverAddress, Duration.ONE_MINUTE,
+                    token);
             inputStream = connection.getInputStream();
             InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
             org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
@@ -5660,27 +5634,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
     }
 
-    /**
-     * Strips off trailing slash and replaces an omitted or unknown protocol by HTTP
-     */
-    private URL createBaseUrl(String urlAsString) throws MalformedURLException {
-        final String urlAsStringWithTrailingSlashRemoved = urlAsString == null ?
-                null : urlAsString.length()>0 && urlAsString.charAt(urlAsString.length()-1)=='/' ?
-                        urlAsString.substring(0, urlAsString.length()-1) : urlAsString;
-        URL url;
-        try {
-            url = new URL(urlAsStringWithTrailingSlashRemoved);
-        } catch (MalformedURLException e1) {
-            // trying to strip off an unknown protocol, defaulting to HTTP
-            String urlAsStringAfterFormatting = urlAsStringWithTrailingSlashRemoved;
-            if (urlAsStringAfterFormatting.contains("://")) {
-                urlAsStringAfterFormatting = urlAsStringWithTrailingSlashRemoved.split("://")[1];
-            }
-            url = new URL("http://" + urlAsStringAfterFormatting);
-        }
-        return url;
-    }
-
     @Override
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
@@ -5689,7 +5642,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
                 ServerActions.CAN_IMPORT_MASTERDATA, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
 
-        String token = getTokenForServer(urlAsString, targetServerUsername, targetServerPassword);
+        String token = RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername, targetServerPassword);
 
         final UUID importOperationId = UUID.randomUUID();
         getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT,
@@ -5716,11 +5669,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 InputStream inputStream = null;
                 try {
                     String masterDataPath = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
-                    URL base = createBaseUrl(urlAsString);
-                    serverAddress = createUrl(base, masterDataPath, query);
+                    URL base = RemoteServerUtil.createBaseUrl(urlAsString);
+                    serverAddress = RemoteServerUtil.createRemoteServerUrl(base, masterDataPath, query);
                     // the response can take a very long time for MDI that include foiling data or such
-                    connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_HOUR.times(2),
-                            t -> t.setRequestProperty("Authorization", "Bearer " + token));
+                    connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(serverAddress,
+                            Duration.ONE_HOUR.times(2), token);
                     getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02,
                             DataImportSubProgress.CONNECTION_ESTABLISH, 0.5);
                     if (compress) {
@@ -5763,16 +5716,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         };
         executor.execute(masterDataImportTask);
         return importOperationId;
-    }
-    
-    private URL createUrl(URL base, String pathWithLeadingSlash, String query) throws Exception {
-        URL url;
-        if (query != null) {
-            url = new URL(base.toExternalForm() + pathWithLeadingSlash + "?" + query);
-        } else {
-            url = new URL(base.toExternalForm() + pathWithLeadingSlash);
-        }
-        return url;
     }
 
     public DataImportProgress getImportOperationProgress(UUID id) {
