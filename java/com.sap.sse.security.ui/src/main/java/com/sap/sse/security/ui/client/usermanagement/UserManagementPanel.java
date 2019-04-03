@@ -62,8 +62,13 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                         .show());
 
         userNameTextbox = buttonPanel.addUnsecuredTextBox(stringMessages.username());
-        buttonPanel.addUnsecuredAction(stringMessages.editRolesAndPermissionsForUser(""),
+        final Button editRolesandPermissionsForUserButton = buttonPanel.addUnsecuredAction(
+                stringMessages.editRolesAndPermissionsForUser(""),
                 () -> showRolesAndPermissionsEditDialog(userService, tableResources, errorReporter));
+        
+        userNameTextbox.addKeyUpHandler(
+                e -> editRolesandPermissionsForUserButton.setEnabled(checkIfUserExists(userNameTextbox.getText())));
+        editRolesandPermissionsForUserButton.setEnabled(false);
 
         userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
                 /* multiSelection */ true, /* enablePager */ true, tableResources);
@@ -146,6 +151,20 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         west.add(detailsPanel);
     }
     
+    /** @return true, if the given username correlates with a visible UserDTO */
+    private boolean checkIfUserExists(final String username) {
+        boolean result = false;
+        if (username != null && !username.isEmpty()) {
+            for (UserDTO user : userList.getAllUsers()) {
+                if (username.equals(user.getName())) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
     /** shows the edit dialog */
     private void showRolesAndPermissionsEditDialog(UserService userService,
             final CellTableWithCheckboxResources tableResources, final ErrorReporter errorReporter) {
