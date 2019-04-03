@@ -5,11 +5,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.WithID;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>> extends OperationsToMasterSendingQueue, WithID {
     final Logger logger = Logger.getLogger(OperationsToMasterSender.class.getName());
@@ -45,7 +46,8 @@ public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>
         // TODO bug4018: if sending the operation fails, e.g., because of an HTTP response code != 2xx, enqueue the operation for retry
         addOperationSentToMasterForReplication(operationWithResultWithIdWrapper);
         URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(this.getId().toString());
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        final URLConnection connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(url,
+                masterDescriptor.getBearerToken());
         connection.setDoOutput(true); // we want to post the serialized operation
         logger.info("Sending operation "+operation+" to master "+masterDescriptor+"'s replicable with ID "+this+" for initial execution and replication");
         connection.connect();
