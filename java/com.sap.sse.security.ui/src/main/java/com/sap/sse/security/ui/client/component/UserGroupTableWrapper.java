@@ -58,6 +58,9 @@ public class UserGroupTableWrapper extends
         final ListHandler<UserGroupDTO> userColumnListHandler = getColumnSortHandler();
 
         // users table
+        final TextColumn<UserGroupDTO> userGroupUUidColumn = new AbstractSortableTextColumn<UserGroupDTO>(
+                group -> group.getId() == null ? "<null>" : group.getId().toString(), userColumnListHandler);
+
         final TextColumn<UserGroupDTO> UserGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<UserGroupDTO>(
                 UserGroupDTO -> UserGroupDTO.getName(), userColumnListHandler);
 
@@ -122,6 +125,7 @@ public class UserGroupTableWrapper extends
 
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(userColumnListHandler);
+        table.addColumn(userGroupUUidColumn, getStringMessages().id());
         table.addColumn(UserGroupWithSecurityDTONameColumn, getStringMessages().groupName());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, userColumnListHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());
