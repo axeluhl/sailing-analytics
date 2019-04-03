@@ -5595,8 +5595,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         try {
             URL base = RemoteServerUtil.createBaseUrl(url);
             serverAddress = RemoteServerUtil.createRemoteServerUrl(base, path, query);
-            connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_MINUTE,
-                    t -> t.setRequestProperty("Authorization", "Bearer " + token));
+            connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(serverAddress, Duration.ONE_MINUTE,
+                    token);
             inputStream = connection.getInputStream();
             InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
             org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
@@ -5660,8 +5660,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     URL base = RemoteServerUtil.createBaseUrl(urlAsString);
                     serverAddress = RemoteServerUtil.createRemoteServerUrl(base, masterDataPath, query);
                     // the response can take a very long time for MDI that include foiling data or such
-                    connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_HOUR.times(2),
-                            t -> t.setRequestProperty("Authorization", "Bearer " + token));
+                    connection = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(serverAddress,
+                            Duration.ONE_HOUR.times(2), token);
                     getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02,
                             DataImportSubProgress.CONNECTION_ESTABLISH, 0.5);
                     if (compress) {
