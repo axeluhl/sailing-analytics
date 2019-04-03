@@ -62,6 +62,7 @@ import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.HandleTabSelectable;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -236,6 +237,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 },filterTextbox.getAllListDataProvider(),table);
         
         AnchorCell anchorCell = new AnchorCell();
+        final TextColumn<EventDTO> eventUUidColumn = new AbstractSortableTextColumn<EventDTO>(
+                event -> event.getId() == null ? "<null>" : event.getId().toString());
+
         Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
@@ -388,6 +392,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 courseAreasColumn, leaderboardGroupsColumn, groupColumn, userColumn);
 
         table.addColumn(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getHeader());
+        table.addColumn(eventUUidColumn, stringMessages.id());
         table.addColumn(eventNameColumn, stringMessages.event());
         table.addColumn(venueNameColumn, stringMessages.venue());
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
