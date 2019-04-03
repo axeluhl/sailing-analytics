@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -640,5 +641,18 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     @Override
     default HasPermissions getType() {
         return SecuredDomainType.LEADERBOARD;
+    }
+    
+    default boolean isPartOfEvent(EventBase event) {
+        boolean result = false;
+        if (getDefaultCourseArea() != null) {
+            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                if(courseArea.equals(getDefaultCourseArea())) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 }
