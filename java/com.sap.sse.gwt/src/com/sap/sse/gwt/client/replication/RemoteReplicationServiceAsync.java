@@ -6,7 +6,7 @@ import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 public interface RemoteReplicationServiceAsync {
     void getReplicaInfo(AsyncCallback<ReplicationStateDTO> callback);
     
-    void startReplicatingFromMaster(String messagingHost, String masterName, String exchangeName, int servletPort,
+    void startReplicatingFromMaster(String messagingHost, String masterHostName, String exchangeName, int servletPort,
             int messagingPort, String usernameOrNull, String passwordOrNull, AsyncCallback<Void> callback);
 
     void stopAllReplicas(AsyncCallback<Void> asyncCallback);

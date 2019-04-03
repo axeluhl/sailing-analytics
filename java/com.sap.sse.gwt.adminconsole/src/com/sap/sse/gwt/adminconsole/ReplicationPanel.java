@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -26,6 +27,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
 import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
@@ -54,6 +56,57 @@ public class ReplicationPanel extends FlowPanel {
     private final Button stopReplicationButton;
     private final Button removeAllReplicas;
     
+    private static class ReplicationData {
+        private final String messagingHost;
+        private final String masterHostName;
+        private final String exchangeName;
+        private final int messagingPort;
+        private final int servletPort;
+        private final String userName;
+        private final String password;
+
+        public ReplicationData(String messagingHost, String masterHostName, String exchangeName, int messagingPort,
+                int servletPort, String userName, String password) {
+            super();
+            this.messagingHost = messagingHost;
+            this.masterHostName = masterHostName;
+            this.exchangeName = exchangeName;
+            this.messagingPort = messagingPort;
+            this.servletPort = servletPort;
+            this.userName = userName;
+            this.password = password;
+        }
+
+        public String getMessagingHost() {
+            return messagingHost;
+        }
+
+        public String getMasterHostName() {
+            return masterHostName;
+        }
+
+        public String getExchangeName() {
+            return exchangeName;
+        }
+
+        public int getMessagingPort() {
+            return messagingPort;
+        }
+
+        public int getServletPort() {
+            return servletPort;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+    }
+
     /**
      * For administrators it is important to understand whether an instance is a replica. A
      * {@link ErrorReporter#reportPersistentInformation(String) persistent error message} shall be shown
@@ -165,31 +218,37 @@ public class ReplicationPanel extends FlowPanel {
     }
     
     private void addReplication() {
-        AddReplicationDialog dialog = new AddReplicationDialog(null,
-                new DialogCallback<Util.Triple<Util.Triple<String, String, String>, Integer, Integer>>() {
-                    @Override
-                    /**
-                     * @param masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber a triple containing the RabbitMQ exchange hostname, the servlet hostname and the RabbitMQ exchange name,
-                     * followed by the RabbitMQ messaging port and the servlet port
-                     */
-                    public void ok(final Util.Triple<Util.Triple<String, String, String>, Integer, Integer> masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber) {
-                        registeredMasters.removeRow(0);
-                        registeredMasters.insertRow(0);
-                        registeredMasters.setWidget(0, 0, new Label(stringMessages.loading()));
-                        addButton.setEnabled(false);
-                        stopReplicationButton.setEnabled(false);
-                        replicationServiceAsync.startReplicatingFromMaster(masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
-                                masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
-                                masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getC(),
-                                masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getC(),
-                                masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getB(),
-                                /* TODO username */ null, /* TODO password */ null, new AsyncCallback<Void>() {
+        AddReplicationDialog dialog = new AddReplicationDialog(new Validator<ReplicationData>() {
+
+            @Override
+            public String getErrorMessage(ReplicationData valueToValidate) {
+                boolean userNameUnset = valueToValidate.getUserName() == null
+                        || valueToValidate.getUserName().isEmpty();
+                boolean passWordUnset = valueToValidate.getPassword() == null
+                        || valueToValidate.getPassword().isEmpty();
+                return userNameUnset == passWordUnset ? null : stringMessages.usernameAndPasswordMustBothBeSet();
+            }
+        }, new DialogCallback<ReplicationData>() {
+            @Override
+            /**
+             * @param masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber
+             *            a triple containing the RabbitMQ exchange hostname, the servlet hostname and the RabbitMQ
+             *            exchange name, followed by the RabbitMQ messaging port and the servlet port
+             */
+            public void ok(final ReplicationData state) {
+                registeredMasters.removeRow(0);
+                registeredMasters.insertRow(0);
+                registeredMasters.setWidget(0, 0, new Label(stringMessages.loading()));
+                addButton.setEnabled(false);
+                stopReplicationButton.setEnabled(false);
+                replicationServiceAsync.startReplicatingFromMaster(state.getMessagingHost(), state.getMasterHostName(),
+                        state.getExchangeName(), state.getServletPort(), state.getMessagingPort(), state.getUserName(),
+                        state.getPassword(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable e) {
                                 addButton.setEnabled(true);
-                                errorReporter.reportError(stringMessages.errorStartingReplication(
-                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
-                                        masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getC(), e.getMessage()));
+                                errorReporter.reportError(stringMessages.errorStartingReplication(state.getMasterHostName(),
+                                        state.getExchangeName(), e.getMessage()));
                                 updateReplicaList();
                             }
 
@@ -200,13 +259,13 @@ public class ReplicationPanel extends FlowPanel {
                                 updateReplicaList();
                             }
                         });
-                    }
-                    
-                    @Override
-                    public void cancel() {
-                        // simply don't add replication
-                    }
-                });
+            }
+
+            @Override
+            public void cancel() {
+                // simply don't add replication
+            }
+        });
         dialog.show();
     }
 
@@ -338,15 +397,17 @@ public class ReplicationPanel extends FlowPanel {
      * @author Axel Uhl (d043530)
      *
      */
-    private class AddReplicationDialog extends DataEntryDialog<Util.Triple<Util.Triple<String, String, String>, Integer, Integer>> {
+    private class AddReplicationDialog extends DataEntryDialog<ReplicationData> {
         private final TextBox hostnameEntryField;
         private final TextBox exchangeHostnameEntryField;
         private final TextBox exchangenameEntryField;
         private final IntegerBox messagingPortField;
         private final IntegerBox servletPortField;
+        private final TextBox usernameEntryField;
+        private final PasswordTextBox passwordEntryField;
         
-        public AddReplicationDialog(final Validator<Util.Triple<Util.Triple<String, String, String>, Integer, Integer>> validator,
-                final DialogCallback<Util.Triple<Util.Triple<String, String, String>, Integer, Integer>> callback) {
+        public AddReplicationDialog(final Validator<ReplicationData> validator,
+                final DialogCallback<ReplicationData> callback) {
             super(stringMessages.connect(), stringMessages.enterMaster(),
                     stringMessages.ok(), stringMessages.cancel(), validator, callback);
             hostnameEntryField = createTextBox("localhost");
@@ -354,6 +415,8 @@ public class ReplicationPanel extends FlowPanel {
             exchangenameEntryField = createTextBox("sapsailinganalytics");
             messagingPortField = createIntegerBox(0, /* visible length */ 5);
             servletPortField = createIntegerBox(8888, /* visibleLength */ 5);
+            usernameEntryField = createTextBox("admin");
+            passwordEntryField = createPasswordTextBox("admin");
         }
         
         /**
@@ -362,7 +425,7 @@ public class ReplicationPanel extends FlowPanel {
          */
         @Override
         protected Widget getAdditionalWidget() {
-            Grid grid = new Grid(10, 2);
+            Grid grid = new Grid(14, 2);
             grid.setWidget(0, 0, new Label(stringMessages.hostname()));
             grid.setWidget(0, 1, hostnameEntryField);
             grid.setWidget(1, 0, new Label(stringMessages.explainReplicationHostname()));
@@ -382,6 +445,14 @@ public class ReplicationPanel extends FlowPanel {
             grid.setWidget(8, 0, new Label(stringMessages.servletPortNumber()));
             grid.setWidget(8, 1, servletPortField);
             grid.setWidget(9, 0, new Label(stringMessages.explainReplicationServletPort()));
+
+            grid.setWidget(10, 0, new Label(stringMessages.username()));
+            grid.setWidget(10, 1, usernameEntryField);
+            grid.setWidget(11, 0, new Label(stringMessages.explainUserName()));
+
+            grid.setWidget(12, 0, new Label(stringMessages.password()));
+            grid.setWidget(12, 1, passwordEntryField);
+            grid.setWidget(13, 0, new Label(stringMessages.explainPassword()));
             return grid;
         }
         
@@ -391,10 +462,10 @@ public class ReplicationPanel extends FlowPanel {
         }
 
         @Override
-        protected Util.Triple<Util.Triple<String, String, String>, Integer, Integer> getResult() {
-            return new Util.Triple<Util.Triple<String, String, String>, Integer, Integer>(
-                    new Util.Triple<String, String, String>(exchangeHostnameEntryField.getText(), hostnameEntryField.getText(), exchangenameEntryField.getText()),
-                    messagingPortField.getValue(), servletPortField.getValue());
+        protected ReplicationData getResult() {
+            return new ReplicationData(exchangeHostnameEntryField.getValue(), hostnameEntryField.getValue(),
+                    exchangenameEntryField.getValue(), messagingPortField.getValue(), servletPortField.getValue(),
+                    usernameEntryField.getValue(), passwordEntryField.getValue());
         }
     }
 

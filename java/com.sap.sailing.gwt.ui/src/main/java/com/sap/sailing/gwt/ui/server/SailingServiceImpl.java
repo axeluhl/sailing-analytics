@@ -4205,7 +4205,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     @Override
-    public void startReplicatingFromMaster(String messagingHost, String masterHost, String exchangeName,
+    public void startReplicatingFromMaster(String messagingHost, String masterHostName, String exchangeName,
             int servletPort, int messagingPort, String usernameOrNull, String passwordOrNull)
             throws IOException, ClassNotFoundException, InterruptedException {
         SecurityUtils.getSubject()
@@ -4215,9 +4215,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         // this we're using the unique server identifier
         final ReplicationService replicationService = getReplicationService();
         replicationService.startToReplicateFrom(replicationService.createReplicationMasterDescriptor(messagingHost,
-                masterHost, exchangeName, servletPort, messagingPort,
+                masterHostName, exchangeName, servletPort, messagingPort,
                 /* use local server identifier as queue name */ replicationService.getServerIdentifier().toString(),
-                RemoteServerUtil.resolveBearerTokenForRemoteServer(masterHost, servletPort, usernameOrNull,
+                RemoteServerUtil.resolveBearerTokenForRemoteServer(masterHostName, servletPort, usernameOrNull,
                         passwordOrNull),
                 replicationService.getAllReplicables()));
     }
