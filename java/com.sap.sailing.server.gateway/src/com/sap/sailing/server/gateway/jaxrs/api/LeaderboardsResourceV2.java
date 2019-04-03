@@ -74,7 +74,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 try {
-                    boolean skip = skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
+                    boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
                     if (!skip) {
                         getSecurityService().checkCurrentUserReadPermission(leaderboard);
                     }

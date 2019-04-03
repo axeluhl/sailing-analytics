@@ -295,7 +295,7 @@ public class EventsResource extends AbstractSailingServerResource {
             boolean skip = false;
             for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
                 for (Leaderboard l : lg.getLeaderboards()) {
-                    if (skipChecksDueToCorrectSecret(l.getName(), secret)) {
+                    if (getService().skipChecksDueToCorrectSecret(l.getName(), secret)) {
                         skip = true;
                     }
                 }
