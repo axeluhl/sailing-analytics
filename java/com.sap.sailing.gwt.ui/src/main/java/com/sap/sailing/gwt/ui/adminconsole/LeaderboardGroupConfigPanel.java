@@ -909,7 +909,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         removeButton.setText(selectedLeaderboardGroups.size() <= 1 ? stringMessages.remove() : stringMessages.removeNumber(selectedLeaderboardGroups.size()));
         boolean canDeleteAllSelected = true;
         for (LeaderboardGroupDTO group : selectedLeaderboardGroups) {
-            if (userService.hasPermission(group, DefaultActions.DELETE)) {
+            if (!userService.hasPermission(group, DefaultActions.DELETE)) {
                 canDeleteAllSelected = false;
             }
         }
