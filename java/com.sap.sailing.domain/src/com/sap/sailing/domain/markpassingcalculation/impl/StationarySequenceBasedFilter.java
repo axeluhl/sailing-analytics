@@ -429,7 +429,8 @@ public class StationarySequenceBasedFilter {
                 final Candidate dummyCandidateForReplacementFix = StationarySequence.createDummyCandidate(fixReplacingExistingOne.getTimePoint());
                 final StationarySequence dummyStationarySequenceForFix = createStationarySequence(dummyCandidateForReplacementFix);
                 final StationarySequence lastSequenceStartingAtOrBeforeFix = stationarySequences.floor(dummyStationarySequenceForFix);
-                final boolean fixIsInStationarySequence = !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(fixReplacingExistingOne.getTimePoint());
+                final boolean fixIsInStationarySequence = lastSequenceStartingAtOrBeforeFix != null &&
+                        !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(fixReplacingExistingOne.getTimePoint());
                 if (!fixIsInStationarySequence) {
                     final StationarySequence lastSequenceEndingBeforeFix = // null in case fix is within a stationary sequence
                             lastSequenceStartingAtOrBeforeFix != null && fixIsInStationarySequence ? null : lastSequenceStartingAtOrBeforeFix;
