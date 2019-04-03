@@ -97,9 +97,17 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
     public static final HasPermissions SERVER = new SecuredSecurityTypes("SERVER", ServerActions.ALL_ACTIONS);
 
     public static enum ReplicatorActions implements Action {
-        START, STOP, DROP_CONNECTION
+        /**
+         * Secures replication actions on the master side.
+         */
+        REPLICATE,
+        /**
+         * Secures replication actions on the replica side.
+         */
+        START_REPLICATION;
+        private static final Action[] ALL_ACTIONS = new Action[] { DefaultActions.READ, REPLICATE, START_REPLICATION };
     };
 
-    public static final HasPermissions REPLICATOR = new SecuredSecurityTypes("REPLICATOR", ReplicatorActions.values());
+    public static final HasPermissions REPLICATOR = new SecuredSecurityTypes("REPLICATOR", ReplicatorActions.ALL_ACTIONS);
 
 }
