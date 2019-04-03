@@ -12,12 +12,12 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.home.shared.partials.dialog.confirm.ConfirmDialogFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeWrapper;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.QRCodeEvent;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -54,7 +54,7 @@ public class QRCodeView extends Composite {
 
     }
 
-    public void showCompetitor(EventViewDTO event, SimpleCompetitorWithIdDTO competitor, BoatDTO boat, MarkDTO mark,
+    public void showCompetitor(QRCodeEvent event, CompetitorDTO competitor, BoatDTO boat, MarkDTO mark,
             String leaderboardName, String branchIoUrl) {
         if (boat != null) {
             titleDivUi.setInnerText(
@@ -80,7 +80,7 @@ public class QRCodeView extends Composite {
         showQrCodeForURL(publicInviteBranchIOUrl);
     }
 
-    public void showBouyTender(EventViewDTO event, String leaderboardName, String branchIoUrl) {
+    public void showBouyTender(QRCodeEvent event, String leaderboardName, String branchIoUrl) {
         titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleBouy(leaderboardName));
         if (event != null) {
             subtitleDivUi.setInnerText(
@@ -90,7 +90,7 @@ public class QRCodeView extends Composite {
         showEventImageIfPossible(event);
     }
 
-    private void showEventImageIfPossible(EventViewDTO event) {
+    private void showEventImageIfPossible(QRCodeEvent event) {
         if (event != null && event.getLogoImage() != null) {
             eventImageUi.getStyle().setBackgroundImage("url('" + event.getLogoImage().getSourceRef() + "')");
             eventImageUi.getStyle().setWidth(event.getLogoImage().getWidthInPx(), Unit.PX);

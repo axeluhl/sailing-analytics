@@ -74,6 +74,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
+import com.sap.sailing.gwt.ui.shared.QRCodeEvent;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
@@ -1082,14 +1083,26 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getAllIgtimiAccountsWithSecurity(AsyncCallback<Iterable<AccountWithSecurityDTO>> callback);
 
     /**
-     * Allows reading public Boats, or Boats that are registered in races belonging to the given regatta
+     * Allows reading public Boats, or Boats that are registered in races belonging in the given regatta
      */
     void getBoat(UUID boatId, String regattaName, String regattaRegistrationLinkSecret,
             AsyncCallback<BoatDTO> asyncCallback);
 
     /**
-     * Allows reading public Marks, or Marks that are registered in races belonging to the given regatta
+     * Allows reading public Marks, or Marks that are registered in the given regatta
      */
     void getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret,
             AsyncCallback<MarkDTO> asyncCallback);
+
+    /**
+     * Allows reading public Events, or Events that are related to the given regatta
+     */
+    void getEvent(UUID eventId, String regattaName, String regattaRegistrationLinkSecret,
+            AsyncCallback<QRCodeEvent> asyncCallback);
+
+    /**
+     * Allows reading public Competitors, or Competitors that are registered in the given regatta
+     */
+    void getCompetitor(UUID competitorId, String leaderboardName, String regattaRegistrationLinkSecret,
+            AsyncCallback<CompetitorDTO> asyncCallback);
 }

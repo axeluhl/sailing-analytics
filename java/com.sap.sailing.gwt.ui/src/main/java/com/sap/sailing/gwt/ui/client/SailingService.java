@@ -90,6 +90,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
+import com.sap.sailing.gwt.ui.shared.QRCodeEvent;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
@@ -1139,12 +1140,23 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() throws UnauthorizedException;
 
     /**
-     * Allows reading public Boats, or Boats that are registered in races belonging to the given regatta
+     * Allows reading public Boats, or Boats that are registered in races belonging in the given regatta
      */
     BoatDTO getBoat(UUID boatId, String regattaName, String regattaRegistrationLinkSecret);
 
     /**
-     * Allows reading public Marks, or Marks that are registered in races belonging to the given regatta
+     * Allows reading public Marks, or Marks that are registered in the given regatta
      */
     MarkDTO getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret);
+
+    /**
+     * Allows reading public Events, or Events that are related to the given regatta
+     */
+    QRCodeEvent getEvent(UUID eventId, String regattaName, String regattaRegistrationLinkSecret);
+
+    /**
+     * Allows reading public Competitors, or Competitors that are registered in the given regatta
+     */
+    CompetitorDTO getCompetitor(UUID competitorId, String leaderboardName,
+            String regattaRegistrationLinkSecret);
 }
