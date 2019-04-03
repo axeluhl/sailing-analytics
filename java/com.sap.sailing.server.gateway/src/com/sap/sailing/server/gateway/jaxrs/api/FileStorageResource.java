@@ -43,6 +43,10 @@ public class FileStorageResource extends AbstractSailingServerResource {
     public Response getFile(@QueryParam("uri") String uri) {
         Response response;
         try {
+
+            getService().getFileStorageManagementService().getActiveFileStorageService()
+                    .doPermissionCheckForGetFile(new URI(uri));
+
             InputStream inputStream = new URL(uri).openStream();
             ResponseBuilder responseBuilder = Response.ok().entity(inputStream);
             if (uri.toLowerCase().endsWith(".jpg")) {
@@ -51,8 +55,10 @@ public class FileStorageResource extends AbstractSailingServerResource {
                 responseBuilder.header("Content-Type", "image/png");
             }
             response = responseBuilder.build();
-        } catch (IOException ioe) {
+        } catch (IOException | URISyntaxException ioe) {
             response = Response.status(Status.BAD_REQUEST).entity(ioe.getMessage()).build();
+        } catch (UnauthorizedException e) {
+            response = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();
         }
         return response;
     }

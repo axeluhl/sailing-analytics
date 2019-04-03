@@ -55,4 +55,7 @@ public interface FileStorageService extends IsManagedByCache<FileStorageServiceR
      * Test whether properties are valid, e.g. by trying to log in using access credentials provided as properties.
      */
     void testProperties() throws InvalidPropertiesException, IOException;
+
+    /** Check required permissions for getfile. */
+    void doPermissionCheckForGetFile(URI uri) throws UnauthorizedException;
 }

@@ -183,4 +183,14 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
         }
         return value;
     }
+
+    @Override
+    public void doPermissionCheckForGetFile(URI uri) throws UnauthorizedException {
+        String filePath = uri.getPath();
+        String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+        final String pathToFile = localPath.getValue() + "/" + fileName;
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ,
+                        new TypeRelativeObjectIdentifier(pathToFile)));
+    }
 }

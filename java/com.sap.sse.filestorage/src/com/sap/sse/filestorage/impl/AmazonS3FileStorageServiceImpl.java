@@ -120,11 +120,12 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     @Override
     public void removeFile(URI uri) throws InvalidPropertiesException, OperationFailedException, UnauthorizedException {
         String key = uri.getPath().substring(uri.getPath().lastIndexOf("/")+1);
-        AmazonS3Client s3Client = createS3Client();
 
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(DefaultActions.DELETE,
                         new TypeRelativeObjectIdentifier(key)));
+
+        AmazonS3Client s3Client = createS3Client();
 
         try {
             s3Client.deleteObject(new DeleteObjectRequest(bucketName.getValue(), key));
@@ -157,5 +158,14 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
             throw new InvalidPropertiesException("invalid bucket", new Pair<FileStorageServiceProperty, String>(
                     bucketName, "bucket does not exist"));
         }
+    }
+
+    @Override
+    public void doPermissionCheckForGetFile(URI uri) throws UnauthorizedException {
+        String key = uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1);
+
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(DefaultActions.DELETE,
+                        new TypeRelativeObjectIdentifier(key)));
     }
 }
