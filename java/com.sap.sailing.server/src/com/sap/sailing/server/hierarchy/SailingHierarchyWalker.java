@@ -29,11 +29,24 @@ public final class SailingHierarchyWalker {
             final EventHierarchyVisitor visitor) {
         final Map<Leaderboard, Set<LeaderboardGroup>> leaderboardsToLeaderboardGroups = new HashMap<>();
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            if (includeLeaderboardGroupsWithOverallLeaderboard || !lg.hasOverallLeaderboard()) {
-                visitor.visit(lg);
-            }
+            // If !includeLeaderboardGroupsWithOverallLeaderboard we consider a LeaderboardGroup to belong
+            // to the Event only if all Leaderboards are part of that Event.
+            boolean hasOverallLeaderboard = lg.hasOverallLeaderboard();
+            boolean allLeaderboardsArePartOfEvent = true;
+            boolean includeLeaderboardGroup = includeLeaderboardGroupsWithOverallLeaderboard || !hasOverallLeaderboard;
             for (Leaderboard lb : lg.getLeaderboards()) {
-                Util.add(leaderboardsToLeaderboardGroups, lb, lg);
+                final boolean partOfEvent = lb.isPartOfEvent(event);
+                if (includeLeaderboardGroup || partOfEvent) {
+                    Util.add(leaderboardsToLeaderboardGroups, lb, lg);
+                } else {
+                    allLeaderboardsArePartOfEvent = false;
+                }
+            }
+            if (includeLeaderboardGroup || allLeaderboardsArePartOfEvent) {
+                visitor.visit(lg);
+                if (hasOverallLeaderboard) {
+                    Util.add(leaderboardsToLeaderboardGroups, lg.getOverallLeaderboard(), lg);
+                }
             }
         }
         for (Map.Entry<Leaderboard, Set<LeaderboardGroup>> entry : leaderboardsToLeaderboardGroups.entrySet()) {
