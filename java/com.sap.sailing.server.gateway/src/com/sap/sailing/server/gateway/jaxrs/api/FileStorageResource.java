@@ -76,12 +76,15 @@ public class FileStorageResource extends AbstractSailingServerResource {
             result.put("status", Status.OK.name());
             response = Response.ok().entity(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
-                | URISyntaxException | IOException | UnauthorizedException e) {
+                | URISyntaxException | IOException e) {
             final String errorMessage = "Could not delete file with URI "+uri+": "+e.getMessage();
             logger.log(Level.WARNING, "Could not delete file with URI "+uri, e);
             result.put("status", Status.BAD_REQUEST.name());
             result.put("message", errorMessage);
             response = Response.status(Status.BAD_REQUEST).entity(result.toJSONString()).build();
+        }
+        catch (UnauthorizedException e) {
+            response = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();            
         }
         return response;
     }
