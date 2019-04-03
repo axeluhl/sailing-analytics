@@ -46,6 +46,7 @@ public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>
         addOperationSentToMasterForReplication(operationWithResultWithIdWrapper);
         URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(this.getId().toString());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Content-Type", "application/octet-stream");
         String optionalBearerToken = masterDescriptor.getBearerToken();
         if (optionalBearerToken != null && !optionalBearerToken.isEmpty()) {
             connection.setRequestProperty("Authorization", "Bearer " + optionalBearerToken);
