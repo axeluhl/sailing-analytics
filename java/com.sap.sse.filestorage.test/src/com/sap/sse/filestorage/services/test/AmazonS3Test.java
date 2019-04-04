@@ -8,8 +8,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
@@ -19,8 +22,19 @@ import com.sap.sse.filestorage.testsupport.AmazonS3TestSupport;
 public class AmazonS3Test {
    @Before
     public void setup() throws InvalidPropertiesException {
+       setUpSecurity();
         storageService = AmazonS3TestSupport.createService();
     }
+   
+   private void setUpSecurity() {
+       org.apache.shiro.mgt.SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
+       Subject fakeSubject = Mockito.mock(Subject.class);
+
+       SecurityUtils.setSecurityManager(securityManager);
+       Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
+       Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
+       Mockito.doNothing().when(fakeSubject).checkPermission(Mockito.anyString());
+   }
     
     private static final String teamImageFile = "Bundesliga2014_Regatta6_eventteaser.jpg";
     private FileStorageService storageService;

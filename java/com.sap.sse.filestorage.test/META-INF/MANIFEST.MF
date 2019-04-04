@@ -10,7 +10,10 @@ Require-Bundle: org.hamcrest;bundle-version="1.1.0",
  org.junit;bundle-version="4.8.2",
  org.apache.commons.io;bundle-version="2.2.0",
  com.sap.sse.replication.testsupport,
- com.sap.sse.replication;bundle-version="1.0.0"
+ com.sap.sse.replication;bundle-version="1.0.0",
+ org.mockito.mockito-core;bundle-version="1.10.14",
+ org.apache.shiro.core;bundle-version="1.2.2",
+ org.objenesis;bundle-version="2.1.0"
 Import-Package: org.apache.commons.logging,
  org.slf4j;version="1.6.4"
 Automatic-Module-Name: com.sap.sse.filestorage.test
