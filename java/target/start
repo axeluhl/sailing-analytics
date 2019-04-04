@@ -101,7 +101,7 @@ if [ -n "$MAIL_SMTP_PASSWORD" ]; then
 fi
 
 # Apply parameters for automatic replication start
-REPLICATION_PARAMETERS="-Dreplicate.on.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT -Dreplicate.master.exchange.name=$REPLICATE_MASTER_EXCHANGE_NAME"
+REPLICATION_PARAMETERS="-Dreplicate.on.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT -Dreplicate.master.exchange.name=$REPLICATE_MASTER_EXCHANGE_NAME -Dreplicate.master.username=$REPLICATE_MASTER_USERNAME -Dreplicate.master.password=$REPLICATE_MASTER_PASSWORD"
 
 if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
     nohup $JAVA_BINARY -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dosgi.shell.telnet.port=$TELNET_PORT -Xmx$MEMORY -jar plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar -configuration ./ -clean 2>/dev/null >/dev/null &
