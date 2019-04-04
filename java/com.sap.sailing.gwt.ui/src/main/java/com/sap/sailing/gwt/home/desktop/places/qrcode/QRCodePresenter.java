@@ -94,9 +94,19 @@ public class QRCodePresenter {
     }
 
     private boolean isCorrectServer(Triple<String, String, Integer> correctServerHost) {
-        boolean protocolSame = Util.equalsWithNull(correctServerHost.getA(), Window.Location.getProtocol());
-        boolean hostSame = Util.equalsWithNull(correctServerHost.getB(), Window.Location.getHostName());
-        boolean portSame = Util.equalsWithNull("" + correctServerHost.getC(), Window.Location.getPort());
+        final String targetProtocol = correctServerHost.getA();
+        final String currentProtocol = Window.Location.getProtocol();
+        boolean protocolSame = Util.equalsWithNull(targetProtocol, currentProtocol);
+        logger.info("Checking Protocol: current=" + currentProtocol + "; target=" + targetProtocol + "; same=" + protocolSame);
+        String targetHost = correctServerHost.getB();
+        String currentHost = Window.Location.getHostName();
+        boolean hostSame = Util.equalsWithNull(targetHost, currentHost);
+        logger.info("Checking Host: current=" + currentHost + "; target=" + targetHost + "; same=" + hostSame);
+        final Integer targetPort = correctServerHost.getC();
+        final String targetPortAsString = correctServerHost.getC() == null ? "" : Integer.toString(targetPort);
+        final String currentPort = Window.Location.getPort();
+        boolean portSame = Util.equalsWithNull(targetPortAsString, currentPort);
+        logger.info("Checking Port: current=" + currentPort + "; target=" + targetPortAsString + "; same=" + portSame);
         return protocolSame && hostSame && portSame;
     }
 
