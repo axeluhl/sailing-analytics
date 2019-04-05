@@ -12,3 +12,9 @@
     min-width: 200px;
     margin-bottom: 5px;
 }
+
+.dialogHeader {
+    display: inline-block;
+    margin-right: 10px;
+    margin-left: 5px;
+}

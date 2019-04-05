@@ -217,10 +217,10 @@ public class RoleDefinitionsPanel extends VerticalPanel {
                 configACL::openDialog);
 
         table.addColumn(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getHeader());
-        table.addColumn(roleDefinitionUUidColumn, stringMessages.id());
         table.addColumn(roleDefinitionNameColumn, stringMessages.name());
         table.addColumn(permissionsColumn, stringMessages.permissions());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
+        table.addColumn(roleDefinitionUUidColumn, stringMessages.id());
         table.addColumn(roleActionColumn, stringMessages.actions());
         table.setSelectionModel(roleSelectionCheckboxColumn.getSelectionModel(), roleSelectionCheckboxColumn.getSelectionManager());
         return table;

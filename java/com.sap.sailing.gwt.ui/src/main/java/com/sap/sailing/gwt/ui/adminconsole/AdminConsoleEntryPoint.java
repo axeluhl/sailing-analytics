@@ -403,6 +403,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
 
         final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanel<>(getUserService(), StringMessages.INSTANCE,
                 SecuredDomainType.getAllInstances(), this, tableResources);
+        userManagementPanel.ensureDebugId("UserManagementPanel");
         panel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<UserManagementPanel<AdminConsoleTableResources>>(userManagementPanel) {
                     @Override
