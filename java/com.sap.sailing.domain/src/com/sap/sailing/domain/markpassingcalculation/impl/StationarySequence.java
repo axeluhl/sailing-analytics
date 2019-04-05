@@ -82,7 +82,7 @@ public class StationarySequence {
             boundingBoxOfTrackSpanningCandidates = bounds;
             final Candidate lastSoFar = candidates.last();
             final Duration extendedBy = lastSoFar.getTimePoint().until(candidateAfterSequence.getTimePoint());
-            candidates.add(candidateAfterSequence);
+            candidates.add(candidateAfterSequence); // non-empty sequence extended at end, so first candidate does not change
             candidatesEffectivelyAdded.add(candidateAfterSequence);
             candidatesEffectivelyRemoved.remove(candidateAfterSequence);
             // now compute the candidates that no longer pass the filter because they are too far away from the
@@ -130,21 +130,28 @@ public class StationarySequence {
      * {@link #boundingBoxOfTrackSpanningCandidates} and seeing if the bounding box grows larger than
      * {@link #CANDIDATE_FILTER_DISTANCE} in {@link Bounds#getDiameter() diameter}. If it does, nothing changes, and
      * {@code false} is returned. But if the track leading to the {@code candidateBeforeSequence} keeps the bounding box
-     * sufficiently small, the candidate is added, the {@link #boundingBoxOfTrackSpanningCandidates} is adjusted,
-     * the {@code candidateBeforeSequence} will be added to {@code candidatesEffectivelyAdded} because it is the
-     * new {@link #getFirst() first} element of this sequence, and all other candidates in this sequence
-     * that no longer are sufficiently close (time-wise) to the new first candidate are added to
-     * {@code candidatesEffectivelyRemoved}; {@code true} is returned in this case, indicating that the sequence
-     * has been extended successfully.
+     * sufficiently small, the candidate is added, the {@link #boundingBoxOfTrackSpanningCandidates} is adjusted, the
+     * {@code candidateBeforeSequence} will be added to {@code candidatesEffectivelyAdded} because it is the new
+     * {@link #getFirst() first} element of this sequence, and all other candidates in this sequence that no longer are
+     * sufficiently close (time-wise) to the new first candidate are added to {@code candidatesEffectivelyRemoved};
+     * {@code true} is returned in this case, indicating that the sequence has been extended successfully.
+     * 
+     * @param stationarySequenceSetToUpdate
+     *            when this method causes a change in what {@link #getFirst()} returns before and after the call, this
+     *            method maintains the set referenced by this parameter accordingly, assuming that the position in the
+     *            set may change, or, if this sequence runs empty, it has to be removed from the set altogether.
      */
     boolean tryToExtendBeforeFirst(Candidate candidateBeforeSequence,
-            Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved) {
+            Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved,
+            NavigableSet<StationarySequence> stationarySequenceSetToUpdate) {
         Bounds bounds = computeExtendedBoundsForFixesBetweenCandidates(candidateBeforeSequence, getFirst());
         if (bounds != null) {
             boundingBoxOfTrackSpanningCandidates = bounds;
             final Candidate firstSoFar = candidates.first();
             final Duration extendedBy = candidateBeforeSequence.getTimePoint().until(firstSoFar.getTimePoint());
+            stationarySequenceSetToUpdate.remove(this);
             candidates.add(candidateBeforeSequence);
+            stationarySequenceSetToUpdate.add(this);
             candidatesEffectivelyAdded.add(candidateBeforeSequence);
             candidatesEffectivelyRemoved.remove(candidateBeforeSequence);
             // now compute the candidates that no longer pass the filter because they are too far away from the
@@ -247,13 +254,25 @@ public class StationarySequence {
      * from {@code candidatesEffectivelyAdded}. If it was the first or the last candidate in this sequence, the time
      * difference to the new candidate on the respective border is calculated and used to add new candidates to the
      * filter result incrementally which were previously filtered out because they were too far away from the border.
+     * 
+     * @param stationarySequenceSetToUpdate
+     *            when this method causes a change in what {@link #getFirst()} returns before and after the call, this
+     *            method maintains the set referenced by this parameter accordingly, assuming that the position in the
+     *            set may change, or, if this sequence runs empty, it has to be removed from the set altogether.
      */
-    void remove(Candidate candidate, Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved) {
+    void remove(Candidate candidate, Set<Candidate> candidatesEffectivelyAdded, Set<Candidate> candidatesEffectivelyRemoved,
+            NavigableSet<StationarySequence> stationarySequenceSetToUpdate) {
         assert candidates.contains(candidate);
         final boolean wasValidCandidate = isCloseEnoughToSequenceBorder(candidate);
         final boolean wasFirst = candidate == getFirst();
         final boolean wasLast = candidate == getLast();
+        if (wasFirst) {
+            stationarySequenceSetToUpdate.remove(this);
+        }
         candidates.remove(candidate);
+        if (wasFirst && !candidates.isEmpty()) {
+            stationarySequenceSetToUpdate.add(this);
+        }
         if (wasValidCandidate) {
             candidatesEffectivelyRemoved.add(candidate);
             candidatesEffectivelyAdded.remove(candidate);
@@ -327,12 +346,17 @@ public class StationarySequence {
      * {@code candidatesEffectivelyAdded} and {@code candidatesEffectivelyRemoved}.</li>
      * </ul>
      * 
+     * @param stationarySequenceSetToUpdate
+     *            when this method causes a change in what {@link #getFirst()} returns before and after the call,
+     *            this method maintains the set referenced by this parameter accordingly, assuming that the position
+     *            in the set may change, or, if this sequence runs empty, it has to be removed from the set altogether.
+     * 
      * @return {@code null} if no new {@link StationarySequence} resulted from any splitting activity (could be because
      *         no split took place, or the split didn't leave more than one candidate for a second sequence}; the new
      *         sequence created by a split otherwise.
      */
     StationarySequence tryToAddFix(GPSFixMoving newFix, Set<Candidate> candidatesEffectivelyAdded,
-            Set<Candidate> candidatesEffectivelyRemoved) {
+            Set<Candidate> candidatesEffectivelyRemoved, NavigableSet<StationarySequence> stationarySequenceSetToUpdate) {
         assert !newFix.getTimePoint().before(getFirst().getTimePoint());
         assert !newFix.getTimePoint().after(getLast().getTimePoint());
         final Bounds newBounds = boundingBoxOfTrackSpanningCandidates.extend(newFix.getPosition());
@@ -355,10 +379,16 @@ public class StationarySequence {
             }
             tailSequence = tailSet.isEmpty() ? null : createStationarySequence(tailSet);
             if (tailSequence != null && tryToAddCandidateAtFixLater) {
-                tailSequence.tryToExtendBeforeFirst(candidates.floor(dummyCandidateForFix), new HashSet<>(), new HashSet<>());
+                tailSequence.tryToExtendBeforeFirst(candidates.floor(dummyCandidateForFix), new HashSet<>(), new HashSet<>(), stationarySequenceSetToUpdate);
             }
             // now remove the tail set candidates from this stationary sequence:
-            candidates.removeAll(new ArrayList<>(candidates.tailSet(dummyCandidateForFix)));
+            final ArrayList<Candidate> fullTailSet = new ArrayList<>(candidates.tailSet(dummyCandidateForFix));
+            if (!fullTailSet.isEmpty() && fullTailSet.get(0) == getFirst()) {
+                // all candidates will be removed from this sequence; the sequence must be removed from its containing set before removing the first candidate...
+                stationarySequenceSetToUpdate.remove(this);
+            }
+            candidates.removeAll(fullTailSet);
+            // ...and it doesn't need adding because if it was removed, it's empty now.
             refreshBoundingBox();
             final Set<Candidate> newValidCandidates = new HashSet<>();
             Util.addAll(getValidCandidates(), newValidCandidates);
