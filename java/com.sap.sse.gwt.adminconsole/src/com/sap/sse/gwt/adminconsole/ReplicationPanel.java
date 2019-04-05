@@ -136,7 +136,6 @@ public class ReplicationPanel extends FlowPanel {
                 }
             }
         }));
-        
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
@@ -145,44 +144,35 @@ public class ReplicationPanel extends FlowPanel {
             }
         });
         add(refreshButton);
-        
         final CaptionPanel mastergroup = new CaptionPanel(stringMessages.explainReplicasRegistered());
         final VerticalPanel masterpanel = new VerticalPanel();
         final AccessControlledButtonPanel masterPanelButtons = new AccessControlledButtonPanel(userService, SecuredSecurityTypes.SERVER);
-        
         registeredReplicas = new Grid();
         registeredReplicas.resizeColumns(3);
         masterpanel.add(registeredReplicas);
-        
         removeAllReplicas = masterPanelButtons.addAction(stringMessages.stopAllReplicas(),
                 () -> userService.hasServerPermission(ServerActions.REPLICATE), this::stopAllReplicas);
         removeAllReplicas.setEnabled(false);
         masterpanel.add(masterPanelButtons);
-        
         mastergroup.add(masterpanel);
         add(mastergroup);
-        
         final CaptionPanel replicagroup = new CaptionPanel(stringMessages.explainConnectionsToMaster());
         final VerticalPanel replicapanel = new VerticalPanel();
         final AccessControlledButtonPanel replicapanelbuttons = new AccessControlledButtonPanel(userService, SecuredSecurityTypes.SERVER);
-        
         registeredMasters = new Grid();
         registeredMasters.resizeColumns(3);
         replicapanel.add(registeredMasters);
-        
         addButton = replicapanelbuttons.addAction(stringMessages.connectToMaster(),
                 () -> userService.hasServerPermission(ServerActions.START_REPLICATION), this::addReplication);
-        
         stopReplicationButton = replicapanelbuttons.addAction(stringMessages.stopConnectionToMaster(),
                 () -> userService.hasServerPermission(ServerActions.START_REPLICATION), this::stopReplication);
-        
         stopReplicationButton.setEnabled(false);
-        
         replicapanel.add(replicapanelbuttons);
         replicagroup.add(replicapanel);
         add(replicagroup);
-        
-        updateReplicaList();
+        if (userService.hasServerPermission(ServerActions.READ_REPLICATOR)) {
+            updateReplicaList();
+        }
     }
 
     protected void stopAllReplicas() {
