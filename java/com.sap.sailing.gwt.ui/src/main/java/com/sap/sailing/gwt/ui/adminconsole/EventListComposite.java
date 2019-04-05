@@ -392,7 +392,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 courseAreasColumn, leaderboardGroupsColumn, groupColumn, userColumn);
 
         table.addColumn(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getHeader());
-        table.addColumn(eventUUidColumn, stringMessages.id());
         table.addColumn(eventNameColumn, stringMessages.event());
         table.addColumn(venueNameColumn, stringMessages.venue());
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
@@ -403,6 +402,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(videosColumn, stringMessages.videos());
         table.addColumn(groupColumn, stringMessages.group());
         table.addColumn(userColumn, stringMessages.user());
+        table.addColumn(eventUUidColumn, stringMessages.id());
         table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
 

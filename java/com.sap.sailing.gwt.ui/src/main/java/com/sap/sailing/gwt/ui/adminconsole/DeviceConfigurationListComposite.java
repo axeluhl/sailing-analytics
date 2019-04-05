@@ -137,7 +137,6 @@ public class DeviceConfigurationListComposite extends Composite  {
         final TextColumn<DeviceConfigurationWithSecurityDTO> deviceConfigurationUUidColumn = new AbstractSortableTextColumn<DeviceConfigurationWithSecurityDTO>(
                 config -> config.id == null ? "<null>" : config.id.toString());
 
-        table.addColumn(deviceConfigurationUUidColumn, stringMessages.id());
 
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
         final AccessControlledActionsColumn<DeviceConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
@@ -171,6 +170,7 @@ public class DeviceConfigurationListComposite extends Composite  {
 
 
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
+        table.addColumn(deviceConfigurationUUidColumn, stringMessages.id());
         table.addColumn(actionColumn, stringMessages.actions());
         return table;
     }

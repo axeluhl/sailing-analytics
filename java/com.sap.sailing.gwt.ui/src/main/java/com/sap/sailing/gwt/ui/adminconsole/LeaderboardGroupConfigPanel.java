@@ -661,12 +661,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         
         groupsTable.setWidth("100%");
         groupsTable.addColumn(leaderboardTableSelectionColumn, leaderboardTableSelectionColumn.getHeader());
-        groupsTable.addColumn(groupUUidColumn, stringMessages.id());
         groupsTable.addColumn(groupNameColumn, stringMessages.name());
         groupsTable.addColumn(groupDescriptionColumn, stringMessages.description());
         groupsTable.addColumn(groupDisplayNameColumn, stringMessages.displayName());
         groupsTable.addColumn(hasOverallLeaderboardColumn, stringMessages.useOverallLeaderboard());
         SecuredDTOOwnerColumn.configureOwnerColumns(groupsTable, leaderboardGroupsListHandler, stringMessages);
+        groupsTable.addColumn(groupUUidColumn, stringMessages.id());
         groupsTable.addColumn(actionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 
