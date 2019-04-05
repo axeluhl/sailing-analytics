@@ -64,7 +64,6 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
-import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
@@ -417,8 +416,8 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         SecuredDTOOwnerColumn.configureOwnerColumns(raceTable, columnSortHandler, stringMessages);
 
         final HasPermissions type = SecuredDomainType.TRACKED_RACE;
-        final AccessControlledActionsColumn<RaceDTO, DefaultActionsImagesBarCell> actionsColumn = create(
-                new DefaultActionsImagesBarCell(stringMessages), userService);
+        final AccessControlledActionsColumn<RaceDTO, RegattaConfigImagesBarCell> actionsColumn = create(
+                new RegattaConfigImagesBarCell(stringMessages), userService);
         final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 race -> regattaRefresher.fillRegattas(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
@@ -429,14 +428,16 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
 
-        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, (r) -> {
-            removeAndUntrackRaces(r);
-        });
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DefaultActions.DELETE,
+                this::removeAndUntrackRace);
+
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_STOP_TRACKING, DefaultActions.UPDATE,
+                this::stopTrackingRace);
 
         raceTable.addColumn(actionsColumn, stringMessages.actions());
     }
 
-    private void removeAndUntrackRaces(final RaceDTO race) {
+    private void removeAndUntrackRace(final RaceDTO race) {
         final RegattaNameAndRaceName name = (RegattaNameAndRaceName) race.getRaceIdentifier();
         sailingService.removeAndUntrackRaces(Arrays.asList(name),
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
@@ -444,6 +445,23 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages
                                 .errorRemovingRace(name != null ? name.toString() : "<null>", caught.getMessage()));
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        regattaRefresher.fillRegattas();
+                    }
+                }));
+    }
+
+    void stopTrackingRace(final RaceDTO race) {
+        final RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
+        sailingService.stopTrackingRaces(Arrays.asList(raceIdentifier),
+                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(
+                                raceIdentifier != null ? raceIdentifier.toString() : "<null>", caught.getMessage()));
                     }
 
                     @Override
