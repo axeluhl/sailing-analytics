@@ -41,6 +41,8 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     private boolean resolvingUserGroupName;
     private StrippedUserGroupDTO resolvedUserGroup;
     private boolean userExists;
+    private final String permissionType;
+    private final String securedObjectId;
     
     static class OwnershipDialogResult {
         private final UUID userGroupId;
@@ -116,11 +118,14 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     }
     
     private EditOwnershipDialog(UserManagementServiceAsync userManagementService, OwnershipDTO ownership,
-            StringMessages stringMessages, DialogCallback<OwnershipDialogResult> callback) {
+            StringMessages stringMessages, DialogCallback<OwnershipDialogResult> callback, final String permissionType,
+            final String securedObjectId) {
         super(stringMessages.ownership(), stringMessages.editObjectOwnership(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator(stringMessages), callback);
         this.userManagementService = userManagementService;
         this.stringMessages = stringMessages;
+        this.permissionType = permissionType;
+        this.securedObjectId = securedObjectId;
         final StrippedUserDTO userOwner = ownership.getUserOwner();
         resolvedUserGroup = ownership.getTenantOwner();
 
@@ -181,11 +186,16 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(2, 2);
-        result.setWidget(0, 0, new Label(stringMessages.user()));
-        result.setWidget(0, 1, suggestUserName);
-        result.setWidget(1, 0, new Label(stringMessages.group()));
-        result.setWidget(1, 1, suggestUserGroupName);
+        final Grid result = new Grid(4, 2);
+        result.setWidget(0, 0, new Label(stringMessages.id() + ": "));
+        result.setWidget(0, 1, new Label(securedObjectId));
+        result.setWidget(1, 0, new Label(stringMessages.permissionType() + ": "));
+        result.setWidget(1, 1, new Label(permissionType));
+
+        result.setWidget(2, 0, new Label(stringMessages.user()));
+        result.setWidget(2, 1, suggestUserName);
+        result.setWidget(3, 0, new Label(stringMessages.group()));
+        result.setWidget(3, 1, suggestUserGroupName);
         return result;
     }
 
@@ -282,8 +292,11 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
          *            {@link Named} {@link SecuredObject} instance to edit ownerships for
          */
         public void openDialog(final T securedObject) {
+            final QualifiedObjectIdentifier identifier = securedObject.getIdentifier();
+            final String permissionType = identifier.getTypeIdentifier();
+            final String id = identifier.getTypeRelativeObjectIdentifier().toString();
             new EditOwnershipDialog(userManagementService, securedObject.getOwnership(),
-                    StringMessages.INSTANCE, new EditOwnershipDialogCallback(securedObject)).show();
+                    StringMessages.INSTANCE, new EditOwnershipDialogCallback(securedObject), permissionType, id).show();
         }
 
         private class EditOwnershipDialogCallback implements DialogCallback<OwnershipDialogResult> {
