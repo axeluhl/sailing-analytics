@@ -6,7 +6,7 @@
     <g:HTMLPanel>
         <div class= "{adr.css.dialogHeader}">
             <g:Label text="{i18n.id}:"/>
-            <g:Label text="{i18n.typeString}:"/>
+            <g:Label text="{i18n.permissionType}:"/>
         </div>
         <div style="display:inline-block;">
             <g:Label ui:field="lblId"/>
