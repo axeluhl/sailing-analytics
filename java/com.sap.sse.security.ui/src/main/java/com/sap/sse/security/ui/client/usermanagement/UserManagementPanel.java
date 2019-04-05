@@ -60,16 +60,13 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),
                 () -> new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService)
                         .show());
-
         userNameTextbox = buttonPanel.addUnsecuredTextBox(stringMessages.username());
-        final Button editRolesandPermissionsForUserButton = buttonPanel.addUnsecuredAction(
+        final Button editRolesAndPermissionsForUserButton = buttonPanel.addUnsecuredAction(
                 stringMessages.editRolesAndPermissionsForUser(""),
                 () -> showRolesAndPermissionsEditDialog(userService, tableResources, errorReporter));
-        
         userNameTextbox.addKeyUpHandler(
-                e -> editRolesandPermissionsForUserButton.setEnabled(checkIfUserExists(userNameTextbox.getText())));
-        editRolesandPermissionsForUserButton.setEnabled(false);
-
+                e -> editRolesAndPermissionsForUserButton.setEnabled(checkIfUserExists(userNameTextbox.getText())));
+        editRolesAndPermissionsForUserButton.setEnabled(false);
         userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
                 /* multiSelection */ true, /* enablePager */ true, tableResources);
         userSelectionModel = userList.getSelectionModel();
@@ -110,7 +107,6 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
             deleteButton.setText(stringMessages.remove() + " (" + userSelectionModel.getSelectedSet().size() + ")");
             deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
         });
-
         ScrollPanel scrollPanel = new ScrollPanel(userList.asWidget());
         LabeledAbstractFilterablePanel<UserDTO> filterBox = userList.getFilterField();
         filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());

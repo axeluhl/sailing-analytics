@@ -303,12 +303,10 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                                 }
                             }
                         });
-
                 if (!originalUser.getEmail().equals(user.getEmail())) {
                     getUserManagementService().updateSimpleUserEmail(user.getName(), user.getEmail(),
                             EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                             new AsyncCallback<Void>() {
-
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     errorReporter.reportError(
@@ -321,13 +319,12 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                                 }
                             });
                 }
-
             }
 
             @Override
             public void cancel() {
             }
-                }, userService, errorReporter);
+        }, userService, errorReporter);
         dialog.ensureDebugId("UserEditDialog");
         dialog.show();
     }

@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.server.gateway.serialization.shared.android
 Automatic-Module-Name: com.sap.sailing.server.gateway.serialization.shared.android
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.domain.shared.android,
  org.json.simple;bundle-version="1.1.0",
