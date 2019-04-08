@@ -113,18 +113,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         connectionsPanel.setStyleName("bold");
 
         Grid grid = new Grid(2, 3);
-        
-        // FIXME: remove temporary vertical panel
-        VerticalPanel vpTemp = new VerticalPanel();
+        VerticalPanel tableAndConfigurationPanel = new VerticalPanel();
         connectionsTable = new TracTracConnectionTableWrapper(userService, sailingService, stringMessages,
                 errorReporter,
                 true, tableResources, () -> {
                 });
         connectionsTable.refreshTracTracAccountList();
-        vpTemp.add(connectionsTable);
-        vpTemp.add(grid);
+        tableAndConfigurationPanel.add(connectionsTable);
+        tableAndConfigurationPanel.add(grid);
 
-        connectionsPanel.setContentWidget(vpTemp);
+        connectionsPanel.setContentWidget(tableAndConfigurationPanel);
 
         
         grid.setWidget(0, 0, new Label(stringMessages.racesWithHiddenState() + ":"));
@@ -133,8 +131,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         grid.setWidget(0, 1, showHiddenRacesCheckbox);
 
         // Add TracTrac Connection
-        // TODO: i18n
-        final Button addConnectionButton = new Button("Add TracTrac Connection");
+        final Button addConnectionButton = new Button(stringMessages.addTracTracConnection());
         addConnectionButton.addClickHandler(e -> {
             new EditTracTracConnectionDialog(new TracTracConfigurationWithSecurityDTO(),
                     new DialogCallback<TracTracConfigurationWithSecurityDTO>() {

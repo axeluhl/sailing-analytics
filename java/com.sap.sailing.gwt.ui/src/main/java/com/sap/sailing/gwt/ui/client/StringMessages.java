@@ -2243,4 +2243,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String invalidState();
     String doYouReallyWantToRemoveDeviceConfiguration(String name);
     String errorFetchingSimulationData(String message);
+    String addTracTracConnection();
+    String editTracTracConnection();
+    String filterTracTracConnections();
+    String creatorName();
 }

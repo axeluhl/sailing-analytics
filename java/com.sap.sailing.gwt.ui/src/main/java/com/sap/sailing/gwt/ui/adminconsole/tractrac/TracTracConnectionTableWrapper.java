@@ -130,9 +130,9 @@ public class TracTracConnectionTableWrapper extends
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
 
-        // TODO: i18n
         filterField = new LabeledAbstractFilterablePanel<TracTracConfigurationWithSecurityDTO>(
-                new Label("Filter Trac Trac Accounts"), new ArrayList<TracTracConfigurationWithSecurityDTO>(),
+                new Label(stringMessages.filterTracTracConnections()),
+                new ArrayList<TracTracConfigurationWithSecurityDTO>(),
                 dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(TracTracConfigurationWithSecurityDTO t) {
@@ -157,8 +157,7 @@ public class TracTracConnectionTableWrapper extends
         table.addColumn(tracTracAccountTracTracServerUpdateUriColumn, stringMessagesClient.tracTracUpdateUrl());
         table.addColumn(tracTracAccountUsernameColumn, stringMessagesClient.tractracUsername());
         table.addColumn(tracTracAccountPasswordColumn, stringMessagesClient.tractracPassword());
-        // TODO: i18n
-        table.addColumn(tracTracAccountCreatorNameColumn, "Creator Name");
+        table.addColumn(tracTracAccountCreatorNameColumn, stringMessagesClient.creatorName());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, tracTracAccountColumnListHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());
         table.ensureDebugId("TracTracConfigurationWithSecurityDTOTable");

@@ -38,7 +38,8 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
             final DialogCallback<TracTracConfigurationWithSecurityDTO> callback, final UserService userService,
             final ErrorReporter errorReporter) {
         // TODO: i18n
-        super("Edit TracTrac Connection", null, stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
+        super(stringMessages.editTracTracConnection(), null, stringMessages.ok(), stringMessages.cancel(),
+                /* validator */ null,
                 /* animationEnabled */true, callback);
         this.dtoToEdit = dtotoEdit;
         this.ensureDebugId("EditTracTracConnectionDialog");
