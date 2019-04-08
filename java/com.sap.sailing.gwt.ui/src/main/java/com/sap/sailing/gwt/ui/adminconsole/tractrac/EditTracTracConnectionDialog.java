@@ -53,6 +53,7 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
         tracTracUpdateURITextBox.setText(dtotoEdit.getCourseDesignUpdateURI());
         tractracUsernameTextBox.setText(dtotoEdit.getTracTracUsername());
         tractracPasswordTextBox.setText(dtotoEdit.getTracTracPassword());
+        super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty());
     }
 
     private void createUi() {
@@ -91,7 +92,6 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
 
         // validation: User should not create empty connections
         jsonURLTextBox.addKeyUpHandler(e -> super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty()));
-        super.getOkButton().setEnabled(false);
 
         grid.setWidget(3, 0, jsonURLLabel);
         grid.setWidget(3, 1, jsonURLTextBox);
