@@ -115,7 +115,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
@@ -148,7 +148,8 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  * service methods, an empty (non-<code>null</code>) result is returned.
  */
 public interface SailingService extends RemoteService, FileStorageManagementGwtService, RemoteReplicationService {
-    List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws UnauthorizedException, Exception;
+    List<TracTracConfigurationWithSecurityDTO> getPreviousTracTracConfigurations()
+            throws UnauthorizedException, Exception;
 
     List<RegattaDTO> getRegattas() throws UnauthorizedException;
 

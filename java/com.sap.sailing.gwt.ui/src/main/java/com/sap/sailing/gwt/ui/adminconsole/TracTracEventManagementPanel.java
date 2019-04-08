@@ -41,7 +41,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.util.NaturalComparator;
@@ -70,7 +70,7 @@ import com.sap.sse.security.ui.client.UserService;
 public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final ErrorReporter errorReporter;
     
-    private final Map<String, TracTracConfigurationDTO> previousConfigurations;
+    private final Map<String, TracTracConfigurationWithSecurityDTO> previousConfigurations;
 
     private final List<TracTracRaceRecordDTO> availableTracTracRaces;
     
@@ -93,7 +93,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
-        this.previousConfigurations = new HashMap<String, TracTracConfigurationDTO>();
+        this.previousConfigurations = new HashMap<String, TracTracConfigurationWithSecurityDTO>();
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
         this.raceList = new ListDataProvider<TracTracRaceRecordDTO>();
         this.setWidget(createContent());
@@ -481,21 +481,24 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     private void fillConfigurations() {
-        this.sailingService.getPreviousTracTracConfigurations(new MarkedAsyncCallback<List<TracTracConfigurationDTO>>(
-                new AsyncCallback<List<TracTracConfigurationDTO>>() {
+        this.sailingService
+                .getPreviousTracTracConfigurations(new MarkedAsyncCallback<List<TracTracConfigurationWithSecurityDTO>>(
+                        new AsyncCallback<List<TracTracConfigurationWithSecurityDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         reportError("Remote Procedure Call getPreviousConfigurations() - Failure: " + caught.getMessage());
                     }
         
                     @Override
-                    public void onSuccess(List<TracTracConfigurationDTO> result) {
+                            public void onSuccess(List<TracTracConfigurationWithSecurityDTO> result) {
                         TracTracEventManagementPanel.this.previousConfigurations.clear();
                         TracTracEventManagementPanel.this.connectionsHistoryListBox.clear();
-                        Collections.sort(result, (c1, c2) -> c1.name.compareTo(c2.name));
-                        for (TracTracConfigurationDTO config : result) {
-                            TracTracEventManagementPanel.this.previousConfigurations.put(config.name, config);
-                            TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name, config.name);
+                                Collections.sort(result, (c1, c2) -> c1.getName().compareTo(c2.getName()));
+                                for (TracTracConfigurationWithSecurityDTO config : result) {
+                                    TracTracEventManagementPanel.this.previousConfigurations.put(config.getName(),
+                                            config);
+                                    TracTracEventManagementPanel.this.connectionsHistoryListBox
+                                            .addItem(config.getName(), config.getName());
                         }
                         
                         if (!result.isEmpty()) {
@@ -551,11 +554,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                                             @Override
                                             public void onSuccess(Void voidResult) {
                                                 // refresh list of previous configurations
-                                                TracTracConfigurationDTO config = new TracTracConfigurationDTO(eventName, jsonURL,
-                                                        liveDataURI, storedDataURI, courseDesignUpdateURI, tractracUsername, tractracPassword);
+                                                        TracTracConfigurationWithSecurityDTO config = new TracTracConfigurationWithSecurityDTO(
+                                                                eventName, jsonURL, liveDataURI, storedDataURI,
+                                                                courseDesignUpdateURI, tractracUsername,
+                                                                tractracPassword,
+                                                                /* current user will be set in backend */null);
                                                 
-                                                if (TracTracEventManagementPanel.this.previousConfigurations.put(config.name, config) == null) {
-                                                    TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name, config.name);
+                                                        if (TracTracEventManagementPanel.this.previousConfigurations
+                                                                .put(config.getName(), config) == null) {
+                                                            TracTracEventManagementPanel.this.connectionsHistoryListBox
+                                                                    .addItem(config.getName(), config.getName());
                                                 }
                                             }
                                         }));
@@ -608,13 +616,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         int index = connectionsHistoryListBox.getSelectedIndex();
         if (index != -1) {        
             String configurationKey = connectionsHistoryListBox.getValue(index);
-            TracTracConfigurationDTO config = previousConfigurations.get(configurationKey);
-            jsonURLTextBox.setValue(config.jsonURL);
-            liveURITextBox.setValue(config.liveDataURI);
-            storedURITextBox.setValue(config.storedDataURI);
-            tracTracUpdateURITextBox.setValue(config.courseDesignUpdateURI);
-            tractracUsernameTextBox.setValue(config.tractracUsername);
-            tractracPasswordTextBox.setValue(config.tractracPassword);
+            TracTracConfigurationWithSecurityDTO config = previousConfigurations.get(configurationKey);
+            jsonURLTextBox.setValue(config.getJSONURL());
+            liveURITextBox.setValue(config.getLiveDataURI());
+            storedURITextBox.setValue(config.getStoredDataURI());
+            tracTracUpdateURITextBox.setValue(config.getCourseDesignUpdateURI());
+            tractracUsernameTextBox.setValue(config.getTracTracUsername());
+            tractracPasswordTextBox.setValue(config.getTracTracPassword());
         }
     }
 

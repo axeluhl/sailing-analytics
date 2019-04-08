@@ -100,7 +100,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
@@ -181,7 +181,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
             AsyncCallback<Void> asyncCallback);
 
-    void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDTO>> callback);
+    void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationWithSecurityDTO>> callback);
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);

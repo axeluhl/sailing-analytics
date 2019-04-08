@@ -459,7 +459,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
@@ -1411,14 +1411,20 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception {
+    public List<TracTracConfigurationWithSecurityDTO> getPreviousTracTracConfigurations() throws Exception {
         final Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT,
                 configs,
-                ttConfig -> new TracTracConfigurationDTO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
+                ttConfig -> {
+                    TracTracConfigurationWithSecurityDTO config = new TracTracConfigurationWithSecurityDTO(
+                            ttConfig.getName(),
+                        ttConfig.getJSONURL().toString(),
                         ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(),
                         ttConfig.getCourseDesignUpdateURI().toString(), ttConfig.getTracTracUsername().toString(),
-                        ttConfig.getTracTracPassword().toString()));
+                            ttConfig.getTracTracPassword().toString(), ttConfig.getCreatorName());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
+                    return config;
+                });
     }
 
     @Override
