@@ -29,6 +29,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.gwt.ui.adminconsole.tractrac.EditTracTracConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -45,6 +46,7 @@ import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -130,15 +132,45 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         showHiddenRacesCheckbox.ensureDebugId("ShowHiddenRacesCheckBox");
         grid.setWidget(0, 1, showHiddenRacesCheckbox);
 
+        // Add TracTrac Connection
+        // TODO: i18n
+        final Button addConnectionButton = new Button("Add TracTrac Connection");
+        addConnectionButton.addClickHandler(e -> {
+            new EditTracTracConnectionDialog(new TracTracConfigurationWithSecurityDTO(),
+                    new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
+                        @Override
+                        public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
+                            sailingService.storeTracTracConfiguration(editedConnection.getName(),
+                                    editedConnection.getJSONURL(), editedConnection.getLiveDataURI(),
+                                    editedConnection.getStoredDataURI(), editedConnection.getCourseDesignUpdateURI(),
+                                    editedConnection.getTracTracUsername(), editedConnection.getTracTracPassword(),
+                                    new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            reportError("Exception trying to store configuration in DB: "
+                                                    + caught.getMessage());
+                                        }
+
+                                        @Override
+                                        public void onSuccess(Void voidResult) {
+                                            connectionsTable.refreshTracTracAccountList();
+                                        }
+                                    }));
+                        }
+
+                        @Override
+                        public void cancel() {
+                        }
+                    }, userService, errorReporter).show();
+        });
+        grid.setWidget(1, 0, addConnectionButton);
+
         // List Races
         final Button listRacesButton = new Button(stringMessages.listRaces());
         listRacesButton.ensureDebugId("ListRacesButton");
-        listRacesButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                loadingMessageLabel.setText(stringMessages.loading());
-                fillRaces(sailingService, showHiddenRacesCheckbox.getValue());
-            }
+        listRacesButton.addClickHandler(event -> {
+            loadingMessageLabel.setText(stringMessages.loading());
+            fillRaces(sailingService, showHiddenRacesCheckbox.getValue());
         });
         listRacesButton.setEnabled(false);
         grid.setWidget(1, 1, listRacesButton);
