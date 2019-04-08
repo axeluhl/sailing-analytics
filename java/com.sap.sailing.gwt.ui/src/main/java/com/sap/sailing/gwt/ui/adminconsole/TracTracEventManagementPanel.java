@@ -149,7 +149,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                             @Override
                                             public void onFailure(Throwable caught) {
-                                                reportError("Exception trying to store configuration in DB: "
+                                                reportError("Exception trying to create configuration in DB: "
                                                         + caught.getMessage());
                                             }
 
@@ -164,6 +164,21 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                             public void cancel() {
                             }
                         }, userService, errorReporter).show());
+        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+            sailingService.deleteTracTracConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(
+                                    "Exception trying to delete configuration in DB: " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            connectionsTable.refreshTracTracAccountList();
+                        }
+                    });
+        });
 
         loadingMessageLabel = new Label();
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
@@ -171,11 +186,15 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             fillRaces(sailingService, showHiddenRacesCheckbox.getValue());
         });
         listRacesButton.setEnabled(false);
+        removeButton.setEnabled(false);
 
         buttonPanel.addUnsecuredWidget(loadingMessageLabel);
 
-        connectionsTable.getSelectionModel().addSelectionChangeHandler(
-                e -> listRacesButton.setEnabled(connectionsTable.getSelectionModel().getSelectedObject() != null));
+        connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
+            final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedObject() != null;
+            listRacesButton.setEnabled(objectSelected);
+            removeButton.setEnabled(objectSelected);
+        });
         return connectionsPanel;
     }
 

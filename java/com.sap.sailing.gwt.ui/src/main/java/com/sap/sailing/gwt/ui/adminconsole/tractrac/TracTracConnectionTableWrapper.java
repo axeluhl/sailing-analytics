@@ -86,7 +86,6 @@ public class TracTracConnectionTableWrapper extends
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_UPDATE, DefaultActions.UPDATE, dto -> {
             new EditTracTracConnectionDialog(dto, new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
-
                 @Override
                 public void ok(final TracTracConfigurationWithSecurityDTO editedObject) {
                     sailingServiceAsync.updateTracTracConfiguration(editedObject,
@@ -94,7 +93,7 @@ public class TracTracConnectionTableWrapper extends
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     errorReporter.reportError(
-                                            "Exception trying to store configuration in DB: " + caught.getMessage());
+                                            "Exception trying to update configuration in DB: " + caught.getMessage());
                                 }
 
                                 @Override
@@ -110,6 +109,19 @@ public class TracTracConnectionTableWrapper extends
             }, userService, errorReporter).show();
         });
 
+        actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
+            sailingServiceAsync.deleteTracTracConfiguration(dto, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Exception trying to delete configuration in DB: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    refreshTracTracAccountList();
+                }
+            });
+        });
 
         final EditOwnershipDialog.DialogConfig<TracTracConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, dto -> refreshTracTracAccountList(),
@@ -125,8 +137,7 @@ public class TracTracConnectionTableWrapper extends
 
         filterField = new LabeledAbstractFilterablePanel<TracTracConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterTracTracConnections()),
-                new ArrayList<TracTracConfigurationWithSecurityDTO>(),
-                dataProvider) {
+                new ArrayList<TracTracConfigurationWithSecurityDTO>(), dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(TracTracConfigurationWithSecurityDTO t) {
                 List<String> string = new ArrayList<String>();
