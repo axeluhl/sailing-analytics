@@ -28,7 +28,6 @@ public class QRCodePresenter {
     public QRCodePresenter(QRCodeClientFactory clientFactory, QRCodePlace place) {
         this.clientFactory = clientFactory;
         this.place = place;
-        
         logger.info("Creating QRCodePresenter with place: " + place);
     }
 
