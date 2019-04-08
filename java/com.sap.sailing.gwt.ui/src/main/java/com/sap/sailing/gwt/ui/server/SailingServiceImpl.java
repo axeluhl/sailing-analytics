@@ -1424,11 +1424,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
-
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.TRACTRAC_ACCOUNT, TracTracConfiguration.getTypeRelativeObjectIdentifier(jsonURL), name,
+                SecuredDomainType.TRACTRAC_ACCOUNT,
+                TracTracConfiguration.getTypeRelativeObjectIdentifier(jsonURL, currentUserName), name,
                 () -> tractracMongoObjectFactory.storeTracTracConfiguration(
-                        getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI,
+                        getTracTracAdapter().createTracTracConfiguration(currentUserName, name, jsonURL, liveDataURI,
+                                storedDataURI,
                                 courseDesignUpdateURI, tracTracUsername, tracTracPassword)));
     }
 

@@ -21,6 +21,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {
         MongoCollection<Document> ttConfigCollection = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
         final Document result = new Document();
+        result.put(FieldNames.TT_CONFIG_CREATOR_NAME.name(), tracTracConfiguration.getCreatorName());
         result.put(FieldNames.TT_CONFIG_NAME.name(), tracTracConfiguration.getName());
         result.put(FieldNames.TT_CONFIG_JSON_URL.name(), tracTracConfiguration.getJSONURL());
         result.put(FieldNames.TT_CONFIG_LIVE_DATA_URI.name(), tracTracConfiguration.getLiveDataURI());

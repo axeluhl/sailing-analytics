@@ -52,7 +52,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String tracTracUsername = tracTracUsernameObject == null ? "" : (String) tracTracUsernameObject;
         String tracTracPassword = tracTracPasswordObject == null ? "" : (String) tracTracPasswordObject;
         
-        return tracTracDomainFactory.createTracTracConfiguration((String) object.get(FieldNames.TT_CONFIG_NAME.name()),
+        return tracTracDomainFactory.createTracTracConfiguration(
+                (String) object.get(FieldNames.TT_CONFIG_CREATOR_NAME.name()),
+                (String) object.get(FieldNames.TT_CONFIG_NAME.name()),
                 (String) object.get(FieldNames.TT_CONFIG_JSON_URL.name()),
                 (String) object.get(FieldNames.TT_CONFIG_LIVE_DATA_URI.name()),
                 (String) object.get(FieldNames.TT_CONFIG_STORED_DATA_URI.name()),

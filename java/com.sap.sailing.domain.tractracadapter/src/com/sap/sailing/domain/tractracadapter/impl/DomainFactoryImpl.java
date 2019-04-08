@@ -998,8 +998,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) {
-        return new TracTracConfigurationImpl(name, jsonURL, liveDataURI, storedDataURI, courseDesignUpdateURI, tracTracUsername, tracTracPassword);
+    public TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
+            String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername,
+            String tracTracPassword) {
+        return new TracTracConfigurationImpl(creatorName, name, jsonURL, liveDataURI, storedDataURI,
+                courseDesignUpdateURI, tracTracUsername, tracTracPassword);
     }
 
     @Override
