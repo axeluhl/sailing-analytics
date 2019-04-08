@@ -106,10 +106,11 @@
      -moz-transition: background 0.2s;
           transition: background 0.2s;
   text-decoration: none;
-  text-align: center;
+/*   text-align: center; */
   color: #fff;
   padding: 0.233333333333333em 0.233333333333333em;
   vertical-align: top;
+  cursor: pointer;
 }
 @media (min-width: 45em) {
   .fleet_races_race {
@@ -136,15 +137,17 @@
 .fleet_races_race_name {
   font-size: 1.166666666666667em;
   font-weight: 700;
+  position: relative;
 }
 .fleet_races_race_name:after {
   content: '';
   display: inline-block;
-  width: 0.466666666666667em;
-  height: 0.466666666666667em;
-  background: url("images/home/skip-forward.png") no-repeat center center;
-  margin: 0 0 0.033333333333333em 0.133333333333333em;
+  width: 1em;
+  height: 0.866666666666667em;
+  background: resourceUrl("launchLoupe") no-repeat center center;
   font-size: 1.466666666666667em;
+  position: absolute;
+  right: 0;
 }
 .fleet_races_race_info {
   width: 100%;
@@ -170,6 +173,9 @@
 }
 .fleet_races_raceplanned:hover {
   background-color: #8a8a8a;
+}
+.fleet_races_raceplanned .fleet_races_race_name:after {
+  background: resourceUrl("launchPlay") no-repeat center center;
 }
 .fleet_races_raceuntracked .fleet_races_race_name:after {
   display: none;

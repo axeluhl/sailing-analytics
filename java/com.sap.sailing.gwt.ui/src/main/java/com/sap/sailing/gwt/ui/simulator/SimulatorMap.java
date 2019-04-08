@@ -58,6 +58,8 @@ import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -127,7 +129,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         @Override
         public void onFailure(Throwable message) {
-            errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
+            errorReporter.reportError(stringMessages.errorServletCall(message.getMessage()));
         }
 
         @Override
@@ -368,8 +370,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     private void loadMapsAPIV3() {
-        boolean sensor = true;
-
         // load all the libs for use in the maps
         ArrayList<LoadLibrary> loadLibraries = new ArrayList<LoadApi.LoadLibrary>();
         loadLibraries.add(LoadLibrary.DRAWING);
@@ -558,7 +558,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
           }
         };
 
-        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey);  
+        LoadApi.go(onLoad, loadLibraries, GoogleMapAPIKey.V3_PARAMS);
     }
 
     private void initializeOverlays() {
@@ -654,7 +654,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         simulatorService.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
             @Override
             public void onFailure(Throwable message) {
-                errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
+                errorReporter.reportError(stringMessages.errorServletCall(message.getMessage()));
             }
 
             @Override
@@ -998,7 +998,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             }
 
         } else {
-            Window.alert("No course set, please initialize the course with Start-End input");
+            Notification.notify("No course set, please initialize the course with Start-End input", NotificationType.ERROR);
         }
     }
 

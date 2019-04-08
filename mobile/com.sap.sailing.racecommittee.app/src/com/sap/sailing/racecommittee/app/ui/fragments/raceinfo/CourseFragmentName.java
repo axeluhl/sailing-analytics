@@ -4,13 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
-
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
@@ -21,7 +14,13 @@ import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.util.NaturalComparator;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 public class CourseFragmentName extends CourseFragment {
 
@@ -61,7 +60,7 @@ public class CourseFragmentName extends CourseFragment {
 
         if (mListView != null) {
             final List<String> courses = preferences.getByNameCourseDesignerCourseNames();
-            Collections.sort(courses, new NaturalComparator());
+            Collections.sort(courses);
             String courseName = "";
 
             CourseBase courseDesign = getRaceState().getCourseDesign();

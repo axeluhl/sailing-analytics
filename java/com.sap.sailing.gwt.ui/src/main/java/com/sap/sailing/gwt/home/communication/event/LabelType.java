@@ -71,6 +71,11 @@ public enum LabelType {
     
     private final String labelType;
     
+    private LabelType() {
+        // For GWT serialization only
+        labelType = null;
+    }
+    
     private LabelType(String labelType) {
         this.labelType = labelType;
     }

@@ -1,10 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.app.FragmentTransaction;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.annotation.IdRes;
-
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -12,7 +7,6 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
@@ -20,6 +14,11 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.FlagPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.SetupPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.IdRes;
+import android.support.v4.app.FragmentTransaction;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
 
@@ -36,7 +35,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
         super.onActivityCreated(savedInstanceState);
 
         replaceFragment(FlagPanelFragment.newInstance(getArguments()), R.id.race_panel_flags);
-        if (AppUtils.with(getActivity()).isTablet() && AppUtils.with(getActivity()).isLand()) {
+        if (AppUtils.with(getActivity()).isTablet() && AppUtils.with(getActivity()).isLandscape()) {
             replaceFragment(SetupPanelFragment.newInstance(getArguments(), 0), R.id.race_panel_setup);
             replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_panel_time);
         }
@@ -81,7 +80,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
                 args.putAll(fragment.getArguments());
             }
             fragment.setArguments(args);
-            FragmentTransaction transaction = getActivity().getFragmentManager().beginTransaction();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(id, fragment);
             transaction.commit();
         }
@@ -99,17 +98,20 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             super.onStatusChanged(state);
 
             switch (state.getStatus()) {
-                case UNSCHEDULED:
-                case FINISHED:
-                    RacingActivity activity = (RacingActivity) getActivity();
-                    if (activity != null) {
-                        activity.onRaceItemClicked(getRace(), true);
-                    }
-                    break;
+            case UNSCHEDULED:
+            case FINISHED:
+                RacingActivity activity = (RacingActivity) getActivity();
+                if (activity != null) {
+                    activity.onRaceItemClicked(getRace(), true);
+                }
+                break;
 
-                default:
-                    showMainContent();
-                    break;
+            case RUNNING:
+                break;
+
+            default:
+                showMainContent();
+                break;
             }
         }
 
@@ -143,8 +145,14 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
             setupUi();
 
-            if (getRaceState().getStatus() == RaceLogRaceStatus.SCHEDULED) {
+            switch (getRaceState().getStatus()) {
+            case SCHEDULED:
                 showMainContent();
+                break;
+
+            default:
+                // nothing
+                break;
             }
         }
 

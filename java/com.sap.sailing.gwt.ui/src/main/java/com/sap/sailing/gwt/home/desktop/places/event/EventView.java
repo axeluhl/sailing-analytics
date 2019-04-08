@@ -21,7 +21,6 @@ import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.player.Timer;
 
@@ -37,7 +36,6 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         boolean needsSelectionInHeader();
         void forPlaceSelection(PlaceCallback callback);
         Timer getTimerForClientServerOffset();
-        SailingServiceAsync getSailingService();
         
         AbstractEventRegattaPlace getPlaceForRegatta(String regattaId);
         AbstractEventRegattaPlace getPlaceForRegattaRaces(String regattaId);
@@ -69,7 +67,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         
         EventViewDTO getEventDTO();
 
-        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 
         String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
                 RegattaAndRaceIdentifier raceIdentifier);

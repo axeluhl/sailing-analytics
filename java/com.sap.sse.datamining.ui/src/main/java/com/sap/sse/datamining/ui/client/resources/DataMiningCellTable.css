@@ -1,0 +1,12 @@
+.cellTableCell {
+	border: none;
+}
+
+.cellTableFirstColumn {
+	width: 1px;
+	padding: 2px 0 2px 3px;
+}
+
+.cellTableHoveredRow {
+	cursor: default;
+}

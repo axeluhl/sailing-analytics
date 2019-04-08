@@ -1,80 +1,87 @@
 #!/bin/sh
 ANDROID_RELEASE_BRANCH=android-xmake-release
 RELEASE_BRANCH=rel-1.4
-APP_MANIFESTS="mobile/com.sap.sailing.android.tracking.app/AndroidManifest.xml mobile/com.sap.sailing.buoy.positioning/AndroidManifest.xml mobile/com.sap.sailing.racecommittee.app/AndroidManifest.xml"
+APP_DIRS="mobile/com.sap.sailing.android.tracking.app/ mobile/com.sap.sailing.android.buoy.positioning.app/ mobile/com.sap.sailing.racecommittee.app/"
+APP_GRADLE_PROPERTIES="gradle.properties"
+FILES2SIGN=cfg/files2sign.json
+VERSION_FILE=cfg/VERSION
 GIT_REMOTE=origin
-UPDATE_ANDROID_MANIFEST_VERSIONS=1
-UPDATE_POM_VERSIONS=1
-PERFORM_GIT_OPERATIONS=1
 
-increment_version_code() {
-  MANIFEST=$1
-  echo "Incrementing version code and version name for $MANIFEST"
-  OLD_VERSION_CODE=`grep 'android:versionCode="[0-9]*"' $MANIFEST | sed -e 's/^.*android:versionCode="\([0-9]*\)".*$/\1/'`
+# proxy can be requested with -x
+OPTION_PROXY_SETTINGS=
+OPTION_UPDATE_ANDROID_VERSIONS=1
+OPTION_PERFORM_GIT_OPERATIONS=1
+
+usage() {
+  echo "$0 [-m -g -r <git-remote>]"
+  echo ""
+  echo "See more usage details in the sapsailing.com wiki at:"
+  echo "  https://wiki.sapsailing.com/wiki/info/landscape/building-and-deploying#building-deploying-stopping-and-starting-server-instances"
+  echo "-m Disable upgrading the versionCode and versionName"
+  echo "-g Disable the final git push operation to $RELEASE_BRANCH"
+  echo "-r The git remote; defaults to origin"
+  exit 2
+}
+
+# Read and update versionCode in build.gradle
+# Based on new versionCode the versionNme will also be updated.
+increment_version_code_and_set_version_name() {
+  DIR=$1
+  GRADLE_PROPERTIES_FILE=$DIR$APP_GRADLE_PROPERTIES
+  echo "Incrementing version code and version name for $DIR"
+  
+  OLD_VERSION_CODE=`grep 'appVersionCode=[0-9]*' $GRADLE_PROPERTIES_FILE | sed -e 's/^.*appVersionCode=\([0-9]*\).*$/\1/'`
   NEW_VERSION_CODE=$(($OLD_VERSION_CODE + 1))
-  echo $MANIFEST: OLD_VERSION_CODE is $OLD_VERSION_CODE, NEW_VERSION_CODE is $NEW_VERSION_CODE
-  OLD_MINOR_VERSION=`grep 'android:versionName="[0-9]*\.[0-9]*"' $MANIFEST | sed -e 's/^.*android:versionName="\([0-9]*\)\.\([0-9]*\)".*$/\2/'`
-  NEW_MINOR_VERSION=$((OLD_MINOR_VERSION + 1))
-  echo $MANIFEST: OLD_MINOR_VERSION is $OLD_MINOR_VERSION, NEW_MINOR_VERSION is $NEW_MINOR_VERSION
-  sed --in-place -e "s/android:versionCode=\"$OLD_VERSION_CODE\"/android:versionCode=\"$NEW_VERSION_CODE\"/" -e "s/android:versionName=\"\([0-9]*\)\.$OLD_MINOR_VERSION\"/android:versionName=\"\1.$NEW_MINOR_VERSION\"/" "$MANIFEST"
+  NEW_VERSION_NAME=1.4.$NEW_VERSION_CODE
+
+  echo $DIR: OLD_VERSION_CODE is $OLD_VERSION_CODE, NEW_VERSION_CODE is $NEW_VERSION_CODE
+  echo $DIR: Using NEW_VERSION_NAME=\"$NEW_VERSION_NAME\"
+  sed --in-place -e "s/appVersionCode=$OLD_VERSION_CODE/appVersionCode=$NEW_VERSION_CODE/" "$GRADLE_PROPERTIES_FILE"
+  sed --in-place -e "s/appVersionName=\([^\"]*\)/appVersionName=$NEW_VERSION_NAME/" "$GRADLE_PROPERTIES_FILE"
 }
 
-upgrade_pom_and_manifest_versions() {
-  POM=$1
-  NEW_POM_VERSION=$2
-  POM_WITH_PARENT_SPEC_REMOVED="${POM}.parentspecremoved"
-  PARENT_SPEC="${POM}.parentspec"
-  RESTORED_POM_WITH_NEW_VERSION_AND_PARENT_SPEC="${POM}.restored"
-  POM_BACKUP="${POM}.bak"
-  cp "$POM" "$POM_BACKUP"
-  # find the area to remove
-  snip_area_start_line=`grep -n SNIP_MARKER_START pom.xml | sed -e 's/^\([0-9]*\):.*$/\1/'`
-  snip_area_end_line=`grep -n SNIP_MARKER_END pom.xml | sed -e 's/^\([0-9]*\):.*$/\1/'`
-  sed -e "$snip_area_start_line,$snip_area_end_line d" <"$POM" >"$POM_WITH_PARENT_SPEC_REMOVED"
-  sed -e "1,$((snip_area_start_line - 1)) d" -e "$((snip_area_end_line + 1)),$ d" <"$POM" >"$PARENT_SPEC"
-  cp "$POM_WITH_PARENT_SPEC_REMOVED" "$POM"
-  echo mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
-  mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
-  sed --in-place -e 's/$/\\/' "$PARENT_SPEC"
-  cat "$POM" | sed -e "$snip_area_start_line i \\`cat "$PARENT_SPEC"`" | sed -e "$snip_area_start_line,$snip_area_end_line s/\\\\$//" >"$RESTORED_POM_WITH_NEW_VERSION_AND_PARENT_SPEC"
-  cp "$RESTORED_POM_WITH_NEW_VERSION_AND_PARENT_SPEC" "$POM"
+# Update files2sign.json with new updated version name 
+# replace, e.g. "version": "1.4.xy" with new one
+update_files2sign() {
+  echo "Update files2sign.json with new versionName $NEW_VERSION_NAME"
+  OLD_VERSION_NAMES=`grep '"version": "1.4.[0-9]*"' $FILES2SIGN | sed -e 's/^.*\"version\": \"\(1.4.[0-9]*\)\".*$/\1/'`
+  for OLD_VERSION_NAME in $OLD_VERSION_NAMES; do
+    sed --in-place -e "s/\"version\": \"$OLD_VERSION_NAME\"/\"version\": \"$NEW_VERSION_NAME\"/" "$FILES2SIGN"
+  done
 }
 
-if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-m -p -g -r <git-remote>] CR-Id: <TheJCWBCRId>"
-    echo ""
-    echo "Request a new Java Correction Workbench (JCWB) Correction Request ID at:"
-    echo "  https://css.wdf.sap.corp/sap(bD1lbiZjPTAwMQ==)/bc/bsp/spn/jcwb/default.htm?newCMForProject=sapsailingcapture#"
-    echo "See more usage details in the sapsailing.com wiki at:"
-    echo "  https://wiki.sapsailing.com/wiki/building-and-deploying#building-deploying-stopping-and-starting-server-instances_app-build-process-for-ios-and-android_xmake-build-for-android-apps"
-    echo "-m Disable upgrading the AndroidManifest.xml versionCode and versionName"
-    echo "-p Disable upgrading the pom.xml and MANIFEST.MF versions"
-    echo "-g Disable the final git push operation to refs/for/$RELEASE_BRANCH"
-    echo "-r The git remote; defaults to origin"
-    echo ""
-    echo "Example: $0 CR-Id: 012003146900000486712016"
-    exit 2
-fi
+# Update the cfg/VERSION file with new updated version name
+update_version_file() {
+  echo "Update cfg/VERSION with new versionName $NEW_VERSION_NAME"
+  echo $NEW_VERSION_NAME > "$VERSION_FILE"
+}
 
-options='mpgr:'
-while getopts $options option
+# Parse the first argument for the help option
+while [ "$1" != "" ]
 do
-    case $option in
-        m) UPDATE_ANDROID_MANIFEST_VERSIONS=0;;
-        p) UPDATE_POM_VERSIONS=0;;
-        g) PERFORM_GIT_OPERATIONS=0;;
-	r) GIT_REMOTE=$OPTARG;;
-        \?) echo "Invalid option"
-            exit 4;;
-    esac
+  case $1 in
+    -h | --help) usage;;
+    *) break;;
+  esac
 done
-shift $((OPTIND-1))
+
+# Parse the options
+options="mgxr:"
+while getopts "$options" option
+do
+  case $option in
+    m) OPTION_UPDATE_ANDROID_VERSIONS=0;;
+    g) OPTION_PERFORM_GIT_OPERATIONS=0;;
+    g) OPTION_PERFORM_GIT_OPERATIONS=0;;
+    r) GIT_REMOTE=$OPTARG;;
+    \?) exit 4;;
+  esac
+done
+shift $((OPTIND - 1))
 
 # change directory to the git root, assuming this script is in the configuration/ subfolder
 GIT_DIR="`dirname \"$0\"`/.."
 echo GIT_DIR: $GIT_DIR
-JCWB_CHANGE_REQUEST_ID_GIT_TAG=$*
-echo "Releasing based on Java Correction Workbench (JCWB) Correction Request ID tag $JCWB_CHANGE_REQUEST_ID_GIT_TAG"
 cd "$GIT_DIR"
 
 git fetch $GIT_REMOTE
@@ -82,47 +89,34 @@ git checkout $ANDROID_RELEASE_BRANCH
 git merge -m "Merging $GIT_REMOTE/$ANDROID_RELEASE_BRANCH" $GIT_REMOTE/$ANDROID_RELEASE_BRANCH
 git fetch $GIT_REMOTE $RELEASE_BRANCH:$RELEASE_BRANCH
 git merge -m "Merging $RELEASE_BRANCH into $ANDROID_RELEASE_BRANCH, probably incorporating version setting to -SNAPSHOT" $GIT_REMOTE/$RELEASE_BRANCH
-git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$ANDROID_RELEASE_BRANCH
+if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
+  git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$ANDROID_RELEASE_BRANCH
+fi
 
-# Patch the AndroidManifest.xml files to upgrade the android:versionCode sequential counter relevant for the PlayStore
-# and the android:versionName which is what the user sees and which we expect to follow a major.minor version scheme,
+# Patch the build.gradle files to upgrade the versionCode sequential counter relevant for the PlayStore
+# and the versionName which is what the user sees and which we expect to follow a major.minor version scheme,
 # where this script increments the minor version by one
-if [ "$UPDATE_ANDROID_MANIFEST_VERSIONS" = "1" ]; then
-  for m in $APP_MANIFESTS; do
-    increment_version_code $m
+if [ "$OPTION_UPDATE_ANDROID_VERSIONS" = "1" ]; then
+  for m in $APP_DIRS; do
+    increment_version_code_and_set_version_name $m
   done
-fi
 
-# Determine the version in the root pom.xml; if a -SNAPSHOT version, simply remove the -SNAPSHOT;
-# otherwise, increment micro version by one and use the Tycho version plugin to update;
-# For this to work, the <parent> specification needs to be removed from the top-level pom which later
-# needs to be re-activated before committing everything
-OLD_POM_VERSION=`head -n 15 pom.xml | grep '<version>.*</version>' | sed -e 's/^.*<version>\(.*\)<\/version>.*$/\1/'`
-echo $OLD_POM_VERSION | grep -q -- "-SNAPSHOT"
-if [ "$?" = "0" ]; then
-  # found a -SNAPSHOT identifier; assuming this was for the next release already; simply remove -SNAPSHOT
-  NEW_POM_VERSION=`echo $OLD_POM_VERSION | sed -e 's/-SNAPSHOT//'`
-else
-  # no -SNAPSHOT found; increment the micro version by one
-  NEW_POM_VERSION=`echo $OLD_POM_VERSION | (IFS=. read major minor micro; echo ${major}.${minor}.$(($micro + 1)) )`
-fi
-echo OLD_POM_VERSION is $OLD_POM_VERSION, NEW_POM_VERSION is $NEW_POM_VERSION
-if [ "$UPDATE_POM_VERSIONS" = "1" ]; then
-  upgrade_pom_and_manifest_versions pom.xml $NEW_POM_VERSION
+  update_files2sign
+
+  update_version_file
 fi
 
 # Now commit the version changes and amend the commit using the change request ID tag:
-git commit -a -m "Upgraded Android apps from version $OLD_POM_VERSION to $NEW_POM_VERSION"
-git commit --amend -m "`git show -s --pretty=format:%s%n%n%b`
-$JCWB_CHANGE_REQUEST_ID_GIT_TAG"
-if [ "$PERFORM_GIT_OPERATIONS" = "1" ]; then
-  git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:refs/for/$RELEASE_BRANCH
+git commit -a -m "Upgraded Android apps from version $OLD_VERSION_NAME to $NEW_VERSION_NAME"
+git commit --amend -m "`git show -s --pretty=format:%s%n%n%b`"
+if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
+  git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$RELEASE_BRANCH
 fi
 
-echo "Now go to https://git.wdf.sap.corp/#/dashboard/self and vote on your change, using the \"Reply\" button."
-echo "Remove the pMiosVoter because it has nothing good to say on Android. Then \"Submit\" your change to merge it to $RELEASE_BRANCH."
-echo "After successful merge, launch a customer stage build here: https://xmake-ldi.wdf.sap.corp:8443/view/SAPSail/job/sapsailingcapture-Release/"
-echo "When done, create a BCP update ticket. See https://wiki.wdf.sap.corp/wiki/display/NAAS/Mobile+Patch+Releases (remove the saprole parameter from the URL)"
-echo "Copy the description of, e.g., https://support.wdf.sap.corp/sap/support/message/1670304244 to start with and adjust versions and commit IDs."
-echo "Make sure you have your Metaman stuff updated, particularly the Release Notes section."
-echo "Then wait for feedback on the release build being ready for smoke testing, do the smoke tests and report back in BCP. That's it :-)"
+echo "Launch a stage build here: https://xmake-mobile-dev.wdf.sap.corp/job/sapsailingprogram/job/sapsailingcapture.android-SP-REL-common_directshipment/"
+echo "using rel-1.4 as the Treeish to build."
+echo "When done, create a BCP update ticket. See https://wiki.wdf.sap.corp/wiki/display/NAAS/Mobile+Patch+Releases \(remove the saprole parameter from the URL\)"
+echo "Copy the description of, e.g., https://support.wdf.sap.corp/sap/support/message/1970099762 to start with and adjust versions and commit IDs."
+echo "Make sure you have your MoMa stuff updated, particularly the Release Notes section."
+echo "See, e.g., https://moma.mo.sap.corp/#/editAssemblyData/186"
+echo "Then wait for feedback on the release build being ready for smoke testing, do the smoke tests and report back in BCP. That\'s it :-\)"

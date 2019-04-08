@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.GPSFixWithContext;
+import com.sap.sailing.datamining.impl.data.TrackedLegOfCompetitorWithSpecificTimePointWithContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -16,8 +17,11 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
 public class GPSFixRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasGPSFixContext> {
 
-    public GPSFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasGPSFixContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasTrackedLegOfCompetitorContext.class, HasGPSFixContext.class, executor, resultReceivers, retrievalLevel);
+    public GPSFixRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<HasGPSFixContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasTrackedLegOfCompetitorContext.class, HasGPSFixContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
     }
 
     @Override
@@ -29,7 +33,11 @@ public class GPSFixRetrievalProcessor extends AbstractRetrievalProcessor<HasTrac
             TrackedLegOfCompetitor trackedLegOfCompetitor = element.getTrackedLegOfCompetitor();
             if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null) {
                 for (GPSFixMoving gpsFix : competitorTrack.getFixes(trackedLegOfCompetitor.getStartTime(), true, trackedLegOfCompetitor.getFinishTime(), true)) {
-                    HasGPSFixContext gpsFixWithContext = new GPSFixWithContext(element, gpsFix);
+                    if (isAborted()) {
+                        break;
+                    }
+                    HasGPSFixContext gpsFixWithContext = new GPSFixWithContext(new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
+                            element.getTrackedLegContext(), element.getTrackedLegOfCompetitor(), gpsFix.getTimePoint()), gpsFix);
                     gpsFixesWithContext.add(gpsFixWithContext);
                 }
             }

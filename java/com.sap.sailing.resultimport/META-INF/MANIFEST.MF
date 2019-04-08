@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Shared result import APIs
 Bundle-SymbolicName: com.sap.sailing.resultimport
+Automatic-Module-Name: com.sap.sailing.resultimport
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.resultimport.Activator
 Bundle-Vendor: SAP
@@ -9,11 +10,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.resultimport,
  com.sap.sailing.resultimport.impl
-Import-Package: com.sap.sailing.domain.base.impl,
+Import-Package: com.sap.sailing.competitorimport,
  com.sap.sailing.domain.common,
- com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.persistence,
- com.sap.sailing.server,
+ com.sap.sailing.server.interfaces,
  org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker;version="1.5.1"
 Require-Bundle: com.sap.sse.common

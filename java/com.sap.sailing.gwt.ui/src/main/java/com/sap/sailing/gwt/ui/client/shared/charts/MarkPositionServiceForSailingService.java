@@ -14,10 +14,16 @@ public class MarkPositionServiceForSailingService implements MarkPositionService
         super();
         this.sailingService = sailingService;
     }
+    
+    @Override
+    public void getMarksInTrackedRace(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, AsyncCallback<Iterable<MarkDTO>> callback) {
+        sailingService.getMarksInTrackedRace(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), callback);
+    }
 
     @Override
-    public void getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, AsyncCallback<MarkTracksDTO> callback) {
-        sailingService.getMarkTracks(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), callback);
+    public void getMarkTrack(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, String markIdAsString,
+            AsyncCallback<MarkTrackDTO> callback) {
+        sailingService.getMarkTrack(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), markIdAsString, callback);
     }
 
     @Override
@@ -41,5 +47,4 @@ public class MarkPositionServiceForSailingService implements MarkPositionService
             Position newPosition, AsyncCallback<Void> callback) {
         sailingService.editMarkFix(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), mark.getIdAsString(), oldFix, newPosition, callback);
     }
-
 }

@@ -6,18 +6,19 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
-import com.sap.sse.common.Named;
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 
-public class User implements Named, WithID {
+public class User implements NamedWithID {
     private static final long serialVersionUID = 1788215575606546042L;
 
     /**
@@ -35,6 +36,12 @@ public class User implements Named, WithID {
      * corporate vs. private users, if used as a marketing tool.
      */
     private String company;
+    
+    /**
+     * An optional field specifying the locale preference of the user. This can be used to internationalize User
+     * specific elements as UIs or notification mails.
+     */
+    private Locale locale;
 
     private String email;
     
@@ -66,16 +73,17 @@ public class User implements Named, WithID {
     }
 
     public User(String name, String email, Collection<Account> accounts) {
-        this(name, email, /* fullName */ null, /* company */ null, /* is email validated */ false,
+        this(name, email, /* fullName */ null, /* company */ null, /* locale */ null, /* is email validated */ false,
              /* password reset secret */ null, /* validation secret */ null, accounts);
     }
 
-    public User(String name, String email, String fullName, String company, Boolean emailValidated,
+    public User(String name, String email, String fullName, String company, Locale locale, Boolean emailValidated,
             String passwordResetSecret, String validationSecret, Collection<Account> accounts) {
         super();
         this.name = name;
         this.fullName = fullName;
         this.company = company;
+        this.locale = locale;
         this.roles = new HashSet<>();
         this.permissions = new HashSet<>();
         this.email = email;
@@ -100,10 +108,6 @@ public class User implements Named, WithID {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getFullName() {
         return fullName;
     }
@@ -118,6 +122,18 @@ public class User implements Named, WithID {
 
     public void setCompany(String company) {
         this.company = company;
+    }
+    
+    public Locale getLocale() {
+        return locale;
+    }
+    
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+    
+    public Locale getLocaleOrDefault() {
+        return locale == null ? Locale.ENGLISH : locale;
     }
 
     public Iterable<String> getRoles() {
@@ -243,7 +259,8 @@ public class User implements Named, WithID {
 
     @Override
     public String toString() {
-        return "User [name=" + name + ", email=" + email + (isEmailValidated()?" (validated)":")")+", roles="
+        return "User [name=" + name + ", email=" + email + ", fullName=" + fullName + ", company=" + company
+                + ", locale=" + locale + (isEmailValidated() ? " (validated)" : ")") + ", roles="
                 + Arrays.toString(roles.toArray(new String[roles.size()])) + ", accounts="
                 + Arrays.toString(accounts.keySet().toArray(new AccountType[accounts.size()])) + "]";
     }

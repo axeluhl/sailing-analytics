@@ -43,6 +43,10 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
 
     protected abstract Map<Fleet, Iterable<? extends RaceColumn>> getRaceColumnsOfSeries();
     
+    /**
+     * For all tracked races found on any of the {@link #getRaceColumnsOfSeries() race columns} produces a valid and
+     * potentially empty set.
+     */
     private Map<TrackedRace, Set<TrackedRace>> reloadAndGetPreviousRacesByRace() {
         final Map<TrackedRace, Set<TrackedRace>> previousRacesByRace = new HashMap<>();
         for (Entry<Fleet, Iterable<? extends RaceColumn>> raceColumnsInSeries : getRaceColumnsOfSeries().entrySet()) {
@@ -96,11 +100,13 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
 
     @Override
     public Set<TrackedRace> getPreviousRacesInExecutionOrder(TrackedRace race) {
-        Set<TrackedRace> result = Collections.emptySet();
+        final Set<TrackedRace> result;
         final Map<TrackedRace, Set<TrackedRace>> previousRacesByRace = getPreviousRacesByRace();
         if (previousRacesByRace != null) {
             result = previousRacesByRace.get(race);
-        } 
+        } else {
+            result = Collections.emptySet();
+        }
         return result;
     }
 }

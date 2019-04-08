@@ -26,7 +26,6 @@ import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
-
     public TrackedRacesExportTest() throws MalformedURLException, URISyntaxException {
         super();
     }
@@ -37,35 +36,34 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, SubscriberInitializationException, CreateModelException {
-        URI storedUri = new URI("file:///"+new File("resources/event_20120905_erEuropean-Gold_fleet_-_race_1.mtb").getCanonicalPath().replace('\\', '/'));
-        super.setUp(new URL("file:///"+new File("resources/event_20120905_erEuropean-Gold_fleet_-_race_1.txt").getCanonicalPath()),
+    public void setUp() throws URISyntaxException, IOException, InterruptedException, SubscriberInitializationException,
+            CreateModelException {
+        URI storedUri = new URI("file:///" + new File("resources/event_20120905_erEuropean-Gold_fleet_-_race_1.mtb")
+                .getCanonicalPath().replace('\\', '/'));
+        super.setUp(
+                new URL("file:///"
+                        + new File("resources/event_20120905_erEuropean-Gold_fleet_-_race_1.txt").getCanonicalPath()),
                 /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS, ReceiverType.MARKPASSINGS });
     }
 
     private byte[] getBytes(TrackFilesDataSource data, TrackFilesFormat format, TrackedRace race,
             boolean dataBeforeAfter, boolean rawFixes) throws IOException {
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ZipOutputStream zip = new ZipOutputStream(out);
-        TrackFileExporterImpl.INSTANCE.writeAllData(Collections.singletonList(data), format, Collections.singletonList(race),
-                true, true, zip);
-
-        zip.flush();
-        byte[] result = out.toByteArray();
-        out.close();
-
-        return result;
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            ZipOutputStream zip = new ZipOutputStream(out);
+            TrackFileExporterImpl.INSTANCE.writeAllData(Collections.singletonList(data), format,
+                    Collections.singletonList(race), true, true, zip);
+            zip.flush();
+            byte[] result = out.toByteArray();
+            return result;
+        }
     }
 
     @Test
     public void doAllFormatsWork() throws IOException, FormatNotSupportedException {
         TrackedRace race = getTrackedRace();
-
         for (TrackFilesFormat format : TrackFilesFormat.values()) {
             byte[] data = getBytes(TrackFilesDataSource.COMPETITORS, format, race, true, true);
-
             assertTrue(data.length > 4000);
         }
     }
@@ -73,10 +71,8 @@ public class TrackedRacesExportTest extends OnlineTracTracBasedTest {
     @Test
     public void doAllDataSourcesWork() throws IOException, FormatNotSupportedException {
         TrackedRace race = getTrackedRace();
-
         for (TrackFilesDataSource source : TrackFilesDataSource.values()) {
             byte[] data = getBytes(source, TrackFilesFormat.Gpx11, race, true, true);
-
             assertTrue(data.length > 40);
         }
     }

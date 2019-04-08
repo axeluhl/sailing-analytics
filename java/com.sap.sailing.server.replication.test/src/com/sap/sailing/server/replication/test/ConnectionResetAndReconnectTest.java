@@ -21,11 +21,12 @@ import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
 
@@ -56,12 +57,12 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
     
     static class MasterReplicationDescriptorMock extends ReplicationMasterDescriptorImpl {
 
-        public MasterReplicationDescriptorMock(String messagingHost, String hostname, String exchangeName, int servletPort, int messagingPort) {
-            super(messagingHost, exchangeName, messagingPort, UUID.randomUUID().toString(), hostname, servletPort);
+        public MasterReplicationDescriptorMock(String messagingHost, String hostname, String exchangeName, int servletPort, int messagingPort, Iterable<Replicable<?, ?>> replicables) {
+            super(messagingHost, exchangeName, messagingPort, UUID.randomUUID().toString(), hostname, servletPort, replicables);
         }
         
         public static MasterReplicationDescriptorMock from(ReplicationMasterDescriptor obj) {
-            return new MasterReplicationDescriptorMock(obj.getMessagingHostname(), obj.getHostname(), obj.getExchangeName(), obj.getServletPort(), obj.getMessagingPort());
+            return new MasterReplicationDescriptorMock(obj.getMessagingHostname(), obj.getHostname(), obj.getExchangeName(), obj.getServletPort(), obj.getMessagingPort(), obj.getReplicables());
         }
         
         @Override

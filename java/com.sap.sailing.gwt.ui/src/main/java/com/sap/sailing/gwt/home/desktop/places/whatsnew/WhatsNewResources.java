@@ -8,16 +8,22 @@ import com.google.gwt.resources.client.TextResource;
 public interface WhatsNewResources extends ClientBundle {
     public static final WhatsNewResources INSTANCE = GWT.create(WhatsNewResources.class);
 
-    @Source("com/sap/sailing/gwt/home/solutions/SailingAnalyticsNotes.html")
+    @Source("resources/SailingAnalyticsNotes.html")
     public TextResource getSailingAnalyticsNotesHtml();
 
-    @Source("com/sap/sailing/gwt/home/solutions/SailingSimulatorNotes.html")
+    @Source("resources/SailingSimulatorNotes.html")
     public TextResource getSailingSimulatorNotesHtml();
     
-    @Source("com/sap/sailing/gwt/home/solutions/RaceCommitteeAppNotes.html")
+    @Source("resources/RaceCommitteeAppNotes.html")
     public TextResource getRaceCommitteeAppNotesHtml();
+
+    @Source("resources/InSightAppNotes.html")
+    public TextResource getInSightAppNotesHtml();
+
+    @Source("resources/BuoyPingerAppNotes.html")
+    public TextResource getBuoyPingerAppNotesHtml();
     
-    @Source("WhatsNew.css")
+    @Source("resources/WhatsNew.css")
     LocalCss css();
 
     public interface LocalCss extends CssResource {

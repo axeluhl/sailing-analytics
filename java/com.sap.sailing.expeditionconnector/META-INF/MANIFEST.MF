@@ -6,12 +6,19 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sailing.expeditionconnector,
- com.sap.sailing.expeditionconnector.impl;x-friends:="com.sap.sailing.server.test"
+ com.sap.sailing.expeditionconnector.impl;x-friends:="com.sap.sailing.server.test,com.sap.sailing.expeditionconnector.persistence"
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.declination,
  com.sap.sailing.udpconnector,
  com.sap.sailing.domain.common,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse,
+ com.sap.sailing.domain.shared.android,
+ com.sap.sailing.server.gateway.serialization.shared.android,
+ com.sap.sailing.expeditionconnector.common,
+ com.sap.sailing.expeditionconnector.persistence
 Bundle-ActivationPolicy: lazy
-Import-Package: org.osgi.framework
+Import-Package: org.osgi.framework,
+ org.osgi.util.tracker;version="1.5.1"
 Bundle-Activator: com.sap.sailing.expeditionconnector.impl.Activator
+Automatic-Module-Name: com.sap.sailing.expeditionconnector

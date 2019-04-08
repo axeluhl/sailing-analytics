@@ -1,13 +1,14 @@
 package com.sap.sailing.server.simulation;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.interfaces.SimulationService;
 
 public interface SimulationServiceFactory {
 
     static SimulationServiceFactory INSTANCE = new SimulationServiceFactoryImpl();
 
-    SimulationService getService(Executor executor, RacingEventService racingEventService);
+    SimulationService getService(ScheduledExecutorService executor, RacingEventService racingEventService);
     
 }

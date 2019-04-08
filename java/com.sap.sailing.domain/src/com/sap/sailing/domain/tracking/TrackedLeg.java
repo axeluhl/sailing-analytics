@@ -5,15 +5,14 @@ import java.util.LinkedHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
-import com.sap.sse.common.Duration;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
@@ -27,7 +26,7 @@ public interface TrackedLeg extends Serializable {
     TrackedRace getTrackedRace();
 
     /**
-     * Determines whether the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
+     * Determines whether the current {@link #getLeg() leg} is +/- {@link LegType#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
      * collinear with the current wind's bearing.
      */
     boolean isUpOrDownwindLeg(TimePoint at) throws NoWindException;
@@ -57,6 +56,16 @@ public interface TrackedLeg extends Serializable {
     Bearing getLegBearing(TimePoint at);
 
     /**
+     * Same as {@link #getLegBearing(TimePoint)}, but giving the caller the possibility to provide a cache for
+     * mark positions and related position and bearing data
+     * 
+     * @param markPositionCache
+     *            a cache for this tracked leg's {@link MarkPositionAtTimePointCache#getTrackedRace() race} and the
+     *            {@link MarkPositionAtTimePointCache#getTimePoint() timePoint} passed
+     */
+    Bearing getLegBearing(TimePoint at, MarkPositionAtTimePointCache markPositionCache);
+
+    /**
      * Returns the positive (absolute) distance of <code>p</code> to this leg's course middle line at <code>timePoint</code>,
      * based on the position of the waypoints delimiting this leg at that time.
      */
@@ -81,7 +90,17 @@ public interface TrackedLeg extends Serializable {
     Distance getGreatCircleDistance(TimePoint timePoint);
 
     /**
-     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
+     * Same as {@link #getGreatCircleDistance(TimePoint)}, but giving the caller the possibility to provide a cache for
+     * mark positions and related position and bearing data
+     * 
+     * @param markPositionCache
+     *            a cache for this tracked leg's {@link MarkPositionAtTimePointCache#getTrackedRace() race} and the
+     *            {@link MarkPositionAtTimePointCache#getTimePoint() timePoint} passed
+     */
+    Distance getGreatCircleDistance(TimePoint timePoint, MarkPositionAtTimePointCache markPositionCache);
+
+    /**
+     * If the current {@link #getLeg() leg} is +/- {@link LegType#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
      * collinear with the wind's bearing, <code>pos1</code> is projected onto the line crossing <code>pos2</code> in the
      * wind's bearing, and the distance from the projection to <code>pos2</code> is returned. Otherwise, it is assumed
      * that the leg is neither an upwind nor a downwind leg, and hence the along-track distance to <code>mark</code> is
@@ -144,7 +163,8 @@ public interface TrackedLeg extends Serializable {
      * is not available
      * @throws NoWindException no wind available. unable to determine legtypes for given timepoint
      */
-    Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
+    LegTargetTimeInfo getEstimatedTimeAndDistanceToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
+            throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     /**
      * Computes the windward distance (for upwind/downwind legs) or the along-course distance (for reaching legs) at a reference time point

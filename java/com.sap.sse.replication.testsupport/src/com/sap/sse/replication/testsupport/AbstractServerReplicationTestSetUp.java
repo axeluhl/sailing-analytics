@@ -2,9 +2,9 @@ package com.sap.sse.replication.testsupport;
 
 import static org.junit.Assert.assertFalse;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
@@ -17,29 +17,45 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.jpountz.lz4.LZ4BlockOutputStream;
+import javax.servlet.ReadListener;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Rule;
 import org.junit.rules.Timeout;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.Activator;
 import com.sap.sse.replication.impl.RabbitOutputStream;
-import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.replication.impl.ReplicaDescriptorImpl;
 import com.sap.sse.replication.impl.ReplicationInstancesManager;
 import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
-import com.sap.sse.replication.impl.ReplicationReceiver;
+import com.sap.sse.replication.impl.ReplicationReceiverImpl;
 import com.sap.sse.replication.impl.ReplicationServiceImpl;
+import com.sap.sse.replication.impl.ReplicationServlet;
 import com.sap.sse.replication.impl.SingletonReplicablesProvider;
+
+import net.jpountz.lz4.LZ4BlockOutputStream;
 
 public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface extends Replicable<?, ?>, ReplicableImpl extends ReplicableInterface> {
     private static final Logger logger = Logger.getLogger(AbstractServerReplicationTestSetUp.class.getName());
@@ -61,7 +77,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         this.servletPort = servletPort;
     }
     
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(5 * 60 * 1000); // timeout after 5 minutes
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(5 * 60 * 1000); // timeout after 5 minutes
     private Thread initialLoadTestServerThread;
 
     /**
@@ -129,7 +145,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
             ReplicableImpl master, ReplicableImpl replica) throws Exception {
         logger.info("basicSetUp for test class "+getClass().getName());
         persistenceSetUp(dropDB);
-        String exchangeName = "test-sapsailinganalytics-exchange";
+        String exchangeName = "test-sapsailinganalytics-exchange-"+new Random().nextInt();
         String exchangeHost = "localhost";
         if (System.getenv(Activator.ENV_VAR_NAME_REPLICATION_HOST) != null) {
             exchangeHost = System.getenv(Activator.ENV_VAR_NAME_REPLICATION_HOST);
@@ -147,12 +163,12 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, 0, rim, new SingletonReplicablesProvider(this.master));
-        replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
+        replicaDescriptor = new ReplicaDescriptorImpl(InetAddress.getLocalHost(), serverUuid, "", new String[] { this.master.getId().toString() });
         
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
         ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator = new ReplicationServiceTestImpl<ReplicableInterface>(exchangeName, exchangeHost, rim, replicaDescriptor,
-                this.replica, this.master, masterReplicator, masterDescriptor);
+                this.replica, this.master, masterReplicator);
         masterDescriptor = replicaReplicator.getMasterDescriptor();
         servletPort = masterDescriptor.getServletPort();
         Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
@@ -186,7 +202,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         }
         if (masterDescriptor != null) {
             logger.info("before stopConnection...");
-            masterDescriptor.stopConnection();
+            masterDescriptor.stopConnection(/* deleteExchange */ true);
         }
         try {
             if (initialLoadTestServerThread != null) {
@@ -236,15 +252,19 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         
         public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, ReplicationInstancesManager replicationInstancesManager,
                 ReplicaDescriptor replicaDescriptor, ReplicableInterface replica,
-                ReplicableInterface master, ReplicationService masterReplicationService, ReplicationMasterDescriptor masterDescriptor)
+                ReplicableInterface master, ReplicationService masterReplicationService)
                 throws IOException {
             super(exchangeName, exchangeHost, 0, replicationInstancesManager, new SingletonReplicablesProvider(replica));
             this.replicaDescriptor = replicaDescriptor;
             this.master = master;
             ss = new ServerSocket(0); // bind to any free port
             this.masterReplicationService = masterReplicationService;
+            final List<Replicable<?, ?>> replicablesToReplicate = new ArrayList<>();
+            for (final String replicableIdAsString : replicaDescriptor.getReplicableIdsAsStrings()) {
+                replicablesToReplicate.add(getReplicablesProvider().getReplicable(replicableIdAsString, /* wait */ false));
+            }
             this.masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, exchangeName, /* messagingPort */ 0,
-                    UUID.randomUUID().toString(), "localhost", ss.getLocalPort());
+                    UUID.randomUUID().toString(), "localhost", ss.getLocalPort(), replicablesToReplicate);
         }
         
         ReplicationMasterDescriptor getMasterDescriptor() {
@@ -267,44 +287,101 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                         }
                         boolean stop = false;
                         while (!stop) {
-                            Socket s = ss.accept();
-                            String request = new BufferedReader(new InputStreamReader(s.getInputStream())).readLine();
+                            final Socket s = ss.accept();
+                            final InputStream inputStream = s.getInputStream();
+                            String request = readLine(inputStream);
                             logger.info("received request "+request);
                             PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
-                            pw.println("HTTP/1.1 200 OK");
-                            pw.println("Content-Type: text/plain");
-                            pw.println();
-                            pw.flush();
-                            if (request.contains("DEREGISTER")) {
-                                // assuming that it is safe to unregister all replicas for tests
-                                for (ReplicaDescriptor descriptor : getReplicaInfo()) {
-                                    unregisterReplica(descriptor);
+                            if (request.startsWith("POST /replication/replication")) {
+                                final ReplicationServlet servlet = new ReplicationServlet(new SingletonReplicablesProvider(master), /* replicationServiceTracker */ null);
+                                final HttpServletRequest requestMock = Mockito.mock(HttpServletRequest.class);
+                                Mockito.when(requestMock.getInputStream()).thenReturn(new ServletInputStream() {
+                                    @Override
+                                    public boolean isFinished() {
+                                        try {
+                                            return inputStream.available() <= 0;
+                                        } catch (IOException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
+
+                                    @Override
+                                    public boolean isReady() {
+                                        try {
+                                            return inputStream.available() > 0;
+                                        } catch (IOException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void setReadListener(ReadListener readListener) {
+                                    }
+
+                                    @Override
+                                    public int read() throws IOException {
+                                        return inputStream.read();
+                                    }
+                                });
+                                final HttpServletResponse responseMock = Mockito.mock(HttpServletResponse.class);
+                                final boolean[] error = { false };
+                                Mockito.doAnswer(new Answer<Void>() {
+                                    @Override
+                                    public Void answer(InvocationOnMock invocation) throws Throwable {
+                                        pw.println("HTTP/1.1 500 Bad Request");
+                                        pw.println("Content-Type: text/plain");
+                                        pw.println();
+                                        pw.println(invocation.getArgumentAt(1, String.class));
+                                        pw.flush();
+                                        error[0] = true;
+                                        return null;
+                                    }
+                                }).when(responseMock).sendError(Matchers.anyInt(), Matchers.isA(String.class));
+                                while (!readLine(inputStream).isEmpty());
+                                servlet.doPost(requestMock, responseMock);
+                                if (!error[0]) {
+                                    pw.println("HTTP/1.1 200 OK");
+                                    pw.println("Content-Type: text/plain");
+                                    pw.println();
+                                    pw.flush();
                                 }
-                            } else if (request.contains("REGISTER")) {
-                                final String uuid = UUID.randomUUID().toString();
-                                registerReplicaUuidForMaster(uuid, masterDescriptor);
-                                masterReplicationService.registerReplica(replicaDescriptor);
-                                pw.print(uuid.getBytes());
-                            } else if (request.contains("INITIAL_LOAD")) {
-                                Channel channel = masterReplicationService.createMasterChannel();
-                                RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
-                                        /* queueName */ "initial-load-for-TestClient-"+UUID.randomUUID(), /* syncAfterTimeout */ false);
-                                pw.println(ros.getQueueName());
-                                final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(ros);
-                                master.serializeForInitialReplication(compressingOutputStream);
-                                compressingOutputStream.finish();
-                                ros.close();
-                            } else if (request.contains("STOP")) {
-                                stop = true;
-                                logger.info("received STOP request");
+                            } else {
+                                pw.println("HTTP/1.1 200 OK");
+                                pw.println("Content-Type: text/plain");
+                                pw.println();
+                                pw.flush();
+                                if (request.contains("DEREGISTER")) {
+                                    // assuming that it is safe to unregister all replicas for tests
+                                    for (ReplicaDescriptor descriptor : getReplicaInfo()) {
+                                        unregisterReplica(descriptor);
+                                    }
+                                } else if (request.contains("REGISTER")) {
+                                    final String uuid = UUID.randomUUID().toString();
+                                    registerReplicaUuidForMaster(uuid, masterDescriptor);
+                                    masterReplicationService.registerReplica(replicaDescriptor);
+                                    pw.print(uuid);
+                                } else if (request.contains("INITIAL_LOAD")) {
+                                    Channel channel = masterReplicationService.createMasterChannel();
+                                    RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
+                                            /* queueName */ "initial-load-for-TestClient-"+UUID.randomUUID(), /* syncAfterTimeout */ false);
+                                    pw.println(ros.getQueueName());
+                                    final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(ros);
+                                    master.serializeForInitialReplication(compressingOutputStream);
+                                    compressingOutputStream.finish();
+                                    ros.close();
+                                } else if (request.contains("STOP")) {
+                                    stop = true;
+                                    logger.info("received STOP request");
+                                }
                             }
-                            pw.close();
+                            pw.flush(); // ensure response is delivered
                             s.close();
                             logger.info("Request handled successfully.");
                         }
-                    } catch (IOException e) {
+                    } catch (IOException | ServletException e) {
                         throw new RuntimeException(e);
                     } finally {
+                        logger.info("replication servlet emulation done");
                         try {
                             if (ss != null) {
                                 ss.close();
@@ -313,6 +390,17 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                             throw new RuntimeException(e);
                         }
                     }
+                }
+
+                private String readLine(final InputStream inputStream) throws IOException {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    int b;
+                    while ((b=inputStream.read()) != -1 && b != '\n') {
+                        if (b != '\r') { // ignore CR
+                            bos.write(b);
+                        }
+                    }
+                    return new String(bos.toByteArray());
                 }
             };
             initialLoadTestServerThread.start();
@@ -324,12 +412,12 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
             return initialLoadTestServerThread;
         }
 
-        public ReplicationReceiver startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
+        public ReplicationReceiverImpl startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
                 throws IOException {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             QueueingConsumer consumer = master.getConsumer();
-            final ReplicationReceiver replicator = new ReplicationReceiver(master, getReplicablesProvider(), startReplicatorSuspended, consumer);
+            final ReplicationReceiverImpl replicator = new ReplicationReceiverImpl(master, getReplicablesProvider(), startReplicatorSuspended, consumer);
             new Thread(replicator).start();
             return replicator;
         }

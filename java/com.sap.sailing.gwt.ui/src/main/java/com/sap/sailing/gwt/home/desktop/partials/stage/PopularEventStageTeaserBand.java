@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.partials.stage;
 
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * Teaser band for a popular but finished event on the homepage stage
@@ -20,7 +20,7 @@ public class PopularEventStageTeaserBand extends StageTeaserBand {
         bandSubtitle.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
 
         actionLink.setVisible(true);
-        actionLink.setText(TextMessages.INSTANCE.viewAnalysis());
+        actionLink.setText(StringMessages.INSTANCE.viewAnalysis());
         actionLink.setHref(getEventNavigation().getTargetUrl());
     }
 

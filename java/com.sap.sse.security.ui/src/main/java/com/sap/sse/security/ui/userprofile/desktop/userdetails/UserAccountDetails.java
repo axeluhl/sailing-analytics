@@ -6,6 +6,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.common.CommonSharedResources;
+import com.sap.sse.security.ui.authentication.resource.SharedAuthenticationResources;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.userprofile.shared.userdetails.AbstractUserDetails;
 
@@ -34,6 +35,6 @@ public class UserAccountDetails extends AbstractUserDetails {
         // TODO correct message
 //        editImageLinkUi.setTitle("TODO picture of: " + currentUser.getName());
         // TODO use image from user when field is available
-        editImageLinkUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
+        editImageLinkUi.getStyle().setBackgroundImage("url('" + SharedAuthenticationResources.INSTANCE.userdefault().getSafeUri().asString() + "')");
     }
 }

@@ -4,11 +4,11 @@ Bundle-Name: com.sap.sailing.domain.shared.android
 Bundle-SymbolicName: com.sap.sailing.domain.shared.android
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sse.common,
  com.sap.sse.shared.android,
- com.sap.sse.datamining.annotations;bundle-version="1.0.0"
+ com.sap.sse.datamining.annotations
 Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.impl,
  com.sap.sailing.domain.abstractlog.race,
@@ -26,8 +26,10 @@ Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate,
  com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl,
  com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl,
- com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26,
- com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl,
+ com.sap.sailing.domain.abstractlog.race.state.racingprocedure.league,
+ com.sap.sailing.domain.abstractlog.race.state.racingprocedure.league.impl,
+ com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line,
+ com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl,
  com.sap.sailing.domain.abstractlog.race.tracking,
  com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl,
  com.sap.sailing.domain.abstractlog.race.tracking.impl,
@@ -38,6 +40,7 @@ Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl,
  com.sap.sailing.domain.abstractlog.shared.analyzing,
  com.sap.sailing.domain.abstractlog.shared.events,
+ com.sap.sailing.domain.anniversary,
  com.sap.sailing.domain.base,
  com.sap.sailing.domain.base.configuration,
  com.sap.sailing.domain.base.configuration.impl,
@@ -47,5 +50,8 @@ Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.base.racegroup.impl,
  com.sap.sailing.domain.racelogtracking,
  com.sap.sailing.domain.racelogtracking.impl,
+ com.sap.sailing.domain.statistics,
+ com.sap.sailing.domain.statistics.impl,
  com.sap.sailing.domain.tracking,
  com.sap.sailing.domain.tracking.impl
+Automatic-Module-Name: com.sap.sailing.domain.shared.android

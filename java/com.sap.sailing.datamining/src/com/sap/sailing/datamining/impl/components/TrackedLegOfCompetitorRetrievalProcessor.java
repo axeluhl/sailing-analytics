@@ -14,14 +14,19 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class TrackedLegOfCompetitorRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedLegContext, HasTrackedLegOfCompetitorContext> {
 
     public TrackedLegOfCompetitorRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasTrackedLegOfCompetitorContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasTrackedLegContext.class, HasTrackedLegOfCompetitorContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasTrackedLegOfCompetitorContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasTrackedLegContext.class, HasTrackedLegOfCompetitorContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override
     protected Iterable<HasTrackedLegOfCompetitorContext> retrieveData(HasTrackedLegContext element) {
         Collection<HasTrackedLegOfCompetitorContext> trackedLegOfCompetitorsWithContext = new ArrayList<>();
         for (Competitor competitor : element.getTrackedRaceContext().getTrackedRace().getRace().getCompetitors()) {
+            if (isAborted()) {
+                break;
+            }
             HasTrackedLegOfCompetitorContext trackedLegOfCompetitorWithContext = new TrackedLegOfCompetitorWithContext(element, element.getTrackedLeg().getTrackedLeg(competitor));
             trackedLegOfCompetitorsWithContext.add(trackedLegOfCompetitorWithContext);
         }

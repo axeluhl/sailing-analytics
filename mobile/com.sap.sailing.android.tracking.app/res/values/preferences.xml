@@ -1,32 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="preference_device_identifier_key">deviceIdentifier</string>
-    <string name="preference_device_identifier_default"></string>
+<resources>
+    <string name="preference_device_identifier_key" translatable="false">deviceIdentifier</string>
+    <string name="preference_device_identifier_default" translatable="false"></string>
 
     <!-- override default values of android.shared -->
-    <string name="app_folder">tracking</string>
+    <string name="app_folder" translatable="false">tracking</string>
 
-    <string name="preference_server_url_key">http://95.85.58.11:8000</string>
-    <string name="preference_server_url_default">http://95.85.58.11:8000</string>
-
-    <string name="preference_energy_saving_enabled_key">preferenceEnergySavingEnabled</string>
-    <string name="preference_heading_with_declination_subtracted_key">preferenceHeadingWithDeclinationSubtracted</string>
+    <string name="preference_heading_with_declination_subtracted_key" translatable="false">preferenceHeadingWithDeclinationSubtracted</string>
 
     <string name="settings_category_energy_saving">Battery Saving</string>
-    <string name="energy_saving_enabled">Save Energy</string>
-    <string name="preference_energy_saving_is_enabled">On</string>
-    <string name="preference_energy_saving_is_disabled">Off</string>
-    <string name="prefrence_energy_saving_summary_is_enabled">GPS Updates are being sent to server every 30 seconds.</string>
-    <string name="prefrence_energy_saving_summary_is_disabled">GPS Updates are being sent to server every 3 seconds.</string>
+    
+    <string name="preference_energy_saving_sending_interval_key" translatable="false">msgSndInt</string>
+    <string name="preference_energy_saving_sending_interval_default" translatable="false">0</string>
+    <string name="preference_energy_saving_sending_interval">choose GPS update sending interval</string> 
+    <string name="preference_energy_saving_sending_interval_summary">Choose a value as high as possible to preserve battery life while still maintaining a reasonable live experience, depending on your use case.</string>
 
-    <string name="preference_gps_fix_interval_ms_key">gpsFixInterval</string>
-    <string name="preference_gps_fix_interval_ms_default">500</string>
-    <string name="preference_gps_fix_fastest_interval_ms_key">gpsFixFastestInterval</string>
-    <string name="preference_gps_fastest_fix_interval_ms_default">100</string>
-    <string name="preference_battery_is_charging">batteryIsCharging</string>
-    <string name="preference_tracking_timer_started">trackingTimerStarted</string>
-    <string name="preference_tracker_is_tracking">trackerIsTracking</string>
-    <string name="preference_tracker_is_tracking_checkin_digest">trackerIsTrackingCheckinDigest</string>
+    <string name="preference_energy_saving_sending_interval_message">GPS updates will be sent to the server%1$s %2$s.</string>
+    <string name="preference_energy_saving_sending_interval_message_key" translatable="false">msgSndIntMessage</string>
+    <string name="preference_energy_saving_sending_interval_message_every">every</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>immediately</item>
+    	<item>5 seconds</item>
+    	<item>10 seconds</item>
+    	<item>20 seconds</item>
+    	<item>60 seconds</item>
+	</string-array>
+	<string-array name="preference_energy_saving_sending_interval_values" translatable="false">
+    	<item>0</item>
+    	<item>5</item>
+    	<item>10</item>
+    	<item>20</item>
+    	<item>60</item>
+	</string-array>
+
+    <string name="preference_gps_fix_interval_ms_key" translatable="false">gpsFixInterval</string>
+    <string name="preference_gps_fix_interval_ms_default" translatable="false">1000</string>
+    <string name="preference_battery_is_charging" translatable="false">batteryIsCharging</string>
+    <string name="preference_tracking_timer_started" translatable="false">trackingTimerStarted</string>
+    <string name="preference_tracker_is_tracking" translatable="false">trackerIsTracking</string>
+    <string name="preference_tracker_is_tracking_checkin_digest" translatable="false">trackerIsTrackingCheckinDigest</string>
 
     <string name="preference_heading_with_declination_subtracted_is_enabled">On</string>
     <string name="preference_heading_with_declination_subtracted_is_disabled">Off</string>

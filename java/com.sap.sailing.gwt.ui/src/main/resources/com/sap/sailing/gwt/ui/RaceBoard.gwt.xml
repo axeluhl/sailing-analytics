@@ -18,15 +18,12 @@
 	<!-- Highcharts API -->
 	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
 	
- 	<!--  Bootstrap API -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
-  
 	<!-- Specify the app entry point class.                         -->
 	<entry-point class='com.sap.sailing.gwt.ui.raceboard.RaceBoardEntryPoint'/>
 
-        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
-  
+    <!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
+
 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceClient' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceShared' />
@@ -34,6 +31,7 @@
 	<inherits name="com.sap.sailing.gwt.ui.SourceRaceboard"/>
 	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard" />
 	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole" />
+    <inherits name='com.sap.sailing.gwt.settings.Settings'/>
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
 </module>

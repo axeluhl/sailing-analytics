@@ -11,6 +11,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sse.common.impl.AbstractColor;
 
 public class MarksJsonSerializerTest {
     
@@ -28,7 +29,7 @@ public class MarksJsonSerializerTest {
     @Test
     public void testName() {
         when(mark.getName()).thenReturn("NAME");
-        when(mark.getColor()).thenReturn("RED");
+        when(mark.getColor()).thenReturn(AbstractColor.getCssColor("RED"));
         when(mark.getId()).thenReturn("IIIIDDDD");
         when(mark.getPattern()).thenReturn("SHINY");
         when(mark.getShape()).thenReturn("ROUND");
@@ -37,7 +38,7 @@ public class MarksJsonSerializerTest {
         JSONObject result = serializer.serialize(mark);
 
         assertEquals("NAME", result.get(MarkJsonSerializer.FIELD_NAME));
-        assertEquals("RED", result.get(MarkJsonSerializer.FIELD_COLOR));
+        assertEquals(AbstractColor.getCssColor("RED").getAsHtml(), result.get(MarkJsonSerializer.FIELD_COLOR));
         assertEquals("IIIIDDDD", result.get(MarkJsonSerializer.FIELD_ID));
         assertEquals("SHINY", result.get(MarkJsonSerializer.FIELD_PATTERN));
         assertEquals("ROUND", result.get(MarkJsonSerializer.FIELD_SHAPE));

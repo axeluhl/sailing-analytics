@@ -2,7 +2,7 @@ package com.sap.sailing.domain.trackfiles;
 
 import java.util.UUID;
 
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
 /**

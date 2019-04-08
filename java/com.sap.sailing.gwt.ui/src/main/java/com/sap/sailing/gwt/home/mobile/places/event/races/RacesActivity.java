@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.places.event.races;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
@@ -29,7 +30,15 @@ public class RacesActivity extends AbstractEventActivity<RegattaRacesPlace> impl
     @Override
     protected EventViewBase initView() {
         final RacesView view = new RacesViewImpl(this);
+        if (isMultiRegattaEvent()) {
+            initSeriesNavigation(view);
+        }
         initQuickfinder(view, true);
         return view;
+    }
+
+    @Override
+    public Optional<String> getPreferredSeriesName() {
+        return getPlace().getPreferredSeriesName();
     }
 }

@@ -51,7 +51,7 @@ public class ThreadManager {
         Thread.enumerate(threads);
         for (Thread t : threads) {
             if (t != null && t.getName().equals(name)) {
-                t.suspend();
+                t.stop();
                 result.put("status", "OK");
                 found = true;
             }
@@ -66,7 +66,60 @@ public class ThreadManager {
         return response;
     }
 
-    @SuppressWarnings("deprecation") // using Thread.suspend()
+    @SuppressWarnings("deprecation") // using Thread.stop()
+    @Path("{name}/stop")
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    public Response stop(@PathParam("name") String name) {
+        final Response response;
+        JSONObject result = new JSONObject();
+        Thread[] threads = new Thread[10000];
+        boolean found = false;
+        Thread.enumerate(threads);
+        for (Thread t : threads) {
+            if (t != null && t.getName().equals(name)) {
+                t.stop();
+                result.put("status", "OK");
+                found = true;
+            }
+        }
+        String json = result.toJSONString();
+        if (!found) {
+            result.put("status", "Not found");
+            response = Response.status(Status.NOT_FOUND).entity(json).build();
+        } else {
+            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+        }
+        return response;
+    }
+
+    @Path("{name}/interrupt")
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    public Response interrupt(@PathParam("name") String name) {
+        final Response response;
+        JSONObject result = new JSONObject();
+        Thread[] threads = new Thread[10000];
+        boolean found = false;
+        Thread.enumerate(threads);
+        for (Thread t : threads) {
+            if (t != null && t.getName().equals(name)) {
+                t.interrupt();
+                result.put("status", "OK");
+                found = true;
+            }
+        }
+        String json = result.toJSONString();
+        if (!found) {
+            result.put("status", "Not found");
+            response = Response.status(Status.NOT_FOUND).entity(json).build();
+        } else {
+            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+        }
+        return response;
+    }
+
+    @SuppressWarnings("deprecation") // using Thread.resume()
     @Path("{name}/resume")
     @GET
     @Produces("application/json;charset=UTF-8")

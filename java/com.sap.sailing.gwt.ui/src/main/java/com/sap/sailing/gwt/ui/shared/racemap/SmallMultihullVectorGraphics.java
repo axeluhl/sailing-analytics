@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
 
 public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
     
@@ -11,14 +12,23 @@ public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
     }
 
     @Override
-    protected void drawBoat(Context2d ctx, boolean isSelected, String color) {
+    protected void drawBoat(Context2d ctx, DisplayMode displayMode, String color) {
         // outer net
-        if(isSelected) {
-            ctx.setFillStyle(color);
-            ctx.setStrokeStyle(color);
-        } else {
+        
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle ("#FFFFFF");
             ctx.setStrokeStyle("#FFFFFF");
+            break;
+        case SELECTED:
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle ("#FFFFFF");
+            ctx.setStrokeStyle("#FFFFFF");
+            break;
         }
         
         ctx.setLineWidth(1.0);
@@ -37,13 +47,23 @@ public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
         ctx.stroke();
 
         // inner net
-        if(isSelected) {
+        
+        switch (displayMode){
+        case DEFAULT:
+            ctx.setFillStyle (color);
+            ctx.setStrokeStyle(color);
+            break;
+        case SELECTED:
             ctx.setFillStyle("#FFFFFF");
             ctx.setStrokeStyle("#FFFFFF");
-        } else {
-            ctx.setFillStyle(color);
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle (color);
             ctx.setStrokeStyle(color);
+            break;
         }
+        
         ctx.setLineWidth(1.0);
 
         ctx.beginPath();
@@ -61,12 +81,21 @@ public class SmallMultihullVectorGraphics extends BoatClassVectorGraphics {
         ctx.stroke();
         
         // hull - left and right part
-        if(isSelected) {
-            ctx.setFillStyle(color);
-            ctx.setStrokeStyle(color);
-        } else {
+        
+        switch (displayMode){
+        case DEFAULT:
             ctx.setFillStyle("#FFFFFF");
             ctx.setStrokeStyle("#000000");
+            break;
+        case SELECTED:
+            ctx.setFillStyle(color);
+            ctx.setStrokeStyle(color);
+            break;
+        case NOT_SELECTED:
+            ctx.setGlobalAlpha(BOAT_NOT_SELECTED_OPACITY);
+            ctx.setFillStyle("#FFFFFF");
+            ctx.setStrokeStyle("#000000");
+            break;
         }
         
         ctx.setLineWidth(5.0);

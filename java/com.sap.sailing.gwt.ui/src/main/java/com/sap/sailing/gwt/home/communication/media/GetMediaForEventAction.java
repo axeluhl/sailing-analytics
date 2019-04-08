@@ -6,15 +6,22 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
+import com.sap.sailing.gwt.home.communication.event.EventLinkDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
-import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load images and videos to be shown on the media page for the
+ * {@link #GetMediaForEventAction(UUID) given event-id}, preparing the appropriate data structure.
+ * </p>
+ */
 public class GetMediaForEventAction implements SailingAction<MediaDTO>, IsClientCacheable {
     
     private UUID eventId;
@@ -23,6 +30,12 @@ public class GetMediaForEventAction implements SailingAction<MediaDTO>, IsClient
     private GetMediaForEventAction() {
     }
 
+    /**
+     * Creates a {@link GetMediaForEventAction} instance for the given event-id.
+     * 
+     * @param eventId
+     *            {@link UUID} of the event to load media for
+     */
     public GetMediaForEventAction(UUID eventId) {
         this.eventId = eventId;
     }
@@ -31,12 +44,15 @@ public class GetMediaForEventAction implements SailingAction<MediaDTO>, IsClient
     @GwtIncompatible
     public MediaDTO execute(SailingDispatchContext ctx) throws DispatchException {
         Event event = ctx.getRacingEventService().getEvent(eventId);
+        EventLinkDTO eventLink = HomeServiceUtil.convertToEventLinkDTO(event, event.getBaseURL(), false,
+                ctx.getRacingEventService());
         EventReferenceDTO eventRef = new EventReferenceDTO(event);
 
         String eventName = event.getName();
         MediaDTO media = new MediaDTO();
-        for(ImageDescriptor image : HomeServiceUtil.getPhotoGalleryImages(event)) {
-            SailingImageDTO imageDTO = new SailingImageDTO(eventRef, image.getURL().toString(), image.getCreatedAtDate().asDate());
+        for (ImageDescriptor image : HomeServiceUtil.getPhotoGalleryImages(event)) {
+            SailingImageDTO imageDTO = new SailingImageDTO(eventLink, image.getURL().toString(),
+                    image.getCreatedAtDate().asDate());
             imageDTO.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
             imageDTO.setTitle(image.getTitle() != null ? image.getTitle(): eventName);
             imageDTO.setSubtitle(image.getSubtitle());
@@ -45,9 +61,9 @@ public class GetMediaForEventAction implements SailingAction<MediaDTO>, IsClient
             imageDTO.setLocale(image.getLocale() != null ? image.getLocale().toString() : null);
             media.addPhoto(imageDTO);
         }
-        for(VideoDescriptor video : event.getVideos()) {
+        for (VideoDescriptor video : event.getVideos()) {
             MimeType type = video.getMimeType();
-            if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
+            if (MediaTagConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
                 SailingVideoDTO videoDTO = HomeServiceUtil.toSailingVideoDTO(eventRef, video);
                 media.addVideo(videoDTO);
             }

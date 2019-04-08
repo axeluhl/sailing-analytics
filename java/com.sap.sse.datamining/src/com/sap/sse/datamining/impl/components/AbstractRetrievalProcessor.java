@@ -19,20 +19,19 @@ import com.sap.sse.datamining.components.ProcessorInstruction;
 public abstract class AbstractRetrievalProcessor<InputType, ResultType> extends AbstractParallelProcessor<InputType, ResultType> {
 
     private final int retrievalLevel;
+    private final String retrievedDataTypeMessageKey;
     private final AtomicInteger retrievedDataAmount;
 
     /**
-     * 
-     * @param inputType
-     * @param resultType
-     * @param executor
-     * @param resultReceivers
-     * @param retrievalLevel The position of this retriever in it's chain. <code>0</code> represents the first.
+     * @param retrievalLevel
+     *            The position of this retriever in it's chain. <code>0</code> represents the first.
      */
     public AbstractRetrievalProcessor(Class<InputType> inputType, Class<ResultType> resultType,
-            ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers, int retrievalLevel) {
+            ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
         super(inputType, resultType, executor, resultReceivers);
         this.retrievalLevel = retrievalLevel;
+        this.retrievedDataTypeMessageKey = retrievedDataTypeMessageKey;
         retrievedDataAmount = new AtomicInteger();
     }
 
@@ -42,6 +41,9 @@ public abstract class AbstractRetrievalProcessor<InputType, ResultType> extends 
             @Override
             public ResultType computeResult() {
                 for (ResultType retrievedElement : retrieveData(element)) {
+                    if (isAborted()) {
+                        break;
+                    }
                     retrievedDataAmount.incrementAndGet();
                     forwardResultToReceivers(retrievedElement);
                 }
@@ -54,6 +56,7 @@ public abstract class AbstractRetrievalProcessor<InputType, ResultType> extends 
 
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
+        additionalDataBuilder.setDataTypeMessageKey(retrievedDataTypeMessageKey);
         additionalDataBuilder.setRetrievedDataAmount(retrievedDataAmount.get());
     }
 

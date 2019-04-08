@@ -74,7 +74,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 receivedRegattaLogEvent[0] = event;
             }
         });
-        final RegattaLogRegisterCompetitorEventImpl event = createRegattaLogEvent();
+        final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         leaderboard.getRegattaLog().add(event);
         assertSame(event, receivedRegattaLogEvent[0]);
     }
@@ -96,14 +96,14 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 receivedRegattaLogEvent[0] = event;
             }
         });
-        final RegattaLogRegisterCompetitorEventImpl event = createRegattaLogEvent();
+        final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         deserializedLeaderboard.getRegattaLog().add(event);
         assertSame(event, receivedRegattaLogEvent[0]);
     }
 
-    private RegattaLogRegisterCompetitorEventImpl createRegattaLogEvent() {
-        final RegattaLogRegisterCompetitorEventImpl event = new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), /* author */ null,
-                AbstractTracTracLiveTest.createCompetitor("Someone"));
+    private RegattaLogRegisterCompetitorEvent createRegattaLogEvent() {
+        final RegattaLogRegisterCompetitorEvent event = new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), /* author */ null,
+                AbstractLeaderboardTest.createCompetitor("Someone"));
         return event;
     }
 
@@ -115,7 +115,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
     
     @Test
     public void testRegattaLeaderboardRegattaLogEventForwarding() {
-        Regatta regatta = new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new);
+        Regatta regatta = new RegattaImpl("test", null, true, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new);
         final RegattaLogEvent[] receivedRegattaLogEvent = new RegattaLogEvent[1];
         regatta.addRaceColumnListener(new RaceColumnListenerWithDefaultAction() {
             private static final long serialVersionUID = -3835439531940986851L;
@@ -129,14 +129,14 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 receivedRegattaLogEvent[0] = event;
             }
         });
-        final RegattaLogRegisterCompetitorEventImpl event = createRegattaLogEvent();
+        final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         regatta.getRegattaLog().add(event);
         assertSame(event, receivedRegattaLogEvent[0]);
     }
 
     @Test
     public void testRegattaLeaderboardRegattaLogEventForwardingAfterRegattaDeserialization() throws ClassNotFoundException, IOException {
-        Regatta regatta = new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new);
+        Regatta regatta = new RegattaImpl("test", null, true, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new);
         Regatta deserializedRegatta = cloneBySerialization(regatta, DomainFactory.INSTANCE);
         final RegattaLogEvent[] receivedRegattaLogEvent = new RegattaLogEvent[1];
         deserializedRegatta.addRaceColumnListener(new RaceColumnListenerWithDefaultAction() {
@@ -151,7 +151,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 receivedRegattaLogEvent[0] = event;
             }
         });
-        final RegattaLogRegisterCompetitorEventImpl event = createRegattaLogEvent();
+        final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         deserializedRegatta.getRegattaLog().add(event);
         assertSame(event, receivedRegattaLogEvent[0]);
     }
@@ -159,7 +159,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
     @Test
     public void testAddCompetitorToRegattaAndEnsureCacheInvalidation() throws NoWindException, InterruptedException, ExecutionException {
         Regatta regatta = createRegatta();
-        RegattaLeaderboard leaderboard = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
+        RegattaLeaderboard leaderboard = createRegattaLeaderboard(regatta);
         final TimePoint now = MillisecondsTimePoint.now();
         leaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);
         LeaderboardDTO dto = leaderboard.getLeaderboardDTO(now.plus(10), Collections.emptySet(), /* addOverallDetails */ false,
@@ -181,7 +181,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
         Series series = new SeriesImpl("Test Series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
                 /* fleets */ Collections.singleton(new FleetImpl("Default")),
                 Collections.singleton("R1"), /* trackedRegattaRegistry */ null);
-        Regatta regatta = new RegattaImpl("test", null, null, null, Collections.singleton(series), false,
+        Regatta regatta = new RegattaImpl("test", null, true, null, null, Collections.singleton(series), false,
                 new LowPoint(), "test", null, OneDesignRankingMetric::new);
         return regatta;
     }
@@ -190,7 +190,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
     public void testAddCompetitorToRegattaAndEnsureCacheInvalidationOnDeserializedRegattaLeaderboard() throws NoWindException,
             InterruptedException, ExecutionException, ClassNotFoundException, IOException {
         Regatta regatta = createRegatta();
-        RegattaLeaderboard leaderboard = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
+        RegattaLeaderboard leaderboard = createRegattaLeaderboard(regatta);
         final TimePoint now = MillisecondsTimePoint.now();
         leaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);
         RegattaLeaderboard deserializedLeaderboard = cloneBySerialization(leaderboard, DomainFactory.INSTANCE);
@@ -207,5 +207,9 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
                 /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertFalse(dto3.competitors.isEmpty());
         assertEquals(event.getCompetitor().getName(), dto3.competitors.get(0).getName());
+    }
+
+    protected RegattaLeaderboard createRegattaLeaderboard(Regatta regatta) {
+        return new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
     }
 }

@@ -13,9 +13,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -28,6 +30,7 @@ import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A leaderboard whose columns are defined by leaderboards. This can be useful for a regatta series where many regattas
@@ -69,14 +72,14 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         private static final long serialVersionUID = 915433462154943441L;
 
         @Override
-        public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
+        public void correctedScoreChanged(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
             getScoreCorrection().notifyListeners(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
         }
 
         @Override
-        public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
-                MaxPointsReason newMaxPointsReason) {
-            getScoreCorrection().notifyListeners(competitor, oldMaxPointsReason, newMaxPointsReason);
+        public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn,
+                MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
+            getScoreCorrection().notifyListeners(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);
         }
 
         @Override
@@ -140,14 +143,28 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public Iterable<Competitor> getAllCompetitors() {
-        Set<Competitor> result = new HashSet<Competitor>();
+    public Iterable<Boat> getAllBoats() {
+        Set<Boat> boats = new HashSet<>();
         for (Leaderboard leaderboard : getLeaderboards()) {
-            Util.addAll(leaderboard.getCompetitors(), result);
+            for (Boat boat: leaderboard.getAllBoats()) {
+                boats.add(boat);
+            }
         }
-        return result;
+        return boats;
     }
 
+    @Override
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        Set<Competitor> competitors = new HashSet<Competitor>();
+        Set<RaceDefinition> raceDefinitionsConsidered = new HashSet<>();
+        for (Leaderboard leaderboard : getLeaderboards()) {
+            final Pair<Iterable<RaceDefinition>, Iterable<Competitor>> allCompetitorsFromLeaderboardWithRaceDefinitionsConsidered = leaderboard.getAllCompetitorsWithRaceDefinitionsConsidered();
+            Util.addAll(allCompetitorsFromLeaderboardWithRaceDefinitionsConsidered.getA(), raceDefinitionsConsidered);
+            Util.addAll(allCompetitorsFromLeaderboardWithRaceDefinitionsConsidered.getB(), competitors);
+        }
+        return new Pair<>(raceDefinitionsConsidered, competitors);
+    }
+ 
     @Override
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
         final Iterable<Competitor> result;
@@ -160,15 +177,27 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
+    public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
+        return null;
+    }
+    
+    @Override
     public Fleet getFleet(String fleetName) {
         return fleetName.equals(metaFleet.getName()) ? metaFleet : null;
     }
 
     @Override
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
-        final List<Competitor> competitorsFromBestToWorst = ((MetaLeaderboardColumn) race).getLeaderboard().getCompetitorsFromBestToWorst(timePoint);
-        Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
-        return competitorsFromBestToWorst.indexOf(competitor)+1;
+        final Leaderboard leaderboard = ((MetaLeaderboardColumn) race).getLeaderboard();
+        final int result;
+        if (leaderboard.hasScores(competitor, timePoint)) {
+            final List<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint);
+            Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
+            result = competitorsFromBestToWorst.indexOf(competitor)+1;
+        } else {
+            result = 0;
+        }
+        return result;
     }
 
     @Override
@@ -194,7 +223,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         leaderboard.addRaceColumnListener(this);
         final ScoreCorrectionChangeForwarder listener = new ScoreCorrectionChangeForwarder();
         scoreCorrectionChangeForwardersByLeaderboard.put(leaderboard, listener);
-        leaderboard.getScoreCorrection().addScoreCorrectionListener(listener);
+        leaderboard.addScoreCorrectionListener(listener);
     }
     
     protected void unregisterScoreCorrectionChangeForwarder(Leaderboard leaderboard) {

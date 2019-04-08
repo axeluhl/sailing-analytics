@@ -16,12 +16,15 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -29,32 +32,40 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
+import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
+import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiURLChangeDialog;
+import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
+import com.sap.sailing.gwt.ui.client.shared.controls.BetterCheckboxCell;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -64,8 +75,9 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  * @author D047974
  * 
  */
-public class MediaPanel extends FlowPanel {
-
+public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
+    private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
+    
     private final SailingServiceAsync sailingService;
     private final LabeledAbstractFilterablePanel<MediaTrack> filterableMediaTracks;
     private List<MediaTrack> allMediaTracks;
@@ -73,12 +85,11 @@ public class MediaPanel extends FlowPanel {
     private final MediaServiceAsync mediaService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private final Grid mediaTracks;
     private Set<RegattasDisplayer> regattasDisplayers;
     private CellTable<MediaTrack> mediaTracksTable;
     private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
     private Date latestDate;
-    private RefreshableSingleSelectionModel<MediaTrack> refreshableSelectionModel;
+    private RefreshableMultiSelectionModel<MediaTrack> refreshableSelectionModel;
 
     public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, MediaServiceAsync mediaService, ErrorReporter errorReporter,
@@ -89,9 +100,6 @@ public class MediaPanel extends FlowPanel {
         this.mediaService = mediaService;  
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        mediaTracks = new Grid();
-        mediaTracks.resizeColumns(3);
-        add(mediaTracks);
         HorizontalPanel buttonAndFilterPanel = new HorizontalPanel();
         allMediaTracks = new ArrayList<MediaTrack>();  
         Button refreshButton = new Button(stringMessages.refresh());
@@ -111,18 +119,57 @@ public class MediaPanel extends FlowPanel {
             }
         });
         buttonAndFilterPanel.add(addUrlButton);
+        
+        Button multiVideo = new Button(stringMessages.multiVideoLinking());
+        multiVideo.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new MultiVideoDialog(sailingService, mediaService, stringMessages, errorReporter, new Runnable() {
+                    
+                    @Override
+                    public void run() {
+                        loadMediaTracks();
+                    }
+                }).center();
+            }
+        });
+        buttonAndFilterPanel.add(multiVideo);
+        
+        
+        Button multiVideoRename = new Button(this.stringMessages.multiUrlChangeMediaTrack());
+        multiVideoRename.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Set<MediaTrack> selected = refreshableSelectionModel.getSelectedSet();
+                if (selected.isEmpty()) {
+                    Notification.notify(stringMessages.noSelection(), NotificationType.ERROR);
+                } else {
+                    new MultiURLChangeDialog(mediaService, stringMessages, selected, errorReporter,
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    loadMediaTracks();
+                                }
+                            }).center();
+                }
+            }
+        });
+        buttonAndFilterPanel.add(multiVideoRename);
+        
         add(buttonAndFilterPanel);
-        createMediaTracksTable();
+        
         Label lblFilterRaces = new Label(stringMessages.filterMediaByName() + ":");
         lblFilterRaces.setWordWrap(false);
         buttonAndFilterPanel.setSpacing(5);
         buttonAndFilterPanel.add(lblFilterRaces);
         buttonAndFilterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
-        this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrack>(lblFilterRaces, allMediaTracks, mediaTracksTable, mediaTrackListDataProvider) {
+        this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrack>(lblFilterRaces, allMediaTracks,
+                mediaTrackListDataProvider) {
             @Override
             public List<String> getSearchableStrings(MediaTrack t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.title);
+                strings.add(t.url);
                 if (t.startTime == null) {
                     GWT.log("startTime of media track "+t.title+" undefined");
                 } else {
@@ -130,12 +177,19 @@ public class MediaPanel extends FlowPanel {
                 }
                 return strings;
             }
+
+            @Override
+            public AbstractCellTable<MediaTrack> getCellTable() {
+                return mediaTracksTable;
+            }
         };
+        createMediaTracksTable();
         filterableMediaTracks.getTextBox().ensureDebugId("MediaTracksFilterTextBox");
         buttonAndFilterPanel.add(filterableMediaTracks);
     }
 
-    protected void loadMediaTracks() {
+    @Override
+    public void loadMediaTracks() {
         mediaTrackListDataProvider.getList().clear();
         mediaService.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrack>>() {
             @Override
@@ -145,17 +199,15 @@ public class MediaPanel extends FlowPanel {
 
             @Override
             public void onSuccess(Iterable<MediaTrack> allMediaTracks) {
+                mediaTrackListDataProvider.getList().clear();
                 Util.addAll(allMediaTracks, mediaTrackListDataProvider.getList());
                 filterableMediaTracks.updateAll(mediaTrackListDataProvider.getList());
                 mediaTrackListDataProvider.refresh();
             }
         });
-        
-
     }
 
     private void createMediaTracksTable() {
-        AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         // Create a CellTable.
 
         // Set a key provider that provides a unique key for each contact. If key is
@@ -169,7 +221,7 @@ public class MediaPanel extends FlowPanel {
         mediaTracksTable.addColumnSortHandler(sortHandler);
 
         // Add a selection model so we can select cells.
-        refreshableSelectionModel = new RefreshableSingleSelectionModel<>(new EntityIdentityComparator<MediaTrack>() {
+        refreshableSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<MediaTrack>() {
             @Override
             public boolean representSameEntity(MediaTrack dto1, MediaTrack dto2) {
                 return dto1.dbId.equals(dto2.dbId);
@@ -178,12 +230,37 @@ public class MediaPanel extends FlowPanel {
             public int hashCode(MediaTrack t) {
                 return t.dbId.hashCode();
             }
-        }, mediaTrackListDataProvider);
+        }, filterableMediaTracks.getAllListDataProvider());
         mediaTracksTable.setSelectionModel(refreshableSelectionModel,
-                DefaultSelectionEventManager.<MediaTrack> createDefaultManager());
+                DefaultSelectionEventManager.createCustomManager(new DefaultSelectionEventManager.CheckboxEventTranslator<MediaTrack>() {
+                    @Override
+                    public boolean clearCurrentSelection(CellPreviewEvent<MediaTrack> event) {
+                        return !isCheckboxColumn(event.getColumn());
+                    }
+
+                    @Override
+                    public SelectAction translateSelectionEvent(CellPreviewEvent<MediaTrack> event) {
+                        NativeEvent nativeEvent = event.getNativeEvent();
+                        if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
+                            if (nativeEvent.getCtrlKey()) {
+                                MediaTrack value = event.getValue();
+                                refreshableSelectionModel.setSelected(value, !refreshableSelectionModel.isSelected(value));
+                                return SelectAction.IGNORE;
+                            }
+                            if (!refreshableSelectionModel.getSelectedSet().isEmpty() && !isCheckboxColumn(event.getColumn())) {
+                                return SelectAction.DEFAULT;
+                            }
+                        }
+                        return SelectAction.TOGGLE;
+                    }
+
+                    private boolean isCheckboxColumn(int columnIndex) {
+                        return columnIndex == 0;
+                    }
+                }));
 
         // Initialize the columns.
-        initTableColumns(refreshableSelectionModel, sortHandler);
+        initTableColumns(sortHandler);
 
         mediaTrackListDataProvider.addDataDisplay(mediaTracksTable);
         add(mediaTracksTable);
@@ -194,20 +271,16 @@ public class MediaPanel extends FlowPanel {
     /**
      * Add the columns to the table.
      */
-    private void initTableColumns(final SelectionModel<MediaTrack> selectionModel, ListHandler<MediaTrack> sortHandler) {
-        // // Checkbox column. This table will uses a checkbox column for selection.
-        // // Alternatively, you can call cellTable.setSelectionEnabled(true) to enable
-        // // mouse selection.
-        // Column<MediaTrackDTO, Boolean> checkColumn = new Column<ContactInfo, Boolean>(new CheckboxCell(true, false))
-        // {
-        // @Override
-        // public Boolean getValue(ContactInfo object) {
-        // // Get the value from the selection model.
-        // return selectionModel.isSelected(object);
-        // }
-        // };
-        // cellTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
-        // cellTable.setColumnWidth(checkColumn, 40, Unit.PX);
+    private void initTableColumns(ListHandler<MediaTrack> sortHandler) {
+        Column<MediaTrack, Boolean> checkColumn = new Column<MediaTrack, Boolean>(new BetterCheckboxCell(tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected())) {
+            @Override
+            public Boolean getValue(MediaTrack object) {
+                // Get the value from the selection model.
+                return refreshableSelectionModel.isSelected(object);
+            }
+        };
+        mediaTracksTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
+        mediaTracksTable.setColumnWidth(checkColumn, 40, Unit.PX);
 
         // db id
         Column<MediaTrack, String> dbIdColumn = new Column<MediaTrack, String>(new TextCell()) {
@@ -400,8 +473,9 @@ public class MediaPanel extends FlowPanel {
         };
         durationColumn.setSortable(true);
         sortHandler.setComparator(durationColumn, new Comparator<MediaTrack>() {
+            final Comparator<Duration> durationComparator = new NullSafeComparableComparator<>(true);
             public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
-                return mediaTrack1.duration.compareTo(mediaTrack2.duration);
+                return durationComparator.compare(mediaTrack1.duration, mediaTrack2.duration);
             }
         });
         durationColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
@@ -432,6 +506,19 @@ public class MediaPanel extends FlowPanel {
         });
         mediaTracksTable.addColumn(durationColumn, stringMessages.duration());
         mediaTracksTable.setColumnWidth(durationColumn, 100, Unit.PCT);
+        // media type
+        Column<MediaTrack, String> mimeTypeColumn = new Column<MediaTrack, String>(new TextCell()) {
+            @Override
+            public String getValue(MediaTrack mediaTrack) {
+                return mediaTrack.mimeType == null ? "" : mediaTrack.mimeType.toString();
+            }
+        };
+        mimeTypeColumn.setSortable(true);
+        mediaTracksTable.addColumn(mimeTypeColumn, stringMessages.mimeType());
+        mediaTracksTable.setColumnWidth(mimeTypeColumn, 100, Unit.PCT);
+        sortHandler.setComparator(mimeTypeColumn, (mt1, mt2)->
+            (mt1.mimeType == null ? "" : mt1.mimeType.toString()).compareTo(
+                    mt2.mimeType == null ? "" : mt2.mimeType.toString()));
 
         // delete action
         ImagesBarColumn<MediaTrack, MediaActionBarCell> mediaActionColumn = new ImagesBarColumn<MediaTrack, MediaActionBarCell>(
@@ -467,9 +554,9 @@ public class MediaPanel extends FlowPanel {
     }
 
     private void addUrlMediaTrack() {
-        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(getDefaultStartTime(),
-                stringMessages, sailingService, errorReporter, regattaRefresher, regattasDisplayers,
-                new DialogCallback<MediaTrack>() {
+        NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaService,
+                getDefaultStartTime(), stringMessages, sailingService, errorReporter, regattaRefresher,
+                regattasDisplayers, new DialogCallback<MediaTrack>() {
 
                     @Override
                     public void cancel() {

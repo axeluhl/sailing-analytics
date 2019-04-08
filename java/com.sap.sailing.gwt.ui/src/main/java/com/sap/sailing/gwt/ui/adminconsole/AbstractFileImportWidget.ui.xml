@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sailing.gwt.ui.adminconsole.AdminConsoleResources"></ui:with>
+    <ui:import field="com.google.gwt.user.client.ui.FormPanel.ENCODING_MULTIPART"/>
+    <ui:import field="com.google.gwt.user.client.ui.FormPanel.METHOD_POST"/>
+    <ui:style>
+        .formPanelContent {
+            white-space: nowrap;
+            margin-bottom: 3px;
+        }
+        .formPanelContent > * {
+            display: inline-block;
+            font-size: 13px !important;
+        }
+        .loadingImage {
+	        width: 16px;
+            height: 16px;
+            margin-bottom: -4px;
+	    }
+    </ui:style>
+    <g:FormPanel encoding="{ENCODING_MULTIPART}" method="{METHOD_POST}" ui:field="formPanelUi">
+        <g:HTMLPanel addStyleNames="{style.formPanelContent}">
+	        <g:FileUpload name="file" ui:field="fileUploadUi"/>
+	        <g:ListBox name="preferredImporter" ui:field="preferredImporterUi" height="21px"/>
+            <g:CheckBox name="downsample" checked="true" ui:field="downsampleUi">Downsample</g:CheckBox>
+	        <g:Button styleName="" ui:field="importButtonUi"/>
+	        <g:Image resource="{res.transparentGif}" addStyleNames="{style.loadingImage}" ui:field="loadingImageUi"/>
+        </g:HTMLPanel>
+    </g:FormPanel>
+</ui:UiBinder> 

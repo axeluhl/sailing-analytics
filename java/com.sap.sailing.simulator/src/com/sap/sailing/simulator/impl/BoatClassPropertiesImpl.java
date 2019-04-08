@@ -1,15 +1,16 @@
 package com.sap.sailing.simulator.impl;
 
 import com.sap.sailing.simulator.BoatClassProperties;
+import com.sap.sse.common.Distance;
 
 public class BoatClassPropertiesImpl implements BoatClassProperties {
 
     String name;
-    Double length;
+    Distance length;
     String polar;
     Integer index;
     
-    public BoatClassPropertiesImpl(String name, Double length, String polar, Integer index) {
+    public BoatClassPropertiesImpl(String name, Distance length, String polar, Integer index) {
         this.name = name;
         this.length = length;
         this.polar = polar;
@@ -20,7 +21,7 @@ public class BoatClassPropertiesImpl implements BoatClassProperties {
         return this.name;
     }
     
-    public Double getLength() {
+    public Distance getLength() {
         return this.length;
     }
     

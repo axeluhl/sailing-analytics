@@ -83,7 +83,9 @@
 .regattaleaderboard_meta_update {
   display: inline-block;
   text-align: right;
+  vertical-align: top;
 }
+.regattaleaderboard_meta_liveraces_button,
 .regattaleaderboard_meta_reload,
 .regattaleaderboard_meta_settings_button,
 .regattaleaderboard_meta_fullscreen_button {
@@ -97,7 +99,7 @@
 }
 .regattaleaderboard_meta_reload {
   background-color: #9f9f9f;
-  background-image: url("images/home/reload.svg");
+  background-image: resourceUrl("reload");
 }
 .regattaleaderboard_meta_reload_live {
   background-color: red;
@@ -109,6 +111,7 @@
 .regattaleaderboard_meta_busyindicator {
   display: inline-block;
   margin: 0 0.666666666666667em;
+  vertical-align: text-bottom;
 }
 
 .regattaleaderboard_meta_liverace {
@@ -127,10 +130,15 @@
 .regattaleaderboard_meta_settings {
   display: inline-block;
   text-align: right;
+  font-size: 0;
+}
+
+.regattaleaderboard_meta_settings * {
+  font-size: 1rem;
 }
 .regattaleaderboard_meta_settings_button {
   background-color: #9f9f9f;
-  background-image: url("images/home/settings.svg");
+  background-image: resourceUrl("settings");
 }
 .regattaleaderboard_table {
   	margin-bottom: 20px;
@@ -186,7 +194,7 @@
   margin-right: 0.333333333333333em;
   background-repeat: no-repeat;
   background-position: center center;
-  background-image: url("images/home/arrow-down-yellow.png");
+  background-image: resourceUrl("arrowDownYellow");
 }
 .regattaleaderboard_header_itemascending:before,
 .regattaleaderboard_header_itemdata_elementascending:before {
@@ -198,7 +206,7 @@
   margin-right: 0.333333333333333em;
   background-repeat: no-repeat;
   background-position: center center;
-  background-image: url("images/home/arrow-up-yellow.png");
+  background-image: resourceUrl("arrowUpYellow");
 }
 .regattaleaderboard_header_table {
   width: 100%;
@@ -228,14 +236,15 @@
   width: 100%;
   table-layout: fixed;
 }
-.marginFix {
-  margin-top:0.5rem;
-}
 .letItScroll {
   overflow-x: auto;
-  margin: 10px 0px;
+  padding: 10px 30px 10px 10px;
 }
 .regattaleaderboard_meta_fullscreen_button {
   background-color: #9f9f9f;
-  background-image: url("images/home/fullscreen.svg");
+  background-image: resourceUrl("fullscreen");
+}
+.regattaleaderboard_meta_liveraces_button {
+  background-color: #9f9f9f;
+  background-image: resourceUrl("liveraces");
 }

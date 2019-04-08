@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.racelog.tracking;
 
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.util.UrlHelper;
 
 /**
@@ -10,7 +11,7 @@ import com.sap.sse.common.util.UrlHelper;
  * {@link DeviceMappingOnRaceQRCodeWidget}).
  * <p>
  * The structure of the URL is documented in the <a
- * href="http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft">Wiki</a>.
+ * href="http://wiki.sapsailing.com/wiki/info/api/api-v1">Wiki</a>.
  * {@code http://<host>/tracking/checkin?event_id=<e>&leaderboard_name=<l>&competitor_id=<c>}
  * 
  * @author Fredrik Teschke
@@ -22,19 +23,30 @@ public class DeviceMappingConstants {
     // all URL components should be treated as case insensitive, preferring _underscores_ to CamelCase.
     public static final String TRACKING_URL_BASE = "/tracking/checkin";
     public static final String BUOY_TENDER_URL_BASE = "/buoy-tender/checkin";
+    public static final String URL_CHECKIN_URL = "checkinUrl";
     public static final String URL_EVENT_ID = "event_id";
     public static final String URL_LEADERBOARD_NAME = "leaderboard_name";
     public static final String URL_COMPETITOR_ID_AS_STRING = "competitor_id";
+    public static final String URL_BOAT_ID_AS_STRING = "boat_id";
     public static final String URL_MARK_ID_AS_STRING = "mark_id";
+    public static final String URL_SECRET = "secret";
     public static final String URL_FROM_MILLIS = "from_millis";
     public static final String URL_TO_MILLIS = "to_millis";
 
     public static final String JSON_COMPETITOR_ID_AS_STRING = "competitorId";
+    public static final String JSON_BOAT_ID_AS_STRING = "boatId";
     public static final String JSON_MARK_ID_AS_STRING = "markId";
     public static final String JSON_DEVICE_UUID = "deviceUuid";
     public static final String JSON_DEVICE_TYPE = "deviceType";
     public static final String JSON_PUSH_DEVICE_ID = "pushDeviceId";
+    public static final String JSON_REGISTER_SECRET = "secret";
     public static final String JSON_FROM_MILLIS = "fromMillis";
+    
+    /**
+     * The parameter to specify the end of the mapping interval, inclusively. Note that when asking a {@link TimeRange} describing
+     * the interval, the {@link TimeRange#to()} method has to return a value "infinitesimally" later than the time point provided here
+     * because {@link TimeRange}s have an <em>exclusive</em> end.
+     */
     public static final String JSON_TO_MILLIS = "toMillis";
     public static final String JSON_TEAM_IMAGE_URI = "teamImageUri";
 

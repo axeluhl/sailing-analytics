@@ -2,8 +2,12 @@
 	clip: rect(auto auto auto auto);
 }
 
+.dialogTopCenterInner {
+  height: 18px;
+}
+
 .gwt-extras-WindowBox .dialogTopCenterInner {
-  background-color: #bbb;
+  background-color: transparent;
 }
 
 .gwt-extras-WindowBox .Caption {
@@ -58,6 +62,11 @@
 	width: 10px;
 	height: 10px;
 	background: url(images/resize_arrow.png) center center no-repeat;
+}
+
+.gwt-extras-WindowBox .dialogBottomLeftInner {
+    width: 10px;
+    height: 10px;
 }
 
 .gwt-extras-WindowBox .media-synch-control {

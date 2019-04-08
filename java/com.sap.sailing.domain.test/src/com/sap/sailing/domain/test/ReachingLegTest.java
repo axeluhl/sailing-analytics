@@ -8,13 +8,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -24,21 +28,17 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -46,7 +46,6 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -56,15 +55,18 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ReachingLegTest extends TrackBasedTest {
-    private List<Competitor> competitors;
-    private CompetitorImpl plattner;
-    private CompetitorImpl hunger;
+    private Map<Competitor,Boat> competitorsAndBoats;
+    private CompetitorWithBoat plattner;
+    private CompetitorWithBoat hunger;
     private MillisecondsTimePoint start;
-    private Competitor schomaeker;
+    private CompetitorWithBoat schomaeker;
 
     /**
      * Creates the race and two competitors ({@link #plattner} and {@link #hunger}) and sets the start line passing for both of them
@@ -72,15 +74,15 @@ public class ReachingLegTest extends TrackBasedTest {
      */
     @Before
     public void setUp() {
-        competitors = new ArrayList<Competitor>();
-        hunger = createCompetitor("Wolfgang Hunger");
-        competitors.add(hunger);
-        plattner = createCompetitor("Dr. Hasso Plattner");
-        competitors.add(plattner);
-        schomaeker = createCompetitor("Meike Schom�ker");
-        competitors.add(schomaeker);
+        competitorsAndBoats = new LinkedHashMap<>();
+        hunger = createCompetitorWithBoat("Wolfgang Hunger"); 
+        competitorsAndBoats.put(hunger, hunger.getBoat());
+        plattner = createCompetitorWithBoat("Dr. Hasso Plattner");
+        competitorsAndBoats.put(plattner, plattner.getBoat());
+        schomaeker = createCompetitorWithBoat("Meike Schom�ker");
+        competitorsAndBoats.put(schomaeker, schomaeker.getBoat());
         start = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
-        setTrackedRace(createTrackedRace("Kieler Woche", "505 Race 2", "505", competitors, start));
+        setTrackedRace(createTrackedRace("Kieler Woche", "505 Race 2", "505", competitorsAndBoats, start));
         List<MarkPassing> hungersMarkPassings = createMarkPassings(hunger, start);
         getTrackedRace().updateMarkPassings(hunger, hungersMarkPassings);
         List<MarkPassing> plattnersMarkPassings = createMarkPassings(plattner, start);
@@ -88,10 +90,11 @@ public class ReachingLegTest extends TrackBasedTest {
     }
     
     protected DynamicTrackedRaceImpl createTrackedRace(String regattaName, String raceName, String boatClassName,
-            Iterable<Competitor> competitors, TimePoint timePointForFixes) {
+            Map<Competitor,Boat> competitorsAndBoats, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
+                RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
@@ -106,9 +109,9 @@ public class ReachingLegTest extends TrackBasedTest {
         waypoints.add(new WaypointImpl(offsetMark));
         waypoints.add(new WaypointImpl(leeGate));
         Course course = new CourseImpl(raceName, waypoints);
-        RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitors);
+        RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats);
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
-        		EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0,
+                /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
@@ -339,7 +342,7 @@ public class ReachingLegTest extends TrackBasedTest {
         Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(plattner, timePointToConsider, WindPositionMode.LEG_MIDDLE);
         assertEquals(0., schomaekersDistanceToLeader.getMeters(), 0.00001);
         // distance to leading Schomaeker expected to be the entire upwind distance plus the offset distance plus half the downwind
-        assertEquals(distanceOfReachingLeg.getMeters()+windwardDistanceOfUpwindLeg.getMeters()*1.5, plattnersDistanceToLeader.getMeters(), 0.001);
+        assertEquals(distanceOfReachingLeg.getMeters()+windwardDistanceOfUpwindLeg.getMeters()*1.5, plattnersDistanceToLeader.getMeters(), 0.01);
     }
 
     @Test
@@ -374,9 +377,9 @@ public class ReachingLegTest extends TrackBasedTest {
                         .getEstimatedPosition(timePointToConsider, /* extrapolate */false)
                         .getDistance(
                                 getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointToConsider, /* extrapolate */
-                                        false)).getMeters(), 0.00001);
+                                        false)).getMeters(), 0.01);
         // however, projected onto the leg their distance should be 0
         Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToCompetitorFarthestAhead(plattner, timePointToConsider, WindPositionMode.LEG_MIDDLE);
-        assertEquals(0., plattnersDistanceToLeader.getMeters(), 0.00001);
+        assertEquals(0., plattnersDistanceToLeader.getMeters(), 0.01);
     }
 }

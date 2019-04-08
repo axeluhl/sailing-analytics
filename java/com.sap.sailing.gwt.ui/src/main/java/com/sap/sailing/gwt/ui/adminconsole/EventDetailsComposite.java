@@ -1,9 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Anchor;
@@ -13,7 +11,8 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
+import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -34,28 +33,27 @@ public class EventDetailsComposite extends Composite  {
     private final Label endDate;
     private final Label isPublic;
     private final Anchor officialWebsiteURL;
+    private final Anchor baseURL;
     private final SimpleAnchorListComposite sailorsInfoWebsiteURLList;
     private final Anchor eventOverviewURL;
     private final SimpleStringListComposite courseAreaNamesList;
     private final SimpleAnchorListComposite imageURLList;
     private final SimpleAnchorListComposite videoURLList;
     private final SimpleStringListComposite leaderboardGroupList;
+    private final SimpleStringListComposite windfinderSpotCollectionsList;
     
     private final CaptionPanel mainPanel;
 
     public EventDetailsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         super();
         this.stringMessages = stringMessages;
-
         event = null;
         mainPanel = new CaptionPanel(stringMessages.regatta());
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
-
-        int rows = 16;
+        int rows = 17;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
-        
         int currentRow = 0;
         eventId = createLabelAndValueWidget(grid, currentRow++, stringMessages.id(), "IdLabel");
         eventName = createLabelAndValueWidget(grid, currentRow++, stringMessages.eventName(), "NameLabel");
@@ -65,18 +63,18 @@ public class EventDetailsComposite extends Composite  {
         endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
         isPublic = createLabelAndValueWidget(grid, currentRow++, stringMessages.isPublic(), "IsPublicLabel");
         officialWebsiteURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
+        baseURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventBaseURL(), "BaseURLLabel");
         sailorsInfoWebsiteURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.eventSailorsInfoWebsiteURL(), "SailorsInfoWebsiteURLLabel");
         eventOverviewURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventOverviewURL(), "EventOverviewURLLabel");
         courseAreaNamesList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.courseAreas(), "CourseAreaValueList");
         imageURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.images(), "ImageURLValueList");
         videoURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.videos(), "VideoURLValueList");
         leaderboardGroupList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.leaderboardGroups(), "LeaderboardGroupValueList");
-        
-        for(int i=0; i < rows; i++) {
+        windfinderSpotCollectionsList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.windFinderSpotCollectionsList(), "WindFinderSpotCollectionsList");
+        for (int i = 0; i < rows; i++) {
             grid.getCellFormatter().setVerticalAlignment(i, 0, HasVerticalAlignment.ALIGN_TOP);
             grid.getCellFormatter().setVerticalAlignment(i, 1, HasVerticalAlignment.ALIGN_TOP);
         }
-
         initWidget(mainPanel);
     }
     
@@ -134,13 +132,13 @@ public class EventDetailsComposite extends Composite  {
             isPublic.setText(String.valueOf(event.isPublic));
             officialWebsiteURL.setText(event.getOfficialWebsiteURL());
             officialWebsiteURL.setHref(event.getOfficialWebsiteURL());
+            baseURL.setText(event.getBaseURL());
+            baseURL.setHref(event.getBaseURL());
             sailorsInfoWebsiteURLList.setValues(new ArrayList<String>(event.getSailorsInfoWebsiteURLs().values()));
-            Map<String, String> regattaOverviewURLParameters = new HashMap<String, String>();
-            regattaOverviewURLParameters.put("event", event.id.toString());
-            String regattaOverviewLink = EntryPointLinkFactory.createRegattaOverviewLink(regattaOverviewURLParameters);
+            String regattaOverviewLink = EntryPointWithSettingsLinkFactory
+                    .createRegattaOverviewLink(new RegattaOverviewContextDefinition(event.id));
             eventOverviewURL.setText(regattaOverviewLink);
             eventOverviewURL.setHref(UriUtils.fromString(regattaOverviewLink));
-     
             List<String> courseAreaNames = new ArrayList<>();
             if (event.venue.getCourseAreas() != null && event.venue.getCourseAreas().size() > 0) {
                 for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
@@ -148,7 +146,6 @@ public class EventDetailsComposite extends Composite  {
                 }
             }
             courseAreaNamesList.setValues(courseAreaNames);
-
             List<String> imageURLStringsAsList = new ArrayList<>();
             for(ImageDTO image: event.getImages()) {
                 imageURLStringsAsList.add(image.getSourceRef());
@@ -164,6 +161,11 @@ public class EventDetailsComposite extends Composite  {
                 leaderboardGroupNamesAsList.add(leaderboardGroupDTO.getName());
             }
             leaderboardGroupList.setValues(leaderboardGroupNamesAsList);
+            List<String> windfinderSpotCollectionsNamesAsList = new ArrayList<>();
+            for (String windfinderSpotCollection : event.getWindFinderReviewedSpotsCollectionIds()) {
+                windfinderSpotCollectionsNamesAsList.add(windfinderSpotCollection);
+            }
+            windfinderSpotCollectionsList.setValues(windfinderSpotCollectionsNamesAsList);
         }
     }
 

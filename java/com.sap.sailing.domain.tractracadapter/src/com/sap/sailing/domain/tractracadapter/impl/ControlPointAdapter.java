@@ -6,6 +6,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.tractrac.model.lib.api.route.IControl;
 
 public class ControlPointAdapter extends AbstractWithID implements TracTracControlPoint {
+    private static final long serialVersionUID = 1012632574166553433L;
     private final IControl controlPoint;
 
     public ControlPointAdapter(IControl controlPoint) {
@@ -47,5 +48,15 @@ public class ControlPointAdapter extends AbstractWithID implements TracTracContr
     @Override
     public boolean getHasTwoPoints() {
         return controlPoint.isMultiple();
+    }
+
+    @Override
+    public UUID getFirstMarkId() {
+        return controlPoint.getControlPoints().get(0).getId();
+    }
+
+    @Override
+    public UUID getSecondMarkId() {
+        return controlPoint.getControlPoints().get(1).getId();
     }
 }

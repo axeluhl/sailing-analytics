@@ -6,6 +6,8 @@
     <inherits name="com.sap.sse.gwt.CommonSharedResources" />
 
 	<source path='client'/>
+	<source path='communication'/>
 	<source path='theme'/>
+	
 </module>
  

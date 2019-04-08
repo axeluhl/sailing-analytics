@@ -22,6 +22,17 @@ import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.shared.media.VideoDescriptor;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load data to be shown on the event overview page for the
+ * {@link #GetEventOverviewStageAction(UUID, boolean) given event-id}, where the prepared data depends on the
+ * {@link HomeServiceUtil#calculateEventState(event) event's state} and video and image availability.
+ * </p>
+ * <p>
+ * The {@link ResultWithTTL result's} time to live is the <i>time until start</i> for upcoming or planned events and
+ * <i>2 minutes</i> for currently running events, otherwise a duration of <i>5 minutes</i> is used.
+ * </p>
+ */
 public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<EventOverviewStageDTO>>, IsClientCacheable {
     
     private UUID eventId;
@@ -31,6 +42,16 @@ public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<
     private GetEventOverviewStageAction() {
     }
 
+    /**
+     * Creates a {@link GetEventOverviewStageAction} instance for the given event-id, where the use of stage or teaser
+     * images can be specified.
+     * 
+     * @param eventId
+     *            {@link UUID} of the {@link Event} to load data for
+     * @param useTeaserImage
+     *            <code>true</code> to use a lower resolution teaser image for the event, <code>false</code> to use a
+     *            high resolution stage image. Can be useful to safe data traffic on mobile connections.
+     */
     public GetEventOverviewStageAction(UUID eventId, boolean useTeaserImage) {
         this.eventId = eventId;
         this.useTeaserImage = useTeaserImage;
@@ -39,14 +60,14 @@ public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<
     @Override
     @GwtIncompatible
     public ResultWithTTL<EventOverviewStageDTO> execute(SailingDispatchContext context) {
-        TimePoint now = MillisecondsTimePoint.now();
-        Event event = context.getRacingEventService().getEvent(eventId);
-        EventState state = HomeServiceUtil.calculateEventState(event);
+        final TimePoint now = MillisecondsTimePoint.now();
+        final Event event = context.getRacingEventService().getEvent(eventId);
+        final EventState state = HomeServiceUtil.calculateEventState(event);
         long ttl = Duration.ONE_MINUTE.times(5).asMillis();
         if(state == EventState.RUNNING) {
             ttl = Duration.ONE_MINUTE.times(2).asMillis();
         }
-        if(state == EventState.UPCOMING || state == EventState.PLANNED) {
+        if (isUpcomingOrPlanned(event, state)) {
             ttl = Math.min(ttl, now.until(event.getStartDate()).asMillis());
         }
         
@@ -58,7 +79,7 @@ public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<
     @GwtIncompatible
     public EventOverviewStageContentDTO getStageContent(SailingDispatchContext context, Event event, EventState state, TimePoint now) {
         // P1: Featured video if available
-        List<String> videoTags = Collections.singletonList(MediaTagConstants.FEATURED);
+        List<String> videoTags = Collections.singletonList(MediaTagConstants.FEATURED.getName());
         VideoDescriptor featuredVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocale(), videoTags , false);
         if (featuredVideo != null) {
             return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA,
@@ -73,7 +94,7 @@ public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<
         }
         
         // Show countdown for planned or upcoming events
-        if(state == EventState.UPCOMING || state == EventState.PLANNED) {
+        if (isUpcomingOrPlanned(event, state)) {
             return new EventOverviewTickerStageDTO(event.getStartDate().asDate(), event.getName(), imageUrl);
         }
         return new EventOverviewTickerStageDTO(null, null, imageUrl);
@@ -130,6 +151,12 @@ public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<
 //        }
 //        
 //        return new EventOverviewTickerStageDTO(null, null, stageImageUrl);
+    }
+
+    @GwtIncompatible
+    private boolean isUpcomingOrPlanned(Event event, EventState state) {
+        final TimePoint startDate = event.getStartDate();
+        return startDate != null && (state == EventState.UPCOMING || state == EventState.PLANNED);
     }
 
     @Override

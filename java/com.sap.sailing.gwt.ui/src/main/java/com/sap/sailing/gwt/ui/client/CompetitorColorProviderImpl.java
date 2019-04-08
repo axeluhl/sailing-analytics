@@ -9,12 +9,14 @@ import com.sap.sailing.domain.common.ColorMap;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.common.Color;
 
 public class CompetitorColorProviderImpl implements CompetitorColorProvider {
     /**
-     * Uses the {@link CompetitorDTO#getIdAsString()} as the ID for the color map
+     * Uses the {@link CompetitorWithBoatDTO#getIdAsString()} as the ID for the color map
      */
     private final ColorMap<String> competitorsColorMap;
     private final Map<RegattaAndRaceIdentifier, Map<CompetitorDTO, Color>> competitorsBoatColorsPerRace;
@@ -25,14 +27,14 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
 
     public CompetitorColorProviderImpl(RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
-        this.competitorsColorMap = new ColorMapImpl<>();
+        this.competitorsColorMap = new ColorMapImpl<>(RaceMap.WATER_COLOR);
         this.competitorsBoatColorsPerRace = new HashMap<RegattaAndRaceIdentifier, Map<CompetitorDTO, Color>>();
         if (raceIdentifier != null) {
             for (Entry<CompetitorDTO, BoatDTO> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
                 if (competitorAndBoat.getValue() != null) {
                     Map<CompetitorDTO, Color> raceColors = competitorsBoatColorsPerRace.get(raceIdentifier);
                     if (raceColors == null) {
-                        raceColors = new HashMap<CompetitorDTO, Color>();
+                        raceColors = new HashMap<>();
                         competitorsBoatColorsPerRace.put(raceIdentifier, raceColors);
                     }
                     Color boatColor = competitorAndBoat.getValue().getColor();

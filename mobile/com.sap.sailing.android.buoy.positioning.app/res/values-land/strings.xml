@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accuracy">Accuracy</string>
+    <string name="distance">Distance</string>
+    <string name="accuracy_detail">of GPS position</string>
+    <string name="distance_detail">to old buoy</string>
+</resources>

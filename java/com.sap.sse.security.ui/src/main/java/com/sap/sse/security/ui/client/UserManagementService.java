@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.client;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -21,7 +22,7 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo login(String username, String password);
 
-    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException;
+    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL) throws UserManagementException, MailException;
     
     /**
      * Either <code>oldPassword</code> or <code>passwordResetSecret</code> need to be provided, or the current user needs to have
@@ -31,7 +32,7 @@ public interface UserManagementService extends RemoteService {
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException;
 
-    void updateUserProperties(String username, String fullName, String company) throws UserManagementException;
+    void updateUserProperties(String username, String fullName, String company, String localeName) throws UserManagementException;
 
     void resetPassword(String username, String eMailAddress, String baseURL) throws UserManagementException, MailException;
 
@@ -59,19 +60,26 @@ public interface UserManagementService extends RemoteService {
      * 
      * @param key must not be <code>null</code>
      * @param value must not be <code>null</code>
+     * @throws UserManagementException 
      */
-    void setPreference(String username, String key, String value);
+    void setPreference(String username, String key, String value) throws UserManagementException;
+    
+    void setPreferences(String username, Map<String, String> keyValuePairs) throws UserManagementException;
 
     /**
      * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
      * <code>username</code>.
      */
-    void unsetPreference(String username, String key);
+    void unsetPreference(String username, String key) throws UserManagementException;
 
     /**
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
-    String getPreference(String username, String key);
+    String getPreference(String username, String key) throws UserManagementException;
+    
+    Map<String, String> getPreferences(String username, List<String> keys) throws UserManagementException;
+    
+    Map<String, String> getAllPreferences(String username) throws UserManagementException;
 
     String getAccessToken(String username);
 

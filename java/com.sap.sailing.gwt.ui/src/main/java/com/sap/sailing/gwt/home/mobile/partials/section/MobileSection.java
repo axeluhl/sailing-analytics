@@ -24,6 +24,7 @@ public class MobileSection extends Composite {
     @UiField DivElement sectionHeaderHolderUi;
     @UiField DivElement sectionContentHolderUi;
     @UiField SimplePanel sectionHeaderUi;
+    @UiField SimplePanel sectionFooterUi;
     @UiField FlowPanel sectionContentUi;
 
     public MobileSection() {
@@ -35,6 +36,11 @@ public class MobileSection extends Composite {
     @UiChild
     public void addHeader(Widget theHeaderWidget) {
         sectionHeaderUi.setWidget(theHeaderWidget);
+    }
+    
+    @UiChild
+    public void addFooter(Widget theFooterWidget) {
+        sectionFooterUi.setWidget(theFooterWidget);
     }
 
     @UiChild

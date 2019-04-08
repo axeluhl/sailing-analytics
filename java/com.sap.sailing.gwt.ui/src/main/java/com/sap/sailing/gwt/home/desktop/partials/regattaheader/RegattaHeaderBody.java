@@ -4,17 +4,16 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.UIObject;
-import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 
 public class RegattaHeaderBody extends UIObject {
 
@@ -24,7 +23,6 @@ public class RegattaHeaderBody extends UIObject {
     interface RegattaHeaderBodyUiBinder extends UiBinder<Element, RegattaHeaderBody> {
     }
     
-    @UiField protected DivElement logoUi;
     @UiField protected SpanElement nameUi;
     @UiField protected DivElement labelUi;
     @UiField protected DivElement detailsItemContainerUi;
@@ -32,18 +30,18 @@ public class RegattaHeaderBody extends UIObject {
     public RegattaHeaderBody(RegattaMetadataDTO regattaMetadata, boolean showStateMarker) {
         RegattaHeaderResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
-        ImageResource logo = BoatClassImageResolver.getBoatClassIconResource(regattaMetadata.getBoatClass());
-        logoUi.getStyle().setBackgroundImage("url('" + logo.getSafeUri().asString() + "')");
         nameUi.setInnerText(regattaMetadata.getDisplayName());
         RegattaState state = regattaMetadata.getState();
         LabelTypeUtil.renderLabelTypeOrHide(labelUi, showStateMarker ? state.getStateMarker() : LabelType.NONE);
         addDetailsItem(regattaMetadata.getCompetitorsCount(), I18N.competitorsCount(regattaMetadata.getCompetitorsCount()));
         addDetailsItem(regattaMetadata.getRaceCount(), I18N.racesCount(regattaMetadata.getRaceCount()));
         String defaultCourseAreaName = regattaMetadata.getDefaultCourseAreaName();
-        if(defaultCourseAreaName != null) {
+        if (defaultCourseAreaName != null) {
             addDetailsItem(I18N.courseAreaName(defaultCourseAreaName));
         }
-        addDetailsItem(regattaMetadata.getBoatCategory());
+        if (regattaMetadata.getLeaderboardGroupNames() != null && !Util.isEmpty(regattaMetadata.getLeaderboardGroupNames())) {
+            addDetailsItem(Util.joinStrings(", ", regattaMetadata.getLeaderboardGroupNames()));
+        }
         UIObject.ensureDebugId(nameUi, "RegattaNameSpan");
         UIObject.ensureDebugId(labelUi, "RegattaStateLabelDiv");
     }
@@ -55,7 +53,7 @@ public class RegattaHeaderBody extends UIObject {
     }
     
     private void addDetailsItem(String text) {
-        if(text != null) {
+        if (text != null) {
             DivElement detailsItem = DOM.createDiv().cast();
             detailsItem.addClassName(RegattaHeaderResources.INSTANCE.css().regattaheader_content_details_item());
             detailsItem.setInnerText(text);

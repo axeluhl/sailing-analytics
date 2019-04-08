@@ -1,82 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-    <View
-        android:id="@+id/toolbar_separator"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/toolbar_separator_height"
-        android:layout_alignParentTop="true"
-        android:background="@color/sap_yellow"/>
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fiori_main_background">
 
     <ImageView
         android:id="@+id/homeBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@id/toolbar_separator"
+        android:layout_above="@+id/scanQr"
         android:contentDescription="@string/empty"
         android:scaleType="centerCrop"
-        android:src="@drawable/working_title"/>
+        android:src="@drawable/working_title" />
 
     <RelativeLayout
         android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/qr_code_label_height"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:background="@color/black_transparent">
+        android:layout_marginLeft="@dimen/fragment_side_margin"
+        android:layout_marginRight="@dimen/fragment_side_margin">
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
+            android:layout_marginBottom="10dp"
             android:gravity="center"
             android:text="@string/scan_hint"
-            android:textColor="@color/white"/>
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/default_text_size" />
     </RelativeLayout>
 
-    <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
+    <Button
         android:id="@+id/scanQr"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/home_button_height"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
         android:layout_above="@+id/noQrCode"
         android:layout_marginBottom="10dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/qr_button"
+        android:layout_marginLeft="@dimen/fragment_side_margin"
+        android:layout_marginRight="@dimen/fragment_side_margin"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/blue_button"
         android:text="@string/scan_qr"
-        android:textAllCaps="true"
-        android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:textSize="@dimen/highlight_text_size" />
 
-    <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
+    <Button
         android:id="@+id/noQrCode"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/no_qr_code_button_height"
         android:layout_above="@+id/bottomLayout"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:background="@drawable/rounded_btn_white"
+        android:layout_marginLeft="@dimen/fragment_side_margin"
+        android:layout_marginRight="@dimen/fragment_side_margin"
+        android:background="@drawable/white_button"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:text="@string/no_qr_code"
-        android:textAllCaps="true"
-        android:textColor="@color/black"
-        android:textSize="18sp"/>
+        android:textColor="@color/fiori_text_color"
+        android:textSize="@dimen/button_text_size" />
 
     <ListView
         android:id="@+id/listRegatta"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_above="@id/scanQr"
-        android:layout_below="@id/toolbar_separator"
-        android:divider="@android:color/white"
-        android:dividerHeight="1dp"/>
+        android:layout_alignParentTop="true"
+        android:divider="@color/separator_color"
+        android:dividerHeight="1dp" />
 
 </RelativeLayout>

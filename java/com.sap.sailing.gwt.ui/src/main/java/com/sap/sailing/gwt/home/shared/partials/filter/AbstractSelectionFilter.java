@@ -51,10 +51,14 @@ public abstract class AbstractSelectionFilter<T, C> extends AbstractFilterWidget
     
     protected abstract String getFilterItemLabel(C item);
     
+    protected C getSelectedValue() {
+        return valueListBox.getValue();
+    }
+
     private class SelectionFilter implements Filter<T> {
         @Override
         public boolean matches(T object) {
-            C selectedFilterItem = valueListBox.getValue();
+            C selectedFilterItem = getSelectedValue();
             return selectedFilterItem == null || selectedFilterItem.equals(getFilterCriteria(object));
         }
 

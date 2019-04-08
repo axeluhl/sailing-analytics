@@ -47,5 +47,25 @@
     <color name="gray">#333333</color>
     <color name="colorPrimary">@color/gray</color>
     <color name="yellow_button_pressed">#D6B363</color>
-    <color name="yellow_button_disabled">#7fEEAA29</color>
+
+    <color name="toolbar_text_color">@color/black</color>
+    <color name="toolbar_background">@color/white</color>
+
+    <color name="separator_color">#d1d3d4</color>
+    <color name="list_header_background_color">#def1f1</color>
+    <color name="list_item_background_color">#f6fbfb</color>
+
+    <color name="fiori_primary_color">#009de0</color>
+    <color name="fiori_text_color">@color/black</color>
+
+    <color name="blue_button_normal">@color/fiori_primary_color</color>
+    <color name="blue_button_pressed">#007aad</color>
+
+    <color name="normal_button">#f3f3f3</color>
+    <color name="normal_button_pressed">#bfbfbf</color>
+
+    <color name="signal_great">#8ab54e</color>
+    <color name="signal_good">@color/sap_yellow</color>
+    <color name="signal_poor">@color/sap_red</color>
+    <color name="signal_none">#455B27</color>
 </resources>

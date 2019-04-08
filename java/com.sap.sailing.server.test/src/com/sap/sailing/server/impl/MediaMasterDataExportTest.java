@@ -3,13 +3,11 @@ package com.sap.sailing.server.impl;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,19 +15,12 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
-import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.RegattaImpl;
-import com.sap.sailing.domain.base.impl.SeriesImpl;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -46,13 +37,10 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
-import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
 
 public class MediaMasterDataExportTest {
@@ -66,17 +54,11 @@ public class MediaMasterDataExportTest {
     static final String missingRace2 = "missing race 2";
     static final String missingRace3 = "missing race 3";
     
-    static final boolean displayGroupsInReverseOrder = true;
-    static final ThresholdBasedResultDiscardingRule resultDiscardingRule = new ThresholdBasedResultDiscardingRuleImpl(new int[0]);
-    static final BoatClass boatClass = new BoatClassImpl("boat class name", BoatClassMasterdata._12M);
-    static final TimePoint startDate = MillisecondsTimePoint.now();
-    static final TimePoint endDate = startDate.plus(MillisecondsDurationImpl.ONE_DAY);
-    static final boolean isMedal = false;
-    static final Fleet regattaFleet = new FleetImpl("fleet name");
-    static final boolean persistent = false;
-    static final ScoringScheme scoringScheme = new LowPoint();
-    static final CourseArea courseArea = new CourseAreaImpl("Course Area", UUID.randomUUID());
-    static final Serializable regatteId = "regatta id";
+    private static final boolean displayGroupsInReverseOrder = true;
+    private static final ThresholdBasedResultDiscardingRule resultDiscardingRule = new ThresholdBasedResultDiscardingRuleImpl(new int[0]);
+    private static final boolean isMedal = false;
+    private static final ScoringScheme scoringScheme = new LowPoint();
+    private static final CourseArea courseArea = new CourseAreaImpl("Course Area", UUID.randomUUID());
     
     @Test
     public void testTrackWithAssignedRaceButEmptyLeaderboardGroup() {
@@ -147,9 +129,9 @@ public class MediaMasterDataExportTest {
         for (RaceIdentifier regattaAndRaceIdentifier : regattaRaces) {
             raceColumnNames.add(regattaAndRaceIdentifier.getRaceName());
         }
-        Regatta regatta = createTestRegatta("regatta name",  raceColumnNames);
+        Regatta regatta = TrackBasedTest.createTestRegatta("regatta name",  raceColumnNames);
         RegattaLeaderboard regattaLeaderboard = new RegattaLeaderboardImpl(regatta, resultDiscardingRule);
-        assignRacesToRegattaLeaderboardColumns(regattaLeaderboard, regattaRaces);
+        TrackBasedTest.assignRacesToRegattaLeaderboardColumns(regattaLeaderboard, regattaRaces);
         
         FlexibleLeaderboard flexibleLeaderboard = new FlexibleLeaderboardImpl("flexible leaderboard", resultDiscardingRule, scoringScheme , courseArea);
         for (RaceIdentifier regattaAndRaceIdentifier : flexibleRaces) {
@@ -157,34 +139,15 @@ public class MediaMasterDataExportTest {
             Fleet defaultFleet = raceColumn.getFleets().iterator().next();
             raceColumn.setRaceIdentifier(defaultFleet, regattaAndRaceIdentifier);
         }
-        
-
         List<? extends Leaderboard> leaderboards = Arrays.asList(regattaLeaderboard, flexibleLeaderboard);
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("name", "description", "displayName", displayGroupsInReverseOrder , leaderboards);
         Set<LeaderboardGroup> groupsToExport = Collections.singleton(leaderboardGroup);
         Iterable<Event> allEvents = Collections.emptyList();
         Map<String, Regatta> regattaForRaceIdString = Collections.emptyMap();
-        GPSFixStore gpsFixStore = mock(GPSFixStore.class);
+        SensorFixStore sensorFixStore = mock(SensorFixStore.class);
         boolean exportWind = false;
-        TopLevelMasterData topLevelMasterData = new TopLevelMasterData(groupsToExport , allEvents , regattaForRaceIdString, allMediaTracks , gpsFixStore , exportWind, new HashMap<>());
+        TopLevelMasterData topLevelMasterData = new TopLevelMasterData(groupsToExport, allEvents,
+                regattaForRaceIdString, allMediaTracks, sensorFixStore, exportWind, new HashMap<>());
         return topLevelMasterData;
     }
-
-    public static void assignRacesToRegattaLeaderboardColumns(RegattaLeaderboard leaderboard, Collection<RaceIdentifier> raceIdentifiers) {
-        Iterator<RaceIdentifier> regattaRacesIterator = raceIdentifiers.iterator();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            raceColumn.setRaceIdentifier(regattaFleet, regattaRacesIterator.next());
-        }
-    }
-
-    public static RegattaImpl createTestRegatta(String regattaName, Iterable<String> raceColumnNames) {
-        Iterable<? extends Fleet> regattaFleets = Collections.singleton(regattaFleet);
-        TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
-        Series series = new SeriesImpl("series name", isMedal, /* isFleetsCanRunInParallel */ true, regattaFleets, raceColumnNames, trackedRegattaRegistry);
-        Iterable<? extends Series> regattaSeries = Collections.singleton(series);
-        return new RegattaImpl(regattaName, boatClass, startDate, endDate, regattaSeries, persistent, scoringScheme, regatteId , courseArea, OneDesignRankingMetric::new);
-    }
-
-
-
 }

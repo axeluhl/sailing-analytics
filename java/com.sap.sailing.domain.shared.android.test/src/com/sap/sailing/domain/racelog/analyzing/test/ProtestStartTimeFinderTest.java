@@ -13,21 +13,21 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestStartTimeFinder;
-import com.sap.sse.common.TimePoint;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestTimeFinder;
+import com.sap.sse.common.TimeRange;
 
-public class ProtestStartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<ProtestStartTimeFinder, TimePoint> {
+public class ProtestStartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<ProtestTimeFinder, TimeRange> {
 
     @Override
-    protected ProtestStartTimeFinder createAnalyzer(RaceLog raceLog) {
-        return new ProtestStartTimeFinder(raceLog);
+    protected ProtestTimeFinder createAnalyzer(RaceLog raceLog) {
+        return new ProtestTimeFinder(raceLog);
     }
 
     @Override
     protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         RaceLogProtestStartTimeEvent event = createEvent(RaceLogProtestStartTimeEvent.class, 1, passId, author);
-        when(event.getProtestStartTime()).thenReturn(mock(TimePoint.class));
-        return new TargetPair(Arrays.asList(event), event.getProtestStartTime());
+        when(event.getProtestTime()).thenReturn(mock(TimeRange.class));
+        return new TargetPair(Arrays.asList(event), event.getProtestTime());
     }
     
     @Test
@@ -40,13 +40,13 @@ public class ProtestStartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Pro
     @Test
     public void testMostRecent() {
         RaceLogProtestStartTimeEvent event1 = createEvent(RaceLogProtestStartTimeEvent.class, 1);
-        when(event1.getProtestStartTime()).thenReturn(mock(TimePoint.class));
+        when(event1.getProtestTime()).thenReturn(mock(TimeRange.class));
         RaceLogProtestStartTimeEvent event2 = createEvent(RaceLogProtestStartTimeEvent.class, 2);
-        when(event2.getProtestStartTime()).thenReturn(mock(TimePoint.class));
+        when(event2.getProtestTime()).thenReturn(mock(TimeRange.class));
         
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event2.getProtestStartTime(), analyzer.analyze());
+        assertEquals(event2.getProtestTime(), analyzer.analyze());
     }
 }

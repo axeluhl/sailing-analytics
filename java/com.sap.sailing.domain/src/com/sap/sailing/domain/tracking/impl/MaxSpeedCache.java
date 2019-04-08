@@ -7,14 +7,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
@@ -58,9 +61,9 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
      * Keys are the "from" time points as passed to {@link #getMaxSpeed(TimePoint, TimePoint)}. Values are navigable
      * sets of pairs whose {@link Pair#getA() a} component is the "to" parameter as passed to
      * {@link #getMaxSpeed(TimePoint, TimePoint)}, and whose {@link Pair#getB() b} component is the track's fix where
-     * the averaged maximum speed for that interval was achieved together with the averaged speed at that point. The
-     * navigable set is ordered according to ascending <code>to</code> time points, yielding shorter cache intervals
-     * before longer intervals.
+     * the maximum speed for that interval was achieved together with the speed at that point. The navigable set is
+     * ordered according to ascending <code>to</code> time points, yielding shorter cache intervals before longer
+     * intervals.
      */
     private final Map<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> cache;
     
@@ -86,9 +89,9 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
      * outside of the invalidation interval, crop cache entry's interval such that it's overlap-free, otherwise remove.
      */
     @Override
-    public void gpsFixReceived(FixType fix, ItemType item, boolean firstFixInTrack) {
+    public void gpsFixReceived(FixType fix, ItemType item, boolean firstFixInTrack, AddResult addedOrReplaced) {
         // find the invalidation interval such that getFixesRelevantForSpeedEstimation, when passed any time point from that interval, produces "fix"
-        Util.Pair<TimePoint, TimePoint> invalidationInterval = track.getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(fix);
+        TimeRange invalidationInterval = track.getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(fix);
         LockUtil.lockForWrite(lock);
         HashMap<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> additionalCacheEntries =
                 new HashMap<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>>();
@@ -131,33 +134,35 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
 
     private Map<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> invalidateEntriesAndReturnAdditionalCacheEntries(
             Entry<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> cacheEntry,
-            Util.Pair<TimePoint, TimePoint> invalidationInterval) {
+            TimeRange invalidationInterval) {
         assert lock.writeLock().isHeldByCurrentThread();
         // cannot modify cache here because caller is in an iteration over cache's entry set; request additions by returning them
         Map<TimePoint, NavigableSet<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>>> result = new HashMap<>();
-        if (!cacheEntry.getKey().after(invalidationInterval.getB())) {
+        final TimePoint cacheEntryFrom = cacheEntry.getKey();
+        if (!cacheEntryFrom.after(invalidationInterval.to())) {
             // invalidation can only become necessary if the cache entry doesn't start after the end of the invalidation interval
-            TimePoint croppedFrom; // start of the remaining valid part of the cache entries
-            if (cacheEntry.getKey().before(invalidationInterval.getA())) {
-                croppedFrom = cacheEntry.getKey();
-            } else {
-                croppedFrom = invalidationInterval.getB(); // cache entry starts in the invalidationInterval; earliest valid point is end of invalidation interval
-            }
             // now scan all entries whose "to" is at or after the invalidationInterval's start:
             for (Iterator<Util.Pair<TimePoint, Util.Pair<FixType, Speed>>> toAndResultIter = cacheEntry.getValue().tailSet(
-                    new Util.Pair<TimePoint, Util.Pair<FixType, Speed>>(invalidationInterval.getA(), null), /* inclusive */ true).iterator();
+                    new Util.Pair<TimePoint, Util.Pair<FixType, Speed>>(invalidationInterval.from(), null), /* inclusive */ true).iterator();
                     toAndResultIter.hasNext(); ) {
                 Util.Pair<TimePoint, Util.Pair<FixType, Speed>> toAndResult = toAndResultIter.next();
                 // cacheEntry's from is before or in the invalidation interval; the current "to" in this loop iteration is in or after the interval
                 // and at or after "from"; in any case the record needs to be deleted:
                 toAndResultIter.remove();
-                // if the current "to" is at or after croppedFrom, check if the old max fix is in the cropped interval; if so, request
-                // creation of a new cache entry:
+                // check if the old max fix is outside the invalidation interval; if so, request creation of a new cropped cache entry
                 if (toAndResult.getB() != null) {
                     final TimePoint maxFixTimePoint = toAndResult.getB().getA().getTimePoint();
-                    if (!toAndResult.getA().before(croppedFrom) && !maxFixTimePoint.before(croppedFrom)
-                            && !maxFixTimePoint.after(toAndResult.getA())) {
-                        addEntryToMap(croppedFrom, toAndResult.getA(), toAndResult.getB(), result);
+                    if (!invalidationInterval.includes(maxFixTimePoint)) {
+                        final TimePoint cacheEntryTo = toAndResult.getA();
+                        final TimeRange croppedCacheEntryTimeRangeContainingMaxFix;
+                        if (invalidationInterval.startsAtOrAfter(maxFixTimePoint)) {
+                            croppedCacheEntryTimeRangeContainingMaxFix = new TimeRangeImpl(cacheEntryFrom, invalidationInterval.from());
+                        } else { // invalidation interval must end before the maxFixTimePoint
+                            assert invalidationInterval.endsBefore(maxFixTimePoint);
+                            croppedCacheEntryTimeRangeContainingMaxFix = new TimeRangeImpl(invalidationInterval.to(), cacheEntryTo);
+                        }
+                        addEntryToMap(croppedCacheEntryTimeRangeContainingMaxFix.from(), 
+                                croppedCacheEntryTimeRangeContainingMaxFix.to(), toAndResult.getB(), result);
                     }
                 }
             }
@@ -290,7 +295,9 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                     } else {
                         speedAtFixTime = track.getEstimatedSpeed(fix.getTimePoint());
                     }
-                    if (speedAtFixTime != null && speedAtFixTime.compareTo(max) > 0) {
+                    // accept max speeds only if they don't exceed our validity threshold
+                    if (speedAtFixTime != null && speedAtFixTime.compareTo(GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING) < 0
+                            && speedAtFixTime.compareTo(max) > 0) {
                         max = speedAtFixTime;
                         maxSpeedFix = fix;
                     }

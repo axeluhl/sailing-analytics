@@ -5,16 +5,6 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.UUID;
 
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -24,6 +14,16 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 public class RaceFactorFragment extends BaseFragment implements View.OnClickListener {
     private HeaderLayout mHeader;
@@ -67,14 +67,14 @@ public class RaceFactorFragment extends BaseFragment implements View.OnClickList
 
         if (getView() != null && getArguments() != null) {
             switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
-                case START_MODE_PLANNED:
-                    if (AppUtils.with(getActivity()).isLand()) {
-                        mHeader.setVisibility(View.GONE);
-                    }
-                    break;
+            case START_MODE_PLANNED:
+                if (AppUtils.with(getActivity()).isLandscape()) {
+                    mHeader.setVisibility(View.GONE);
+                }
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
 
@@ -101,7 +101,8 @@ public class RaceFactorFragment extends BaseFragment implements View.OnClickList
         uri.appendQueryParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, getRace().getName());
         uri.appendQueryParameter(RaceColumnConstants.EXPLICIT_FACTOR, factor);
 
-        getActivity().startService(MessageSendingService.createMessageIntent(getActivity(), uri.toString(), null, UUID.randomUUID(), "{}", null));
+        getActivity().startService(MessageSendingService.createMessageIntent(getActivity(), uri.toString(), null,
+                UUID.randomUUID(), "{}", null));
 
         if (!TextUtils.isEmpty(factor)) {
             getRace().setExplicitFactor(Double.parseDouble(factor));
@@ -111,7 +112,8 @@ public class RaceFactorFragment extends BaseFragment implements View.OnClickList
 
         if (isAdded()) {
             BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
-            BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
+            BroadcastManager.getInstance(getActivity())
+                    .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
             BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_UPDATE_SCREEN));
         }
     }

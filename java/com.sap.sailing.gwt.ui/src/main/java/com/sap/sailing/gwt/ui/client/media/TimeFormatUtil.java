@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sse.common.Duration;
@@ -15,7 +16,7 @@ public class TimeFormatUtil {
     public static final DateTimeFormat DATETIME_FORMAT = DateTimeFormat.getFormat("yyyy MMM dd HH:mm:ss.SSS");
     
     private static NumberFormat zeroPaddingNumberFormat_Min = NumberFormatterFactory.getDecimalFormat(2, 0);
-    private static NumberFormat zeroPaddingNumberFormat_Sec = NumberFormatterFactory.getDecimalFormat(2, 3);
+    private static NumberFormat zeroPaddingNumberFormat_Sec = NumberFormat.getFormat("00.000");
 
     public static Duration hrsMinSecToMilliSeconds(String hrsMinSec) {
         String[] segements = hrsMinSec.split(":");
@@ -67,7 +68,10 @@ public class TimeFormatUtil {
             }
             rest = (rest % MILLISECONDS_PER_MINUTE);
             double seconds = rest / 1000d;
-            result.append(zeroPaddingNumberFormat_Sec.format(signum * seconds));
+            double toFormat = signum * seconds;
+            String localeSpecificFormatedValue = zeroPaddingNumberFormat_Sec.format(toFormat);
+            String currentLocaleSeperator = LocaleInfo.getCurrentLocale().getNumberConstants().decimalSeparator();
+            result.append(localeSpecificFormatedValue.replace(currentLocaleSeperator, "."));
             return result.toString();
         } else {
             return "";

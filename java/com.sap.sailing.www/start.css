@@ -25,22 +25,22 @@ body {
 }
 
 .sapLogo {
-	float: left;
-	margin: 13px 0 0 12px;
+    float: left;
+    margin: 13px 0 0 12px;
 }
 
 .sapLogoImage {
-	max-height: 2em; 	
+    max-height: 2em;    
 }
 
 .sailingAnalyticsLabelPanel {
-	margin: 10px 0 0 0;
+    margin: 10px 0 0 0;
 }
 
 .sailingAnalyticsLabel {
-	float: left;
-	color: #fff;
-	font-size: 16px;
+    float: left;
+    color: #fff;
+    font-size: 16px;
 }
 
 a {

@@ -13,20 +13,23 @@ import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.SWCStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
-import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sse.common.Duration;
 
 public class PreferencesRegattaConfigurationLoader implements ConfigurationLoader<RegattaConfiguration> {
 
     private static final String TAG = PreferencesRegattaConfigurationLoader.class.getSimpleName();
-    
+
     public static PreferencesRegattaConfigurationLoader loadFromPreferences(AppPreferences preferences) {
-        PreferencesRegattaConfigurationLoader loader = new PreferencesRegattaConfigurationLoader(new RegattaConfigurationImpl(), preferences);
+        PreferencesRegattaConfigurationLoader loader = new PreferencesRegattaConfigurationLoader(
+                new RegattaConfigurationImpl(), preferences);
         loader.load();
         return loader;
     }
@@ -44,21 +47,32 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
 
     @Override
     public RegattaConfiguration load() {
-        
+
         configuration.setDefaultRacingProcedureType(preferences.getDefaultRacingProcedureType());
         configuration.setDefaultCourseDesignerMode(preferences.getDefaultCourseDesignerMode());
-        
+        configuration.setDefaultProtestTimeDuration(
+                Duration.ONE_MINUTE.times(preferences.getProtestTimeDurationInMinutes()));
+
         RRS26ConfigurationImpl rrs26 = new RRS26ConfigurationImpl();
         rrs26.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.RRS26));
         rrs26.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.RRS26));
         rrs26.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.RRS26));
-        rrs26.setStartModeFlags(new ArrayList<Flags>(preferences.getRRS26StartmodeFlags()));
+        rrs26.setStartModeFlags(new ArrayList<>(preferences.getRRS26StartmodeFlags()));
         configuration.setRRS26Configuration(rrs26);
+
+        SWCStartConfigurationImpl swcStart = new SWCStartConfigurationImpl();
+        swcStart.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.SWC));
+        swcStart.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.SWC));
+        swcStart.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.SWC));
+        swcStart.setStartModeFlags(new ArrayList<>(preferences.getSWCStartmodeFlags()));
+        configuration.setSWCStartConfiguration(swcStart);
 
         GateStartConfigurationImpl gateStart = new GateStartConfigurationImpl();
         gateStart.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.GateStart));
-        gateStart.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.GateStart));
-        gateStart.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.GateStart));
+        gateStart.setHasIndividualRecall(
+                preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.GateStart));
+        gateStart.setResultEntryEnabled(
+                preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.GateStart));
         gateStart.setHasPathfinder(preferences.getGateStartHasPathfinder());
         gateStart.setHasAdditionalGolfDownTime(preferences.getGateStartHasAdditionalGolfDownTime());
         configuration.setGateStartConfiguration(gateStart);
@@ -68,7 +82,7 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         ess.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.ESS));
         ess.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.ESS));
         configuration.setESSConfiguration(ess);
-        
+
         RacingProcedureConfigurationImpl basic = new RacingProcedureConfigurationImpl();
         basic.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.BASIC));
         basic.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.BASIC));
@@ -87,22 +101,38 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
     @Override
     public void store() {
         ExLog.i(preferences.getContext(), TAG, "Storing new racing procedure configuration.");
-        
+
         if (configuration.getDefaultRacingProcedureType() != null) {
             preferences.setDefaultRacingProcedureType(configuration.getDefaultRacingProcedureType());
         }
-        
+
         if (configuration.getDefaultCourseDesignerMode() != null) {
             preferences.setDefaultCourseDesignerMode(configuration.getDefaultCourseDesignerMode());
+        }
+
+        if (configuration.getDefaultProtestTimeDuration() != null) {
+            preferences.setDefaultProtestTimeDurationInMinutes(
+                    (int) configuration.getDefaultProtestTimeDuration().asMinutes());
+            preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(false);
+        } else {
+            preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
         }
 
         if (configuration.getRRS26Configuration() != null) {
             RRS26Configuration config = configuration.getRRS26Configuration();
             storeRacingProcedureConfiguration(RacingProcedureType.RRS26, config);
             if (config.getStartModeFlags() != null) {
-                preferences.setRRS26StartmodeFlags(new HashSet<Flags>(config.getStartModeFlags()));
+                preferences.setRRS26StartmodeFlags(new HashSet<>(config.getStartModeFlags()));
             }
         }
+        if (configuration.getSWCStartConfiguration() != null) {
+            SWCStartConfiguration config = configuration.getSWCStartConfiguration();
+            storeRacingProcedureConfiguration(RacingProcedureType.SWC, config);
+            if (config.getStartModeFlags() != null) {
+                preferences.setSWCStartmodeFlags(new HashSet<>(config.getStartModeFlags()));
+            }
+        }
+
         if (configuration.getGateStartConfiguration() != null) {
             GateStartConfiguration config = configuration.getGateStartConfiguration();
             storeRacingProcedureConfiguration(RacingProcedureType.GateStart, config);

@@ -17,7 +17,8 @@ public class AlwaysFailingGPSFixImporter implements GPSFixImporter {
     }
 
     @Override
-    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, String sourceName)
+    public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
+            String sourceName)
             throws FormatNotSupportedException, IOException {
         int read = 0;
         while (inputStream.read() != -1 && (failAfterAtMostSoManyBytes == -1 || read++ < failAfterAtMostSoManyBytes)) {

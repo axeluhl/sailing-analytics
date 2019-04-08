@@ -1,6 +1,6 @@
 package com.sap.sailing.polars.mining;
 
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sse.common.Bearing;
 
 /**
  * Rounds a {@link Bearing} and provides {@link #hashCode()} and {@link #equals(Object)} methods.

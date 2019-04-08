@@ -5,13 +5,14 @@ Bundle-SymbolicName: com.sap.sailing.media.persistence.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.mongodb.mongo-java-driver;bundle-version="2.13.0",
- com.sap.sse.mongodb,
+Require-Bundle: com.sap.sse.mongodb,
  org.json.simple;bundle-version="1.1.0",
  org.hamcrest.core;bundle-version="1.1.0",
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  com.sap.sailing.domain.persistence;bundle-version="1.0.0",
  com.sap.sailing.gwt.ui;bundle-version="1.0.0",
  com.sap.sailing.domain.common;bundle-version="1.0.0",
  org.hamcrest;bundle-version="1.1.0",
- com.sap.sse.common
+ com.sap.sse.common,
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
+Automatic-Module-Name: com.sap.sailing.media.persistence.test

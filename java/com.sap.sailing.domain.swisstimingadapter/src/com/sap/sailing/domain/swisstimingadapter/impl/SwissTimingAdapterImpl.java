@@ -59,94 +59,94 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
 
     @Override
     public List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname,
-            int port) throws InterruptedException, UnknownHostException, IOException,
-            ParseException {
+            int port) throws InterruptedException, UnknownHostException, IOException, ParseException {
         List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
         // TODO --> Frank: this needs to come from Manage2Sail and its JSON document somehow...
         return result;
     }
 
     @Override
-    public RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo,
-            String raceID, String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
+    public RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID,
+            String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
             StartList startList, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds,
-            boolean useInternalMarkPassingAlgorithm)
-            throws Exception {
-        return trackerManager.addRace(regattaToAddTo, swissTimingDomainFactory.createTrackingConnectivityParameters(
-                hostname, port, raceID, raceName, raceDescription, boatClass, startList,
-                DEFAULT_SWISSTIMING_LIVE_DELAY_IN_MILLISECONDS, swissTimingFactory, swissTimingDomainFactory,
-                raceLogStore, regattaLogStore, useInternalMarkPassingAlgorithm), timeoutInMilliseconds);
+            boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
+            String updateURL, String updateUsername, String updatePassword) throws Exception {
+        return trackerManager.addRace(regattaToAddTo,
+                swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port, raceID, raceName,
+                        raceDescription, boatClass, startList, DEFAULT_SWISSTIMING_LIVE_DELAY_IN_MILLISECONDS,
+                        swissTimingFactory, swissTimingDomainFactory, raceLogStore, regattaLogStore,
+                        useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination, updateURL, updateUsername, updatePassword),
+                timeoutInMilliseconds);
     }
 
     @Override
     public StartList readStartListForRace(String raceId, RegattaResults regattaResults) {
-    	StartList result = null;
+        StartList result = null;
         List<Competitor> competitors = new ArrayList<Competitor>();
 
-		Map<String, Person> persons = new HashMap<String, Person>(); 
-		Map<String, Boat> boats = new HashMap<String, Boat>(); 
-		Map<String, Team> teams = new HashMap<String, Team>(); 
-		// collect boats, persons and teams
+        Map<String, Person> persons = new HashMap<String, Person>();
+        Map<String, Boat> boats = new HashMap<String, Boat>();
+        Map<String, Team> teams = new HashMap<String, Team>();
+        // collect boats, persons and teams
         for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
-        	if(o instanceof Person) {
-        		Person p = (Person) o;
-        		persons.put(p.getPersonID(), p);
-        	} else if (o instanceof Boat) {
-        		Boat b = (Boat) o;
-        		boats.put(b.getBoatID(), b);
-        	} else if (o instanceof Team) {
-        		Team t = (Team) o;
-        		teams.put(t.getTeamID(), t);
-        	}
+            if (o instanceof Person) {
+                Person p = (Person) o;
+                persons.put(p.getPersonID(), p);
+            } else if (o instanceof Boat) {
+                Boat b = (Boat) o;
+                boats.put(b.getBoatID(), b);
+            } else if (o instanceof Team) {
+                Team t = (Team) o;
+                teams.put(t.getTeamID(), t);
+            }
         }
-        
         for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
             if (o instanceof Event) {
-            	Event event = (Event) o;
+                Event event = (Event) o;
                 for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
                     if (eventO instanceof Division) {
                         Division division = (Division) eventO;
-                        for(Object seriesResultOrRaceResultOrTRResult: division.getSeriesResultOrRaceResultOrTRResult()) {
-                        	if(seriesResultOrRaceResultOrTRResult instanceof RaceResult) {
-                        		RaceResult raceResult = (RaceResult) seriesResultOrRaceResultOrTRResult;
-                        		if(raceResult.getRaceID().equals(raceId)) {
-                        			Team team = teams.get(raceResult.getTeamID());
-                        			if(team != null) {
-                        				Boat boat = boats.get(team.getBoatID());
-                        				if(boat != null) {
-                        					List<CrewMember> crew = new ArrayList<CrewMember>(); 
-                        					for(Crew crewMember: team.getCrew()) {
-                            					Person person = persons.get(crewMember.getPersonID());
-                        						crew.add(new CrewMemberImpl(person.getGivenName() + " " + person.getFamilyName(),
-                        								person.getNOC().name(), crewMember.getPosition().name()));
-                        					}
-                        					Crew firstCrewMember = team.getCrew().get(0);
-                        					Person person = persons.get(firstCrewMember.getPersonID());
-                        					String nationality = person.getNOC().name();
-                        					CompetitorWithID competitor = new CompetitorWithID(team.getTeamID(), boat.getSailNumber(), nationality, team.getTeamName(), crew);
-                                			competitors.add(competitor);
-                        				}
-                        			}
-                        		}
-                        	}
+                        for (Object seriesResultOrRaceResultOrTRResult : division.getSeriesResultOrRaceResultOrTRResult()) {
+                            if (seriesResultOrRaceResultOrTRResult instanceof RaceResult) {
+                                RaceResult raceResult = (RaceResult) seriesResultOrRaceResultOrTRResult;
+                                if (raceResult.getRaceID().equals(raceId)) {
+                                    Team team = teams.get(raceResult.getTeamID());
+                                    if (team != null) {
+                                        Boat boat = boats.get(team.getBoatID());
+                                        if (boat != null) {
+                                            List<CrewMember> crew = new ArrayList<CrewMember>();
+                                            for (Crew crewMember : team.getCrew()) {
+                                                Person person = persons.get(crewMember.getPersonID());
+                                                crew.add(new CrewMemberImpl(
+                                                        person.getGivenName() + " " + person.getFamilyName(),
+                                                        (person.getNOC()==null)?null:(person.getNOC().name()), crewMember.getPosition().name()));
+                                            }
+                                            String nationality = team.getNOC()==null?null:team.getNOC().name();
+                                            CompetitorWithID competitor = new CompetitorWithID(team.getTeamID(),
+                                                    boat.getSailNumber(), nationality, team.getTeamName(), crew);
+                                            competitors.add(competitor);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-        if(!competitors.isEmpty()) {
-    		result = new StartListImpl(raceId, competitors);
+        if (!competitors.isEmpty()) {
+            result = new StartListImpl(raceId, competitors);
         }
-
         return result;
     }
-    
+
     @Override
     public RegattaResults readRegattaEntryListFromXrrUrl(String xrrEntryListUrl) throws IOException, JAXBException {
-    	// try to read the entry list from manage2sail
+        // try to read the entry list from manage2sail
         URL regattaEntryListUrl = new URL(xrrEntryListUrl);
         URLConnection regattaEntryListConn = regattaEntryListUrl.openConnection();
-        RegattaResults regattaResults = ParserFactory.INSTANCE.createParser((InputStream) regattaEntryListConn.getContent(), xrrEntryListUrl).parse();
+        RegattaResults regattaResults = ParserFactory.INSTANCE
+                .createParser((InputStream) regattaEntryListConn.getContent(), xrrEntryListUrl).parse();
         return regattaResults;
     }
 }

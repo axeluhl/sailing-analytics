@@ -117,6 +117,21 @@ public abstract class BaseDataLabels<T extends BaseDataLabels> extends Labels<T>
     }
 
     /**
+     * Convenience method for setting the 'useHTML' option for the data labels.  Equivalent to:
+     * <pre><code>
+     *     labels.setOption("useHTML", false);
+     * </code></pre>
+     * Whether to use HTML to render the data label text.
+     * Using HTML allows for advanced formatting, images and reliable bi-directional text rendering.
+     * Note that exported images won't respect the HTML, and that HTML won't respect Z-index settings.
+     * @param useHTML 'true' to use HTML to render label texts.
+     * @return A reference to this {@link BaseDataLabels} instance for convenient method chaining.
+     */
+    public T setUseHTML(Boolean useHTML) {
+        return this.setOption("useHTML", useHTML);
+    }
+
+    /**
      * Convenience method for setting the 'format' option for a dataLabel.  Equivalent to:
      * <pre><code>
      *     dataLabel.setOption("format", "{y} mm");

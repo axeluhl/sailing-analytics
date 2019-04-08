@@ -1,25 +1,26 @@
 package com.sapsailing.xrr.structureimport.eventimport;
 
 import java.io.IOException;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class EventParser {
+    private static final Logger logger = Logger.getLogger(EventParser.class.getName());
     
     public EventResults parseEvent(String url){
-        
         EventResults eventResults = null;
-        
         JSONObject jsonRoot;
         try {
             InputStreamReader streamReader = getStreamReader(url);
@@ -29,7 +30,6 @@ public class EventParser {
             String name = (String) jsonRoot.get("Name");
             String xrrUrl = (String) jsonRoot.get("XrrUrl");
             eventResults = new EventResults(id, name, xrrUrl);
-            
             JSONArray jsonRegattas = (JSONArray) jsonRoot.get("Regattas");
             for (Object regattaObject: jsonRegattas) {
                 RegattaJSON regatta = new RegattaJSON();
@@ -42,39 +42,24 @@ public class EventParser {
                 regatta.setXrrPreliminaryUrl((String) jsonRegatta.get("XrrPreliminaryUrl"));
                 regatta.setXrrFinalUrl((String) jsonRegatta.get("XrrFinalUrl"));
                 regatta.setHtmlUrl((String) jsonRegatta.get("HtmlUrl"));
-                
                 eventResults.addRegatta(regatta);
-            
             }
-            
             streamReader.close();
-            
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error during parsing event structure", e);
         }
-        
         return eventResults;
     }
     
     private InputStreamReader getStreamReader(String url) throws UnsupportedEncodingException{
-        
         InputStream is = null;
-        
         URLConnection connection = null;
         try {
-            connection = new URL(url).openConnection();
+            connection = HttpUrlConnectionHelper.redirectConnection(new URL(url));
             is = connection.getInputStream();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error during connecting to event structure url "+url, e);
         }
-        
         return new InputStreamReader(is, "UTF-8");
-        
     }
 }

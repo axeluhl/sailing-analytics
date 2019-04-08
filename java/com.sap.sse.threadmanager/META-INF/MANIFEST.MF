@@ -19,3 +19,4 @@ Import-Package: javax.ws.rs;version="1.1.1",
  javax.ws.rs.core,
  org.osgi.framework;version="1.8.0"
 Web-ContextPath: /threadmanager
+Automatic-Module-Name: com.sap.sse.threadmanager

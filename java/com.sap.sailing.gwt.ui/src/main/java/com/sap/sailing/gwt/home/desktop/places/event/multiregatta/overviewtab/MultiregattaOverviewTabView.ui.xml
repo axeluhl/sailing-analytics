@@ -1,16 +1,18 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
-        	 xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'>
-  	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+             xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'
+             xmlns:sp='urn:import:com.sap.sailing.gwt.home.shared.partials'>
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <g:HTMLPanel>
     <dp:eventstage.EventOverviewStage ui:field="stageUi" />
     <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}">
+        <g:SimplePanel ui:field="descriptionUi" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" />
         <dp:liveraces.LiveRacesList ui:field="liveRacesListUi" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" />
         <dp:regattanavigation.DropdownFilter ui:field="boatCategoryFilterUi" 
-        		addStyleNames="{res.mainCss.spacermargintopmedium} {res.mainCss.spacermarginbottombig}"/>
-		<dp:multiregattalist.MultiRegattaList ui:field="regattaListUi" />
-		<dp:statistics.StatisticsBox addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" ui:field="statisticsBoxUi"/>
+                addStyleNames="{res.mainCss.spacermargintopmedium} {res.mainCss.spacermarginbottombig}"/>
+        <dp:multiregattalist.MultiRegattaList ui:field="regattaListUi" />
+        <sp:statistics.EventStatisticsBox addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" ui:field="statisticsBoxUi"/>
       </div>
     </div>
     <dp:raceoffice.RaceOfficeSection ui:field="raceOfficeSectionUi" />

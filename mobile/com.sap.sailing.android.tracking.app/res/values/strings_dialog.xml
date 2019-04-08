@@ -1,4 +1,4 @@
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources>
 
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -6,7 +6,7 @@
     <string name="confirm_data_you_are_signed_in_as_sail_id">You are signing in as {sail_id}</string>
     <string name="confirm_data_is_correct">OK</string>
     <string name="decline_data_is_incorrect">That\'s not me!</string>
-    <string name="confirm_delete_checkin">Do you really want to delete this checkin?</string>
+    <string name="confirm_delete_checkin">Do you really want to delete this check-in?</string>
     <string name="download_team_image_message">Downloading team image...</string>
     <string name="checkout_warning_message">Do you REALLY want to logout? You will need to re-login with the provided QR code to access your regatta!</string>
 </resources>

@@ -5,14 +5,15 @@ Bundle-SymbolicName: com.sap.sse.security.ui
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sse.security.ui.server.Activator
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.5.1"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: WEB-INF/classes/
-Require-Bundle: javax.servlet;bundle-version="2.5.0",
+Require-Bundle: javax.servlet;bundle-version="3.1.0",
  com.sap.sse.gwt,
- com.google.gwt.osgi;bundle-version="2.7.0",
+ com.google.gwt.user;bundle-version="2.8.2";resolution:=optional,
+ com.google.gwt.servlet;bundle-version="2.8.2",
  com.sap.sse.security,
  org.json.simple,
  com.sap.sailing.domain.common,
@@ -31,8 +32,10 @@ Export-Package: com.sap.sse.security.shared,
  com.sap.sse.security.ui.authentication.create,
  com.sap.sse.security.ui.authentication.decorator,
  com.sap.sse.security.ui.authentication.generic,
+ com.sap.sse.security.ui.authentication.generic.resource,
  com.sap.sse.security.ui.authentication.generic.sapheader,
  com.sap.sse.security.ui.authentication.info,
+ com.sap.sse.security.ui.authentication.login,
  com.sap.sse.security.ui.authentication.recover,
  com.sap.sse.security.ui.authentication.signin,
  com.sap.sse.security.ui.authentication.view,
@@ -41,10 +44,12 @@ Export-Package: com.sap.sse.security.shared,
  com.sap.sse.security.ui.client.i18n,
  com.sap.sse.security.ui.loginpanel,
  com.sap.sse.security.ui.server,
+ com.sap.sse.security.ui.settings,
  com.sap.sse.security.ui.shared,
- com.sap.sse.security.ui.userprofile.desktop.userheader,
- com.sap.sse.security.ui.userprofile.mobile.userheader,
- com.sap.sse.security.ui.userprofile.shared.userheader,
- com.sap.sse.security.ui.userprofile.shared.userdetails,
  com.sap.sse.security.ui.userprofile.desktop.userdetails,
- com.sap.sse.security.ui.userprofile.mobile.userdetails
+ com.sap.sse.security.ui.userprofile.desktop.userheader,
+ com.sap.sse.security.ui.userprofile.mobile.userdetails,
+ com.sap.sse.security.ui.userprofile.mobile.userheader,
+ com.sap.sse.security.ui.userprofile.shared.userdetails,
+ com.sap.sse.security.ui.userprofile.shared.userheader
+Automatic-Module-Name: com.sap.sse.security.ui

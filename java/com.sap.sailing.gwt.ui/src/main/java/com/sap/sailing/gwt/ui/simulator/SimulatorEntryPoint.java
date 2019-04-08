@@ -7,16 +7,21 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
-import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.resources.Highcharts;
+import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
+import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
+import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
+import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 
 public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
 
@@ -45,9 +50,9 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
     @Override
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithExport();
-    	super.doOnModuleLoad();
+        super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
-    	checkUrlParameters();
+        checkUrlParameters();
         createSimulatorPanel();
     }
 
@@ -181,41 +186,26 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
         }
     }
 
-    private FlowPanel createLogoAndTitlePanel(SimulatorMainPanel simulatorPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages().strategySimulatorTitle(), null,
-                getStringMessages(), this, getUserService());
-        /*{
-            @Override
-            public void onResize() {
-                super.onResize();
-                if (isSmallWidth()) {
-                    remove(globalNavigationPanel);
-                } else {
-                    add(globalNavigationPanel);
-                }
-            }
-        };*/
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
-        return logoAndTitlePanel;
-    }
-
     private void createSimulatorPanel() {
-        SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, getStringMessages(), this, xRes, yRes, border, streamletPars,
-                autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showLineGuides, showStreamlets, showMapControls);
-
-        DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
-        RootLayoutPanel.get().add(p);
-
-        // FlowPanel toolbarPanel = new FlowPanel();
-        // toolbarPanel.add(simulatorPanel.getNavigationWidget());
-        // p.addNorth(toolbarPanel, 40);
-
-        FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(simulatorPanel);
-
-        p.addNorth(logoAndTitlePanel, 68);
-        p.add(simulatorPanel);
-        p.addStyleName("dockLayoutPanel");
+        SAPSailingHeaderWithAuthentication header  = new SAPSailingHeaderWithAuthentication(getStringMessages().strategySimulatorTitle());
+        
+        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
+        authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+            @Override
+            public Widget get() {
+                SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, getStringMessages(), SimulatorEntryPoint.this, xRes, yRes, border, streamletPars,
+                        autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showLineGuides, showStreamlets, showMapControls, getUserService());
+                return simulatorPanel;
+            }
+        });
+        
+        RootLayoutPanel rootPanel = RootLayoutPanel.get();
+        DockLayoutPanel panel = new DockLayoutPanel(Unit.PX);
+        panel.addNorth(header, 75);
+        panel.add(authorizedContentDecorator);
+        panel.addStyleName("dockLayoutPanel");
+        rootPanel.add(panel);
     }
-
+    
 }

@@ -124,14 +124,27 @@
                 android:scaleX="@integer/picker_scale"
                 android:scaleY="@integer/picker_scale">
 
-                <include
-                    android:id="@+id/time_picker"
-                    layout="@layout/time_picker"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true" />
-            </RelativeLayout>
+                    android:layout_centerInParent="true"
+                    android:orientation="horizontal">
 
+                    <include
+                        android:id="@+id/time_picker"
+                        layout="@layout/time_picker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <NumberPicker
+                        android:id="@+id/second_picker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:descendantFocusability="blocksDescendants"
+                        android:visibility="visible" />
+                </LinearLayout>
+            </RelativeLayout>
         </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

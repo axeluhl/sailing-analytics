@@ -13,7 +13,6 @@ import java.net.URL;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -24,6 +23,7 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.xmlexport.LeaderboardData;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class XMLExportTest extends OnlineTracTracBasedTest {
     
@@ -44,7 +44,6 @@ public class XMLExportTest extends OnlineTracTracBasedTest {
         boolean result = getTrackedRace().recordWind(new WindImpl(/* position */null, getTrackedRace().getStartOfRace(), new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(65))),
                 new WindSourceImpl(WindSourceType.WEB));
         assert result==true;
-
     }
     
     protected String getExpectedEventName() {
@@ -70,7 +69,8 @@ public class XMLExportTest extends OnlineTracTracBasedTest {
         }
         String resultData = leaderboardData.getResultXML();
         assertNotNull(resultData);
-        assertTrue(resultData.length()>261000);
+        int resultDataLength = resultData.length();
+        assertTrue("resultData length was " + resultDataLength + ", but expected to be > 220000", resultDataLength > 220000);
     }
 
 }

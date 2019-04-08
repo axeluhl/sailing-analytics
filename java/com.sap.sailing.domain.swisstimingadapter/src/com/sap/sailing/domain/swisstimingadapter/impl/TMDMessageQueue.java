@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -30,14 +31,14 @@ public class TMDMessageQueue {
     
     private static class TMDMessageContents {
         private final String raceID;
-        private final String boatID;
+        private final String competitorIdAsString;
         private final List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds;
 
-        public TMDMessageContents(String raceID, String boatID,
+        public TMDMessageContents(String raceID, String competitorIdAsString,
                 List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
             super();
             this.raceID = raceID;
-            this.boatID = boatID;
+            this.competitorIdAsString = competitorIdAsString;
             this.markIndicesRanksAndTimesSinceStartInMilliseconds = markIndicesRanksAndTimesSinceStartInMilliseconds;
         }
 
@@ -45,8 +46,8 @@ public class TMDMessageQueue {
             return raceID;
         }
 
-        public String getBoatID() {
-            return boatID;
+        public String getCompetitorIdAsString() {
+            return competitorIdAsString;
         }
 
         public List<Util.Triple<Integer, Integer, Long>> getMarkIndicesRanksAndTimesSinceStartInMilliseconds() {
@@ -55,7 +56,7 @@ public class TMDMessageQueue {
         
         @Override
         public String toString() {
-            StringBuilder result = new StringBuilder("TMD|"+getRaceID()+"|"+getBoatID()+"|");
+            StringBuilder result = new StringBuilder("TMD|"+getRaceID()+"|"+getCompetitorIdAsString()+"|");
             result.append(getMarkIndicesRanksAndTimesSinceStartInMilliseconds().size());
             result.append('|');
             for (Util.Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : getMarkIndicesRanksAndTimesSinceStartInMilliseconds()) {
@@ -82,8 +83,8 @@ public class TMDMessageQueue {
         queuedMessages = new HashSet<>();
     }
     
-    public synchronized void enqueue(String raceID, String boatID, List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
-        final TMDMessageContents message = new TMDMessageContents(raceID, boatID, markIndicesRanksAndTimesSinceStartInMilliseconds);
+    public synchronized void enqueue(String raceID, String competitorIdAsString, List<Util.Triple<Integer, Integer, Long>> markIndicesRanksAndTimesSinceStartInMilliseconds) {
+        final TMDMessageContents message = new TMDMessageContents(raceID, competitorIdAsString, markIndicesRanksAndTimesSinceStartInMilliseconds);
         queuedMessages.add(message);
         logger.info("Queued TMD message "+message+" for replay when start time has been received");
     }
@@ -101,10 +102,9 @@ public class TMDMessageQueue {
         // otherwise, this could lead to the "guessed time" to 
         while (i.hasNext()) {
             TMDMessageContents messageContents = i.next();
-            Competitor competitor = raceTracker.getCompetitorByBoatIDAndRaceIDOrBoatClass(messageContents.getBoatID(),
-                    messageContents.getRaceID(), raceTracker.getBoatClass());
+            Competitor competitor = raceTracker.getDomainFactory().getBaseDomainFactory().getExistingCompetitorById(UUID.fromString(messageContents.getCompetitorIdAsString()));
             if (competitor == null) {
-                logger.info("Received timing data for boat ID " + messageContents.getBoatID() + " in race " + messageContents.getRaceID()
+                logger.info("Received timing data for boat ID " + messageContents.getCompetitorIdAsString() + " in race " + messageContents.getRaceID()
                         + " but couldn't find a competitor with that boat ID in this race. Ignoring.");
             } else {
                 NavigableSet<MarkPassing> oldMarkPassings = trackedRace.getMarkPassings(competitor);
@@ -156,7 +156,7 @@ public class TMDMessageQueue {
         while (i.hasNext()) {
             TMDMessageContents messageContents = i.next();
             logger.info("Re-Playing TMD message "+messageContents+" with new race start time "+trackedRace.getStartOfRace());
-            raceTracker.receivedTimingData(messageContents.getRaceID(), messageContents.getBoatID(),
+            raceTracker.receivedTimingData(messageContents.getRaceID(), messageContents.getCompetitorIdAsString(),
                     messageContents.getMarkIndicesRanksAndTimesSinceStartInMilliseconds());
             i.remove();
         }

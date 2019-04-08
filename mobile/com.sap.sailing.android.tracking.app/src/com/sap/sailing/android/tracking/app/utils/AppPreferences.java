@@ -3,15 +3,15 @@ package com.sap.sailing.android.tracking.app.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.sap.sailing.android.shared.util.BaseAppPreferences;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TrackingService;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-
-import com.sap.sailing.android.shared.util.BaseAppPreferences;
-import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 
 public class AppPreferences extends BaseAppPreferences {
 
@@ -24,11 +24,6 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public static final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl("Tracking App", 0);
-
-    public String getServerUploadTeamImagePath() {
-        return PrefUtils.getString(context, R.string.preference_server_team_image_upload_path,
-                R.string.preference_server_team_image_upload_path);
-    }
 
     public String getServerGpsFixesPostPath() {
         return PrefUtils.getString(context, R.string.preference_server_gps_fixes_post_path,
@@ -54,8 +49,8 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public String getServerLeaderboardPath(String leaderboardName) {
-        return context.getString(R.string.preference_server_leaderboard_path).replace(
-                "{leaderboard_name}", leaderboardName);
+        return context.getString(R.string.preference_server_leaderboard_path).replace("{leaderboard_name}",
+                leaderboardName);
     }
 
     public String getServerCompetitorPath(String competitorId) throws UnsupportedEncodingException {
@@ -63,9 +58,23 @@ public class AppPreferences extends BaseAppPreferences {
                 URLEncoder.encode(competitorId, "UTF-8").replaceAll("\\+", "%20"));
     }
 
-    public String getServerCompetiorTeamPath(String competitorId){
-        return context.getString(R.string.preference_server_team_info_path).replace("{competitor_id}",
-            competitorId);
+    public String getServerUploadTeamImagePath(String competitorId) throws UnsupportedEncodingException {
+        return context.getString(R.string.preference_server_team_image_upload_path).replace("{competitor_id}",
+                URLEncoder.encode(competitorId, "UTF-8").replaceAll("\\+", "%20"));
+    }
+
+    public String getServerCompetitorTeamPath(String competitorId) {
+        return context.getString(R.string.preference_server_team_info_path).replace("{competitor_id}", competitorId);
+    }
+
+    public String getServerMarkPath(String leaderboardName, String markId) {
+        String path = context.getString(R.string.preference_server_mark_path);
+        return path.replace("{leaderboardName}", leaderboardName).replace("{mark_id}", markId);
+    }
+
+    public String getServerBoatPath(String boatId) {
+        String path = context.getString(R.string.preference_server_boat_path);
+        return path.replace("{boat_id}", boatId);
     }
 
     public int getGPSFixInterval() {
@@ -75,19 +84,12 @@ public class AppPreferences extends BaseAppPreferences {
         return value == null ? -1 : Integer.valueOf(value);
     }
 
-    public int getGPSFixFastestInterval() {
-        // EditTextPreference saves value as string, even if android:inputType="number" is set
-        String value = PrefUtils.getString(context, R.string.preference_gps_fix_fastest_interval_ms_key,
-                R.string.preference_gps_fastest_fix_interval_ms_default);
-        return value == null ? -1 : Integer.valueOf(value);
-    }
-
     public String getEventId() {
         return PrefUtils.getString(context, R.string.preference_eventid_key, R.string.preference_eventid_default);
     }
 
     public void setEventId(String id) {
-        preferences.edit().putString(context.getString(R.string.preference_eventid_key), id).commit();
+        preferences.edit().putString(context.getString(R.string.preference_eventid_key), id).apply();
     }
 
     public String getCompetitorId() {
@@ -96,7 +98,7 @@ public class AppPreferences extends BaseAppPreferences {
 
     public void setBatteryIsCharging(boolean batteryIsCharging) {
         preferences.edit().putBoolean(context.getString(R.string.preference_battery_is_charging), batteryIsCharging)
-                .commit();
+                .apply();
     }
 
     public boolean getBatteryIsCharging() {
@@ -104,22 +106,13 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public void setCompetitorId(String id) {
-        preferences.edit().putString(context.getString(R.string.preference_competitor_key), id).commit();
-    }
-
-    public void setEnergySavingEnabledByUser(boolean newValue) {
-        preferences.edit().putBoolean(context.getString(R.string.preference_energy_saving_enabled_key), newValue)
-                .commit();
-    }
-
-    public boolean getEnergySavingEnabledByUser() {
-        return preferences.getBoolean(context.getString(R.string.preference_energy_saving_enabled_key), false);
+        preferences.edit().putString(context.getString(R.string.preference_competitor_key), id).apply();
     }
 
     public void setDisplayHeadingWithSubtractedDeclination(boolean newValue) {
         preferences.edit()
                 .putBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key), newValue)
-                .commit();
+                .apply();
     }
 
     public boolean getDisplayHeadingWithSubtractedDeclination() {
@@ -128,8 +121,7 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public void setTrackingTimerStarted(long milliseconds) {
-        preferences.edit().putLong(context.getString(R.string.preference_tracking_timer_started), milliseconds)
-                .commit();
+        preferences.edit().putLong(context.getString(R.string.preference_tracking_timer_started), milliseconds).apply();
     }
 
     public long getTrackingTimerStarted() {
@@ -137,7 +129,7 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public void setTrackerIsTracking(boolean isTracking) {
-        preferences.edit().putBoolean(context.getString(R.string.preference_tracker_is_tracking), isTracking).commit();
+        preferences.edit().putBoolean(context.getString(R.string.preference_tracker_is_tracking), isTracking).apply();
     }
 
     public boolean getTrackerIsTracking() {
@@ -147,20 +139,25 @@ public class AppPreferences extends BaseAppPreferences {
     public void setTrackerIsTrackingCheckinDigest(String checkinDigest) {
         preferences.edit()
                 .putString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), checkinDigest)
-                .commit();
+                .apply();
     }
 
     public String getTrackerIsTrackingCheckinDigest() {
         return preferences.getString(context.getString(R.string.preference_tracker_is_tracking_checkin_digest), null);
     }
 
-    public static boolean getPrintDatabaseOperationDebugMessages() {
-        return false;
+    public void setMessageResendIntervalInMillis(int intervalInMillis) {
+        preferences.edit()
+                .putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), intervalInMillis)
+                .apply();
     }
 
-    public void setMessageResendInterval(int interval) {
-        preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), interval)
-                .commit();
+    /**
+     * Returns the message sending interval in milliseconds
+     */
+    public int getMessageSendingIntervalInMillis() {
+        return preferences.getInt(context.getString(R.string.preference_messageResendIntervalMillis_key),
+                /* default */ TrackingService.UPDATE_INTERVAL_IN_MILLIS_DEFAULT);
     }
 
     public boolean hasFailedUpload(String key) {
@@ -168,10 +165,11 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public void setFailedUpload(String key) {
-        pref.edit().putBoolean(key, true).commit();
+        pref.edit().putBoolean(key, true).apply();
     }
 
     public void removeFailedUpload(String key) {
-        pref.edit().remove(key).commit();
+        pref.edit().remove(key).apply();
     }
+
 }

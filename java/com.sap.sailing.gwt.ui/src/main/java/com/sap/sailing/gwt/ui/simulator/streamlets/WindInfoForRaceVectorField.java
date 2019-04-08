@@ -14,7 +14,6 @@ import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -22,6 +21,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.simulator.streamlets.PositionDTOWeigher.AverageLatitudeProvider;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Implements the {@link VectorField} interface by providing real wind data from a <code>TrackedRace</code> which has
@@ -48,8 +48,9 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     private double averageLatitudeCosine;
     private double knotsInDegreePerFrame;
     private final CoordinateSystem coordinateSystem;
-    private boolean colored = false;
     
+    private final BearingWithConfidenceCluster<Position> bearingCluster;
+
     private final Comparator<WindDTO> windByRequestTimePointComparator = new Comparator<WindDTO>() {
         @Override
         public int compare(WindDTO o1, WindDTO o2) {
@@ -63,6 +64,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         this.windInfoForRace = windInfoForRace;
         this.knotsInDegreePerFrame = 1.0 / (60*3600) / framesPerSecond; // 1kn = 1/60 deg/h = 1/(60*3600) deg/s
         weigher = new PositionDTOWeigher(/* halfConfidenceDistance */new MeterDistance(100), this);
+        bearingCluster = new BearingWithConfidenceCluster<>(weigher);
     }
     
     /**
@@ -101,11 +103,8 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         final Position p = coordinateSystem.getPosition(mappedPosition);
         double speedConfidenceSum = 0;
         double knotSpeedSumScaledByConfidence = 0;
-        final BearingWithConfidenceCluster<Position> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
+        bearingCluster.clear();
         for (final Entry<WindSource, WindTrackInfoDTO> windSourceAndWindTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
-            /*if ((windSourceAndWindTrack.getKey().name().equals("RACECOMMITTEE"))||(windSourceAndWindTrack.getKey().name().equals("COURSE_BASED"))) {
-                continue;
-            }*/
            if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
                 WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue(), at);
                 if (timewiseClosestFixForWindSource != null) {
@@ -215,35 +214,4 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     public double getParticleFactor() {
         return 0.5;
     }
-
-    public void setColors(boolean isColored) {
-        this.colored = isColored;
-    }
-
-    public boolean getColors() {
-        return this.colored;
-    }
-
-    /**
-     * {@link #MAX_WIND_SPEED_IN_KNOTS maximum wind speed} is fully opaque; zero speed is fully transparent
-     */
-    @Override
-    public String getColor(double speed) {
-        if (this.colored) {
-            double h;
-            if (speed <= 4.0) {
-                h = 240.0;
-            } else if (speed <= 12.0) {
-                h = 120.0 + (12.0 - speed) / (12.0 - 4.0) * (240.0 - 120.0);
-            } else if (speed <= 20.0) {
-                h = 0.0 + (20.0 - speed) / (20.0 - 12.0) * (120.0 - 0.0);
-            } else {
-                h = 0.0;
-            }
-            return "hsl(" + Math.round(h) + ", 100%, 50%)";
-        } else {
-            return "rgba(255,255,255," + Math.min(1.0, 0.5 + 0.6 * speed / MAX_WIND_SPEED_IN_KNOTS) + ")";
-        }
-    }
-
 }

@@ -87,10 +87,11 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService()
-                .getAllMediaTracks(), getService().getGPSFixStore(), exportWind, deviceConfigurations);
+                        .getAllMediaTracks(),
+                getService().getSensorFixStore(), exportWind, deviceConfigurations);
         final StreamingOutput streamingOutput;
         if (compress) {
-            streamingOutput= new CompressingStreamingOutput(masterData, competitorIds, startTime);
+            streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime);
         } else {
             streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime);
         }

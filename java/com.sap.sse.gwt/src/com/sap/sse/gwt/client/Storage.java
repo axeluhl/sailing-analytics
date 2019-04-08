@@ -3,6 +3,7 @@ package com.sap.sse.gwt.client;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.shared.HandlerRegistration;
 
@@ -25,14 +26,23 @@ public class Storage extends JavaScriptObject {
     
     private static void registerAsStorageEventHandler() {
         if (isSupported()) {
-            registerAsStorageEventHandlerImpl();
+            try {
+                registerAsStorageEventHandlerImpl();
+            } catch (Exception e) {
+                // in classic DevMode with Internet Explorer an exception is thrown here;
+                // to continue support of classic DevMode we'll simply catch and log the exception here:
+                GWT.log(e.getMessage());
+            }
         }
     }
 
     private static native void registerAsStorageEventHandlerImpl() /*-{
-        $wnd.addEventListener("storage", function(e) {
-            @com.sap.sse.gwt.client.Storage::onStorageEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(e);
-        });
+        $wnd
+                .addEventListener(
+                        "storage",
+                        function(e) {
+                            @com.sap.sse.gwt.client.Storage::onStorageEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(e);
+                        });
     }-*/;
 
     public static HandlerRegistration addStorageEventHandler(final StorageEvent.Handler handler) {
@@ -126,5 +136,9 @@ public class Storage extends JavaScriptObject {
 
     public final native int getLength() /*-{
         return this.length;
+    }-*/;
+
+    public final native String[] getAllKeys()/*-{
+        return this.keys();
     }-*/;
 }

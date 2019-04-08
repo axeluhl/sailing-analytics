@@ -14,13 +14,14 @@ public class ManagedRaceCalculator {
     private AbstractLogEventAuthor author;
     private ConfigurationLoader<RegattaConfiguration> configuration;
 
-    public ManagedRaceCalculator(RaceLog raceLog, AbstractLogEventAuthor author, ConfigurationLoader<RegattaConfiguration> configuration) {
+    public ManagedRaceCalculator(RaceLog raceLog, AbstractLogEventAuthor author,
+            ConfigurationLoader<RegattaConfiguration> configuration) {
         this.raceLog = raceLog;
         this.author = author;
         this.configuration = configuration;
     }
 
-    public RaceState calculateRaceState(){
+    public RaceState calculateRaceState() {
         return RaceStateImpl.create(new AndroidRaceLogResolver(), raceLog, author, configuration);
     }
 }

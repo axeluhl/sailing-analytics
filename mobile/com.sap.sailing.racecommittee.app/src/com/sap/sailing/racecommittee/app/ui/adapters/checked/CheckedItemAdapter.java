@@ -2,6 +2,11 @@ package com.sap.sailing.racecommittee.app.ui.adapters.checked;
 
 import java.util.List;
 
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
 import android.content.Context;
 import android.graphics.Typeface;
 import android.text.TextUtils;
@@ -11,11 +16,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
 
@@ -62,11 +62,14 @@ public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
             }
         } else if (!item.isEnabled()) {
             mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_white_10));
+        } else {
+            mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
         }
 
         if (!TextUtils.isEmpty(item.getSubtext())) {
             subTextView.setText(item.getSubtext());
-            subTextView.setTextColor(ThemeHelper.getColor(getContext(), position == checkedPosition ? R.attr.white : R.attr.sap_light_gray));
+            subTextView.setTextColor(ThemeHelper.getColor(getContext(),
+                    position == checkedPosition ? R.attr.white : R.attr.sap_light_gray));
             subTextView.setVisibility(View.VISIBLE);
             mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
         } else {

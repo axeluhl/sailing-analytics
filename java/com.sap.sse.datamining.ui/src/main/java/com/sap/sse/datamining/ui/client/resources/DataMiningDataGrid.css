@@ -1,0 +1,39 @@
+.dataGridCell {
+    border: none;
+}
+
+.dataGridFirstColumn {
+    width: 20px;
+    padding: 2px 0 2px 3px;
+}
+
+.dataGridHoveredRow {
+    cursor: default;
+    background: #d5e2ff;
+}
+
+.dataGridSelectedRow {
+	background: #628cd5;
+	color: white;
+}
+
+.dataGridSubHeader {
+    text-align: center;
+    margin-top: 5px;
+    background-color: #eee;
+}
+
+.dataGridSubHeaderLabel {
+	position: relative;
+	left: -20px;
+	font-weight: 600;
+	text-shadow: none;
+}
+
+.dataGridSpacedSubHeader {
+	padding-top: 1em;
+}
+
+.dataGridClearFocus *:focus {
+    outline: none;
+}

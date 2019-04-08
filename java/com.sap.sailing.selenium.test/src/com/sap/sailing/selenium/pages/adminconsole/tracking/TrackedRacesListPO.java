@@ -6,13 +6,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 
-import com.google.common.base.Function;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -152,11 +152,15 @@ public class TrackedRacesListPO extends PageArea {
         
         CellTablePO<DataEntryPO> table = getTrackedRacesTable();
         
+        final int regattaColumnIndex = table.getColumnIndex("Regatta");
+        final int boatClassColumnIndex = table.getColumnIndex("Boat Class");
+        final int raceColumnIndex = table.getColumnIndex("Race");
+        final int statusColumnIndex = table.getColumnIndex("Status");
         for(DataEntryPO entry : table.getEntries()) {
-            String regatta = entry.getColumnContent("Regatta");
-            String boatClass = entry.getColumnContent("Boat Class");
-            String race = entry.getColumnContent("Race");
-            String status = entry.getColumnContent("Status");
+            String regatta = entry.getColumnContent(regattaColumnIndex);
+            String boatClass = entry.getColumnContent(boatClassColumnIndex);
+            String race = entry.getColumnContent(raceColumnIndex);
+            String status = entry.getColumnContent(statusColumnIndex);
             
             TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, race);
             
@@ -191,6 +195,16 @@ public class TrackedRacesListPO extends PageArea {
     public void remove(List<TrackedRaceDescriptor> races) {
         selectRaces(races);
         
+        removeSelectedTrackedRacesAndWaitForAjaxRequests();
+    }
+    
+    public void removeAll() {
+        getTrackedRacesTable().selectAllEntries();
+        
+        removeSelectedTrackedRacesAndWaitForAjaxRequests();
+    }
+
+    private void removeSelectedTrackedRacesAndWaitForAjaxRequests() {
         this.removeButton.click();
         
         waitForAjaxRequests();
@@ -272,12 +286,15 @@ public class TrackedRacesListPO extends PageArea {
         List<DataEntryPO> rows = table.getEntries();
         Iterator<DataEntryPO> iterator = rows.iterator();
         
+        final int regattaColumnIndex = table.getColumnIndex("Regatta");
+        final int boatClassColumnIndex = table.getColumnIndex("Boat Class");
+        final int raceColumnIndex = table.getColumnIndex("Race");
         while(iterator.hasNext()) {
             DataEntryPO entry = iterator.next();
             
-            String regatta = entry.getColumnContent("Regatta");
-            String boatClass = entry.getColumnContent("Boat Class");
-            String race = entry.getColumnContent("Race");
+            String regatta = entry.getColumnContent(regattaColumnIndex);
+            String boatClass = entry.getColumnContent(boatClassColumnIndex);
+            String race = entry.getColumnContent(raceColumnIndex);
             
             TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, race);
             

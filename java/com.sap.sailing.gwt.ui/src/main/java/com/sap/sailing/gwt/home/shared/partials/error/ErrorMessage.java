@@ -11,7 +11,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public class ErrorMessage extends Composite {
 
@@ -27,7 +29,7 @@ public class ErrorMessage extends Composite {
     private Command reloadCommand;
 
     public ErrorMessage(String errorMessageDetail, Throwable errorReason, Command reloadCommand) {
-        this(TextMessages.INSTANCE.errorMessageLoadingData(), errorMessageDetail, errorReason, reloadCommand);
+        this(StringMessages.INSTANCE.errorMessageLoadingData(), errorMessageDetail, errorReason, reloadCommand);
     }
     
     public ErrorMessage(String errorMessage, String errorMessageDetail, Throwable errorReason, Command reloadCommand) {
@@ -38,11 +40,11 @@ public class ErrorMessage extends Composite {
         if (errorMessage != null && !errorMessage.isEmpty()) {
             this.errorMessage.setInnerText(errorMessage);
         } else {
-            this.errorMessage.setInnerText(TextMessages.INSTANCE.errorMessageLoadingData());
+            this.errorMessage.setInnerText(StringMessages.INSTANCE.errorMessageLoadingData());
         }
 
         this.errorMessageDetail.setInnerText(errorMessageDetail);
-        Window.setStatus(errorMessageDetail);
+        Notification.notify(errorMessageDetail, NotificationType.WARNING);
     }
     
     public void addReloadPageButtonStyleNames(String styleNames) {

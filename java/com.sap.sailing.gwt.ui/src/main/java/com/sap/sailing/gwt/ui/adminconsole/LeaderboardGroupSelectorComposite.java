@@ -17,6 +17,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -36,6 +37,8 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class LeaderboardGroupSelectorComposite extends Composite implements HasValueChangeHandlers<Iterable<LeaderboardGroupDTO>> {
@@ -47,7 +50,7 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
     
     private LabeledAbstractFilterablePanel<LeaderboardGroupDTO> availableLeaderboardGroupsFilterablePanel;
     private CellTable<LeaderboardGroupDTO> availableLeaderboardGroupsTable;
-    private MultiSelectionModel<LeaderboardGroupDTO> availableLeaderboardGroupsSelectionModel;
+    private RefreshableMultiSelectionModel<LeaderboardGroupDTO> availableLeaderboardGroupsSelectionModel;
     private ListDataProvider<LeaderboardGroupDTO> availableLeaderboardGroupsProvider;
 
     private List<LeaderboardGroupDTO> availableLeaderboardGroups;
@@ -136,7 +139,37 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
     private Widget createAvailableLeaderboardGroupsPanel() {
         availableLeaderboardGroupsTable = new BaseCelltable<LeaderboardGroupDTO>(10000000, tableRes);
         CaptionPanel result = new CaptionPanel(stringMessages.availableLeaderboardGroups());
-        availableLeaderboardGroupsSelectionModel = new MultiSelectionModel<>();
+        availableLeaderboardGroupsProvider = new ListDataProvider<>();
+        availableLeaderboardGroupsProvider.setList(availableLeaderboardGroups);
+        availableLeaderboardGroupsProvider.addDataDisplay(availableLeaderboardGroupsTable);
+        availableLeaderboardGroupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(
+                new Label(stringMessages.filterLeaderboardGroupsByName()),
+                Collections.<LeaderboardGroupDTO> emptyList(), availableLeaderboardGroupsProvider) {
+            @Override
+            public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
+                List<String> result = new ArrayList<>();
+                result.add(t.getName());
+                return result;
+            }
+
+            @Override
+            public AbstractCellTable<LeaderboardGroupDTO> getCellTable() {
+                return availableLeaderboardGroupsTable;
+            }
+        };
+        availableLeaderboardGroupsSelectionModel = new RefreshableMultiSelectionModel<>(
+                new EntityIdentityComparator<LeaderboardGroupDTO>() {
+
+                    @Override
+                    public boolean representSameEntity(LeaderboardGroupDTO dto1, LeaderboardGroupDTO dto2) {
+                        return dto1.getName().equals(dto2.getName());
+                    }
+
+                    @Override
+                    public int hashCode(LeaderboardGroupDTO t) {
+                        return t.getName().hashCode();
+                    }
+                }, availableLeaderboardGroupsFilterablePanel.getAllListDataProvider());
         availableLeaderboardGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -144,19 +177,6 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
             }
         });
         availableLeaderboardGroupsTable.setSelectionModel(availableLeaderboardGroupsSelectionModel);
-        availableLeaderboardGroupsProvider = new ListDataProvider<>();
-        availableLeaderboardGroupsProvider.setList(availableLeaderboardGroups);
-        availableLeaderboardGroupsProvider.addDataDisplay(availableLeaderboardGroupsTable);
-        availableLeaderboardGroupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(new Label(
-                stringMessages.filterLeaderboardGroupsByName()), Collections.<LeaderboardGroupDTO> emptyList(),
-                availableLeaderboardGroupsTable, availableLeaderboardGroupsProvider) {
-            @Override
-            public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
-                List<String> result = new ArrayList<>();
-                result.add(t.getName());
-                return result;
-            }
-        };
         VerticalPanel vp = new VerticalPanel();
         vp.add(availableLeaderboardGroupsFilterablePanel);
         vp.add(availableLeaderboardGroupsTable);

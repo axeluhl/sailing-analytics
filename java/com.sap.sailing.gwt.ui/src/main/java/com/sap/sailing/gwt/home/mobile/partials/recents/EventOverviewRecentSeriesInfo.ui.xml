@@ -3,13 +3,14 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentResources" />
+	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
 	<a class="{local_res.css.eventsoverviewrecent_event} {local_res.css.seriesInfo}">
 		<div class="{local_res.css.eventteaser_title}">
 			<div class="{local_res.css.eventteaser_title_name}" ui:field="seriesNameUi"></div>
 			<div class="{local_res.css.eventteaser_title_location}" ui:field="seriesInfoUi"></div>
 		</div>
 		<div class="{local_res.css.eventsoverviewrecent_event_arrow}">
-			<img src="images/home/arrow-down-grey.png" class="{local_res.css.eventsoverviewrecent_event_arrow_image}"></img>
+			<img src="{shr.arrowDownGrey.getSafeUri}" class="{local_res.css.eventsoverviewrecent_event_arrow_image}"></img>
 		</div>
 	</a>
 </ui:UiBinder> 

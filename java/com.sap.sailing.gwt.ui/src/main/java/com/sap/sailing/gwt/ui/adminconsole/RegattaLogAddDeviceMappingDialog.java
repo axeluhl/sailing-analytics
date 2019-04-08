@@ -15,16 +15,18 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.BranchIOConstants;
+import com.sap.sailing.domain.common.MailInvitationType;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.SelectionChangedHandler;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -32,14 +34,16 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstrap<DeviceMappingDTO> {
+public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTimeBox<DeviceMappingDTO> {
     private final String leaderboardName;
     private final GenericListBox<EventDTO> events; 
 
-    protected final BetterDateTimeBox from;
-    protected final BetterDateTimeBox to;
+    protected final DateAndTimeInput from;
+    protected final DateAndTimeInput to;
     protected final ListBox deviceType;
     protected final TextBox deviceId;
     protected final DeviceMappingQRCodeWidget qrWidget;
@@ -51,7 +55,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
 
     public RegattaLogAddDeviceMappingDialog(SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, String leaderboardName, DialogCallback<DeviceMappingDTO> callback,
-            final DeviceMappingDTO mapping) {
+            final DeviceMappingDTO mapping, final MailInvitationType mailInvitationType) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
                 stringMessages.add(), stringMessages.cancel(), new DataEntryDialog.Validator<DeviceMappingDTO>() {
                     @Override
@@ -83,9 +87,9 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
 
-        from = createDateTimeBox(new Date());
+        from = createDateTimeBox(new Date(), Accuracy.SECONDS);
         from.setValue(null);
-        to = createDateTimeBox(new Date());
+        to = createDateTimeBox(new Date(), Accuracy.SECONDS);
         to.setValue(null);
 
         deviceType = createListBox(false);
@@ -116,7 +120,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
                     public void onSelectionChange(MarkDTO mark) {
                         selectedItem = mark;
                         qrWidget.setMappedItem(DeviceMappingConstants.URL_MARK_ID_AS_STRING, mark.getIdAsString());
-                        validate();
+                        validateAndUpdate();
                     }
 
                     @Override
@@ -124,7 +128,15 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
                         selectedItem = competitor;
                         qrWidget.setMappedItem(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                                 competitor.getIdAsString());
-                        validate();
+                        validateAndUpdate();
+                    }
+                    
+                    @Override
+                    public void onSelectionChange(BoatDTO boat) {
+                        selectedItem = boat;
+                        qrWidget.setMappedItem(DeviceMappingConstants.URL_BOAT_ID_AS_STRING,
+                                boat.getIdAsString());
+                        validateAndUpdate();
                     }
                 }, mapping != null ? mapping.mappedTo : null);
         if (mapping != null) {
@@ -132,10 +144,10 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
             from.setValue(mapping.from);
             to.setValue(mapping.to);
         }
-        qrWidget = setupQRCodeWidget();
+        qrWidget = setupQRCodeWidget(mailInvitationType);
         qrWidget.generateQRCode();
         this.leaderboardName = leaderboardName;
-        loadCompetitorsAndMarks();
+        loadCompetitorsBoatsAndMarks();
         events = new GenericListBox<EventDTO>(new ValueBuilder<EventDTO>() {
             @Override
             public String getValue(EventDTO item) {
@@ -193,7 +205,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
         return panel;
     }
 
-    private DeviceMappingQRCodeWidget setupQRCodeWidget() {
+    private DeviceMappingQRCodeWidget setupQRCodeWidget(final MailInvitationType mailInvitationType) {
         return new DeviceMappingQRCodeWidget(stringMessages, new DeviceMappingQRCodeWidget.URLFactory() {
             @Override
             public String createURL(String baseUrlWithoutTrailingSlash, String mappedItemType, String mappedItemId)
@@ -201,9 +213,26 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
                 if (events.getValue() == null) {
                     throw new QRCodeURLCreationException(stringMessages.noEventSelected());
                 }
-                String eventIdAsString = events.getValue().id.toString();
-                return DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash, eventIdAsString,
-                        leaderboardName, mappedItemType, mappedItemId, GwtUrlHelper.INSTANCE);
+
+                final String eventIdAsString = events.getValue().id.toString();
+                String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(baseUrlWithoutTrailingSlash,
+                        eventIdAsString, leaderboardName, mappedItemType, mappedItemId, GwtUrlHelper.INSTANCE);
+                if (mailInvitationType == MailInvitationType.LEGACY) {
+                    // URL is already legacy
+                } else if (mailInvitationType == MailInvitationType.SailInsight1) {
+                    url = BranchIOConstants.SAILINSIGHT_APP_BRANCHIO + "?"
+                            + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
+                            + GwtUrlHelper.INSTANCE.encodeQueryString(url);
+                } else if (mailInvitationType == MailInvitationType.SailInsight2) {
+                    url = BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO + "?"
+                            + BranchIOConstants.OPEN_REGATTA_2_APP_BRANCHIO_PATH + "="
+                            + GwtUrlHelper.INSTANCE.encodeQueryString(url);
+                }
+                else {
+                    throw new QRCodeURLCreationException("Unknown mail invitation type: " + mailInvitationType);
+                }
+
+                return url;
             }
         });
     }
@@ -216,8 +245,9 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
         return new DeviceMappingDTO(deviceIdentifier, from.getValue(), to.getValue(), selectedItem, null);
     }
 
-    private void loadCompetitorsAndMarks() {
+    private void loadCompetitorsBoatsAndMarks() {
         sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
+        sailingService.getBoatRegistrationsForLeaderboard(leaderboardName, itemSelectionPanel.getSetBoatsCallback());
         sailingService.getMarksInRegattaLog(leaderboardName, itemSelectionPanel.getSetMarksCallback());
     }
 }

@@ -1,37 +1,38 @@
 package com.sap.sailing.racecommittee.app.data.parsers;
 
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorAndBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sse.common.Util.Pair;
 
-public class CompetitorsDataParser implements DataParser<Collection<Competitor>> {
+public class CompetitorsDataParser implements DataParser<Map<Competitor, Boat>> {
 
-    private JsonDeserializer<Competitor> deserializer;
+    private CompetitorAndBoatJsonDeserializer deserializer;
 
-    public CompetitorsDataParser(JsonDeserializer<Competitor> deserializer) {
+    public CompetitorsDataParser(CompetitorAndBoatJsonDeserializer deserializer) {
         this.deserializer = deserializer;
     }
 
-    public Collection<Competitor> parse(Reader reader) throws Exception {
+    public Map<Competitor, Boat> parse(Reader reader) throws Exception {
         Object parsedResult = JSONValue.parseWithException(reader);
         JSONArray jsonArray = Helpers.toJSONArraySafe(parsedResult);
-        Collection<Competitor> competitors = new ArrayList<Competitor>();
-
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         for (Object element : jsonArray) {
             JSONObject json = Helpers.toJSONObjectSafe(element);
-            Competitor competitor = deserializer.deserialize(json);
-            competitors.add(competitor);
+            Pair<DynamicCompetitor, Boat> competitorAndBoatPair = deserializer.deserialize(json);
+            competitorsAndBoats.put(competitorAndBoatPair.getA(), competitorAndBoatPair.getB());
         }
-
-        return competitors;
+        return competitorsAndBoats;
     }
 
 }

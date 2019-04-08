@@ -13,14 +13,16 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.DateParser;
 import com.sun.jersey.api.core.ResourceContext;
 
 public abstract class AbstractSailingServerResource {
+    private static final String SLASH_ENCODING = "__";
     @Context ServletContext servletContext;
     @Context ResourceContext resourceContext;
     
@@ -48,14 +50,27 @@ public abstract class AbstractSailingServerResource {
         return tracker.getService(); 
     }
     
+    public ReplicationService getReplicationService() {
+        @SuppressWarnings("unchecked")
+        ServiceTracker<ReplicationService, ReplicationService> tracker = (ServiceTracker<ReplicationService, ReplicationService>) servletContext.getAttribute(RestServletContainer.REPLICATION_SERVICE_TRACKER_NAME);
+        return tracker.getService(); 
+    }
+    
     protected Regatta findRegattaByName(String regattaName) {
-        return getService().getRegattaByName(regattaName);
+        Regatta regatta = getService().getRegattaByName(regattaName);
+        if (regatta == null && regattaName.contains(SLASH_ENCODING)) {
+            regatta = getService().getRegattaByName(regattaName.replaceAll(SLASH_ENCODING, "/"));
+        }
+        return regatta;
     }
 
     protected RaceDefinition findRaceByName(Regatta regatta, String raceName) {
         RaceDefinition result = null;
         if (regatta != null) {
             result = regatta.getRaceByName(raceName);
+            if (result == null && raceName.contains(SLASH_ENCODING)) {
+                result = regatta.getRaceByName(raceName.replaceAll(SLASH_ENCODING, "/"));
+            }
         }
         return result;
     }

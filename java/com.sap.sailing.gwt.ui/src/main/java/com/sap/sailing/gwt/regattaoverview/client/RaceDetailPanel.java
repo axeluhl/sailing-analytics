@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.LineStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RaceDetailPanel extends SimplePanel {
@@ -51,8 +51,10 @@ public class RaceDetailPanel extends SimplePanel {
     private final Label startDateLabel = new Label();
     private final Label finishTimeLabel = new Label();
     private final Label finishDurationLabel = new Label();
-    private final Label protestTimeLabel = new Label();
-    private final Label protestDateLabel = new Label();
+    private final Label protestStartTimeLabel = new Label();
+    private final Label protestFinishTimeLabel = new Label();
+    private final Label protestStartDateLabel = new Label();
+    private final Label protestFinishDateLabel = new Label();
     private final Label updateTimeLabel = new Label();
     private final Label updateDateLabel = new Label();
     private final Label vesselPositionLabel = new Label();
@@ -88,17 +90,20 @@ public class RaceDetailPanel extends SimplePanel {
 
         int cellSpacing = 3;
 
-        Grid basicsGrid = new Grid(3, 3);
+        Grid basicsGrid = new Grid(4, 3);
         basicsGrid.setCellSpacing(cellSpacing);
         basicsGrid.setWidget(0, 0, new Label(stringMessages.startAt()));
         basicsGrid.setWidget(1, 0, new Label(stringMessages.finishAt()));
-        basicsGrid.setWidget(2, 0, new Label(stringMessages.protestEndsAt()));
+        basicsGrid.setWidget(2, 0, new Label(stringMessages.protestStartsAt()));
+        basicsGrid.setWidget(3, 0, new Label(stringMessages.protestEndsAt()));
         basicsGrid.setWidget(0, 1, startTimeLabel);
         basicsGrid.setWidget(1, 1, finishTimeLabel);
-        basicsGrid.setWidget(2, 1, protestTimeLabel);
+        basicsGrid.setWidget(2, 1, protestStartTimeLabel);
+        basicsGrid.setWidget(3, 1, protestFinishTimeLabel);
         basicsGrid.setWidget(0, 2, startDateLabel);
         basicsGrid.setWidget(1, 2, finishDurationLabel);
-        basicsGrid.setWidget(2, 2, protestDateLabel);
+        basicsGrid.setWidget(2, 2, protestStartDateLabel);
+        basicsGrid.setWidget(3, 2, protestFinishDateLabel);
 
         Grid managementGrid = new Grid(3, 3);
         managementGrid.setCellSpacing(cellSpacing);
@@ -167,13 +172,21 @@ public class RaceDetailPanel extends SimplePanel {
         }
         finishDurationLabel.setText(finishDurationText);
 
-        String protestTimeText = data.raceInfo.protestFinishTime == null ? "-" : timeFormatter
-                .format(data.raceInfo.protestFinishTime);
-        protestTimeLabel.setText(protestTimeText);
+        String protestStartTimeText = data.raceInfo.protestStartTime == null ? "-" : timeFormatter
+                .format(data.raceInfo.protestStartTime);
+        protestStartTimeLabel.setText(protestStartTimeText);
 
-        String protestDateText = data.raceInfo.protestFinishTime == null ? "" : dateFormatter
+        String protestFinishTimeText = data.raceInfo.protestFinishTime == null ? "-" : timeFormatter
                 .format(data.raceInfo.protestFinishTime);
-        protestDateLabel.setText(protestDateText);
+        protestFinishTimeLabel.setText(protestFinishTimeText);
+
+        String protestStartDateText = data.raceInfo.protestStartTime == null ? "" : dateFormatter
+                .format(data.raceInfo.protestStartTime);
+        protestStartDateLabel.setText(protestStartDateText);
+
+        String protestFinishDateText = data.raceInfo.protestFinishTime == null ? "" : dateFormatter
+                .format(data.raceInfo.protestFinishTime);
+        protestFinishDateLabel.setText(protestFinishDateText);
 
         String updateTimeText = data.raceInfo.lastUpdateTime == null ? "-" : timeFormatter
                 .format(data.raceInfo.lastUpdateTime);
@@ -209,7 +222,8 @@ public class RaceDetailPanel extends SimplePanel {
             if (data.raceInfo.startProcedureDTO != null) {
                 switch (data.raceInfo.startProcedure) {
                 case RRS26:
-                    RRS26InfoDTO rrsInfo = (RRS26InfoDTO) data.raceInfo.startProcedureDTO;
+                case SWC:    
+                    LineStartInfoDTO rrsInfo = (LineStartInfoDTO) data.raceInfo.startProcedureDTO;
                     if (rrsInfo != null) {
                         if (rrsInfo.startModeFlag != null) {
                             showProcedureInfo("Start mode", rrsInfo.startModeFlag.toString());
@@ -270,7 +284,7 @@ public class RaceDetailPanel extends SimplePanel {
         }
 
         return bothNullOrEquals(left.courseAreaIdAsString, right.courseAreaIdAsString)
-                && bothNullOrEquals(left.regattaName, right.regattaName)
+                && bothNullOrEquals(left.leaderboardName, right.leaderboardName)
                 && bothNullOrEquals(left.raceInfo.seriesName, right.raceInfo.seriesName)
                 && bothNullOrEquals(left.raceInfo.fleetName, right.raceInfo.fleetName)
                 && bothNullOrEquals(left.raceInfo.raceName, right.raceInfo.raceName);

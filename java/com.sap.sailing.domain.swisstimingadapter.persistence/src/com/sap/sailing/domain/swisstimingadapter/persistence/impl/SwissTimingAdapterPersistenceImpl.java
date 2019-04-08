@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bson.Document;
+
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingArchiveConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
@@ -18,7 +19,7 @@ import com.sap.sse.mongodb.MongoDBService;
 
 public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPersistence {
 
-    private final DB database;
+    private final MongoDatabase database;
 
     private final SwissTimingFactory swissTimingFactory;
 
@@ -34,11 +35,11 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     public Iterable<SwissTimingConfiguration> getSwissTimingConfigurations() {
         List<SwissTimingConfiguration> result = new ArrayList<SwissTimingConfiguration>();
         try {
-            DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
-            for (DBObject o : stConfigs.find()) {
+            MongoCollection<org.bson.Document> stConfigs = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
+            for (Document o : stConfigs.find()) {
                 SwissTimingConfiguration stConfig = loadSwissTimingConfiguration(o);
-                // the old swisstiming config was not based on a json URL -> ignore such configs
-                if(stConfig.getJsonURL() != null) {
+                // the old SwissTiming configuration was not based on a JSON URL -> ignore such configurations
+                if (stConfig.getJsonURL() != null) {
                     result.add(stConfig);
                 }
             }
@@ -52,21 +53,23 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         return result;
     }
 
-    private SwissTimingConfiguration loadSwissTimingConfiguration(DBObject object) {
+    private SwissTimingConfiguration loadSwissTimingConfiguration(Document object) {
         String name = (String) object.get(FieldNames.ST_CONFIG_NAME.name());
         String jsonURL = (String) object.get(FieldNames.ST_CONFIG_JSON_URL.name());
         String hostname = (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name());
         Integer port = (Integer) object.get(FieldNames.ST_CONFIG_PORT.name());
-
-        return swissTimingFactory.createSwissTimingConfiguration(name, jsonURL, hostname, port);
+        String updateURL = (String) object.get(FieldNames.ST_CONFIG_UPDATE_URL.name());
+        String updateUsername = (String) object.get(FieldNames.ST_CONFIG_UPDATE_USERNAME.name());
+        String updatePassword = (String) object.get(FieldNames.ST_CONFIG_UPDATE_PASSWORD.name());
+        return swissTimingFactory.createSwissTimingConfiguration(name, jsonURL, hostname, port, updateURL, updateUsername, updatePassword);
     }
 
     @Override
     public Iterable<SwissTimingArchiveConfiguration> getSwissTimingArchiveConfigurations() {
         List<SwissTimingArchiveConfiguration> result = new ArrayList<SwissTimingArchiveConfiguration>();
         try {
-            DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
-            for (DBObject o : stConfigs.find()) {
+            MongoCollection<org.bson.Document> stConfigs = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+            for (Document o : stConfigs.find()) {
                 SwissTimingArchiveConfiguration stConfig = loadSwissTimingArchiveConfiguration(o);
                 result.add(stConfig);
             }
@@ -80,36 +83,39 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         return result;
     }
 
-    private SwissTimingArchiveConfiguration loadSwissTimingArchiveConfiguration(DBObject object) {
+    private SwissTimingArchiveConfiguration loadSwissTimingArchiveConfiguration(Document object) {
         return swissTimingFactory.createSwissTimingArchiveConfiguration((String) object.get(FieldNames.ST_ARCHIVE_JSON_URL.name()));
     }
 
     @Override
     public void storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration) {
-        DBCollection stConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
+        MongoCollection<org.bson.Document> stConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
         stConfigCollection.createIndex(new BasicDBObject(CollectionNames.SWISSTIMING_CONFIGURATIONS.name(), 1));
-        BasicDBObject result = new BasicDBObject();
+        Document result = new Document();
         result.put(FieldNames.ST_CONFIG_NAME.name(), swissTimingConfiguration.getName());
-        for (DBObject equallyNamedConfig : stConfigCollection.find(result)) {
-            stConfigCollection.remove(equallyNamedConfig);
+        for (Document equallyNamedConfig : stConfigCollection.find(result)) {
+            stConfigCollection.deleteOne(equallyNamedConfig);
         }
         result.put(FieldNames.ST_CONFIG_JSON_URL.name(), swissTimingConfiguration.getJsonURL());
         result.put(FieldNames.ST_CONFIG_HOSTNAME.name(), swissTimingConfiguration.getHostname());
         result.put(FieldNames.ST_CONFIG_PORT.name(), swissTimingConfiguration.getPort());
+        result.put(FieldNames.ST_CONFIG_UPDATE_URL.name(), swissTimingConfiguration.getUpdateURL());
+        result.put(FieldNames.ST_CONFIG_UPDATE_USERNAME.name(), swissTimingConfiguration.getUpdateUsername());
+        result.put(FieldNames.ST_CONFIG_UPDATE_PASSWORD.name(), swissTimingConfiguration.getUpdatePassword());
 
-        stConfigCollection.insert(result);
+        stConfigCollection.insertOne(result);
     }
 
     @Override
     public void storeSwissTimingArchiveConfiguration(
             SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration) {
-        DBCollection stArchiveConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+        MongoCollection<org.bson.Document> stArchiveConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
         stArchiveConfigCollection.createIndex(new BasicDBObject(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name(), 1));
-        BasicDBObject result = new BasicDBObject();
+        Document result = new Document();
         result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonUrl());
-        for (DBObject equallyNamedConfig : stArchiveConfigCollection.find(result)) {
-            stArchiveConfigCollection.remove(equallyNamedConfig);
+        for (Document equallyNamedConfig : stArchiveConfigCollection.find(result)) {
+            stArchiveConfigCollection.deleteOne(equallyNamedConfig);
         }
-        stArchiveConfigCollection.insert(result);
+        stArchiveConfigCollection.insertOne(result);
     }
 }

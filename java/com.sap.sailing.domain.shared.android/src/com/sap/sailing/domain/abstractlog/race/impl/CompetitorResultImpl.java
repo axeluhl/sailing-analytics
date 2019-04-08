@@ -23,8 +23,11 @@ public class CompetitorResultImpl implements CompetitorResult {
     
     private final String comment;
 
+    private final MergeState mergeState;
+    
     public CompetitorResultImpl(Serializable competitorId, String competitorDisplayName, int oneBasedRank,
-            MaxPointsReason maxPointsReason, Double score, TimePoint finishingTime, String comment) {
+            MaxPointsReason maxPointsReason, Double score, TimePoint finishingTime, String comment,
+            MergeState mergeState) {
         super();
         this.competitorId = competitorId;
         this.competitorDisplayName = competitorDisplayName;
@@ -33,6 +36,7 @@ public class CompetitorResultImpl implements CompetitorResult {
         this.score = score;
         this.finishingTime = finishingTime;
         this.comment = comment;
+        this.mergeState = mergeState;
     }
 
     @Override
@@ -71,6 +75,11 @@ public class CompetitorResultImpl implements CompetitorResult {
     }
 
     @Override
+    public MergeState getMergeState() {
+        return mergeState == null ? MergeState.OK : mergeState; // default in case of having de-serialized an old version
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -81,6 +90,7 @@ public class CompetitorResultImpl implements CompetitorResult {
         result = prime * result + ((maxPointsReason == null) ? 0 : maxPointsReason.hashCode());
         result = prime * result + oneBasedRank;
         result = prime * result + ((score == null) ? 0 : score.hashCode());
+        result = prime * result + ((mergeState == null) ? 0 : mergeState.hashCode());
         return result;
     }
 
@@ -122,6 +132,11 @@ public class CompetitorResultImpl implements CompetitorResult {
                 return false;
         } else if (!score.equals(other.score))
             return false;
+        if (mergeState == null) {
+            if (other.mergeState != null)
+                return false;
+        } else if (!mergeState.equals(other.mergeState))
+            return false;
         return true;
     }
 
@@ -129,7 +144,7 @@ public class CompetitorResultImpl implements CompetitorResult {
     public String toString() {
         return "CompetitorResultImpl [competitorId=" + competitorId + ", competitorName=" + competitorDisplayName + ", rank="
                 + oneBasedRank + ", maxPointsReason=" + maxPointsReason + ", score=" + score + ", finishingTime="
-                + finishingTime + ", comment=" + comment + "]";
+                + finishingTime + ", comment=" + comment + ", mergeState=" + mergeState + "]";
     }
     
 }

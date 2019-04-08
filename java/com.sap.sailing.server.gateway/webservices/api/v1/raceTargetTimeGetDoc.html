@@ -5,16 +5,17 @@
 	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
 	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
 	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
-	<title>SAP Sailing Analytics Webservices API Version 1.0 Beta</title>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
 </head>
 <body>
-<h1>SAP Sailing Analytics Webservices API Version 1.0 Beta</h1>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
 <h2>URL: /api/v1/regattas/{regattaname}/races/{racename}/targettime</h2>
 
 <b>Description:</b>
 <p>Gets the estimated time it will take to sail a race. The mark positions and the wind data are
 taken from the optional timeasmillis parameter which defaults to the current time. Note that sometimes the marks are not in place yet
-when the race starts and that a windward mark may be collected already before the race finishes.
+when the race starts and that a windward mark may be collected already before the race finishes.<br/>
+All slashes contained within the {regattaname} and {racename} parameters must be replaced by "__" (double underscore).
 </p>
 <br/>
 <table>

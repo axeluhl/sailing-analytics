@@ -13,8 +13,9 @@ import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
+import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueProvider;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
-import com.sap.sailing.gwt.home.shared.partials.filter.RegattaByBootCategoryFilter;
+import com.sap.sailing.gwt.home.shared.partials.filter.RegattaByLeaderboardGroupNameFilter;
 import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListPresenter;
 
 public class MultiRegattaViewImpl extends AbstractEventOverview {
@@ -25,6 +26,7 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
         super(presenter, false, false);
         FlowPanel container = new FlowPanel();
         this.setupOverviewStage(container);
+        this.setupEventDescription(container);
         this.setupRegattaStatusList(container);
         this.setupUpdateBox(container);
         this.setupImpressions(container);
@@ -36,10 +38,10 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
         regattaStatusUi = new RegattaStatus(currentPresenter);
         RegattaListPresenter<RegattasAndLiveRacesDTO> regattaListPresenter = 
                 new RegattaListPresenter<RegattasAndLiveRacesDTO>(regattaStatusUi);
-        RegattaByBootCategoryFilter bootCategoryFilter = new RegattaByBootCategoryFilter();
-        regattaStatusUi.setFilterSectionWidget(bootCategoryFilter);
-        MultiRegattaViewImplFilterPresenter filterPresenter = 
-                new MultiRegattaViewImplFilterPresenter(bootCategoryFilter, regattaListPresenter);
+        RegattaByLeaderboardGroupNameFilter leaderboardGroupNameFilter = new RegattaByLeaderboardGroupNameFilter();
+        regattaStatusUi.setFilterSectionWidget(leaderboardGroupNameFilter);
+        MultiRegattaViewImplFilterPresenter filterPresenter = new MultiRegattaViewImplFilterPresenter(
+                leaderboardGroupNameFilter, regattaListPresenter, regattaListPresenter);
         container.add(regattaStatusUi);
         refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(
                 regattaListPresenter.getRefreshableWidgetWrapper(regattaStatusUi)), 
@@ -47,19 +49,28 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
     }
     
     private class MultiRegattaViewImplFilterPresenter extends FilterPresenter<RegattaMetadataDTO, String> {
-        private final List<FilterValueChangeHandler<RegattaMetadataDTO, String>> valueChangeHandler;
+
+        private final List<FilterValueProvider<String>> valueProviders;
+        private final List<FilterValueChangeHandler<RegattaMetadataDTO>> valueChangeHandlers;
         
         public MultiRegattaViewImplFilterPresenter(FilterWidget<RegattaMetadataDTO, String> filterWidget,
-            FilterValueChangeHandler<RegattaMetadataDTO, String> valueChangeHandler) {
+                FilterValueProvider<String> valueProvider,
+                FilterValueChangeHandler<RegattaMetadataDTO> valueChangeHandler) {
             super(filterWidget);
-            this.valueChangeHandler = Arrays.asList(valueChangeHandler);
+            this.valueProviders = Arrays.asList(valueProvider);
+            this.valueChangeHandlers = Arrays.asList(valueChangeHandler);
             super.addHandler(valueChangeHandler);
         }
-        @Override
-        protected List<FilterValueChangeHandler<RegattaMetadataDTO, String>> getCurrentValueChangeHandlers() {
-            return valueChangeHandler;
-        }
         
+        @Override
+        protected List<FilterValueProvider<String>> getCurrentValueProviders() {
+            return valueProviders;
+        }
+
+        @Override
+        protected List<FilterValueChangeHandler<RegattaMetadataDTO>> getCurrentValueChangeHandlers() {
+            return valueChangeHandlers;
+        }
     }
 
 }

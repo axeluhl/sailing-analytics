@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.simulator.BoatClassProperties;
 import com.sap.sailing.simulator.RaceProperties;
 
@@ -71,7 +72,7 @@ public enum ConfigurationManager {
 
                 if (polarDiagramConfig) {
                     this._boatClassesInfo
-                    .add(new BoatClassPropertiesImpl(elements[0], Double.parseDouble(elements[1]), elements[2], index++));
+                    .add(new BoatClassPropertiesImpl(elements[0], new MeterDistance(Double.parseDouble(elements[1])), elements[2], index++));
                 } else {
                     this._racesInfo.add(new RacePropertiesImpl(elements[0], elements[1], elements[2], index++));
                 }

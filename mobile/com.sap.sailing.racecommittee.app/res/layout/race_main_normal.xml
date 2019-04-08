@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/race_main_normal"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -47,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:src="?attr/button_prev"/>
+            android:src="?attr/button_prev" />
 
         <ImageView
             android:id="@+id/nav_next"
@@ -55,7 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:src="?attr/button_next"/>
+            android:src="?attr/button_next" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -113,4 +114,11 @@
         android:id="@+id/protest_time_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <fragment
+        class="com.sap.sailing.racecommittee.app.ui.fragments.DemoOverlayFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:ignore="MissingId" />
+
 </RelativeLayout>

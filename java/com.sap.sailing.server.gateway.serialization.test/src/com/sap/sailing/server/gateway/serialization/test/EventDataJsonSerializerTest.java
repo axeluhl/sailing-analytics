@@ -48,6 +48,7 @@ public class EventDataJsonSerializerTest {
     protected final TimePoint expectedEndDate = new MillisecondsTimePoint(new Date());
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
     protected final URL expectedOfficialWebsiteURL;
+    protected final URL expectedBaseURL;
     protected final Map<Locale, URL> expectedSailorsInfoWebsiteURLs;
     protected final URL expectedLogoImageURL;
     protected final ImageDescriptor expectedLogoImageDescriptor;
@@ -60,6 +61,7 @@ public class EventDataJsonSerializerTest {
 
     public EventDataJsonSerializerTest() throws MalformedURLException {
         expectedOfficialWebsiteURL = new URL("http://official.website.com");
+        expectedBaseURL = new URL("http://our.own.com");
         expectedLogoImageURL = new URL("http://official.logo.com/logo.png");
         expectedLogoImageDescriptor = new ImageDescriptorImpl(expectedLogoImageURL, MillisecondsTimePoint.now());
         expectedSailorsInfoWebsiteURLs = new HashMap<>();
@@ -76,6 +78,7 @@ public class EventDataJsonSerializerTest {
         when(event.getName()).thenReturn(expectedName);
         when(event.getDescription()).thenReturn(expectedDescription);
         when(event.getOfficialWebsiteURL()).thenReturn(expectedOfficialWebsiteURL);
+        when(event.getBaseURL()).thenReturn(expectedBaseURL);
         when(event.getSailorsInfoWebsiteURLs()).thenReturn(expectedSailorsInfoWebsiteURLs);
         when(event.getSailorsInfoWebsiteURL(null)).thenReturn(expectedSailorsInfoWebsiteURLs.get(null));
         when(event.getStartDate()).thenReturn(expectedStartDate);

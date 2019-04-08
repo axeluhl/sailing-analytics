@@ -9,8 +9,8 @@ import org.openqa.selenium.support.ui.Select;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
-import com.sap.sailing.selenium.pages.gwt.BetterDateTimeBoxPO;
 import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
+import com.sap.sailing.selenium.pages.gwt.DateAndTimeInputPO;
 import com.sap.sailing.selenium.pages.gwt.TextAreaPO;
 import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
@@ -50,8 +50,8 @@ public class EventCreateDialogPO extends DataEntryDialogPO {
         TextBoxPO.create(driver, nameTextBox).appendText(name);
         TextAreaPO.create(driver, descriptionTextArea).appendText(description);
         TextBoxPO.create(driver, venueTextBox).appendText(venue);
-        BetterDateTimeBoxPO.create(driver, startDateTimeBox).setDate(start);
-        BetterDateTimeBoxPO.create(driver, endDateTimeBox).setDate(end);
+        DateAndTimeInputPO.create(driver, startDateTimeBox).setValue(start, false);
+        DateAndTimeInputPO.create(driver, endDateTimeBox).setValue(end, false);
         CheckBoxPO.create(driver, isPublicCheckBox).setSelected(isPublic);
     }
     
@@ -62,15 +62,15 @@ public class EventCreateDialogPO extends DataEntryDialogPO {
     }
     
     WebElement goToTab(String tabName, String id) {
-        return goToTab(eventDialogTabPanel, tabName, id, /* isVertical */ false);
+        return goToTab(eventDialogTabPanel, tabName, id, TabPanelType.TAB_LAYOUT_PANEL);
     }
     
     WebElement goToLeaderboardGroupsTab() {
         return goToTab("Leaderboard groups", LEADERBOARD_GROUPS_TAB_ID);
     }
 
-    WebElement goToCourseAreasTab() {
-        return goToTab("Course areas", COURSE_AREAS_TAB_ID);
+    CourseAreasTabPO goToCourseAreasTab() {
+        return new CourseAreasTabPO(driver, goToTab("Course areas", COURSE_AREAS_TAB_ID));
     }
 
     WebElement goToImagesTab() {

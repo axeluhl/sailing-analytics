@@ -17,7 +17,4 @@
         android:id="@+id/options_menu_role"
         android:title="@string/options_menu_role" />
 
-    <item
-        android:id="@+id/options_menu_logout"
-        android:title="@string/logout" />
 </menu>

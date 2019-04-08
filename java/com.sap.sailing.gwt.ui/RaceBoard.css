@@ -85,28 +85,16 @@ table {
 	border-collapse: separate;
 }
 
-.CombinedWindPanelParentDiv {
+.TopLeftControlsWrapperPanelParentDiv {
 	padding-top: 34px;
 	padding-left: 10px;
 }
 
-.TrueNorthIndicatorPanelParentDiv {
-	padding-top: 10px;
-	padding-left: 10px;
-}
-.CombinedWindPanelParentDiv.indentsmall,
-.TrueNorthIndicatorPanelParentDiv.indentsmall {
+.TopLeftControlsWrapperPanel.indentsmall {
 	padding-left: 30px;
 }
-.CombinedWindPanelParentDiv.indentbig,
-.TrueNorthIndicatorPanelParentDiv.indentbig {
+.TopLeftControlsWrapperPanel.indentbig  {
 	padding-left: 45px;
-}
-
-.MapSimulationLegendParentDiv {
-	padding-bottom: 10px;
-	padding-right: 10px;
-	pointer-events: none;
 }
 
 .MapSimulationLegend {
@@ -115,7 +103,7 @@ table {
 
 .MapSimulationLegendParentDiv {
 	padding-bottom: 10px;
-	padding-right: 10px;
+	padding-right: 50px;
 	pointer-events: none;
 }
 
@@ -454,8 +442,8 @@ img.openColumn {
 
 .busyIndicator-Simple {
 	position: absolute;
-	top: 0.7em;
-	right: 7.4em;
+	top: 0.3em;
+	right: 0.4em;
 }
 
 .busyIndicator-Circle {
@@ -582,7 +570,27 @@ img.openColumn {
 	background-position: 5% 50%, 95% 50%
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard {
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-table {
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_Table_INACTIVE.png),
+		url(images/arrows_top_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-NorthSouthToggleButton-Open-table {
+	background-color: white;
+	background-image:
+		url(images/viewicons/@1x/img/SAP_RV_Table_GHOSTED.png),
+		url(images/arrows_bottom_black_small.png);
+	background-repeat: no-repeat, no-repeat;
+	background-position: 5% 50%, 95% 50%
+}
+
+.gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard,
+.gwt-SplitLayoutPanel-WestToggleButton-Open-leaderboard
+ {
 	background-color: white;
 	background-image:
 		url(images/viewicons/@1x/img/SAP_RV_Leaderboard_GHOSTED.png),
@@ -592,7 +600,8 @@ img.openColumn {
 	background-position: 5px center, calc(100% - 6px) center;
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard {
+.gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard,
+.gwt-SplitLayoutPanel-WestToggleButton-Closed-leaderboard {
 	background-color: white;
 	background-image:
 		url(images/viewicons/@1x/img/SAP_RV_Leaderboard_INACTIVE.png),
@@ -600,6 +609,26 @@ img.openColumn {
 	background-repeat: no-repeat, no-repeat;
 	background-position: 4% 50%, 96% 50%;
 	background-position: 5px center, calc(100% - 6px) center;
+}
+
+.gwt-SplitLayoutPanel-WestToggleButton-Open-tags {
+	background-color: white;
+    background-image:
+        url(images/viewicons/@1x/img/SAP_RV_Map_GHOSTED.png),
+        url(images/arrows_bottom_black_small.png);
+    background-repeat: no-repeat, no-repeat;
+    background-position: 4% 50%, 96% 50%;
+    background-position: 5px center, calc(100% - 6px) center;
+}
+
+.gwt-SplitLayoutPanel-WestToggleButton-Closed-tags {
+    background-color: white;
+    background-image:
+        url(images/viewicons/@1x/img/SAP_RV_Map_INACTIVE.png),
+        url(images/arrows_top_black_small.png);
+    background-repeat: no-repeat, no-repeat;
+    background-position: 4% 50%, 96% 50%;
+    background-position: 5px center, calc(100% - 6px) center;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-media,
@@ -779,6 +808,7 @@ img.openColumn {
 	padding: 5px 5px;
 	background-color: #efab00;
 	border: 1px solid gray;
+	cursor: pointer;
 }
 
 .EditMarkPositionConfirmCancelButtons .gwt-MenuItem:hover {
@@ -800,23 +830,53 @@ img.openColumn {
 	line-height: 130%;
 }
 
-.EditMarkPositionMarkTable {
-	margin: 10px;
-	min-width: 300px;
-	border-top: 1px solid #e5e5e5;
-	border-left: 1px solid #e5e5e5;
+.EditMarkPositionHintPanel {
+    margin: 10px 10px 0;
+    padding-left: 1px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #7c7c7c;
+    width: 400px;
 }
 
-.EditMarkPositionMarkTable button {
-	width: 100%;
+.EditMarkPositionHintPanel > div:first-child {
+    display: inline;
+    padd
+}
+
+.EditMarkPositionHintPanel > div:last-child {
+    clear: both;
+}
+
+.EditMarkPositionMarkTable {
+	margin: 10px;
+	min-width: 400px;
+}
+
+.EditMarkPositionHintPanel button, .EditMarkPositionMarkTable button {
 	font-size: 12px;
 	font-weight: bold;
 	border: 1px solid gray;
 	background-color: #efab00;
 	padding: 7px;
 	color: #fff;
+	cursor: pointer;
 }
 
-.EditMarkPositionMarkTable button:hover {
+.EditMarkPositionHintPanel button {
+	border-radius: 0;
+	margin-top: 5px;
+	float: right;
+}
+
+.EditMarkPositionHintPanel button:active {
+	border: 1px solid gray;
+}
+
+.EditMarkPositionMarkTable button {
+	width: 100%;
+}
+
+.EditMarkPositionHintPanel button:hover, .EditMarkPositionMarkTable button:hover {
 	background-color: #bf8b00;
 }

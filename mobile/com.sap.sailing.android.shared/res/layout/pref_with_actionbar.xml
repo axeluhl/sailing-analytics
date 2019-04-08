@@ -18,7 +18,7 @@
             android:layout_height="match_parent"
             android:padding="10dp">
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            <TextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
                 android:singleLine="true"
                 android:textSize="16sp"/>
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            <TextView
                 android:id="@+id/toolbar_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -39,12 +39,11 @@
         </LinearLayout>
 
     </com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar>
-
     <View
-        android:id="@+id/top_bar"
+        android:id="@+id/toolbar_separator"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/toolbar_separator_height"
-        android:background="@color/sap_yellow"/>
+        android:background="@color/separator_color"/>
 
     <FrameLayout
         android:id="@+id/content_frame"

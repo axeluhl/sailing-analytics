@@ -3,6 +3,13 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.ScreenHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoggableDialogFragment;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,13 +23,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.ScreenHelper;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoggableDialogFragment;
 
 public class LoginListViews extends LoggableDialogFragment implements View.OnClickListener {
 
@@ -73,7 +73,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         ArrayList<View> above_position = new ArrayList<>();
         above_position.add(event_layout);
         above_position.add(area_layout);
-        mPositionContainer = new ToggleContainer(view, position_fragment, position_header, position_text, above_position);
+        mPositionContainer = new ToggleContainer(view, position_fragment, position_header, position_text,
+                above_position);
 
         // add listeners to the click areas
         if (event_header != null) {
@@ -114,26 +115,26 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     public void onClick(View view) {
 
         switch (view.getId()) {
-            case R.id.event_header:
-                mCourseAreaContainer.close();
-                mPositionContainer.close();
-                mEventContainer.toggle();
-                break;
+        case R.id.event_header:
+            mCourseAreaContainer.close();
+            mPositionContainer.close();
+            mEventContainer.toggle();
+            break;
 
-            case R.id.area_header:
-                mEventContainer.close();
-                mPositionContainer.close();
-                mCourseAreaContainer.toggle();
-                break;
+        case R.id.area_header:
+            mEventContainer.close();
+            mPositionContainer.close();
+            mCourseAreaContainer.toggle();
+            break;
 
-            case R.id.position_header:
-                mEventContainer.close();
-                mCourseAreaContainer.close();
-                mPositionContainer.toggle();
-                break;
+        case R.id.position_header:
+            mEventContainer.close();
+            mCourseAreaContainer.close();
+            mPositionContainer.toggle();
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
 
         showButton();
@@ -162,7 +163,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         private AppUtils mAppUtils;
 
-        public ToggleContainer(View rootView, FrameLayout frame, RelativeLayout header, TextView text, List<View> layouts) {
+        public ToggleContainer(View rootView, FrameLayout frame, RelativeLayout header, TextView text,
+                List<View> layouts) {
             mRootView = rootView;
             mFrame = frame;
             mText = text;
@@ -179,7 +181,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
                 // open the frame
                 if (mFrame.getLayoutParams().height == 0) {
                     mFrame.getLocationOnScreen(pos);
-                    if ((mAppUtils.isPhone() && mAppUtils.isLand()) || (mAppUtils.isPhone() && mAppUtils.isHDPI())) {
+                    if ((mAppUtils.isPhone() && mAppUtils.isLandscape())
+                            || (mAppUtils.isPhone() && mAppUtils.isHDPI())) {
                         if (mLayouts != null) {
                             for (View view : mLayouts) {
                                 setVisibility(view, View.GONE);
@@ -199,7 +202,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         public void close() {
             if (mFrame != null && mFrame.getLayoutParams() != null) {
-                if ((!mAppUtils.is10inch() && mAppUtils.isLand()) || mAppUtils.isPhone() && mAppUtils.isHDPI() ) {
+                if ((!mAppUtils.is10inch() && mAppUtils.isLandscape()) || mAppUtils.isPhone() && mAppUtils.isHDPI()) {
                     if (mLayouts != null) {
                         for (View view : mLayouts) {
                             setVisibility(view, View.VISIBLE);
@@ -237,25 +240,25 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             switch (action) {
-                case AppConstants.INTENT_ACTION_TOGGLE:
-                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                    if (AppConstants.INTENT_ACTION_TOGGLE_EVENT.equals(data)) {
-                        onClick(mEventContainer.getHeader());
-                    }
-                    if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
-                        onClick(mCourseAreaContainer.getHeader());
-                    }
-                    if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
-                        onClick(mPositionContainer.getHeader());
-                    }
-                    break;
+            case AppConstants.INTENT_ACTION_TOGGLE:
+                String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                if (AppConstants.INTENT_ACTION_TOGGLE_EVENT.equals(data)) {
+                    onClick(mEventContainer.getHeader());
+                }
+                if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
+                    onClick(mCourseAreaContainer.getHeader());
+                }
+                if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
+                    onClick(mPositionContainer.getHeader());
+                }
+                break;
 
-                case AppConstants.INTENT_ACTION_RESET:
-                    mSignUp.setEnabled(false);
-                    break;
+            case AppConstants.INTENT_ACTION_RESET:
+                mSignUp.setEnabled(false);
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
     }

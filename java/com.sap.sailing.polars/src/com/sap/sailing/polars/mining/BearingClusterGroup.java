@@ -1,13 +1,12 @@
 package com.sap.sailing.polars.mining;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;
@@ -57,15 +56,5 @@ public class BearingClusterGroup extends FixClusterGroup<Bearing> {
         Comparator<Bearing> comparator = new BearingComparator();
         return new ComparatorClusterBoundary<Bearing>(angle, strategy, comparator);
     }
-
-    private static class BearingComparator implements Comparator<Bearing>, Serializable {
-
-        private static final long serialVersionUID = 8166601046140275541L;
-
-        @Override
-        public int compare(Bearing arg0, Bearing arg1) {
-            return new Double(arg0.getDegrees()).compareTo(new Double(arg1.getDegrees()));
-        }
-    };
 
 }

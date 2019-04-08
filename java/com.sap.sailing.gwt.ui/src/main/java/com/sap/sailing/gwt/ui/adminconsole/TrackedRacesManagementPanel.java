@@ -43,16 +43,13 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                         sailingService.setStartTimeReceivedForRace(selectedRaceDTO.getRaceIdentifier(), newStartTimeReceived, new AsyncCallback<RaceDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                TrackedRacesManagementPanel.this.errorReporter.reportError("Error setting the received start time: " + caught.getMessage());
+                                TrackedRacesManagementPanel.this.errorReporter.reportError(stringMessages.errorSettingStartTime(caught.getMessage()));
                             }
                             @Override
                             public void onSuccess(RaceDTO result) {
-                                if (result != null) {
-                                    selectedRaceDTO = result;
-                                    refreshSelectedRaceData();
-                                    
-                                    TrackedRacesManagementPanel.this.regattaRefresher.fillRegattas();
-                                }
+                                selectedRaceDTO = result;
+                                refreshSelectedRaceData();
+                                TrackedRacesManagementPanel.this.regattaRefresher.fillRegattas();
                             }
                         });
                     }
@@ -64,15 +61,16 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
         controlsPanel.add(setStartTimeButton);
         selectedRaceContentPanel.add(controlsPanel);
 
-        raceDataGrid = new Grid(6,2);
+        raceDataGrid = new Grid(7, 2);
         this.selectedRaceContentPanel.add(raceDataGrid);
         
-        raceDataGrid.setText(0, 0, "StartTime:");
-        raceDataGrid.setText(1, 0, "EndTime:");
-        raceDataGrid.setText(2, 0, "Duration:");
-        raceDataGrid.setText(3, 0, "Start of tracking:");
-        raceDataGrid.setText(4, 0, "End of tracking:");
-        raceDataGrid.setText(5, 0, "Delay to live (ms):");
+        raceDataGrid.setText(0, 0, stringMessages.startTime()+":");
+        raceDataGrid.setText(1, 0, stringMessages.endTime()+":");
+        raceDataGrid.setText(2, 0, stringMessages.finishingTime()+":");
+        raceDataGrid.setText(3, 0, stringMessages.duration()+":");
+        raceDataGrid.setText(4, 0, stringMessages.startOfTracking()+":");
+        raceDataGrid.setText(5, 0, stringMessages.endOfTracking()+":");
+        raceDataGrid.setText(6, 0, stringMessages.delayForLiveMode()+" (ms):");
     }
 
     @Override
@@ -90,26 +88,32 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
             } else {
                 raceDataGrid.setText(1, 1, "");
             }
-            if(selectedRaceDTO.startOfRace != null && selectedRaceDTO.endOfRace != null) {
-                Date duration = new Date(selectedRaceDTO.endOfRace.getTime() - selectedRaceDTO.startOfRace.getTime());
-                raceDataGrid.setText(2, 1, durationFormatter.render(duration));
+            if (selectedRaceDTO.raceFinishedTime != null) {
+                raceDataGrid.setText(2, 1, dateFormatter.render(selectedRaceDTO.raceFinishedTime) + " "
+                        + timeFormatter.render(selectedRaceDTO.raceFinishedTime));
             } else {
                 raceDataGrid.setText(2, 1, "");
             }
-            if (selectedRaceDTO.trackedRace != null && selectedRaceDTO.trackedRace.startOfTracking != null) {
-                raceDataGrid.setText(3, 1, dateFormatter.render(selectedRaceDTO.trackedRace.startOfTracking) + " "
-                        + timeFormatter.render(selectedRaceDTO.trackedRace.startOfTracking));
+            if(selectedRaceDTO.startOfRace != null && selectedRaceDTO.endOfRace != null) {
+                Date duration = new Date(selectedRaceDTO.endOfRace.getTime() - selectedRaceDTO.startOfRace.getTime());
+                raceDataGrid.setText(3, 1, durationFormatter.render(duration));
             } else {
                 raceDataGrid.setText(3, 1, "");
             }
-            if (selectedRaceDTO.trackedRace != null && selectedRaceDTO.trackedRace.endOfTracking != null) {
-                raceDataGrid.setText(4, 1, dateFormatter.render(selectedRaceDTO.trackedRace.endOfTracking) + " "
-                        + timeFormatter.render(selectedRaceDTO.trackedRace.endOfTracking));
+            if (selectedRaceDTO.trackedRace != null && selectedRaceDTO.trackedRace.startOfTracking != null) {
+                raceDataGrid.setText(4, 1, dateFormatter.render(selectedRaceDTO.trackedRace.startOfTracking) + " "
+                        + timeFormatter.render(selectedRaceDTO.trackedRace.startOfTracking));
             } else {
                 raceDataGrid.setText(4, 1, "");
             }
+            if (selectedRaceDTO.trackedRace != null && selectedRaceDTO.trackedRace.endOfTracking != null) {
+                raceDataGrid.setText(5, 1, dateFormatter.render(selectedRaceDTO.trackedRace.endOfTracking) + " "
+                        + timeFormatter.render(selectedRaceDTO.trackedRace.endOfTracking));
+            } else {
+                raceDataGrid.setText(5, 1, "");
+            }
             if (selectedRaceDTO.trackedRace != null) {
-                raceDataGrid.setText(5, 1, "" + selectedRaceDTO.trackedRace.delayToLiveInMs);
+                raceDataGrid.setText(6, 1, "" + selectedRaceDTO.trackedRace.delayToLiveInMs);
             }
         }
     }

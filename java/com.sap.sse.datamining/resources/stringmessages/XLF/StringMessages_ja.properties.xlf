@@ -1,59 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-05-19T09:43:15Z" original="/usr/sap/ljs/app/Converter_5483050776164983/java/com.sap.sse.datamining/resources/stringmessages/StringMessages.properties" source-language="en" target-language="ja">
+	<file datatype="javapropertyresourcebundle" date="2017-03-03T15:28:33Z" original="/usr/sap/ljs/app/Converter_8942097082529348960/java/com.sap.sse.datamining/resources/stringmessages/StringMessages.properties" source-language="en" target-language="ja">
 		<header>
 			<skl>
-				<internal-file crc="299055c6be272a85a07b907e3c6ce40a" form="base64">H4sIAAAAAAAAAD2MQQoCMQxF9znFLHWnB8hicCXSjYMHKBpLsE2hTQdhmLsbpuoieT958MeZig+EYyc4erAX7ICpJbQB59+cLH8JjqXfnXDKTRS3bQ1KpWKCi2St+BKzMdJdWQL+Yha4Um1RJw7CT6aCy2Eddstx3cP/d5absG6GZTAHH6Y6WeOvAAAA</internal-file>
+				<internal-file crc="f7dde89d81cbbd5ecbf2e3b6c9500184" form="base64">H4sIAAAAAAAAAD2MzQrCMAzH73mKHvWmD5DD0ItILw4foMxYgm0KazuEsXc3rJuH5Pf/COkmGp0n7BrB0oudYAP0NaIOWPflqHojWJbmG+GSqhRcd9NXzoVl2DKzW31faMwY4S6pZPyInodAg7Yed5kEHpRrKD174TfTiPNpMYf5vBzhn93kKVzWhsVoBz9+8w8UzAAAAA==</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-05-11T12:28:06Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2017-01-26T16:57:14Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
 		<body>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Average" resname="Average">
 				<source>Average</source>
-				<target>平均</target>
+				<target state="signed-off">平均</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Median" resname="Median">
 				<source>Median</source>
-				<target>中央値</target>
+				<target state="signed-off">中央値</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Sum" resname="Sum">
 				<source>Sum</source>
-				<target>合計</target>
+				<target state="signed-off">合計</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Maximum" resname="Maximum">
 				<source>Maximum</source>
-				<target>最大</target>
+				<target state="signed-off">最大</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Minimum" resname="Minimum">
 				<source>Minimum</source>
-				<target>最小</target>
+				<target state="signed-off">最小</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Count" resname="Count">
 				<source>Count</source>
-				<target>カウント</target>
+				<target state="signed-off">カウント</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CountDistinct" resname="CountDistinct">
+				<source>Count Distinct</source>
+				<target>カウント区別</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Meters" resname="Meters">
 				<source>m</source>
-				<target state="translated">m</target>
+				<target state="signed-off">m</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Knots" resname="Knots">
 				<source>kn</source>
-				<target>kn</target>
+				<target state="signed-off">kn</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Collecting" resname="Collecting">
 				<source>Collection</source>
-				<target>コレクション</target>
+				<target state="signed-off">コレクション</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ResultSignifier" resname="ResultSignifier">
 				<source><ph id="1">{0}</ph> (<ph id="2">{1}</ph>)</source>
-				<target><ph id="1">{0}</ph> (<ph id="2">{1}</ph>)</target>
+				<target state="signed-off"><ph id="1">{0}</ph> (<ph id="2">{1}</ph>)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SignifierInUnit" resname="SignifierInUnit">
 				<source><ph id="1">{0}</ph> in <ph id="2">{1}</ph></source>
-				<target><ph id="1">{0}</ph> / <ph id="2">{1}</ph></target>
+				<target state="signed-off"><ph id="1">{0}</ph> / <ph id="2">{1}</ph></target>
 			</trans-unit>
 		</body>
 	</file>

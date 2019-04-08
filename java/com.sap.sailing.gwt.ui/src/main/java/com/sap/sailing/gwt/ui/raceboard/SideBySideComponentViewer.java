@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.domain.common.security.Permission;
@@ -27,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
+import com.sap.sailing.gwt.ui.client.shared.racemap.maneuver.ManeuverTablePanel;
 import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -46,6 +48,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
     private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works well for 505 and ESS
+    private final int MIN_TAGGING_WIDTH = Math.min(440, Window.getClientWidth() - 40);
 
     /**
      * Absolute Panel that informs its children about a resize
@@ -62,9 +65,11 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     }
 
     private Component<?> leftComponent;
+    private final Component<?> centerComponent;
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
+    private final Panel rightPanel;
     private final StringMessages stringMessages;
     private final Button mediaSelectionButton;
     private final Button mediaManagementButton;
@@ -75,16 +80,16 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private LayoutPanel mainPanel;
 
     private TouchSplitLayoutPanel splitLayoutPanel;
-    private int savedSplitPosition = -1;
-    private boolean layoutForLeftComponentForcedOnce = false;
 
-    public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP,
-            final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
-            final StringMessages stringMessages, UserService userService, EditMarkPassingsPanel markPassingsPanel,
-            EditMarkPositionPanel markPositionPanel) {
+    public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> centerComponentP,
+            final Component<?> rightComponentP, final MediaPlayerManagerComponent mediaPlayerManagerComponent,
+            List<Component<?>> components, final StringMessages stringMessages, UserService userService,
+            EditMarkPassingsPanel markPassingsPanel, EditMarkPositionPanel markPositionPanel,
+            ManeuverTablePanel maneuverTablePanel) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
+        this.centerComponent = centerComponentP;
         this.rightComponent = rightComponentP;
         this.components = components;
         this.mediaSelectionButton = createMediaSelectionButton(mediaPlayerManagerComponent);
@@ -92,8 +97,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.markPassingsPanel = markPassingsPanel;
         this.markPositionPanel = markPositionPanel;
         markPositionPanel.setComponentViewer(this);
-        userService.addUserStatusEventHandler(this);
-        mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
+        mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
             public void notifyStateChange() {
                 String caption;
                 String tooltip;
@@ -105,11 +109,10 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                     break;
                 case 1:
                     mediaSelectionButton.setVisible(true);
-                    if(mediaPlayerManagerComponent.isPlaying()){
+                    if (mediaPlayerManagerComponent.isPlaying()) {
                         caption = stringMessages.mediaHideVideoCaption();
                         tooltip = stringMessages.mediaHideVideoTooltip();
-                    }
-                    else{
+                    } else {
                         caption = stringMessages.mediaShowVideoCaption();
                         tooltip = stringMessages.mediaShowVideoTooltip(mediaPlayerManagerComponent.getAssignedMediaTracks().iterator().next().title);
                     }
@@ -133,18 +136,12 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.leftScrollPanel = new ScrollPanel();
         this.leftScrollPanel.add(leftComponentP.getEntryWidget());
         this.leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
-        this.mainPanel = new LayoutPanel() {
-            @Override
-            public void onResize() {
-                int leftWidth = leftScrollPanel.getOffsetWidth();
-                // The left scroll panel is potentially resized to ensure it is not too wide when the screen gets narrower,
-                // e.g. when resizing browser window or changing mobile device orientation. An offset of 40px is used, so
-                // the panels size slider and its toggle button is always accessable if it is open.
-                savedSplitPosition = Math.min(leftWidth > 0 ? leftWidth : savedSplitPosition, Window.getClientWidth() - 40);
-                splitLayoutPanel.setWidgetSize(leftScrollPanel, savedSplitPosition);
-                super.onResize();
-            }
-        };
+        // Right panel needs to implement interface ProvidesResize as the only child 
+        // is a HeaderPanel which implements RequiresResize.
+        this.rightPanel = new SimpleLayoutPanel();
+        this.rightPanel.add(rightComponentP.getEntryWidget());
+        this.rightPanel.setTitle(rightComponentP.getEntryWidget().getTitle());
+        this.mainPanel = new LayoutPanel();
         this.mainPanel.setSize("100%", "100%");
         this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
         this.mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
@@ -155,13 +152,15 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         initializeComponents();
 
         // initialize the leaderboard component
-        savedSplitPosition = MIN_LEADERBOARD_WIDTH;
-        splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, savedSplitPosition);
+        splitLayoutPanel.insert(leftScrollPanel, leftComponent, Direction.WEST, MIN_LEADERBOARD_WIDTH);
+        
+        // initialize the tagging component
+        splitLayoutPanel.insert(rightPanel, rightComponent, Direction.EAST, MIN_TAGGING_WIDTH);
 
         // create a panel that will contain the horizontal toggle buttons
         ResizableAbsolutePanel panelForMapAndHorizontalToggleButtons = new ResizableAbsolutePanel();
-        panelForMapAndHorizontalToggleButtons.add(rightComponent.getEntryWidget());
-        splitLayoutPanel.insert(panelForMapAndHorizontalToggleButtons, rightComponent, Direction.CENTER, 0);
+        panelForMapAndHorizontalToggleButtons.add(centerComponent.getEntryWidget());
+        splitLayoutPanel.insert(panelForMapAndHorizontalToggleButtons, centerComponent, Direction.CENTER, 0);
 
         // add additional toggle buttons panel that currently only contains the video button
         List<Pair<Button, String>> additionalVerticalButtons = new ArrayList<Pair<Button, String>>();
@@ -169,7 +168,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 mediaPlayerManagerComponent.getDependentCssClassName()));
             additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
                     "managemedia"));
-        onUserStatusChange(userService.getCurrentUser());
+        userService.addUserStatusEventHandler(this, true);
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
                 additionalVerticalButtons);
@@ -227,7 +226,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         result.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                    multiSelectionControl.show();
+                multiSelectionControl.show();
             }
         });
         // hide button initially as we defer showing the button to the asynchronous
@@ -254,19 +253,28 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
      * itself when it is not visible.
      */
     public void forceLayout() {
-        if (!leftComponent.isVisible() && rightComponent.isVisible()) {
+        if (!leftComponent.isVisible() && centerComponent.isVisible()) {
             // the leaderboard is not visible, but the map is
             if (isWidgetInSplitPanel(leftScrollPanel)) {
-                if (leftScrollPanel.getOffsetWidth() > 0) {
-                    savedSplitPosition = Math.min(savedSplitPosition, leftScrollPanel.getOffsetWidth());
-                }
                 splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */true,
-                        savedSplitPosition);
+                        MIN_LEADERBOARD_WIDTH);
             }
-        } else if (leftComponent.isVisible() && rightComponent.isVisible()) {
+        } else if (leftComponent.isVisible() && centerComponent.isVisible()) {
             // the leaderboard and the map are visible
-            splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */false, savedSplitPosition);
-        } else if (!leftComponent.isVisible() && !rightComponent.isVisible()) {
+            splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */false, MIN_LEADERBOARD_WIDTH);
+        } else if (!leftComponent.isVisible() && !centerComponent.isVisible()) {
+        }
+        
+        if (!rightComponent.isVisible() && centerComponent.isVisible()) {
+            // the tagging is not visible, but the map is
+            if (isWidgetInSplitPanel(rightPanel)) {
+                splitLayoutPanel.setWidgetVisibility(rightPanel, rightComponent, /* hidden */true,
+                        MIN_TAGGING_WIDTH);
+            }
+        } else if (rightComponent.isVisible() && centerComponent.isVisible()) {
+            // the leaderboard and the map are visible
+            splitLayoutPanel.setWidgetVisibility(rightPanel, rightComponent, /* hidden */false, MIN_TAGGING_WIDTH);
+        } else if (!rightComponent.isVisible() && !centerComponent.isVisible()) {
         }
 
         for (Component<?> component : components) {
@@ -294,18 +302,8 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         return "";
     }
 
-    public void setLeftComponentWidth(int width) {
-        // TODO: The information provided by width is wrong
-        // need to find a way to get the correct information
-        if (!layoutForLeftComponentForcedOnce) {
-            savedSplitPosition = MIN_LEADERBOARD_WIDTH;
-            forceLayout();
-        }
-        layoutForLeftComponentForcedOnce = true;
-    }
-
     @Override
-    public void onUserStatusChange(UserDTO user) {
+    public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
         final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
         final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
         boolean forceLayout = false;
@@ -359,10 +357,44 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         }
     }
     
+    /**
+     * Shows/hides the text on right components toggle button by modifying CSS <code>font-size</code> property and adjust
+     * the dragger position by modifying CSS <code>margin-top</code> property. 
+     * 
+     * @param visible
+     *            <code>true</code> to show the button text, <code>false</code> to hide it
+     */
+    void setRightComponentToggleButtonTextVisibilityAndDraggerPosition(final boolean visible) {
+        Splitter rightFlowPanelSplitter = splitLayoutPanel.getAssociatedSplitter(rightPanel);
+        if (rightFlowPanelSplitter != null) {
+            Style toggleButtonStyle = rightFlowPanelSplitter.getToggleButton().getElement().getStyle();
+            if (visible) toggleButtonStyle.clearFontSize();
+            else toggleButtonStyle.setFontSize(0, Unit.PX);
+            Style drapperStyle = rightFlowPanelSplitter.getDragger().getElement().getStyle();
+            if (visible) drapperStyle.clearMarginTop();
+            else drapperStyle.setMarginTop(-25, Unit.PX);
+        }
+    }
+    
     public void setLeftComponentToggleButtonVisible(boolean visible) {
         Splitter leftScrollPanelSplitter = splitLayoutPanel.getAssociatedSplitter(leftScrollPanel);
         if (leftScrollPanelSplitter != null) {
             leftScrollPanelSplitter.getToggleButton().setVisible(visible);
         }
+    }
+    
+    public void setRightComponentToggleButtonVisible(boolean visible) {
+        Splitter rightPanelSplitter = splitLayoutPanel.getAssociatedSplitter(rightPanel);
+        if (rightPanelSplitter != null) {
+            rightPanelSplitter.getToggleButton().setVisible(visible);
+        }
+    }
+    
+    public ScrollPanel getLeftScrollPanel() {
+        return leftScrollPanel;
+    }
+    
+    public Panel getRightPanel() {
+        return rightPanel;
     }
 }

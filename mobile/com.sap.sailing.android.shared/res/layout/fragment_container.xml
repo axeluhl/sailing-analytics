@@ -1,46 +1,21 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <include
         android:id="@+id/toolbar"
+        layout="@layout/custom_toolbar" />
+
+    <View
+        android:id="@+id/toolbar_separator"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="10dp">
-
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-                android:id="@+id/toolbar_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:lines="1"
-                android:singleLine="true"
-                android:textSize="16sp"/>
-
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-                android:id="@+id/toolbar_subtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:lines="1"
-                android:singleLine="true"
-                android:textSize="12sp"/>
-
-        </LinearLayout>
-
-    </com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar>
+        android:layout_height="@dimen/toolbar_separator_height"
+        android:background="@color/separator_color" />
 
     <FrameLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"/>
+        android:layout_height="match_parent" />
 
-</RelativeLayout>
+</LinearLayout>

@@ -11,20 +11,40 @@ Export-Package:
  com.sap.sailing.polars.regression,
  com.sap.sailing.polars.windestimation
 Require-Bundle: 
- com.sap.sailing.domain.common;bundle-version="1.0.0",
+ com.sap.sailing.domain.common,
  com.sap.sailing.domain,
+ com.sap.sailing.polars.datamining,
+ com.sap.sailing.server.gateway.serialization.shared.android,
+ com.sap.sailing.server.gateway.serialization,
  com.sap.sse.datamining,
- com.sap.sse.datamining.annotations;bundle-version="1.0.0",
- com.sap.sse.datamining.shared;bundle-version="1.0.0",
+ com.sap.sse.datamining.annotations,
+ com.sap.sse.datamining.shared,
  com.sap.sse.common,
  com.sap.sse,
  com.sap.sse.shared.android,
  org.apache.commons.math;bundle-version="2.1.0",
  org.eclipse.osgi,
- com.sap.sse.replication;bundle-version="1.0.0",
- com.sap.sse.operationaltransformation;bundle-version="1.0.0"
+ com.sap.sse.operationaltransformation,
+ com.sap.sse.security,
+ com.sun.jersey,
+ javax.servlet;bundle-version="2.6.0",
+ org.apache.shiro.core;bundle-version="1.2.2",
+ org.apache.shiro.web;bundle-version="1.2.2",
+ org.apache.shiro.ehcache;bundle-version="1.2.3",
+ com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0",
+ com.sap.sse.replication.interfaces;bundle-version="1.0.0"
 Import-Package: 
  com.sap.sailing.util,
- com.sap.sse.common
+ javax.ws.rs;version="1.1.1",
+ javax.ws.rs.core;version="1.1.1",
+ javax.xml.bind,
+ org.apache.http,
+ org.apache.http.client;version="[4.2.6,4.3.0)",
+ org.apache.http.client.methods;version="[4.2.6,4.3.0)",
+ org.apache.http.impl.client;version="[4.2.6,4.3.0)",
+ org.json.simple,
+ org.json.simple.parser
+Web-ContextPath: /polars
 Bundle-Activator: com.sap.sailing.polars.impl.Activator
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.sap.sailing.polars

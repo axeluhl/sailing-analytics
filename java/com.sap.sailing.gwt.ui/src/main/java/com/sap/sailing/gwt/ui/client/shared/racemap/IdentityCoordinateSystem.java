@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.google.gwt.maps.client.base.LatLng;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sse.common.Bearing;
 
 public class IdentityCoordinateSystem implements CoordinateSystem {
     @Override

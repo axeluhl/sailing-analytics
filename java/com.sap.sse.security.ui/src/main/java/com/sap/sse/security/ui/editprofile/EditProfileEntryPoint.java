@@ -23,6 +23,8 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.UserManagementService;
@@ -109,7 +111,7 @@ public class EditProfileEntryPoint implements EntryPoint {
         if (usernameFromURL == null) {
             userService.addUserStatusEventHandler(new UserStatusEventHandler() {
                 @Override
-                public void onUserStatusChange(UserDTO user) {
+                public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                     if (user == null) {
                         nameText.setText("");
                         emailText.setText("");
@@ -163,20 +165,20 @@ public class EditProfileEntryPoint implements EntryPoint {
                         if (caught instanceof UserManagementException) {
                             String message = ((UserManagementException) caught).getMessage();
                             if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
-                                Window.alert(stringMessages.passwordDoesNotMeetRequirements());
+                                Notification.notify(stringMessages.passwordDoesNotMeetRequirements(), NotificationType.ERROR);
                             } else if (UserManagementException.INVALID_CREDENTIALS.equals(message)) {
-                                Window.alert(stringMessages.invalidCredentials());
+                                Notification.notify(stringMessages.invalidCredentials(), NotificationType.ERROR);
                             } else {
-                                Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
+                                Notification.notify(stringMessages.errorChangingPassword(caught.getMessage()), NotificationType.ERROR);
                             }
                         } else {
-                            Window.alert(stringMessages.errorChangingPassword(caught.getMessage()));
+                            Notification.notify(stringMessages.errorChangingPassword(caught.getMessage()), NotificationType.ERROR);
                         }
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                        Window.alert(stringMessages.passwordSuccessfullyChanged());
+                        Notification.notify(stringMessages.passwordSuccessfullyChanged(), NotificationType.SUCCESS);
                     }
                 });
             }

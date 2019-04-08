@@ -12,13 +12,15 @@ import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.WidgetCollection;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,28 +29,44 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator;
+import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.NormalizedInterval;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeChangeListener;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public abstract class AbstractRaceChart<SettingsType extends Settings> extends AbsolutePanel implements Component<SettingsType>, TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
+public abstract class AbstractRaceChart<SettingsType extends Settings> extends AbstractCompositeComponent<SettingsType>
+        implements TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
     /**
      * Used as the turboThreshold for the Highcharts series; this is basically the maximum number of points in a series
      * to be displayed. Default is 1000. See also bug 1742.
      */
     protected static final int MAX_SERIES_POINTS = 1000000;
 
+    public static class ExposedAbsolutePanel extends AbsolutePanel {
+
+        public WidgetCollection getChildren() {
+            return super.getChildren();
+        }
+
+    }
+
+    private ExposedAbsolutePanel rootPanel = new ExposedAbsolutePanel();
+
     protected Chart chart;
     protected PlotLine timePlotLine;
 
     protected final Timer timer;
-    protected final TimeRangeWithZoomProvider timeRangeWithZoomProvider; 
-  
+    protected final TimeRangeWithZoomProvider timeRangeWithZoomProvider;
+
     protected final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
@@ -60,21 +78,26 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     protected final SailingServiceAsync sailingService;
 
     protected boolean isLoading = false;
-    protected boolean isZoomed = false;
-    
+
     protected static ChartsCss chartsCss = ChartCssResources.INSTANCE.css();
-    
-    /** the tick count must be the same as TimeSlider.TICKCOUNT, otherwise the time ticks will be not synchronized */  
+
+    /** the tick count must be the same as TimeSlider.TICKCOUNT, otherwise the time ticks will be not synchronized */
     private final int TICKCOUNT = 10;
 
+    public static final long MINUTE_IN_MILLIS = 60 * 1000;
+
     private boolean ignoreNextClickEvent;
-    
+
     private final SimpleBusyIndicator busyIndicator;
-    
+
     private final Button settingsButton;
-    
-    protected AbstractRaceChart(SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, 
-            final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
+    private final FlowPanel toolbar = new FlowPanel();
+
+    protected AbstractRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
+            RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
+            TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
+        super(parent, context);
         this.sailingService = sailingService;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.timer = timer;
@@ -89,20 +112,28 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         busyIndicator = new SimpleBusyIndicator(/* busy */ true, 2.0f);
         busyIndicator.setPanelStyleClass(chartsCss.busyIndicatorStyle());
         busyIndicator.setImageStyleClass(chartsCss.busyIndicatorImageStyle());
+        toolbar.addStyleName(chartsCss.toolbar());
+        add(toolbar);
         settingsButton = createSettingsButton();
-        settingsButton.setStyleName(chartsCss.settingsButtonStyle());
-        settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
-        add(settingsButton);
+        settingsButton.setStyleName(chartsCss.settingsButtonBackgroundImage());
+        addToolbarButton(settingsButton);
+        initWidget(rootPanel);
         getElement().getStyle().setMarginRight(12, Unit.PX);
         getElement().getStyle().setMarginLeft(12, Unit.PX);
     }
-    
+
     /**
-     * Subclasses implement this, e.g., by calling {@link SettingsDialog#createSettingsButton(com.sap.sse.gwt.client.shared.components.Component, StringMessages)}.
-     * This class's constructor will add the {@link ChartsCss#settingsButtonStyle()} and the {@link ChartsCss#settingsButtonBackgroundImage()}.
+     * Subclasses implement this, e.g., by calling
+     * {@link SettingsDialog#createSettingsButton(com.sap.sse.gwt.client.shared.components.Component, StringMessages)}.
+     * This class's constructor will add the {@link ChartsCss#settingsButtonStyle()} and the
+     * {@link ChartsCss#settingsButtonBackgroundImage()}.
      */
     protected abstract Button createSettingsButton();
-    
+
+    public void addToolbarButton(Button button) {
+        toolbar.insert(button, 0);
+    }
+
     /**
      * Subclasses need to provide a settings button which will be displayed at a useful position in the layout of this
      * complex panel, e.g., in the top right corner.
@@ -110,20 +141,20 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     private Button getSettingsButton() {
         return settingsButton;
     }
-    
+
     /**
-     * Simulates a {@link SimplePanel} behavior by replacing all widgets but the {@link #getSettingsButton() settings button} which is always
-     * supposed to be visible. If <code>widget</code> is already a child of this panel, it is left unchanged, and all other widgets except for
-     * the settings button are removed.
+     * Simulates a {@link SimplePanel} behavior by replacing all widgets but the {@link #getSettingsButton() settings
+     * button} which is always supposed to be visible. If <code>widget</code> is already a child of this panel, it is
+     * left unchanged, and all other widgets except for the settings button are removed.
      */
     protected void setWidget(Widget widget) {
         Button settingsButton = getSettingsButton();
         boolean foundWidget = false;
-        for (Iterator<Widget> i=getChildren().iterator(); i.hasNext(); ) {
+        for (Iterator<Widget> i = rootPanel.getChildren().iterator(); i.hasNext();) {
             Widget child = i.next();
             if (child == widget) {
                 foundWidget = true;
-            } else if (child != settingsButton) {
+            } else if (child != settingsButton && child != toolbar) {
                 i.remove();
             }
         }
@@ -133,46 +164,40 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     }
 
     protected void showLoading(String message) {
-        if (timer.getPlayMode() != PlayModes.Live) {
-            if (chart.isRendered()) {
-                chart.showLoading(message);
-            } else {
-                add(busyIndicator);
-            }
+        if (chart.isRendered()) {
+            chart.showLoading(message);
+        } else {
+            add(busyIndicator);
         }
         isLoading = true;
     }
 
     protected void hideLoading() {
-        if (timer.getPlayMode() != PlayModes.Live) {
-            chart.hideLoading();
-        }
+        chart.hideLoading();
         isLoading = false;
         remove(busyIndicator);
     }
 
     protected boolean onXAxisSelectionChange(ChartSelectionEvent chartSelectionEvent) {
-        try {
-            long xAxisMin = chartSelectionEvent.getXAxisMinAsLong();
-            long xAxisMax = chartSelectionEvent.getXAxisMaxAsLong();
-            if (!isZoomed) {
-                isZoomed = true;
-            }
-            timeRangeWithZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
-        } catch (Exception e) {
-            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                @Override
-                public void execute() {
-                    // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
-                    isZoomed = false;
-                    timeRangeWithZoomProvider.resetTimeZoom();
-                    // redraw is triggered by the call to onTimeZoomReset() and therefore not necessary again here
-                    // after the selection change event, another click event is sent with the mouse position on the "Reset Zoom" button; ignore that
-                    ignoreNextClickEvent = true;
+        Long xAxisMin = chartSelectionEvent.getXAxisMinAsLongOrNull();
+        Long xAxisMax = chartSelectionEvent.getXAxisMaxAsLongOrNull();
+        // Set a minute as max time zoom just as for chart
+        if (xAxisMax != null && xAxisMin != null) {
+            if (xAxisMax - xAxisMin > MINUTE_IN_MILLIS) {
+                Date rangeStart = new Date(xAxisMin);
+                Date rangeEnd = new Date(xAxisMax);
+                if(timer.getPlayMode() == PlayModes.Live) {
+                    timer.pause();
                 }
-            });
+                Scheduler.get().scheduleDeferred(() -> timeRangeWithZoomProvider.setTimeZoom(rangeStart, rangeEnd));
+                return true;
+            }
+            return false;
+        } else {
+            ignoreNextClickEvent = true;
+            timeRangeWithZoomProvider.resetTimeZoom();
+            return false;
         }
-        return true;
     }
 
     protected boolean onClick(ChartClickEvent chartClickEvent) {
@@ -187,13 +212,31 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         return true;
     }
 
+    /**
+     * Does nothing here; subclasses have the possibility to override if they need to re-load data based on changes in
+     * the visible area that may lead to step size / resolution adjustments
+     */
+    protected void updateChartIfEffectiveStepSizeChanged(Date minTimepoint, Date maxTimepoint) {
+    }
+
+    /**
+     * @param allowZoomProcessing if true, in livemode and zoomed, reset the zoom
+     */
     protected void changeMinMaxAndExtremesInterval(Date minTimepoint, Date maxTimepoint, boolean redraw) {
         if (chart != null) {
             XAxis xAxis = chart.getXAxis();
+            // if we are zoomed, and in livemode, reset the zoom, as this cannot be handled by the timesliders expected
+            // behaviour
+            if (timeRangeWithZoomProvider.isZoomed() && timer.getPlayMode() == PlayModes.Live) {
+                Scheduler.get().scheduleDeferred(timeRangeWithZoomProvider::resetTimeZoom);
+                return;
+            }
             if (minTimepoint != null && maxTimepoint != null) {
                 xAxis.setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), /* redraw */ false, false);
                 long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
-                xAxis.setTickInterval(tickInterval);
+                TimeTicksCalculator calculator = new TimeTicksCalculator();
+                NormalizedInterval normalizedInterval = calculator.normalizeTimeTickInterval(tickInterval);
+                xAxis.setTickInterval(normalizedInterval.count * normalizedInterval.unitRange);
             }
             if (minTimepoint != null) {
                 xAxis.setMin(minTimepoint.getTime());
@@ -207,37 +250,38 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         }
     }
 
-    protected void setSeriesPoints(Series series, Point[] points) {
-        if (timeRangeWithZoomProvider.isZoomed()) {
+    protected void setSeriesPoints(Series series, Point[] points, boolean manageZoom) {
+        if (manageZoom && timeRangeWithZoomProvider.isZoomed()) {
             com.sap.sse.common.Util.Pair<Date, Date> timeZoom = timeRangeWithZoomProvider.getTimeZoom();
             resetMinMaxAndExtremesInterval(/* redraw */ false);
-            series.setPoints(points, false);
+            series.setPoints(points, /* redraw */ false);
             changeMinMaxAndExtremesInterval(timeZoom.getA(), timeZoom.getB(), /* redraw */ false);
         } else {
-            series.setPoints(points, false);
+            series.setPoints(points, /* redraw */ false);
         }
     }
-    
+
     protected void resetMinMaxAndExtremesInterval(boolean redraw) {
-        changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), redraw);
+        changeMinMaxAndExtremesInterval(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(),
+                redraw);
     }
 
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
         changeMinMaxAndExtremesInterval(zoomStartTimepoint, zoomEndTimepoint, true);
-        // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
-        // chart.showResetZoom();
+        chart.showResetZoom(); // Patched method
+        fireEvent(new ChartZoomChangedEvent(zoomStartTimepoint, zoomEndTimepoint));
     }
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
-        if (!(isZoomed && timer.getPlayMode() == PlayModes.Live)) {
-            resetMinMaxAndExtremesInterval(/* redraw */ true);
-        }
+        resetMinMaxAndExtremesInterval(true);
     }
 
     @Override
     public void onTimeZoomReset() {
+        fireEvent(new ChartZoomResetEvent());
+        chart.hideResetZoom();
         resetMinMaxAndExtremesInterval(true);
     }
 
@@ -247,8 +291,33 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
         chart.getXAxis().addPlotLines(timePlotLine);
     }
 
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
+    public void add(Widget widget) {
+        rootPanel.add(widget);
+    }
+
+    public boolean remove(Widget widget) {
+        return rootPanel.remove(widget);
+    }
+
+    public WidgetCollection getChildren() {
+        return rootPanel.getChildren();
+    }
+
+    /**
+     * Determines if a standard loading message is allowed to appear over the chart or not.
+     * 
+     * @return <code>true</code> if the message is allowed, <code>false</code> otherwise.
+     */
+    protected boolean shouldShowLoading(Long timestamp) {
+        return timestamp == null
+                || (timer.getPlayState() != PlayStates.Playing && timer.getPlayMode() != PlayModes.Live);
+    }
+
+    public HandlerRegistration addChartZoomChangedHandler(ChartZoomChangedEvent.Handler handler) {
+        return addHandler(handler, ChartZoomChangedEvent.TYPE);
+    }
+
+    public HandlerRegistration addChartZoomResetHandler(ChartZoomResetEvent.Handler handler) {
+        return addHandler(handler, ChartZoomResetEvent.TYPE);
     }
 }

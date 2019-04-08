@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -20,7 +21,7 @@ public class RaceLogWindFixEventDeserializer extends BaseRaceLogEventDeserialize
     
     private final JsonDeserializer<Wind> windDeserializer;
 
-    public RaceLogWindFixEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer, JsonDeserializer<Wind> windDeserializer) {
+    public RaceLogWindFixEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer, JsonDeserializer<Wind> windDeserializer) {
         super(competitorDeserializer);
         this.windDeserializer = windDeserializer;
     }

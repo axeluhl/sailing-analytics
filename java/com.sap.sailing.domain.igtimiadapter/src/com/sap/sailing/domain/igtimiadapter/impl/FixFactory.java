@@ -54,9 +54,12 @@ public class FixFactory {
                 Sensor sensor = new SensorImpl(deviceSerialNumber,
                         fixTypeAndOptionalColonSeparatedSensorsSubId.length < 2 ? 0
                                 : Long.valueOf(fixTypeAndOptionalColonSeparatedSensorsSubId[1]));
-                Fix fix = createFix(sensor, Type.valueOf(fixType), timePoint, valuesPerSubindex);
-                result.add(fix);
-                fixIndex++;
+                final Type ft = Type.valueOf(fixType);
+                if (ft != null) {
+                    Fix fix = createFix(sensor, ft, timePoint, valuesPerSubindex);
+                    result.add(fix);
+                    fixIndex++;
+                }
             }
         }
         return result;

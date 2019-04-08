@@ -10,9 +10,17 @@ import com.sap.sse.security.shared.UserManagementException;
 
 public interface UserStore extends Named {
     Iterable<User> getUsers();
+    
+    boolean hasUsers();
 
+    /**
+     * The user with that {@link User#getName() name} or {@code null} if no such user exists
+     */
     User getUserByName(String name);
 
+    /**
+     * The user with that {@link User#getEmail() email} or {@code null} if no such user exists
+     */
     User getUserByEmail(String email);
     
     User getUserByAccessToken(String accessToken);
@@ -53,6 +61,60 @@ public interface UserStore extends Named {
     void unsetPreference(String username, String key);
 
     String getPreference(String username, String key);
+    
+    /**
+     * <p>
+     * In an OSGi environment, this shouldn't be called manually, but instead automatically managed by setting a
+     * {@link PreferenceConverterRegistrationManager} up. {@link PreferenceConverter}s should be registered in the OSGi
+     * service registry with {@link PreferenceConverter#KEY_PARAMETER_NAME} containing the associated preference key
+     * added as property of the service registration.
+     * </p>
+     * 
+     * <p>
+     * Registers a converter objects for a preference key that is used to convert preference Strings to Objects. This
+     * makes it possible to access deserialized settings without the need to do the deserialization over and over again.
+     * </p>
+     * 
+     * @param key
+     *            the key to associate the converter with
+     * @param converter
+     *            the converter to use for (de)serialization
+     */
+    void registerPreferenceConverter(String key, PreferenceConverter<?> converter);
+    
+    /**
+     * <p>
+     * In an OSGi environment, this shouldn't be called manually, but instead automatically managed by setting a
+     * {@link PreferenceConverterRegistrationManager} up.
+     * </p>
+     * 
+     * <p>
+     * Removes a registered {@link PreferenceConverter}  with the given key.
+     * </p>
+     * 
+     * @param key
+     *            the key of the {@link PreferenceConverter} to remove
+     */
+    void removePreferenceConverter(String key);
+    
+    /**
+     * Gets a preference object. Always returns null if there is no converter associated with the given key -> see
+     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     */
+    <T> T getPreferenceObject(String username, String key);
+    
+    /**
+     * Sets a preference as Object. This converts the given Object to a preference {@link String} using a
+     * {@link PreferenceConverter} that was registered through
+     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     * 
+     * @return the {@link String}-converted value of the preference object, as internally passed to
+     *         {@link #setPreference(String, String, String)}
+     * 
+     * @throws IllegalArgumentException
+     *             if there is no {@link PreferenceConverter} registered with the given key.
+     */
+    String setPreferenceObject(String username, String key, Object preferenceObject) throws IllegalArgumentException;
 
     /**
      * Sets a value for a key if that key was previously added to this store using {@link #addSetting(String, Class)}.
@@ -80,6 +142,7 @@ public interface UserStore extends Named {
     /**
      * Removes all users and all their preferences and all settings from this store's in-memory representation.
      * For safety reasons and because a replica's DB state is undefined anyhow, leaves persistent content in place.
+     * Registered listeners will not be removed automatically.
      * Use with due care.
      */
     void clear();
@@ -106,4 +169,8 @@ public interface UserStore extends Named {
      * {@code username} no access token has previously been {@link #setAccessToken(String, String) set}.
      */
     String getAccessToken(String username);
+    
+    void addPreferenceObjectListener(String key, PreferenceObjectListener<?> listener, boolean fireForAlreadyExistingPreferences);
+    
+    void removePreferenceObjectListener(PreferenceObjectListener<?> listener);
 }

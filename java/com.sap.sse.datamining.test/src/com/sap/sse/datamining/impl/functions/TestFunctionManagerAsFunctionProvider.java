@@ -17,6 +17,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
@@ -67,6 +68,11 @@ public class TestFunctionManagerAsFunctionProvider {
     }
     
     @Test
+    public void testGetIdentityFunction() {
+        assertThat(server.getIdentityFunction(), is(new IdentityFunction()));
+    }
+    
+    @Test
     public void testGetAllStatistics() {
         Collection<Function<?>> expectedFunctions = functionRegistryUtil.getAllExpectedStatistics();
         assertThat(server.getAllStatistics(), is(expectedFunctions));
@@ -114,7 +120,7 @@ public class TestFunctionManagerAsFunctionProvider {
                 break;
             }
         }
-        final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensionsMappedByLevel = server.getReducedDimensionsMappedByLevelFor(retrieverChain);
+        final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensionsMappedByLevel = server.getReducedDimensionsMappedByLevelFor(retrieverChain).getReducedDimensions();
         assertThat(reducedDimensionsMappedByLevel, is(expectedDimensions));
     }
     
@@ -151,6 +157,11 @@ public class TestFunctionManagerAsFunctionProvider {
         Collection<Function<?>> expectedFunctions = functionRegistryUtil.getExpectedFunctionsFor(Test_HasLegOfCompetitorContext.class);
         assertThat(server.getFunctionsFor(Test_HasLegOfCompetitorContext.class), is(expectedFunctions));
         assertThat(server.getFunctionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedFunctions));
+    }
+    
+    @Test
+    public void testGetAllFunctionsForObject() {
+        assertThat(Util.size(server.getFunctionsFor(Object.class)), is(0));
     }
     
     @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
@@ -238,6 +249,21 @@ public class TestFunctionManagerAsFunctionProvider {
         assertThat(server.getFunctionForDTO(sideEffectFreeValueDTO_German), is(nullValue()));
         FunctionDTO sideEffectFreeValueDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(sideEffectFreeValue);
         assertThat(server.getFunctionForDTO(sideEffectFreeValueDTO), is(nullValue()));
+    }
+    
+    @Test
+    public void testGetFunctionForIdentityDTO() {
+        DataMiningDTOFactory dtoFactory = FunctionTestsUtil.getDTOFactory();
+        IdentityFunction identityFunction = new IdentityFunction();
+        
+        FunctionDTO identityFunctionDTO_English = dtoFactory.createFunctionDTO(identityFunction, stringMessages, Locale.ENGLISH); 
+        assertThat(server.getFunctionForDTO(identityFunctionDTO_English), is(identityFunction));
+        
+        FunctionDTO identityFunctionDTO_German = dtoFactory.createFunctionDTO(identityFunction, stringMessages, Locale.GERMAN); 
+        assertThat(server.getFunctionForDTO(identityFunctionDTO_German), is(identityFunction));
+        
+        FunctionDTO identityFunctionDTO = dtoFactory.createFunctionDTO(identityFunction); 
+        assertThat(server.getFunctionForDTO(identityFunctionDTO), is(identityFunction));
     }
     
     @Test

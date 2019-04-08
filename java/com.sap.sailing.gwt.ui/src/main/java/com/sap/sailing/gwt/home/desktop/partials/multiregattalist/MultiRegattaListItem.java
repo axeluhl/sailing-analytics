@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.desktop.partials.regattaheader.RegattaHeader;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sse.common.Util;
 
 public class MultiRegattaListItem extends Composite {
 
@@ -36,8 +37,8 @@ public class MultiRegattaListItem extends Composite {
         regattaStepsUi.setLeaderboardNavigation(regattaWithProgress.getState(), leaderboardNavigation);
     }
     
-    void setVisibilityDependingOnBoatCategory(String visibleBoatCategory) {
-        setVisible(visibleBoatCategory == null || visibleBoatCategory.equals(regattaWithProgress.getBoatCategory()));
+    void setVisibilityDependingOnLeaderboardGroup(String nameOfVisibleLeaderboardGroup) {
+        setVisible(nameOfVisibleLeaderboardGroup == null || Util.contains(regattaWithProgress.getLeaderboardGroupNames(), nameOfVisibleLeaderboardGroup));
     }
 
 }

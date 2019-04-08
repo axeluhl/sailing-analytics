@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -47,9 +47,8 @@ public class DashboardLiveRaceProvider {
     
     private void setLiveRaceForLeaderboardName(String leaderboardName, TrackedRace liveRace) {
         if (liveRaceForLeaderboardNames.containsKey(leaderboardName)) {
-            liveRaceForLeaderboardNames.replace(leaderboardName, liveRace);
-        } else {
-            liveRaceForLeaderboardNames.put(leaderboardName, liveRace);
+            liveRaceForLeaderboardNames.remove(leaderboardName);
         }
+        liveRaceForLeaderboardNames.put(leaderboardName, liveRace);
     }
 }

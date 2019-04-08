@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
 	<ui:style gss="true" type="com.sap.sailing.gwt.home.mobile.partials.imagegallery.MobileFullscreenGallery.Style">
 		.popup {
 			position: fixed !important;
@@ -38,8 +38,8 @@
 		</g:layer>
 		<g:layer top="0" right="0" width="100px" height="50px">
 			<g:FlowPanel addStyleNames="{style.actionContainer}">
-				<g:Image url="images/home/reload.svg" styleName="{style.action}" ui:field="autoplayActionUi"/>
-				<g:Image url="images/home/close.svg" styleName="{style.action}" ui:field="closeActionUi"/>
+				<g:Image url="{shr.reload.getSafeUri.asString}" styleName="{style.action}" ui:field="autoplayActionUi"/>
+				<g:Image url="{shr.close.getSafeUri.asString}" styleName="{style.action}" ui:field="closeActionUi"/>
 			</g:FlowPanel>
 		</g:layer>
 	</g:LayoutPanel>

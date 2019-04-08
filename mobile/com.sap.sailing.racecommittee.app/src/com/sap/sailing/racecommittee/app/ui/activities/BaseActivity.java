@@ -1,12 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.io.Closeable;
-import java.io.IOException;
-
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
@@ -16,7 +11,9 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.BackPressListener;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
@@ -37,43 +34,25 @@ public class BaseActivity extends SendingServiceAwareActivity {
         super.onCreate(savedInstanceState);
 
         AppUtils.lockOrientation(this);
-        ThemeHelper.setTheme(this);
 
-        preferences = AppPreferences.on(getApplicationContext());
+        preferences = AppPreferences.on(this);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.options_menu_settings:
-                ExLog.i(this, TAG, "Clicked SETTINGS");
-                startActivity(new Intent(this, PreferenceActivity.class));
-                return true;
+        case R.id.options_menu_settings:
+            ExLog.i(this, TAG, "Clicked SETTINGS");
+            startActivity(new Intent(this, PreferenceActivity.class));
+            return true;
 
-            case R.id.options_menu_info:
-                ExLog.i(this, TAG, "Clicked INFO");
-                startActivity(new Intent(this, SystemInformationActivity.class));
-                return true;
+        case R.id.options_menu_info:
+            ExLog.i(this, TAG, "Clicked INFO");
+            startActivity(new Intent(this, SystemInformationActivity.class));
+            return true;
 
-            case R.id.options_menu_logout:
-                ExLog.i(this, TAG, "Clicked LOGOUT");
-                AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
-                        .setTitle(getString(R.string.logout_dialog_title))
-                        .setMessage(getString(R.string.logout_dialog_message))
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                preferences.setAccessToken(null);
-                                startActivity(new Intent(BaseActivity.this, PasswordActivity.class));
-                                finish();
-                            }
-                        })
-                        .setNegativeButton(android.R.string.cancel, null).create();
-                dialog.show();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -84,8 +63,8 @@ public class BaseActivity extends SendingServiceAwareActivity {
     }
 
     /**
-     * {@link #resetDataManager() Resets the data manager} (which all redefinitions must do) and then
-     * fades this activity.
+     * {@link #resetDataManager() Resets the data manager} (which all redefinitions must do) and then fades this
+     * activity.
      */
     protected boolean onReset() {
         resetDataManager();
@@ -108,6 +87,9 @@ public class BaseActivity extends SendingServiceAwareActivity {
     }
 
     public AppPreferences getPreferences() {
+        if (preferences == null) {
+            preferences = AppPreferences.on(this);
+        }
         return preferences;
     }
 

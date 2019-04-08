@@ -11,5 +11,7 @@ public interface RaceLogServletConstants {
     static final String PARAMS_RACE_COLUMN_NAME = "race_column";
     static final String PARAMS_RACE_FLEET_NAME = "fleet";
     static final String PARAMS_CLIENT_UUID = "clientuuid";
-    static final String PARAM_COURSE_AREA_FILTER = "courseArea";
+    static final String PARAMS_COURSE_AREA_FILTER = "courseArea";
+    static final String PARAMS_TRACK_WIND = "trackWind";
+    static final String PARAMS_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION = "correctWindDirectionByMagneticDeclination";
 }

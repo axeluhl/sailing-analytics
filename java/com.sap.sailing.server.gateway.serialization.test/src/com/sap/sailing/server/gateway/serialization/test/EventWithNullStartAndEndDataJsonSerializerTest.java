@@ -46,6 +46,7 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
     protected final TimePoint expectedEndDate = null;
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
     protected final URL expectedOfficialWebsiteURL;
+    protected final URL expectedBaseURL; 
     protected final URL expectedLogoImageURL;
     protected final ImageDescriptor expectedLogoImageDescriptor;
     protected final LeaderboardGroupBase expectedLeaderboardGroup = mock(LeaderboardGroupBase.class);
@@ -58,6 +59,7 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
 
     public EventWithNullStartAndEndDataJsonSerializerTest() throws MalformedURLException {
         expectedOfficialWebsiteURL = new URL("http://official.website.com");
+        expectedBaseURL = new URL("http://our.veryown.com");
         expectedLogoImageURL = new URL("http://official.logo.com/logo.png");
         expectedLogoImageDescriptor = new ImageDescriptorImpl(expectedLogoImageURL, MillisecondsTimePoint.now());
     }
@@ -74,6 +76,7 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         when(event.getName()).thenReturn(expectedName);
         when(event.getDescription()).thenReturn(expectedDescription);
         when(event.getOfficialWebsiteURL()).thenReturn(expectedOfficialWebsiteURL);
+        when(event.getBaseURL()).thenReturn(expectedBaseURL);
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
@@ -104,6 +107,7 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         assertEquals(expectedName, deserializedEvent.getName());
         assertEquals(expectedDescription, deserializedEvent.getDescription());
         assertEquals(expectedOfficialWebsiteURL, deserializedEvent.getOfficialWebsiteURL());
+        assertEquals(expectedBaseURL, deserializedEvent.getBaseURL());
         assertEquals(1, Util.size(deserializedEvent.getImages()));
         assertEquals(expectedLogoImageURL, deserializedEvent.getImages().iterator().next().getURL());
         LeaderboardGroupBase deserializedLg = deserializedEvent.getLeaderboardGroups().iterator().next();

@@ -9,7 +9,13 @@ import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressFleetDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressSeriesDTO;
+import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 
+/**
+ * {@link RaceCallback} implementation, which prepares races information to display the {@link RegattaProgressDTO
+ * progress of a regatta} including its {@link RegattaProgressSeriesDTO series} and {@link RegattaProgressFleetDTO
+ * fleets}.
+ */
 public class RegattaProgressCalculator implements EventActionUtil.RaceCallback {
 
     private Map<String, Map<String, FleetInfo>> infoPerSeriesAndFleet = new LinkedHashMap<>();
@@ -40,6 +46,9 @@ public class RegattaProgressCalculator implements EventActionUtil.RaceCallback {
         return fleetInfo;
     }
     
+    /**
+     * @return the {@link RegattaProgressDTO} instance, including the progresses for series and fleets.
+     */
     public RegattaProgressDTO getResult() {
         RegattaProgressDTO progress = new RegattaProgressDTO();
         for (Entry<String, Map<String, FleetInfo>> seriesInfo : infoPerSeriesAndFleet.entrySet()) {

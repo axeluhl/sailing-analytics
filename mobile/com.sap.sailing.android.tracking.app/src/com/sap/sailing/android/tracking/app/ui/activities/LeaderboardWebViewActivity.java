@@ -1,11 +1,13 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.LeaderboardFragment;
+
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 public class LeaderboardWebViewActivity extends BaseActivity {
 
@@ -30,14 +32,20 @@ public class LeaderboardWebViewActivity extends BaseActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
             getSupportActionBar().setTitle(getString(R.string.title_activity_leaderboard));
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
+        }
+        View view = findViewById(R.id.toolbar_subtitle);
+        if (view != null) {
+            view.setVisibility(View.GONE);
         }
 
         replaceFragment(R.id.content_frame, new LeaderboardFragment());

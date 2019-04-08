@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +17,7 @@ import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.trackfiles.TrackFileExporter;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * Export data to well-known formats such as GPX, KML etc. Internally, the RouteConverter Library is used.
@@ -55,7 +55,7 @@ public class TrackFileExporterImpl implements TrackFileExporter {
         };
 
         List<WriteRaceDataCallable> callables = new ArrayList<>();
-        ExecutorService executor = Executors.newCachedThreadPool();
+        ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
         List<String> errors = new ArrayList<>();
         for (TrackedRace race : races) {
             for (TrackFilesDataSource d : data) {

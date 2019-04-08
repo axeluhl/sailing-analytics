@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
@@ -43,13 +43,16 @@ public class GetSearchResultsAction implements SailingAction<ListResult<SearchRe
     @Override
     @GwtIncompatible
     public ListResult<SearchResultDTO> execute(SailingDispatchContext ctx) throws DispatchException {
-        KeywordQuery searchQuery = new KeywordQuery(searchText.split("[ \t]+"));
+        KeywordQuery searchQuery = new KeywordQuery(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchText));
         RacingEventService service = ctx.getRacingEventService();
+        final ListResult<SearchResultDTO> result;
         if (remoteServerName == null) {
-            return getListResult(service.search(searchQuery), ctx.getRequestBaseURL(), false);
+            result = getListResult(service.search(searchQuery), ctx.getRequestBaseURL(), false);
+        } else {
+            RemoteSailingServerReference remoteServer = service.getRemoteServerReferenceByName(remoteServerName);
+            result = getListResult(service.searchRemotely(remoteServerName, searchQuery), remoteServer.getURL(), true);
         }
-        RemoteSailingServerReference remoteServer = service.getRemoteServerReferenceByName(remoteServerName);
-        return getListResult(service.searchRemotely(remoteServerName, searchQuery), remoteServer.getURL(), true);
+        return result;
     }
 
     @GwtIncompatible

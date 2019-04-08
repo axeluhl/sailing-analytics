@@ -7,13 +7,15 @@ Bundle-Vendor: SAP
 Fragment-Host: com.sap.sse.security
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.hamcrest;bundle-version="1.1.0",
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  com.sap.sse.security.userstore.mongodb,
  com.sap.sse.mongodb,
  com.rabbitmq.client,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sse.replication.testsupport,
  com.sap.sse.mail.replication.testsupport,
  org.objenesis;bundle-version="2.1.0",
- org.mockito.mockito-core;bundle-version="1.10.14"
+ org.mockito.mockito-core;bundle-version="1.10.14",
+ com.sap.sse.replication;bundle-version="1.0.0",
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Import-Package: org.osgi.util.tracker;version="1.5.1"
+Automatic-Module-Name: com.sap.sse.security.replication.test

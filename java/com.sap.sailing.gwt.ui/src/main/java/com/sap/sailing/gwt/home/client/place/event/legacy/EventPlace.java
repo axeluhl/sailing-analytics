@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.client.place.event.legacy;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class EventPlace extends AbstractBasePlace {
     private final String eventUuidAsString;
@@ -35,7 +35,7 @@ public class EventPlace extends AbstractBasePlace {
     }
 
     public String getTitle(String eventName) {
-        return TextMessages.INSTANCE.sapSailing() + " - " + eventName;
+        return StringMessages.INSTANCE.sapSailing() + " - " + eventName;
     }
     
     public String getEventUuidAsString() {

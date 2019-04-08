@@ -29,7 +29,7 @@
     <string name="error_invalid_qr_code">Ungültiger QR-Code</string>
 
     <!-- Regatta -->
-    <string name="your_regattas">Ihre Regattas:</string>
+    <string name="your_regattas">Ihre Regatten:</string>
     <string name="options_refresh">Aktualisieren</string>
 
     <!-- Eula -->
@@ -52,5 +52,12 @@
     <!-- Message Sending -->
     <string name="sending_waiting">%1$d Events konnten noch nicht gesendet werden.\nLetzter erfolgreicher Versand fand statt %2$s</string>
     <string name="sending_no_waiting">Derzeit keine unversendeten Events.</string>
-    
+
+    <!-- Competitor list footer text -->
+    <string name="footer_text">Mehr Informationen auf</string>
+    <string name="footer_text_link">https://www.sapsailing.com</string>
+
+    <string name="yesterday">Gestern</string>
+    <string name="today">Heute</string>
+    <string name="tomorrow">Morgen</string>
 </resources>

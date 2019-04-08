@@ -13,7 +13,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -25,7 +24,11 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.SmartFutureCache.UpdateInterval;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.impl.HasTracingGet;
+import com.sap.sse.util.impl.HasTracingGetImpl;
+import com.sap.sse.util.impl.KnowsExecutor;
+import com.sap.sse.util.impl.KnowsExecutorAndTracingGet;
+import com.sap.sse.util.impl.KnowsExecutorAndTracingGetImpl;
 
 /**
  * A cache for which a background update can be triggered. Readers can decide whether they want to wait for any ongoing
@@ -88,22 +91,12 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     private final Map<K, V> cache;
     
     /**
-     * When many updates are triggered in a short period of time by a single thread, ensure that the single thread
-     * providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
-     * core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
-     */
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()-1, 3);
-    
-    /**
      * Note that this needs to have more than one thread because there may be calculations used for cache updates that
      * need to wait for other cache updates to finish. If those were all to be handled by a single thread, deadlocks
      * would occur. Remember that there may still be single-core machines, so the factor with which
      * <code>availableProcessors</code> is multiplied needs to be greater than one at least.
      */
-    private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-            /* maximumPoolSize */ THREAD_POOL_SIZE,
-            /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
+    private final static Executor recalculator = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
 
     private final CacheUpdater<K, V, U> cacheUpdateComputer;
     
@@ -201,6 +194,10 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             return callable.call();
         }
         
+        @Override
+        public String toString() {
+            return callable==null?"null":callable.toString();
+        }
     }
     
     /**
@@ -214,7 +211,9 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * @author Axel Uhl (D043530)
      * 
      */
-    private class FutureTaskWithCancelBlocking extends FutureTask<V> implements Callable<V> {
+    private class FutureTaskWithCancelBlocking extends FutureTask<V> implements KnowsExecutor, Callable<V> {
+        private final KnowsExecutorAndTracingGet<V> tracingGetHelper;
+        
         private boolean runningAndReadUpdateInterval;
         
         private final K key;
@@ -241,6 +240,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         public FutureTaskWithCancelBlocking(SettableCallable<V> callable, final K key, final U updateInterval,
                 final boolean callerWaitsSynchronouslyForResult, final Thread callerThread) {
             super(callable);
+            tracingGetHelper = new KnowsExecutorAndTracingGetImpl<>();
             callable.setCallable(this);
             this.gettingThreads = new HashSet<>();
             this.key = key;
@@ -287,7 +287,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                     }
                 }
             }
-            return super.get();
+            return tracingGetHelper.callGetAndTraceAfterEachTimeout(this);
         }
 
         @Override
@@ -376,6 +376,16 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         public U getUpdateInterval() {
             return updateInterval;
         }
+
+        @Override
+        public void setExecutorThisTaskIsScheduledFor(ThreadPoolExecutor executorThisTaskIsScheduledFor) {
+            tracingGetHelper.setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
+        }
+        
+        @Override
+        public String toString() {
+            return getClass().getName()+" [key="+key+", updateInterval="+updateInterval+", cacheUpdateComputer="+cacheUpdateComputer+"]";
+        }
     }
     
     public SmartFutureCache(CacheUpdater<K, V, U> cacheUpdateComputer, String nameForLocks) {
@@ -411,9 +421,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             logger.finest("resuming cache "+nameForLocks);
             for (Iterator<Entry<K, Pair<U, Set<SettableFuture<Future<V>>>>>> i=triggeredAndNotYetScheduled.entrySet().iterator(); i.hasNext(); ) {
                 Entry<K, Pair<U, Set<SettableFuture<Future<V>>>>> e = i.next();
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("while resuming "+nameForLocks+", triggering update for key "+e.getKey()+" with update interval "+e.getValue());
-                }
+                logger.finest(()->"while resuming "+nameForLocks+", triggering update for key "+e.getKey()+" with update interval "+e.getValue());
                 triggerUpdate(e.getKey(), e.getValue().getA());
                 i.remove();
             }
@@ -520,14 +528,33 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 notifyAll();
             }
         }
+        
+        public String toString() {
+            final String result;
+            synchronized (this) {
+                if (isSet) {
+                    result = value==null?"null":value.toString();
+                } else {
+                    result = "unset";
+                }
+            }
+            return result;
+        }
     }
     
     private static class TransitiveFuture<T> implements Future<T> {
         private final SettableFuture<Future<T>> future;
+        private final HasTracingGet<T> tracingGetHelper;
         
         protected TransitiveFuture(SettableFuture<Future<T>> future) {
             super();
             this.future = future;
+            this.tracingGetHelper = new HasTracingGetImpl<T>() {
+                @Override
+                protected String getAdditionalTraceInfo() {
+                    return "transitive future "+TransitiveFuture.this.future.toString();
+                }
+            };
         }
 
         @Override
@@ -559,7 +586,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
         @Override
         public T get() throws InterruptedException, ExecutionException {
-            return future.get().get();
+            return tracingGetHelper.callGetAndTraceAfterEachTimeout(this);
         }
 
         @Override
@@ -583,7 +610,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         synchronized (ongoingRecalculations) {
             if (ongoingRecalculations.containsKey(key)) {
                 FutureTaskWithCancelBlocking scheduledOrRunning = ongoingRecalculations.get(key);
-                // a future is already scheduled for the key; try to 
+                // a future is already scheduled for the key; try to adjust the update interval
                 boolean reuseExistingFuture = scheduledOrRunning.tryToUpdateUpdateInterval(updateInterval);
                 if (reuseExistingFuture) {
                     result = scheduledOrRunning;

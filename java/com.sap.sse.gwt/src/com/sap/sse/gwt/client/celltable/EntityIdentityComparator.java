@@ -26,7 +26,7 @@ public interface EntityIdentityComparator<T> {
     boolean representSameEntity(T dto1, T dto2);
     
     /**
-     * A hash code that is "in line" wiht the equality definition implemented by
+     * A hash code that is "in line" with the equality definition implemented by
      * {@link #representSameEntity(Object, Object)}. More specifically, two objects that represent the same entity
      * according to {@link #representSameEntity(Object, Object)} must have equal hash codes. Conversely, two objects
      * with equal hash codes may still represent different entities.

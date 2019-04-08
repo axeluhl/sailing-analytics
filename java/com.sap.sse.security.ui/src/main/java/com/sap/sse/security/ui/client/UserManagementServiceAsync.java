@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.client;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -18,7 +19,7 @@ public interface UserManagementServiceAsync {
 
     void logout(AsyncCallback<SuccessInfo> callback);
 
-    void createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL, AsyncCallback<UserDTO> callback);
+    void createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL, AsyncCallback<UserDTO> callback);
 
     void updateSimpleUserPassword(String name, String oldPassword, String passwordResetSecret, String newPassword, AsyncCallback<Void> callback);
 
@@ -28,7 +29,7 @@ public interface UserManagementServiceAsync {
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL, AsyncCallback<Void> callback);
 
-    void updateUserProperties(String username, String fullName, String company, AsyncCallback<Void> callback);
+    void updateUserProperties(String username, String fullName, String company, String localeName, AsyncCallback<Void> callback);
 
     void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
 
@@ -47,10 +48,17 @@ public interface UserManagementServiceAsync {
     void addSetting(String key, String clazz, String setting, AsyncCallback<Void> callback);
 
     void setPreference(String username, String key, String value, AsyncCallback<Void> callback);
+    
+    void setPreferences(String username, Map<String, String> keyValuePairs, AsyncCallback<Void> callback);
 
     void unsetPreference(String username, String key, AsyncCallback<Void> callback);
 
     void getPreference(String username, String key, AsyncCallback<String> callback);
+    
+    void getPreferences(String username, List<String> keys,
+            final AsyncCallback<Map<String, String>> callback);
+    
+    void getAllPreferences(String username, final AsyncCallback<Map<String, String>> callback);
 
     /**
      * Obtains an access token for the user specified by {@code username}. The caller needs to

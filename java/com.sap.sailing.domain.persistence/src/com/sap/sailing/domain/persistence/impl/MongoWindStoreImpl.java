@@ -4,8 +4,8 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -23,11 +23,11 @@ import com.sap.sse.mongodb.MongoDBService;
  *
  */
 public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore {
-    private transient final DB db;
+    private transient final MongoDatabase db;
     private final MongoObjectFactory mongoObjectFactory;
     private final DomainObjectFactory domainObjectFactory;
 
-    public MongoWindStoreImpl(DB db, MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory)
+    public MongoWindStoreImpl(MongoDatabase db, MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory)
             throws UnknownHostException, MongoException {
         this.db = db;
         this.mongoObjectFactory = mongoObjectFactory;
@@ -69,5 +69,10 @@ public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore
             e.getValue().addListener(new MongoWindListener(trackedRace, regattaName, e.getKey(), mongoObjectFactory, db));
         }
         return result;
+    }
+    
+    @Override
+    public void clear() {
+        db.getCollection(CollectionNames.WIND_TRACKS.name()).drop();
     }
 }

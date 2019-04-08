@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-05-19T09:42:17Z" original="/usr/sap/ljs/app/Converter_5483050776164983/java/com.sap.sse.filestorage/resources/stringmessages/FileStorageStringMessages.properties" source-language="en" target-language="ja">
+	<file datatype="javapropertyresourcebundle" date="2017-03-03T15:29:56Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sse.filestorage/resources/stringmessages/FileStorageStringMessages.properties" source-language="en" target-language="ja">
 		<header>
 			<skl>
 				<internal-file crc="37afe0b1eb405886cd475fe305c64722" form="base64">H4sIAAAAAAAAAJ1SwW7bMAy95yt4bNHBPeTcQ4tiQLGiGNrmAxiZTojSkiHKSb3Dvn2klGTddSdL1OPj4/PT9SNpuHsrKRMMLKSQItyP+Ms+b+sO3vcEmXSWwnFXERBxJGAFhIyxTyNsNk+PMMmsUAydMu84ojQwxd4au5Wu70Mg1ae+DmwXsL4rITwQbAXjB5QEsxL8vu3wqLchU0+xMIoCRy2E/fWF6ActTToZrMCJ0Kr/wfgwhw8qL7ZXpfQDpAFa+UxxtUf1M0q2tgXok7V8A7PAnzNEol5B52HgwDYEJsojq3KKer2SFFBOgvOBg7mdMqj5fvbVFVUDK7S5p4tpHDv4Xt93JsY7qHdohf3Esr9xaNXsWgJG2Nqx+mFILLBFpU2Wv7iXVMhG2ZPPCykW1yuLSzHmEx7GWSsi0+DxuLDyVjwUo7HI4hGxMPhY34g+cZyEKnbPdDAF2wXGNMcaIDz1fV3vax8M2QKlBQuHTnFSZPH8BKumZk+mSTi0f3HxoGsGPzTl1Wc/w+b1GW7gsvhdLRx9JZgnSdibvirlyCL/btgYn88TKme9gV/PqXDtbRf7Mbij1R9TuhdHUgMAAA==</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-05-11T12:28:05Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2016-11-04T21:01:36Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
 		<body>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="s3Desc" resname="s3Desc">
 				<source>Store files on Amazon S3. The resulting file name is a random UUID plus the original file ending.</source>
-				<target>ファイルを Amazon S3 に保管します。結果として得られるファイル名は、ランダムな UUID に元のファイルの末尾を加えたものです。</target>
+				<target state="signed-off">ファイルを Amazon S3 に保管します。結果として得られるファイル名は、ランダムな UUID に元のファイルの末尾を加えたものです。</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="s3AccessIdDesc" resname="s3AccessIdDesc">
 				<source>Access ID (leave blank to use ~/.aws/credentials instead)</source>
-				<target>アクセス ID (空白のままにすると、代わりに ~/.aws/credentials を使用)</target>
+				<target state="signed-off">アクセス ID (空白のままにすると、代わりに ~/.aws/credentials を使用)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="s3AccessKeyDesc" resname="s3AccessKeyDesc">
 				<source>Secret Access Key (leave blank to use ~/.aws/credentials instead)</source>
-				<target>秘密アクセスキー (空白のままにすると、代わりに ~/.aws/credentials を使用)</target>
+				<target state="signed-off">秘密アクセスキー (空白のままにすると、代わりに ~/.aws/credentials を使用)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="s3BucketNameDesc" resname="s3BucketNameDesc">
 				<source>Name of Bucket to use (has to already exist, and user needs sufficient permissions)</source>
-				<target>使用するバケットの名称 (すでに存在していること、かつユーザに十分な権限があることが必要)</target>
+				<target state="signed-off">使用するバケットの名称 (すでに存在していること、かつユーザに十分な権限があることが必要)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="localDesc" resname="localDesc">
 				<source>Service for storing files in the local file system. Files get stored in localPath+fileName and can be accessed at baseUrl+fileName Note that the content lying in baseUrl must therefore be accessible remotely. This can for examplebe achieved by mounting a remote file system for example from static.sapsailing.com on the replicas to localPath.</source>
-				<target>ローカルファイルシステムにファイルを保管するサービスです。ファイルは、ローカルパス + ファイル名で保管され、ベース URL + ファイル名でアクセスできます。そのため、ベース URL にあるコンテンツはリモートからアクセス可能でなければなりません。これはたとえば、複製上の static.sapsailing.com などからローカルパスにリモートファイルシステムをマウントすることによって達成することができます。</target>
+				<target state="signed-off">ローカルファイルシステムにファイルを保管するサービスです。ファイルは、ローカルパス + ファイル名で保管され、ベース URL + ファイル名でアクセスできます。そのため、ベース URL にあるコンテンツはリモートからアクセス可能でなければなりません。これはたとえば、複製上の static.sapsailing.com などからローカルパスにリモートファイルシステムをマウントすることによって達成することができます。</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="localBaseUrlDesc" resname="localBaseUrlDesc">
 				<source>Base URL + fileName = URL where uploaded file will be accessible</source>
-				<target>ベース URL + ファイル名 = アップロードしたファイルがアクセス可能となる場所の URL</target>
+				<target state="signed-off">ベース URL + ファイル名 = アップロードしたファイルがアクセス可能となる場所の URL</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="localLocalPathDesc" resname="localLocalPathDesc">
 				<source>Local Path to use for file storage</source>
-				<target>ファイル保管に使用するローカルパス</target>
+				<target state="signed-off">ファイル保管に使用するローカルパス</target>
 			</trans-unit>
 		</body>
 	</file>

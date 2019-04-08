@@ -12,17 +12,16 @@
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<!-- Highcharts API -->
 	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
-	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
-	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
 		<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
 	<inherits name='com.google.gwt.maps.Maps' />
 	<!-- GWT JSON Support -->
 	<inherits name='com.google.gwt.json.JSON' />
-        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
-  	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow" />
+
+	<!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
+
+	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow" />
 
 	<source path='client'/>
 	<source path='shared'/>

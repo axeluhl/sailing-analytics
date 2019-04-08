@@ -6,31 +6,25 @@ import java.util.Map;
 import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
 
 public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
-    public static String createRaceBoardLink(Map<String, String> parameters) {
-        return createEntryPointLink("/gwt/RaceBoard.html", parameters);
-    }
+    public static final String LEADERBOARD_PATH = "/gwt/Leaderboard.html";
+    public static final String AUTOPLAY_PATH = "/gwt/AutoPlay.html";
 
     public static String createSimulatorLink(Map<String, String> parameters) {
         return createEntryPointLink("/gwt/Simulator.html", parameters);
     }
-
-    public static String createLeaderboardLink(Map<String, String> parameters) {
-        return createEntryPointLink("/gwt/Leaderboard.html", parameters);
+    
+    public static String createLeaderboardTabLink(String eventId, String regattaId) {
+        return createEventRegattaTabLink(eventId, regattaId, "leaderboard");
     }
     
-    public static String createLeaderboardEditingLink(Map<String, String> parameters) {
-        return createEntryPointLink("/gwt/LeaderboardEditing.html", parameters);
+    public static String createRacesTabLink(String eventId, String leaderboardName) {
+        return createEventRegattaTabLink(eventId, leaderboardName, "races");
     }
     
-    public static String createLeaderboardTabLink(String eventId, String regattaId, Map<String, String> parameters) {
-        return createEntryPointLink("/gwt/Home.html#/regatta/leaderboard/:eventId=" + eventId + "&regattaId=" + regattaId, parameters);
-    }
-    
-    public static String createLeaderboardPlaceLink(String eventId, String leaderboardName) {
-        final Map<String, String> emptyParams = Collections.emptyMap();
-        return createEntryPointLink("/gwt/Home.html#EventPlace:eventId="+eventId+
-                "&navigationTab=Regatta&leaderboardName=" +leaderboardName, emptyParams);
-
+    private static String createEventRegattaTabLink(String eventId, String regattaId, String tabName) {
+        return createEntryPointLink(
+                "/gwt/Home.html", "/regatta/" + tabName + "/:eventId=" + eventId + "&regattaId=" + regattaId,
+                Collections.<String, String>emptyMap());
     }
     
     public static String createLeaderboardGroupLink(Map<String, String> parameters) {
@@ -38,14 +32,14 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     }
     
     public static String createEventPlaceLink(String eventId, Map<String, String> parameters) {
-        return createEntryPointLink("/gwt/Home.html#/event/:eventId="+eventId, parameters);
-    }
-    
-    public static String createRegattaOverviewLink(Map<String, String> parameters) {
-        return createEntryPointLink("/gwt/RegattaOverview.html", parameters);
+        return createEntryPointLink("/gwt/Home.html", "/event/:eventId="+eventId, parameters);
     }
     
     public static String createDashboardLink(Map<String, String> parameters) {
         return createEntryPointLink("/dashboards/RibDashboard.html", parameters);
+    }
+    
+    public static String createPairingListLink(Map<String, String> parameters) {
+        return createEntryPointLink("/gwt/PairingList.html", parameters);
     }
 }

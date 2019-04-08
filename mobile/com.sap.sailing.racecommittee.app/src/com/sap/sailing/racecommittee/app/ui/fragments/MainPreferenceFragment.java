@@ -1,17 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-
-import android.app.Fragment;
-import android.app.LoaderManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.DrawableRes;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -33,11 +32,16 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
+import com.sap.sailing.racecommittee.app.ui.activities.PasswordActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.CourseDesignerPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaSpecificPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.views.decoration.PreferenceMarginItemDecoration;
+
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainPreferenceFragment extends LoggableFragment {
 
@@ -58,43 +62,77 @@ public class MainPreferenceFragment extends LoggableFragment {
         RecyclerView recyclerView = ViewHelper.get(layout, R.id.preference_header);
         if (recyclerView != null) {
             ArrayList<PreferenceItem> items = new ArrayList<>();
-            items.add(new PreferenceItem(getString(R.string.settings_category_general), R.drawable.ic_more_horiz_yellow_24dp, GeneralPreferenceFragment.class.getName()));
-            items.add(new PreferenceItem(getString(R.string.settings_category_regatta_defaults), R.drawable.ic_boat_yellow_24dp, RegattaPreferenceFragment.class.getName()));
-            items.add(new PreferenceItem(getString(R.string.settings_category_regattas), R.drawable.ic_boat_yellow_24dp, RegattaSpecificPreferenceFragment.class.getName()));
-            items.add(new PreferenceItem(getString(R.string.settings_category_course_designer), R.drawable.ic_pin_drop_yellow_24dp, CourseDesignerPreferenceFragment.class.getName()));
-            items.add(new PreferenceItem(getString(R.string.reload_config), R.drawable.ic_autorenew_yellow_24dp, new Runnable() {
+            items.add(new PreferenceItem(getString(R.string.settings_category_general),
+                    R.drawable.ic_more_horiz_yellow_24dp, GeneralPreferenceFragment.class.getName()));
+            items.add(new PreferenceItem(getString(R.string.settings_category_regatta_defaults),
+                    R.drawable.ic_boat_yellow_24dp, RegattaPreferenceFragment.class.getName()));
+            items.add(new PreferenceItem(getString(R.string.settings_category_regattas), R.drawable.ic_boat_yellow_24dp,
+                    RegattaSpecificPreferenceFragment.class.getName()));
+            items.add(new PreferenceItem(getString(R.string.settings_category_course_designer),
+                    R.drawable.ic_pin_drop_yellow_24dp, CourseDesignerPreferenceFragment.class.getName()));
+            items.add(new PreferenceItem(getString(R.string.reload_config), R.drawable.ic_autorenew_yellow_24dp,
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
+                                    AppPreferences.on(getActivity()).getDeviceIdentifier());
+
+                            LoaderManager.LoaderCallbacks<?> configurationLoader = DataManager.create(getActivity())
+                                    .createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
+
+                                        @Override
+                                        public void onLoadFailed(Exception reason) {
+                                            if (reason instanceof FileNotFoundException) {
+                                                Toast.makeText(getActivity(),
+                                                        getString(R.string.loading_configuration_not_found),
+                                                        Toast.LENGTH_LONG).show();
+                                                ExLog.w(getActivity(), TAG, String.format(
+                                                        "There seems to be no configuration for this device: %s",
+                                                        reason.toString()));
+                                            } else {
+                                                Toast.makeText(getActivity(),
+                                                        getString(R.string.loading_configuration_failed),
+                                                        Toast.LENGTH_LONG).show();
+                                                ExLog.ex(getActivity(), TAG, reason);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onLoadSucceeded(DeviceConfiguration configuration,
+                                                boolean isCached) {
+                                            // this is our 'global' configuration, let's store it in app preferences
+                                            PreferencesDeviceConfigurationLoader
+                                                    .wrap(configuration, AppPreferences.on(getActivity())).store();
+
+                                            Toast.makeText(getActivity(),
+                                                    getString(R.string.loading_configuration_succeded),
+                                                    Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+
+                            getLoaderManager().initLoader(0, null, configurationLoader).forceLoad();
+                        }
+                    }));
+            items.add(new PreferenceItem(getString(R.string.logout), R.drawable.ic_logout_yellow_24dp, new Runnable() {
                 @Override
                 public void run() {
-                    DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getActivity())
-                        .getDeviceIdentifier());
-
-                    LoaderManager.LoaderCallbacks<?> configurationLoader = DataManager.create(getActivity()).createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
-
-                        @Override
-                        public void onLoadFailed(Exception reason) {
-                            if (reason instanceof FileNotFoundException) {
-                                Toast.makeText(getActivity(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
-                                ExLog.w(getActivity(), TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
-                            } else {
-                                Toast.makeText(getActivity(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
-                                ExLog.ex(getActivity(), TAG, reason);
-                            }
-                        }
-
-                        @Override
-                        public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                            // this is our 'global' configuration, let's store it in app preferences
-                            PreferencesDeviceConfigurationLoader.wrap(configuration, AppPreferences.on(getActivity())).store();
-
-                            Toast.makeText(getActivity(), getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                    getLoaderManager().initLoader(0, null, configurationLoader).forceLoad();
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(R.string.logout_dialog_title)
+                            .setMessage(getString(R.string.logout_dialog_message))
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    AppPreferences.on(getActivity()).setAccessToken(null);
+                                    startActivity(new Intent(getActivity(), PasswordActivity.class));
+                                    getActivity().finish();
+                                }
+                            }).setNegativeButton(android.R.string.cancel, null).show();
                 }
             }));
-            recyclerView.addItemDecoration(new PreferenceMarginItemDecoration(getActivity(), getResources().getDimensionPixelSize(R.dimen.preference_margin)));
-            recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.preference_columns)));
+            recyclerView.addItemDecoration(new PreferenceMarginItemDecoration(getActivity(),
+                    getResources().getDimensionPixelSize(R.dimen.preference_margin)));
+            recyclerView.setLayoutManager(
+                    new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.preference_columns)));
             recyclerView.setAdapter(new PreferenceAdapter(getActivity(), items));
         }
 
@@ -122,7 +160,10 @@ public class MainPreferenceFragment extends LoggableFragment {
             holder.item = mItems.get(position);
             holder.textView.setText(holder.item.title);
             holder.textView.setCompoundDrawablesWithIntrinsicBounds(holder.item.drawable, null, null, null);
-            holder.line.setVisibility(TextUtils.isEmpty(holder.item.clazz) ? View.GONE : View.VISIBLE);
+
+            int count = mItems.size() - 1;
+            int columns = getResources().getInteger(R.integer.preference_columns);
+            holder.line.setVisibility((position > count - columns) ? View.GONE : View.VISIBLE);
         }
 
         @Override
@@ -152,7 +193,8 @@ public class MainPreferenceFragment extends LoggableFragment {
                         try {
                             Fragment fragment = (Fragment) Class.forName(item.clazz).newInstance();
                             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(item.title);
-                            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(null).commit();
+                            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment)
+                                    .addToBackStack(null).commit();
                         } catch (ClassNotFoundException ex) {
                             ExLog.ex(getActivity(), TAG, ex);
                         } catch (java.lang.InstantiationException ex) {

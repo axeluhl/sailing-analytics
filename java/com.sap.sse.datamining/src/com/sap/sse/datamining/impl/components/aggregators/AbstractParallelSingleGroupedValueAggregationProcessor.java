@@ -27,20 +27,27 @@ public abstract class AbstractParallelSingleGroupedValueAggregationProcessor<Val
     }
 
     @Override
-    protected void handleElement(GroupedDataEntry<ValueType> element) {
+    public void handleElement(GroupedDataEntry<ValueType> element) {
         GroupKey key = element.getKey();
         ValueType value = element.getDataEntry();
-        if (!valueMap.containsKey(key)) {
-            valueMap.put(key, value);
-        } else {
-            valueMap.put(key, compareValuesAndReturnNewResult(valueMap.get(key), value));
+        if (value != null) {
+            if (!valueMap.containsKey(key)) {
+                valueMap.put(key, value);
+            } else {
+                valueMap.put(key, compareValuesAndReturnNewResult(valueMap.get(key), value));
+            }
         }
     }
 
+    /**
+     * @param currentResult not {@code null}
+     * @param newValue not {@code null}
+     * @return not {@code null}
+     */
     protected abstract ValueType compareValuesAndReturnNewResult(ValueType currentResult, ValueType newValue);
 
     @Override
-    protected Map<GroupKey, ValueType> getResult() {
+    public Map<GroupKey, ValueType> getResult() {
         return valueMap;
     }
 

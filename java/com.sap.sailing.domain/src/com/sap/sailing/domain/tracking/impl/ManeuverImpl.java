@@ -1,42 +1,50 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.tracking.impl.AbstractGPSFixImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sailing.domain.tracking.ManeuverLoss;
+import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
 /**
  * @author Axel Uhl (d043530)
  *
  */
-public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
+public abstract class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     private static final long serialVersionUID = -5317959066507472580L;
     private final ManeuverType type;
     private final Tack newTack;
     private final Position position;
     private final TimePoint timePoint;
-    private final SpeedWithBearing speedWithBearingBefore;
-    private final SpeedWithBearing speedWithBearingAfter;
-    private final double directionChangeInDegrees;
-    private final Distance maneuverLoss;
+    private final double maxTurningRateInDegreesPerSecond;
+    private final ManeuverCurveBoundaries mainCurveBoundaries;
+    private final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries;
+    private final MarkPassing markPassing;
+    private final ManeuverLoss maneuverLoss;
 
-    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint, SpeedWithBearing speedWithBearingBefore,
-            SpeedWithBearing speedWithBearingAfter, double directionChangeInDegrees, Distance maneuverLoss) {
-        super();
+    public ManeuverImpl(ManeuverType type, Tack newTack, Position position, TimePoint timePoint,
+            ManeuverCurveBoundaries mainCurveBoundaries,
+            ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries,
+            double maxTurningRateInDegreesPerSecond, MarkPassing markPassing, ManeuverLoss maneuverLoss) {
         this.type = type;
         this.newTack = newTack;
         this.position = position;
         this.timePoint = timePoint;
-        this.speedWithBearingBefore = speedWithBearingBefore;
-        this.speedWithBearingAfter = speedWithBearingAfter;
-        this.directionChangeInDegrees = directionChangeInDegrees;
+        this.mainCurveBoundaries = mainCurveBoundaries;
+        this.maneuverCurveWithStableSpeedAndCourseBoundaries = maneuverCurveWithStableSpeedAndCourseBoundaries;
+        this.maxTurningRateInDegreesPerSecond = maxTurningRateInDegreesPerSecond;
+        this.markPassing = markPassing;
         this.maneuverLoss = maneuverLoss;
     }
-    
+
     @Override
     public ManeuverType getType() {
         return type;
@@ -53,18 +61,13 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     }
 
     @Override
-    public SpeedWithBearing getSpeedWithBearingBefore() {
-        return speedWithBearingBefore;
+    public ManeuverCurveBoundaries getMainCurveBoundaries() {
+        return mainCurveBoundaries;
     }
 
     @Override
-    public SpeedWithBearing getSpeedWithBearingAfter() {
-        return speedWithBearingAfter;
-    }
-
-    @Override
-    public double getDirectionChangeInDegrees() {
-        return directionChangeInDegrees;
+    public ManeuverCurveBoundaries getManeuverCurveWithStableSpeedAndCourseBoundaries() {
+        return maneuverCurveWithStableSpeedAndCourseBoundaries;
     }
 
     @Override
@@ -73,15 +76,69 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
     }
 
     @Override
-    public Distance getManeuverLoss() {
-        return maneuverLoss;
+    public double getDirectionChangeInDegrees() {
+        return getManeuverBoundaries().getDirectionChangeInDegrees();
+    }
+
+    @Override
+    public SpeedWithBearing getSpeedWithBearingBefore() {
+        return getManeuverBoundaries().getSpeedWithBearingBefore();
+    }
+
+    @Override
+    public SpeedWithBearing getSpeedWithBearingAfter() {
+        return getManeuverBoundaries().getSpeedWithBearingAfter();
+    }
+
+    @Override
+    public Speed getLowestSpeed() {
+        return getManeuverBoundaries().getLowestSpeed();
     }
 
     @Override
     public String toString() {
         return super.toString() + " " + type + " on new tack " + newTack + " on position " + position
-                + " at time point " + timePoint + ". " + "Speed before maneuver " + speedWithBearingBefore
-                + " speed after maneuver " + speedWithBearingAfter + ". The maneuver changed the course by "
-                + directionChangeInDegrees + "deg." + (getManeuverLoss() == null ? "" : " Lost approximately "+getManeuverLoss());
+                + " at time point " + timePoint + ", " + getManeuverBoundaries() + ", max. turning rate: "
+                + maxTurningRateInDegreesPerSecond
+                + (getManeuverLoss() == null ? "" : ", Lost approximately " + getManeuverLoss().getProjectedDistanceLost()) + ", Mark passing: "
+                + markPassing;
     }
+
+    @Override
+    public double getMaxTurningRateInDegreesPerSecond() {
+        return maxTurningRateInDegreesPerSecond;
+    }
+
+    @Override
+    public Duration getDuration() {
+        return getManeuverBoundaries().getDuration();
+    }
+
+    @Override
+    public MarkPassing getMarkPassing() {
+        return markPassing;
+    }
+
+    @Override
+    public boolean isMarkPassing() {
+        return markPassing != null;
+    }
+
+    @Override
+    public NauticalSide getToSide() {
+        return getMainCurveBoundaries().getDirectionChangeInDegrees() < 0 ? NauticalSide.PORT : NauticalSide.STARBOARD;
+    }
+    
+    @Override
+    public double getAvgTurningRateInDegreesPerSecond() {
+        return Math.abs(getMainCurveBoundaries().getDirectionChangeInDegrees())
+                / getMainCurveBoundaries().getDuration().asSeconds();
+    }
+    
+    @Override
+    public ManeuverLoss getManeuverLoss() {
+        return maneuverLoss;
+    }
+    
+
 }

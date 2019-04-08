@@ -5,8 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -17,16 +18,19 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -36,18 +40,17 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
@@ -59,6 +62,7 @@ import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindByRaceLogTest {
@@ -80,7 +84,7 @@ public class WindByRaceLogTest {
         // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = service.getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
-        Competitor competitor = createCompetitor(masterDomainFactory);
+        CompetitorWithBoat competitor = createCompetitorWithBoat(masterDomainFactory, boatClass);
         int[] discardThreshold = {1, 2};
         CreateFlexibleLeaderboard createLeaderboardOperation = new CreateFlexibleLeaderboard("Test Leaderboard", "Test", discardThreshold, new LowPoint(), null);
         service.apply(createLeaderboardOperation);
@@ -93,23 +97,27 @@ public class WindByRaceLogTest {
         Regatta regatta = service.apply(addRegattaOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
-        RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Collections.singletonList(competitor));
+        final Map<Competitor, Boat> competitorsAndBoats = new HashMap<>(); 
+        competitorsAndBoats.put(competitor, competitor.getBoat());
+        RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, competitorsAndBoats);
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         service.apply(addRaceOperation);
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1"), /*passingInstruction*/ null));
         raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
         service.apply(new TrackRegatta(raceIdentifier));
-        trackedRace = (DynamicTrackedRace) service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,/* delayToLiveInMillis */ 5000,
+        trackedRace = (DynamicTrackedRace) service.apply(new CreateTrackedRace(raceIdentifier, EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
         trackedRace.setStartOfTrackingReceived(MillisecondsTimePoint.now());
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
     }
 
-    private Competitor createCompetitor(final DomainFactory masterDomainFactory) {
-        return masterDomainFactory.getOrCreateCompetitor("GER 61", "Sailor", Color.RED, "noone@nowhere.de", null, new TeamImpl("Sailor",
+    private CompetitorWithBoat createCompetitorWithBoat(final DomainFactory masterDomainFactory, final BoatClass boatClass) {
+        Competitor competitor = masterDomainFactory.getOrCreateCompetitor("GER 61", "Sailor", "S", Color.RED, "noone@nowhere.de", null, new TeamImpl("Sailor",
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Sailor 1", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null)}),
                 new PersonImpl("Sailor 2", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
-                new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        DynamicBoat boat = (DynamicBoat) masterDomainFactory.getOrCreateBoat("boat", "GER 61", boatClass, "GER 61", null);
+        return new CompetitorWithBoatImpl(competitor, boat);
     }
     
     private void attachTrackedRaceToRaceColumn() {
@@ -147,8 +155,22 @@ public class WindByRaceLogTest {
         
         try {
             windTrack.lockForRead();
-            assertTrue(Util.contains(windTrack.getFixes(), wind1));
-            assertTrue(Util.contains(windTrack.getFixes(), wind2));
+            boolean foundWind1 = false;
+            boolean foundWind2 = false;
+            for (Wind w : windTrack.getFixes()) {
+                try {
+                    PositionAssert.assertWindEquals(w, wind1, /* posDegDelta */ 0.000001, /* bearingDegreeDelta */ 0.01, /* knotSpeedDelta */ 0.01);
+                    foundWind1 = true;
+                } catch (AssertionError e) {
+                }
+                try {
+                    PositionAssert.assertWindEquals(w, wind2, /* posDegDelta */ 0.000001, /* bearingDegreeDelta */ 0.01, /* knotSpeedDelta */ 0.01);
+                    foundWind2 = true;
+                } catch (AssertionError e) {
+                }
+            }
+            assertTrue(foundWind1);
+            assertTrue(foundWind2);
         } finally {
             windTrack.unlockAfterRead();
         }
@@ -173,7 +195,15 @@ public class WindByRaceLogTest {
         
         try {
             windTrack.lockForRead();
-            assertTrue(Util.contains(windTrack.getFixes(), wind1));
+            boolean foundWind1 = false;
+            for (Wind w : windTrack.getFixes()) {
+                try {
+                    PositionAssert.assertWindEquals(w, wind1, /* posDegDelta */ 0.000001, /* bearingDegreeDelta */ 0.01, /* knotSpeedDelta */ 0.01);
+                    foundWind1 = true;
+                } catch (AssertionError e) {
+                }
+            }
+            assertTrue(foundWind1);
         } finally {
             windTrack.unlockAfterRead();
         }

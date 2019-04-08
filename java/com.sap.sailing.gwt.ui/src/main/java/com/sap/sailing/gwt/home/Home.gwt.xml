@@ -1,57 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
 <module>
-	<inherits name='com.sap.sailing.gwt.ui.CommonConfigs'/>
-
-	<inherits name="com.sap.sse.gwt.dispatch.Dispatch" />
-	
-	<!-- Other module inherits -->
-	
-	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
-	<inherits name="com.sap.sse.SSECommon" />
-	<inherits name="com.sap.sailing.domain.SailingDomain" />
-	<inherits name="com.sap.sse.gwt.AdminConsole" />
-	<inherits name="com.sap.sse.security.ui.LoginPanel" />
-	<inherits name="com.sap.sse.security.ui.Authentication" />
-	<inherits name="com.sap.sse.security.ui.UserProfile" />
-	
-	<!-- Highcharts API -->
-	<inherits name='com.sap.sse.gwt.Highcharts' />
-
-	<!-- Google Maps API -->
-	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
-  	<inherits name='com.google.gwt.maps.Maps' />
-  	
-  	<!--  Bootstrap API -->
-  	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-  	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
-
-	<inherits name='com.sap.sailing.gwt.common.SailingLocales' />
-	
-	<source path='client' />
-	<source path='shared' />
-	<source path='desktop' />
-	<source path='mobile' />
-	<source path='communication' />
-	
-	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
-	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
-	<inherits name='com.sap.sailing.gwt.ui.SourceClient'/>
-	<inherits name='com.sap.sailing.gwt.ui.SourceShared'/>
-	<inherits name='com.sap.sailing.gwt.ui.SourceActions'/>
-	<inherits name='com.sap.sailing.gwt.ui.SourceSimulator'/>
-	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole"/>
-	<inherits name="com.sap.sailing.gwt.regattaoverview.SourceRegattaOverview"/>
-	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard"/>
-	<inherits name='com.sap.sse.gwt.CommonControlCSS'/>
-	
-	<replace-with class="com.sap.sailing.gwt.home.shared.utils.dateformatter.CustomEventDatesFormatter">
-        <when-type-is class="com.sap.sailing.gwt.home.shared.utils.dateformatter.DefaultEventDatesFormatter"/>
-        <any>
-            <when-property-is name="locale" value="en"/>
-            <when-property-is name="locale" value="de"/>
-        </any>
-    </replace-with>
-	
+	<inherits name='com.sap.sailing.gwt.home.HomeBase'/>	
 	<entry-point class="com.sap.sailing.gwt.home.shared.SwitchingEntryPoint" />
 </module>

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -12,8 +13,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +25,9 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -31,6 +36,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -38,11 +44,13 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -50,14 +58,18 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.SensorFixTrackListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
+import com.sap.sailing.domain.tracking.TrackFactory;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -79,6 +91,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private transient Set<CourseDesignChangedListener> courseDesignChangedListeners;
     private transient Set<StartTimeChangedListener> startTimeChangedListeners;
     private transient Set<RaceAbortedListener> raceAbortedListeners;
+    private transient Map<TrackingDataLoader, TrackedRaceStatus> loaderStatus = new HashMap<>();
 
     /**
      * Caches the result from {@link #getResultsFromRaceLogs}. This cache is updated in
@@ -87,14 +100,30 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     private Map<Competitor, CompetitorResult> competitorResultsFromRaceLog;
 
+    /**
+     * When one or more race logs are attached, changes in those race logs, or in case of dependent start
+     * times even changes in other race logs, may impact this race's start time. This listener receives those start
+     * time changes, also those from races that this race's start time depends upon, and triggers an update of
+     * this race's start time caches. The field is transient, therefore needs no serialization support but needs
+     * to be restored during at the time of de-serialization.
+     */
+    private transient RaceStateChangedListener raceStateBasedStartTimeChangedListener;
+    
+    /**
+     * Flag that indicates if a {@link GPSFix} is already tracked in any {@link GPSFixTrack} for a competitor of this
+     * race.
+     */
+    private final AtomicBoolean gpsFixReceived;
+
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
-            WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            long delayForCacheInvalidationOfWindEstimation, boolean useInternalMarkPassingAlgorithm,
-            RankingMetricConstructor rankingMetricConstructor, RaceLogResolver raceLogResolver) {
-        super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
-                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                delayForCacheInvalidationOfWindEstimation, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+            WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            long millisecondsOverWhichToAverageSpeed, long delayForCacheInvalidationOfWindEstimation,
+            boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
+            RaceLogResolver raceLogResolver) {
+        super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+                millisecondsOverWhichToAverageSpeed, delayForCacheInvalidationOfWindEstimation,
+                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+        raceStateBasedStartTimeChangedListener = createRaceStateStartTimeChangeListener();
         this.competitorResultsFromRaceLog = new HashMap<>();
         this.logListener = new DynamicTrackedRaceLogListener(this);
         if (markPassingCalculator != null) {
@@ -103,6 +132,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.courseDesignChangedListeners = new HashSet<>();
         this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
+        
+        gpsFixReceived = new AtomicBoolean(false);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
@@ -112,12 +143,18 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
             setWindSourcesToExclude(windSourcesToExclude);
         }
+        
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
         }
         // default wind tracks are observed because they are created by the superclass constructor using
         // createWindTrack which adds this object as a listener
+    }
+    
+    @Override
+    public boolean hasGPSData() {
+        return gpsFixReceived.get();
     }
 
     /**
@@ -126,6 +163,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        raceStateBasedStartTimeChangedListener = createRaceStateStartTimeChangeListener();
+        // the race states are transient, therefore not serialized; they are re-constructed here when asked for;
+        // the transient raceStateBasedStartTimeChangedListener is re-added here, like it was in attachRaceLog(...)
+        for (final RaceLog raceLog : attachedRaceLogs.values()) {
+            getRaceState(raceLog).addChangedListener(raceStateBasedStartTimeChangedListener);
+        }
         listeners = new HashSet<RaceChangeListener>();
         logListener = new DynamicTrackedRaceLogListener(this);
         courseDesignChangedListeners = new HashSet<>();
@@ -134,11 +177,24 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     protected Object readResolve() {
-        super.readResolve();
         if (markPassingCalculator != null) {
             logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
         }
         return this;
+    }
+
+    private RaceStateChangedListener createRaceStateStartTimeChangeListener() {
+        return new BaseRaceStateChangedListener() {
+            @Override
+            public void onStartTimeChanged(ReadonlyRaceState state) {
+                final TimePoint oldStartTime = getStartOfRace();
+                invalidateStartTime();
+                final TimePoint startTimeFromRaceLog = state.getStartTime();
+                if (!Util.equalsWithNull(oldStartTime, startTimeFromRaceLog)) {
+                    onStartTimeChangedByRaceCommittee(startTimeFromRaceLog);
+                }
+            }
+        };
     }
 
     /**
@@ -152,17 +208,17 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * to wait until all persistent wind sources have been successfully and completely loaded.
      */
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
-            WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor, RaceLogResolver raceLogResolver) {
-        this(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
+            WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            long millisecondsOverWhichToAverageSpeed, boolean useInternalMarkPassingAlgorithm,
+            RankingMetricConstructor rankingMetricConstructor, RaceLogResolver raceLogResolver) {
+        this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 millisecondsOverWhichToAverageWind / 2, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
     }
 
     @Override
     public void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimesInterval) {
-        if (!onlyWhenInTrackingTimesInterval || isFixWithinStartAndEndOfTracking(fix.getTimePoint())) {
+        if (!onlyWhenInTrackingTimesInterval || isWithinStartAndEndOfTracking(fix.getTimePoint())) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             if (track != null) {
                 if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
@@ -179,21 +235,87 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         super.setStatus(newStatus);
         notifyListeners(newStatus, oldStatus);
     }
+    
+    @Override
+    public void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus newStatus) {
+        TrackedRaceStatusEnum raceStatus;
+        double totalProgress = 1.0;
+        if (newStatus.getStatus() == TrackedRaceStatusEnum.REMOVED) {
+            synchronized (loaderStatus) {
+                this.updateLoaderStatus(source, newStatus);
+            }
+            raceStatus = newStatus.getStatus();
+        } else {
+            raceStatus = TrackedRaceStatusEnum.FINISHED;
+            synchronized (loaderStatus) {
+                this.updateLoaderStatus(source, newStatus);
+                if (!loaderStatus.isEmpty()) {
+                    double sumOfLoaderProgresses = 0.0;
+                    boolean anyError = false;
+                    boolean anyLoading = false;
+                    boolean allPrepared = true;
+                    raceStatus = TrackedRaceStatusEnum.TRACKING;
+                    for (TrackedRaceStatus status : loaderStatus.values()) {
+                        anyError |= (status.getStatus() == TrackedRaceStatusEnum.ERROR);
+                        anyLoading |= (status.getStatus() == TrackedRaceStatusEnum.LOADING);
+                        allPrepared &= (status.getStatus() == TrackedRaceStatusEnum.PREPARED);
+                        sumOfLoaderProgresses += status.getLoadingProgress();
+                    }
+                    if (anyError) {
+                        raceStatus = TrackedRaceStatusEnum.ERROR;
+                    } else if (anyLoading) {
+                        raceStatus = TrackedRaceStatusEnum.LOADING;
+                        totalProgress = sumOfLoaderProgresses / loaderStatus.size();
+                    } else {
+                        raceStatus = allPrepared ? TrackedRaceStatusEnum.PREPARED : TrackedRaceStatusEnum.TRACKING;
+                    }
+                }
+            }
+        }
+        this.setStatus(new TrackedRaceStatusImpl(raceStatus, totalProgress));
+    }
+   
+    private void updateLoaderStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
+        if (status.getStatus() == TrackedRaceStatusEnum.FINISHED || status.getStatus() == TrackedRaceStatusEnum.REMOVED) {
+            loaderStatus.remove(loader);
+        } else {
+            loaderStatus.put(loader, status);
+        }
+    }
+    
+    @Override
+    public void waitForLoadingToFinish() throws InterruptedException {
+        synchronized (getStatusNotifier()) {
+            while (getStatus().getStatus() == TrackedRaceStatusEnum.PREPARED || getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
+                try {
+                    getStatusNotifier().wait();
+                } catch (InterruptedException e) {
+                    logger.info("waitUntilNotLoading on tracked race " + this + " interrupted: " + e.getMessage()
+                            + ". Continuing to wait.");
+                }
+            }
+        }
+    }
 
     @Override
     public void recordFix(Mark mark, GPSFix fix, boolean onlyWhenInTrackingTimeInterval) {
         final TimePoint fixTimePoint = fix.getTimePoint();
-        if (!onlyWhenInTrackingTimeInterval || isFixWithinStartAndEndOfTracking(fixTimePoint)) {
+        if (!onlyWhenInTrackingTimeInterval || isWithinStartAndEndOfTracking(fixTimePoint)) {
             getOrCreateTrack(mark).addGPSFix(fix);
+        } else {
+            logger.finer(() -> "Dropped fix " + fix + " because it is outside the tracking interval "
+                    + getStartOfTracking() + ".." + getEndOfTracking());
         }
     }
 
     /**
-     * A time point is considered "in" if it is (inclusively) between {@link #getStartOfTracking()} and {@link #getEndOfTracking()}.
-     * A <code>null</code> value for one of the two interval demarcations means an open-ended interval.
+     * A time point is considered "in" if a non-{@code null} {@link #getStartOfTracking()} has been defined and the
+     * {@code fixTimePoint} is at or after that time point and {@link #getEndOfTracking()}.
+     * A <code>null</code> value for {@link #getEndOfTracking} means an open-ended interval.
      */
-    private boolean isFixWithinStartAndEndOfTracking(final TimePoint fixTimePoint) {
-        return (getStartOfTracking() == null || getStartOfTracking().compareTo(fixTimePoint) <= 0) &&
+    @Override
+    public boolean isWithinStartAndEndOfTracking(final TimePoint fixTimePoint) {
+        return getStartOfTracking() != null && getStartOfTracking().compareTo(fixTimePoint) <= 0 &&
             (getEndOfTracking() == null || getEndOfTracking().compareTo(fixTimePoint) >= 0);
     }
 
@@ -224,7 +346,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListenersWindAveragingChanged(oldMillisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageWind);
     }
 
-
     @Override
     public void setAndFixDelayToLiveInMillis(long delayToLiveInMillis) {
         if (getDelayToLiveInMillis() != delayToLiveInMillis) {
@@ -236,9 +357,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setDelayToLiveInMillis(long delayToLiveInMillis) {
-        if (!delayToLiveInMillisFixed && getDelayToLiveInMillis() != delayToLiveInMillis) {
-            super.setDelayToLiveInMillis(delayToLiveInMillis);
-            notifyListenersDelayToLiveChanged(delayToLiveInMillis);
+        if (!delayToLiveInMillisFixed) {
+            if (getDelayToLiveInMillis() != delayToLiveInMillis) {
+                super.setDelayToLiveInMillis(delayToLiveInMillis);
+                notifyListenersDelayToLiveChanged(delayToLiveInMillis);
+            }
+        } else {
+            logger.info("Not setting live delay for race "+getRace().getName()+" to "+delayToLiveInMillis+"ms because delay has been fixed");
         }
     }
 
@@ -254,7 +379,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     /**
      * In addition to creating the track which is performed by the superclass implementation, this implementation
-     * registers a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark, boolean)
+     * registers a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark, boolean, AddResult)
      * notifies the listeners} about updates. In previous versions the {@link #updated(TimePoint)} method was
      * <em>not</em> called with the mark fix's time point because mark fixes could have been received also from marks
      * that don't belong to this race. However, we don't support any connector anymore that works this way. Therefore,
@@ -267,10 +392,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             private static final long serialVersionUID = -2855787105725103732L;
 
             @Override
-            public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack) {
+            public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack, AddResult addedOrReplaced) {
                 updated(fix.getTimePoint());
                 triggerManeuverCacheRecalculationForAllCompetitors();
-                notifyListeners(fix, mark, firstFixInTrack);
+                notifyListeners(fix, mark, firstFixInTrack, addedOrReplaced);
             }
 
             @Override
@@ -291,7 +416,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * Callers iterating over the result need to synchronize on the resulting collection while iterating
      * to avoid {@link ConcurrentModificationException}s.
      */
-    private Set<RaceChangeListener> getListeners() {
+    @Override
+    protected Set<RaceChangeListener> getListeners() {
         if (listeners == null) {
             listeners = new HashSet<RaceChangeListener>();
         }
@@ -352,7 +478,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     try {
                         boolean firstInTrack = true;
                         for (GPSFix fix : markTrack.getRawFixes()) {
-                            listener.markPositionChanged(fix, mark, firstInTrack);
+                            listener.markPositionChanged(fix, mark, firstInTrack, /* addedOrReplaced */ AddResult.ADDED);
                             firstInTrack = false;
                         }
                     } finally {
@@ -365,7 +491,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     competitorTrack.lockForRead();
                     try {
                         for (GPSFixMoving fix : competitorTrack.getRawFixes()) {
-                            listener.competitorPositionChanged(fix, competitor);
+                            listener.competitorPositionChanged(fix, competitor, /* addedOrReplaced */ AddResult.ADDED);
                         }
                     } finally {
                         competitorTrack.unlockAfterRead();
@@ -395,21 +521,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListenersWindSourcesToExcludeChanged(windSourcesToExclude);
     }
 
-    private void notifyListeners(Consumer<RaceChangeListener> notifyAction) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                notifyAction.accept(listener);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListeners(Consumer<RaceChangeListener> notifyAction", e);
-            }
-        }
-    }
-
     @Override
     public void setFinishedTime(final TimePoint newFinishedTime) {
         final TimePoint oldFinishedTime = getFinishedTime();
@@ -425,12 +536,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.windSourcesToExcludeChanged(windSourcesToExclude));
     }
 
-    private void notifyListenersStartOfTrackingChanged(TimePoint startOfTracking) {
-        notifyListeners(listener -> listener.startOfTrackingChanged(startOfTracking));
+    private void notifyListenersStartOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
+        notifyListeners(listener -> listener.startOfTrackingChanged(oldStartOfTracking, newStartOfTracking));
     }
 
-    private void notifyListenersEndOfTrackingChanged(TimePoint endOfTracking) {
-        notifyListeners(listener -> listener.endOfTrackingChanged(endOfTracking));
+    private void notifyListenersEndOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
+        notifyListeners(listener -> listener.endOfTrackingChanged(oldEndOfTracking, newEndOfTracking));
     }
 
     private void notifyListenersStartTimeReceivedChanged(TimePoint startTimeReceived) {
@@ -465,12 +576,16 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListenersWaypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
     }
 
-    private void notifyListeners(GPSFix fix, Mark mark, boolean firstInTrack) {
-        notifyListeners(listener -> listener.markPositionChanged(fix, mark, firstInTrack));
+    private void notifyListeners(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
+        notifyListeners(listener -> listener.markPositionChanged(fix, mark, firstInTrack, addedOrReplaced));
     }
 
-    private void notifyListeners(GPSFixMoving fix, Competitor competitor) {
-        notifyListeners(listener -> listener.competitorPositionChanged(fix, competitor));
+    private void notifyListeners(GPSFixMoving fix, Competitor competitor, AddResult addedOrReplaced) {
+        notifyListeners(listener -> listener.competitorPositionChanged(fix, competitor, addedOrReplaced));
+    }
+
+    private void notifyListenersAboutFirstGPSFixReceived() {
+        notifyListeners(RaceChangeListener::firstGPSFixReceived);
     }
 
     private void notifyListeners(TrackedRaceStatus status, TrackedRaceStatus oldStatus) {
@@ -499,6 +614,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     private void notifyListeners(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
         notifyListeners(listener -> listener.markPassingReceived(competitor, oldMarkPassings, markPassings));
+    }
+    
+    private void notifyListenersAboutSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
+        notifyListeners(listener -> listener.competitorSensorTrackAdded(track));
+    }
+    
+    private void notifyListeners(Competitor competitor, String trackName, SensorFix fix, AddResult addedOrReplaced) {
+        notifyListeners(listener -> listener.competitorSensorFixAdded(competitor, trackName, fix, addedOrReplaced));
     }
 
     /**
@@ -669,49 +792,57 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             try {
                 clearMarkPassings(competitor);
                 for (MarkPassing markPassing : markPassings) {
-                    // try to find corresponding old start mark passing
-                    if (oldStartMarkPassing != null
-                            && markPassing.getWaypoint().equals(oldStartMarkPassing.getWaypoint())) {
-                        if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null
-                                && markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
-                            requiresStartTimeUpdate = false;
-                        }
-                    }
-                    if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
-                        StringBuilder courseWaypointsWithID = new StringBuilder();
-                        boolean first = true;
-                        for (Waypoint courseWaypoint : getRace().getCourse().getWaypoints()) {
-                            if (first) {
-                                first = false;
-                            } else {
-                                courseWaypointsWithID.append(" -> ");
+                    // Now since this caller of this update may not have held the course lock, mark passings
+                    // may already be obsolete and for waypoints that no longer exist. Check:
+                    if (getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()) >= 0) {
+                        // try to find corresponding old start mark passing
+                        if (oldStartMarkPassing != null
+                                && markPassing.getWaypoint().equals(oldStartMarkPassing.getWaypoint())) {
+                            if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null
+                                    && markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
+                                requiresStartTimeUpdate = false;
                             }
-                            courseWaypointsWithID.append(courseWaypoint.toString());
-                            courseWaypointsWithID.append(" (ID=");
-                            courseWaypointsWithID.append(courseWaypoint.getId());
-                            courseWaypointsWithID.append(")");
                         }
-                        logger.severe("Received mark passing " + markPassing + " for race " + getRace()
-                                + " for waypoint ID" + markPassing.getWaypoint().getId()
-                                + " but the waypoint does not exist in course " + courseWaypointsWithID);
+                        if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
+                            StringBuilder courseWaypointsWithID = new StringBuilder();
+                            boolean first = true;
+                            for (Waypoint courseWaypoint : getRace().getCourse().getWaypoints()) {
+                                if (first) {
+                                    first = false;
+                                } else {
+                                    courseWaypointsWithID.append(" -> ");
+                                }
+                                courseWaypointsWithID.append(courseWaypoint.toString());
+                                courseWaypointsWithID.append(" (ID=");
+                                courseWaypointsWithID.append(courseWaypoint.getId());
+                                courseWaypointsWithID.append(")");
+                            }
+                            logger.severe("Received mark passing " + markPassing + " for race " + getRace()
+                                    + " for waypoint ID" + markPassing.getWaypoint().getId()
+                                    + " but the waypoint does not exist in course " + courseWaypointsWithID);
+                        } else {
+                            markPassingsForCompetitor.add(markPassing);
+                        }
+                        Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing
+                                .getWaypoint());
+                        final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
+                        LockUtil.lockForWrite(markPassingsLock2);
+                        try {
+                            // The mark passings of competitor have been removed by the call to
+                            // clearMarkPassings(competitor) above
+                            // from both, the collection that holds the mark passings by waypoint and the one that holds the
+                            // mark passings per competitor; so we can simply add here:
+                            markPassingsInOrderForWaypoint.add(markPassing);
+                        } finally {
+                            LockUtil.unlockAfterWrite(markPassingsLock2);
+                        }
+                        if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
+                            timePointOfLatestEvent = markPassing.getTimePoint();
+                        }
                     } else {
-                        markPassingsForCompetitor.add(markPassing);
-                    }
-                    Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing
-                            .getWaypoint());
-                    final NamedReentrantReadWriteLock markPassingsLock2 = getMarkPassingsLock(markPassingsInOrderForWaypoint);
-                    LockUtil.lockForWrite(markPassingsLock2);
-                    try {
-                        // The mark passings of competitor have been removed by the call to
-                        // clearMarkPassings(competitor) above
-                        // from both, the collection that holds the mark passings by waypoint and the one that holds the
-                        // mark passings per competitor; so we can simply add here:
-                        markPassingsInOrderForWaypoint.add(markPassing);
-                    } finally {
-                        LockUtil.unlockAfterWrite(markPassingsLock2);
-                    }
-                    if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
-                        timePointOfLatestEvent = markPassing.getTimePoint();
+                        logger.warning("Received mark passing "+markPassing+
+                                " for non-existing waypoint "+markPassing.getWaypoint()+
+                                " in race "+getRace().getName()+". Ignoring.");
                     }
                 }
             } finally {
@@ -814,11 +945,18 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         setStartOfTrackingReceived(startOfTrackingReceived, /* waitForGPSFixesToLoad */ false);
     }
 
+    /**
+     * Making this method publicly visible for those tests seeing this implementation class
+     */
+    public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
+        super.setStartOfTrackingReceived(startOfTrackingReceived, waitForGPSFixesToLoad);
+    }
+    
     @Override
     protected void startOfTrackingChanged(final TimePoint oldStartOfTracking, boolean waitForGPSFixesToLoad) {
         super.startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
         if (!Util.equalsWithNull(oldStartOfTracking, getStartOfTracking())) {
-            notifyListenersStartOfTrackingChanged(getStartOfTracking());
+            notifyListenersStartOfTrackingChanged(oldStartOfTracking, getStartOfTracking());
         }
     }
 
@@ -826,30 +964,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     protected void endOfTrackingChanged(TimePoint oldEndOfTracking, boolean waitForGPSFixesToLoad) {
         super.endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
         if (!Util.equalsWithNull(oldEndOfTracking, getEndOfTracking())) {
-            notifyListenersEndOfTrackingChanged(getEndOfTracking());
+            notifyListenersEndOfTrackingChanged(oldEndOfTracking, getEndOfTracking());
         }
     }
 
     /**
      * Making this method publicly visible for those tests seeing this implementation class
      */
-    public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
-        super.setStartOfTrackingReceived(startOfTrackingReceived, waitForGPSFixesToLoad);
-    }
-
-    /**
-     * Making this method publicly visible for those tests seeing this implementation class
-     */
-    @Override
-    public void setEndOfTrackingReceived(TimePoint endOfTracking, boolean waitForGPSFixesToLoad) {
-        super.setEndOfTrackingReceived(endOfTracking, waitForGPSFixesToLoad);
+    public void setEndOfTrackingReceived(final TimePoint endOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
+        super.setEndOfTrackingReceived(endOfTrackingReceived, waitForGPSFixesToLoad);
     }
 
     @Override
     public void setEndOfTrackingReceived(TimePoint endOfTrackingReceived) {
         setEndOfTrackingReceived(endOfTrackingReceived, /* waitForGPSFixesToLoad */ false);
     }
-    
+
     /**
      * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded by this
      * call, all listeners are notified about these existing wind fixes using their
@@ -896,10 +1026,16 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack) {
+    public void gpsFixReceived(GPSFixMoving fix, Competitor competitor, boolean firstFixInTrack, AddResult addedOrReplaced) {
         updated(fix.getTimePoint());
         triggerManeuverCacheRecalculation(competitor);
-        notifyListeners(fix, competitor);
+        notifyListeners(fix, competitor, addedOrReplaced);
+        
+        // getAndSet call is atomic which means, that it can be ensured that the listeners are notified only once
+        final boolean oldGPSFixReceived = gpsFixReceived.getAndSet(true);
+        if (!oldGPSFixReceived) {
+            notifyListenersAboutFirstGPSFixReceived();
+        }
     }
 
     @Override
@@ -957,15 +1093,24 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void attachRaceLog(RaceLog raceLog) {
         logListener.addTo(raceLog);
         super.attachRaceLog(raceLog);
+        getRaceState(raceLog).addChangedListener(raceStateBasedStartTimeChangedListener);
     }
     
     @Override
-    public void detachRaceLog(Serializable identifier) {
-        RaceLog attachedRaceLog = attachedRaceLogs.get(identifier);
+    public RaceLog detachRaceLog(Serializable identifier) {
+        final RaceLog attachedRaceLog = attachedRaceLogs.get(identifier);
         if (attachedRaceLog != null) {
             logListener.removeFrom(attachedRaceLog);
         }
-        super.detachRaceLog(identifier);
+        final RaceLog raceLogDetached = super.detachRaceLog(identifier);
+        assert raceLogDetached == attachedRaceLog;
+        synchronized (raceStates) {
+            final ReadonlyRaceState raceState = raceStates.remove(attachedRaceLog);
+            if (raceState != null) {
+                raceState.removeChangedListener(raceStateBasedStartTimeChangedListener);
+            }
+        }
+        return attachedRaceLog;
     }
     
     @Override
@@ -991,7 +1136,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             for (StartTimeChangedListener startTimeChangedListener : startTimeChangedListeners) {
                 startTimeChangedListener.startTimeChanged(newStartTime);
             }
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
         }
         updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
@@ -1013,6 +1158,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.startTimeChangedListeners.add(listener);
     }
     
+    
+    @Override
+    public void removeStartTimeChangedListener(StartTimeChangedListener listener) {
+        startTimeChangedListeners.remove(listener);
+    }
+
     @Override
     public void addRaceAbortedListener(RaceAbortedListener listener) {
         this.raceAbortedListeners.add(listener);
@@ -1030,5 +1181,54 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
+    }
+    @Override
+    public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
+            Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
+        return super.getOrCreateSensorTrack(competitor, trackName, newTrackFactory);
+    }
+    
+    @Override
+    public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getDynamicSensorTrack(
+            Competitor competitor, String trackName) {
+        return super.getSensorTrack(competitor, trackName);
+    }
+    
+    @Override
+    public void recordSensorFix(Competitor competitor, String trackName, SensorFix fix, boolean onlyWhenInTrackingTimesInterval) {
+        if (!onlyWhenInTrackingTimesInterval || isWithinStartAndEndOfTracking(fix.getTimePoint())) {
+            DynamicSensorFixTrack<Competitor, SensorFix> track = getSensorTrack(competitor, trackName);
+            if (track != null) {
+                if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                    logger.finest(""+competitor.getName() + ": " + fix);
+                }
+                track.add(fix); // the track notifies this tracked race which in turn notifies its listeners
+            }
+        }
+    }
+    
+    @Override
+    public void addSensorTrack(Competitor competitor, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
+        super.addSensorTrack(competitor, trackName, track);
+    }
+    
+    @Override
+    protected <FixT extends SensorFix> Optional<Runnable> addSensorTrackInternal(Pair<Competitor, String> key,
+            DynamicSensorFixTrack<Competitor, FixT> track) {
+        super.addSensorTrackInternal(key, track);
+        track.addListener(new SensorFixTrackListener<Competitor, FixT>() {
+            private static final long serialVersionUID = 6143309919537011377L;
+
+            @Override
+            public boolean isTransient() {
+                return true;
+            }
+
+            @Override
+            public void fixReceived(FixT fix, Competitor item, String trackName, boolean firstFixInTrack, AddResult addedOrReplaced) {
+                notifyListeners(item, trackName, fix, addedOrReplaced);
+            }
+        });
+        return Optional.of(()->notifyListenersAboutSensorTrackAdded(track));
     }
 }

@@ -4,8 +4,9 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetitionResources" />
-	<div class="{local_res.css.regattacompetition_phase_fleet}" ui:field="raceContainerUi">
+	<g:HTMLPanel addStyleNames="{local_res.css.regattacompetition_phase_fleet}">
 		<div class="{res.mainCss.fleetcorner}" ui:field="fleetCornerUi"></div>
     	<div class="{local_res.css.regattacompetition_phase_fleet_title}" ui:field="fleetNameUi"></div>
-	</div>
+    	<g:FlowPanel ui:field="raceContainerUi"/>
+	</g:HTMLPanel>
 </ui:UiBinder>

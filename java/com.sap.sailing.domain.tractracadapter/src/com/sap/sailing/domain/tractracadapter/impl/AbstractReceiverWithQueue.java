@@ -6,21 +6,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 
@@ -34,7 +37,15 @@ import com.tractrac.subscription.lib.api.IRaceSubscriber;
  */
 public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Receiver {
     private static Logger logger = Logger.getLogger(AbstractReceiverWithQueue.class.getName());
-    
+
+    /**
+     * The timeout after which to re-try looking for the race definition to have appeared in
+     * {@link #getTrackedRace(IRace)} in case an infinite timeout (-1) was specified. During this
+     * short break, {@link #getTrackedRace(IRace)} will check for {@link #hasBeenStoppedPreemptively()}
+     * and will stop trying to look for the race if this received was stopped preemptively.
+     */
+    private static final long RETRY_TIMEOUT_IN_MILLIS = Duration.ONE_MINUTE.asMillis();
+
     private final LinkedBlockingDeque<Util.Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
     private final IEvent tractracEvent;
@@ -44,6 +55,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final Simulator simulator;
     private final Thread thread;
     private final Map<Util.Triple<A, B, C>, Set<LoadingQueueDoneCallBack>> loadingQueueDoneCallBacks;
+    private final long timeoutInMilliseconds;
 
     /**
      * used by {@link #stopAfterNotReceivingEventsForSomeTime(long)} and {@link #run()} to check if an event was received
@@ -51,8 +63,17 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
      */
     private boolean receivedEventDuringTimeout;
     
+    /**
+     * Set by {@link #stopPreemptively()}. Invocations of {@link #handleEvent(Triple)} waiting for something
+     * should wait repeatedly with some timeout, such as, say, one minute, and keep re-trying until what they
+     * are waiting for has appeared, or this flag has been set in which case they can abort and assume they
+     * received a stop event.
+     */
+    private boolean stoppedPreemptively;
+    
     public AbstractReceiverWithQueue(DomainFactory domainFactory, IEvent tractracEvent,
-            DynamicTrackedRegatta trackedRegatta, Simulator simulator, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+            DynamicTrackedRegatta trackedRegatta, Simulator simulator, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber,
+            long timeoutInMilliseconds) {
         super();
         this.eventSubscriber = eventSubscriber;
         this.raceSubscriber = raceSubscriber;
@@ -63,6 +84,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         this.queue = new LinkedBlockingDeque<Util.Triple<A, B, C>>();
         this.thread = new Thread(this, getClass().getName());
         this.loadingQueueDoneCallBacks = new HashMap<>();
+        this.timeoutInMilliseconds = timeoutInMilliseconds;
     }
     
     protected IEventSubscriber getEventSubscriber() {
@@ -93,6 +115,11 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         // mark the end and hence terminate the thread by adding a null/null/null event to the queue
         queue.clear();
         stopAfterProcessingQueuedEvents();
+        stoppedPreemptively = true;
+    }
+    
+    protected boolean hasBeenStoppedPreemptively() {
+        return stoppedPreemptively;
     }
     
     @Override
@@ -165,9 +192,12 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                         callback.loadingQueueDone(this);
                     }
                 }
-
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.log(Level.INFO, "Interrupted while taking element from queue", e);
+            } catch (Exception e) {
+                // before this thread terminates abnormally, at least log it:
+                logger.log(Level.SEVERE, ""+this+" is terminating abnormally; the race will probably be left at LOADING (100%).", e);
+                throw e;
             }
         }
         unsubscribe();
@@ -192,16 +222,19 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     /**
      * Tries to find a {@link TrackedRace} for <code>race</code> in the {@link com.sap.sailing.domain.base.Regatta}
      * corresponding to {@link #tractracEvent}, as keyed by the {@link #domainFactory}. Waits for
-     * {@link RaceTracker#TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS} milliseconds for the
-     * {@link RaceDefinition} to show up. If it doesn't, <code>null</code> is returned. If the {@link RaceDefinition}
-     * for <code>race</code> is not found in the {@link com.sap.sailing.domain.base.Regatta}, <code>null</code> is
-     * returned. If the {@link TrackedRace} for <code>race</code> isn't found in the {@link TrackedRegatta},
-     * <code>null</code> is returned, too.
+     * {@link #timeoutInMilliseconds} milliseconds for the {@link RaceDefinition} to show up, or infinitely if
+     * {@link #timeoutInMilliseconds} is -1, except this receiver is {@link #hasBeenStoppedPreemptively() stopped
+     * preemptively}. If the race doesn't show up under these boundary conditions, <code>null</code> is returned. If the
+     * {@link RaceDefinition} for <code>race</code> is not found in the {@link com.sap.sailing.domain.base.Regatta},
+     * <code>null</code> is returned. If the {@link TrackedRace} for <code>race</code> isn't found in the
+     * {@link TrackedRegatta}, <code>null</code> is returned, too.
      */
     protected DynamicTrackedRace getTrackedRace(IRace race) {
         DynamicTrackedRace result = null;
-        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race.getId(),
-                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+        final long effectiveTimeoutInMilliseconds = timeoutInMilliseconds == -1 ? RETRY_TIMEOUT_IN_MILLIS : timeoutInMilliseconds;
+        RaceDefinition raceDefinition;
+        while ((raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race.getId(), effectiveTimeoutInMilliseconds)) == null &&
+                timeoutInMilliseconds == -1 && !hasBeenStoppedPreemptively());
         if (raceDefinition != null) {
             com.sap.sailing.domain.base.Regatta domainRegatta = trackedRegatta.getRegatta();
             if (domainRegatta.getRaceByName(raceDefinition.getName()) != null) {
@@ -214,18 +247,35 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     @Override
     public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) {
         synchronized (loadingQueueDoneCallBacks) {
+            // Synchronization: If the following peekLast() call returns an element that is consumed just before the
+            // callback is added to loadingQueueDoneCallbacks then the callback will still be triggered because the
+            // run() method also synchronizes on loadingQueueDoneCallBacks before checking for any call back to be
+            // triggered for the event just consumed. Worst case: the event is taken from the queue but not yet
+            // handled. In this case the peekLast() call will already return null and execute the loadingQueueDone(this)
+            // callback already although the event's handling has not completed yet.
             Triple<A, B, C> lastInQueue = queue.peekLast();
             // when simulator is attached, consider loading already done; the simulator simulates "live" tracking
             if (lastInQueue == null || getSimulator() != null) {
                 callback.loadingQueueDone(this);
             } else {
-                Set<LoadingQueueDoneCallBack> set = loadingQueueDoneCallBacks.get(lastInQueue);
-                if (set == null) {
-                    set = new HashSet<>();
-                    loadingQueueDoneCallBacks.put(lastInQueue, set);
-                }
-                set.add(callback);
+                Util.addToValueSet(loadingQueueDoneCallBacks, lastInQueue, callback);
             }
         }
+    }
+    
+    protected void ensureAllSingleMarksOfCourseAreaAreCreated(final IRace tractracRace) {
+        for (final IControl tractracControlPoint : getDomainFactory().getControlsForCourseArea(getTracTracEvent(),
+                tractracRace.getCourseArea())) {
+            if (!tractracControlPoint.isMultiple()) {
+                final TracTracControlPoint ttcp = new ControlPointAdapter(tractracControlPoint);
+                getDomainFactory().getOrCreateControlPoint(ttcp);
+            }
+        }
+    }
+    
+    @Override
+    public String toString() {
+        return "Receiver "+getClass().getName()+" for regatta "+getTrackedRegatta().getRegatta().getName()+
+                " in event "+getTracTracEvent().getName()+" with ID "+getTracTracEvent().getId();
     }
 }

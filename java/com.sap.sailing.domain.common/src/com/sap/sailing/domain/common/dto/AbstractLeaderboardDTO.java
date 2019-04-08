@@ -4,10 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -36,23 +34,27 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public String defaultCourseAreaName;
     public ScoringSchemeType scoringScheme;
     public LeaderboardType type;
+    public boolean canBoatsOfCompetitorsChangePerRace;
 
     private Long delayToLiveInMillisForLatestRace;
+    private BoatClassDTO boatClass;
+    
+    @Deprecated
+    protected AbstractLeaderboardDTO() {} // for GWT serialization only
 
-    public AbstractLeaderboardDTO() {
+    public AbstractLeaderboardDTO(BoatClassDTO boatClass) {
+        this.boatClass = boatClass;
         races = new ArrayList<RaceColumnDTO>();
     }
     
-    public Set<BoatClassDTO> getBoatClasses() {
-        Set<BoatClassDTO> result = new HashSet<BoatClassDTO>();
-        if(rows != null) {
-            for (CompetitorDTO competitor : rows.keySet()) {
-                result.add(competitor.getBoatClass());
-            }
-        }
-        return result;
+    public BoatClassDTO getBoatClass() {
+        return boatClass;
     }
-
+    
+    protected void setBoatClass(BoatClassDTO boatClass) {
+        this.boatClass = boatClass;
+    }
+    
     public String getDisplayName() {
         return displayName;
     }
@@ -103,7 +105,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
      * Tells if the <code>competitor</code> scored (and therefore presumably participated) in a medal race represented
      * in this leaderboard.
      */
-    public boolean scoredInMedalRace(CompetitorDTO competitor) {
+    public boolean scoredInMedalRace(CompetitorWithBoatDTO competitor) {
         LeaderboardRowDTO row = rows.get(competitor);
         for (RaceColumnDTO race : races) {
             if (race.isMedalRace() && row.fieldsByRaceColumnName.get(race.getRaceColumnName()).netPoints > 0) {
@@ -113,7 +115,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return false;
     }
 
-    public Double getTotalPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
+    public Double getTotalPoints(CompetitorWithBoatDTO competitor, String nameOfLastRaceSoFar) {
         Double totalPoints = null;
         final LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
@@ -355,7 +357,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         } else {
             List<String> raceNames = new ArrayList<String>();
             for (RaceColumnDTO race : races) {
-                raceNames.add(race.getName());
+                raceNames.add(race != null ? race.getName() : null);
             }
             result = prime * result + raceNames.hashCode();
         }
@@ -401,11 +403,11 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
             List<String> raceColumnNames = new ArrayList<String>(races.size());
             List<String> otherRaceColumnNames = new ArrayList<String>(races.size());
             for (RaceColumnDTO race : races) {
-                raceColumnNames.add(race.getName());
+                raceColumnNames.add(race != null ? race.getName() : null);
             }
             if (other.races != null) {
                 for (RaceColumnDTO otherRace : other.races) {
-                    otherRaceColumnNames.add(otherRace.getName());
+                    otherRaceColumnNames.add(otherRace != null ? otherRace.getName() : null);
                 }
             }
             if (!raceColumnNames.equals(otherRaceColumnNames))
@@ -430,4 +432,17 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public void setDelayToLiveInMillisForLatestRace(Long delayToLiveInMillisForLatestRace) {
         this.delayToLiveInMillisForLatestRace = delayToLiveInMillisForLatestRace;
     }
+    
+    public List<String> getNamesOfRaceColumns() {
+        List<String> result = new ArrayList<>(races.size());
+        for(RaceColumnDTO column : races) {
+            result.add(column.getRaceColumnName());
+        }
+        return result;
+    }
+
+    public String getName() {
+        return name;
+    }
+
 }

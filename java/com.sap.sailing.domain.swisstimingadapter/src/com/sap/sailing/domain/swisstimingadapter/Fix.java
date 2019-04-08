@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
-import com.sap.sailing.domain.common.Distance;
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 
 /**
  * Data fix transmitted periodically from the SwissTiming Sail Master system, telling boat position and speed
@@ -13,7 +15,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
  *
  */
 public interface Fix {
-    String getBoatID();
+    Serializable getTrackedObjectId();
     
     TrackerType getTrackerType();
     

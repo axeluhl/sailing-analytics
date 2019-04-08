@@ -1,22 +1,27 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.LongSetting;
 
-public class ChartSettings extends AbstractSettings {
-    private final long stepSize;
+public class ChartSettings extends AbstractGenericSerializableSettings {
     
-    public ChartSettings(long stepSize) {
-        this.stepSize = stepSize;
+    private static final long serialVersionUID = 7041836078658713937L;
+    
+    private LongSetting stepSizeInMillis;
+    
+    @Override
+    protected void addChildSettings() {
+        stepSizeInMillis = new LongSetting("stepSizeInMillis", this, AbstractCompetitorRaceChart.DEFAULT_STEPSIZE);
+    }
+    
+    public ChartSettings() {
+    }
+    
+    public ChartSettings(long stepSizeInMillis) {
+        this.stepSizeInMillis.setValue(stepSizeInMillis);
     }
 
-    /**
-     * Copy-constructor
-     */
-    public ChartSettings(ChartSettings superResult) {
-        this(superResult.getStepSize());
-    }
-
-    public long getStepSize() {
-        return stepSize;
+    public long getStepSizeInMillis() {
+        return stepSizeInMillis.getValue();
     }
 }

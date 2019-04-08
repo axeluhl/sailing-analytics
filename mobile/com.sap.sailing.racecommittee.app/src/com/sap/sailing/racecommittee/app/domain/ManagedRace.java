@@ -1,18 +1,18 @@
 package com.sap.sailing.racecommittee.app.domain;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.racegroup.FilterableRace;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.impl.Result;
-import com.sap.sse.common.Named;
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.WithID;
 
 /**
  * A managed race's {@link #getName()} is the race column's name.
@@ -20,7 +20,7 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Named, WithID {
+public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, NamedWithID {
 
     /**
      * @return the identifier of the race.
@@ -60,34 +60,20 @@ public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Name
      */
     Collection<Competitor> getCompetitors();
 
-    /**
-     * returns the list of markers to display on the racemap
-     *
-     * @return list of Markers
-     */
-    List<MapMarker> getMapMarkers();
+    Map<Competitor, Boat> getCompetitorsAndBoats();
 
     CourseBase getCourseOnServer();
 
     void setCourseOnServer(CourseBase course);
 
     /**
-     * sets the list of competitors for a race. As the competitors are retrieved later from the backend, the list of
-     * competitors has to be settable.
+     * sets the list of competitors and boats for a race. As the competitors are retrieved later from the backend, the
+     * list of competitors has to be settable.
      *
      * @param competitors
      *            the retrieved list of competitors for this race
      */
-    void setCompetitors(Collection<Competitor> competitors);
-
-    /**
-     * sets the list of mapItems ( buoys, other boats ) for a race. As the mapItems are retrieved later from the backend, the list of
-     * mapItems has to be settable.
-     *
-     * @param markers
-     *            the retrieved list of mapItems for this race
-     */
-    void setMapMarkers(List<MapMarker> markers);
+    void setCompetitors(Map<Competitor, Boat> competitorsAndBoats);
 
     /**
      * Returns true if {@link RaceState} has been calculated and set
@@ -97,17 +83,21 @@ public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Name
     boolean calculateRaceState();
 
     /**
-     * sets the finished time, if the finished time is after the finishing time; check the {@link Result} for error message
+     * sets the finished time, if the finished time is after the finishing time; check the {@link Result} for error
+     * message
      *
-     * @param finishedTime finished time
+     * @param finishedTime
+     *            finished time
      * @return result object
      */
     Result setFinishedTime(TimePoint finishedTime);
 
     /**
-     * sets the finishing time, if the finishing time is after the start time; check the {@link Result} for error message
+     * sets the finishing time, if the finishing time is after the start time; check the {@link Result} for error
+     * message
      *
-     * @param finishingTime finishing time
+     * @param finishingTime
+     *            finishing time
      * @return result object
      */
     Result setFinishingTime(TimePoint finishingTime);

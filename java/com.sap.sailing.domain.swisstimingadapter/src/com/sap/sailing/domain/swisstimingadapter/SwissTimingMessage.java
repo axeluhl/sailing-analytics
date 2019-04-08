@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.udpconnector.UDPMessage;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
 public interface SwissTimingMessage extends UDPMessage {

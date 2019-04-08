@@ -4,7 +4,7 @@ Bundle-Name: SAP Sailing Common
 Bundle-SymbolicName: com.sap.sailing.domain.common
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.abstractlog,
@@ -21,9 +21,15 @@ Export-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.racelog.utils,
  com.sap.sailing.domain.common.scalablevalue.impl,
  com.sap.sailing.domain.common.security,
+ com.sap.sailing.domain.common.sensordata,
+ com.sap.sailing.domain.common.sharding,
+ com.sap.sailing.domain.common.tagging,
  com.sap.sailing.domain.common.trackfiles,
  com.sap.sailing.domain.common.tracking,
- com.sap.sailing.domain.common.tracking.impl
+ com.sap.sailing.domain.common.tracking.impl,
+ com.sap.sailing.domain.common.windfinder
 Require-Bundle: com.sap.sse.common,
  com.sap.sse.security.common,
- com.sap.sse.datamining.annotations;bundle-version="1.0.0"
+ com.sap.sse.datamining.annotations;bundle-version="1.0.0",
+ org.json.simple;bundle-version="1.1.0"
+Automatic-Module-Name: com.sap.sailing.domain.common

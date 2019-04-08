@@ -71,6 +71,18 @@ public interface Series extends SeriesBase {
     
     void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule);
     
+    /**
+     * If not {@code null}, defines an upper inclusive limit for the number of races that may be discarded from
+     * this series. For example, when setting this to {@code 1} for a final series in a regatta that has a
+     * qualification and a final series, when the second discard becomes available and the series don't define
+     * their own discarding rules, two discards may be picked from the qualification series, but at most one
+     * could be selected in the final even if another final race has a score worse than that of all
+     * qualification races.
+     */
+    Integer getMaximumNumberOfDiscards();
+    
+    void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards);
+
     Regatta getRegatta();
     
     /**
@@ -118,4 +130,5 @@ public interface Series extends SeriesBase {
     boolean hasSplitFleetContiguousScoring();
 
     void setSplitFleetContiguousScoring(boolean hasSplitFleetScore);
+
 }

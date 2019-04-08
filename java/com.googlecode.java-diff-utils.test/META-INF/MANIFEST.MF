@@ -9,3 +9,4 @@ Fragment-Host: com.googlecode.java-diff-utils
 Bundle-ClassPath: test/,
  .
 Import-Package: junit.framework;version="4.8.1"
+Automatic-Module-Name: com.googlecode.java-diff-utils.test

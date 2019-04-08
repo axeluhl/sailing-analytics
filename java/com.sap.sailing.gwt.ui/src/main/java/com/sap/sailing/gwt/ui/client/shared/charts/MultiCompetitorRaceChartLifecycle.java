@@ -1,35 +1,36 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent> {
+public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChartSettings> {
     private final StringMessages stringMessages;
-    private final boolean hasOverallLeaderboard;
+    private final Iterable<DetailType> allowedDetailTypes;
     
-    public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages, boolean hasOverallLeaderboard) {
+    public static final String ID = "cc";
+    
+    /**
+     * Lifecycle for the Chart currently used in the Raceboard to display additional data.
+     * 
+     * @param allowedDetailTypes
+     *            Is a List of all valid DetailTypes for this chart. These are dependant on the environment, for example
+     *            foiling races with Brave-Devices can show additional DetailTypes. The order of the List determines the
+     *            order of the options in the related settingsdialog
+     */
+    public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages, Iterable<DetailType> allowedDetailTypes) {
         this.stringMessages = stringMessages;
-        this.hasOverallLeaderboard = hasOverallLeaderboard;
+        this.allowedDetailTypes = allowedDetailTypes;
     }
 
     @Override
     public MultiCompetitorRaceChartSettingsComponent getSettingsDialogComponent(MultiCompetitorRaceChartSettings settings) {
-        return new MultiCompetitorRaceChartSettingsComponent(settings, stringMessages, hasOverallLeaderboard);
+        return new MultiCompetitorRaceChartSettingsComponent(settings, stringMessages, allowedDetailTypes);
     }
 
     @Override
     public MultiCompetitorRaceChartSettings createDefaultSettings() {
-        ChartSettings chartSettings = new ChartSettings(AbstractCompetitorRaceChart.DEFAULT_STEPSIZE);
-        DetailType defaultDetailType = DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
-        return new MultiCompetitorRaceChartSettings(chartSettings, defaultDetailType);
-    }
-
-    @Override
-    public MultiCompetitorRaceChartSettings cloneSettings(MultiCompetitorRaceChartSettings settings) {
-        return new MultiCompetitorRaceChartSettings(new ChartSettings(settings.getStepSize()), settings.getDetailType());
+        return new MultiCompetitorRaceChartSettings();
     }
 
     @Override
@@ -38,12 +39,16 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     }
 
     @Override
-    public Serializable getComponentId() {
-        return getLocalizedShortName();
+    public String getComponentId() {
+        return ID;
     }
 
     @Override
     public boolean hasSettings() {
         return true;
+    }
+
+    public Iterable<DetailType> getAllowedDetailTypes() {
+        return allowedDetailTypes;
     }
 }

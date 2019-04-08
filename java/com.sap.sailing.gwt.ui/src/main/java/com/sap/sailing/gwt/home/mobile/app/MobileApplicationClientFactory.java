@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultViewImpl;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
+import com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew.WhatsNewDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
@@ -23,12 +24,13 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndErrorAndUserService;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
-import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
+import com.sap.sse.security.ui.authentication.login.LoginHintContent;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -39,8 +41,8 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  */
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
-        ErrorAndBusyClientFactory, SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory,
-        WithAuthenticationManager {
+        SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory, WithAuthenticationManager,
+        ClientFactoryWithDispatchAndErrorAndUserService {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationManager authenticationManager;
@@ -61,13 +63,28 @@ public class MobileApplicationClientFactory extends
         this(new MobileApplicationView(navigator, eventBus), eventBus, placeController, navigator);
     }
 
-    public MobileApplicationClientFactory(MobileApplicationView root, EventBus eventBus,
+    public MobileApplicationClientFactory(final MobileApplicationView root, EventBus eventBus,
             PlaceController placeController, final MobilePlacesNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         this.authenticationManager = new AuthenticationManagerImpl(this, eventBus, getNavigator()
                 .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
                 .getPasswordResetNavigation().getFullQualifiedUrl());
+        WhatsNewDialogFactory.registerWithUserService(getUserService(), getPlaceController());
+        
+        authenticationManager.checkNewUserPopup(() -> root.setSubHeaderContent(null), dismissCallback -> {
+            final LoginHintContent content = new LoginHintContent(() -> {
+                root.setSubHeaderContent(null);
+                dismissCallback.run();
+            }, () -> {
+                root.setSubHeaderContent(null);
+                dismissCallback.run();
+                navigator.goToPlace(navigator.getMoreLoginInfo());
+            },() -> {
+                navigator.goToPlace(navigator.getSignInNavigation());
+            });
+            root.setSubHeaderContent(content);
+        });
     }
 
     public MobilePlacesNavigator getNavigator() {

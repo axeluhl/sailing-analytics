@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.WindTrackImpl.DummyWind;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -19,7 +20,7 @@ public class CombinedWindAsNavigableSet extends VirtualWindFixesAsNavigableSet {
 
     private static final long serialVersionUID = -153959652212518644L;
 
-    public CombinedWindAsNavigableSet(WindTrack track, TrackedRace trackedRace, long resolutionInMilliseconds) {
+    public CombinedWindAsNavigableSet(CombinedWindTrackImpl track, TrackedRace trackedRace, long resolutionInMilliseconds) {
         super(track, trackedRace, resolutionInMilliseconds);
     }
     
@@ -28,6 +29,11 @@ public class CombinedWindAsNavigableSet extends VirtualWindFixesAsNavigableSet {
         super(track, trackedRace, from, to, resolutionInMilliseconds);
     }
     
+    @Override
+    protected CombinedWindTrackImpl getTrack() {
+        return (CombinedWindTrackImpl) super.getTrack();
+    }
+
     @Override
     protected Wind getWind(Position p, TimePoint timePoint) {
         return getTrackedRace().getWind(p, timePoint);
@@ -50,6 +56,15 @@ public class CombinedWindAsNavigableSet extends VirtualWindFixesAsNavigableSet {
         return getToInternal() == null ? getTrackedRace().getEndOfRace() == null ? getTrackedRace().getTimePointOfLastEvent() == null ?
                 new MillisecondsTimePoint(1) : getTrackedRace().getTimePointOfLastEvent()
                 : ceilingToResolution(getTrackedRace().getEndOfRace()) : getToInternal();
+    }
+
+    /**
+     * Uses the {@link TrackedRace#getCenterOfCourse(TimePoint) center of the course} as the position for which to
+     * compute the combined wind
+     */
+    @Override
+    protected DummyWind createDummyWindFix(TimePoint timePoint) {
+        return new DummyWind(timePoint, getTrack().getDefaultPosition(timePoint));
     }
 
 }

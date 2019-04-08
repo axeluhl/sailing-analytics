@@ -24,7 +24,8 @@ public class RangeInputFilter implements InputFilter {
             double input = Double.parseDouble(dest.toString() + source.toString());
             if (isInRange(mMin, mMax, input))
                 return null;
-        } catch (NumberFormatException nfe) { }
+        } catch (NumberFormatException nfe) {
+        }
         return "";
     }
 

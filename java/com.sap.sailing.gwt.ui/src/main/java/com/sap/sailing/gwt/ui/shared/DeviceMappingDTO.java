@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
+import com.sap.sse.common.TimePoint;
 
 public class DeviceMappingDTO implements IsSerializable {
     public DeviceIdentifierDTO deviceIdentifier;
@@ -13,16 +14,26 @@ public class DeviceMappingDTO implements IsSerializable {
     public Date to;
     public MappableToDevice mappedTo;
     public List<UUID> originalRaceLogEventIds;
+    public TimePoint lastFix;
     
     protected DeviceMappingDTO() {}
     
+    /**
+     * Produces an instance without a last fix
+     */
     public DeviceMappingDTO(DeviceIdentifierDTO deviceId, Date from, Date to, MappableToDevice mappedTo,
             List<UUID> originalRaceLogEventIds) {
+        this(deviceId, from, to, mappedTo, originalRaceLogEventIds, /* lastFix */ null);
+    }
+    
+    public DeviceMappingDTO(DeviceIdentifierDTO deviceId, Date from, Date to, MappableToDevice mappedTo,
+            List<UUID> originalRaceLogEventIds, TimePoint lastFix) {
         this.deviceIdentifier = deviceId;
         this.from = from;
         this.to = to;
         this.mappedTo = mappedTo;
         this.originalRaceLogEventIds = originalRaceLogEventIds;
+        this.lastFix = lastFix;
     }
 
     @Override

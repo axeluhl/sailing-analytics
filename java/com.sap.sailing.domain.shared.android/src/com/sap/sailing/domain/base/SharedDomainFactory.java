@@ -8,8 +8,9 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sse.common.Color;
 
-public interface SharedDomainFactory extends CompetitorFactory {
+public interface SharedDomainFactory extends CompetitorFactory, BoatFactory {
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -44,15 +45,15 @@ public interface SharedDomainFactory extends CompetitorFactory {
      * in that case. Otherwise, a new {@link Mark} is created with <code>color</code> as its {@link Mark#getColor()} 
      * and <code>shape</code> as its {@link Mark#getShape()}.
      */
-    Mark getOrCreateMark(Serializable id, String name, MarkType type, String color, String shape, String pattern);
+    Mark getOrCreateMark(Serializable id, String name, MarkType type, Color color, String shape, String pattern);
     
     /**
      * @see #getOrCreateMark(String, String)
      */
-    Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type, String color, String shape, String pattern);
+    Mark getOrCreateMark(String toStringRepresentationOfID, String name, MarkType type, Color color, String shape, String pattern);
 
     /**
-     * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createGate(Serializable, Mark, Mark, String)} instead
+     * @param name also uses the name as the gate's ID; if you have a real ID, use {@link #createControlPointWithTwoMarks(Serializable, Mark, Mark, String)} instead
      */
     ControlPointWithTwoMarks createControlPointWithTwoMarks(Mark left, Mark right, String name);
 
@@ -72,6 +73,10 @@ public interface SharedDomainFactory extends CompetitorFactory {
      */
     Waypoint getExistingWaypointByIdOrCache(Waypoint waypoint);
 
+    BoatClass getBoatClass(String name);
+    
+    Iterable<BoatClass> getBoatClasses();
+
     BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind);
 
     /**
@@ -81,9 +86,9 @@ public interface SharedDomainFactory extends CompetitorFactory {
     BoatClass getOrCreateBoatClass(String name);
 
     /**
-     * Gets the {@link CompetitorStore} of this {@link SharedDomainFactory}.
+     * Gets the {@link CompetitorAndBoatStore} of this {@link SharedDomainFactory}.
      */
-    CompetitorStore getCompetitorStore();
+    CompetitorAndBoatStore getCompetitorAndBoatStore();
    
     /**
      * If a {@link CourseArea} with the given id already exists, it is returned. Otherwise a new {@link CourseArea} 
@@ -110,4 +115,8 @@ public interface SharedDomainFactory extends CompetitorFactory {
     ControlPointWithTwoMarks getOrCreateControlPointWithTwoMarks(String id, String name, Mark left, Mark right);
     
     RaceLogResolver getRaceLogResolver();
+
+    Mark getOrCreateMark(String name, MarkType markType);
+
+    Mark getOrCreateMark(Serializable id, String name, MarkType markType);
 }

@@ -4,6 +4,7 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatusResources" />
+	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
 	<g:HTMLPanel>
 		<a title="" ui:field="linkUi">
 			<div class="{local_res.css.regattastatus_content_regatta_race} {res.mediaCss.grid}">
@@ -29,8 +30,8 @@
 							ui:field="raceLegsInfoProgressUi"></div>
 					</div>
 				</div>
-				<!-- IF END -->
-				<!-- <img src="images/home/arrow-grey-right.png" class="{local_res.css.regattastatus_content_regatta_race_arrow}"></img> -->
+				<div class="{local_res.css.regattastatus_content_regatta_race_arrow}"
+					style="display:none;" ui:field="actionArrowUi"></div>
 			</div>
 		</a>
 	</g:HTMLPanel>

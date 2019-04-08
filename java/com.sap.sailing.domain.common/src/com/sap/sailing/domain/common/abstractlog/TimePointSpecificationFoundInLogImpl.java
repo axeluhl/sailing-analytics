@@ -17,4 +17,29 @@ public class TimePointSpecificationFoundInLogImpl implements TimePointSpecificat
     public TimePoint getTimePoint() {
         return timePoint;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((timePoint == null) ? 0 : timePoint.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TimePointSpecificationFoundInLogImpl other = (TimePointSpecificationFoundInLogImpl) obj;
+        if (timePoint == null) {
+            if (other.timePoint != null)
+                return false;
+        } else if (!timePoint.equals(other.timePoint))
+            return false;
+        return true;
+    }
 }

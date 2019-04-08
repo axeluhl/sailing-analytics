@@ -2,14 +2,14 @@ package com.sap.sse.datamining.impl.data;
 
 import java.util.Map;
 
-import com.sap.sse.datamining.data.QueryResult;
+import com.sap.sse.datamining.data.ExtensibleQueryResult;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.impl.NullAdditionalResultData;
 import com.sap.sse.datamining.shared.impl.QueryResultBaseImpl;
 
-public class QueryResultImpl<ResultType> extends QueryResultBaseImpl<ResultType> implements QueryResult<ResultType> {
+public class QueryResultImpl<ResultType> extends QueryResultBaseImpl<ResultType> implements ExtensibleQueryResult<ResultType> {
     private static final long serialVersionUID = 5173796619174827696L;
     
     private Class<ResultType> resultType;
@@ -40,5 +40,4 @@ public class QueryResultImpl<ResultType> extends QueryResultBaseImpl<ResultType>
     public AdditionalResultData getAdditionalData() {
         return super.getAdditionalData();
     }
-    
 }

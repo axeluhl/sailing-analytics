@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A leaderboard that is based on the definition of a {@link Regatta} with its {@link Series} and {@link Fleet}. The regatta
@@ -53,15 +55,19 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     public Regatta getRegatta() {
         return regatta;
     }
-
+    
+    public static String getLeaderboardNameForRegatta(Regatta regatta) {
+        return regatta.getName();
+    }
+    
     @Override
     public String getName() {
-        return getRegatta().getName();
+        return getLeaderboardNameForRegatta(getRegatta());
     }
 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
-        List<RaceColumn> result = new ArrayList<RaceColumn>();
+        final List<RaceColumn> result = new ArrayList<RaceColumn>();
         for (Series series : getRegatta().getSeries()) {
             for (RaceColumn raceColumn : series.getRaceColumns()) {
                 result.add(raceColumn);
@@ -107,8 +113,8 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
      * {@link RegattaLog}.
      */
     @Override
-    public Iterable<Competitor> getAllCompetitors() {
-        return regatta.getAllCompetitors();
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        return regatta.getAllCompetitorsWithRaceDefinitionsConsidered();
     }
     
     @Override
@@ -117,7 +123,21 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     }
     
     @Override
-    protected LeaderboardType getLeaderboardType() {
+    public LeaderboardType getLeaderboardType() {
         return LeaderboardType.RegattaLeaderboard;
+    }
+
+    @Override
+    public BoatClass getBoatClass() {
+        return getRegatta().getBoatClass();
+    }
+
+    @Override
+    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+        return getRegatta().getOrCreateCompetitorsProvider();
+    }
+    
+    public void setFleetsCanRunInParallelToTrue() {
+        this.getRegattaLike().setFleetsCanRunInParallelToTrue();
     }
 }

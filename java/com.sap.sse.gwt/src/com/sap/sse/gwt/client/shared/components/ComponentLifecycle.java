@@ -1,8 +1,7 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.io.Serializable;
-
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A {@link ComponentLifecycle} decouples the lifecycle of a component from the corresponding component instance. This way we
@@ -14,13 +13,10 @@ import com.sap.sse.common.settings.Settings;
  *            the SettingsDialogComponent type
  * @author Frank Mittag
  */
-public interface ComponentLifecycle<S extends Settings, SDC extends SettingsDialogComponent<S>> {
-
-    SDC getSettingsDialogComponent(S settings);
+public interface ComponentLifecycle<S extends Settings> {
+    SettingsDialogComponent<S> getSettingsDialogComponent(S settings);
 
     S createDefaultSettings();
-
-    S cloneSettings(S settings);
     
     /**
      * @return the display name of the component
@@ -30,11 +26,33 @@ public interface ComponentLifecycle<S extends Settings, SDC extends SettingsDial
     /**
      * @return the id of the component
      */
-    Serializable getComponentId();
+    String getComponentId();
 
     /**
      * @return true if the component has settings that a user may change. 
      */
     boolean hasSettings();
+
+    /**
+     * Extracts User Settings from provided {@link Settings}.
+     * 
+     * @param settings The settings which belong to the component maintained by this lifecycle
+     * @return User Settings extracted from the provided settings
+     * @see ComponentContext
+     */
+    default S extractUserSettings(S settings) {
+        return settings;
+    }
+
+    /**
+     * Extracts Document Settings from provided {@link Settings}.
+     * 
+     * @param settings The settings which belong to the component maintained by this lifecycle
+     * @return Document Settings extracted from the provided settings
+     * @see ComponentContext
+     */
+    default S extractDocumentSettings(S settings) {
+        return settings;
+    }
 
 }

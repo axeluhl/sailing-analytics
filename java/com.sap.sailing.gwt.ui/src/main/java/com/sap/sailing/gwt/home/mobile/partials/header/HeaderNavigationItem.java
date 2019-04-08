@@ -11,6 +11,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Represents an entry in the header's popup menu.
+ */
 public class HeaderNavigationItem extends Widget implements HasClickHandlers {
 
     @UiField

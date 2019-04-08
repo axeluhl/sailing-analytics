@@ -7,7 +7,7 @@ import static com.sap.sailing.selenium.pages.common.DateHelper.getPastTime;
 import java.util.Date;
 import java.util.function.Predicate;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +71,7 @@ public class TestStateVisualizationRegatta extends AbstractSeleniumTest {
             EventConfigurationPanelPO eventConfigPanel = adminConsolePage.goToEvents();
             final String eventName = "RegattaStateTestEvent", venue = "Anywhere", boatClass = "J-22";
             eventConfigPanel.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(eventName, null, venue,
-                    getPastDate(3), getFutureDate(3), true, regattaName, boatClass, regattaStartDate, regattaEndDate);
+                    getPastDate(3), getFutureDate(3), true, regattaName, boatClass, regattaStartDate, regattaEndDate, false);
             this.eventUrl = eventConfigPanel.getEventEntry(eventName).getEventURL();
         }
         

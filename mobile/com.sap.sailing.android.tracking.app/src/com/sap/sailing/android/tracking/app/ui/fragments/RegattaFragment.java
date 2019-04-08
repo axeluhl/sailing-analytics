@@ -1,17 +1,9 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -19,6 +11,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,6 +32,13 @@ import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -57,6 +58,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_regatta, container, false);
 
         Button startTrackingButton = (Button) view.findViewById(R.id.start_tracking);
@@ -77,8 +79,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         TextView addPhotoText = (TextView) view.findViewById(R.id.add_photo_text);
         addPhotoText.setOnClickListener(this);
 
-        setLeaderboardImageHeight(view);
-
         return view;
     }
 
@@ -90,17 +90,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         RegattaActivity activity = (RegattaActivity) getActivity();
         if (prefs.hasFailedUpload(activity.leaderboard.name)) {
             activity.showRetryUploadLayout();
-        }
-    }
-
-    private void setLeaderboardImageHeight(View view){
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            RelativeLayout imageLayout = (RelativeLayout) view.findViewById(R.id.image);
-            ViewGroup.LayoutParams layoutParams = imageLayout.getLayoutParams();
-            int displayHeight = getResources().getDisplayMetrics().heightPixels;
-            // calculate 1/3 of display height
-            layoutParams.height = displayHeight / 3;
-            imageLayout.setLayoutParams(layoutParams);
         }
     }
 
@@ -117,11 +106,18 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         if (System.currentTimeMillis() > regattaStart) {
             textView.setText(getString(R.string.regatta_in_progress));
-            threeBoxesLayout.setVisibility(View.INVISIBLE);
+            threeBoxesLayout.setVisibility(View.GONE);
+            centerViewInParent(textView);
         } else {
             textView.setText(getString(R.string.regatta_starts_in));
             threeBoxesLayout.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void centerViewInParent(View view) {
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        view.setLayoutParams(layoutParams);
     }
 
     public boolean isShowingBigCheckoutButton() {
@@ -216,9 +212,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
      * Ask user if he wants to take a new picture or select an existing one.
      */
     public void showChooseExistingPictureOrTakeNewPhotoAlert() {
-        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.add_photo_select)
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.add_photo_select)
                 .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
-                .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton(R.string.existing_image, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         pickExistingImage();
@@ -229,7 +225,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
                         showTakePhotoActivity();
                     }
                 }).create();
-
         dialog.show();
     }
 
@@ -241,8 +236,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     private void showTakePhotoActivity() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
         File photoFile = ((RegattaActivity) getActivity()).getImageFile(CAMERA_TEMP_FILE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+        Uri file = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", photoFile);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, file);
         startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
     }
 
@@ -306,9 +303,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         int scale = 1;
         if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
-            scale = (int) Math.pow(
-                    2,
-                    (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
+            scale = (int) Math.pow(2, (int) Math.ceil(
+                    Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
         }
 
         BitmapFactory.Options options2 = new BitmapFactory.Options();
@@ -341,6 +337,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     }
 
     private void startTrackingActivity() {
+        prefs.setTrackingTimerStarted(MillisecondsTimePoint.now().asMillis());
         RegattaActivity regattaActivity = (RegattaActivity) getActivity();
         Intent intent = new Intent(getActivity(), TrackingActivity.class);
         String checkinDigest = regattaActivity.event.checkinDigest;
@@ -378,31 +375,21 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         TextView hoursTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_hours_label);
         TextView minutesTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_minutes_label);
 
+        daysTextViewLabel.setText(getResources().getQuantityText(R.plurals.day, days));
+        hoursTextViewLabel.setText(getResources().getQuantityText(R.plurals.hour, hours));
+        minutesTextViewLabel.setText(getResources().getQuantityText(R.plurals.minute, minutes));
+
         daysTextView.setText(String.format("%02d", days));
         hoursTextView.setText(String.format("%02d", hours));
         minutesTextView.setText(String.format("%02d", minutes));
-
-        if (days == 1) {
-            daysTextViewLabel.setText(R.string.day);
-        } else {
-            daysTextViewLabel.setText(R.string.days);
-        }
-
-        if (hours == 1) {
-            hoursTextViewLabel.setText(R.string.hour);
-        } else {
-            hoursTextViewLabel.setText(R.string.hours);
-        }
-
-        if (minutes == 1) {
-            minutesTextViewLabel.setText(R.string.minute);
-        } else {
-            minutesTextViewLabel.setText(R.string.minutes);
-        }
     }
 
     public void setFragmentWatcher(FragmentWatcher fWatcher) {
         watcher = fWatcher;
+    }
+
+    public interface FragmentWatcher {
+        public void onViewCreated();
     }
 
     private class TimerRunnable implements Runnable {
@@ -439,10 +426,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             running = false;
         }
 
-    }
-
-    public interface FragmentWatcher {
-        public void onViewCreated();
     }
 
 }

@@ -15,6 +15,9 @@
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+	<inherits name="com.sap.sse.security.ui.Settings" />
+        <inherits name='com.sap.sailing.gwt.settings.Settings'/>
+        <inherits name="com.sap.sailing.ExpeditionConnectorCommon" />
 	
   	<!-- Highcharts API -->
 	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
@@ -23,17 +26,11 @@
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
   	<inherits name='com.google.gwt.maps.Maps' />
 	
-  	<!--  Bootstrap API -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
-  
 	<!-- Specify the app entry point class.                         -->
 	<entry-point class='com.sap.sailing.gwt.ui.leaderboardedit.LeaderboardEditPage'/>
 	
-	<!-- Specify the paths for translatable code                    -->
-	<extend-property name="locale" values="de"/>
-	<extend-property name="locale" values="ru"/>
-	
+    <inherits name="com.sap.sailing.domain.SailingDomain" />
+
 	<source path='common'/>
 	<source path='client'/>
 	<source path='adminconsole'/>
@@ -46,7 +43,7 @@
 	<source path='simulator'/>
 	
 	<set-configuration-property name="CssResource.enableGss" value="true" />
-	<set-configuration-property name="CssResource.legacy" value="true" />
+	<set-configuration-property name="CssResource.conversionMode" value="strict" />
 	
 	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
     <inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>

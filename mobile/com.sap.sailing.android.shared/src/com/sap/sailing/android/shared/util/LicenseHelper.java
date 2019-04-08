@@ -1,5 +1,13 @@
 package com.sap.sailing.android.shared.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import com.sap.sailing.android.shared.R;
+
+import android.content.Context;
 import de.psdev.licensesdialog.licenses.ApacheSoftwareLicense20;
 import de.psdev.licensesdialog.licenses.License;
 import de.psdev.licensesdialog.model.Notice;
@@ -21,27 +29,58 @@ public class LicenseHelper {
         return new Notice(name, url, copyright, license);
     }
 
-    public Notice getAndroidSupportNotice() {
+    public Notice getAndroidSupportNotice(Context context) {
         String name = "Android Support Library";
         String url = "http://developer.android.com/tools/support-library/index.html";
-        String copyright = "Copyright (C) Google";
+        String copyright = getContent(context, R.raw.android_support_library);
         License license = new ApacheSoftwareLicense20();
         return new Notice(name, url, copyright, license);
     }
 
-    public Notice getAdvancedRecyclerViewNotice() {
-        String name = "Advanced RecyclerView";
-        String url = "https://github.com/h6ah4i/android-advancedrecyclerview";
-        String copyright = "Copyright (C) 2015 Haruki Hasegawa";
+    public Notice getViewPageIndicator(Context context) {
+        String name = "Android-ViewPagerIndicator";
+        String url = "http://github.com/JakeWharton/Android-ViewPagerIndicator";
+        String copyright = getContent(context, R.raw.android_viewpageindicator);
         License license = new ApacheSoftwareLicense20();
         return new Notice(name, url, copyright, license);
     }
 
-    public Notice getDialogNotice() {
+    public Notice getDialogNotice(Context context) {
         String name = "LicensesDialog";
         String url = "http://psdev.de";
-        String copyright = "Copyright 2013 Philip Schiffer <admin@psdev.de>";
+        String copyright = getContent(context, R.raw.licensesdialog);
         License license = new ApacheSoftwareLicense20();
         return new Notice(name, url, copyright, license);
+    }
+
+    private String getContent(final Context context, final int contentResourceId) {
+        BufferedReader reader = null;
+        try {
+            final InputStream inputStream = context.getResources().openRawResource(contentResourceId);
+            if (inputStream != null) {
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+                return toString(reader);
+            }
+            throw new IOException("Error opening license file.");
+        } catch (final IOException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    // Don't care.
+                }
+            }
+        }
+    }
+
+    private String toString(final BufferedReader reader) throws IOException {
+        final StringBuilder builder = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            builder.append(line).append(System.getProperty("line.separator"));
+        }
+        return builder.toString();
     }
 }

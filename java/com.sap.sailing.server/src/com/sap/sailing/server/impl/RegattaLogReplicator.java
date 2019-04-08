@@ -8,8 +8,8 @@ import com.sap.sailing.domain.regattalike.RegattaAsRegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifierResolver;
 import com.sap.sailing.domain.regattalike.RegattaLikeListener;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
+import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.RecordRegattaLogEventOnFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RecordRegattaLogEventOnRegatta;
 
@@ -20,7 +20,7 @@ import com.sap.sailing.server.operationaltransformation.RecordRegattaLogEventOnR
  * passed to this object's constructor and send a {@link RecordRegattaLogEventOnRegatta} or a
  * {@link RecordRegattaLogEventOnFlexibleLeaderboard} operation to all replicas.
  * 
- * This class is a modified version of {@link RaceLogReplicator}
+ * This class is a modified version of {@link RaceLogReplicatorAndNotifier}
  * 
  */
 public class RegattaLogReplicator implements RegattaLikeListener {

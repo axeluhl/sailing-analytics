@@ -13,14 +13,9 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
-import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class CompetitorsJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4510175441769759252L;
@@ -62,8 +57,7 @@ public class CompetitorsJsonExportServlet extends AbstractJsonHttpServlet {
             return;
         }
         JSONArray result = new JSONArray();
-        CompetitorJsonSerializer serializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
-        		new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()));
+        CompetitorJsonSerializer serializer = CompetitorJsonSerializer.create();
         for (Competitor competitor : leaderboard.getCompetitors(raceColumn, fleet)) {
             result.add(serializer.serialize(competitor));
         }

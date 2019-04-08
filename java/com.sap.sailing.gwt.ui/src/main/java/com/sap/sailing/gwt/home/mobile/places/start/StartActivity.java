@@ -4,6 +4,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.communication.anniversary.GetAnniversariesAction;
 import com.sap.sailing.gwt.home.communication.start.EventQuickfinderDTO;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.communication.start.GetRecentEventsAction;
@@ -14,6 +15,8 @@ import com.sap.sailing.gwt.home.mobile.places.start.StartView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
 public class StartActivity extends AbstractActivity implements Presenter {
@@ -27,6 +30,7 @@ public class StartActivity extends AbstractActivity implements Presenter {
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
+        panel.setWidget(clientFactory.createBusyView());
         Window.setTitle(place.getTitle());
         final StartView view = new StartViewImpl(StartActivity.this);
         clientFactory.getDispatch().execute(new GetStagedEventsAction(true), 
@@ -45,6 +49,10 @@ public class StartActivity extends AbstractActivity implements Presenter {
                 view.setQuickFinderValues(result.getValues());
             }
         });
+
+        final RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(view.asWidget(), panel,
+                clientFactory.getDispatch(), clientFactory);
+        refreshManager.add(view.getAnniversariesView(), new GetAnniversariesAction());
     }
 
     @Override

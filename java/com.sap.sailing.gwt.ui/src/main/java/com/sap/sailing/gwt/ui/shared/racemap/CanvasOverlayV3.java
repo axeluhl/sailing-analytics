@@ -40,9 +40,9 @@ import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnAddHandl
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnDrawHandler;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnRemoveHandler;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * The abstract base class for all canvas overlays.
@@ -88,9 +88,6 @@ public abstract class CanvasOverlayV3 {
      */
     private long transitionTimeInMilliseconds;
 
-    private final int minZoomLevel = 1;
-    private final int maxZoomLevel = 21;
-    
     public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId, CoordinateSystem coordinateSystem) {
         this.transitionTimeInMilliseconds = -1; // no animated position transition initially
         this.map = map;
@@ -115,18 +112,6 @@ public abstract class CanvasOverlayV3 {
         return canvas;
     }
 
-    /** 
-     * This method can be used to calculate a value in a min-max range according to the zoom level.
-     * Sample 1: minZoom = 1, maxZoom = 21, currentZoom = 21 will return maxValue
-     * Sample 2: minZoom = 1, maxZoom = 21, currentZoom = 1 will return minValue
-     * Sample 3: minZoom = 1, maxZoom = 21, currentZoom = 11, minValue = 1, maxValue = 2 will return 1.5
-     */
-    public double fitValueToMapZoom(double minValue, double maxValue) {
-        double dZoom = maxZoomLevel - minZoomLevel;
-        double zoomInPercentage = (map.getZoom() - minZoomLevel) / dZoom; 
-        return  minValue + (maxValue - minValue) * zoomInPercentage; 
-    }
-    
     public boolean isVisible() {
         return getCanvas() != null && getCanvas().isVisible();
     }
@@ -247,10 +232,15 @@ public abstract class CanvasOverlayV3 {
 
     protected abstract void draw();
 
+    protected void onAttach() {
+    }
+
     protected OverlayViewOnAddHandler getOnAddHandler() {
         OverlayViewOnAddHandler result = new OverlayViewOnAddHandler() {
             @Override
             public void onAdd(OverlayViewMethods methods) {
+                methods.getPanes().getMapPane().appendChild(canvas.getElement());
+                CanvasOverlayV3.this.onAttach();
                 methods.getPanes().getOverlayMouseTarget().appendChild(canvas.getElement());
             }
         };
@@ -364,9 +354,9 @@ public abstract class CanvasOverlayV3 {
         setProperty(canvas.getElement().getStyle(), "transform", "translateZ(0) rotate("+Math.round(rotationInDegrees)+"deg)");
     }
 
-    protected double calculateRadiusOfBoundingBoxInPixels(MapCanvasProjection projection, Position centerPosition, double lengthInMeter) {
-        Position translateRhumbX = centerPosition.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(lengthInMeter));
-        Position translateRhumbY = centerPosition.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(lengthInMeter));
+    protected double calculateRadiusOfBoundingBoxInPixels(MapCanvasProjection projection, Position centerPosition, Distance length) {
+        Position translateRhumbX = centerPosition.translateRhumb(new DegreeBearingImpl(90), length);
+        Position translateRhumbY = centerPosition.translateRhumb(new DegreeBearingImpl(0), length);
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         LatLng posWithDistanceY = coordinateSystem.toLatLng(translateRhumbY);
         Point pointCenter = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(centerPosition));
@@ -377,17 +367,17 @@ public abstract class CanvasOverlayV3 {
         return Math.min(diffX, diffY);  
     }
 
-    protected double calculateDistanceAlongX(MapCanvasProjection projection, Position pos, double distanceXInMeter) {
-        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
+    protected double calculateDistanceAlongX(MapCanvasProjection projection, Position pos, Distance distanceX) {
+        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), distanceX);
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         Point point = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(pos));
         Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
         return Math.abs(pointX.getX() - point.getX());
     }
     
-    protected Size calculateBoundingBox(MapCanvasProjection projection, Position pos, double distanceXInMeter, double distanceYInMeter) {
-        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
-        Position translateRhumbY = pos.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(distanceYInMeter));
+    protected Size calculateBoundingBox(MapCanvasProjection projection, Position pos, Distance distanceX, Distance distanceY) {
+        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), distanceX);
+        Position translateRhumbY = pos.translateRhumb(new DegreeBearingImpl(0), distanceY);
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         LatLng posWithDistanceY = coordinateSystem.toLatLng(translateRhumbY);
         Point pointCenter = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(pos));

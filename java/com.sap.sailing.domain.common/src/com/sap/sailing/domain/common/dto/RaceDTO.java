@@ -12,8 +12,6 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 public class RaceDTO extends BasicRaceDTO {
     private static final long serialVersionUID = 2613189982608149975L;
 
-    public enum RaceLiveState { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE, TRACKED_BUT_NOT_SCHEDULED };
-
     /**
      * Tells if this race is currently being tracked, meaning that a {@link RaceTracker} is
      * listening for incoming GPS fixes, mark passings etc., to update a {@link TrackedRace} object
@@ -40,20 +38,6 @@ public class RaceDTO extends BasicRaceDTO {
         super(raceIdentifier, trackedRace);
         this.regattaName = raceIdentifier.getRegattaName();
         this.isTracked = isCurrentlyTracked;
-    }
-
-    public RaceLiveState getLiveState(long serverTimePointAsMillis) {
-        RaceLiveState result = RaceLiveState.NOT_TRACKED;
-        if (trackedRace != null && trackedRace.hasGPSData && trackedRace.hasWindData) {
-            result = RaceLiveState.TRACKED;
-            if (isLive(serverTimePointAsMillis)) {
-                result = RaceLiveState.TRACKED_AND_LIVE;
-                if (startOfRace == null) {
-                    result = RaceLiveState.TRACKED_BUT_NOT_SCHEDULED;
-                }
-            }
-        }
-        return result;
     }
 
     public RegattaAndRaceIdentifier getRaceIdentifier() {

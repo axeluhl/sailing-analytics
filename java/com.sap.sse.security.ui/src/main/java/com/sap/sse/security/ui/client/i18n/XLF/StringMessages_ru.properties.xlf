@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-05-12T13:07:23Z" original="/usr/sap/ljs/app/Converter_2475291648609719345/java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages.properties" source-language="en" target-language="ru">
+	<file datatype="javapropertyresourcebundle" date="2017-03-03T15:30:11Z" original="/usr/sap/ljs/app/Converter_5099745395718684415/java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages.properties" source-language="en" target-language="ru">
 		<header>
 			<skl>
-				<internal-file crc="ad098eb3d0a7bbfaf753d0f6d0a7c151" form="base64">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</internal-file>
+				<internal-file crc="1a97a5a016bf3357b3f0613d523b2ebc" form="base64">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</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-05-11T12:24:39Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2016-12-09T08:12:06Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
@@ -141,7 +141,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="userDetails" resname="userDetails">
 				<source>User details</source>
-				<target state="translated">Данные пользователя</target>
+				<target state="signed-off">Данные пользователя</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="deleteUser" resname="deleteUser">
 				<source>Delete user</source>
@@ -200,8 +200,8 @@
 				<target state="signed-off">Ошибка при входе с именем пользователя <ph id="1">{0}</ph>: <ph id="2">{1}</ph></target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="signedUpSuccessfully" resname="signedUpSuccessfully">
-				<source>Successfully signed up user <ph id="1">{0}</ph>. Please check you e-mails to validate your e-mail account.</source>
-				<target state="signed-off">Успешно выполнен вход пользователя <ph id="1">{0}</ph>. Проверьте почту для подтверждения учетной записи электронной почты.</target>
+				<source>Successfully signed up user <ph id="1">{0}</ph>. Please check your e-mails to validate your e-mail account.</source>
+				<target state="signed-off">Успешно выполнен вход пользователя <ph id="1">{0}</ph>. Проверьте электронную почту для подтверждения своей учетной записи.</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="unknownErrorCreatingUser" resname="unknownErrorCreatingUser">
 				<source>Unknown error trying to sign up user with name <ph id="1">{0}</ph>. Perhaps another user with that name already exists.</source>
@@ -394,6 +394,14 @@
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="refresh" resname="refresh">
 				<source>Refresh</source>
 				<target state="signed-off">Обновить</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="preferredLanguage" resname="preferredLanguage">
+				<source>Preferred language</source>
+				<target state="signed-off">Предпочитаемый язык</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="cannotResetInvalidURL" resname="cannotResetInvalidURL">
+				<source>Invalid reset URL...</source>
+				<target>Недействительный URL-адрес сброса...</target>
 			</trans-unit>
 		</body>
 	</file>

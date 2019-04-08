@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DoublePair;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util;
 
 /**
@@ -25,6 +25,7 @@ import com.sap.sse.common.Util;
 public class BearingWithConfidenceCluster<RelativeTo> {
     private final List<BearingWithConfidence<RelativeTo>> bearings;
     private final Weigher<RelativeTo> weigher;
+    private final ConfidenceBasedAverager<DoublePair, Bearing, RelativeTo> averager;
     
     /**
      * @param weigher
@@ -36,6 +37,7 @@ public class BearingWithConfidenceCluster<RelativeTo> {
     public BearingWithConfidenceCluster(Weigher<RelativeTo> weigher) {
         bearings = new ArrayList<BearingWithConfidence<RelativeTo>>();
         this.weigher = weigher;
+        averager = ConfidenceFactory.INSTANCE.createAverager(weigher);
     }
     
     /**
@@ -141,7 +143,6 @@ public class BearingWithConfidenceCluster<RelativeTo> {
      * {@link BearingWithConfidence#getObject() object}.
      */
     public BearingWithConfidence<RelativeTo> getAverage(RelativeTo relativeTo) {
-        ConfidenceBasedAverager<DoublePair, Bearing, RelativeTo> averager = ConfidenceFactory.INSTANCE.createAverager(weigher);
         HasConfidence<DoublePair, Bearing, RelativeTo> average = averager.getAverage(getBearings(), relativeTo);
         return average == null ? null : new BearingWithConfidenceImpl<RelativeTo>(average.getObject(), average.getConfidence(), average.getRelativeTo());
     }
@@ -168,5 +169,9 @@ public class BearingWithConfidenceCluster<RelativeTo> {
     
     private BearingWithConfidenceCluster<RelativeTo> createEmptyCluster() {
         return new BearingWithConfidenceCluster<RelativeTo>(weigher);
+    }
+
+    public void clear() {
+        bearings.clear();
     }
 }

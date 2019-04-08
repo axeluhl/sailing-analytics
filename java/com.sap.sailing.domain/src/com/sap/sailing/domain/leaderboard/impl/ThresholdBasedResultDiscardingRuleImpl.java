@@ -16,6 +16,8 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -77,7 +79,7 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
     public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
             Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint) {
         int resultsToDiscard = getNumberOfResultsToDiscard(competitor, raceColumnsToConsider, leaderboard, timePoint);
-        Set<RaceColumn> result;
+        final Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
             final Map<RaceColumn, Double> totalPointsForCompetitorPerColumn = new HashMap<>();
             List<RaceColumn> sortedRaces = new ArrayList<RaceColumn>();
@@ -101,20 +103,42 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
                 }
             };
             Collections.sort(sortedRaces, comparator);
-            int i=0;
             Iterator<RaceColumn> badRacesIter = sortedRaces.iterator();
-            while (badRacesIter.hasNext() && i<resultsToDiscard) {
+            while (badRacesIter.hasNext() && result.size()<resultsToDiscard) {
                 final RaceColumn badRace = badRacesIter.next();
                 final MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, badRace, timePoint);
                 if (maxPointsReason == null || maxPointsReason.isDiscardable()) {
-                    result.add(badRace);
-                    i++;
+                    addDiscardIfWithinSeriesLimits(result, badRace);
                 }
             }
         } else {
             result = Collections.emptySet();
         }
         return result;
+    }
+
+    /**
+     * Only adds the discard if the {@link Series} to which the {@code badRace} {@link RaceColumn} belongs
+     * does not define a separate limit for the number of its races that may be discarded, or if that number
+     * is less than the number of races discarded so far from that series.
+     */
+    private void addDiscardIfWithinSeriesLimits(Set<RaceColumn> result, RaceColumn badRace) {
+        final Series series;
+        if (!(badRace instanceof RaceColumnInSeries) ||
+                (series = ((RaceColumnInSeries) badRace).getSeries()).getMaximumNumberOfDiscards() == null ||
+                getRacesDiscardedFromSeries(result, series) < series.getMaximumNumberOfDiscards()) {
+            result.add(badRace);
+        }
+    }
+
+    private int getRacesDiscardedFromSeries(Set<RaceColumn> result, Series series) {
+        int count = 0;
+        for (final RaceColumn rc : result) {
+            if (rc instanceof RaceColumnInSeries && ((RaceColumnInSeries) rc).getSeries() == series) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private int getNumberOfResultsToDiscard(Competitor competitor, Iterable<RaceColumn> raceColumnsToConsider,

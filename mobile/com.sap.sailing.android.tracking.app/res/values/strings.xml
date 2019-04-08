@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string name="empty"></string>
+<resources>
+    <string name="empty" translatable="false"></string>
+    <string name="log_file_template" translatable="false">sap_insight_log_%s.txt</string>
+    <string name="crash_file_name" translatable="false">sap_insight_crash_%s.txt</string>
     <string name="app_name">SAP Sail InSight</string>
     <string name="options_menu_settings">Settings</string>
     <string name="options_menu_checkout">Checkout</string>
@@ -9,8 +10,8 @@
     <string name="options_replace_team_photo">Replace Team Photo</string>
     <string name="settings_category_other">Other Settings</string>
     <string name="device_identifier">Device Identifier</string>
-    <string name="tracker_started">SAP Sail InSight started</string>
-    <string name="tracker_stopped">SAP Sail InSight stopped</string>
+    <string name="tracker_started">Tracking was successfully started</string>
+    <string name="tracker_stopped">Tracking was successfully stopped</string>
     <string name="title_activity_regatta">Regatta</string>
     <string name="title_activity_leaderboard">Leaderboard</string>
     <string name="title_activity_start">Set Up GPS Tracker</string>
@@ -34,15 +35,21 @@
     <string name="error_could_not_complete_operation_on_server_try_again">Could not complete operation on server. Please try again.</string>
     <string name="error_sending_team_image_to_server">Error: Could not send team image to server.</string>
     <string name="regatta_starts_in">Regatta starts in:</string>
-    <string name="hours">Hours</string>
-    <string name="minutes">Minutes</string>
-    <string name="days">Days</string>
-    <string name="hour">Hour</string>
-    <string name="minute">Minute</string>
-    <string name="day">Day</string>
-    <string name="please_listen_to_announcements">Please listen to the announcements</string>
+    <plurals name="hour">
+        <item quantity="one">Hour</item>
+        <item quantity="other">Hours</item>
+    </plurals>
+    <plurals name="minute">
+        <item quantity="one">Minute</item>
+        <item quantity="other">Minutes</item>
+    </plurals>
+    <plurals name="day">
+        <item quantity="one">Day</item>
+        <item quantity="other">Days</item>
+    </plurals>
+    <string name="please_listen_to_announcements">Please listen to announcements</string>
     <string name="close">Close</string>
-    <string name="thank_you_you_successfully_participated">Thank you, you have successfully taken part in the regatta.\n\nYour SAP Sailing Team</string>
+    <string name="thank_you_you_successfully_participated">Thank you! You have successfully taken part in the regatta.\n\nYour SAP Sailing Team</string>
     <string name="tracking_colon">Tracking:</string>
     <string name="regatta_in_progress">The regatta is in progress.</string>
     <string name="heading">Heading</string>
@@ -54,11 +61,10 @@
     <string name="error_while_receiving_server_data">Error while receiving server data</string>
     <string name="info_already_checked_in_this_qr_code">Already checked in to this regatta</string>
     <string name="warning">Warning</string>
-    <string name="enable_gps">GPS is turned off. Tracking requires GPS positions. Do you want to turn on GPS in the location settings?</string>
-    <string name="gps_turned_off">GPS is turned off. Please turn on location access (GPS) in your Android Settings!</string>
+    <string name="enable_gps">GPS is turned off, but tracking requires GPS positions. Do you want to turn on GPS in the location settings?</string>
+    <string name="gps_turned_off">GPS is turned off. Please turn on location services (GPS) in your Android settings to start tracking.</string>
     <string name="knots">%sKn</string>
     <string name="preferences">Preferences</string>
-
     <string name="initial_timer_text_zerozero" translatable="false">00:00:00</string>
     <string name="initial_hyphen" translatable="false">-</string>
     <string name="initial_hyphen_degrees" translatable="false">-°</string>
@@ -66,4 +72,5 @@
     <string name="content_description_flag_icon" translatable="false">flag icon</string>
     <string name="tracking_notification_text">Currently Tracking %s</string>
     <string name="waiting_for_gps">Waiting for GPS</string>
+    <string name="service_info" translatable="false">SAP Sail InSight Service</string>
 </resources>

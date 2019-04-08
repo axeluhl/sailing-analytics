@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/colorPrimary"
-                tools:ignore="Overdraw">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/list_header_background_color">
 
-    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textSize="16sp"
-        android:background="@color/colorPrimary"
-        android:textColor="@color/white"
-        android:text="@string/your_regattas"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/list_header_height">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="@dimen/fragment_side_margin"
+            android:text="@string/your_regattas"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/list_header_text_size" />
+    </LinearLayout>
 
 </RelativeLayout>

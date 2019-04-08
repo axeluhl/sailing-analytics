@@ -4,10 +4,9 @@ import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.Renamable;
-import com.sap.sse.common.Named;
+import com.sap.sse.common.NamedWithID;
+import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.WithID;
 import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.shared.media.WithMedia;
 
@@ -15,7 +14,7 @@ import com.sap.sse.shared.media.WithMedia;
  * Base interface for an Event consisting of all static information, which might be shared
  * by the server and an Android application.
  */
-public interface EventBase extends Named, WithDescription, Renamable, WithID, WithMedia {
+public interface EventBase extends NamedWithID, WithDescription, Renamable, WithMedia {
 
     void setDescription(String description);
     
@@ -50,6 +49,16 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     
     void setOfficialWebsiteURL(URL officialWebsiteURL);
 
+    /**
+     * @return the URL under which the event's landing page in the {@code sapsailing.com} universe can be reached. This
+     *         could be something like {@code tw2015.sapsailing.com} or {@link 505worlds2012.sapsailing.com} or similar.
+     *         It shall be a URL to which relative paths to pages in the context of this event can be appended, such
+     *         as links to race boards, leaderboards or the regatta overview.
+     */
+    URL getBaseURL();
+    
+    void setBaseURL(URL baseURL);
+    
     /**
      * Returns a mapping of Locales to URLs where the URLs are meant as an external web site containing sailor related
      * information like protests, official results, etc.

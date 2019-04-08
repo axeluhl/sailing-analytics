@@ -8,6 +8,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.GetSeriesStatisticsAction;
@@ -17,10 +18,12 @@ import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardB
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentYearEvent;
 import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
-import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
+import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.MobileStatisticsBoxView;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
+import com.sap.sailing.gwt.home.shared.partials.statistics.EventStatisticsBox;
 import com.sap.sailing.gwt.home.shared.refresh.LifecycleRefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SeriesViewImpl extends Composite implements SeriesView {
@@ -34,18 +37,18 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     @UiField Quickfinder quickFinderUi;
     @UiField(provided = true) MinileaderboardBox leaderboardUi;
     @UiField FlowPanel eventsUi;
-    @UiField(provided = true) StatisticsBox statisticsBoxUi;
+    @UiField(provided = true) EventStatisticsBox statisticsBoxUi;
 
     private final Presenter currentPresenter;
     private final RefreshManager refreshManager;
 
-    public SeriesViewImpl(SeriesView.Presenter presenter) {
+    public SeriesViewImpl(SeriesView.Presenter presenter, FlagImageResolver flagImageResolver) {
         this.currentPresenter = presenter;
         this.refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
         EventSeriesViewDTO series = currentPresenter.getSeriesDTO();
         eventHeaderUi = new SeriesHeader(series);
         this.setupStatisticsBox(series);
-        leaderboardUi = new MinileaderboardBox(true);
+        leaderboardUi = new MinileaderboardBox(true, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
         this.setupListContent(series);
         this.setupEventListContent(series);
@@ -53,7 +56,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     
     private void setupEventListContent(EventSeriesViewDTO series) {
         boolean first = true;
-        for(EventMetadataDTO eventOfSeries : series.getEvents()) {
+        for(EventMetadataDTO eventOfSeries : series.getEventsDescending()) {
             if(eventOfSeries.getState() == EventState.PLANNED) {
                 continue;
             }
@@ -65,17 +68,18 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     }
     
     @Override
-    public void setQuickFinderValues(String seriesName, Collection<EventMetadataDTO> eventsOfSeries) {
+    public void setQuickFinderValues(String seriesName,
+            Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
         QuickfinderPresenter.getForSeriesLeaderboards(quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
     }
 
     private void setupListContent(EventSeriesViewDTO event) {
         leaderboardUi.setAction(MSG.showAll(), currentPresenter.getMiniOverallLeaderboardNavigation());
-        refreshManager.add(leaderboardUi, new GetMiniOverallLeaderbordAction(event.getId(), 3));
+        refreshManager.add(leaderboardUi, new GetMiniOverallLeaderbordAction(event.getLeaderboardGroupUUID(), event.getLeaderboardId(), 3));
     }
     
     private void setupStatisticsBox(EventSeriesViewDTO series) {
-        statisticsBoxUi = new StatisticsBox(true);
-        refreshManager.add(statisticsBoxUi, new GetSeriesStatisticsAction(series.getId()));
+        statisticsBoxUi = new EventStatisticsBox(true, new MobileStatisticsBoxView());
+        refreshManager.add(statisticsBoxUi, new GetSeriesStatisticsAction(series.getLeaderboardGroupUUID()));
     }
 }

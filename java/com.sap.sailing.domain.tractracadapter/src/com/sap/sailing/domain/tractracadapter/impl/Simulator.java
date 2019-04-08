@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
@@ -14,8 +15,12 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
+import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -36,7 +41,7 @@ public class Simulator {
     private final WindStore windStore;
     private boolean stopped;
     private Duration advanceInMillis = Duration.NULL.minus(1);
-    private Timer timer = new Timer("Timer for TracTrac Simulator");
+    private Timer timer = new Timer("Timer for TracTrac Simulator", /* isDaemon */ true);
     private final Duration offsetToStart;
     
     public Simulator(WindStore windStore, Duration offsetToStart) {
@@ -66,7 +71,7 @@ public class Simulator {
                     stop(); // stop simulator when tracked race is removed from its regatta
                 }
             }
-        });
+        }, /* No replication handling necessary */ Optional.empty(), /* synchronous */ false);
         startWindPlayer();
     }
     
@@ -88,7 +93,8 @@ public class Simulator {
         for (final Map.Entry<? extends WindSource, ? extends WindTrack> windSourceAndTrack : windStore.loadWindTracks(
                 trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace,
                 /* millisecondsOverWhichToAverageWind doesn't matter because we only use raw fixes */ 10000).entrySet()) {
-            new Thread("Wind simulator for wind source "+windSourceAndTrack.getKey()+" for tracked race "+trackedRace.getRace().getName()) {
+            Thread windSimulatorThread =
+                    new Thread("Wind simulator for wind source "+windSourceAndTrack.getKey()+" for tracked race "+trackedRace.getRace().getName()) {
                 @Override
                 public void run() {
                     final WindTrack windTrack = windSourceAndTrack.getValue();
@@ -105,7 +111,9 @@ public class Simulator {
                     }
                     logger.info("Wind Track Simulator for race "+trackedRace.getRace().getName()+" finished. stopped="+stopped);
                 }
-            }.start();
+            };
+            windSimulatorThread.setDaemon(true);
+            windSimulatorThread.start();
         }
     }
     
@@ -269,20 +277,40 @@ public class Simulator {
         scheduleFixRecording(mark, markFix, recorder);
     }
 
-    private <T> void scheduleFixRecording(final T object, GPSFixMoving fix, final RecordGPSFix<T> recorder) {
+    public void scheduleCompetitorSensorData(DynamicBravoFixTrack<Competitor> bravoFixTrack, BravoFix fix) {
         final TimePoint transformedTimepoint = advance(fix.getTimePoint());
-        final GPSFixMoving transformedMarkFix = new GPSFixMovingImpl(fix.getPosition(), transformedTimepoint, fix.getSpeed());
-        long waitTime = getWaitTimeInMillisUntil(transformedMarkFix.getTimePoint());
+        final BravoFix transformedFix = new BravoFixImpl(new DoubleVectorFixImpl(transformedTimepoint, fix.get()));
+        long waitTime = getWaitTimeInMillisUntil(transformedFix.getTimePoint());
         if (waitTime <= 0) {
-            recorder.recordFix(object, transformedMarkFix);
+            bravoFixTrack.add(transformedFix);
         } else {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     try {
-                        recorder.recordFix(object, transformedMarkFix);
+                        bravoFixTrack.add(transformedFix);
                     } catch (Exception e) {
-                        logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", e);
+                        logger.throwing(Simulator.class.getName(), "scheduleSensorData", e);
+                    }
+                }
+            }, transformedTimepoint.asDate());
+        }
+    }
+
+    private <T> void scheduleFixRecording(final T object, GPSFixMoving fix, final RecordGPSFix<T> recorder) {
+        final TimePoint transformedTimepoint = advance(fix.getTimePoint());
+        final GPSFixMoving transformedFix = new GPSFixMovingImpl(fix.getPosition(), transformedTimepoint, fix.getSpeed());
+        long waitTime = getWaitTimeInMillisUntil(transformedFix.getTimePoint());
+        if (waitTime <= 0) {
+            recorder.recordFix(object, transformedFix);
+        } else {
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        recorder.recordFix(object, transformedFix);
+                    } catch (Exception e) {
+                        logger.throwing(Simulator.class.getName(), "schedulePosition", e);
                     }
                 }
             }, transformedTimepoint.asDate());
@@ -294,4 +322,5 @@ public class Simulator {
         timer.cancel();
         stopped = true;
     }
+
 }

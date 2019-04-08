@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -13,21 +15,25 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCache;
 import com.sap.sailing.domain.leaderboard.caching.LiveLeaderboardUpdater;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A leaderboard is used to display the results of one or more {@link TrackedRace races}. It manages the competitors'
@@ -94,6 +100,15 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      */
     Iterable<Competitor> getAllCompetitors();
 
+    Iterable<Boat> getAllBoats();
+
+    /**
+     * Same as {@link #getAllCompetitors()}, only that additionally the method returns as a first element in a pair
+     * which {@link RaceDefinition}s were used in order to fetch their {@link RaceDefinition#getCompetitors()} to
+     * assemble the results.
+     */
+    Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered();
+
     /**
      * Retrieves all competitors expected to race in the fleet and column specified.
      * When a {@link TrackedRace} is {@link RaceColumn#getTrackedRace(Fleet) attached} to the race
@@ -112,9 +127,16 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     
     /**
      * Convenience method which returns the difference between {@link #getAllCompetitors()} and {@link #getCompetitors()}.
+     * The collection is a copy that can safely be held and modified, but it is not "live" in the sense that it does not
+     * reflect changes that occur to the set of suppressed competitors after calling this method, nor vice-versa.
      */
     Iterable<Competitor> getSuppressedCompetitors();
     
+    /**
+     * Tells whether {@code competitor} is among those {@link #getSuppressedCompetitors() suppressed}
+     */
+    boolean isSuppressed(Competitor competitor);
+
     /**
      * Can be used to exclude competitor from regular views of this leaderboard as well as from the scoring process.
      * As a result of suppressing a competitor, it will no longer result from calls to {@link #getCompetitors} nor to
@@ -122,7 +144,12 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * It will, however, continue to be returned from {@link #getAllCompetitors()}.
      */
     void setSuppressed(Competitor competitor, boolean suppressed);
-    
+
+    /**
+     * Retrieves the boat of a given competitor for the specified raceColumn and fleet.
+     */
+    Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet);
+
     /**
      * Returns the first fleet found in the sequence of this leaderboard's {@link #getRaceColumns() race columns}'
      * {@link RaceColumn#getFleets() fleets} whose name equals <code>fleetName</code>. If no such fleet is found,
@@ -173,7 +200,8 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * exactly <i>n</i> races. Still, this method pretends such a time point would have existed, actually ignoring
      * the <i>times</i> at which a race took place but only looking at the resulting scores and discards.<p>
      * 
-     * When computing the net points sum after all columns up to and including the race column that is the key of the resulting
+     * When computing the ne
+     * t points sum after all columns up to and including the race column that is the key of the resulting
      * map, the method applies the discarding and tie breaking rules as they would have had to be applied had the races
      * in the respective column just completed.
      * 
@@ -197,19 +225,21 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     Map<Competitor, Double> getCompetitorsForWhichThereAreCarriedPoints();
 
     /**
-     * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sse.common.TimePoint)} with the
-     * additional logic that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started} yet
-     * or no {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked
-     * race for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.<p>
+     * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sse.common.TimePoint)} with the additional logic
+     * that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started} yet or no
+     * {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked race
+     * for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.
+     * <p>
      * 
-     * For each competitor tracking-wise ranking better than <code>competitor</code> but with
-     * a {@link #getMaxPointsReason(Competitor, RaceColumn, TimePoint) disqualification reason} given, <code>competitor</code>'s
-     * rank is improved by one.  
+     * For each competitor tracking-wise ranking better than <code>competitor</code> but with a
+     * {@link #getMaxPointsReason(Competitor, RaceColumn, TimePoint) disqualification reason} given,
+     * <code>competitor</code>'s rank is improved by one.
      * 
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
      *            a race that is contained in the {@link #getRaceColumns()} result
+     * @return a 1-based rank, or 0 if no rank can be determined for the {@code competitor} in {@code race}
      */
     int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
@@ -249,7 +279,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *         competitor doesn't appear in any of the race column's attached tracked races. A 0.0 score is returned
      *         if the competitor's result for <code>race</code> is discarded.
      */
-    Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    Double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
     /**
      * Tells whether the contribution of <code>raceColumn</code> is discarded in the current leaderboard's standings for
@@ -286,7 +316,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link #getTotalPoints(Competitor, RaceColumn, TimePoint)} and not on
      * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}.
      */
-    List<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint) throws NoWindException;
+    Iterable<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint) throws NoWindException;
     
     /**
      * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
@@ -297,7 +327,8 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
     
     /**
-     * Returns the total rank of the given competitor.
+     * Returns the total rank of the given competitor or {@code 0} if no rank can be determined for
+     * the {@code competitor} in this leaderboard.
      */
     int getTotalRankOfCompetitor(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
@@ -348,6 +379,10 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     boolean hasCarriedPoints(Competitor competitor);
 
     SettableScoreCorrection getScoreCorrection();
+    
+    void addScoreCorrectionListener(ScoreCorrectionListener listener);
+
+    void removeScoreCorrectionListener(ScoreCorrectionListener listener);
 
     Competitor getCompetitorByName(String competitorName);
     
@@ -423,10 +458,10 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(Competitor competitor, TimePoint timePoint);
     
     /**
-     * @return <code>null</code> if no tracked race is available in this leaderboard, the competitor hasn't started
-     * a single race at <code>timePoint</code> or if the competitor has not finished one of the races. This method
-     * computes the average speed starting with the first mark passing until <code>timePoint</code> or if earlier then
-     * the timePoint of the last mark passing.
+     * @return the {@link #getTotalDistanceTraveled(Competitor, TimePoint) total distance} the competitor has traveled
+     *         up to {@code timePoint}, divided by the {@link #getTotalTimeSailed(Competitor, TimePoint) total time
+     *         sailed} up to this {@code timePoint}; {@code null} in case a zero or {@code null} time has been spent so
+     *         far, or a {@code null} distance is returned by {@link #getTotalDistanceTraveled(Competitor, TimePoint)}.
      */
     Speed getAverageSpeedOverGround(Competitor competitor, TimePoint timePoint);
 
@@ -456,6 +491,26 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      *         leaderboard
      */
     Distance getTotalDistanceTraveled(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * Computes the distance the <code>competitor</code> has been foiling in the tracked races in this leaderboard, starting
+     * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
+     * end of the last race, whichever is first.
+     * 
+     * @return <code>null</code> if the <code>competitor</code> hasn't foiled any distance in any tracked race in this
+     *         leaderboard
+     */
+    Distance getTotalDistanceFoiled(Competitor competitor, TimePoint timePoint);
+    
+    /**
+     * Computes the duration the <code>competitor</code> has foiled in the tracked races in this leaderboard, starting
+     * to count in each race when the competitor passes the start line, aggregating up to <code>timePoint</code> or the
+     * end of the last race, whichever is first.
+     * 
+     * @return <code>null</code> if the <code>competitor</code> hasn't foiled at any time in any tracked race in this
+     *         leaderboard
+     */
+    Duration getTotalDurationFoiled(Competitor competitor, TimePoint timePoint);
     
     /**
      * Same as {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}, only that for determining the discarded
@@ -487,7 +542,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     CourseArea getDefaultCourseArea();
 
     /**
-     * Must be called when the leaderboard is removed from its server, becoming in accessible. This will give the leaderboard
+     * Must be called when the leaderboard is removed from its server, becoming inaccessible. This will give the leaderboard
      * a chance to release all its resources that won't be collected or freed automatically. In particular, a leaderboard may
      * hold on to listeners which in turn are registered with {@link TrackedRace}s and therefore won't be released to the garbage
      * collector unless the tracked race becomes unreferenced. This may take long because the tracked race can generally
@@ -526,4 +581,45 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
             InterruptedException, ExecutionException;
 
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
+
+    /**
+     * Looks through all {@link #getRaceColumns() race columns} and their {@link RaceColumn#getFleets() fleets} and checks
+     * if {@code trackedRace} is {@link RaceColumn#getTrackedRace(Fleet) linked} to that combination. If such a slot is found
+     * that "slot" is returned by a pair specifying the non-{@code null} {@link RaceColumn} and {@code Fleet} pair. Otherwise,
+     * {@code null} is returned.
+     */
+    Pair<RaceColumn, Fleet> getRaceColumnAndFleet(TrackedRace trackedRace);
+
+    /**
+     * Gets the ("dominant") boat class for this leaderboard. For a {@link RegattaLeaderboard} this is the {@link Regatta}'s boat class.
+     * For a {@link FlexibleLeaderboard} the implementation is more complex because no fixed boat class is set for the leaderboard. There,
+     * the boat class will be determined based on the most frequently occurring boat class when iterating across the competitors.
+     */
+    BoatClass getBoatClass();
+    
+    LeaderboardType getLeaderboardType();
+
+    /**
+     * Tells if there is at least one non-{@code null} score for the given {@code competitor} in the
+     * leaderboard.
+     */
+    boolean hasScores(Competitor competitor, TimePoint timePoint);
+
+    /**
+     * Returns true if a racecolumn evaluates to be a win for the given competitor at the given timepoint.
+     * If the competitor is not scored for this race, false is returned 
+     */
+    default boolean isWin(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        final Double points = getTotalPoints(competitor, raceColumn, timePoint);
+        final boolean result;
+        if (points == null) {
+            result = false;
+        } else if (getScoringScheme().isHigherBetter()) {
+            double competitorCount = Util.size(getCompetitors());
+            result = points >= (competitorCount - 0.05);
+        } else {
+            result = points <= 1.05;
+        }
+        return result;
+    }
 }

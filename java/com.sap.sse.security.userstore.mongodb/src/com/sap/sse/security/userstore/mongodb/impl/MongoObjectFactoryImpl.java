@@ -2,13 +2,17 @@ package com.sap.sse.security.userstore.mongodb.impl;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.bson.Document;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.UpdateOptions;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
@@ -18,55 +22,75 @@ import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
+    private static final Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
+    private final MongoDatabase db;
+    final MongoCollection<org.bson.Document> settingCollection;
 
-    private final DB db;
 
-    public MongoObjectFactoryImpl(DB db) {
+    public MongoObjectFactoryImpl(MongoDatabase db) {
         this.db = db;
+        settingCollection = db.getCollection(CollectionNames.PREFERENCES.name());
+        for (Document index : settingCollection.listIndexes()) {
+            final Object key = index.get("key");
+            if (key instanceof Document) {
+                final Document keyDocument = (Document) key;
+                if (keyDocument.size() == 1 && keyDocument.containsKey(FieldNames.Preferences.USERNAME.name()) && !index.getBoolean("unique", false)) {
+                    settingCollection.dropIndex(index.getString("name"));
+                    break;
+                }
+            }
+        }
+        try {
+            settingCollection.createIndex(new Document(FieldNames.Preferences.USERNAME.name(), 1), new IndexOptions().name("uniquebyusername").unique(true));
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "There are duplicate keys in the "+CollectionNames.PREFERENCES.name()+
+                    " collection. Unique index cannot be created. Consider cleaning up.", e);
+        }
     }
 
     @Override
-    public DB getDatabase() {
+    public MongoDatabase getDatabase() {
         return db;
     }
 
     @Override
     public void storeUser(User user) {
-        DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
-        usersCollection.createIndex(new BasicDBObject(FieldNames.User.NAME.name(), null));
-        DBObject dbUser = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.User.NAME.name(), user.getName());
+        MongoCollection<org.bson.Document> usersCollection = db.getCollection(CollectionNames.USERS.name());
+        usersCollection.createIndex(new Document(FieldNames.User.NAME.name(), 1));
+        Document dbUser = new Document();
+        Document query = new Document(FieldNames.User.NAME.name(), user.getName());
         dbUser.put(FieldNames.User.NAME.name(), user.getName());
         dbUser.put(FieldNames.User.EMAIL.name(), user.getEmail());
         dbUser.put(FieldNames.User.FULLNAME.name(), user.getFullName());
         dbUser.put(FieldNames.User.COMPANY.name(), user.getCompany());
+        dbUser.put(FieldNames.User.LOCALE.name(), user.getLocale() != null ? user.getLocale().toLanguageTag() : null);
         dbUser.put(FieldNames.User.EMAIL_VALIDATED.name(), user.isEmailValidated());
         dbUser.put(FieldNames.User.PASSWORD_RESET_SECRET.name(), user.getPasswordResetSecret());
         dbUser.put(FieldNames.User.VALIDATION_SECRET.name(), user.getValidationSecret());
         dbUser.put(FieldNames.User.ACCOUNTS.name(), createAccountMapObject(user.getAllAccounts()));
         dbUser.put(FieldNames.User.ROLES.name(), user.getRoles());
         dbUser.put(FieldNames.User.PERMISSIONS.name(), user.getPermissions());
-        usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+        usersCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUser, new UpdateOptions().upsert(true));
     }
     
     @Override
     public void deleteUser(User user) {
-        DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
-        DBObject dbUser = new BasicDBObject();
+        MongoCollection<org.bson.Document> usersCollection = db.getCollection(CollectionNames.USERS.name());
+        Document dbUser = new Document();
         dbUser.put(FieldNames.User.NAME.name(), user.getName());
-        usersCollection.remove(dbUser);
+        usersCollection.deleteOne(dbUser);
     }
 
-    private DBObject createAccountMapObject(Map<AccountType, Account> accounts) {
-        DBObject dbAccounts = new BasicDBObject();
+    private Document createAccountMapObject(Map<AccountType, Account> accounts) {
+        Document dbAccounts = new Document();
         for (Entry<AccountType, Account> e : accounts.entrySet()) {
             dbAccounts.put(e.getKey().name(), createAccountObject(e.getValue()));
         }
         return dbAccounts;
     }
 
-    private DBObject createAccountObject(Account a) {
-        DBObject dbAccount = new BasicDBObject();
+    private Document createAccountObject(Account a) {
+        Document dbAccount = new Document();
         if (a instanceof UsernamePasswordAccount) {
             UsernamePasswordAccount upa = (UsernamePasswordAccount) a;
             dbAccount.put(FieldNames.UsernamePassword.NAME.name(), upa.getName());
@@ -84,55 +108,51 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeSettings(Map<String, Object> settings) {
-        DBCollection settingCollection = db.getCollection(CollectionNames.SETTINGS.name());
-        settingCollection.createIndex(new BasicDBObject(FieldNames.Settings.NAME.name(), null));
-        DBObject dbSettings = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
+        MongoCollection<org.bson.Document> settingCollection = db.getCollection(CollectionNames.SETTINGS.name());
+        settingCollection.createIndex(new Document(FieldNames.Settings.NAME.name(), 1));
+        Document dbSettings = new Document();
+        Document query = new Document(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
         dbSettings.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.VALUES.name());
         dbSettings.put(FieldNames.Settings.MAP.name(), createSettingsMapObject(settings));
-
-        settingCollection.update(query, dbSettings, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbSettings, new UpdateOptions().upsert(true));
     }
 
     @Override
     public void storePreferences(String username, Map<String, String> userMap) {
-        DBCollection settingCollection = db.getCollection(CollectionNames.PREFERENCES.name());
-        settingCollection.createIndex(new BasicDBObject(FieldNames.Preferences.USERNAME.name(), null));
         BasicDBList dbSettings = new BasicDBList();
         for (Entry<String, String> e : userMap.entrySet()) {
-            DBObject entry = new BasicDBObject();
+            Document entry = new Document();
             entry.put(FieldNames.Preferences.KEY.name(), e.getKey());
             entry.put(FieldNames.Preferences.VALUE.name(), e.getValue());
             dbSettings.add(entry);
         }
-        DBObject query = new BasicDBObject(FieldNames.Preferences.USERNAME.name(), username);
-        DBObject update = new BasicDBObject(FieldNames.Preferences.KEYS_AND_VALUES.name(), dbSettings);
+        Document query = new Document(FieldNames.Preferences.USERNAME.name(), username);
+        Document update = new Document(FieldNames.Preferences.KEYS_AND_VALUES.name(), dbSettings);
         update.put(FieldNames.Preferences.USERNAME.name(), username);
-        settingCollection.update(query, update, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, update, new UpdateOptions().upsert(true));
     }
 
     @Override
     public void storeSettingTypes(Map<String, Class<?>> settingTypes) {
-        DBCollection settingCollection = db.getCollection(CollectionNames.SETTINGS.name());
-        settingCollection.createIndex(new BasicDBObject(FieldNames.Settings.NAME.name(), null));
-        DBObject dbSettingTypes = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
+        MongoCollection<org.bson.Document> settingCollection = db.getCollection(CollectionNames.SETTINGS.name());
+        settingCollection.createIndex(new Document(FieldNames.Settings.NAME.name(), 1));
+        Document dbSettingTypes = new Document();
+        Document query = new Document(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
         dbSettingTypes.put(FieldNames.Settings.NAME.name(), FieldNames.Settings.TYPES.name());
         dbSettingTypes.put(FieldNames.Settings.MAP.name(), createSettingTypesMapObject(settingTypes));
-
-        settingCollection.update(query, dbSettingTypes, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+        settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbSettingTypes, new UpdateOptions().upsert(true));
     }
 
-    private DBObject createSettingsMapObject(Map<String, Object> settings) {
-        DBObject dbSettings = new BasicDBObject();
+    private Document createSettingsMapObject(Map<String, Object> settings) {
+        Document dbSettings = new Document();
         for (Entry<String, Object> e : settings.entrySet()) {
             dbSettings.put(e.getKey(), e.getValue());
         }
         return dbSettings;
     }
 
-    private DBObject createSettingTypesMapObject(Map<String, Class<?>> settingTypes) {
-        DBObject dbSettingTypes = new BasicDBObject();
+    private Document createSettingTypesMapObject(Map<String, Class<?>> settingTypes) {
+        Document dbSettingTypes = new Document();
         for (Entry<String, Class<?>> e : settingTypes.entrySet()) {
             dbSettingTypes.put(e.getKey(), e.getValue().getName());
         }

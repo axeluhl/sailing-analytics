@@ -1,6 +1,7 @@
 package com.sap.sailing.polars.mining;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,10 +14,10 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
+import com.sap.sse.common.Speed;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
@@ -221,4 +222,16 @@ public class CubicRegressionPerCourseProcessor implements
         return null;
     }
 
+    public Map<GroupKey, AngleAndSpeedRegression> getRegressions() {
+        synchronized (regressions) {
+            return Collections.unmodifiableMap(regressions);
+        }
+    }
+    
+    public void updateRegressions(Map<GroupKey, AngleAndSpeedRegression> regressionsToUpdate) {
+        synchronized (regressions) {
+            regressions.putAll(regressionsToUpdate);
+        }
+    }
+    
 }

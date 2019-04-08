@@ -79,6 +79,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
  * <ul class='css'>
  * <li>.gwt-SplitLayoutPanel { the panel itself }</li>
  * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-HDragger { horizontal dragger }</li>
+ * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-HDragger-Inverted { horizontal dragger }</li>
  * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-VDragger { vertical dragger }</li>
  * </ul>
  * 
@@ -243,7 +244,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             this.reverse = reverse;
             this.associatedComponent = associatedComponent;
             this.hasToggleButtonsAssociated = false;
-            this.splitterToggleButton = new Button(target.getTitle());
+            this.splitterToggleButton = new Button(associatedComponent.getLocalizedShortName());
         }
 
         public Component<?> getAssociatedComponent() {
@@ -394,7 +395,11 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             super(target, associatedComponent, reverse);
             addStyleName("SplitLayoutPanel-Divider-Horizontal");
             getDragger().getElement().getStyle().setPropertyPx("width", horizontalSplitterSize);
-            getDragger().setStyleName("gwt-SplitLayoutPanel-HDragger");
+            if(!reverse) {                
+                getDragger().setStyleName("gwt-SplitLayoutPanel-HDragger");
+            } else {
+                getDragger().setStyleName("gwt-SplitLayoutPanel-HDragger-Inverted");
+            }
         }
 
         @Override
@@ -598,7 +603,8 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         HSplitter lastHorizontalSplitter = null;
         VSplitter lastVerticalSplitter = null;
         List<Splitter> allVerticalSplitters = new ArrayList<TouchSplitLayoutPanel.Splitter>();
-        List<Splitter> allHorizontalSplitters = new ArrayList<TouchSplitLayoutPanel.Splitter>();
+        List<Splitter> horizontalEastSplitters = new ArrayList<TouchSplitLayoutPanel.Splitter>();
+        List<Splitter> horizontalWestSplitters = new ArrayList<TouchSplitLayoutPanel.Splitter>();
         for (Widget widget : splitterChildren) {
             if (widget instanceof VSplitter) {
                 allVerticalSplitters.add((VSplitter) widget);
@@ -607,7 +613,12 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 lastVerticalSplitter = (VSplitter)widget;
             } else if (widget instanceof HSplitter) {
                 lastHorizontalSplitter = (HSplitter) widget;
-                allHorizontalSplitters.add((HSplitter) widget);
+                LayoutData layoutData = (LayoutData) widget.getLayoutData();
+                if(layoutData.direction == Direction.EAST) {
+                    horizontalEastSplitters.add((HSplitter) widget);
+                } else if(layoutData.direction == Direction.WEST) {
+                    horizontalWestSplitters.add((HSplitter) widget);
+                }
             }
         }
         if (lastVerticalSplitter != null) {
@@ -620,9 +631,16 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         }
         ensureVerticalToggleButtonPosition();
         if (lastHorizontalSplitter != null) {
-            Panel horizontalButtonsPanel = createToggleButtonPanel(allHorizontalSplitters,
-                    "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm, /* additional buttons and styles */ null);
-            panelForHorizontalButtons.add(horizontalButtonsPanel);
+            if(horizontalEastSplitters.size() > 0) {
+                Panel horizontalButtonsPanel = createToggleButtonPanel(horizontalEastSplitters,
+                        "gwt-SplitLayoutPanel-WestToggleButton-Panel", "gwt-SplitLayoutPanel-WestToggleButton", cm, /* additional buttons and styles */ null);                
+                panelForHorizontalButtons.add(horizontalButtonsPanel);
+            }
+            if(horizontalWestSplitters.size() > 0) {
+                Panel horizontalButtonsPanel = createToggleButtonPanel(horizontalWestSplitters,
+                        "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm, /* additional buttons and styles */ null);                
+                panelForHorizontalButtons.add(horizontalButtonsPanel);
+            }
             lastHorizontalSplitter.setVisible(false);
             lastHorizontalSplitter.setDraggerVisible(false);
         }
@@ -653,11 +671,13 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             splitterTogglerButton.setStyleName(buttonStyleName);
             splitterTogglerButton.addStyleDependentName("Closed");
             splitterTogglerButton.addStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
+            splitterTogglerButton.ensureDebugId("SplitLayoutPanelToggleButton-" + associatedComponent.getDependentCssClassName());
             splitterTogglerButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     boolean componentWasVisibleUntilNow = associatedComponent.isVisible();
                     associatedComponent.setVisible(!componentWasVisibleUntilNow);
+                    // TODO: Safe to remove style management here? Will also be handled by "componentViewer.forceLayout();" => duplicated style management
                     splitter.setVisible(!componentWasVisibleUntilNow);
                     splitter.setDraggerVisible(!componentWasVisibleUntilNow);
                     if (!componentWasVisibleUntilNow == true) {
@@ -808,16 +828,18 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * </p>
      * 
      * @param hidden set this to true if the panel should be hidden
-     * @param size the size of the panel. Always provide the visible size even when hidden is true.
+     * @param initialSize the size of the panel. only required to be valid if not hidden.
      */
     public void setWidgetVisibility(Widget widget, Component<?> associatedComponentToWidget,
-            final boolean hidden, final int size) {
+            final boolean hidden, final int initialSize) {
         super.setWidgetHidden(widget, hidden);
         final Splitter splitter = getAssociatedSplitter(widget);
         if (splitter != null) {
             LayoutData layoutData = (LayoutData) widget.getLayoutData();
             if (hidden) {
-                layoutData.oldSize = layoutData.size;
+                if(layoutData.size > 0) {
+                    layoutData.oldSize = layoutData.size;
+                }
                 widget.setVisible(false);
                 if (associatedComponentToWidget != null) {
                     if (associatedComponentToWidget.isVisible()) {
@@ -825,6 +847,9 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     }
                 }
                 splitter.setAssociatedWidgetSize(0, /* defer */false);
+
+                // need to ensure visibility of dragger, do NOT use setVisible() as south/north splitter should be shown always
+                splitter.setDraggerVisible(!hidden);
             } else {
                 widget.setVisible(true);
                 if (associatedComponentToWidget != null) {
@@ -832,7 +857,16 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                         associatedComponentToWidget.setVisible(true);
                     }
                 }
-                splitter.setAssociatedWidgetSize((layoutData.oldSize > 0 ? layoutData.oldSize : size), /* defer */false);
+                if (layoutData.size <= 0) {
+                    //it is not yet sized
+                    if(layoutData.oldSize > 0) {
+                        //and we have a stored old size it had before minimizing it
+                        splitter.setAssociatedWidgetSize(layoutData.oldSize, /* defer */false);
+                    } else {
+                        //and we do not have any size yet, so use the default size
+                        splitter.setAssociatedWidgetSize(initialSize, /* defer */false);
+                    }
+                }
                 splitter.setDraggerVisible(!hidden);
                 splitter.setVisible(!hidden);
                 splitter.getToggleButton().removeStyleDependentName("Closed");

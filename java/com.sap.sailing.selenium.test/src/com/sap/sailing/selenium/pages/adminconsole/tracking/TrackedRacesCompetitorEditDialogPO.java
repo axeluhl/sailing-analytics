@@ -11,11 +11,8 @@ public class TrackedRacesCompetitorEditDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "NameTextBox")
     private WebElement nameTextBox;
     
-    @FindBy(how = BySeleniumId.class, using = "SailIdTextBox")
-    private WebElement sailIdTextBox;
-    
-    @FindBy(how = BySeleniumId.class, using = "BoatClassNameSuggestBox")
-    private WebElement boatClassNameSuggestBox;
+    @FindBy(how = BySeleniumId.class, using = "ShortNameTextBox")
+    private WebElement shortNameTextBox;
     
     @FindBy(how = BySeleniumId.class, using = "OkButton")
     private WebElement okButton;
@@ -29,13 +26,8 @@ public class TrackedRacesCompetitorEditDialogPO extends DataEntryDialogPO {
         this.nameTextBox.sendKeys(name);
     }
 
-    public void setSailIdTextBox(String sailId) {
-        this.sailIdTextBox.clear();
-        this.sailIdTextBox.sendKeys(sailId);
-    }
-
-    public void setBoatClassNameSuggestBox(String boatClassName) {
-        this.boatClassNameSuggestBox.clear();
-        this.boatClassNameSuggestBox.sendKeys(boatClassName);
+    public void setShortNameTextBox(String name) {
+        this.shortNameTextBox.clear();
+        this.shortNameTextBox.sendKeys(name);
     }
 }

@@ -3,18 +3,20 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sse.common.TimeRange;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 public class RaceSummaryFragment extends BaseFragment {
 
@@ -26,6 +28,10 @@ public class RaceSummaryFragment extends BaseFragment {
     private TextView mFinishEndTime;
     private TextView mFinishEndDuration;
     private TextView mFinishDuration;
+    private View mRegionProtest;
+    private TextView mProtestTimeStart;
+    private TextView mProtestTimeEnd;
+    private TextView mProtestTimeDuration;
     private View mRegionWind;
     private View mRegionRecall;
 
@@ -37,7 +43,14 @@ public class RaceSummaryFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_summary, container, false);
+        final AppUtils appUtils = AppUtils.with(inflater.getContext());
+        final int resId;
+        if (appUtils.isPhone() && getResources().getConfiguration().fontScale > 1 && !appUtils.isHDPI()) {
+            resId = R.layout.race_summary_large_font;
+        } else {
+            resId = R.layout.race_summary_normal;
+        }
+        View layout = inflater.inflate(resId, container, false);
 
         mRaceStateListener = new RaceStateListener();
         mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
@@ -48,6 +61,10 @@ public class RaceSummaryFragment extends BaseFragment {
         mFinishEndTime = ViewHelper.get(layout, R.id.race_finish_end_time);
         mFinishEndDuration = ViewHelper.get(layout, R.id.race_finish_end_duration);
         mFinishDuration = ViewHelper.get(layout, R.id.race_finish_duration);
+        mRegionProtest = ViewHelper.get(layout, R.id.region_protest);
+        mProtestTimeStart = ViewHelper.get(layout, R.id.protest_time_start);
+        mProtestTimeEnd = ViewHelper.get(layout, R.id.protest_time_end);
+        mProtestTimeDuration = ViewHelper.get(layout, R.id.protest_time_duration);
         mRegionWind = ViewHelper.get(layout, R.id.region_wind);
         mRegionRecall = ViewHelper.get(layout, R.id.region_individual_recalls);
 
@@ -56,8 +73,8 @@ public class RaceSummaryFragment extends BaseFragment {
             editStartTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment
-                        .newInstance(RaceTimeChangeFragment.START_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.START_TIME_MODE),
+                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                 }
             });
         }
@@ -67,8 +84,8 @@ public class RaceSummaryFragment extends BaseFragment {
             editFinishingTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment
-                        .newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE),
+                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                 }
             });
         }
@@ -78,8 +95,8 @@ public class RaceSummaryFragment extends BaseFragment {
             editFinishedTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment
-                        .newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE),
+                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                 }
             });
         }
@@ -131,17 +148,41 @@ public class RaceSummaryFragment extends BaseFragment {
         if (mFinishStartTime != null && getRaceState().getFinishingTime() != null) {
             mFinishStartTime.setText(mDateFormat.format(finishingTime.getTime()));
         }
-        if (mFinishStartDuration != null && getRaceState().getStartTime() != null && getRaceState().getFinishingTime() != null) {
-            mFinishStartDuration.setText(TimeUtils.formatTimeAgo(getActivity(), finishingTime.getTimeInMillis() - startTime.getTimeInMillis()));
+        if (mFinishStartDuration != null && getRaceState().getStartTime() != null
+                && getRaceState().getFinishingTime() != null) {
+            mFinishStartDuration.setText(TimeUtils.formatTimeAgo(getActivity(),
+                    finishingTime.getTimeInMillis() - startTime.getTimeInMillis()));
         }
         if (mFinishEndTime != null && getRaceState().getFinishedTime() != null) {
             mFinishEndTime.setText(mDateFormat.format(finishedTime.getTime()));
         }
-        if (mFinishEndDuration != null && getRaceState().getStartTime() != null && getRaceState().getFinishedTime() != null) {
-            mFinishEndDuration.setText(TimeUtils.formatTimeAgo(getActivity(), finishedTime.getTimeInMillis() -  startTime.getTimeInMillis()));
+        if (mFinishEndDuration != null && getRaceState().getStartTime() != null
+                && getRaceState().getFinishedTime() != null) {
+            mFinishEndDuration.setText(TimeUtils.formatTimeAgo(getActivity(),
+                    finishedTime.getTimeInMillis() - startTime.getTimeInMillis()));
         }
         if (mFinishDuration != null) {
-            mFinishDuration.setText(TimeUtils.formatTimeAgo(getActivity(), finishedTime.getTimeInMillis() - finishingTime.getTimeInMillis()));
+            mFinishDuration.setText(TimeUtils.formatTimeAgo(getActivity(),
+                    finishedTime.getTimeInMillis() - finishingTime.getTimeInMillis()));
+        }
+
+        if (mRegionProtest != null) {
+            mRegionProtest.setVisibility(View.GONE);
+            if (getRaceState().getProtestTime() != null) {
+                mRegionProtest.setVisibility(View.VISIBLE);
+
+                TimeRange protestTime = getRaceState().getProtestTime();
+                if (mProtestTimeStart != null) {
+                    mProtestTimeStart.setText(mDateFormat.format(protestTime.from().asDate()));
+                }
+                if (mProtestTimeEnd != null) {
+                    mProtestTimeEnd.setText(mDateFormat.format(protestTime.to().asDate()));
+                }
+                if (mProtestTimeDuration != null) {
+                    mProtestTimeDuration.setText(TimeUtils.formatTimeAgo(getActivity(),
+                            protestTime.to().minus(protestTime.from().asMillis()).asMillis()));
+                }
+            }
         }
 
         if (mRegionWind != null) {
@@ -153,13 +194,15 @@ public class RaceSummaryFragment extends BaseFragment {
 
                 TextView direction = ViewHelper.get(getView(), R.id.wind_direction);
                 if (direction != null) {
-                    String wind_direction = String.format(getString(R.string.race_summary_wind_direction_value), wind.getFrom().getDegrees());
+                    String wind_direction = String.format(getString(R.string.race_summary_wind_direction_value),
+                            wind.getFrom().getDegrees());
                     direction.setText(wind_direction);
                 }
 
                 TextView speed = ViewHelper.get(getView(), R.id.wind_speed);
                 if (speed != null) {
-                    String wind_speed = String.format(getString(R.string.race_summary_wind_speed_value), wind.getKnots());
+                    String wind_speed = String.format(getString(R.string.race_summary_wind_speed_value),
+                            wind.getKnots());
                     speed.setText(wind_speed);
                 }
             }
@@ -225,6 +268,11 @@ public class RaceSummaryFragment extends BaseFragment {
         @Override
         public void onWindFixChanged(ReadonlyRaceState state) {
             showData();
+        }
+
+        @Override
+        public void onTagEventsChanged(ReadonlyRaceState state) {
+            // TODO: add android support for tags
         }
     }
 

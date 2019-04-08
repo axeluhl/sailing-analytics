@@ -48,7 +48,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
                 try {
                     executor.execute(instruction);
                 } catch (RejectedExecutionException exc) {
-                    LOGGER.log(Level.WARNING, "A " + RejectedExecutionException.class.getSimpleName()
+                    LOGGER.log(Level.FINEST, "A " + RejectedExecutionException.class.getSimpleName()
                             + " appeared during the processing.");
                     instruction.run();
                 }
@@ -59,18 +59,21 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     private boolean isInstructionValid(ProcessorInstruction<ResultType> instruction) {
         return instruction != null;
     }
-    
+
+    @Override
     public void instructionSucceeded(ResultType result) {
         forwardResultToReceivers(result);
     }
-    
+
+    @Override
     public void instructionFailed(Exception e) {
         if (!isAborted() || !(e instanceof InterruptedException)) {
             onFailure(e);
         }
     }
-    
-    public void afterInstructionFinished() {
+
+    @Override
+    public void afterInstructionFinished(ProcessorInstruction<ResultType> instruction) {
         unfinishedInstructionsCounter.getAndDecrement();
     }
     

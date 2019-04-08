@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.partials.seriesheader;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
 
-public interface SeriesHeaderResources extends ClientBundle {
+public interface SeriesHeaderResources extends SharedDesktopResources {
     public static final SeriesHeaderResources INSTANCE = GWT.create(SeriesHeaderResources.class);
 
     @Source("SeriesHeader.gss")
@@ -14,7 +14,6 @@ public interface SeriesHeaderResources extends ClientBundle {
         String leaderboardquickaccess();
         String eventheader();
         String eventheader_breadcrumb();
-        String eventheader_breadcrumbback();
         String eventheader_intro();
         String eventheader_intro_logo();
         String eventheader_intro_logo_image();

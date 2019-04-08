@@ -9,10 +9,11 @@ Fragment-Host: com.sap.sailing.polars
 Require-Bundle: org.hamcrest;bundle-version="1.1.0",
  org.hamcrest.core;bundle-version="1.1.0",
  org.mockito.mockito-core;bundle-version="1.10.14",
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  com.sap.sailing.domain.test,
  com.sap.sse.common,
  com.sap.sailing.domain.tractracadapter,
  com.tractrac.clientmodule;bundle-version="3.0.7",
  com.sap.sailing.domain,
  com.sap.sailing.polars.datamining
+Automatic-Module-Name: com.sap.sailing.polars.test

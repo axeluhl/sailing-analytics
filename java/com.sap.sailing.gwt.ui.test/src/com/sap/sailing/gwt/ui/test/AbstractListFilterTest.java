@@ -25,12 +25,12 @@ public class AbstractListFilterTest {
 
     @Before
     public void setUp() {
-        all.add(new BoatImpl("Race 1", null, "Kiel"));
-        all.add(new BoatImpl("Race 2", null, "Kiel"));
-        all.add(new BoatImpl("Race 3", null, "Kiel"));
-        all.add(new BoatImpl("Race 1", null, "Wannsee"));
-        all.add(new BoatImpl("Race 2", null, "Wannsee"));
-        all.add(new BoatImpl("Final", null, "Wannsee"));
+        all.add(new BoatImpl("1", "Race 1", null, "Kiel"));
+        all.add(new BoatImpl("2", "Race 2", null, "Kiel"));
+        all.add(new BoatImpl("3", "Race 3", null, "Kiel"));
+        all.add(new BoatImpl("4", "Race 1", null, "Wannsee"));
+        all.add(new BoatImpl("5", "Race 2", null, "Wannsee"));
+        all.add(new BoatImpl("6", "Final", null, "Wannsee"));
     }
 
     @Test

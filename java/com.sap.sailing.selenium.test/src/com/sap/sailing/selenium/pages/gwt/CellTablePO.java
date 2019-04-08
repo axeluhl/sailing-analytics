@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -125,6 +127,15 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
         return headers;
     }
     
+    public boolean containsColumnHeader(String headerToCheck) {
+        for (String header : getColumnHeaders()) {
+            if(header.contains(headerToCheck)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /**
      * <p></p>
      * 
@@ -244,6 +255,33 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     }
     
     /**
+     * <p>Selects entries based on the given Predicate.</p>
+     * 
+     * <p>Note: If an entry is not contained in the table it will not be selected.</p>
+     */
+    public void selectEntries(Predicate<T> toSelectPredicate, BooleanSupplier canAbort) {
+        for (T entry : getEntries()) {
+            if(toSelectPredicate.test(entry)) {
+                entry.appendToSelection();
+            } else {
+                entry.deselect();
+            }
+            if (canAbort.getAsBoolean()) {
+                break;
+            }
+        }
+    }
+    
+    /**
+     * <p>Selects entries based on the given Predicate.</p>
+     * 
+     * <p>Note: If an entry is not contained in the table it will not be selected.</p>
+     */
+    public void selectAllEntries() {
+        selectEntries(e -> true, Boolean.FALSE::booleanValue);
+    }
+    
+    /**
      * <p>Returns all currently selected entries. If no entry is selected, an empty list is returned.</p>
      * 
      * @return
@@ -308,5 +346,16 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
         String image = images.get(0).getAttribute("src");
         
         return LOADING_ANIMATION_IMAGE.equals(image);
+    }
+    
+    public void waitForTableToShowData() {
+        waitUntil(() -> {
+            try {
+                return !getRows().isEmpty();
+            } catch (Exception e) {
+                // This can fail while the table is just updating
+                return false;
+            }
+        });
     }
 }

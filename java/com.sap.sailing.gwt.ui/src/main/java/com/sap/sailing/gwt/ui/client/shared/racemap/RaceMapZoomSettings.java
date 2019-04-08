@@ -1,16 +1,20 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.EnumSetSetting;
 
 /**
  * @author Lennart Hensler (D054527)
  */
-public class RaceMapZoomSettings {
+public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
     
+    private static final long serialVersionUID = 7283052942434130497L;
+
     /**
      * The auto-zoom types for a {@link RaceMap}.<br />
      * Each zoom type has a {@link LatLngBoundsCalculator}, which calculates the new bounds for a map.
@@ -30,30 +34,47 @@ public class RaceMapZoomSettings {
         }
     };
 
-    private Iterable<ZoomTypes> typesToConsiderOnZoom;
-    private boolean zoomToSelectedCompetitors;
-
+    private EnumSetSetting<ZoomTypes> typesToConsiderOnZoom;
+    private BooleanSetting zoomToSelectedCompetitors;
+    
+    @Override
+    protected void addChildSettings() {
+        typesToConsiderOnZoom = new EnumSetSetting<>("typesToConsiderOnZoom", this, Collections.singleton(ZoomTypes.BUOYS), ZoomTypes::valueOf);
+        zoomToSelectedCompetitors = new BooleanSetting("zoomToSelectedCompetitors", this, false);
+    }
+    
     /**
-     * Creates new RaceMapZoomSettings with the {@link ZoomTypes} <code>BOATS</code> and <code>TAILS</code>.<br />
+     * Creates default RaceMapZoomSettings with the {@link ZoomTypes} <code>BUOYS</code>.<br />
      * The attribute <code>zoomToSelectedCompetitors</code> will be <code>false</code>.
      */
     public RaceMapZoomSettings() {
-        final List<ZoomTypes> myTypesToConsiderOnZoom = new ArrayList<>();
-        typesToConsiderOnZoom = myTypesToConsiderOnZoom;
-        // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
-        myTypesToConsiderOnZoom.add(ZoomTypes.BUOYS);
-        zoomToSelectedCompetitors = false;
-    }
-    
-    public RaceMapZoomSettings(Iterable<ZoomTypes> typesToConsiderOnZoom, boolean zoomToSelected) {
-        this.typesToConsiderOnZoom = typesToConsiderOnZoom;
-        this.zoomToSelectedCompetitors = zoomToSelected;
+        super();
     }
 
+    /**
+     * Creates default RaceMapZoomSettings with the {@link ZoomTypes} <code>BUOYS</code>.<br />
+     * The attribute <code>zoomToSelectedCompetitors</code> will be <code>false</code>.
+     */
+    public RaceMapZoomSettings(String propertyName, AbstractGenericSerializableSettings parentSettings) {
+        super(propertyName, parentSettings);
+    }
+    
+    public RaceMapZoomSettings(Iterable<ZoomTypes> typesToConsider, boolean zoomToSelected) {
+        this.typesToConsiderOnZoom.setValues(typesToConsider);
+        this.zoomToSelectedCompetitors.setValue(zoomToSelected);
+    }
+    
+    protected void init(RaceMapZoomSettings settings) {
+        if (settings != null) {
+            this.typesToConsiderOnZoom.setValues(settings.getTypesToConsiderOnZoom());
+            this.zoomToSelectedCompetitors.setValue(settings.isZoomToSelectedCompetitors());
+        }
+    }
+    
     public LatLngBounds getNewBounds(RaceMap forMap) {
         LatLngBounds newBounds = null;
         if (typesToConsiderOnZoom != null) {
-            for (ZoomTypes type : typesToConsiderOnZoom) {
+            for (ZoomTypes type : typesToConsiderOnZoom.getValues()) {
                 //Calculate the new bounds and extend the result
                 LatLngBounds calculatedBounds = type.calculateNewBounds(forMap);
                 if (calculatedBounds != null) {
@@ -70,25 +91,15 @@ public class RaceMapZoomSettings {
     }
     
     public Iterable<ZoomTypes> getTypesToConsiderOnZoom() {
-        return typesToConsiderOnZoom;
-    }
-    
-    public void setTypesToConsiderOnZoom(Iterable<ZoomTypes> typesToConsiderOnZoom) {
-        List<ZoomTypes> newTypesToConsiderOnZoom = new ArrayList<>();
-        Util.addAll(typesToConsiderOnZoom, newTypesToConsiderOnZoom);
-        this.typesToConsiderOnZoom = newTypesToConsiderOnZoom;
-    }
-    
-    public void setZoomToSelectedCompetitors(boolean zoomToSelectedCompetitors) {
-        this.zoomToSelectedCompetitors = zoomToSelectedCompetitors;
+        return typesToConsiderOnZoom.getValues();
     }
     
     public boolean isZoomToSelectedCompetitors() {
-        return zoomToSelectedCompetitors;
+        return zoomToSelectedCompetitors.getValue();
     }
 
     public boolean containsZoomType(ZoomTypes zoomType) {
-        return Util.contains(typesToConsiderOnZoom, zoomType);
+        return Util.contains(typesToConsiderOnZoom.getValues(), zoomType);
     }
 
     @Override
@@ -96,7 +107,7 @@ public class RaceMapZoomSettings {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((typesToConsiderOnZoom == null) ? 0 : typesToConsiderOnZoom.hashCode());
-        result = prime * result + (zoomToSelectedCompetitors ? 1231 : 1237);
+        result = prime * result + (zoomToSelectedCompetitors.getValue() ? 1231 : 1237);
         return result;
     }
 

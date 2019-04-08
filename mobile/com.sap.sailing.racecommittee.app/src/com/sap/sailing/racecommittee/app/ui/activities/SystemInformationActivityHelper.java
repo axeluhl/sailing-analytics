@@ -1,8 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.util.Date;
-import java.util.List;
-
 import android.content.pm.PackageInfo;
 import android.text.format.DateFormat;
 import android.view.View;
@@ -15,6 +12,8 @@ import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.LicenseHelper;
 import com.sap.sailing.racecommittee.app.R;
+
+import java.util.Date;
 
 import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.model.Notices;
@@ -41,18 +40,24 @@ public class SystemInformationActivityHelper {
         if (activity.boundSendingService) {
             Date lastSuccessfulSend = activity.sendingService.getLastSuccessfulSend();
             String never = activity.getString(R.string.never);
-            statusView.setText(activity.getString(R.string.events_waiting_to_be_sent, activity.sendingService.getDelayedIntentsCount(), lastSuccessfulSend == null ? never : lastSuccessfulSend));
+            statusView.setText(activity.getString(R.string.events_waiting_to_be_sent,
+                    activity.sendingService.getDelayedIntentsCount(),
+                    lastSuccessfulSend == null ? never : lastSuccessfulSend));
 
-            List<String> delayedIntentsContent = activity.sendingService.getDelayedIntentsContent();
-            String waitingEvents = "";
-            int waitingEventsSize = delayedIntentsContent.size();
-            for (int index = 0; index < waitingEventsSize; index++) {
-                waitingEvents += delayedIntentsContent.get(index);
-                if (!(index == waitingEventsSize - 1)) {
-                    waitingEvents += "\n";
+            Iterable<String> delayedIntentsContent = activity.sendingService.getDelayedIntentsContent();
+            StringBuilder waitingEvents = new StringBuilder();
+            synchronized (delayedIntentsContent) {
+                boolean first = true;
+                for (final String waitingEvent : delayedIntentsContent) {
+                    if (!first) {
+                        waitingEvents.append("\n");
+                    } else {
+                        first = false;
+                    }
+                    waitingEvents.append(waitingEvent);
                 }
             }
-            waitingView.setText(waitingEvents);
+            waitingView.setText(waitingEvents.toString());
         } else {
             statusView.setText(activity.getString(R.string.generic_error));
         }
@@ -100,8 +105,8 @@ public class SystemInformationActivityHelper {
             installView.setText(activity.getString(R.string.generic_error));
         } else {
             Date installDate = new Date(info.lastUpdateTime);
-            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate), DateFormat
-                .getTimeFormat(activity).format(installDate)));
+            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate),
+                    DateFormat.getTimeFormat(activity).format(installDate)));
         }
     }
 
@@ -125,10 +130,9 @@ public class SystemInformationActivityHelper {
     private void showLicenseDialog() {
         Notices notices = new Notices();
         LicenseHelper licenseHelper = new LicenseHelper();
-        notices.addNotice(licenseHelper.getAndroidSupportNotice());
-        notices.addNotice(licenseHelper.getAdvancedRecyclerViewNotice());
+        notices.addNotice(licenseHelper.getAndroidSupportNotice(activity));
         notices.addNotice(licenseHelper.getJsonSimpleNotice());
-        notices.addNotice(licenseHelper.getDialogNotice());
+        notices.addNotice(licenseHelper.getDialogNotice(activity));
         LicensesDialog.Builder builder = new LicensesDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.license_information));
         builder.setNotices(notices);

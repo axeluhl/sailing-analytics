@@ -17,6 +17,9 @@ public class NaturalComparator implements Comparator<String> {
         this.caseSensitive = caseSensitive;
     }
     
+    /**
+     * Creates a case-sensitive natural comparator.
+     */
     public NaturalComparator() {
         caseSensitive = true;
     }
@@ -47,7 +50,7 @@ public class NaturalComparator implements Comparator<String> {
 
             // Compare all-digit blocks as numbers - all-char blocks as strings
             if (Character.isDigit(aBlock.charAt(0)) && Character.isDigit(bBlock.charAt(0))) {
-                result = Integer.valueOf(aBlock).compareTo(Integer.valueOf(bBlock));
+                result = Long.valueOf(aBlock).compareTo(Long.valueOf(bBlock));
             } else {
                 result = aBlock.compareTo(bBlock);
             }

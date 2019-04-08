@@ -149,3 +149,8 @@
 .cellTableTotalColumn {
     background-color: #e0e0e0 !important;
 }
+
+.cellTableDisabledRow {
+	background: #e5e5e5;
+	opacity : 0.8;
+}

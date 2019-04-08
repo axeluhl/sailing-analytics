@@ -2,7 +2,6 @@ package com.sap.sailing.xmlexport;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.NavigableSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,12 +18,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -32,7 +28,10 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
@@ -243,41 +242,13 @@ public abstract class ExportAction {
         return result;
     }
     
-    public Speed getAverageSpeedOverGround(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint, boolean alsoIncludeNonFinishedRaces) {
-        Speed result = null;
-        if (Util.contains(trackedRace.getRace().getCompetitors(), competitor)) {
-            NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-            if (!markPassings.isEmpty()) {
-                TimePoint from = markPassings.first().getTimePoint();
-                TimePoint to;
-                if (timePoint.after(markPassings.last().getTimePoint()) &&
-                        markPassings.last().getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint()) {
-                    // stop counting when competitor finished the race
-                    to = markPassings.last().getTimePoint();
-                } else {
-                    if (markPassings.last().getWaypoint() != trackedRace.getRace().getCourse().getLastWaypoint() &&
-                            timePoint.after(markPassings.last().getTimePoint()) &&
-                            !alsoIncludeNonFinishedRaces) {
-                        return null;
-                    }
-                    to = timePoint;
-                }
-                Distance distanceTraveled = trackedRace.getDistanceTraveled(competitor, timePoint);
-                if (distanceTraveled != null) {
-                    result = distanceTraveled.inTime(to.asMillis()-from.asMillis());
-                }
-            }
-        }
-        return result;
-    }
-    
-    public List<Maneuver> getManeuvers(TrackedRace trackedRace, Competitor competitor, boolean waitForLatest) throws NoWindException {
-        List<Maneuver> maneuvers = trackedRace.getManeuvers(competitor,
+    public Iterable<Maneuver> getManeuvers(TrackedRace trackedRace, Competitor competitor, boolean waitForLatest) throws NoWindException {
+        Iterable<Maneuver> maneuvers = trackedRace.getManeuvers(competitor,
                 trackedRace.getStartOfRace(), trackedRace.getEndOfRace(), waitForLatest);
         return maneuvers;
     }
 
-    public Integer getNumberOfJibes(List<Maneuver> maneuvers) throws NoWindException {
+    public Integer getNumberOfJibes(Iterable<Maneuver> maneuvers) throws NoWindException {
         int result = 0;
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == ManeuverType.JIBE) {
@@ -287,7 +258,7 @@ public abstract class ExportAction {
         return result;
     }
 
-    public Integer getNumberOfPenaltyCircles(List<Maneuver> maneuvers) throws NoWindException {
+    public Integer getNumberOfPenaltyCircles(Iterable<Maneuver> maneuvers) throws NoWindException {
         int result = 0;
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
@@ -297,7 +268,7 @@ public abstract class ExportAction {
         return result;
     }
 
-    public Integer getNumberOfTacks(List<Maneuver> maneuvers) throws NoWindException {
+    public Integer getNumberOfTacks(Iterable<Maneuver> maneuvers) throws NoWindException {
         int result = 0;
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == ManeuverType.TACK) {

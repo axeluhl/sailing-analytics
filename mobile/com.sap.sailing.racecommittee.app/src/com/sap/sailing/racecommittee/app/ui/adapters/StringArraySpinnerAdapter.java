@@ -2,10 +2,15 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.racecommittee.app.R;
 
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +18,10 @@ import android.widget.AdapterView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.racecommittee.app.R;
-
 public class StringArraySpinnerAdapter implements SpinnerAdapter {
 
-    private ArrayList<String> mArray;
+    private static final float TEXT_SIZE = 22;
+    private List<String> mArray;
     private int mSelectedItem = -1;
 
     public StringArraySpinnerAdapter(@NonNull String[] data) {
@@ -38,12 +41,13 @@ public class StringArraySpinnerAdapter implements SpinnerAdapter {
         if (mainText != null) {
             mainText.setText(mArray.get(position));
             mainText.setTextColor(context.getResources().getColor(R.color.constant_black));
+            mainText.setTextSize(TEXT_SIZE);
         }
 
         if (mSelectedItem == position) {
-            layout.setBackgroundColor(context.getResources().getColor(R.color.light_sap_light_gray));
+            layout.setBackgroundColor(ContextCompat.getColor(context, R.color.light_sap_light_gray));
         } else {
-            layout.setBackgroundColor(context.getResources().getColor(R.color.light_sap_gray_black_30));
+            layout.setBackgroundColor(ContextCompat.getColor(context, R.color.light_sap_gray_black_30));
         }
 
         layout.setClickable(false);
@@ -90,9 +94,10 @@ public class StringArraySpinnerAdapter implements SpinnerAdapter {
         }
 
         TextView mainText = ViewHelper.get(layout, android.R.id.text1);
-        if (mainText != null) {
+        if (mainText != null && mArray.size() > position) {
             mainText.setText(mArray.get(position));
             mainText.setTextColor(context.getResources().getColor(R.color.constant_black));
+            mainText.setTextSize(TEXT_SIZE);
         }
 
         return layout;

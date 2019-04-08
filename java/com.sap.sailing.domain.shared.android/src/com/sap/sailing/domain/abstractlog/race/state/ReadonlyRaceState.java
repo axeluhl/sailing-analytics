@@ -4,6 +4,7 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 
 /**
  * This interface gives you reading access to the state of a race. You can query various properties of the race
@@ -134,7 +136,7 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
     /**
      * If there is a protest time set, returns the most recent one. Otherwise <code>null</code>.
      */
-    TimePoint getProtestTime();
+    TimeRange getProtestTime();
 
     /**
      * If there is a course set, returns the most recent one. Otherwise <code>null</code>.
@@ -146,4 +148,8 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
      */
     Wind getWindFix();
 
+    /**
+     * Returns an iterable of tag events which may be empty but never <code>null</code>.
+     */
+    Iterable<RaceLogTagEvent> getTagEvents();
 }

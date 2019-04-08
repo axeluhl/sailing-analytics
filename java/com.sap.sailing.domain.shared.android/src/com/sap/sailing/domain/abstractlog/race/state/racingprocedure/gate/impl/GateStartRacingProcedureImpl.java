@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -33,7 +32,7 @@ import com.sap.sse.common.Util;
 
 public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements GateStartRacingProcedure {
 
-    private final static long startPhaseClassOverGolfUpIntervall = 8 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static long startPhaseClassOverGolfUpInterval = 8 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhasePapaUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhasePapaDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
 
@@ -99,7 +98,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     public boolean isStartphaseActive(TimePoint startTime, TimePoint now) {
         if (now.before(startTime)) {
             long timeTillStart = startTime.minus(now.asMillis()).asMillis();
-            return timeTillStart < startPhaseClassOverGolfUpIntervall;
+            return timeTillStart < startPhaseClassOverGolfUpInterval;
         }
         return false;
     }
@@ -119,9 +118,9 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     }
 
     @Override
-    protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+    public Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent> asList(
-                new RaceStateEventImpl(startTime.minus(startPhaseClassOverGolfUpIntervall),
+                new RaceStateEventImpl(startTime.minus(startPhaseClassOverGolfUpInterval),
                         RaceStateEvents.GATE_CLASS_OVER_GOLF_UP),
                 new RaceStateEventImpl(startTime.minus(startPhasePapaUpInterval), RaceStateEvents.GATE_PAPA_UP),
                 new RaceStateEventImpl(startTime.minus(startPhasePapaDownInterval), RaceStateEvents.GATE_PAPA_DOWN),
@@ -153,13 +152,13 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     public FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now) {
         Flags classFlag = getConfiguration().getClassFlag() != null ? getConfiguration().getClassFlag() : Flags.CLASS;
         TimePoint gateShutdownTime = getGateShutdownTimePoint(startTime);
-        if (now.before(startTime.minus(startPhaseClassOverGolfUpIntervall))) {
+        if (now.before(startTime.minus(startPhaseClassOverGolfUpInterval))) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, false), new FlagPole(Flags.PAPA,
                     false)), null, Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA,
-                    false)), startTime.minus(startPhaseClassOverGolfUpIntervall));
+                    false)), startTime.minus(startPhaseClassOverGolfUpInterval));
         } else if (now.before(startTime.minus(startPhasePapaUpInterval))) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA,
-                    false)), startTime.minus(startPhaseClassOverGolfUpIntervall), Arrays.asList(new FlagPole(classFlag,
+                    false)), startTime.minus(startPhaseClassOverGolfUpInterval), Arrays.asList(new FlagPole(classFlag,
                     Flags.GOLF, true), new FlagPole(Flags.PAPA, true)), startTime.minus(startPhasePapaUpInterval));
         } else if (now.before(startTime.minus(startPhasePapaDownInterval))) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA,

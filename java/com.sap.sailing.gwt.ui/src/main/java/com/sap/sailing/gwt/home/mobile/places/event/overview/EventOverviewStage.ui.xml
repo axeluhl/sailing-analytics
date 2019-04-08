@@ -3,9 +3,13 @@
 		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared" 
 		xmlns:sp="urn:import:com.sap.sailing.gwt.home.shared.partials">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-	<g:HTMLPanel>
+	<ui:style>
+		.stage {
+			border-top: 2px solid #ccc;
+		}
+	</ui:style>
+	<g:HTMLPanel addStyleNames="{style.stage}">
 		<sp:message.Message ui:field="message" />
 		<div class="{res.mediaCss.grid}">
 			<g:SimplePanel ui:field="stage" addStyleNames="{res.mediaCss.small12}" />

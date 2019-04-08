@@ -15,7 +15,6 @@ import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.controls.ControlPosition;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.LegIdentifierImpl;
@@ -31,6 +30,8 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
@@ -45,8 +46,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     public static final String GET_SIMULATION_CATEGORY = "getSimulation";
     private final String textColor = "Black";
     private final String textFont = "10pt 'Open Sans'";
-    private String algorithmTimedOutText = "out-of-bounds";
-    private String mixedLegText = "ambiguous wind";
     private int xOffset = 0;
     private int yOffset = 0; //150;
     private double rectWidth = 20;
@@ -111,12 +110,17 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     @Override
     protected void drawCenterChanged() {
+        draw();
     }
 
     @Override
     protected void draw() {
+        if (mapProjection != null) {
+            super.setCanvasSettings();
+            drawPaths();
+        }
     }    
-    
+
     private void createSimulationLegend(MapWidget map) {
         simulationLegend = Canvas.createIfSupported();
         simulationLegend.addStyleName("MapSimulationLegend");
@@ -135,13 +139,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         });
         map.setControls(ControlPosition.RIGHT_BOTTOM, simulationLegend);
         simulationLegend.getParent().addStyleName("MapSimulationLegendParentDiv");
-    }
-    
-    public void onBoundsChanged(boolean zoomChanged) {
-        // calibrate canvas
-        super.draw();
-        // draw simulation paths
-        this.drawPaths();
     }
     
     public void clearCanvas() {
@@ -174,7 +171,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         }
         drawLegend(simulationLegend);
         // calibrate canvas
-        super.draw();
+        super.setCanvasSettings();
         // draw paths
         Context2d ctxt = canvas.getContext2d();
         PathDTO[] paths = simulationResult.getPaths();
@@ -249,13 +246,13 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         double deltaTimeOut = 0;
         double mixedLegWidth = 0;
         if (containsMixedLeg) {
-            txtmet = context2d.measureText(mixedLegText);
+            txtmet = context2d.measureText(stringMessages.mixedLegText());
             mixedLegWidth = txtmet.getWidth();
             newwidth = Math.max(timewidth, mixedLegWidth);
         }
         double timeOutWidth = 0;
         if (containsTimeOut) {
-            txtmet = context2d.measureText(algorithmTimedOutText);
+            txtmet = context2d.measureText(stringMessages.algorithmTimeOutText());
             timeOutWidth = txtmet.getWidth();
             newwidth = Math.max(newwidth, timeOutWidth);
         }
@@ -274,7 +271,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth, deltaTime, true);
         }
         for (PathDTO path : paths) {
-            String timeText = (path.getMixedLeg() ? mixedLegText : (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime())));
+            String timeText = (path.getMixedLeg() ? stringMessages.mixedLegText() : (path.getAlgorithmTimedOut() ? stringMessages.algorithmTimeOutText() : getFormattedTime(path.getPathTime())));
             drawRectangleWithText(context2d, xOffset, yOffset + (paths.length-index-(racePath==null?1:0)) * rectHeight, this.colors.getColor(paths.length-1-index),
                 pathNameFormatter.format(path), timeText, txtmaxwidth, timewidth, (path.getMixedLeg()?deltaMixedLeg:(path.getAlgorithmTimedOut()?deltaTimeOut:deltaTime)), visiblePaths[paths.length-1-index]);
             index++;
@@ -340,8 +337,8 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                     @Override
                     public void onFailure(Throwable caught) {
                         // TODO: add corresponding message to string-messages
-                        // Window.setStatus(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
-                        Window.setStatus(GET_SIMULATION_CATEGORY);
+                        // Notification.error(stringMessages.errorFetchingWindStreamletData(caught.getMessage()));
+                        Notification.notify(GET_SIMULATION_CATEGORY, NotificationType.WARNING);
                     }
 
                     @Override
@@ -365,7 +362,9 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                                 visiblePaths[1] = Boolean.FALSE; // hide left-opportunist by default
                                 visiblePaths[2] = Boolean.FALSE; // hide right-opportunist by default
                                 clearCanvas();
-                                drawPaths();
+                                if (mapProjection != null) {
+                                    drawPaths();
+                                }
                             }
                         } else {
                             raceLeg = 0;

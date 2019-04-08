@@ -54,6 +54,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialogPO {
     public void addRaces(int races, String prefix) {
         Select select = new Select(this.numberOfRacesListBox);
         select.selectByValue(Integer.toString(races));
+        setRaceNamePrefix(prefix);
         this.addRacesButton.click();
         pressOk();
     }

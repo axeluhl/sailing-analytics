@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 2.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 2.0</h1>
+<h2>URL: /api/v2/leaderboards/{name}</h2>
+
+<b>Description:</b>
+<p>The service gets the details of a leaderboard</p>
+The service can be parameterized to return only the values of certain leaderboard columns.<br/>
+Furthermore it's possible to control which calculated values should be returned on race level.<br/> 
+The supported race detail constants right now are:<br/>
+- RACE_GAP_TO_LEADER_IN_SECONDS<br/>
+- RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS<br/>
+- RACE_DISTANCE_TRAVELED<br/>
+- RACE_TIME_TRAVELED<br/>
+- RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS<br/>
+- RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS<br/> 
+- NUMBER_OF_MANEUVERS<br/>
+- CURRENT_LEG
+- OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS<br/>
+There is also the 'ALL' shortcut constant which can be used to get all available race details without the need to enumerate them.<br/>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>resultState [Default = Live, Final] </td>
+	</tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>columnNames [Default = all columns]</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>raceDetails [Default = RACE_GAP_TO_LEADER_IN_SECONDS, RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, CURRENT_LEG]</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <div>time (ISO format, such as 2014-02-14T10:12:03Z)</div>
+            <div>timeasmillis</div>
+        </td>
+    </tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>maxCompetitorsCount [Default = 1000]</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>GET</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><a href="http://www.sapsailing.com/sailingserver/api/v2/leaderboards/505 Worlds 2013">http://www.sapsailing.com/sailingserver/api/v2/leaderboards/505 Worlds 2013</a></td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

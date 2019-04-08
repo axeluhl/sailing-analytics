@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
 /**

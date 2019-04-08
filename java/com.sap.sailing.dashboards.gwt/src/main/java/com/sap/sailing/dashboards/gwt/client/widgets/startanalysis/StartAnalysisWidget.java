@@ -43,6 +43,7 @@ import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
  * The class contains an collection of {@link StartAnalysisCard}s that are displayed in horizontal aligned pages. It
@@ -112,11 +113,12 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
      * */
     private int numberOfStartAnalysisCards = 0;
     private boolean displaysCards;
-    private List<StartAnalysisDTO> starts;
-    private List<StartAnalysisCard> pageChangeListener;
+    private final List<StartAnalysisDTO> starts;
+    private final List<StartAnalysisCard> pageChangeListener;
     private BottomNotification bottomNotification;
     private CompetitorSelectionPopup competitorSelectionPopup;
-    private DashboardClientFactory dashboardClientFactory;
+    private final DashboardClientFactory dashboardClientFactory;
+    private final ErrorReporter errorReporter;
 
     private final String cookieKeyForSelectedCompetitorInLeaderboard;
 
@@ -131,8 +133,9 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
     /**
      * Component that contains handles, displays and loads startanalysis cards.
      * */
-    public StartAnalysisWidget(DashboardClientFactory dashboardClientFactory) {
+    public StartAnalysisWidget(DashboardClientFactory dashboardClientFactory, ErrorReporter errorReporter) {
         StartAnalysisWidgetResources.INSTANCE.gss().ensureInjected();
+        this.errorReporter = errorReporter;
         dashboardWidgetHeaderAndNoDataMessage = new DashboardWidgetHeaderAndNoDataMessage();
         selectedCompetitorWithSettingsButton = new SettingsButtonWithSelectionIndicationLabel();
         selectedCompetitorWithSettingsButton.disable();
@@ -238,7 +241,6 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
     private void initCompetitorSelectionPopupAndAddCompetitorSelectionListener() {
         competitorSelectionPopup = new CompetitorSelectionPopup();
         competitorSelectionPopup.addListener(new CompetitorSelectionListener() {
-
             @Override
             public void didClickOKWithSelectedCompetitor(CompetitorDTO competitor) {
                 if (competitor != null) {
@@ -379,7 +381,7 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         }
         final StartAnalysisCard startlineAnalysisCard = new StartAnalysisCard(numberOfStartAnalysisCards
                 * SCROLL_OFFSET_STARTANALYSIS_CARDS + MARGIN_LEFT_STARTANALYSIS_CARD, numberOfStartAnalysisCards,
-                startAnalysisDTO, dashboardClientFactory.getSailingService(), raceMapResources);
+                startAnalysisDTO, dashboardClientFactory.getSailingService(), errorReporter, raceMapResources);
         startanalysis_card_container.add(startlineAnalysisCard);
         startlineAnalysisCard.startAnalysisComponentPageChangedToIndexAndStartAnalysis(page, startAnalysisDTO);
         registerPageChangeListener(startlineAnalysisCard);

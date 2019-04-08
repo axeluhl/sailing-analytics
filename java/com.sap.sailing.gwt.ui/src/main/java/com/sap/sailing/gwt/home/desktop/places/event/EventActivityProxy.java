@@ -1,8 +1,12 @@
 package com.sap.sailing.gwt.home.desktop.places.event;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.app.WithHeader;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.AbstractMultiregattaEventPlace;
@@ -17,6 +21,9 @@ import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderbo
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sse.gwt.resources.CommonControlsCSS;
+import com.sap.sse.gwt.resources.Highcharts;
 
 public class EventActivityProxy extends AbstractEventActivityProxy<EventClientFactory> implements WithHeader {
 
@@ -34,14 +41,30 @@ public class EventActivityProxy extends AbstractEventActivityProxy<EventClientFa
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
+                CommonControlsCSS.ensureInjected();
+                Highcharts.ensureInjected();
                 if (place instanceof AbstractEventRegattaPlace) {
-                    super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) place, event, clientFactory,
-                            homePlacesNavigator, getNavigationPathDisplay()));
+                    withFlagImageResolver(flagImageResolver -> new EventRegattaActivity((AbstractEventRegattaPlace) place, event, clientFactory,
+                            homePlacesNavigator, getNavigationPathDisplay(), flagImageResolver));
                 }
                 if (place instanceof AbstractMultiregattaEventPlace) {
-                    super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place, event,
+                    onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place, event,
                             clientFactory, homePlacesNavigator, getNavigationPathDisplay()));
                 }
+            }
+            private void withFlagImageResolver(final Function<FlagImageResolver, Activity> activityFactory) {
+                final Consumer<Activity> onSuccess = super::onSuccess;
+                final Consumer<Throwable> onFailure = super::onFailure;
+                FlagImageResolver.get(new AsyncCallback<FlagImageResolver>() {
+                    @Override
+                    public void onSuccess(FlagImageResolver result) {
+                        onSuccess.accept(activityFactory.apply(result));
+                    }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        onFailure.accept(caught);
+                    }
+                });
             }
         });
     }
@@ -50,14 +73,14 @@ public class EventActivityProxy extends AbstractEventActivityProxy<EventClientFa
     protected AbstractEventPlace verifyAndAdjustPlace(EventViewDTO event) {
         AbstractEventPlace adjustedPlace = super.verifyAndAdjustPlace(event);
         EventContext contextWithoutRegatta = new EventContext(adjustedPlace.getCtx()).withRegattaId(null);
-        if(adjustedPlace instanceof LatestNewsPlace) {
-            if(event.getType() == EventType.MULTI_REGATTA) {
+        if (adjustedPlace instanceof LatestNewsPlace) {
+            if (event.isMultiRegatta()) {
                 return new MultiregattaOverviewPlace(contextWithoutRegatta);
             }
             return new RegattaOverviewPlace(contextWithoutRegatta);
         }
-        
-        if(adjustedPlace instanceof MiniLeaderboardPlace) {
+
+        if (adjustedPlace instanceof MiniLeaderboardPlace) {
             return new RegattaLeaderboardPlace(adjustedPlace.getCtx());
         }
         return adjustedPlace;

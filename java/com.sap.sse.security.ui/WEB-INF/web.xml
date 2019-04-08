@@ -44,6 +44,24 @@
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
 
+        <filter>
+                <filter-name>GWTCacheControlServletFilter</filter-name>
+                <filter-class>com.sap.sse.gwt.server.GWTCacheControlServletFilter</filter-class>
+        </filter>
+        <filter-mapping>
+                <filter-name>GWTCacheControlServletFilter</filter-name>
+                <url-pattern>/*</url-pattern>
+        </filter-mapping>
+  
+  	<filter>
+		<filter-name>LocaleInjectionFilter</filter-name>
+		<filter-class>com.sap.sse.security.ui.server.LocaleInjectionFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>LocaleInjectionFilter</filter-name>
+		<url-pattern>*.html</url-pattern>
+	</filter-mapping>
+
 	<servlet>
 		<display-name>User Management Service</display-name>
 		<servlet-name>UserManagementService</servlet-name>

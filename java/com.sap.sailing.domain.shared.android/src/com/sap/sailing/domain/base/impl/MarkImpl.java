@@ -6,12 +6,13 @@ import java.util.Collections;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class MarkImpl extends NamedImpl implements Mark {
     private static final long serialVersionUID = 1900673146064411979L;
 
-    private final String color;
+    private final Color color;
     private final String shape;
     private final String pattern;
     private final MarkType type;
@@ -25,7 +26,7 @@ public class MarkImpl extends NamedImpl implements Mark {
         this(id, name, MarkType.BUOY, /* color */null, /* shape */null, /* pattern */null);
     }
 
-    public MarkImpl(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
+    public MarkImpl(Serializable id, String name, MarkType type, Color color, String shape, String pattern) {
         super(name);
         this.id = id;
         this.type = type;
@@ -53,7 +54,7 @@ public class MarkImpl extends NamedImpl implements Mark {
     }
 
     @Override
-    public String getColor() {
+    public Color getColor() {
         return color;
     }
 

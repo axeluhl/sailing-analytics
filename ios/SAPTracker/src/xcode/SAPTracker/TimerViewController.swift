@@ -10,28 +10,71 @@ import Foundation
 
 class TimerViewController: UIViewController {
 
-    @IBOutlet weak var trackingTimeLabel: UILabel!
+    fileprivate let startDate = Date()
     
-    let startDate = NSDate()
-    let dateFormatter = NSDateFormatter()
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var timeLabel: UILabel!
+    
+    weak var timer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // start tracking timer
-        let timer = NSTimer(timeInterval: 0.1, target: self, selector: "timer:", userInfo: nil, repeats: true)
-        NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)
+        setup()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        validateTimer()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        invalidateTimer()
+    }
+    
+    // MARK: - Timer
+    
+    fileprivate func validateTimer() {
+        timer = Timer.scheduledTimer(
+            timeInterval: 0.1,
+            target: self,
+            selector: #selector(tickTimer),
+            userInfo: nil,
+            repeats: true
+        )
+        tickTimer()
+    }
+
+    fileprivate func invalidateTimer() {
+        timer?.invalidate()
+    }
+    
+    // MARK: - Setup
+    
+    fileprivate func setup() {
+        setupLocalization()
+    }
+    
+    fileprivate func setupLocalization() {
+        titleLabel.text = Translation.TimerView.TitleLabel.Text.String
+    }
+    
+    // MARK: - Timer
+    
+    @objc fileprivate func tickTimer() {
+        let currentDate = Date()
+        let timeInterval = currentDate.timeIntervalSince(startDate)
+        let timerDate = Date(timeIntervalSince1970: timeInterval)
+        timeLabel.text = dateFormatter.string(from: timerDate)
+    }
+    
+    // MARK: - Properties
+    
+    fileprivate lazy var dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
-        
-    }
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        return dateFormatter
+    }()
     
-    // MARK:- Timer
-    
-    func timer(timer: NSTimer) {
-        let currentDate = NSDate()
-        let timeInterval = currentDate.timeIntervalSinceDate(startDate)
-        let timerDate = NSDate(timeIntervalSince1970: timeInterval)
-        trackingTimeLabel.text = dateFormatter.stringFromDate(timerDate)
-    }
 }

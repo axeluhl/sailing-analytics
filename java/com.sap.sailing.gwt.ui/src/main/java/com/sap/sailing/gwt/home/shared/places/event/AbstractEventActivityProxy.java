@@ -5,7 +5,6 @@ import java.util.UUID;
 import com.google.gwt.activity.shared.Activity;
 import com.sap.sailing.gwt.home.communication.event.GetEventViewAction;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.overviewtab.MultiregattaOverviewPlace;
@@ -39,7 +38,7 @@ public abstract class AbstractEventActivityProxy<C extends ClientFactory & Clien
             @Override
             public void onSuccess(EventViewDTO event) {
                 if(place instanceof EventDefaultPlace) {
-                    place = getRealPlace(event.getType());
+                    place = getRealPlace(event.isMultiRegatta());
                 }
                 afterEventLoad(clientFactory, event, verifyAndAdjustPlace(event));
             }
@@ -65,8 +64,8 @@ public abstract class AbstractEventActivityProxy<C extends ClientFactory & Clien
      */
     protected abstract void afterEventLoad(C clientFactory, EventViewDTO event, AbstractEventPlace place);
 
-    private AbstractEventPlace getRealPlace(EventType eventType) {
-        if(eventType == EventType.SERIES_EVENT || eventType == EventType.SINGLE_REGATTA) {
+    private AbstractEventPlace getRealPlace(boolean isMultiRegatta) {
+        if (!isMultiRegatta) {
             return new RegattaOverviewPlace(new EventContext(place.getCtx()).withRegattaId(null));
         }
         return new MultiregattaOverviewPlace(place.getCtx());
@@ -80,28 +79,28 @@ public abstract class AbstractEventActivityProxy<C extends ClientFactory & Clien
     protected AbstractEventPlace verifyAndAdjustPlace(EventViewDTO event) {
         EventContext contextWithoutRegatta = new EventContext(place.getCtx()).withRegattaId(null);
         // TODO check if regatta ID is valid
-        if(place instanceof AbstractMultiregattaEventPlace && event.getType() != EventType.MULTI_REGATTA) {
+        if (place instanceof AbstractMultiregattaEventPlace && !event.isMultiRegatta()) {
             // Events with a type other than multi regatta only have regatta level pages
-            if(place instanceof MultiregattaRegattasPlace) {
+            if (place instanceof MultiregattaRegattasPlace) {
                 return new RegattaRacesPlace(contextWithoutRegatta);
             }
-            if(place instanceof MultiregattaMediaPlace) {
+            if (place instanceof MultiregattaMediaPlace) {
                 return new RegattaMediaPlace(contextWithoutRegatta);
             }
             return new RegattaOverviewPlace(contextWithoutRegatta);
         }
-        
-        if(place instanceof AbstractEventRegattaPlace) {
+
+        if (place instanceof AbstractEventRegattaPlace) {
             boolean regattaKnown = event.isRegattaIDKnown(place.getCtx().getRegattaId());
-            if(event.getType() != EventType.MULTI_REGATTA && place.getCtx().getRegattaId() != null && !regattaKnown) {
+            if (!event.isMultiRegatta() && place.getCtx().getRegattaId() != null && !regattaKnown) {
                 // Regatta ID unknown but unnecessary ...
                 place.getCtx().withRegattaId(null);
-            } else if(event.getType() == EventType.MULTI_REGATTA && !regattaKnown) {
+            } else if (event.isMultiRegatta() && !regattaKnown) {
                 return new MultiregattaRegattasPlace(contextWithoutRegatta);
             }
         }
-        
-        if(place instanceof RegattaMediaPlace && event.getType() == EventType.MULTI_REGATTA) {
+
+        if (place instanceof RegattaMediaPlace && event.isMultiRegatta()) {
             // The media page for multi regatta events is on event level only but not on regatta level
             return new MultiregattaMediaPlace(contextWithoutRegatta);
         }

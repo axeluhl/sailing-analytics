@@ -6,8 +6,8 @@ public abstract class AbstractMemoryMonitorAction implements MemoryMonitorAction
 
     private final double threshold;
 
-    public AbstractMemoryMonitorAction(double freeMemoryInPercentThreshold) {
-        this.threshold = freeMemoryInPercentThreshold;
+    public AbstractMemoryMonitorAction(double freeMemoryRatioThreshold) {
+        this.threshold = freeMemoryRatioThreshold;
     }
 
     @Override
@@ -16,8 +16,8 @@ public abstract class AbstractMemoryMonitorAction implements MemoryMonitorAction
     }
 
     @Override
-    public boolean checkMemoryAndPerformAction(double freeMemoryInPercent) {
-        if (freeMemoryInPercent < threshold) {
+    public boolean checkMemoryAndPerformAction(double freeMemoryRatio) {
+        if (freeMemoryRatio < threshold) {
             performAction();
             return true;
         }

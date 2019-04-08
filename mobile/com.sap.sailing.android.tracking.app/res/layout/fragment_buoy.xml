@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fiori_main_background">
+
+    <TextView
+        android:id="@+id/buoy_Name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        tools:text="Text"
+        tools:background="#E90EA8"
+        android:layout_centerInParent="true"
+        android:textSize="@dimen/tracking_button_text_size"/>
+
+    <Button
+        android:id="@+id/start_tracking"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/tracking_button_height"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/regatta_button_margin"
+        android:layout_marginLeft="@dimen/fragment_side_margin"
+        android:layout_marginRight="@dimen/fragment_side_margin"
+        android:background="@drawable/start_tracking_button"
+        android:padding="@dimen/regatta_button_padding"
+        android:text="@string/start_tracking"
+        android:textSize="@dimen/tracking_button_text_size"/>
+
+</RelativeLayout>

@@ -1,8 +1,8 @@
 package com.sap.sailing.polars.windestimation;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 import com.sap.sse.common.scalablevalue.ScalableValueWithDistance;

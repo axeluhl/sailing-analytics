@@ -1,0 +1,72 @@
+.cellTableWidget {
+    font-size: 1rem;
+    border: 1px solid #dedede;
+    border-radius: .333333333333333em;
+    border-spacing: 0;
+    border-collapse: separate;
+    overflow: hidden;
+    background-color: #f2f2f2;
+}
+
+.cellTableWidget>thead>tr {
+    color: #666;
+    background-color: #dfdfdf;
+    border-bottom: 1px solid #dedede;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-radius: .333333333333333em 0 0 .333333333333333em;
+}
+
+.cellTableWidget>thead>tr>th {
+    padding: .666666666666667em .666666666666667em .666666666666667em 1.333333333333333em;
+    text-align: left;
+}
+
+
+.cellTableCell {
+    text-align: left;
+    vertical-align: baseline;
+    border-bottom: 1px solid #dfdfdf;
+    white-space: nowrap;
+    padding: 1.4em .666666666666667em .733333333333333em 1.333333333333333em;
+}
+
+.textCellWordWrap {
+    white-space: normal;
+}
+
+.buttonCell {
+    text-align: right;
+    vertical-align: middle;
+    padding-left: 0;
+    padding-right: .666666666666667em;
+    padding-top: .666666666666667em;
+}
+
+.buttonCell>div>button {
+    font-size: 1rem;
+    color: #fff;
+    font-weight: 700;
+    background: #008fcc;
+    display: -webkit-inline-box;
+    display: -webkit-inline-flex;
+    display: -moz-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0;
+    -moz-box-flex: 0;
+    -ms-flex: 0;
+    flex: 0;
+    text-align: center;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 2.666666666666667em;
+    padding: 0 1em 0 1em;
+    border-radius: .2em;
+    position: relative;
+    border: none;
+}

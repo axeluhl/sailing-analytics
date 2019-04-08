@@ -2,7 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                xmlns:Tools="http://schemas.android.com/apk/res-auto"
+                android:background="@drawable/fiori_main_background">
 
     <RelativeLayout
         android:id="@+id/image"
@@ -38,15 +40,15 @@
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:src="@drawable/ic_menu_camera"/>
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            <TextView
                 android:id="@+id/add_photo_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
                 android:text="@string/add_team_photo"
-                android:textColor="@color/white"/>
+                android:textColor="@color/fiori_text_color"/>
         </LinearLayout>
 
         <LinearLayout
@@ -55,111 +57,126 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:background="@color/white_transparent"
+            android:background="@color/white_less_transparent"
             android:orientation="horizontal"
             android:visibility="gone"
             tools:visibility="gone">
 
             <ProgressBar
+                style="?android:attr/progressBarStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="?android:attr/progressBarStyle"
                 android:indeterminate="true"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"/>
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            <TextView
                 android:id="@+id/upload_progress_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
                 android:text="@string/upload_in_progress"
-                android:textColor="@color/white"/>
+                android:textColor="@color/fiori_text_color"
+                android:textSize="@dimen/default_text_size"/>
         </LinearLayout>
+
+        <View
+            android:id="@+id/image_bottom"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_alignParentBottom="true"/>
 
         <LinearLayout
             android:id="@+id/retry_upload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_above="@id/image_bottom"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:background="@color/white_transparent"
-            android:orientation="horizontal"
-            android:visibility="gone"
+            android:layout_marginBottom="107dp"
+            android:background="@color/white_less_transparent"
             android:clickable="true"
             android:onClick="retryUpload"
+            android:orientation="horizontal"
+            android:visibility="gone"
             tools:visibility="visible">
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            <TextView
                 android:id="@+id/retry_upload_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:drawableLeft="@drawable/ic_action_navigation_refresh"
                 android:drawablePadding="8dp"
-                android:paddingRight="8dp"
-                android:paddingTop="8dp"
                 android:paddingBottom="8dp"
                 android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="8dp"
                 android:text="@string/upload_retry"
-                android:textColor="@color/white"/>
+                android:textColor="@color/fiori_text_color"
+                android:textSize="@dimen/default_text_size"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/competitor_info_layout"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:background="@color/black_transparent"
+            android:background="@color/competitor_background_color"
             android:baselineAligned="false"
             android:measureWithLargestChild="false"
             android:orientation="horizontal"
-            android:padding="10dp">
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp">
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            <TextView
                 android:id="@+id/competitor_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/fragment_side_margin"
                 android:layout_weight="1"
-                android:gravity="start|center_vertical"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:gravity="start"
                 android:text="@string/empty"
-                android:textColor="@color/white"/>
+                android:textColor="@color/fiori_text_color"
+                android:textSize="@dimen/default_text_size"
+                android:textStyle="bold"/>
 
             <RelativeLayout
                 android:layout_width="10dp"
                 android:layout_height="fill_parent"
                 android:layout_weight="0.53"
                 android:cropToPadding="true"
-                android:paddingTop="3dp"
-                android:paddingBottom="3dp"
                 android:gravity="end"
+                android:paddingBottom="3dp"
                 android:paddingLeft="5dp"
-                android:paddingRight="5dp">
+                android:paddingRight="5dp"
+                android:paddingTop="3dp">
 
                 <ImageView
                     android:id="@+id/flag_image"
                     android:layout_width="20dp"
                     android:layout_height="fill_parent"
-                    android:scaleType="fitXY"
-                    android:contentDescription="@string/content_description_flag_icon"
                     android:adjustViewBounds="true"
-                    android:textColor="@color/white"/>
+                    android:contentDescription="@string/content_description_flag_icon"
+                    android:scaleType="fitXY"
+                    android:textColor="@color/fiori_text_color"/>
             </RelativeLayout>
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            <TextView
                 android:id="@+id/sail_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/fragment_side_margin"
                 android:gravity="end|center_vertical"
                 android:padding="0dp"
                 android:text="@string/empty"
-                android:textColor="@color/white"/>
+                android:textColor="@color/fiori_text_color"
+                android:textSize="@dimen/default_text_size"
+                android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -167,49 +184,40 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@id/competitor_info_layout"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
             android:layout_marginBottom="15dp"
-            android:layout_marginRight="15dp"
             android:layout_marginEnd="15dp"
-            android:background="@drawable/background_transparent_box"
+            android:layout_marginRight="15dp"
+            android:background="@color/white_less_transparent"
             android:orientation="horizontal"
             android:padding="0dp">
 
             <Button
                 android:id="@+id/change_photo_button"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@drawable/stift"/>
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/edit_pencil"/>
         </LinearLayout>
 
         <View
             android:id="@+id/bottom_bar"
-            android:layout_width="fill_parent"
-            android:layout_height="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/toolbar_separator_height"
             android:layout_alignBottom="@+id/competitor_info_layout"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:background="@color/sap_yellow"/>
+            android:background="@color/separator_color"/>
 
-        <View
-            android:id="@+id/top_bar"
-            android:layout_width="fill_parent"
-            android:layout_height="4dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:background="@color/sap_yellow"/>
     </RelativeLayout>
 
     <ScrollView
         android:id="@+id/scroll_view"
-        android:layout_width="fill_parent"
-        android:layout_height="100dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
         android:layout_above="@+id/start_tracking_box"
         android:layout_below="@id/image"
-        android:layout_gravity="center"
-        android:background="@color/black"
         android:isScrollContainer="true"
         android:orientation="vertical"
         android:scrollbars="vertical">
@@ -218,6 +226,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <!-- deprecated layout -->
             <RelativeLayout
                 android:id="@+id/thank_you_layout"
                 android:layout_width="match_parent"
@@ -225,244 +234,231 @@
                 android:baselineAligned="false"
                 android:measureWithLargestChild="false"
                 android:orientation="horizontal"
-                android:padding="10dp"
-                android:visibility="invisible">
+                android:paddingTop="10dp"
+                android:visibility="gone">
 
-                <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+                <TextView
                     android:id="@+id/thank_you_note"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:gravity="start"
                     android:padding="0dp"
                     android:text="@string/thank_you_you_successfully_participated"
-                    android:textColor="@color/white"
+                    android:textColor="@color/fiori_text_color"
                     android:textStyle="bold"/>
             </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/start_date_layout"
                 android:layout_width="match_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:measureWithLargestChild="false"
-                android:orientation="horizontal"
-                android:padding="10dp">
+                android:orientation="horizontal">
 
-                <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+                <TextView
                     android:id="@+id/regatta_starts_in"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
                     android:gravity="center"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
                     android:paddingTop="10dp"
                     android:text="@string/regatta_starts_in"
-                    android:textColor="@color/white"
-                    android:textStyle="bold"/>
+                    android:textColor="@color/fiori_text_color"
+                    android:textSize="@dimen/default_text_size"/>
 
                 <LinearLayout
                     android:id="@+id/three_boxes_regatta_starts"
                     android:layout_width="match_parent"
-                    android:layout_height="fill_parent"
+                    android:layout_height="wrap_content"
                     android:layout_below="@id/regatta_starts_in"
                     android:baselineAligned="false"
-                    android:gravity="center"
+                    android:gravity="center_horizontal"
                     android:measureWithLargestChild="false"
                     android:orientation="horizontal"
-                    android:padding="10dp">
+                    tools:visibility="gone">
 
                     <LinearLayout
                         android:id="@+id/three_boxes_days_box"
-                        android:layout_width="80dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/background_box"
+                        android:layout_marginLeft="@dimen/regatta_start_date_side_margin"
+                        android:layout_marginRight="@dimen/regatta_start_date_side_margin"
                         android:baselineAligned="false"
                         android:gravity="center"
                         android:measureWithLargestChild="false"
                         android:orientation="vertical"
                         android:padding="0dp">
 
-                        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+                        <TextView
                             android:id="@+id/starts_in_days"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="0dp"
-                            android:textColor="@color/white"
-                            android:textSize="40sp"/>
+                            android:textColor="@color/fiori_text_color"
+                            android:textSize="@dimen/highlight_text_size"/>
 
-                        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+                        <TextView
                             android:id="@+id/starts_in_days_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="0dp"
-                            android:text="@string/days"
                             android:singleLine="true"
-                            android:layout_marginBottom="5dp"
-                            android:textColor="@color/white"/>
+                            android:textColor="@color/fiori_text_color"
+                            android:textSize="@dimen/default_text_size"/>
+
                     </LinearLayout>
+
+                    <View
+                        android:layout_width="@dimen/countdown_separator_width"
+                        android:layout_height="@dimen/countdown_separator_height"
+                        android:layout_gravity="center_vertical"
+                        android:background="@color/separator_color"/>
 
                     <LinearLayout
                         android:id="@+id/three_boxes_hours_box"
-                        android:layout_width="80dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/background_box"
+                        android:layout_marginLeft="@dimen/regatta_start_date_side_margin"
+                        android:layout_marginRight="@dimen/regatta_start_date_side_margin"
                         android:baselineAligned="false"
                         android:gravity="center"
                         android:measureWithLargestChild="false"
                         android:orientation="vertical"
                         android:padding="0dp">
 
-                        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+                        <TextView
                             android:id="@+id/starts_in_hours"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="0dp"
-                            android:textColor="@color/white"
-                            android:textSize="40sp"/>
+                            android:textColor="@color/fiori_text_color"
+                            android:textSize="@dimen/highlight_text_size"/>
 
-                        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+                        <TextView
                             android:id="@+id/starts_in_hours_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="0dp"
-                            android:text="@string/hours"
                             android:singleLine="true"
-                            android:layout_marginBottom="5dp"
-                            android:textColor="@color/white"/>
+                            android:textColor="@color/fiori_text_color"
+                            android:textSize="@dimen/default_text_size"/>
                     </LinearLayout>
+
+                    <View
+                        android:layout_width="@dimen/countdown_separator_width"
+                        android:layout_height="@dimen/countdown_separator_height"
+                        android:layout_gravity="center_vertical"
+                        android:background="@color/separator_color"/>
 
                     <LinearLayout
                         android:id="@+id/three_boxes_minutes_box"
-                        android:layout_width="80dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/background_box"
+                        android:layout_marginLeft="@dimen/regatta_start_date_side_margin"
+                        android:layout_marginRight="@dimen/regatta_start_date_side_margin"
                         android:baselineAligned="false"
                         android:gravity="center"
                         android:measureWithLargestChild="false"
                         android:orientation="vertical"
                         android:padding="0dp">
 
-                        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+                        <TextView
                             android:id="@+id/starts_in_minutes"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="0dp"
-                            android:textColor="@color/white"
-                            android:textSize="40sp"/>
+                            android:textColor="@color/fiori_text_color"
+                            android:textSize="@dimen/highlight_text_size"/>
 
-                        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+                        <TextView
                             android:id="@+id/starts_in_minutes_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="0dp"
-                            android:text="@string/minutes"
                             android:singleLine="true"
-                            android:layout_marginBottom="5dp"
-                            android:textColor="@color/white"/>
+                            android:textColor="@color/fiori_text_color"
+                            android:textSize="@dimen/default_text_size"/>
                     </LinearLayout>
                 </LinearLayout>
             </RelativeLayout>
-
 
         </RelativeLayout>
     </ScrollView>
 
     <RelativeLayout
         android:id="@+id/start_tracking_box"
-        android:layout_width="fill_parent"
-        android:layout_height="200dp"
-        android:layout_above="@id/bottomLayout"
-        android:background="@color/black">
-
-        <View
-            android:id="@+id/white_bar"
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:background="@color/white_transparent"/>
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/regatta_button_layout_height"
+        android:layout_above="@+id/bottom_announcement">
 
         <LinearLayout
             android:id="@+id/event_buttons"
             android:layout_width="match_parent"
             android:layout_height="@dimen/regatta_button_height"
-            android:layout_below="@id/white_bar"
+            android:layout_above="@+id/layout_start_tracking"
+            android:layout_marginBottom="@dimen/regatta_button_margin"
             android:orientation="horizontal">
 
-            <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+            <Button
                 android:id="@+id/show_event_button"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_margin="@dimen/regatta_button_margin"
-                android:layout_marginLeft="@dimen/regatta_button_side_margin"
-                android:layout_marginRight="@dimen/regatta_button_side_margin"
-                android:padding="@dimen/regatta_button_padding"
+                android:layout_marginLeft="@dimen/fragment_side_margin"
                 android:layout_weight="1"
+                android:background="@drawable/blue_button"
+                android:padding="@dimen/regatta_button_padding"
                 android:text="@string/show_event"
-                android:background="@drawable/rounded_btn_blue"
-                android:textAllCaps="true"
-                android:textStyle="bold"
+                android:textSize="@dimen/button_text_size"
                 tools:text="Show Event"/>
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
+            <Button
                 android:id="@+id/show_leaderboards_button"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_margin="@dimen/regatta_button_margin"
-                android:layout_marginLeft="@dimen/regatta_button_side_margin"
-                android:layout_marginRight="@dimen/regatta_button_side_margin"
+                android:layout_marginLeft="@dimen/fragment_side_margin"
+                android:layout_marginRight="@dimen/fragment_side_margin"
                 android:layout_weight="1"
-                android:background="@drawable/rounded_btn_yellow"
+                android:background="@drawable/blue_button"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/show_leaderboard"
-                android:textAllCaps="true"
-                android:textStyle="bold"/>
+                android:textSize="@dimen/button_text_size"/>
 
         </LinearLayout>
 
         <RelativeLayout
+            android:id="@+id/layout_start_tracking"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/regatta_button_height"
-            android:layout_below="@+id/event_buttons">
+            android:layout_height="@dimen/tracking_button_height"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="@dimen/regatta_button_margin">
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
+            <Button
                 android:id="@+id/start_tracking"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="@dimen/regatta_button_margin"
-                android:layout_marginLeft="@dimen/regatta_button_side_margin"
-                android:layout_marginRight="@dimen/regatta_button_side_margin"
-                android:background="@drawable/rounded_btn_green"
+                android:layout_marginLeft="@dimen/fragment_side_margin"
+                android:layout_marginRight="@dimen/fragment_side_margin"
+                android:background="@drawable/start_tracking_button"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/start_tracking"
-                android:textAllCaps="true"
-                android:textStyle="bold"/>
+                android:textSize="@dimen/tracking_button_text_size"/>
 
         </RelativeLayout>
 
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/bottomLayout"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
+    <TextView
+        android:id="@+id/bottom_announcement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:background="@color/darker_gray">
-
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-            android:id="@+id/bottom_announcement"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:gravity="center"
-            android:text="@string/please_listen_to_announcements"
-            android:textColor="@color/white"/>
-    </RelativeLayout>
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/regatta_button_margin"
+        android:layout_marginTop="@dimen/regatta_button_margin"
+        android:text="@string/please_listen_to_announcements"
+        android:textColor="@color/fiori_text_color"
+        android:textSize="@dimen/default_text_size"/>
 
 </RelativeLayout>

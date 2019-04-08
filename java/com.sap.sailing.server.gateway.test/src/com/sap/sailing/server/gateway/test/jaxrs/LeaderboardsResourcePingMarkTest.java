@@ -22,11 +22,11 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelogtracking.DeviceMapping;
+import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
@@ -57,11 +57,10 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
             "    }";
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
-        
         mark = racingEventService.getBaseDomainFactory().getOrCreateMark("id", "name");
-        Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), MillisecondsTimePoint.now(),
+        Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), /* canBoatsOfCompetitorsChangePerRace */ true, MillisecondsTimePoint.now(),
                 MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections
                         .singleton(new FleetImpl("fleet")), Arrays.asList("column"), racingEventService)), false,
                 new HighPoint(), 0, null, OneDesignRankingMetric::new);
@@ -77,8 +76,9 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         {
         Response response = resource.pingMark(PING_MARK_JSON, leaderboard.getName(), mark.getId().toString());
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
-        Map<Mark, List<DeviceMapping<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze();
-        List<DeviceMapping<Mark>> mappingsForMark = mappings.get(mark);
+            Map<Mark, List<DeviceMappingWithRegattaLogEvent<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(
+                    log).analyze();
+            List<DeviceMappingWithRegattaLogEvent<Mark>> mappingsForMark = mappings.get(mark);
         assertThat("one mapping was created for the one ping", mappingsForMark.size(), equalTo(1));
         assertOneFixPerMapping(mappingsForMark);
         }
@@ -87,19 +87,22 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         // created (anymore; they used to be before bug2851)
         Response response = resource.pingMark(PING2_MARK_JSON, leaderboard.getName(), mark.getId().toString());
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
-        Map<Mark, List<DeviceMapping<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze();
-        List<DeviceMapping<Mark>> mappingsForMark = mappings.get(mark);
+            Map<Mark, List<DeviceMappingWithRegattaLogEvent<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(
+                    log).analyze();
+            List<DeviceMappingWithRegattaLogEvent<Mark>> mappingsForMark = mappings.get(mark);
         assertThat("Assert no additional mapping was created for the second ping", mappingsForMark.size(), equalTo(2));
         assertOneFixPerMapping(mappingsForMark);
         }
     }
 
-    private void assertOneFixPerMapping(List<DeviceMapping<Mark>> mappingsForMark) throws TransformationException,
+    private void assertOneFixPerMapping(List<DeviceMappingWithRegattaLogEvent<Mark>> mappingsForMark)
+            throws TransformationException,
             NoCorrespondingServiceRegisteredException {
-        for (DeviceMapping<Mark> i : mappingsForMark) {
+        for (DeviceMappingWithRegattaLogEvent<Mark> i : mappingsForMark) {
             DeviceIdentifier device = i.getDevice();
             // first ping produces exactly one fix:
-            assertThat("all fixes stored", racingEventService.getGPSFixStore().getNumberOfFixes(device), equalTo(1L));
+            assertThat("all fixes stored", racingEventService.getSensorFixStore().getNumberOfFixes(device),
+                    equalTo(1L));
         }
     }
 }

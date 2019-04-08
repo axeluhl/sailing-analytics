@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.polars;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
@@ -9,14 +11,14 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -162,22 +164,29 @@ public interface PolarDataService {
     void insertExistingFixes(TrackedRace trackedRace);
     
     /**
-     * 
      * @param boatClass When polars of this boat class change, the listener will be notified. May not be null.
      * @param listener may not be null
      */
     void registerListener(BoatClass boatClass, PolarsChangedListener listener);
     
-    /**
-     * 
-     * @param boatClass
-     * @param listener
-     */
     void unregisterListener(BoatClass boatClass, PolarsChangedListener listener);
 
+    /**
+     * Announces a base {@link DomainFactory} to this polar data service that it now can start using. Calling this
+     * method with a non-{@code null} parameter will unblock all {@link #runWithDomainFactory} calls.
+     */
     void registerDomainFactory(DomainFactory domainFactory);
     
-    void unregisterDomainFactory(DomainFactory domainFactory);
-    
+    /**
+     * When called, the method blocks until a {@link DomainFactory} has been {@link #registerDomainFactory(DomainFactory) registered}
+     * with this service, then lets the {@code consumer} accept that domain factory.
+     */
+    void runWithDomainFactory(Consumer<DomainFactory> consumer) throws InterruptedException;
 
+    Map<BoatClass, Long> getFixCountPerBoatClass();
+
+    SpeedWithBearingWithConfidence<Void> getClosestTwaTws(ManeuverType type, Speed speedAtManeuverStart,
+            double courseChangeDeg, BoatClass boatClass);
+
+    double getManeuverAngleInDegreesFromTwa(double twa, ManeuverType maneuverType);
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.shared.app;
 
+import java.util.UUID;
+
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
@@ -21,8 +23,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 
 /**
- * Helper class to support converting old places to new ones.
- * 
+ * Helper class to support converting old places to new ones and relace inconsistent places with working ones.
  */
 public class ApplicationPlaceUpdater {
 
@@ -98,7 +99,7 @@ public class ApplicationPlaceUpdater {
 
     private Place getRealSeriesPlace(SeriesPlace place) {
         String seriesId = place.getEventUuidAsString();
-        SeriesContext context = new SeriesContext(seriesId);
+        SeriesContext context = SeriesContext.createWithSeriesId(UUID.fromString(seriesId));
 
         // TODO evaluate additional parameters
 

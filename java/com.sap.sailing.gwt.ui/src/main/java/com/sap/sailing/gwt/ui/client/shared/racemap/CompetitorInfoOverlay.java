@@ -29,7 +29,10 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
 
     private int canvasWidth;
     private int canvasHeight;
-    private int infoBoxHeight = 20;
+    private int infoBoxHeight;
+    private int defaultInfoBoxHeight = 14;
+    public static final int X_TEXT_COORDINATE = 8;
+    public static final int Y_TEXT_COORDINATE = 14;
 
     private Color competitorColor; 
 
@@ -52,10 +55,11 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
 
             ctx.setFont("12px bold Verdana sans-serif");
-            TextMetrics measureText = ctx.measureText(infoText);
-            double textWidth = measureText.getWidth();
-
-            canvasWidth = (int) textWidth + 10 + infoBoxHeight;
+            String[] textLines = infoText.split("\n");
+            TextMetrics measureText = ctx.measureText(findLargestLine(textLines));
+            double largestLineWidth = measureText.getWidth();
+            infoBoxHeight = defaultInfoBoxHeight + textLines.length * 10;
+            canvasWidth = (int)largestLineWidth + infoBoxHeight;
             setCanvasSize(canvasWidth, canvasHeight);
 
             ctx.save();
@@ -77,25 +81,17 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             ctx.beginPath();
             ctx.moveTo(1.0,1.0);
             ctx.lineTo(canvasWidth,1.0);
-            ctx.lineTo(canvasWidth-infoBoxHeight,infoBoxHeight);
+            double lenghtOfTheLastLine = ctx.measureText(textLines[textLines.length - 1]).getWidth();
+            int bottomLineWidth = 2 * X_TEXT_COORDINATE + (int) lenghtOfTheLastLine;
+            ctx.lineTo(bottomLineWidth, infoBoxHeight);
             ctx.lineTo(1.0,infoBoxHeight);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
             
-            // show a second measure
-//            ctx.beginPath();
-//            ctx.moveTo(1.0,26.4);
-//            ctx.lineTo(66.2,26.4);
-//            ctx.lineTo(53.1,39.3);
-//            ctx.lineTo(1.0,39.3);
-//            ctx.closePath();
-//            ctx.fill();
-//            ctx.stroke();
-
             ctx.beginPath();
             ctx.setFillStyle("black");
-            ctx.fillText(infoText, 8, 14);
+            drawText(textLines, ctx);
             ctx.stroke();
 
             ctx.restore();
@@ -120,5 +116,23 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
      */
     public void setInfoText(String infoText) {
         this.infoText = infoText;
+    }
+    
+    private void drawText(String[] lines, Context2d ctx) {
+        for (int i = 0; i < lines.length; i++) {
+            ctx.fillText(lines[i], X_TEXT_COORDINATE, Y_TEXT_COORDINATE + i * 12);
+        }
+    }
+
+    private String findLargestLine(String[] lines) {
+        int index = 0;
+        int maxLength = lines[0].length();
+        for (int i = 0; i < lines.length; i++) {
+            if (maxLength < lines[i].length()) {
+                index = i;
+                maxLength = lines[i].length();
+            }
+        }
+        return lines[index];
     }
 }

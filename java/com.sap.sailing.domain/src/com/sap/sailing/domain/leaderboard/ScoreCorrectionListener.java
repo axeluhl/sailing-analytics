@@ -6,9 +6,9 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sse.common.TimePoint;
 
 public interface ScoreCorrectionListener {
-    void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore);
+    void correctedScoreChanged(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore);
 
-    void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason);
+    void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason);
     
     void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints);
     

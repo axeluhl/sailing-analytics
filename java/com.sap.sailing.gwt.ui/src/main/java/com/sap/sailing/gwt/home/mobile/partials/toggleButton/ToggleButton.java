@@ -1,47 +1,32 @@
 package com.sap.sailing.gwt.home.mobile.partials.toggleButton;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class ToggleButton extends Widget {
+public class ToggleButton extends BigButton {
 
     private static final StringMessages I18N = StringMessages.INSTANCE;
-    private static ToggleButtonUiBinder uiBinder = GWT.create(ToggleButtonUiBinder.class);
-
-    interface ToggleButtonUiBinder extends UiBinder<Element, ToggleButton> {
-    }
-    
-    @UiField DivElement toggleButtonUi;
     private final ToggleButtonCommand toggleCommand;
     private String label;
 
-    public ToggleButton(ToggleButtonCommand toggleCommand) {
+    public ToggleButton(final ToggleButtonCommand toggleCommand) {
         this.toggleCommand = toggleCommand;
-        ToggleButtonResources.INSTANCE.css().ensureInjected();
-        setElement(uiBinder.createAndBindUi(this));
-        sinkEvents(Event.ONCLICK);
-    }
-    
-    public void setLabel(String label) {
-        toggleButtonUi.setInnerText(toggleCommand.expanded ? I18N.collapseX(label) : I18N.showAllX(label));
-        this.label = label;
+        this.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                toggleCommand.execute();
+                buttonUi.setInnerText(toggleCommand.expanded ? I18N.collapseX(label) : I18N.showAllX(label));
+            }
+        });
     }
     
     @Override
-    public void onBrowserEvent(Event event) {
-        if (event.getTypeInt() == Event.ONCLICK) {
-            toggleCommand.execute();
-            toggleButtonUi.setInnerText(toggleCommand.expanded ? I18N.collapseX(label) : I18N.showAllX(label));
-            return;
-        }
-        super.onBrowserEvent(event);
+    public void setLabel(String label) {
+        buttonUi.setInnerText(toggleCommand.expanded ? I18N.collapseX(label) : I18N.showAllX(label));
+        this.label = label;
     }
     
     public static abstract class ToggleButtonCommand implements Command {

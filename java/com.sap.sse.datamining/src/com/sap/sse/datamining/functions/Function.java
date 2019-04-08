@@ -9,6 +9,7 @@ public interface Function<ReturnType> {
 
     public Class<?> getDeclaringType();
     public Iterable<Class<?>> getParameters();
+    public boolean needsLocalizationParameters();
     public Class<ReturnType> getReturnType();
 
     public boolean isDimension();

@@ -1,11 +1,10 @@
 package com.sap.sailing.gwt.home.mobile.partials.eventsteps;
 
-import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_SERIES_NAME;
-
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -16,7 +15,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressFleetDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressSeriesDTO;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class EventStepsPhase extends Composite {
 
@@ -26,20 +27,26 @@ public class EventStepsPhase extends Composite {
     interface EventStepsPhaseUiBinder extends UiBinder<Widget, EventStepsPhase> {
     }
     
+    @UiField AnchorElement anchorUi;
     @UiField DivElement nameUi;
     @UiField ImageElement checkUi;
     @UiField DivElement progressUi;
     @UiField DivElement fleetsContainerUi;
 
-    public EventStepsPhase(RegattaProgressSeriesDTO seriesProgress) {
+    EventStepsPhase(RegattaProgressSeriesDTO seriesProgress, PlaceNavigation<?> placeNavigation, boolean showName) {
         initWidget(uiBinder.createAndBindUi(this));
-        nameUi.setInnerText(DEFAULT_SERIES_NAME.equals(seriesProgress.getName()) ? I18N.races() : seriesProgress.getName());
+        LinkUtil.configureForAction(anchorUi, () -> placeNavigation.goToPlace());
+        if (showName) {
+            nameUi.setInnerText(seriesProgress.getName());
+        } else {
+            nameUi.removeFromParent();
+        }
         if (seriesProgress.isCompleted()) {
-            progressUi.setInnerText(String.valueOf(seriesProgress.getTotalRaceCount()));
+            progressUi.setInnerText(I18N.racesCount(seriesProgress.getTotalRaceCount()));
         } else {
             checkUi.getStyle().setDisplay(Display.NONE);
             int current = seriesProgress.getProgressRaceCount(), total = seriesProgress.getTotalRaceCount();
-            progressUi.setInnerText(I18N.currentOfTotal(current, total));
+            progressUi.setInnerText(I18N.currentOfTotalRaces(current, total));
         }
         if (seriesProgress.getProgressRaceCount() == 0) {
             addStyleName(EventStepsResources.INSTANCE.css().eventsteps_phases_phaseinactive());

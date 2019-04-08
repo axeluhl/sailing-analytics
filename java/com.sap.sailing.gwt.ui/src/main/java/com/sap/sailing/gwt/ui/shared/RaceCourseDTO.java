@@ -25,6 +25,11 @@ public class RaceCourseDTO implements IsSerializable {
         this(waypoints, getMarksFromWaypoints(waypoints));
     }
 
+    public RaceCourseDTO(List<WaypointDTO> waypoints, List<MarkDTO> allMarks) {
+        this.waypoints = waypoints;
+        this.allMarks = allMarks;
+    }
+
     private static List<MarkDTO> getMarksFromWaypoints(List<WaypointDTO> waypoints) {
         final LinkedHashSet<MarkDTO> marks = new LinkedHashSet<>();
         for (final WaypointDTO waypoint : waypoints) {
@@ -37,11 +42,6 @@ public class RaceCourseDTO implements IsSerializable {
             result.add(m);
         }
         return result;
-    }
-
-    public RaceCourseDTO(List<WaypointDTO> waypoints, List<MarkDTO> allMarks) {
-        this.waypoints = waypoints;
-        this.allMarks = allMarks;
     }
 
     public List<ControlPointDTO> getControlPoints() {
@@ -68,5 +68,36 @@ public class RaceCourseDTO implements IsSerializable {
             result = marks.values();
         }
         return result;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((allMarks == null) ? 0 : allMarks.hashCode());
+        result = prime * result + ((waypoints == null) ? 0 : waypoints.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RaceCourseDTO other = (RaceCourseDTO) obj;
+        if (allMarks == null) {
+            if (other.allMarks != null)
+                return false;
+        } else if (!allMarks.equals(other.allMarks))
+            return false;
+        if (waypoints == null) {
+            if (other.waypoints != null)
+                return false;
+        } else if (!waypoints.equals(other.waypoints))
+            return false;
+        return true;
     }
 }

@@ -21,15 +21,14 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.home.desktop.partials.old.LeaderboardDelegate;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.SelectedLeaderboardChangeListener;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
@@ -39,7 +38,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
-public class OldMultiLeaderboard extends Composite implements SelectedLeaderboardChangeListener, BusyStateChangeListener {
+public class OldMultiLeaderboard extends Composite implements SelectedLeaderboardChangeListener<MultiRaceLeaderboardPanel>, BusyStateChangeListener {
     private static OldMultiLeaderboardUiBinder uiBinder = GWT.create(OldMultiLeaderboardUiBinder.class);
 
     interface OldMultiLeaderboardUiBinder extends UiBinder<Widget, OldMultiLeaderboard> {
@@ -57,10 +56,10 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     @UiField BusyIndicator busyIndicator;
     @UiField EventRegattaLeaderboardResources local_res;
 
-    private MultiLeaderboardPanel multiLeaderboardPanel;
+    private MultiLeaderboardProxyPanel multiLeaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldMultiLeaderboardDelegate delegate;
-    private LeaderboardPanel lastSelectedLeaderboardPanel;
+    private MultiRaceLeaderboardPanel lastSelectedLeaderboardPanel;
 
     public OldMultiLeaderboard() {
         this(null);
@@ -108,6 +107,21 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
         }, ClickEvent.getType());
     }
 
+    /**
+     * This method turns on auto playing mode on leaderboard
+     */
+    public void turnOnAutoPlay() {
+        if (autoRefreshTimer.getPlayState() != PlayStates.Playing) {
+            autoRefreshTimer.setPlayMode(PlayModes.Live);
+        }
+        
+        // Styles applied each time because of tabs switching. In this case play mode stays as Playing but styling is lost
+        autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        if (delegate != null) {
+            delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        }
+    }
+
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
         if (autoRefreshTimer != null) {
@@ -115,7 +129,8 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
             autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
             if (delegate != null) {
                 delegate.getAutoRefreshControl().removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-                delegate.getAutoRefreshControl().removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
+                delegate.getAutoRefreshControl()
+                        .removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
             }
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
@@ -132,7 +147,8 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
                 autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
                 if (delegate != null) {
                     // delegate.getAutoRefreshControl().getElement().getStyle().setBackgroundColor("red");
-                    delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+                    delegate.getAutoRefreshControl()
+                            .addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
                 }
             }
         }
@@ -144,7 +160,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
             final String componentName = multiLeaderboardPanel.getLocalizedShortName();
             final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
 
-            SettingsDialog<?> dialog = new SettingsDialog<LeaderboardSettings>(multiLeaderboardPanel, StringMessages.INSTANCE) {
+            SettingsDialog<?> dialog = new SettingsDialog<MultiRaceLeaderboardSettings>(multiLeaderboardPanel, StringMessages.INSTANCE) {
                 protected Widget getAdditionalWidget() {
                     Widget additionalWidget = super.getAdditionalWidget();
                     if (!oldMultiLeaderboardPanel.getElement().isOrHasChild(multiLeaderboardPanel.getElement())) {
@@ -167,7 +183,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
         }
     }
 
-    public void setMultiLeaderboard(MultiLeaderboardPanel multiLeaderboardPanel, final Timer timer) {
+    public void setMultiLeaderboard(MultiLeaderboardProxyPanel multiLeaderboardPanel, final Timer timer) {
         this.autoRefreshTimer = timer;
         this.multiLeaderboardPanel = multiLeaderboardPanel;
         this.multiLeaderboardPanel.addSelectedLeaderboardChangeListener(this);
@@ -190,10 +206,10 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
                 String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatter.render(lastCorrectionDate) + ", "
                         + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
                 lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
-                lastScoringUpdateTextDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
+                lastScoringUpdateTextDiv.setInnerText(StringMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
                 if (delegate != null) {
                     delegate.getLastScoringUpdateTimeElement().setInnerText(lastUpdate);
-                    delegate.getLastScoringUpdateTextElement().setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
+                    delegate.getLastScoringUpdateTextElement().setInnerText(StringMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
                 }
             } else {
                 lastScoringUpdateTimeDiv.setInnerText("");
@@ -216,7 +232,7 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     }
 
     @Override
-    public void onSelectedLeaderboardChanged(LeaderboardPanel selectedLeaderboard) {
+    public void onSelectedLeaderboardChanged(MultiRaceLeaderboardPanel selectedLeaderboard) {
         if(lastSelectedLeaderboardPanel != null) {
             lastSelectedLeaderboardPanel.removeBusyStateChangeListener(this);
         }
@@ -224,6 +240,6 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
         lastSelectedLeaderboardPanel = selectedLeaderboard;
     }
     
-    public interface OldMultiLeaderboardDelegate extends LeaderboardDelegate<MultiLeaderboardPanel>{
+    public interface OldMultiLeaderboardDelegate extends LeaderboardDelegate {
     }
 }

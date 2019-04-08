@@ -13,9 +13,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -38,13 +36,12 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.websocket.WebSocketConnectionManager;
 import com.sap.sailing.domain.tracking.DynamicTrack;
-import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
  * Receives Igtimi {@link Fix}es and tries to generate a {@link Wind} object from each {@link AWS} fix. For this to
@@ -181,16 +178,12 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
     
     private Wind getWind(final TimePoint timePoint, String deviceSerialNumber) throws ClassNotFoundException, IOException, ParseException {
         final Wind result;
-        com.sap.sse.common.Util.Pair<AWA, AWA> awaPair = getSurroundingFixes(getAwaTrack(deviceSerialNumber), timePoint);
-        Bearing awa = getAWA(timePoint, awaPair);
-        com.sap.sse.common.Util.Pair<AWS, AWS> awsPair = getSurroundingFixes(getAwsTrack(deviceSerialNumber), timePoint);
-        Speed aws = getAWS(timePoint, awsPair);
-        com.sap.sse.common.Util.Pair<GpsLatLong, GpsLatLong> gpsPair = getSurroundingFixes(getGpsTrack(deviceSerialNumber), timePoint);
-        Position pos = getPosition(timePoint, gpsPair);
+        Bearing awaFrom = getAwaTrack(deviceSerialNumber).getInterpolatedValue(timePoint, a->new ScalableBearing(a.getApparentWindAngle()));
+        Bearing awa = awaFrom==null?null:awaFrom.reverse();
+        Speed aws = getAwsTrack(deviceSerialNumber).getInterpolatedValue(timePoint, a->new ScalableSpeed(a.getApparentWindSpeed()));
+        Position pos = getGpsTrack(deviceSerialNumber).getInterpolatedValue(timePoint, g->new ScalablePosition(g.getPosition()));
         if (pos != null) {
-            com.sap.sse.common.Util.Pair<HDG, HDG> hdgPair = getSurroundingFixes(getHdgTrack(deviceSerialNumber), timePoint);
-            com.sap.sse.common.Util.Pair<HDGM, HDGM> hdgmPair = getSurroundingFixes(getHdgmTrack(deviceSerialNumber), timePoint);
-            Bearing heading = getHeading(timePoint, hdgPair, hdgmPair, pos);
+            Bearing heading = getHeading(timePoint, deviceSerialNumber, pos);
             if (awa != null && aws != null && heading != null) {
                 Bearing apparentWindDirection = heading.add(awa);
                 SpeedWithBearing apparentWindSpeedWithDirection = new KnotSpeedWithBearingImpl(aws.getKnots(), apparentWindDirection);
@@ -218,10 +211,8 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                  * So again, my personal preference would be to work with the data that should be the most accurate
                  * (COG/SOG) and consider algorithms that handle smoothing of that data best."
                  */
-                com.sap.sse.common.Util.Pair<SOG, SOG> sogPair = getSurroundingFixes(getSogTrack(deviceSerialNumber), timePoint);
-                Speed sog = getSOG(timePoint, sogPair);
-                com.sap.sse.common.Util.Pair<COG, COG> cogPair = getSurroundingFixes(getCogTrack(deviceSerialNumber), timePoint);
-                Bearing cog = getCOG(timePoint, cogPair);
+                Speed sog = getSogTrack(deviceSerialNumber).getInterpolatedValue(timePoint, s->new ScalableSpeed(s.getSpeedOverGround()));
+                Bearing cog = getCogTrack(deviceSerialNumber).getInterpolatedValue(timePoint, c->new ScalableBearing(c.getCourseOverGround()));
                 if (sog != null && cog != null) {
                     SpeedWithBearing sogCog = new KnotSpeedWithBearingImpl(sog.getKnots(), cog);
                     SpeedWithBearing trueWindSpeedAndDirection = apparentWindSpeedWithDirection.add(sogCog);
@@ -238,153 +229,13 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         return result;
     }
 
-    private Bearing getAWA(TimePoint timePoint, com.sap.sse.common.Util.Pair<AWA, AWA> awaPair) {
-        final Bearing awaFrom;
-        if (awaPair.getA() == null) {
-            if (awaPair.getB() == null) {
-                awaFrom = null;
-            } else {
-                awaFrom = awaPair.getB().getApparentWindAngle();
-            }
-        } else {
-            if (awaPair.getB() == null) {
-                awaFrom = awaPair.getA().getApparentWindAngle();
-            } else {
-                awaFrom = timeBasedAgerage(timePoint,
-                        new ScalableBearing(awaPair.getA().getApparentWindAngle()), awaPair.getA().getTimePoint(),
-                        new ScalableBearing(awaPair.getB().getApparentWindAngle()), awaPair.getB().getTimePoint());
-            }
-        }
-        return awaFrom == null ? null : awaFrom.reverse();
-    }
-
-    private Speed getAWS(TimePoint timePoint, com.sap.sse.common.Util.Pair<AWS, AWS> awsPair) {
-        final Speed aws;
-        if (awsPair.getA() == null) {
-            if (awsPair.getB() == null) {
-                aws = null;
-            } else {
-                aws = awsPair.getB().getApparentWindSpeed();
-            }
-        } else {
-            if (awsPair.getB() == null) {
-                aws = awsPair.getA().getApparentWindSpeed();
-            } else {
-                aws = timeBasedAgerage(timePoint,
-                        new ScalableSpeed(awsPair.getA().getApparentWindSpeed()), awsPair.getA().getTimePoint(),
-                        new ScalableSpeed(awsPair.getB().getApparentWindSpeed()), awsPair.getB().getTimePoint());
-            }
-        }
-        return aws;
-    }
-
-    private Speed getSOG(TimePoint timePoint, com.sap.sse.common.Util.Pair<SOG, SOG> sogPair) {
-        final Speed sog;
-        if (sogPair.getA() == null) {
-            if (sogPair.getB() == null) {
-                sog = null;
-            } else {
-                sog = sogPair.getB().getSpeedOverGround();
-            }
-        } else {
-            if (sogPair.getB() == null) {
-                sog = sogPair.getA().getSpeedOverGround();
-            } else {
-                sog = timeBasedAgerage(timePoint,
-                        new ScalableSpeed(sogPair.getA().getSpeedOverGround()), sogPair.getA().getTimePoint(),
-                        new ScalableSpeed(sogPair.getB().getSpeedOverGround()), sogPair.getB().getTimePoint());
-            }
-        }
-        return sog;
-    }
-
-    private Bearing getCOG(TimePoint timePoint, com.sap.sse.common.Util.Pair<COG, COG> cogPair) {
-        final Bearing sog;
-        if (cogPair.getA() == null) {
-            if (cogPair.getB() == null) {
-                sog = null;
-            } else {
-                sog = cogPair.getB().getCourseOverGround();
-            }
-        } else {
-            if (cogPair.getB() == null) {
-                sog = cogPair.getA().getCourseOverGround();
-            } else {
-                sog = timeBasedAgerage(timePoint,
-                        new ScalableBearing(cogPair.getA().getCourseOverGround()), cogPair.getA().getTimePoint(),
-                        new ScalableBearing(cogPair.getB().getCourseOverGround()), cogPair.getB().getTimePoint());
-            }
-        }
-        return sog;
-    }
-
-    private Position getPosition(TimePoint timePoint, com.sap.sse.common.Util.Pair<GpsLatLong, GpsLatLong> gpsPair) {
-        final Position pos;
-        if (gpsPair.getA() == null) {
-            if (gpsPair.getB() == null) {
-                pos = null;
-            } else {
-                pos = gpsPair.getB().getPosition();
-            }
-        } else {
-            if (gpsPair.getB() == null) {
-                pos = gpsPair.getA().getPosition();
-            } else {
-                pos = timeBasedAgerage(timePoint, new ScalablePosition(gpsPair.getA().getPosition()), gpsPair.getA()
-                        .getTimePoint(), new ScalablePosition(gpsPair.getB().getPosition()), gpsPair.getB()
-                        .getTimePoint());
-            }
-        }
-        return pos;
-    }
-
-    private Bearing getHDG(TimePoint timePoint, com.sap.sse.common.Util.Pair<HDG, HDG> hdgPair) {
-        final Bearing hdg;
-        if (hdgPair.getA() == null) {
-            if (hdgPair.getB() == null) {
-                hdg = null;
-            } else {
-                hdg = hdgPair.getB().getTrueHeading();
-            }
-        } else {
-            if (hdgPair.getB() == null) {
-                hdg = hdgPair.getA().getTrueHeading();
-            } else {
-                hdg = timeBasedAgerage(timePoint,
-                        new ScalableBearing(hdgPair.getA().getTrueHeading()), hdgPair.getA().getTimePoint(),
-                        new ScalableBearing(hdgPair.getB().getTrueHeading()), hdgPair.getB().getTimePoint());
-            }
-        }
-        return hdg;
-    }
-
-    private Bearing getHDGM(TimePoint timePoint, com.sap.sse.common.Util.Pair<HDGM, HDGM> hdgmPair) {
-        final Bearing hdgm;
-        if (hdgmPair.getA() == null) {
-            if (hdgmPair.getB() == null) {
-                hdgm = null;
-            } else {
-                hdgm = hdgmPair.getB().getMagnetigHeading();
-            }
-        } else {
-            if (hdgmPair.getB() == null) {
-                hdgm = hdgmPair.getA().getMagnetigHeading();
-            } else {
-                hdgm = timeBasedAgerage(timePoint,
-                        new ScalableBearing(hdgmPair.getA().getMagnetigHeading()), hdgmPair.getA().getTimePoint(),
-                        new ScalableBearing(hdgmPair.getB().getMagnetigHeading()), hdgmPair.getB().getTimePoint());
-            }
-        }
-        return hdgm;
-    }
-
-    private Bearing getHeading(TimePoint timePoint, com.sap.sse.common.Util.Pair<HDG, HDG> hdgPair, com.sap.sse.common.Util.Pair<HDGM, HDGM> hdgmPair, Position position) throws ClassNotFoundException, IOException, ParseException {
+    private Bearing getHeading(TimePoint timePoint, String deviceSerialNumber, Position position) throws ClassNotFoundException, IOException, ParseException {
         final Bearing trueHeading;
-        Bearing hdg = getHDG(timePoint, hdgPair);
+        Bearing hdg = getHdgTrack(deviceSerialNumber).getInterpolatedValue(timePoint, h->new ScalableBearing(h.getTrueHeading()));
         if (hdg != null) {
             trueHeading = hdg;
         } else {
-            Bearing hdgm = getHDGM(timePoint, hdgmPair);
+            Bearing hdgm = getHdgmTrack(deviceSerialNumber).getInterpolatedValue(timePoint, h->new ScalableBearing(h.getMagnetigHeading()));
             if (hdgm != null) {
                 if (declinationService == null) {
                     trueHeading = hdgm;
@@ -403,25 +254,6 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
             }
         }
         return trueHeading;
-    }
-
-    private <V, T> T timeBasedAgerage(TimePoint timePoint, ScalableValue<V, T> value1, TimePoint timePoint1, ScalableValue<V, T> value2, TimePoint timePoint2) {
-        final T acc;
-        if (timePoint1.equals(timePoint2)) {
-            acc = value1.add(value2).divide(2);
-        } else {
-            long timeDiff1 = Math.abs(timePoint1.asMillis() - timePoint.asMillis());
-            long timeDiff2 = Math.abs(timePoint2.asMillis() - timePoint.asMillis());
-            acc = value1.multiply(timeDiff2).add(value2.multiply(timeDiff1)).divide(timeDiff1 + timeDiff2);
-        }
-        return acc;
-    }
-
-    private <T extends Timed> com.sap.sse.common.Util.Pair<T, T> getSurroundingFixes(Track<T> track, TimePoint timePoint) {
-        T left = track.getLastFixAtOrBefore(timePoint);
-        T right = track.getFirstFixAtOrAfter(timePoint);
-        com.sap.sse.common.Util.Pair<T, T> result = new com.sap.sse.common.Util.Pair<>(left, right);
-        return result;
     }
 
     private DynamicTrack<AWA> getAwaTrack(String deviceSerialNumber) {

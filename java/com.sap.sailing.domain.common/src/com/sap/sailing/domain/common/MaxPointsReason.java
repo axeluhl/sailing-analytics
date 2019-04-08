@@ -10,49 +10,58 @@ package com.sap.sailing.domain.common;
 public enum MaxPointsReason {
     
     /** The competitor finished the race properly */
-    NONE(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
+    NONE(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ false),
     /** Did Not Start */
-    DNS(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true), 
+    DNS(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ true), 
     /** Did Not Finish */
-    DNF(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
+    DNF(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** DiSQualified */
-    DSQ(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
+    DSQ(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** On Course Side (jumped the gun) */
-    OCS(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
+    OCS(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ true),
     /** Disqualified, non-discardable */
-    DND(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true),
+    DND(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** 20 % penalty under rule 30.2 */
-    ZFP(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
+    ZFP(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ false),
     /** Took a Scoring penalty under rule 44.3 (a) */
-    SCP(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
+    SCP(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ false),
     /** Disqualification not excludable under rule 90.3 (b) */
-    DNE(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true),
+    DNE(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Disqualification for gross misconduct not excludable under rule 90.3 (b) */
-    DGM(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true),
+    DGM(/* discardable */ false, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Redress given */
-    RDG(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
+    RDG(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ false),
     /** Black Flag Disqualified */
-    BFD(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
+    BFD(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ true),
     /** Did Not Compete */
-    DNC(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
+    DNC(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ true),
     /** Retired After Finishing */
-    RAF(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
+    RAF(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Discretionary Penalty Imposed by the race committee */
-    DPI(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false),
+    DPI(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ false),
     /** Retired */
-    RET(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
+    RET(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Uniform Flag Disqualification */
-    UFD(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
+    UFD(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ true),
     /** Time limit Expired */
-    TLE(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true);
+    TLE(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
+    /** Standard Penalty by Race Committee; gives a certain number of penalty points on top of rank-inferred score */
+    STP(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ false, /* appliesAtStartOfRace */ true),
+    /** Disqualified after causing a tangle in an incident */
+    DCT(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
+    /** Retired after causing a tangle */
+    RCT(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false);
     
     private final boolean discardable;
     
     private final boolean advanceCompetitorsTrackedWorse;
+    
+    private final boolean appliesAtStartOfRace;
 
-    private MaxPointsReason(boolean discardable, boolean advanceCompetitorsTrackedWorse) {
+    private MaxPointsReason(boolean discardable, boolean advanceCompetitorsTrackedWorse, boolean appliesAtStartOfRace) {
         this.discardable = discardable;
         this.advanceCompetitorsTrackedWorse = advanceCompetitorsTrackedWorse;
+        this.appliesAtStartOfRace = appliesAtStartOfRace;
     }
 
     public boolean isDiscardable() {
@@ -66,5 +75,9 @@ public enum MaxPointsReason {
      */
     public boolean isAdvanceCompetitorsTrackedWorse() {
         return advanceCompetitorsTrackedWorse;
+    }
+
+    public boolean isAppliesAtStartOfRace() {
+        return appliesAtStartOfRace;
     }
 }

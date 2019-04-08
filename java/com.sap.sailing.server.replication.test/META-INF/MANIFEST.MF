@@ -8,18 +8,18 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sse.replication
 Import-Package: com.rabbitmq.client;version="2.8.4"
 Require-Bundle: com.sap.sailing.server,
+ com.sap.sailing.server.interface,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain,
  com.sap.sailing.domain.test,
  com.sap.sse.mongodb,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.tractracadapter,
  com.tractrac.clientmodule;bundle-version="2.0.0",
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.domain.swisstimingadapter,
  org.json.simple;bundle-version="1.1.0",
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  org.hamcrest;bundle-version="1.1.0",
  com.sap.sailing.polars,
  com.sap.sse.common,
@@ -27,4 +27,9 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.shared.android,
  com.sap.sse.replication.testsupport,
  com.sap.sse.filestorage,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sailing.server.gateway,
+ javax.ws.rs,
+ com.sap.sailing.server.testsupport,
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
+Automatic-Module-Name: com.sap.sailing.server.replication.test

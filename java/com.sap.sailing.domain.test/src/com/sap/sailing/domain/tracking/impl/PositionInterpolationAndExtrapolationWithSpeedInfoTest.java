@@ -5,13 +5,13 @@ import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 
 public class PositionInterpolationAndExtrapolationWithSpeedInfoTest extends PositionInterpolationAndExtrapolationTest<GPSFixMoving> {

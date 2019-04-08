@@ -8,16 +8,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.Assert;
-
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
@@ -30,7 +26,10 @@ import com.sap.sailing.domain.test.measurements.MeasurementCase;
 import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import org.junit.Assert;
 
 public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
@@ -56,7 +55,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
     @Test
     public void testFinder() {
         CandidateFinder f = new CandidateFinderImpl(race);
-        List<GPSFix> fixesAdded = new ArrayList<>();
+        List<GPSFixMoving> fixesAdded = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             GPSFixMoving fix = rndFix();
             race.recordFix(ron, fix);
@@ -67,7 +66,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         time = System.currentTimeMillis() - time;
         result.put("FinderPerformance", time);
         System.out.println(time);
-        Assert.assertTrue("Time expected to be less than 5000ms but was "+time+"ms", time < 5000);
+        Assert.assertTrue("Time expected to be less than 7000ms but was "+time+"ms", time < 7000);
     }
 
     @Test
@@ -75,7 +74,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
         final long time = timeToAddCandidatesToChooser(500, 1, 25);
         System.out.println(time);
         result.put("ChooserPerformance", time);
-        assertTrue(time < 5000);
+        assertTrue("time needs to be less than 15s but was "+time+"ms", time < 15000);
     }
 
     private long timeToAddCandidatesToChooser(int numberOfTimesAdding, int numberToAddEachTime, int numberOfRepititions) {

@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sse.common.TimePoint;
@@ -16,7 +17,7 @@ import com.sap.sse.common.TimePoint;
 public class RaceLogEndOfTrackingEventDeserializer extends BaseRaceLogEventDeserializer implements
         JsonDeserializer<RaceLogEvent> {
 
-    public RaceLogEndOfTrackingEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
+    public RaceLogEndOfTrackingEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer) {
         super(competitorDeserializer);
     }
 

@@ -4,13 +4,14 @@ Bundle-Name: Datamining-Polars-Shared
 Bundle-SymbolicName: com.sap.sailing.polars.datamining.shared
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Require-Bundle: com.sap.sse.datamining.shared,
  com.sap.sailing.domain.common,
- com.sap.sailing.domain;bundle-version="1.0.0",
- com.sap.sse;bundle-version="1.0.0",
- com.sap.sse.common;bundle-version="1.0.0",
+ com.sap.sailing.domain,
+ com.sap.sse,
+ com.sap.sse.common,
  com.sap.sse.datamining.annotations
 Export-Package: com.sap.sailing.polars.datamining.shared
+Automatic-Module-Name: com.sap.sailing.polars.datamining.shared

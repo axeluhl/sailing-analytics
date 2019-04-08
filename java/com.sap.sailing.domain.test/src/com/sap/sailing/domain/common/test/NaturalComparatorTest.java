@@ -27,6 +27,11 @@ public class NaturalComparatorTest {
     public void testCaseInsensitive(){
         assertEquals(0, caseInsensitive.compare("E", "e"));
     }
+    
+    @Test
+    public void testWithAngleBracket() {
+        assertTrue(caseInsensitive.compare("[4.0kn - 7.0kn[ Light breeze", "[11.0kn - 16.0kn[ Moderate breeze")<0);
+    }
 
     @Test 
     public void testCaseInsensitiveIsDifferent(){

@@ -15,7 +15,6 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.impl.RenamableImpl;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -24,6 +23,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.RenamableImpl;
 
 /**
  * A series listens on its columns; however, a veto for column addition isn't done here but in a {@link RegattaLeaderboard}.
@@ -40,6 +40,16 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
+
+    /**
+     * If not {@code null}, defines an upper inclusive limit for the number of races that may be discarded from
+     * this series. For example, when setting this to {@code 1} for a final series in a regatta that has a
+     * qualification and a final series, when the second discard becomes available and the series don't define
+     * their own discarding rules, two discards may be picked from the qualification series, but at most one
+     * could be selected in the final even if another final race has a score worse than that of all
+     * qualification races.
+     */
+    private Integer maximumNumberOfDiscards;
     
     /**
      * If set, the series doesn't take over the scores from any previous series but starts with zero scores for all its
@@ -352,6 +362,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        raceColumnListeners.notifyListenersAboutRaceColumnNameChanged(raceColumn, oldName, newName);
+    }
+
+    @Override
     public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
         raceColumnListeners.notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
     }
@@ -389,6 +404,16 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
             raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldResultDiscardingRule, resultDiscardingRule);
         }
         this.resultDiscardingRule = resultDiscardingRule;
+    }
+
+    @Override
+    public Integer getMaximumNumberOfDiscards() {
+        return maximumNumberOfDiscards;
+    }
+
+    @Override
+    public void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards) {
+        this.maximumNumberOfDiscards = maximumNumberOfDiscards;
     }
 
     @Override

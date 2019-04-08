@@ -5,14 +5,15 @@
 	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
 	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
 	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
-	<title>SAP Sailing Analytics Webservices API Version 1.0 Beta</title>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
 </head>
 <body>
-<h1>SAP Sailing Analytics Webservices API Version 1.0 Beta</h1>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
 <h2>URL: /api/v1/regattas/{regattaname}/races/{racename}/wind</h2>
 
 <b>Description:</b>
-<p>Gets all GPS positions and data values for the wind of a race</p>
+<p>Gets all GPS positions and data values for the wind of a race.<br/>
+All slashes contained within the {regattaname} and {racename} parameters must be replaced by "__" (double underscore).</p>
 <br/>
 <table>
 	<tr>
@@ -26,8 +27,8 @@
 	<tr>
 		<td>Mandatory parameters:</td>
 		<td>
-			<div>regattaname</div>
-			<div>racename</div>
+			<div>fromtime (ISO format, such as 2014-02-14T10:12:03Z) or fromtimeasmillis (time in milliseconds)</div>
+			<div>totime (ISO format, such as 2014-02-14T10:12:03Z) or totimeasmillis (time in milliseconds)</div>
 		</td>
 	</tr>
 	<tr>
@@ -35,10 +36,6 @@
 		<td>
 			<div>windsource [COMBINED = Default, WEB, EXPEDITION, TRACK_BASED_ESTIMATION, COURSE_BASED, RACECOMMITTEE]</div>
 			<div>windsourceid (Id of a wind source. For example Igtimi wind sources will have the type=EXPEDITION but each of them has unique ids. If you want to filter by these then you can use this parameter)</div>
-			<div>fromtime (ISO format, such as 2014-02-14T10:12:03Z)</div>
-			<div>fromtimeasmillis</div>
-			<div>totime (ISO format, such as 2014-02-14T10:12:03Z)</div>
-			<div>totimeasmillis</div>
 		</td>
 	</tr>
 	<tr>

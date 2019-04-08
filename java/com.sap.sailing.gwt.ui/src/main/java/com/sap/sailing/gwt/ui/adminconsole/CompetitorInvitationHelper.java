@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Set;
 
 import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -11,6 +10,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class CompetitorInvitationHelper {
@@ -27,14 +28,13 @@ public class CompetitorInvitationHelper {
 
     public void inviteCompetitors(Set<CompetitorDTO> competitors, String leaderboardName) {
         if (competitors.size() == 0){
-            Window.alert(stringMessages.selectAtLeastOneCompetitorForInvitation());
+            Notification.notify(stringMessages.selectAtLeastOneCompetitorForInvitation(), NotificationType.ERROR);
         } else {
             boolean emailProvidedForAll = isEmailProvidedForAll(competitors);
-
             if (emailProvidedForAll) {
                 openChooseEventDialogAndSendMails(competitors, leaderboardName);
             } else {
-                Window.alert(stringMessages.notAllCompetitorsProvideEmail());
+                Notification.notify(stringMessages.notAllCompetitorsProvideEmail(), NotificationType.ERROR);
             }
         }
     }
@@ -56,18 +56,18 @@ public class CompetitorInvitationHelper {
             public void ok(Pair<EventDTO, String> result) {
                 sailingService.inviteCompetitorsForTrackingViaEmail(result.getB(), result.getA(), leaderboardName,
                         competitors,
-                        stringMessages.appstoreSapSailingInsight(),
-                                stringMessages.playstoreTrackingApp(),
+                        stringMessages.appstoreSapSailInsight(),
+                                stringMessages.playstoreInsightApp(),
                         getLocaleInfo(), new AsyncCallback<Void>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.sendingMailsFailed() + caught.getMessage());
+                                Notification.notify(stringMessages.sendingMailsFailed() + caught.getMessage(), NotificationType.ERROR);
                             }
 
                             @Override
                             public void onSuccess(Void result) {
-                                Window.alert(stringMessages.sendingMailsSuccessful());
+                                Notification.notify(stringMessages.sendingMailsSuccessful(), NotificationType.SUCCESS);
                             }
                         });
             }

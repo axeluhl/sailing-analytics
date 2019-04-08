@@ -2,16 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
 import java.text.DecimalFormat;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
@@ -21,7 +11,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRac
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -29,14 +19,24 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartPathFinderFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFactorFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 public class SetupPanelFragment extends BasePanelFragment {
 
@@ -72,15 +72,13 @@ public class SetupPanelFragment extends BasePanelFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout;
         switch (getArguments().getInt(ARGS_PAGE, 0)) {
-            case 1:
-                layout = inflater.inflate(R.layout.race_panel_setup_hor_2, container, false);
-                break;
+        case 1:
+            layout = inflater.inflate(R.layout.race_panel_setup_hor_2, container, false);
+            break;
 
-            default:
-                layout = inflater.inflate(R.layout.race_panel_setup, container, false);
+        default:
+            layout = inflater.inflate(R.layout.race_panel_setup, container, false);
         }
-
-        mFactorFormat = new DecimalFormat(container.getContext().getString(R.string.race_factor_format));
 
         mStateListener = new RaceStateChangedListener();
         mProcedureListener = new RaceProcedureChangedListener();
@@ -148,6 +146,13 @@ public class SetupPanelFragment extends BasePanelFragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mFactorFormat = new DecimalFormat(getActivity().getString(R.string.race_factor_format));
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
 
@@ -176,10 +181,11 @@ public class SetupPanelFragment extends BasePanelFragment {
                 mButtonRaceGroup.setVisibility(View.GONE);
             }
 
-            if (getRaceState().getRacingProcedure() instanceof RRS26RacingProcedure) {
+            if (getRaceState().getRacingProcedure() instanceof ConfigurableStartModeFlagRacingProcedure) {
                 if (mButtonMode != null) {
-                    RRS26RacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
-                    mButtonMode.setPanelImage(FlagsResources.getFlagDrawable(getActivity(), typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
+                    ConfigurableStartModeFlagRacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
+                    mButtonMode.setPanelImage(FlagsResources.getFlagDrawable(getActivity(),
+                            typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
                     mButtonMode.setVisibility(View.VISIBLE);
                 }
             }
@@ -190,14 +196,16 @@ public class SetupPanelFragment extends BasePanelFragment {
                     mButtonPathfinder.setVisibility(View.VISIBLE);
                 }
                 if (mButtonTiming != null) {
-                    mButtonTiming.setPanelText(RaceHelper.getGateTiming(getActivity(), typedProcedure, getRace().getRaceGroup()));
+                    mButtonTiming.setPanelText(
+                            RaceHelper.getGateTiming(getActivity(), typedProcedure, getRace().getRaceGroup()));
                     mButtonTiming.setVisibility(View.VISIBLE);
                 }
             }
             if (getRaceState().getRacingProcedure() instanceof ESSRacingProcedure) {
                 if (mButtonRaceGroup != null) {
                     mButtonRaceGroup.setVisibility(View.VISIBLE);
-                    mButtonRaceGroup.setPanelSwitch(getRaceState().isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
+                    mButtonRaceGroup.setPanelSwitch(getRaceState().isAdditionalScoringInformationEnabled(
+                            AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
                 }
             }
         }
@@ -224,110 +232,110 @@ public class SetupPanelFragment extends BasePanelFragment {
 
     private void checkStatus() {
         switch (getRace().getStatus()) {
-            case UNSCHEDULED:
-                changeVisibility(mButtonProcedure, false);
-                changeVisibility(mButtonMode, false);
-                changeVisibility(mButtonPathfinder, false);
-                changeVisibility(mButtonTiming, false);
-                changeVisibility(mButtonRaceGroup, false);
-                changeVisibility(mButtonCourse, false);
-                changeVisibility(mButtonWind, false);
-                break;
+        case UNSCHEDULED:
+            changeVisibility(mButtonProcedure, false);
+            changeVisibility(mButtonMode, false);
+            changeVisibility(mButtonPathfinder, false);
+            changeVisibility(mButtonTiming, false);
+            changeVisibility(mButtonRaceGroup, false);
+            changeVisibility(mButtonCourse, false);
+            changeVisibility(mButtonWind, false);
+            break;
 
-            case PRESCHEDULED:
-                changeVisibility(mButtonProcedure, false);
-                changeVisibility(mButtonMode, false);
-                changeVisibility(mButtonPathfinder, false);
-                changeVisibility(mButtonTiming, false);
-                changeVisibility(mButtonRaceGroup, false);
-                changeVisibility(mButtonCourse, false);
-                changeVisibility(mButtonWind, false);
-                break;
+        case PRESCHEDULED:
+            changeVisibility(mButtonProcedure, false);
+            changeVisibility(mButtonMode, false);
+            changeVisibility(mButtonPathfinder, false);
+            changeVisibility(mButtonTiming, false);
+            changeVisibility(mButtonRaceGroup, false);
+            changeVisibility(mButtonCourse, false);
+            changeVisibility(mButtonWind, false);
+            break;
 
-            case SCHEDULED:
-                changeVisibility(mButtonProcedure, false);
-                changeVisibility(mButtonMode, false);
-                changeVisibility(mButtonPathfinder, false);
-                changeVisibility(mButtonTiming, false);
-                changeVisibility(mButtonRaceGroup, false);
-                changeVisibility(mButtonCourse, false);
-                changeVisibility(mButtonWind, false);
-                break;
+        case SCHEDULED:
+            changeVisibility(mButtonProcedure, false);
+            changeVisibility(mButtonMode, false);
+            changeVisibility(mButtonPathfinder, false);
+            changeVisibility(mButtonTiming, false);
+            changeVisibility(mButtonRaceGroup, false);
+            changeVisibility(mButtonCourse, false);
+            changeVisibility(mButtonWind, false);
+            break;
 
-            case STARTPHASE:
-                changeVisibility(mButtonProcedure, true);
-                changeVisibility(mButtonMode, true);
-                changeVisibility(mButtonPathfinder, true);
-                changeVisibility(mButtonTiming, true);
-                changeVisibility(mButtonRaceGroup, true);
-                changeVisibility(mButtonCourse, false);
-                changeVisibility(mButtonWind, false);
-                break;
+        case STARTPHASE:
+            changeVisibility(mButtonProcedure, true);
+            changeVisibility(mButtonMode, true);
+            changeVisibility(mButtonPathfinder, true);
+            changeVisibility(mButtonTiming, true);
+            changeVisibility(mButtonRaceGroup, true);
+            changeVisibility(mButtonCourse, false);
+            changeVisibility(mButtonWind, false);
+            break;
 
-            case RUNNING:
-                changeVisibility(mButtonProcedure, true);
-                changeVisibility(mButtonMode, true);
-                changeVisibility(mButtonPathfinder, true);
-                changeVisibility(mButtonTiming, true);
-                changeVisibility(mButtonRaceGroup, true);
-                changeVisibility(mButtonCourse, false);
-                changeVisibility(mButtonWind, false);
+        case RUNNING:
+            changeVisibility(mButtonProcedure, true);
+            changeVisibility(mButtonMode, true);
+            changeVisibility(mButtonPathfinder, true);
+            changeVisibility(mButtonTiming, true);
+            changeVisibility(mButtonRaceGroup, true);
+            changeVisibility(mButtonCourse, false);
+            changeVisibility(mButtonWind, false);
 
-                uncheckMarker(mButtonProcedure);
-                uncheckMarker(mButtonMode);
-                uncheckMarker(mButtonPathfinder);
-                uncheckMarker(mButtonTiming);
-                break;
+            uncheckMarker(mButtonProcedure);
+            uncheckMarker(mButtonMode);
+            uncheckMarker(mButtonPathfinder);
+            uncheckMarker(mButtonTiming);
+            break;
 
-            case FINISHING:
-                changeVisibility(mButtonProcedure, true);
-                changeVisibility(mButtonMode, true);
-                changeVisibility(mButtonPathfinder, true);
-                changeVisibility(mButtonTiming, true);
-                changeVisibility(mButtonRaceGroup, true);
-                changeVisibility(mButtonCourse, true);
-                changeVisibility(mButtonWind, false);
+        case FINISHING:
+            changeVisibility(mButtonProcedure, true);
+            changeVisibility(mButtonMode, true);
+            changeVisibility(mButtonPathfinder, true);
+            changeVisibility(mButtonTiming, true);
+            changeVisibility(mButtonRaceGroup, true);
+            changeVisibility(mButtonCourse, true);
+            changeVisibility(mButtonWind, false);
 
-                uncheckMarker(mButtonProcedure);
-                uncheckMarker(mButtonMode);
-                uncheckMarker(mButtonPathfinder);
-                uncheckMarker(mButtonTiming);
-                uncheckMarker(mButtonCourse);
-                break;
+            uncheckMarker(mButtonProcedure);
+            uncheckMarker(mButtonMode);
+            uncheckMarker(mButtonPathfinder);
+            uncheckMarker(mButtonTiming);
+            uncheckMarker(mButtonCourse);
+            break;
 
-            case FINISHED:
-                changeVisibility(mButtonProcedure, false);
-                changeVisibility(mButtonMode, false);
-                changeVisibility(mButtonPathfinder, false);
-                changeVisibility(mButtonTiming, false);
-                changeVisibility(mButtonRaceGroup, false);
-                changeVisibility(mButtonCourse, false);
-                changeVisibility(mButtonWind, false);
+        case FINISHED:
+            changeVisibility(mButtonProcedure, false);
+            changeVisibility(mButtonMode, false);
+            changeVisibility(mButtonPathfinder, false);
+            changeVisibility(mButtonTiming, false);
+            changeVisibility(mButtonRaceGroup, false);
+            changeVisibility(mButtonCourse, false);
+            changeVisibility(mButtonWind, false);
 
-                uncheckMarker(mButtonProcedure);
-                uncheckMarker(mButtonMode);
-                uncheckMarker(mButtonPathfinder);
-                uncheckMarker(mButtonTiming);
-                uncheckMarker(mButtonCourse);
-                uncheckMarker(mButtonWind);
-                break;
+            uncheckMarker(mButtonProcedure);
+            uncheckMarker(mButtonMode);
+            uncheckMarker(mButtonPathfinder);
+            uncheckMarker(mButtonTiming);
+            uncheckMarker(mButtonCourse);
+            uncheckMarker(mButtonWind);
+            break;
 
-            default:
-                changeVisibility(mButtonProcedure, true);
-                changeVisibility(mButtonMode, true);
-                changeVisibility(mButtonPathfinder, true);
-                changeVisibility(mButtonTiming, true);
-                changeVisibility(mButtonRaceGroup, true);
-                changeVisibility(mButtonCourse, true);
-                changeVisibility(mButtonWind, true);
+        default:
+            changeVisibility(mButtonProcedure, true);
+            changeVisibility(mButtonMode, true);
+            changeVisibility(mButtonPathfinder, true);
+            changeVisibility(mButtonTiming, true);
+            changeVisibility(mButtonRaceGroup, true);
+            changeVisibility(mButtonCourse, true);
+            changeVisibility(mButtonWind, true);
 
-                uncheckMarker(mButtonProcedure);
-                uncheckMarker(mButtonMode);
-                uncheckMarker(mButtonProcedure);
-                uncheckMarker(mButtonTiming);
-                uncheckMarker(mButtonCourse);
-                uncheckMarker(mButtonWind);
-                break;
+            uncheckMarker(mButtonProcedure);
+            uncheckMarker(mButtonMode);
+            uncheckMarker(mButtonProcedure);
+            uncheckMarker(mButtonTiming);
+            uncheckMarker(mButtonCourse);
+            uncheckMarker(mButtonWind);
+            break;
         }
     }
 
@@ -340,31 +348,41 @@ public class SetupPanelFragment extends BasePanelFragment {
     private void uncheckMarker(PanelButton view) {
         if (isAdded()) {
             if (mButtonProcedure != null && !mButtonProcedure.equals(view)) {
-                resetFragment(mButtonProcedure.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartProcedureFragment.class);
+                resetFragment(mButtonProcedure.isLocked(),
+                        getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false),
+                        StartProcedureFragment.class);
                 mButtonProcedure.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonMode != null && !mButtonMode.equals(view)) {
-                resetFragment(mButtonMode.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), LineStartModeFragment.class);
+                resetFragment(mButtonMode.isLocked(),
+                        getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartModeFragment.class);
                 mButtonMode.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonPathfinder != null && !mButtonPathfinder.equals(view)) {
-                resetFragment(mButtonPathfinder.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), GateStartPathFinderFragment.class);
+                resetFragment(mButtonPathfinder.isLocked(),
+                        getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false),
+                        GateStartPathFinderFragment.class);
                 mButtonPathfinder.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonTiming != null && !mButtonTiming.equals(view)) {
-                resetFragment(mButtonTiming.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), GateStartTimingFragment.class);
+                resetFragment(mButtonTiming.isLocked(),
+                        getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false),
+                        GateStartTimingFragment.class);
                 mButtonTiming.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonFactor != null && !mButtonFactor.equals(view)) {
-                resetFragment(mButtonFactor.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), RaceFactorFragment.class);
+                resetFragment(mButtonFactor.isLocked(),
+                        getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), RaceFactorFragment.class);
                 mButtonFactor.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonCourse != null && !mButtonCourse.equals(view)) {
-                resetFragment(mButtonCourse.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), CourseFragment.class);
+                resetFragment(mButtonCourse.isLocked(),
+                        getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), CourseFragment.class);
                 mButtonCourse.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonWind != null && !mButtonWind.equals(view)) {
-                resetFragment(mButtonWind.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), WindFragment.class);
+                resetFragment(mButtonWind.isLocked(),
+                        getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), WindFragment.class);
                 mButtonWind.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
         }
@@ -379,7 +397,6 @@ public class SetupPanelFragment extends BasePanelFragment {
             state.getRacingProcedure().addChangedListener(mProcedureListener);
 
             refreshPanel();
-            uncheckMarker(null);
         }
 
         @Override
@@ -387,7 +404,6 @@ public class SetupPanelFragment extends BasePanelFragment {
             super.onCourseDesignChanged(state);
 
             refreshPanel();
-            uncheckMarker(null);
         }
 
         @Override
@@ -395,7 +411,6 @@ public class SetupPanelFragment extends BasePanelFragment {
             super.onWindFixChanged(state);
 
             refreshPanel();
-            uncheckMarker(null);
         }
 
         @Override
@@ -403,24 +418,16 @@ public class SetupPanelFragment extends BasePanelFragment {
             super.onStatusChanged(state);
 
             checkStatus();
-            uncheckMarker(null);
         }
     }
 
     private class RaceProcedureChangedListener extends BaseRacingProcedureChangedListener {
-
-        private PanelButton mView;
-
-        public RaceProcedureChangedListener() {
-            mView = new PanelButton(getActivity());
-        }
 
         @Override
         public void onActiveFlagsChanged(ReadonlyRacingProcedure racingProcedure) {
             super.onActiveFlagsChanged(racingProcedure);
 
             refreshPanel();
-            uncheckMarker(mView);
         }
     }
 
@@ -430,19 +437,20 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
+                    AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE);
             switch (view.toggleMarker()) {
-                case PanelButton.LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
+            case PanelButton.LEVEL_NORMAL:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
 
-                case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(StartProcedureFragment.newInstance(BaseFragment.START_MODE_PLANNED));
-                    break;
+            case PanelButton.LEVEL_TOGGLED:
+                replaceFragment(StartProcedureFragment.newInstance(BaseFragment.START_MODE_PLANNED));
+                break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                    break;
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
+                break;
             }
             view.disableToggle();
         }
@@ -459,18 +467,19 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
+                    AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE);
             switch (view.toggleMarker()) {
-                case PanelButton.LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
+            case PanelButton.LEVEL_NORMAL:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
 
-                case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(LineStartModeFragment.newInstance(LineStartModeFragment.START_MODE_PLANNED));
-                    break;
+            case PanelButton.LEVEL_TOGGLED:
+                replaceFragment(StartModeFragment.newInstance(StartModeFragment.START_MODE_PLANNED));
+                break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             view.disableToggle();
         }
@@ -487,18 +496,20 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
+                    AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER);
             switch (view.toggleMarker()) {
-                case PanelButton.LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
+            case PanelButton.LEVEL_NORMAL:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
 
-                case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(GateStartPathFinderFragment.newInstance(GateStartPathFinderFragment.START_MODE_PLANNED));
-                    break;
+            case PanelButton.LEVEL_TOGGLED:
+                replaceFragment(
+                        GateStartPathFinderFragment.newInstance(GateStartPathFinderFragment.START_MODE_PLANNED));
+                break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             view.disableToggle();
         }
@@ -515,18 +526,19 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
+                    AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING);
             switch (view.toggleMarker()) {
-                case PanelButton.LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
+            case PanelButton.LEVEL_NORMAL:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
 
-                case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(GateStartTimingFragment.newInstance(GateStartTimingFragment.START_MODE_PLANNED));
-                    break;
+            case PanelButton.LEVEL_TOGGLED:
+                replaceFragment(GateStartTimingFragment.newInstance(GateStartTimingFragment.START_MODE_PLANNED));
+                break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             view.disableToggle();
         }
@@ -546,7 +558,8 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onChangedSwitch(PanelButton view, boolean isChecked) {
-            getRaceState().setAdditionalScoringInformationEnabled(MillisecondsTimePoint.now(), /*enable*/isChecked, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
+            getRaceState().setAdditionalScoringInformationEnabled(MillisecondsTimePoint.now(), /* enable */isChecked,
+                    AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         }
     }
 
@@ -555,18 +568,19 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_FACTOR);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
+                    AppConstants.INTENT_ACTION_TOGGLE_FACTOR);
             switch (view.toggleMarker()) {
-                case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
+            case LEVEL_NORMAL:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
 
-                case LEVEL_TOGGLED:
-                    replaceFragment(RaceFactorFragment.newInstance(BaseFragment.START_MODE_PLANNED));
-                    break;
+            case LEVEL_TOGGLED:
+                replaceFragment(RaceFactorFragment.newInstance(BaseFragment.START_MODE_PLANNED));
+                break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             view.disableToggle();
         }
@@ -582,18 +596,19 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COURSE);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
+                    AppConstants.INTENT_ACTION_TOGGLE_COURSE);
             switch (view.toggleMarker()) {
-                case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
+            case LEVEL_NORMAL:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
 
-                case LEVEL_TOGGLED:
-                    replaceFragment(CourseFragment.newInstance(BaseFragment.START_MODE_PLANNED, preferences));
-                    break;
+            case LEVEL_TOGGLED:
+                replaceFragment(CourseFragment.newInstance(BaseFragment.START_MODE_PLANNED, preferences));
+                break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             view.disableToggle();
         }
@@ -609,18 +624,19 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onClick(PanelButton view) {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_WIND);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
+                    AppConstants.INTENT_ACTION_TOGGLE_WIND);
             switch (view.toggleMarker()) {
-                case LEVEL_NORMAL:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    break;
+            case LEVEL_NORMAL:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                break;
 
-                case LEVEL_TOGGLED:
-                    replaceFragment(WindFragment.newInstance(BaseFragment.START_MODE_PLANNED));
-                    break;
+            case LEVEL_TOGGLED:
+                replaceFragment(WindFragment.newInstance(BaseFragment.START_MODE_PLANNED));
+                break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            default:
+                ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             view.disableToggle();
         }
@@ -643,22 +659,31 @@ public class SetupPanelFragment extends BasePanelFragment {
             if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
                 if (intent.getExtras() != null) {
                     String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                    if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE.equals(data)) {
+                    switch (data) {
+                    case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE:
                         uncheckMarker(mButtonProcedure);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE.equals(data)) {
+                        break;
+                    case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE:
                         uncheckMarker(mButtonMode);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER.equals(data)) {
+                        break;
+                    case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER:
                         uncheckMarker(mButtonPathfinder);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING.equals(data)) {
+                        break;
+                    case AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING:
                         uncheckMarker(mButtonTiming);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_FACTOR.equals(data)) {
+                        break;
+                    case AppConstants.INTENT_ACTION_TOGGLE_FACTOR:
                         uncheckMarker(mButtonFactor);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_COURSE.equals(data)) {
+                        break;
+                    case AppConstants.INTENT_ACTION_TOGGLE_COURSE:
                         uncheckMarker(mButtonCourse);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_WIND.equals(data)) {
+                        break;
+                    case AppConstants.INTENT_ACTION_TOGGLE_WIND:
                         uncheckMarker(mButtonWind);
-                    } else {
+                        break;
+                    default:
                         uncheckMarker(null);
+                        break;
                     }
                 }
             }

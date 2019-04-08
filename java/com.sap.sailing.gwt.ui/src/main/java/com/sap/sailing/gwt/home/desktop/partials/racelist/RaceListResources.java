@@ -1,14 +1,20 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
+import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
 
-public interface RaceListResources extends ClientBundle {
+public interface RaceListResources extends SharedDesktopResources {
     public static final RaceListResources INSTANCE = GWT.create(RaceListResources.class);
 
     @Source("RaceList.gss")
     LocalCss css();
+    
+    @Source("windkompass_nord.svg")
+    @MimeType("image/svg+xml")
+    DataResource compass();
 
     public interface LocalCss extends CssResource {
         String race();
@@ -22,7 +28,6 @@ public interface RaceListResources extends ClientBundle {
         String race_itemwind();
         String race_itemname();
         String race_itemwinner();
-        String race_item_flag();
         String race_item_position();
         String race_item_sailid();
         String race_item_winner();
@@ -51,5 +56,11 @@ public interface RaceListResources extends ClientBundle {
 
         String racesListIcon();
         String racesListHideColumn();
+        
+        String iconGPS();
+        String iconWind();
+        String iconVideo();
+        String iconAudio();
+        String legend();
     }
 }

@@ -18,8 +18,6 @@ public interface RaceLogEventVisitor {
 
     public void visit(RaceLogStartTimeEvent event);
 
-    public void visit(RaceLogCourseAreaChangedEvent event);
-    
     public void visit(RaceLogCourseDesignChangedEvent event);
     
     public void visit(RaceLogFinishPositioningListChangedEvent event);
@@ -39,7 +37,7 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogDenoteForTrackingEvent event);
     
     public void visit(RaceLogStartTrackingEvent event);
-    
+
     public void visit(RaceLogRegisterCompetitorEvent event);
 
     public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation);
@@ -55,4 +53,6 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogEndOfTrackingEvent event);
 
     public void visit(RaceLogUseCompetitorsFromRaceLogEvent event);
+
+    public void visit(RaceLogTagEvent event);
 }

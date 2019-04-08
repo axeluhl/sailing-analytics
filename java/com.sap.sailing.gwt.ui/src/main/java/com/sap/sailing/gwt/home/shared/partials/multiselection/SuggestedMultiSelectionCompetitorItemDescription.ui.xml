@@ -1,0 +1,17 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources" />
+    <ui:style>
+        .imageSize {
+            width: 1.666666666666667em !important;
+            height: 2em !important;
+        }
+    </ui:style>
+    <div>
+        <div class="{local_res.css.suggestionsItemDescriptionImage} {style.imageSize}" ui:field="flagImageUi"></div>
+        <span class="{local_res.css.suggestionsItemDescriptionId}" ui:field="sailIdUi"></span>
+        <span ui:field="nameUi"></span>
+    </div>
+</ui:UiBinder> 

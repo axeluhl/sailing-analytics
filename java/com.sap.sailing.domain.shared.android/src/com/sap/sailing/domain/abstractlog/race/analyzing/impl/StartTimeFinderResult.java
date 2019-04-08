@@ -7,6 +7,14 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
+/**
+ * The result of a {@link StartTimeFinder} that tells about the dependencies through which the start time
+ * may be resolved from other races, reasons for the failure to resolve a start time and the actual start
+ * time as obtained immediately or transitively through a chain of dependencies.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class StartTimeFinderResult {
     public static enum ResolutionFailed { RACE_LOG_UNRESOLVED, CYCLIC_DEPENDENCY, NO_START_TIME_SET };
     
@@ -19,7 +27,7 @@ public class StartTimeFinderResult {
     private final ResolutionFailed resolutionFailed;
     
     private Duration startTimeDiff;
-
+    
     public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff) {
         this(racesDependingOn, startTime, startTimeDiff, /* resolutionFailed */ null);
     }
@@ -40,6 +48,9 @@ public class StartTimeFinderResult {
         this(/* racesDependingOn */ Collections.<SimpleRaceLogIdentifier>emptyList(), startTime, startTimeDiff);
     }
 
+    /**
+     * @return {@code null} if the start time was resolved; a reason for failure to resolve otherwise
+     */
     public ResolutionFailed getResolutionFailed() {
         return resolutionFailed;
     }

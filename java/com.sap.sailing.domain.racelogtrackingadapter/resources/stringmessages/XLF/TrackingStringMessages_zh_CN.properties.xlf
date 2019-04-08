@@ -1,63 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-05-19T09:39:27Z" original="/usr/sap/ljs/app/Converter_5483050776164983/java/com.sap.sailing.domain.racelogtrackingadapter/resources/stringmessages/TrackingStringMessages.properties" source-language="en" target-language="zh-CN">
+	<file datatype="javapropertyresourcebundle" date="2017-01-12T14:35:06Z" original="/usr/sap/ljs/app/Converter_7335190261158680380/java/com.sap.sailing.domain.racelogtrackingadapter/resources/stringmessages/TrackingStringMessages.properties" source-language="en" target-language="zh-CN">
 		<header>
 			<skl>
-				<internal-file crc="cdbdcb19e10086d34f715e2a7da26eef" form="base64">H4sIAAAAAAAAAF2RTU/DMAyG7/0VvnGZEGekHgYSUiVgY+3gnLXeajWNo9jbqBD/naQtbOLm+PXH+zgaTN2ROxTuRGqU2D1xyKs5C5c07DlkUhv3tnnkBlfhnYR0G2zFGzyQKIal5C+mQ5BjQBj4CK05IWiL8HX3DUvvgZyosRabW6hadJDmjQV7tpbPaeM0HjhAbanuRtWS6+AoSY5jA0hvgvqWXZzOEOb1YCQ7o625x4rzjymKBRmtyq1gkLzU2AfxmcxkxjWBqbmWllNqkm2c6SL7Ce0wwlYtyXO0khf7Ec9EzICmSb40atAbssATUYMnqhHOpO34TvjGpvLhcoYFCPXeDjPrDuMREpIkN/fZ7shDha7BkKcQdIwz432pHLCYxlT4qclSw+5GLzdPCwfUBXiLRvB36X1qL1jyuftyDu9n/D/p+hzJwDqSxm/2/tX0mJfLNZSROOE/JHuTnEnMFa6kQ6v/S2HOZz95rIJYdwIAAA==</internal-file>
+				<internal-file crc="064477f4b22ea4cc8cbdaab36795b9a4" form="base64">H4sIAAAAAAAAAF1RQU7DQAy85xW+cakQ50o5FCSkSEBLk8J5m7iN1c16tXZbIsTf2U1SWnHzzjjjmYkGUx/I7Qt3IjVK7J455NWEwhWGHYdMauPe10/c4DJ8kJBugq14jXsSxbCQ/NUcEOQYEHo+QmtOCNoifD/8wMJ7ICdqrMXmHqoWHSS9YWHH1vI5XRzlgQPUlurDwFpyBzhKoqNsAOlMUN+yi+oMYToPRrIz2po7rDj/HKe4kNGy3AgGyUuN30F8JjOZcU1gam6pxQiNtI2aLmY/oe2HsFVL8hKt5MVuiGdizICmSb40ctAZssBjogZPVCOcSdvhneIbm9b7aw0zEOq87aesW4wlpEiS3Myz7ZH7Cl2DIU8j6DBnxvtSOWAxylT4pRdLDbs7vfaejvaoM/AWjeDl8DxJFCz5pHCtxPupgj/qtpJkYhXTxl/t/ZvpMC8XKyhj6lTBY7I40plErHAl7Vv9vwoTnv0Cs+RzW3sCAAA=</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-05-11T12:28:05Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2016-12-16T08:45:26Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
 		<body>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="trackingInvitationFor" resname="trackingInvitationFor">
 				<source>Tracking Invitation for</source>
-				<target>跟踪邀请 - </target>
+				<target state="signed-off">跟踪邀请 - </target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="scanQRCodeOrVisitUrlToRegisterAs" resname="scanQRCodeOrVisitUrlToRegisterAs">
 				<source>Make sure you have the <ph id="1">{0}</ph> App installed. Then scan the following QRCode or click the link using your smartphone to register as</source>
-				<target>确保已安装 <ph id="1">{0}</ph> 应用。然后，使用智能手机扫描以下二维码或点击链接注册</target>
+				<target state="signed-off">确保已安装 <ph id="1">{0}</ph> 应用。然后，使用智能手机扫描以下二维码或点击链接注册</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="welcomeTo" resname="welcomeTo">
 				<source>Welcome to</source>
-				<target>欢迎使用</target>
+				<target state="signed-off">欢迎使用</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="iOSUsers" resname="iOSUsers">
 				<source>Start iOS App</source>
-				<target>启动 iOS 应用</target>
+				<target state="signed-off">启动 iOS 应用</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="androidUsers" resname="androidUsers">
 				<source>Start Android App</source>
-				<target>启动 Android 应用</target>
+				<target state="signed-off">启动 Android 应用</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="alternativelyVisitThisLink" resname="alternativelyVisitThisLink">
 				<source>If you are reading this mail on the device with the App already installed, simply click below to start:</source>
-				<target>如果在已安装该应用的设备中读取邮件，只需点击以下链接即可启动：</target>
+				<target state="signed-off">如果在已安装该应用的设备中读取邮件，只需点击以下链接即可启动：</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="buoyTender" resname="buoyTender">
 				<source>buoy tender</source>
-				<target>浮标供应船</target>
+				<target state="signed-off">浮标供应船</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appStoreInstallText" resname="appStoreInstallText">
-				<source>If don't have the App yet, please install:</source>
-				<target>如果尚无该应用，请安装：</target>
+				<source>If you don't have the App yet, please install:</source>
+				<target state="translated">如果您尚无该应用，请安装：</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appIos" resname="appIos">
 				<source>Install iOS App</source>
-				<target>安装 iOS 应用</target>
+				<target state="signed-off">安装 iOS 应用</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appAndroid" resname="appAndroid">
 				<source>Install Android App</source>
-				<target>安装 Android 应用</target>
+				<target state="signed-off">安装 Android 应用</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="buoyPingerAppName" resname="buoyPingerAppName">
 				<source>SAP Sailing Buoy Pinger</source>
-				<target>SAP Sailing Buoy Pinger</target>
+				<target state="signed-off">SAP Sailing Buoy Pinger</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sailInSightAppName" resname="sailInSightAppName">
 				<source>SAP Sail InSight</source>
-				<target>SAP Sail InSight</target>
+				<target state="signed-off">SAP Sail InSight</target>
 			</trans-unit>
 		</body>
 	</file>

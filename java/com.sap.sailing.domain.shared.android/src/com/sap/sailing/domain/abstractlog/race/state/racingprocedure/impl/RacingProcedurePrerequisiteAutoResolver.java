@@ -4,7 +4,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite.Resolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl.GateLaunchTimePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl.PathfinderPrerequisite;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl.StartmodePrerequisite;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl.StartModePrerequisite;
 
 /**
  * Always calls {@link RacingProcedurePrerequisite#fulfillWithDefault()}.
@@ -22,13 +22,11 @@ public class RacingProcedurePrerequisiteAutoResolver implements Resolver {
     }
 
     @Override
-    public void fulfill(StartmodePrerequisite prerequisite) {
+    public void fulfill(StartModePrerequisite prerequisite) {
         prerequisite.fulfillWithDefault();
     }
 
     @Override
     public void onFulfilled() {
-        
     }
-
 }

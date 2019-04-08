@@ -1,16 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.utils;
 
-import java.util.ArrayList;
-import java.util.Locale;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.support.v4.content.ContextCompat;
 
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
+
+import java.util.ArrayList;
+import java.util.Locale;
 
 public class FlagsResources {
 
@@ -91,7 +89,7 @@ public class FlagsResources {
             break;
 
         case INDIA_ZULU:
-            flag = "flag_india_zulu_96dp_" + AppPreferences.on(context).getTheme();
+            flag = "flag_india_zulu_96dp";
             outline = null; // because of custom xml
             break;
 
@@ -105,8 +103,43 @@ public class FlagsResources {
             outline = outline.replace("XX", "01");
             break;
 
+        case OSCAR:
+            flag = "flag_oscar_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
         case PAPA:
             flag = "flag_papa_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_FIVE:
+            flag = "flag_swc_five_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_FOUR:
+            flag = "flag_swc_four_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_ONE:
+            flag = "flag_swc_one_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_THREE:
+            flag = "flag_swc_three_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_TWO:
+            flag = "flag_swc_two_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
+        case SWC_ZERO:
+            flag = "flag_swc_zero_" + size + "dp";
             outline = outline.replace("XX", "01");
             break;
 
@@ -132,7 +165,7 @@ public class FlagsResources {
 
         result.add(context.getResources().getIdentifier(flag, "drawable", context.getPackageName()));
 
-        if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(context).getTheme()) && outline != null) {
+        if (outline != null) {
             result.add(context.getResources().getIdentifier(outline, "drawable", context.getPackageName()));
         }
 

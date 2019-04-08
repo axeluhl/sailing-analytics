@@ -29,13 +29,11 @@ public class RectField implements VectorField {
 
     private final double maxLength;
     private final double particleFactor;
-    private final String[] colorsForSpeeds;
 
     private final CoordinateSystem coordinateSystem;
 
     public RectField(Vector[][] field, double x0, double y0, double x1, double y1, StreamletParameters parameters, CoordinateSystem coordinateSystem) {
         this.coordinateSystem = coordinateSystem;
-        colorsForSpeeds = createColorsForSpeeds();
         this.x0 = x0;
         this.x1 = x1;
         this.y0 = y0;
@@ -64,7 +62,7 @@ public class RectField implements VectorField {
     }
 
     public static RectField read(String jsonData, boolean correctForSphere, StreamletParameters parameters, CoordinateSystem coordinateSystem) {
-        JSONObject data = JSONParser.parseLenient(jsonData).isObject();
+        JSONObject data = JSONParser.parseStrict(jsonData).isObject();
         int w = (int) data.get("gridWidth").isNumber().doubleValue();
         int h = (int) data.get("gridHeight").isNumber().doubleValue();
         Vector[][] field = new Vector[w][h];
@@ -146,26 +144,6 @@ public class RectField implements VectorField {
     @Override
     public double getParticleWeight(LatLng p, Vector v) {
         return v == null ? 0 : (1.0 - v.length() / this.maxLength);
-    }
-    
-    @Override
-    public String getColor(double speed) {
-        return colorsForSpeeds[getIntensity(speed)];
-    }
-
-    private String[] createColorsForSpeeds() {
-        String[] colors = new String[256];
-        double alpha = 1.0;
-        int greyValue = 255;
-        for (int i = 0; i < 256; i++) {
-            colors[i] = "rgba(" + (greyValue) + "," + (greyValue) + "," + (greyValue) + "," + (alpha * i / 255.0) + ")";
-        }
-        return colors;
-    }
-
-    private int getIntensity(double speed) {
-        double s = speed / maxLength;
-        return (int) Math.min(255, 90 + Math.round(350 * s));
     }
 
     @Override

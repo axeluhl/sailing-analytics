@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
-import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 
@@ -112,9 +112,9 @@ public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServ
         receiver.addListener(listener, validMessagesOnly);
     }
     
-    private ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory> createExpeditionTrackerFactory(BundleContext context) {
-        ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory> result = new ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory>(
-                getContext(), ExpeditionWindTrackerFactory.class.getName(), null);
+    private ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> createExpeditionTrackerFactory(BundleContext context) {
+        ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> result = new ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory>(
+                getContext(), ExpeditionTrackerFactory.class.getName(), null);
         result.open();
         return result;
     }

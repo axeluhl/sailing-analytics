@@ -7,6 +7,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
+import com.sap.sse.security.ui.authentication.resource.SharedAuthenticationResources;
 
 /**
  * Base view class of the user header. This class implements the shared logic of the desktop and mobile
@@ -30,7 +31,7 @@ public class AbstractUserHeader extends Composite implements NeedsAuthentication
         // TODO correct message
 //        imageUi.setTitle("TODO picture of: " + currentUser.getName());
         // TODO use image from user when field is available
-        imageUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
+        imageUi.getStyle().setBackgroundImage("url('" + SharedAuthenticationResources.INSTANCE.userdefault().getSafeUri().asString() + "')");
         
         titleUi.setInnerText(authenticationContext.getUserTitle());
         subtitleUi.setInnerText(authenticationContext.getUserSubtitle());

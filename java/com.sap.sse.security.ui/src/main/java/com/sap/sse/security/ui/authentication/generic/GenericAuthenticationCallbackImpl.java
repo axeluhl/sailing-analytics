@@ -5,6 +5,13 @@ import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 
+/**
+ * Implementation of {@link AuthenticationCallback} to be used with {@link GenericAuthentication}.
+ *
+ * This implementation ensures that the logged in Info is shown inline in the flyout while the user profile page is
+ * opened in a new tab/window using the link provided by the {@link GenericAuthenticationLinkFactory} given to the
+ * constructor.
+ */
 class GenericAuthenticationCallbackImpl implements AuthenticationCallback {
     
     private final GenericAuthenticationLinkFactory linkFactory;

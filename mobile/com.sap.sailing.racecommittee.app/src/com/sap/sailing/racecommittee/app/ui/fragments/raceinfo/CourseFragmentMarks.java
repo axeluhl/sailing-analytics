@@ -1,32 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import android.app.FragmentManager;
 import android.content.DialogInterface;
-import android.content.Loader;
-import android.graphics.drawable.NinePatchDrawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.decoration.ItemShadowDecorator;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
-import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
-import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -48,34 +35,39 @@ import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithId
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.HolderAwareOnDragListener;
+import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.ItemTouchHelperCallback;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseMarksDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.EventListener, CourseElementAdapter.ItemClick {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+public class CourseFragmentMarks extends CourseFragment
+        implements CourseMarkAdapter.MarkClick, HolderAwareOnDragListener {
 
     private static final String EACH_WAYPOINT_NEEDS_PASSING_INSTRUCTIONS = "Each waypoint needs passing instructions";
     private static final String MISSING_SECOND_MARK = "Missing second mark";
     private ReadonlyDataManager mDataManager;
-    private RecyclerViewDragDropManager mDragDropManager;
-    private RecyclerViewSwipeManager mSwipeManager;
-    private RecyclerViewTouchActionGuardManager mGuardManager;
     private ArrayList<CourseListDataElementWithIdImpl> mHistory;
     private ArrayList<CourseListDataElementWithIdImpl> mElements;
     private ArrayList<Mark> mMarks;
     private RecyclerView mHistoryCourse;
     private RecyclerView mCurrentCourse;
     private CourseElementAdapter mHistoryAdapter;
-    private RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> mCourseAdapter;
+    private CourseElementAdapter mCourseAdapter;
     private CourseMarksDialogFragment mMarksDialog;
+    private ItemTouchHelper mItemTouchHelper;
     private int mId;
     private Button mReset;
 
     public CourseFragmentMarks() {
         super();
-
         mId = 0;
         mHistory = new ArrayList<>();
         mElements = new ArrayList<>();
@@ -93,13 +85,12 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
-
         mReset = (Button) layout.findViewById(R.id.resetCourse);
         if (mReset != null) {
             mReset.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setTitle(mReset.getText());
                     if (mReset.getTag() != null) {
                         builder.setMessage(getString(R.string.reset_message_1));
@@ -118,7 +109,8 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                if (getRace().getCourseDesign() != null && !getString(R.string.unpublished_course).equals(getRace().getCourseDesign().getName())) {
+                                if (getRace().getCourseDesign() != null && !getString(R.string.unpublished_course)
+                                        .equals(getRace().getCourseDesign().getName())) {
                                     fillCourseElement();
                                 } else {
                                     copyPreviousToNewCourseDesign();
@@ -131,54 +123,28 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                 }
             });
         }
-
         mHistoryCourse = (RecyclerView) layout.findViewById(R.id.previous_course);
         if (mHistoryCourse != null) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             mHistoryCourse.setLayoutManager(layoutManager);
 
-            mHistoryAdapter = new CourseElementAdapter(getActivity(), mHistory, ESSMarkImageHelper.getInstance(getActivity()), false);
+            mHistoryAdapter = new CourseElementAdapter(getActivity(), mHistory,
+                    ESSMarkImageHelper.getInstance(getActivity()), false, this);
             mHistoryCourse.setAdapter(mHistoryAdapter);
         }
-
         mCurrentCourse = ViewHelper.get(layout, R.id.new_course);
         if (mCurrentCourse != null) {
-            mGuardManager = new RecyclerViewTouchActionGuardManager();
-            mGuardManager.setInterceptVerticalScrollingWhileAnimationRunning(true);
-            mGuardManager.setEnabled(true);
 
-            mDragDropManager = new RecyclerViewDragDropManager();
-            NinePatchDrawable drawable = (NinePatchDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.material_shadow_z3);
-            mDragDropManager.setDraggingItemShadowDrawable(drawable);
+            mCourseAdapter = new CourseElementAdapter(getActivity(), mElements,
+                    ESSMarkImageHelper.getInstance(getActivity()), true, this);
+            mCourseAdapter.setDragListener(this);
 
-            mSwipeManager = new RecyclerViewSwipeManager();
-
-            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-
-            CourseElementAdapter adapter = new CourseElementAdapter(getActivity(), mElements, ESSMarkImageHelper.getInstance(getActivity()), true);
-            adapter.setItemClickListener(this);
-            adapter.setEventListener(this);
-
-            @SuppressWarnings("unchecked")
-            RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> dragAdapter = mDragDropManager.createWrappedAdapter(adapter);
-            mCourseAdapter = dragAdapter;
-
-            @SuppressWarnings("unchecked")
-            RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mCourseAdapter);
-            mCourseAdapter = swipeManager;
-
-            mCurrentCourse.setLayoutManager(layoutManager);
             mCurrentCourse.setAdapter(mCourseAdapter);
-            mCurrentCourse.setItemAnimator(new SwipeDismissItemAnimator());
+            mCurrentCourse.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                mCurrentCourse.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) ContextCompat
-                        .getDrawable(getActivity(), R.drawable.material_shadow_z1)));
-            }
-
-            mGuardManager.attachRecyclerView(mCurrentCourse);
-            mSwipeManager.attachRecyclerView(mCurrentCourse);
-            mDragDropManager.attachRecyclerView(mCurrentCourse);
+            ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(mCourseAdapter);
+            mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.attachToRecyclerView(mCurrentCourse);
         }
 
         return layout;
@@ -272,28 +238,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     }
 
     @Override
-    public void onPause() {
-        mDragDropManager.cancelDrag();
-        super.onPause();
-    }
-
-    @Override
     public void onDestroy() {
-        if (mDragDropManager != null) {
-            mDragDropManager.release();
-            mDragDropManager = null;
-        }
-
-        if (mSwipeManager != null) {
-            mSwipeManager.release();
-            mSwipeManager = null;
-        }
-
-        if (mGuardManager != null) {
-            mGuardManager.release();
-            mGuardManager = null;
-        }
-
         if (mHistoryCourse != null) {
             mHistoryCourse.setAdapter(null);
             mHistoryCourse = null;
@@ -306,20 +251,25 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         }
 
         if (mCourseAdapter != null) {
-            WrapperAdapterUtils.releaseAll(mCourseAdapter);
             mCourseAdapter = null;
         }
 
         super.onDestroy();
     }
 
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewholder) {
+        mItemTouchHelper.startDrag(viewholder);
+    }
+
     private void loadMarks() {
-        Loader<?> marksLoader = getLoaderManager()
-                .restartLoader(0, null, mDataManager.createMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
+        Loader<?> marksLoader = getLoaderManager().restartLoader(0, null,
+                mDataManager.createMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
                     @Override
                     public void onLoadFailed(Exception reason) {
                         String toastText = getString(R.string.marks_w_placeholder);
-                        Toast.makeText(getActivity(), String.format(toastText, reason.toString()), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), String.format(toastText, reason.toString()), Toast.LENGTH_LONG)
+                                .show();
                     }
 
                     @Override
@@ -344,10 +294,8 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
     protected List<CourseListDataElementWithIdImpl> convertCourseDesignToCourseElements(CourseBase courseData) {
         List<CourseListDataElementWithIdImpl> elementList = new ArrayList<>();
-
         for (Waypoint waypoint : courseData.getWaypoints()) {
             ControlPoint controlPoint = waypoint.getControlPoint();
-
             if (controlPoint instanceof Mark) {
                 CourseListDataElementWithIdImpl element = new CourseListDataElementWithIdImpl();
                 element.setId(mId);
@@ -365,30 +313,16 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             }
             mId++;
         }
-
         return elementList;
     }
 
-    @Override
     public void onItemEditClick(int type, CourseListDataElementWithIdImpl element) {
-        switch (type) {
-            case CourseElementAdapter.TOUCH_TYPE_AREA:
-                createPassingInstructionDialog(element);
-                mCourseAdapter.notifyDataSetChanged();
-                break;
-
-            default:
-                showMarkDialog(type, element);
-        }
+        createPassingInstructionDialog(element);
+        mCourseAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onAddItemClick() {
-        showMarkDialog(CourseElementAdapter.TOUCH_TYPE_AREA, null);
-    }
-
-    private void showMarkDialog(int type, CourseListDataElementWithIdImpl element) {
-        FragmentManager manager = getFragmentManager();
+    public void showMarkDialog(int type, CourseListDataElementWithIdImpl element) {
+        FragmentManager manager = getActivity().getSupportFragmentManager();
         mMarksDialog = CourseMarksDialogFragment.newInstance(mMarks, element, type);
         mMarksDialog.setListener(this);
         mMarksDialog.show(manager, "course_marks");
@@ -397,26 +331,26 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     @Override
     public void onItemClick(Mark mark, int type, CourseListDataElementWithIdImpl element) {
         switch (type) {
-            case CourseElementAdapter.TOUCH_LEFT_AREA:
-                element.setLeftMark(mark);
-                break;
+        case CourseElementAdapter.TOUCH_LEFT_AREA:
+            element.setLeftMark(mark);
+            break;
 
-            case CourseElementAdapter.TOUCH_RIGHT_AREA:
-                element.setRightMark(mark);
-                break;
+        case CourseElementAdapter.TOUCH_RIGHT_AREA:
+            element.setRightMark(mark);
+            break;
 
-            default:
-                if (mElements.isEmpty()) {
-                    addNewCourseElementToList(mark);
+        default:
+            if (mElements.isEmpty()) {
+                addNewCourseElementToList(mark);
+            } else {
+                CourseListDataElement twoMarksCourseElement = getFirstTwoMarksCourseElementWithoutRightMark();
+                if (twoMarksCourseElement != null) {
+                    twoMarksCourseElement.setRightMark(mark);
                 } else {
-                    CourseListDataElement twoMarksCourseElement = getFirstTwoMarksCourseElementWithoutRightMark();
-                    if (twoMarksCourseElement != null) {
-                        twoMarksCourseElement.setRightMark(mark);
-                    } else {
-                        addNewCourseElementToList(mark);
-                    }
+                    addNewCourseElementToList(mark);
                 }
-                break;
+            }
+            break;
         }
         mCourseAdapter.notifyDataSetChanged();
         if (mMarksDialog.isVisible()) {
@@ -426,8 +360,9 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
     private CourseListDataElement getFirstTwoMarksCourseElementWithoutRightMark() {
         for (CourseListDataElement courseElement : mElements) {
-            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate) || courseElement.getPassingInstructions()
-                    .equals(PassingInstruction.Line) || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))
+            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate)
+                    || courseElement.getPassingInstructions().equals(PassingInstruction.Line)
+                    || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))
                     && courseElement.getRightMark() == null) {
                 return courseElement;
             }
@@ -452,25 +387,27 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     }
 
     private void createPassingInstructionDialog(final CourseListDataElementWithIdImpl courseElement) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         final PassingInstruction[] passingInstructionsRelevantForUserEntry = PassingInstruction.relevantValues();
-        final CharSequence[] i18NPassingInstructions = getI18NPassingInstructions(passingInstructionsRelevantForUserEntry);
-        builder.setTitle(R.string.pick_a_rounding_direction).setItems(i18NPassingInstructions, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int position) {
-                PassingInstruction pickedDirection = passingInstructionsRelevantForUserEntry[position];
-                onPassingInstructionPicked(courseElement, pickedDirection);
-            }
-        });
+        final CharSequence[] i18NPassingInstructions = getI18NPassingInstructions(
+                passingInstructionsRelevantForUserEntry);
+        builder.setTitle(R.string.pick_a_rounding_direction).setItems(i18NPassingInstructions,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int position) {
+                        PassingInstruction pickedDirection = passingInstructionsRelevantForUserEntry[position];
+                        onPassingInstructionPicked(courseElement, pickedDirection);
+                    }
+                });
         builder.create().show();
     }
 
     /**
-     * Cosntructs a message text for each of the {@link PassingIntsruction} values passed. The message strings
-     * returned correspond in their order with the {@link PassingInstruction}s passed in the array.
+     * Cosntructs a message text for each of the {@link PassingInstruction} values passed. The message strings returned
+     * correspond in their order with the {@link PassingInstruction}s passed in the array.
      */
     private CharSequence[] getI18NPassingInstructions(PassingInstruction[] passingInstructionsRelevantForUserEntry) {
         final CharSequence[] result = new CharSequence[passingInstructionsRelevantForUserEntry.length];
-        int i=0;
+        int i = 0;
         for (final PassingInstruction passingInstruction : passingInstructionsRelevantForUserEntry) {
             result[i++] = getI18NPassingInstruction(passingInstruction);
         }
@@ -508,7 +445,8 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         return result;
     }
 
-    protected void onPassingInstructionPicked(CourseListDataElementWithIdImpl courseElement, PassingInstruction pickedDirection) {
+    protected void onPassingInstructionPicked(CourseListDataElementWithIdImpl courseElement,
+            PassingInstruction pickedDirection) {
         courseElement.setPassingInstructions(pickedDirection);
         if (!PassingInstruction.Gate.equals(pickedDirection) && !PassingInstruction.Line.equals(pickedDirection)) {
             courseElement.setRightMark(null);
@@ -537,7 +475,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     }
 
     private void createUsePreviousCourseDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(getString(R.string.use_previous_course_dialog_title));
         builder.setMessage(R.string.use_previous_course_dialog_message);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
@@ -569,15 +507,17 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         List<Waypoint> waypoints = new ArrayList<>();
 
         for (CourseListDataElement courseElement : mElements) {
-            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate) || courseElement.getPassingInstructions()
-                    .equals(PassingInstruction.Line) || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))) {
+            if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate)
+                    || courseElement.getPassingInstructions().equals(PassingInstruction.Line)
+                    || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))) {
                 if (courseElement.getRightMark() != null) {
-                    String cpwtmName =
-                            "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / " + courseElement.getRightMark().getName();
-                    ControlPointWithTwoMarks cpwtm = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(), courseElement
-                            .getRightMark(), cpwtmName);
+                    String cpwtmName = "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / "
+                            + courseElement.getRightMark().getName();
+                    // Not providing a UUID for the new control point; instead, the name will be used as a (temporary?)
+                    // ID.
+                    ControlPointWithTwoMarks cpwtm = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(),
+                            courseElement.getRightMark(), cpwtmName);
                     Waypoint waypoint = new WaypointImpl(cpwtm, courseElement.getPassingInstructions());
-
                     waypoints.add(waypoint);
                 } else {
                     throw new IllegalStateException(MISSING_SECOND_MARK);
@@ -585,7 +525,8 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             } else if (courseElement.getPassingInstructions().equals(PassingInstruction.None)) {
                 throw new IllegalStateException(EACH_WAYPOINT_NEEDS_PASSING_INSTRUCTIONS);
             } else {
-                Waypoint waypoint = new WaypointImpl(courseElement.getLeftMark(), courseElement.getPassingInstructions());
+                Waypoint waypoint = new WaypointImpl(courseElement.getLeftMark(),
+                        courseElement.getPassingInstructions());
 
                 waypoints.add(waypoint);
             }
@@ -613,18 +554,17 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign, CourseDesignerMode.BY_MARKS);
         saveChangedCourseDesignInCache(courseDesign);
         switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
-            case START_MODE_PRESETUP:
-                openMainScheduleFragment();
-                break;
+        case START_MODE_PRESETUP:
+            openMainScheduleFragment();
+            break;
 
-            case START_MODE_PLANNED:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+        case START_MODE_PLANNED:
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+            break;
         }
     }
 
-    @Override
-    public void onItemRemoved(int position) {
+    public void onItemRemoved() {
         setResetButton();
     }
 }

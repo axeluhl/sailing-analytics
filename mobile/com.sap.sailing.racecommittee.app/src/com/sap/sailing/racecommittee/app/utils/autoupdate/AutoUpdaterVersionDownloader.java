@@ -6,12 +6,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import android.content.Context;
-import android.util.Log;
-
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
 import com.sap.sse.common.Util;
+
+import android.content.Context;
+import android.util.Log;
 
 public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pair<Integer, String>> {
     private final static String TAG = AutoUpdaterVersionDownloader.class.getName();
@@ -49,7 +49,15 @@ public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pai
         String[] map = contents.split("=");
         if (map.length == 2) {
             String apkFileName = map[0];
-            String versionCode = map[1];
+            String versionInfo = map[1];
+            String versionCode;
+            if (versionInfo.contains("-")) {
+                String[] version = versionInfo.split("-");
+                versionCode = version[0];
+                String versionVariant = version[1];
+            } else {
+                versionCode = versionInfo;
+            }
             try {
                 Integer code = Integer.parseInt(versionCode);
                 return new Util.Pair<Integer, String>(code, apkFileName);

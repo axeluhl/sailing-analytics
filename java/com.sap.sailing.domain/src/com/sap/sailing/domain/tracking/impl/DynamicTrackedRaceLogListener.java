@@ -56,6 +56,9 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
 
+    /**
+     * Race logs as keys, {@link ReadonlyRaceState} objects wrapping their respective key race log as values
+     */
     private ConcurrentMap<RaceLog, ReadonlyRaceState> raceLogs = new ConcurrentHashMap<>();
 
     private DynamicTrackedRace trackedRace;
@@ -76,7 +79,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             logger.severe("Trying to add " + this + " as listener to a null race log for tracked race " + trackedRace.getRace());
         } else {
             raceLog.addListener(this);
-            final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.create(trackedRace.getRaceLogResolver(), raceLog);
+            final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(trackedRace.getRaceLogResolver(), raceLog);
             raceLogs.put(raceLog, raceState);
             raceState.addChangedListener(new BaseRaceStateChangedListener() {
                 @Override
@@ -293,7 +296,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(RaceLogFixedMarkPassingEvent event) {
         if (markPassingUpdateListener != null) {
-            markPassingUpdateListener.addFixedPassing(event.getInvolvedBoats().get(0), event.getZeroBasedIndexOfPassedWaypoint(),
+            markPassingUpdateListener.addFixedPassing(event.getInvolvedCompetitors().get(0), event.getZeroBasedIndexOfPassedWaypoint(),
                     event.getTimePointOfFixedPassing());
         }
     }
@@ -301,7 +304,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(RaceLogSuppressedMarkPassingsEvent event) {
         if (markPassingUpdateListener != null) {
-            markPassingUpdateListener.addSuppressedPassing(event.getInvolvedBoats().get(0),
+            markPassingUpdateListener.addSuppressedPassing(event.getInvolvedCompetitors().get(0),
                     event.getZeroBasedIndexOfFirstSuppressedWaypoint());
         }
     }
@@ -323,10 +326,10 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
             }
             if (revokedEvent instanceof RaceLogSuppressedMarkPassingsEvent) {
-                markPassingUpdateListener.removeSuppressedPassing(revokedEvent.getInvolvedBoats().get(0));
+                markPassingUpdateListener.removeSuppressedPassing(revokedEvent.getInvolvedCompetitors().get(0));
             }
             if (revokedEvent instanceof RaceLogFixedMarkPassingEvent) {
-                markPassingUpdateListener.removeFixedPassing(revokedEvent.getInvolvedBoats().get(0),
+                markPassingUpdateListener.removeFixedPassing(revokedEvent.getInvolvedCompetitors().get(0),
                         ((RaceLogFixedMarkPassingEvent) revokedEvent).getZeroBasedIndexOfPassedWaypoint());
             }
         }

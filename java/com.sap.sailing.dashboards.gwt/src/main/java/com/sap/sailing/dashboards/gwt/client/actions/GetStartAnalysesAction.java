@@ -47,7 +47,7 @@ public class GetStartAnalysesAction implements DashboardAction<StartAnalysesDTO>
             try {
                 Competitor competitor = null;
                 if(competitorIdAsString != null) {
-                    competitor = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);   
+                    competitor = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorIdAsString);   
                 }
                 Leaderboard leaderboard = dashboardDispatchContext.getRacingEventService().getLeaderboardByName(this.leaderboarName);
                 if (leaderboard != null) {

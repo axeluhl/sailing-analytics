@@ -14,3 +14,4 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.domain,
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.freg.resultimport

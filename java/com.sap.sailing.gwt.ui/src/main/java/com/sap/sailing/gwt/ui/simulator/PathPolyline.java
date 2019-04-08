@@ -18,11 +18,11 @@ import com.google.gwt.maps.client.overlays.PolylineOptions;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnDrawHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.TwoDPoint;
 import com.sap.sailing.gwt.ui.simulator.racemap.TwoDSegment;
 import com.sap.sailing.gwt.ui.simulator.racemap.TwoDVector;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
@@ -1108,10 +1109,9 @@ public class PathPolyline {
                 USE_REAL_AVERAGE_WIND);
 
         this.simulatorService.getTotalTime(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
-
             @Override
             public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
+                errorReporter.reportError(StringMessages.INSTANCE.errorLoadingTotalTime(error.getMessage()));
             }
 
             @Override
@@ -1121,12 +1121,10 @@ public class PathPolyline {
                     errorReporter.reportError(notificationMessage, true);
                     warningAlreadyShown = true;
                 }
-
                 if (getTotalTimeFactor) {
                     totalTimeFactor = receiveData.factorSim2GPS;
                 }
                 long totalTime = Math.round(receiveData.totalTimeSeconds / totalTimeFactor);
-
                 simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
                 simulatorMap.redrawLegendCanvasOverlay();
             }

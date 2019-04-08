@@ -1,0 +1,209 @@
+/**
+ * styles for search result page
+ */
+.paging {
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+  margin-top: 1.875em;
+}
+.paging_perpage {
+  float: right;
+}
+.paging_link {
+  float: left;
+  border-top: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+  border-bottom: solid 1px #ccc;
+  width: 2.5em;
+  height: 2.5em;
+  text-align: center;
+  color: #666;
+  line-height: 2.5em;
+  cursor: pointer;
+}
+.paging_link_label {
+  float: left;
+  line-height: 2.5em;
+}
+.paging_linkperpage {
+  margin-left: 0.625em;
+  border-left: solid 1px #ccc;
+}
+.paging_linkactive,
+.paging_link:hover,
+.paging_link:focus {
+  background-color: #999;
+  color: #f6f9fc;
+  text-decoration: none;
+}
+.paging_linkprevious,
+.paging_linknext {
+  height: 0;
+  overflow: hidden;
+  border: 0;
+  background-image: resourceUrl("paging");
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: cover;
+  padding: 2.5em 0 0 0;
+}
+.paging_linknext {
+  background-position: -2.5em center;
+}
+.dropdown {
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+  width: 18.75em;
+  display: inline-block;
+}
+.dropdown:hover .dropdown_content,
+.dropdown:focus .dropdown_content {
+  display: block;
+}
+.dropdown_head {
+  cursor: pointer;
+  display: block;
+}
+.dropdown_head_title {
+  cursor: pointer;
+  background: #f8f8f8;
+  color: #666;
+  height: 2.5625em;
+  line-height: 2.5em;
+  padding-left: 0.9375em;
+  font-weight: 700;
+}
+.dropdown_head_titlebutton {
+  float: right;
+}
+.dropdown_content {
+  position: absolute;
+  z-index: 1;
+  background: #f6f9fc;
+  display: none;
+  width: 18.75em;
+  height: auto;
+  max-height: 21.875em;
+  overflow: auto;
+  box-shadow: 0 0.0625em 0.25em #ccc;
+  border-bottom: solid 1px #ccc;
+}
+.dropdown_content_link {
+  display: block;
+  cursor: pointer;
+  padding: 1.25em 0.9375em;
+  border-bottom: 1px solid #ddd;
+}
+.dropdown_content_link:hover,
+.dropdown_content_link:focus {
+  background: #f8f8f8;
+  text-decoration: none;
+}
+.dropdown_content_link:hover .dropdown_content_link_title,
+.dropdown_content_link:focus .dropdown_content_link_title {
+  text-decoration: underline;
+}
+.dropdown_content_link_title {
+  color: #008fcc;
+  display: block;
+  font-weight: 700;
+  font-size: 1.125em;
+}
+.dropdown_content_link_subtitle {
+  color: #666;
+  font-size: 1em;
+}
+.searchresult {
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+}
+.searchresult_form {
+  display: block;
+}
+.searchresult_form_label {
+  font-size: 1.3125em;
+  color: #008fcc;
+  font-weight: 700;
+  display: inline-block;
+  padding: 0.3125em 0 0.625em;
+}
+.searchresult_form_input {
+  display: block;
+  padding: 0.625em 0 0.5625em 2.5em;
+  background-image: resourceUrl("search");
+  background-repeat: no-repeat;
+  background-color: #f6f9fc;
+  background-position: 0.625em center;
+  border: solid 1px #eee;
+  width: 90%;
+  float: left;
+}
+.searchresult_form_button {
+  /* @alternate */ font-size: 16px;
+  /* @alternate */ font-size: 1rem;
+  width: 10%;
+  float: right;
+  text-transform: uppercase;
+  padding-left: 0;
+  padding-right: 0;
+}
+.searchresult_header {
+  background: #eee;
+  padding: 1.875em 0;
+}
+.searchresult_header_formlabel {
+  font-size: 1.75em;
+  padding-bottom: 0.3125em;
+}
+.searchresult_header_input {
+  border: solid 1px #f6f9fc;
+}
+.searchresult_content {
+  display: block;
+}
+.searchresult_content_amount {
+  border-bottom: solid 1px #ddd;
+  overflow: visible;
+}
+.searchresult_content_amount_relevance {
+  float: right;
+  margin-top: 1.125em;
+}
+.searchresult_content_amount_relevance_label {
+  float: left;
+  line-height: 2.5em;
+  margin-right: 0.9375em;
+}
+.searchresult_content_item {
+  border-bottom: solid 1px #ddd;
+  padding: 1.4375em 5em 1.4375em 0;
+}
+.searchresult_content_item_headline {
+  display: inline-block;
+  font-size: 1.5em;
+  font-weight: 700;
+  padding: 0 0 0.3125em;
+}
+.searchresult_content_item_description {
+  padding-bottom: 0.625em;
+  color: #333;
+}
+.searchresult_content_item_description_morelink {
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 0.3125em;
+}
+.searchresult_content_item_footer {
+  color: #989898;
+}
+.searchresult_content_item_footer_link {
+  cursor: pointer;
+}
+.searchresult_content_item_footer_separator {
+  display: inline-block;
+  padding: 0 0.625em;
+}
+.searchresult_footer {
+  padding: 4.375em 0 6.25em;
+}

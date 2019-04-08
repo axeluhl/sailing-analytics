@@ -1,123 +1,123 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-05-30T12:19:28Z" original="/usr/sap/ljs/app/Converter_2475291648609719345/java/com.sap.sse.gwt/src/com/sap/sse/gwt/client/controls/filestorage/StringMessages.properties" source-language="en" target-language="zh-CN">
+	<file datatype="javapropertyresourcebundle" date="2017-01-12T14:34:57Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sse.gwt/src/com/sap/sse/gwt/client/controls/filestorage/StringMessages.properties" source-language="en" target-language="zh-CN">
 		<header>
 			<skl>
 				<internal-file crc="85e48bcf9e250e66161b1b03d11cf699" form="base64">H4sIAAAAAAAAAH1SzU4jMQy+5yn8BIgXyKEa2MuuAFEEZ5O4naiZZOR4WiG0746TtLNod+Hi/2/8eb4UPJLdqjFMU9b4sTmTD/b+p3GYHEU7NGfQe7vx3pAPYm/VmEJ8JL5lzmw3CagGkJ1bmMnDaQyRAEVomiWkPUgGl5OgE5CRoKOv4CESFgI3kjvAW14YEskp86FOJ3IScgJMHoTfAPcY0pVxMReyQ7WNudADZ0d+YRowxnaGEKxFqNUz30eaY6Bity0D7qlp7Ic8TUsKDivhlyBjH7LtRuXzqQsnbZ+PMHpT0L+3aU73yKb0WLcIYIE+YFxeor/L8kRFlNxMLJXKUMuQsv4YbcC8dlaAfua/87rqi/G+v/IPjv5CdDaNvDZX1K+M/itY1N63uCOGiK/xAi3/YC8DF3hR5XZMZVS1mjcJJ7J3aswR40L2uVrjqTgOc30G9uZP3AXryiiTtAv7hbFNDZ+zqkbVqwreg7Xyowk+50RJ1i7sVOn3699mbu9yS1GfoD0/0tIy8wFPN7vhNwMAAA==</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-05-11T12:24:39Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2016-11-04T21:01:36Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
 		<body>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="save" resname="save">
 				<source>Save</source>
-				<target state="signed-off">保存</target>
+				<target>保存</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="remove" resname="remove">
 				<source>Remove</source>
-				<target state="signed-off">删除</target>
+				<target>移除</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ok" resname="ok">
 				<source>OK</source>
-				<target state="signed-off">确定</target>
+				<target>确定</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="cancel" resname="cancel">
 				<source>Cancel</source>
-				<target state="signed-off">取消</target>
+				<target>取消</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="add" resname="add">
 				<source>Add</source>
-				<target state="signed-off">添加</target>
+				<target>添加</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="edit" resname="edit">
 				<source>Edit</source>
-				<target state="signed-off">编辑</target>
+				<target>编辑</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="serverError" resname="serverError">
 				<source>An error occurred while attempting to contact the server. Please check your network connection and try again.</source>
-				<target state="signed-off">尝试联系服务器时出错。请检查网络连接，并重试。</target>
+				<target>尝试联系服务器时出错。请检查网络连接，并重试。</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="close" resname="close">
 				<source>Close</source>
-				<target state="signed-off">关闭</target>
+				<target>关闭</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="remoteProcedureCall" resname="remoteProcedureCall">
 				<source>Remote Procedure Call</source>
-				<target state="signed-off">远程过程调用</target>
+				<target>远程过程调用</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="serverReplies" resname="serverReplies">
 				<source>Server replies</source>
-				<target state="signed-off">服务器应答</target>
+				<target>服务器应答</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorCommunicatingWithServer" resname="errorCommunicatingWithServer">
 				<source>Error communicating with server</source>
-				<target state="signed-off">与服务器通信时发生错误</target>
+				<target>与服务器通信时发生错误</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="active" resname="active">
 				<source>Active</source>
-				<target state="signed-off">已激活</target>
+				<target>已激活</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="setAsActive" resname="setAsActive">
 				<source>Set as active</source>
-				<target state="signed-off">设置为已激活</target>
+				<target>设置为已激活</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="couldNotTestProperties" resname="couldNotTestProperties">
 				<source>Could not test properties</source>
-				<target state="signed-off">无法测试属性</target>
+				<target>无法测试属性</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="couldNotSetProperties" resname="couldNotSetProperties">
 				<source>Could not set properties</source>
-				<target state="signed-off">无法设置属性</target>
+				<target>无法设置属性</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="couldNotSetActiveService" resname="couldNotSetActiveService">
 				<source>Could not set active service</source>
-				<target state="signed-off">无法设置已激活的服务</target>
+				<target>无法设置已激活的服务</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="couldNotLoadActiveService" resname="couldNotLoadActiveService">
 				<source>Could not load active service</source>
-				<target state="signed-off">无法加载已激活的服务</target>
+				<target>无法加载已激活的服务</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="couldNotLoadAvailableServices" resname="couldNotLoadAvailableServices">
 				<source>Could not load available services</source>
-				<target state="signed-off">无法加载可用的服务</target>
+				<target>无法加载可用的服务</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="refresh" resname="refresh">
 				<source>Refresh</source>
-				<target state="signed-off">刷新</target>
+				<target>刷新</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="name" resname="name">
 				<source>Name</source>
-				<target state="signed-off">名称</target>
+				<target>名称</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="value" resname="value">
 				<source>Value</source>
-				<target state="signed-off">值</target>
+				<target>值</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="description" resname="description">
 				<source>Description</source>
-				<target state="signed-off">描述</target>
+				<target>描述</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="error" resname="error">
 				<source>Error</source>
-				<target state="signed-off">错误</target>
+				<target>错误</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="configuration" resname="configuration">
 				<source>Configuration</source>
-				<target state="signed-off">配置</target>
+				<target>配置</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="settings" resname="settings">
 				<source>Settings</source>
-				<target state="signed-off">设置</target>
+				<target>设置</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="settingsForComponent" resname="settingsForComponent">
 				<source>Settings for <ph id="1">{0}</ph></source>
-				<target state="signed-off"><ph id="1">{0}</ph>设置</target>
+				<target><ph id="1">{0}</ph>设置</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="pleaseSelect" resname="pleaseSelect">
 				<source>Please select</source>
-				<target state="signed-off">请选择</target>
+				<target>请选择</target>
 			</trans-unit>
 		</body>
 	</file>

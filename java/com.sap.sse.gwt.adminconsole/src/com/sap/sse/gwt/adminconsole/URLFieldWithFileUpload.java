@@ -12,7 +12,6 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -27,6 +26,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * A {@link TextBox} together with an upload button that can use the file storage service to
@@ -46,7 +47,15 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
 
     private boolean valueChangeHandlerInitialized = false;
     
+    private final FormPanel uploadFormPanel;
+    
+    private final HorizontalPanel uploadPanel;
+    
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
+        this(stringMessages, true);
+    }
+   
+    public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload) {
         final VerticalPanel mainPanel = new VerticalPanel();
         final HorizontalPanel imageUrlPanel = new HorizontalPanel();
         mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
@@ -57,8 +66,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 final JSONObject resultJson = parseAfterReplacingSurroundingPreElement(event.getResults()).isObject();
-                Window.alert(stringMessages.removeResult(resultJson.get("status").isString().stringValue(),
-                        resultJson.get("message") == null ? "" : resultJson.get("message").isString().stringValue()));
+                Notification.notify(stringMessages.removeResult(resultJson.get("status").isString().stringValue(),
+                        resultJson.get("message") == null ? "" : resultJson.get("message").isString().stringValue()), NotificationType.INFO);
                 setURL("");
             }
         });
@@ -77,16 +86,19 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         });
         removePanel.add(removeButton);
         urlTextBox = new TextBox();
+        urlTextBox.getElement().addClassName("url-textbox");
         urlTextBox.setWidth("400px");
         imageUrlPanel.add(urlTextBox);
         imageUrlPanel.add(removePanel);
         
         // the upload panel
-        FormPanel uploadFormPanel = new FormPanel();
+        uploadFormPanel = new FormPanel();
         mainPanel.add(uploadFormPanel);
-        HorizontalPanel uploadPanel = new HorizontalPanel();
+        uploadPanel = new HorizontalPanel();
         uploadPanel.setSpacing(3);
-        uploadFormPanel.add(uploadPanel);
+        if(initiallyEnableUpload) {
+            uploadFormPanel.add(uploadPanel);
+        }
         uploadFormPanel.setAction("/sailingserver/fileupload");
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
@@ -118,10 +130,10 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                         uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
                         setValue(uri, true);
                         removeButton.setEnabled(true);
-                        Window.alert(stringMessages.uploadSuccessful());
+                        Notification.notify(stringMessages.uploadSuccessful(), NotificationType.SUCCESS);
                     } else {
-                        Window.alert(stringMessages.fileUploadResult(resultJson.get(0).isObject().get("status").isString().stringValue(),
-                                resultJson.get(0).isObject().get("message").isString().stringValue()));
+                        Notification.notify(stringMessages.fileUploadResult(resultJson.get(0).isObject().get("status").isString().stringValue(),
+                                resultJson.get(0).isObject().get("message").isString().stringValue()), NotificationType.ERROR);
                     }
                 }
             }
@@ -196,5 +208,13 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
      */
     private JSONValue parseAfterReplacingSurroundingPreElement(String jsonString) {
         return JSONParser.parseStrict(jsonString.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
+    }
+    
+    public void setUploadEnabled(boolean uploadEnabled) {
+        if (uploadEnabled) {
+            uploadFormPanel.add(uploadPanel);
+        } else {
+            uploadFormPanel.remove(uploadPanel);
+        }
     }
 }

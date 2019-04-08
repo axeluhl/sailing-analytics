@@ -10,18 +10,697 @@
 <body>
 	<div class="logoAndTitlePanel">
     	<a class="sapLogo" href="http://www.sap.com">
-        	<img class="sapLogoImage" src="/images/logo-small@2x.png" alt="SAP Website"/>
+            <img class="sapLogoImage" src="/images/logo-small@2x.png" alt="SAP Website"/>
     	</a>
-		<div class="sailingAnalyticsLabelPanel">
-	    	<div class="sailingAnalyticsLabel">Sailing Analytics</div>
-	      </div>
+	<div class="sailingAnalyticsLabelPanel">
+	<div class="sailingAnalyticsLabel">Sailing Analytics</div>
+	</div>
     </div>
-
 	<div class="yield_content">
 		<div class="contentWrapper">
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+                    <h2 class="articleSubheadline">April 2019</h2>
+                    <ul class="bulletList">
+			<li>Filtering the leaderboard groups during a Master Data Import now also
+			    handles quoted strings correctly. With this, e.g., searching for a
+			    leaderboard group containing "Apr 2" in its name is doable.
+			</li>
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">March 2019</h2>
+                    <ul class="bulletList">
+			<li>By caching serialized results of leaderboard requests the server now requires
+			    significantly less CPU power during live situations. Instead of computing the
+			    serialized representation of a leaderboard again and again, the serialized version
+			    is maintained in the cache as long as the original object from which the serialized
+			    version was produced is referenced. This way, the cache cleans itself. It can be
+			    observed through JMX, e.g., using JConsole, by looking at the JMX bean
+			    <tt>com.sap.sse:type=GWTRPCSerializedResultCache_*</tt>.
+			</li>
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">February 2019</h2>
+                    <ul class="bulletList">
+			<li>The pairing list construction supports a new parameter that can be used
+			    to balance fairness of boat assignment with the reduction of boat changes
+			    between flights. It can be set between 0 (focus on fair boat assignments;
+			    use this, e.g., if there are noticeable differences between the boats used
+			    to ensure a fair distribution) and the number of flights, e.g., 14 or 15 for
+			    a typical league set-up (focus on reducing the number of boat changes while
+			    sacrificing a bit of boat assignment fairness).
+			</li>
+			<li>The built-in mark passing calculator that is primarily used for smartphone
+			    tracking has been improved. In particular, it now recognizes trackers left behind,
+			    e.g., on a committee boat, and avoids performance issues incurred by these scenarios
+			    by filtering possible mark passing candidates using a bounding box-based approach:
+			    if a tracker hardly moves over some time, only the most promising candidates from
+			    that time interval are considered. This avoids compute time and memory issues
+			    seen in the past.
+			</li>
+			<li>When during a server re-start with the <tt>-Drestore.tracked.races=true</tt> parameter
+			    restoring a race fails with an exception, that race is now removed from the restore list,
+			    a corresponding <tt>SEVERE</tt> log entry is written, and the server will no longer try
+			    to restore that race upon future restarts. This way, races that have been removed at
+			    their source will not keep causing permanent restore trouble, and manual database
+			    intervention is no longer necessary.
+			</li>
+			<li>A new status REST endpoint has been added: <tt>/gwt/status</tt>. It combines the status
+			    checks of <tt>/sailingserver/api/v1/status</tt> and <tt>/replication/replication?action=STATUS</tt>,
+			    and because it is offered by the same module hosting the web UI of the server, its availability
+			    indicates that the corresponding module has started and has registered with the web server
+			    successfully. It reports a 200 HTTP response if itself and the status reports it syndicates
+			    report availability, a non-2XX status otherwise.
+			</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">January 2019</h2>
+                    <ul class="bulletList">
+                        <li>Allow entering a priority for courses managed in the AdminConsole.
+                            The new default priority now is 1. It used to be 0 which caused problems
+                            because the Race Manager app's highest (logically) priority is 1 which
+                            never took priority over the AdminConsole-provided prio-0 events.</li>
+                        <li>User sessions are now stored durably in the database so that they can be
+                            restored in case of a server re-start. Users therefore will no longer need
+                            to sign in again only because a server was re-started.</li>
+                        <li>New availability checks have been implemented. Two new REST endpoints are provided:
+                            <ul>
+                              <li>/sailingserver/api/v1/status reports the availability of the "Sailing" application</li>
+                              <li>/replication/replication?action=STATUS reports the availability of the replication module,
+                                  providing details about each replication-capable component and queue lengths</li>
+                              <li>the "status" script in the server's working directory, next to the "start" and "stop"
+                                  script, now provides output based on the status checks above, plus a check for a 2XX
+                                  response code for /index.html. The exit code for the "status" script is now 1 in case
+                                  of an error / lack of availability, and 0 if all checks passed and server looks
+                                  available.</li>
+                            </ul>
+                        </li>
+			<li>Upgraded the MongoDB driver to version 3.6.4. This allows you to specify the new
+			    retryWrites parameter, e.g., as in "mongodb://mongo0.internal.sapsailing.com/mydb?replicaSet=live&retryWrites=true".
+			    This will improve your system's behavior if you run with a MongoDB replica set and have to
+			    assume that at some point the PRIMARY MongoDB system may fail, with the remaining systems
+			    in the replica set voting for a new PRIMARY. Without retryWrites your system will bluntly
+			    fail, but with retryWrites, write operations will be re-tried once, with a timeout usually
+			    enough for the remaining replicas to agree on a new PRIMARY.
+			</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">October 2018</h2>
+                    <ul class="bulletList">
+                        <li>Added progress indicator to device mappings panel for smartphone tracking.</li>
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">September 2018</h2>
+                    <ul class="bulletList">
+                        <li>Added automatic resizing when adding images to an event using the ImageDialog. 
+                        It shows a check box if resizing is necessary, if you check it, the service will resize the image for you.</li>
+                        <li>Now showing an error when trying to upload an image or video to an event and no working FileStorageService is registered.</li>
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">August 2018</h2>
+                    <ul class="bulletList">
+                        <li>The mark passing editor now uses a full date/time format for the mark passing time points.</li>
+                        <li>The TracTrac connector panel no longer shows a password visibly but uses a password text field.</li>
+                        <li>The SwissTiming connector can now handle an "Update URL" together with username/password access
+                            credentials which are used, if present, to send feedback requests about start times, race status
+                            and course changes to that URL.</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">July 2018</h2>
+                    <ul class="bulletList">
+                        <li>When adding a YouTube video for tracked races ("Manage Media" in <tt>RaceBoard.html</tt> or "Tracked Races > Audio & Video" in <tt>AdminConsole.html</tt>) the respective video metadata is now read using YouTube API v3.
+                            This functionality used to work some years ago using API v2 but was broken since this API version was discontinued some time ago.
+                            Due to limitations of the new API we can't read the start timepoint of videos by now. You still need to provide this value manually.</li>
+                        <li>In the "Tracked races" tab, within the eponymous section of the AdminConsole, the "Set start
+                            time received" dialog can be used to remove the currently set start time received, by simply
+                            leaving the value empty and confirming the dialog.</li>
+                        <li>Up to 15 discards can now be configured for series and leaderboards. This enables, e.g., "Wednesday Night" scenarios
+                            where over the season, say, 20 races are run but due to changing participation only, say, the five best ones shall be scored.</li>
+                        <li>There is a new scoring scheme available to be selected upon regatta creation.
+                            The scoring scheme is named "Low Point System, First with two wins in medals is winner" and introduces the following specifics compared to the standard low point scheme:
+                            <ul>
+                                <li>Medal series does not feature doubling of points in the medal series by default.</li>
+                                <li>A competitor having two wins in the medal series is treated as overall winner.
+                                    If there is a carry forward column in the medal series, having one point there also counts as a win which means the best competitor in the qualification needs a win less than any other finalist to be the overall winner.</li>
+                                <li>If the medal series isn't started yet or no competitor has collected two wins, scoring by points is used.
+                                    This also applies if the regatta is aborted (e.g. due to weather conditions) before any competitor could win two races in the medal series.</li>
+                                <li>If two competitors have the same amount of points in the medal series the tie breaking criteria is the carry forward column of the medal series.
+                                    If there is no carry forward column in the medal series, the last medal race is used as tie breaking criteria.
+                                    For any non-medal series, the standard low point rules apply.</li>
+                            </ul>
+                        </li>
+                        <li>A TracAPI upgrade from version 3.10.1 to 3.11.0 unifies the handling of course updates and solves an issue
+                            observed with updating mark passing instructions.</li>
+                        <li>Bug fix for mark position editor, now providing consistent behavior during adding of new mark fixes</li>
+                        <li>Data Mining now more aggressively terminates running queries if needed.</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">June 2018</h2>
+                    <ul class="bulletList">
+                        <li>Added the available WindFinder Spot Collections. The desired ones can be selected from the WindFinder Tab in the Event Dialog.</li>
+                        <li>Added the ability to change the url of multiple Mediatracks with a common prefix at once.
+                            This is useful e.g. for video migration scenarios when movin videaos from one server to another.
+                            This can be done from the adminconsole->tracked races->audio & videos tab</li>
+                        <li>In raceboard when you edit a video you do not need to explicitly press "Preview" before saving anymore.
+                            Saving now implicitly applies the changes.</li>
+                        <li>The URLs of our GWT services are extended to include a leaderboard name if a call is context sensitive to a specific leaderboard.
+                            This does not affect the functionality of any service but allows us to setup load balancing with leaderboard specific routing.
+                            The leaderboard names put into the URL are cleaned: Any character that isn't a latin upper/lowercase letter or digit is replaced with an underscore character.
+                            Currently, the following leaderboard specific URLs are used:
+                            <ul>
+                                <li>/gwt/service/sailing/leaderboard/[CLEANED-LEADERBOARD-NAME]</li>
+                                <li>/gwt/service/dispatch/leaderboard/[CLEANED-LEADERBOARD-NAME]</li>
+                            </ul>
+                            Be aware that request without leaderboard suffix may be sent from pages that do not show leaderboard specific contents.
+                            Due to this it is required to define a fallback rule for any unqualified request.
+                            </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">May 2018</h2>
+                    <ul class="bulletList">
+                        <li>Added the ability to add multiple mp4 videos as mediatracks at once via the new multi video dialog, located at trackedraces -> Audio & Video.
+                            This features requires a webserver with index listing enabled. Additionally the dialog offers the ability to add the new mediatracks 
+                            directly to all races overlapping the starttime and duration of the mediatrack.</li>
+                        <li>On the "Edit mark positions" panel within RaceBoard, now a "Clear selection" button appears
+                            when selecting a mark from the table, which provides an easier and more obvious way to
+                            deselect all marks, what is needed in order to see the full course with all marks again.</li>
+                        <li>The <tt>AutoPlay.html</tt> configuration "Sixty Inch" was improved for the usage with events that aren't part of an event series.
+                            While no race is live or scheduled, only the overall leaderboard used to be shown.
+                            In addition to this, also the regatta leaderboard is shown in an alternating order.
+                            For non series events there is no overall leaderboard which means, that only the regatta leaderboard is shown.</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">April 2018</h2>
+                    <ul class="bulletList">
+                        <li>The import of additional expedition data was extended to read many additional measures.
+                            These can be visualized in the leaderboard as well as the competitor charts in <tt>RaceBoard.html</tt>.
+                            In addition, the leaderboard has been extended to provide bravo and expedition related measures consistently on race and leg level.
+                            The respective settings dialogs were changed as well to only show specific options, if bravo or expedition tracks are available.
+                            Any previously imported expedition tracks may be dropped and reimported to gain access to the newly introduced measures.</li>
+                        <li>The settings dialog of the competitor charts in <tt>RaceBoard.html</tt> now provides the measures in alphabetical order (based on the current locale).
+                            Expedition specific measures - if available - are shown at the end of the list.</li>
+                        <li>The all in one expedition import has been extended to be able to import new competitor tracks or new races to an existing regatta.
+                            Previously it was only possible to import a new event structure.</li>
+                        <li>The Expedition log file import now prefers "GPS Time" for time stamping over "Utc" and over other date / time formats, making it
+                            more consistent with the Expedition live connector which uses column 146 for time stamping which is GPS Time.</li>
+                        <li>Two dimensional metrics can now be displayed by using a scatter plot presenter within the data mining tool.
+                            Select a metric that returns a pair of numbers and choose "Average" or "Identity" as an aggregator.</li>
+                        <li>Replication was made more robust for fixes that are delivered and applied asynchronously. If a race was removed
+                            while still in tracking mode, fix-related operations may have been queued already on the replica when the
+                            tracked race is removed. The pending GPS fix operations then would have clogged the executor threads until
+                            the entire replica comes to a halt. With the change, race-related asynchronous operations will simply be
+                            dropped when the race to which they pertain is not found on the replica.</li>
+                        <li>When editing mark positions, all fixes are now displayed, including potential outliers.</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">March 2018</h2>
+                    <ul class="bulletList">
+                        <li>Boats are now separate entities. See the "Tracked Races / Boats" tab in the admin console.
+                            When creating a regatta, you now need to specify whether in that regatta the competitors
+                            may sail on changing boats ("Can boats of competitors change per race").
+                            If boats can change, boat assignments need to be specified per
+                            race. For the TracTrac connector this may happen as in the past, using the corresponding
+                            metadata attributes (boatName, either one of boatId or boatUuid, and boatColor) on the
+                            competitors in the race. For smartphone tracking, boats can be specified in the
+                            "Connectors / Smartphone Tracking" tab by using the boat icon in the actions column of
+                            the leaderboards table ("Boat Registrations"). This defines the boats from which you can
+                            then select in the scope of each race of the regatta. When adding competitors to such
+                            a race then you now have to assign boats from the boats list to each competitor before
+                            you can confirm the competitor-to-race assignments.
+                        </li>
+                        <li>In addition to track competitors and marks using smartphone-tracking it is now possible to track boats.
+                            This is e.g. useful for several national leagues where competitors are assigned dynamically to boats for each race.
+                            In this case the competitors were used to bring a smartphone with them to the assigned boat.
+                            With the recent changes regarding boat and competitor mapping per race, Smartphone-tracking is now enabled to dynamically track boat-mapped devices to the correct competitors in the context of a race.
+                            There are two ways to add boats to be tracked to a regatta:
+                            <ul>
+                                <li>After adding a denotation to the racelog(s), add competitors to at least one race and ensure that the boats to be tracked are mapped to those</li>
+                                <li>Register boats directly to the regatta</li>
+                            </ul>
+                            For available boats, you can now add mappings and generate a QR code in the corresponding dialog.
+                            In addition, it is possible to upload tracking files and map them to boats.
+                        </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">February 2018</h2>
+                    <ul class="bulletList">
+                        <li>Further improvements of maneuver detection algorithm were introduced. Mark Passing is no longer regarded as a separate maneuver type. Instead, it is regarded as a supplementary information which gets appended to a maneuver instance. Therefore, a new filtering dimension was added for maneuver data mining, which is boolean and is named as "Mark Passing".</li>
+                        <li>Added leaderboard group name as a dimension to a leaderboard's context</li>
+                        <li>Added True Wind Angle as a data mining statistic on GPS fixes</li>
+                        <li>Time points for wind data related to individual fixes now uses the fixes' specific time points, not the wind at the middle of the leg</li>
+                        <li>Finally, the data mining UI sorts wind strengths given in Beaufort according to their strengths, not their names</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">January 2018</h2>
+                    <ul class="bulletList">
+                        <li>The auto detection for the media add dialog was improved. It will now attempt to only load the parts of a video that are required to parse the tags. Additionally if the server cannot reach a video, the client (browser) will make an attempt to load the video. This allows to analyze locally hosted videos without the need to upload them.</li>
+                        <li>In the raceboard the floating video box was improved, leading to a more solid resizing and moving behavior.</li>
+                        <li>In the raceboard, the adding of videos has now an additional fallback startDate, if no startOfRace could be determined, and the file did not contain a proper creationtime tag, startOfTracking is used.</li>
+                        <li>In the raceboard, the floating video box will now only display an edit button in the header, next to close and minimize. Upon clicking it, the box will expand and show the prior always shown editing buttons. This saves a lot of screenspace for logged in admin enabled users.</li>
+                        <li>For smartphone tracked races it's now possible to slice a new race from an existing one in the RaceBoard.
+                            As a user having sufficient permissions you need to select a specific time range in the competitor chart of a race.
+                            This will make a new Button appear near to the settings button of the chart.
+                            When you click this button you are being asked for a name of the new race.
+                            A new race column is created in the same series the current race is associated to.
+                            A new tracked race is then associated to the new column for the fleet of the current race.
+                            This new race is being filled with the data from the current race for the selected time range.
+                            After the slicing process is finished, a dialog will open providing a link to the RaceBoard for the newly added race.</li>
+                    </ul>
+    
+                    <h2 class="articleSubheadline">December 2017</h2>
+                    <ul class="bulletList">
+                        <li>In the raceboard it is now possible to upload 360&deg; videos in addition to the already supported video types. 
+                        360&deg; Videos must use MimeType mp4panorama, 2d mp4 videos must still use mimetype mp4, as in older releases. 
+                        The dialog will try an auto-detection for the mimetype upon entering the link.
+                        Additionally, for mp4 videos it is now possible to use the start time, written in the file, as
+                        a start time preset for the mediatrack, simplifying the video linking.</li>
+                        <li>In Home it is now also possible to use 360&deg; videos, for example as a highlight video</li>
+                        <li>Various Fix importers can now properly report errors and other states</li>
+                        <li>Pairing list generation is now supported. Add competitors to a regatta, then use the new
+                            action icons in the Leaderboards/Leaderboards panel in the administration console to generate
+                            a pairing list. The result can be exported as a CSV file compatible with the TracTrac Excel
+                            spreadsheet for importing the pairing lists into their solution; printing is also enabled.
+                            For smart phone tracking it is possible to fill the pairing list into the race logs in order
+                            to record the competitor / boat assignments according to the pairing list. To allow for
+                            contiguous race numbering, in this context a new feature was introduced that allows users
+                            to pick a race name prefix during denoting all races of a regatta for smart phone tracking,
+                            producing contiguously increasing race names/numbers (R1, R2, ..., R45).</li>
+                    </ul>
+    
+                    <h2 class="articleSubheadline">November 2017</h2>
+                    <ul class="bulletList">
+                        <li>In addition to the "Set start time" dialog there's now a "Set finishing and end time dialog".
+                            This dialog makes it possible to set the finishing as well as the end time in the RaceLog.
+                            It is intended to be used in cases where a race wasn't correctly finished using the race management app.
+                        </li>
+                        <li>New GPS fix, wind and sensor data importers have been implemented: "Bravo" and "Expedition."
+                        </li>
+                        <li>An upgrade to TracAPI 3.8.0 is expected to have fixed the issue with static marks not providing
+                            a position fix within a race's tracking time interval when the tracking start is set after the
+                            static position was entered.
+                        </li>
+                    </ul>
+    
+                    <h2 class="articleSubheadline">September 2017</h2>
+                    <ul class="bulletList">
+                        <li>Authentication for Igtimi accounts is now possible with an OAuth process.
+                            Instead of having to enter the username/password combination into the
+                            administration console, a popup window will show an IFrame with Igtimi's
+                            authentication form. Redirection goes to www.sapsailing.com, together with
+                            a "state" URL parameter providing the base URL of the original server instance
+                            requesting authentication. www.sapsailing.com will then redirect to that server,
+                            removing the "state" parameter from the request and leaving only the "code"
+                            parameter in the URL which the server ultimately receiving the redirected request
+                            will use to obtain an access token and the Igtimi account details. For now, and
+                            as a fallback, the old, non-OAuth process is still supported for a while, though
+                            deprecated as of now.
+                        </li> 
+                        <li>In the process of supporting Igtimi OAuth authentication, new optional system properties for
+                            the Igtimi connector have been introduced:
+                            <ul>
+                              <li><tt>igtimi.client.redirect.protocol</tt>: the redirection protocol, usually one of http or https</li>
+                              <li><tt>igtimi.client.redirect.host</tt>: redirection host; defaults to www.sapsailing.com</li>
+                              <li><tt>igtimi.client.redirect.port</tt>: redirection port; defaults to empty, using the default port for the protocol</li>
+                            </ul>
+                        </li>
+                        <li>When using a TracTrac update URI, errors were possible due to the incorrect use of HTTP
+                            instead of HTTPS as the URI/URL's protocol. The TracTrac server responds to an HTTP
+                            request with a response code 302 (temporary redirect), but our TracTrac connector did
+                            not handle this due to redirects that change protocols are not followed by default in
+                            Java. This has now been changed, and although it is of course better to use the correct
+                            protocol (HTTPS) right away, redirects will now be handled correctly, too.
+                        </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">August 2017</h2>
+                    <ul class="bulletList">
+                        <li>An NMEA wind import feature is now available under "Tracked Races -- Wind." It can be
+                            used to import .txt and .zip files containing data in NMEA-0183 format. The importer
+                            recognizes wind data provided by MWD and MDA sentences but can also use apparent and true
+                            wind readings from MWV sentences which are then combined with position, heading and motion data
+                            to obtain a true wind speed and direction. ZIP files are searched for .txt files which
+                            are then analyzed.
+                        </li>
+                        <li>A new scoring scheme "Low Point with Automatic RDG" is now available. It can help in league
+                            set-ups where one possible definition for the score of a redress given can be to average the
+                            scores of the competitor in all other flights scored, for past and coming races. This scoring
+                            scheme will apply as a default score for an RDG this average. As usual, as soon as an explicit
+                            score is provided for the race, the default calculation will no longer be applied.
+                        </li> 
+                    </ul>
+    
+                    <h2 class="articleSubheadline">July 2017</h2>
+                    <ul class="bulletList">
+                        <li>The sort order of Events/Leaderboards in event series in Home.html is now more consistent
+                            by using the declared sort order in the respective LeaderboardGroup. In addition, the flag
+                            "Display groups in reverse order" in the LeaderboardGroup dialog now affects all occurrences
+                            of Events/Leaderboards in event series in Home.html. If the flag is not set, the order is
+                            latest on top in vertical lists and latest right in horizontal lists. With this change,
+                            the operator is now fully responsible for the sort order.
+                        </li>
+                    </ul>
+    
+                    <h2 class="articleSubheadline">May 2017</h2>
+                    <ul class="bulletList">
+                        <li>The logic of the "Control tracking from start and finish times" check box now behaves slightly
+                            differently. As before, a default start of tracking time is derived from the race start time
+                            (currently five minutes before race start). Likewise, a default end of tracking time is derived
+                            from the race finish time (the time when the blue flag was lowered, or more technically,
+                            when a FINISHED race state was set in the race log) which is currently two minutes after
+                            the race has finished. However, previously, when deviating start of tracking or end of tracking times
+                            were set through other channels, such as received from TracTrac or set explicitly through
+                            the administration console, new events would have been written to the race log, fixing the
+                            start of tracking / end of tracking times according to the derivation rules.<p>
+                            This logic has caused undesired effects and has therefore been removed. For example, when
+                            an end of tracking time has been set explicitly through the administration console then
+                            it may have been overwritten by a new end-of-tracking-time event appended to the race log
+                            when the race is loaded again. Similarly, when a new start time was provided, an explicitly
+                            set start of tracking time would have been canceled. With the new behavior, explicit settings
+                            of start/end of tracking will remain untouched.<p>
+                            For "Smartphone Tracking" the check box therefore now mainly controls whether or not a start/end
+                            of tracking time is written to the race log when the user starts/stops tracking for the first time
+                            through the administration console: when the tracking times are to be controlled by the race's
+                            start and finish times, simply starting / stopping to track a race with the smartphone connector won't
+                            set the start / end of tracking times.<p>
+                            For the TracTrac connector, when the check box is set, as before messages will go out to TracTrac
+                            when the race start / finish times have changed. The feedback from TracTrac will adjust the
+                            tracking times as received by the connector, but no race log entries for the tracking times
+                            will be created anymore.</li>
+                        <li>A new type of leaderboard has been introduced: a regatta leaderboard with competitor elimination.
+                            Such a leaderboard creates a view onto a regular regatta leaderboard and allows the user to
+                            eliminate a subset of the competitors from its display. The scores of all remaining competitors
+                            are taken from the original regatta leaderboard without modification, including all
+                            corrections, penalties and the discarding rule, including the live ranks. This means,
+                            in particular, that the ranks shown for a race in such a leaderboard are not contiguous in
+                            case there are eliminated competitors. The score sum for each competitor is computed as usual.
+                            For the regatta rank, a contiguous count is applied. This way it is possible to create
+                            a new ranking for only a subset of the competitors; a practice common for championships
+                            that want to publish a separate youth leaderboard, e.g., for all competitors under a
+                            certain age.</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">April 2017</h2>
+                    <ul class="bulletList">
+                        <li><code>/gwt/AutoPlay.html</code> can be fully parameterized. Previously, only few of the
+                            available settings for Leaderboard and RaceBoard embedded into this view were effectively passed via URL
+                            to the views. <code>/gwt/AutoPlay.html</code> is now based on the settings framework so that specific
+                            URL parameters may have changed. Please recreate your bookmarks if you are affected by non-working parameters.
+                        </li>
+                        <li>The leaderboard configuration dialog in the admin console has been updated. Now it is possible to configure
+                        a leaderboard with the whole range of settings it supports.
+                        </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">April 2017</h2>
+                    <ul class="bulletList">
+                    	<li>Marks can now be given any valid CSS color. This will be considered also in the
+                    	    SAP Race Management app where the mark will be shown in their actual color in
+                    	    the "By Marks" course editor.
+                    	</li>
+                    	<li>Polar diagrams (also known as VPPs) will now be updated after importing wind.
+                    	</li>
+                    	<li>Competitors that the TracTrac connector declares as "non-competing" are consistently
+                    	    ignored. This may include camera boats, jury boats and other moving objects that do
+                    	    not represent competitor boats.
+                    	</li>
+                    	<li>Upgraded to TracAPI 3.6.3 which offers improvements regarding the identification of
+                    	    marks and waypoints.
+                    	</li>
+                    	<li>A bug regarding the regatta filter setting for the tracked races list has been fixed.
+                    	    The filter setting now survives a refresh cycle of the tracked races list.
+                    	</li>
+                    	<li>When using the TracTrac connector, identification of marks has slightly changed for
+                    	    gates and lines. Before, the mark IDs were constructed based on the control point's
+                    	    name. Now, the control point's ID plus a numeric suffic (1/2) is used instead,
+                    	    providing uniqueness at the same scope that TracTrac provides uniqueness regarding
+                    	    their control point IDs. 
+                    	</li>
+                    </ul>
+                    <h2 class="articleSubheadline">March 2017</h2>
+                    <ul class="bulletList">
+                    	<li>A more compact internal storage format for GPS and Wind fixes is now being used. Instead of a full
+                    	    64-bit "double" value for all components such at latitude, longitude, speed over ground or course over
+                    	    ground, "smaller" data types such as "int" and "short" are now employed. The reduction of accuracy
+                    	    that this brings about is negligible given the accuracy of the tracking systems used. For example,
+                    	    the latitude values are encoded such that while covering the full range from -90Â° to +90Â°, the
+                    	    resolution is at 4.6mm. Similarly, speeds are represented in their compact form in such a way
+                    	    that speeds up to 500kts can be represented at a resolution of 0.015kts.
+                    	</li>
+                    	<li>When a race cannot be loaded successfully through the TracTrac connector, e.g., because its boat
+                    	    class does not match the regatta's boat class, the tracker is now stopped, and a SEVERE log message
+                    	    is written, giving the reason for the failure to load the race. This gives administrators an opportunity
+                    	    to correct any errors in the underlying data and try again. Previously, tracking such a 
+                    	    was not possible without a server re-start because the tracker continued to exist.
+                    	</li>
+                    	<li>The application's locale now switches based on the client's "Accept-Language" HTTP header field.
+                    	    This means that the application as well as all its parts, including the administration console,
+                    	    will show in the user's default language if supported, defaulting to English otherwise.
+                    	</li>
+                    </ul>
+                    <h2 class="articleSubheadline">February 2017</h2>
+                    <ul class="bulletList">
+                    	<li>Wind data in GRIB format can now be imported in the "Wind" sub-tab of the "Tracked Races" tab
+                    	    in the <tt>AdminConsole</tt>. When one or more races are being tracked, with a tracking time
+                    	    interval that includes the time point(s) for which the GRIB data is valid, the wind data at
+                    	    the resolution of the GRIB file is added as separate wind fixes with type "WEB" to the race(s)
+                    	    selected, or to all races if no race is selected.<p>
+                    	    Multiple GRIB files can be specified; this is even necessary if GRIB sources are being used where
+                    	    the so-called "U" and "V" or "speed" and "direction" components, respectively, are provided in
+                    	    separate files. The importer will merge the GRIB sources to produce wind readings with true
+                    	    wind direction and true wind speed.
+                    	    Note that large GRIB files can result in many wind fixes being added to the WEB source. Make sure
+                    	    the GRIB files you use are adequate in resolution and region as well as adequate in time. Obtaining
+                    	    a forecast 72h in the future makes little sense for an in-shore race starting in 30min.
+                    	</li>
+                    	<li>The REST service for wind (/sailingservice/api/v1/regattas/{regatta}/races/{race}/wind) now considers
+                    	    the center of the course to calculate the COMBINED wind readings. Previously, all wind readings for the COMBINED
+                    	    wind track as published through the REST API were equally considered, regardless of how far away a
+                    	    wind sensor was from the course. Now, sensors closer to the course count more than those further away.
+                    	    Furthermore, the time between two readings in the COMBINED wind track in the REST output has been
+                    	    reduced from ten seconds to one second.
+                    	</li>
+                    </ul>
+                    <h2 class="articleSubheadline">January 2017</h2>
+                    <ul class="bulletList">
+                    	<li>Filter boxes now support quoting phrases, such as <tt>"Race 2"</tt> to make them a single search term.
+                    	    Previously, when entering <tt>Race 2</tt> this would match all lines containing <tt>Race</tt> as well
+                    	    as all lines containing the digit <tt>2</tt>, such as it occurs in <tt>2015</tt> or <tt>2016</tt>.
+                    	    Enclosing the phrase with double quotes as in <tt>"Race 2"</tt> will consider the full string in quotes
+                    	    as a search term. In the unlikely case of searching for a double quote you can do that by prefixing
+                    	    the double quote with a backslash character, as in <tt>\"</tt>.
+                    	</li>
+                    	<li>When changing the start/end of tracking times in the "Smartphone Tracking" tab, it is now possible
+                    	    to "unset" one or both of these time stamps. Next to the date/time entry field these is now a
+                    	    "Set" checkbox. When the date/time field is modified, the box is automatically checked because
+                    	    it seems reasonable to assume that the user wants this change to be committed. When committing
+                    	    an empty date/time field with the "Set" checkbox ticked, the <tt>null</tt> time stamp which
+                    	    makes this an open tracking interval is committed and will override any inference that may be
+                    	    made based on the race's start and finish time. When unchecking the "Set" checkbox, the previously
+                    	    committed timestamp is revoked (regardless of the contents of the date/time field), allowing for
+                    	    inference to take place if the regatta has been configured for tracking times inference.
+                    	</li>
+                    	<li>There is a new permission, <tt>DATA_MINING</tt>, which is now required in order to use the
+                    	    <tt>/gwt/DataMining.html</tt> entry point and the related back-end service.
+                    	</li>
+                    	<li>Quoted filtering keywords may now contain leading and/or trailing space characters that are
+                    	    considered when applying the filter. For example, if you have regatta names "Regatta I - 2017" and
+                    	    "Regatta II - 2017" and you would like to filter for "Regatta I" then you now may enter the
+                    	    search term "Regatta I " (with a trailing blank) which then will no longer match "Regatta II - 2017".
+                    	</li> 
+                    </ul>
+                    <h2 class="articleSubheadline">December 2016</h2>
+                    <ul class="bulletList">
+			 <li>Partial replication is now possible. If the system property <tt>replicate.on.start</tt>
+			     that controls automatic replication upon start-up provides only a partial comma-separated
+			     list of replicables, the connection to the master server (configured by the other
+			     replication-related system properties such as <tt>replicate.master.servlet.host</tt> etc.)
+			     will be used to replicate only those replicables whose IDs are specified in
+			     <tt>replicate.on.start</tt>. All other replicables will operate locally.
+			     Usually, the <tt>replicate.on.start</tt> system property is controlled
+			     by the environment variable <tt>REPLICATE_ON_START</tt> that is set in the <tt>env.sh</tt>
+			     configuration file used during server startup and influenced by the server environments
+			     from <a href="http://releases.sapsailing.com/environments">http://releases.sapsailing.com/environments</a>
+			     and overridden by the user details provided to the instance through the AWS EC2 machinery.<p>
+			     The Administration Console (<tt>/gwt/AdminConsole.html</tt> entry point) will now
+			     show which replicables a replica replicates, both, on the replica's administration
+			     console's "Replication" panel, as well as on the master's "Replication" panel, there
+			     for each replica.<p>
+			     The master will restrict broadcasting its operations to those replicables for which
+			     at least one replica has subscribed. While the initial load is requested individually
+			     for each replica and can therefore be tailored to the replicas requested, the operation
+			     broadcast channel is not specific to any replica. It therefore contains the operations
+			     of all replicables for which at least one replica has subscribed. Replicas receiving
+			     operations for replicables for which they did not subscribe will simply drop those
+			     operations (note, however, that the replica will still have to read the operations from the
+			     channel before dropping; this way, registering a replica may have bandwidth effects for
+			     other replicas). Similarly, "backward replication" from a replica to a master will only
+			     take place for those replicables for which the replica has requested replication from (and
+			     therefore also "to") the master.<p>
+			     With this it is now possible to replicate only the Security Service, using ID
+			     <tt>com.sap.sse.security.impl.SecurityServiceImpl</tt>, running all other replicables
+			     in "master mode." This will let the instance share user, permission, role and session management
+			     details with the instance from which the Security Service is being replicated while
+			     having its own master objects for all other replicables, such as the sailing application
+			     (RacingEventService),  mail service or the polar data service. Note that with this feature
+			     the server replicating another instance's Security Service will grant the roles and permissions
+			     to subjects authenticated against that replicated Security Service. For example, if a user
+			     has been granted the <tt>admin</tt> role by that service then the user has that role also
+			     in all other server instances replicating that Security Service. Therefore, use this feature
+			     with extreme caution. Keep in mind that in the near future we will extend the permissions and
+			     role concept by the possibility to restrict permissions and roles to "scopes" such as an
+			     event or a regatta or an account. See also
+			     <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3504">https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3504</a>.
+			 </li>
+			 <li>The server can now optionally restore all races it had tracked the last time. This is
+			     similar to a web browser's capability to restore the tabs the user had open when the browser
+			     was terminated or crashed. To enable this feature, use the system property
+			     <tt>restore.tracked.races</tt>, using the command line option <tt>-Drestore.tracked.races=true</tt>.
+			     So far, the default for this system property is <tt>false</tt>, so by default, when the property
+			     is not provided at all on the command line then the tracked races loaded last won't be restored,
+			     and the server will start out with an empty set of tracked races.<p>
+			     Note that the wind tracking properties, as set when initially tracking the race, are also restored
+			     to their last state. If a live race has last been tracked with live wind tracking, with wind directions
+			     being corrected by the local magnetic declination, then upon server restore the same live tracking will
+			     be started again, including live wind tracking with the same declination correction settings.<p>
+			     When the "Stop Tracking" feature is used, implicitly tracking wind will be stopped in case live wind
+			     tracking had previously been requested for that race. This change is also considered during the restore
+			     process where such a race will no longer receive live wind tracking upon restoring it.<p>
+			     When a tracked race is removed from the server then it will not be restored anymore upon the next
+			     server restart with the restore option enabled. When an entire regatta with a number of tracked
+			     races linked into it is removed then the tracked races are removed as well and will not be
+			     restored upon server re-start.<p>
+			     The restore progress can be monitored using the JConsole or any other JMX monitoring tool. In the
+			     <tt>com.sap.sailing</tt> category you will find the <tt>RacingEventService</tt> object. Among its
+			     attributes there are now the two new ones: <tt>NumberOfTrackedRacesToRestore</tt> and
+			     <tt>NumberOfTrackedRacesRestored</tt>. See the following two screen shots:<p>
+			     <img width="100%" src="images/JConsoleNumberOfTrackedRacesToRestore.png"><p>
+			     <img width="100%" src="images/JConsoleNumberOfTrackedRacesRestored.png">
+			 </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">November 2016</h2>
+                    <ul class="bulletList">
+			 <li>When launching a server, a system property <tt>polardata.source.url</tt> can
+			     be provided in order to specify a server base URL from where to import polar
+			     data into the upstarting server. Usually, this would be the "archive" server's
+			     base URL, such as https://www.sapsailing.com. Note that the exporting server
+			     needs to already support this feature and the importing and exporting server
+			     should be at roughly the same version to ensure binary compatibility for the
+			     polar sheet data.
+			 </li>
+			 <li>In the <em>Tracked Races / Competitors</em> tab there is now a new button "Import Competitor"
+			     that opens a dialog for selecting an import source. The Manage2Sail source is configured through
+			     the same URL as used for the result importer. Select the regatta from which you want to import,
+			     then check for which competitors there are matching / similar existing competitors. Single
+			     selection on the left lets you map to one of the matching existing competitors. Ultimately,
+			     select those competitors (including those you mapped to existing ones) you want to import.
+			     Optionally provide a search tag for them which will be added to the new and mapped-to
+			     competitors for easy retrieval later when selecting competitors to add to a regatta
+			     or race.
+			 </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">October 2016</h2>
+                    <ul class="bulletList">
+			<li>A regatta now has an additional property: "Buoy zone radius in hull lengths." It
+			    can be used to determine the radius of the zone around the marks in terms of
+			    hull lengths. This sets the default for the race viewer (RaceBoard.html entry point)
+			    based on the hull length as known from the boat class.</li>
+			<li>When producing the QR code for the Race Management App's device configurations,
+			    the access token parameter was not properly URL-encoded. In case the access token
+			    contains a '+' character it is incorrectly decoded by the app, letting the authentication
+			    fail. This issue has now been fixed in the AdminConsole, and the access token parameter is
+			    now properly URL-encoded.</li>
+			 <li>Tracked races can now also be filtered by the regatta to which they belong.
+			     When selecting a regatta leaderboard, by default the table of tracked races will be
+			     filtered by the regatta whose leaderboard was selected. The regatta filter can be
+			     used in conjunction with the regular text filter field.
+			 </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">September 2016</h2>
+                    <ul class="bulletList">
+			<li>When denoting a regatta for smartphone tracking, the "By Marks" course designer is
+			    automatically selected if no active regatta configuration was set yet, or a warning
+			    and question to the user is issued, strongly suggesting the use of the "By Marks" course
+			    designer. Background: using the "By Name" course designer could accidentally delete a
+			    valid course layout.
+			</li>
+			<li>Regattas now have an additional setting: "Control tracking from start and finish times."
+			    With it, the start and finish times for a race as entered into the race log, e.g., through
+			    the Race Management app, can be used by tracking connectors to control the tracking for
+			    that race. So far, the TracTrac connector and the Smartphone connector have been
+			    enabled. When a start time for a race
+			    is received and the "Control..." flag is set, the tracking start time will be set to
+			    five minutes before the race start time. Similarly, when the blue flag is lowered, signaling
+			    that the race has finished, the tracking end time will be set to two minutes later.
+			    This should make an operator's job easier when the race timing is maintained properly
+			    through the race log, i.e., through the Race Management app.<p>
+			    In turn, for the Smartphone tracking connector, start/end tracking times are recorded
+			    automatically upon start and stop tracking actions only if the regatta is <em>not</em>
+			    marked as "Control tracking from start and finish times." Background: with this it is
+			    possible to start tracking for a number of races scheduled for a day and having the
+			    Race Management app control the tracking times automatically.
+			 </li>
+			 <li>The "start of tracking" property on a tracked race now has to be set to a valid, non-empty value
+			     in order for fixed to be accepted into the race. As before, an empty "end of tracking" value
+			     means an open-ended interval, and fixes at or after the start of tracking time point will then
+			     continue to be accepted.
+			 </li>
+			 <li>The device mappings dialog now shows the time point of the last fix received from each mapping
+			     and has a convenient filter text box.
+			 </li>
+			 <li>Thread management has been improved. Fewer and more reasonably-designed thread pools
+			     are now created, and thread priorities less than normal (for background operations) now
+			     correctly map to operating system thread priorities, making foreground tasks more
+			     responsive. The less excessive concurrency has furthermore healthy effects on memory
+			     mamangement and garbage collection.
+			 </li>
+			 <li>Fixed a bug in the smart phone tracking course designer. When adding or removing marks
+			     now, unsaved changes to the waypoints and control points tables are preserved.
+			 </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">July 2016</h2>
+                    <ul class="bulletList">
+                        <li>According to some change in a tracked races lifecycle, fix-tracking no longer depends
+                            on tracking races via racelog event but is bound to denotation only. So fix-tracking
+                            via smartphone apps or uploading tracking files can also be used in combination with
+                            e.g. TracTrac.
+                        </li>
+                        <li>Because fix-tracking is now more flexible (see above), it is no longer restricted to
+                            GPS-fixes. 
+                        </li>
+                        <li>It is now possible to track fixes from Bravo foiling sensor devices, currently used in
+                            Extreme Sailing Series events only. This kind of data can be uploaded via a new dialog
+                            within the AdminConsole (Connectors > Smartphone Tracking)  
+                        </li>
+			<li>When a competitor is suppressed in a leaderboard, now the other competitors ranking
+			    worse will be "promoted" by one rank per better suppressed competitor. This way, live
+			    ranks will be correct if, e.g., a "Flexible Leaderboard" is used for a separate scoring
+			    scheme for only a subset of the competitor.
+			</li>
+			<li>When entering a fixed position for a mark in the "Smartphone Tracking" environment it is
+			    now possible to enter a time stamp for the fix. This way it is also possible to adjust
+			    a mark's position to a fixed lat/lng for some time point in the past.
+			</li>
+			<li>A series within a regatta can now define a maximum number of discards applied in that
+			    series. When combined with leaderboard-wide discards, generally discards can be distributed
+			    across the leaderboard as needed, but restricted by the maximum specified for each series.
+			    Leave the maximum empty to not provide any maximum. Setting to 0 will cause no scores to
+			    be discarded in that series.
+			</li>
+			<li>An event now has a "Base URL" which should be used to enable useful e-mail notifications with
+			    links embedded in them that lead to the correct server. If a notification is to contain
+			    a link to a dedicated event server, the event cannot be reached through www.sapsailing.com,
+			    and so if this generic link is used as a default, users will end up not finding the page
+			    linked to by the notification.
+			</li>
+			<li>The checkboxes "Track Wind" and "Correct by Declination" are now switched on by default
+			    for smartphone-tracked races
+			</li>
+                    </ul>
 			
                     <h2 class="articleSubheadline">June 2016</h2>
                     <ul class="bulletList">
@@ -32,6 +711,31 @@
 			    accidentally String types with double-quoted values were used have been changed to
 			    numeric types, represented in the JSON documents without double quotes.
 			</li>
+			<li>It is now possible to use overlapping leaderboard groups in an event, such that one
+			    leaderboard can be part of more than one leaderboard group of the event. This comes in
+			    handy if there are different schemes by which the regattas or leaderboards may be grouped
+			    and is particularly useful for large events for filtering the regattas in the event
+			    overview. Please note that in case a leaderboard is part of a leaderboard group with
+			    an overall leaderboard ("series scoring"), the leaderboard group with the overall
+			    leaderboard must be provided as the first of the overlapping leaderboard groups in
+			    the scope of the event.
+			</li>
+			<li>Earlier releases have introduced an issue with leaderboard configuration and with binding
+			    tracked races to their leaderboard slots. When a filter is set for the tracked races list,
+			    changing the leaderboard selection or changing the race column selection such that the
+			    tracked race for a selected race column is not visible due to the filter, the connection
+			    between the race column and the tracked race is removed.<p>
+			    In order to reduce chances for failure, now at least changing the leaderboard selection
+			    will de-select any selected race column, making sure that nothing needs to be selected
+			    in the potentially filtered list of tracked races.<p>
+			    However, trouble remains: changing the tracked races filter while having a race column
+			    with a tracked race connected selected in the table on the left will unlink the race
+			    column's tracked race. As a workaround, you'll have to either de-select the race column
+			    in the left table before changing the filter, e.g., by Ctrl-clicking the race column
+			    selected. Or you remove any filter text for the tracked races list before you change
+			    the selection in the race column table. This will make sure that the race connected
+			    to the race column that you may select next will be available for automatic selection.
+			 </li>
                     </ul>
 
                     <h2 class="articleSubheadline">May 2016</h2>
@@ -81,6 +785,11 @@
                             There is a default value that can be overwritten on a per locale base.
                             No sailors info link is shown for UI languages if there is neither a default link nor one for the specific locale,
                             even if there is one for another locale configured.
+                        </li>
+                        <li>The mechanism to handle RegattaOverview settings has been changed to a more generic approach.
+                            This leads to slightly changed URL parameter names so that old bookmarks could be broken in a way
+                            so that the actual shown set of races is different using the new version because the old parameters aren't correctly recognized.
+                            All automatically generated links to this page in Home and AdminConsole have been updated to use the new parameter names.
                         </li>
                     </ul>
                     

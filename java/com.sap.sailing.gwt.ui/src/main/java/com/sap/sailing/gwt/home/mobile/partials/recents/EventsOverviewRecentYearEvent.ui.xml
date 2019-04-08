@@ -7,6 +7,7 @@
 		type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res"
 		type="com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentResources" />
+	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
 	<div>
 	<a ui:field="eventLinkUi">
 		<div class="{local_res.css.eventsoverviewrecent_event}">
@@ -21,7 +22,7 @@
 				</div>
 			</div>
 			<div class="{local_res.css.eventsoverviewrecent_event_arrow}">
-				<img src="images/home/arrow-down-grey.png" alt="{i18n.goToEventOverview}"
+				<img src="{shr.arrowDownGrey.getSafeUri}" alt="{i18n.goToEventOverview}"
 					class="{local_res.css.eventsoverviewrecent_event_arrow_image}"></img>
 			</div>
 		</div>

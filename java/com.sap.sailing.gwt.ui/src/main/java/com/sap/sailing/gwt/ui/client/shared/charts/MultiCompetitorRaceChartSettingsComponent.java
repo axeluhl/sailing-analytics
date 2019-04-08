@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -9,81 +11,118 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSettingsComponent<MultiCompetitorRaceChartSettings> implements
+/**
+ * This class is responsible for showing the settings dialog for the comptitorchart that is used for example in the
+ * RaceBoard. It will depending on availableDetailTypes offer different options to select for the first and for the
+ * second type. The availableDetailTypes are determined based on the environment of the corresponding race, for example
+ * if additional foiling sensor data is imported. If non availableDetailTypes are selected for the first/second, instead
+ * the dialog will show the first valid/none selected. Upon making to default the prior invalid values are overwritten,
+ * they are kept otherwise.
+ */
+public class MultiCompetitorRaceChartSettingsComponent extends
+        AbstractChartSettingsComponent<MultiCompetitorRaceChartSettings> implements
         SettingsDialogComponent<MultiCompetitorRaceChartSettings> {
-    private ListBox chartTypeSelectionListBox;
-    private final DetailType initialDetailType;
-    private final List<DetailType> availableDetailsTypes;    
+    private ListBox chartFirstTypeSelectionListBox;
+    private ListBox chartSecondTypeSelectionListBox;
+    private final DetailType initialFirstDetailType;
+    private final DetailType initialSecondDetailType;
+    private final Iterable<DetailType> availableDetailsTypes;
     
-    public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings, StringMessages stringMessages, boolean hasOverallLeaderboard) {
+    public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings,
+            StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
         super(settings, stringMessages);
-        this.initialDetailType = settings.getDetailType();
-        
-        availableDetailsTypes = new ArrayList<DetailType>();
-        availableDetailsTypes.add(DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
-        availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED);
-        availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START);
-        availableDetailsTypes.add(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS);
-        availableDetailsTypes.add(DetailType.GAP_TO_LEADER_IN_SECONDS);
-        availableDetailsTypes.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
-        availableDetailsTypes.add(DetailType.RACE_RANK);
-        availableDetailsTypes.add(DetailType.REGATTA_RANK);
-        availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
-        availableDetailsTypes.add(DetailType.BEAT_ANGLE);
-        availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
-        
-        if (hasOverallLeaderboard) {
-            availableDetailsTypes.add(DetailType.OVERALL_RANK);
-        }
+        this.initialFirstDetailType = settings.getFirstDetailType();
+        this.initialSecondDetailType = settings.getSecondDetailType();
+        this.availableDetailsTypes = availableDetailTypes;
     }
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSpacing(5);
-
         Label chartSelectionLabel = new Label(stringMessages.chooseChart());
         mainPanel.add(chartSelectionLabel);
-        chartTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */ false);
-        int i=0;
-        for (DetailType detailType : availableDetailsTypes) {
-            chartTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
-            if (detailType == initialDetailType) {
-                chartTypeSelectionListBox.setSelectedIndex(i);
+        chartFirstTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
+        chartSecondTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
+        //add empty values, required, if a non available value is saved as default in the settings. Eg. rideheight, which is only valid for foiling races
+        chartSecondTypeSelectionListBox.addItem("--", "--");
+        int i = 0;
+        
+        List<DetailType> sortedAvailableDetailTypes = new ArrayList<DetailType>();
+        Util.addAll(availableDetailsTypes, sortedAvailableDetailTypes);
+        Collections.sort(sortedAvailableDetailTypes, new Comparator<DetailType>() {
+            @Override
+            public int compare(DetailType o1, DetailType o2) {
+                final boolean o1Expedition = o1.isExpeditionType();
+                final boolean o2Expedition = o2.isExpeditionType();
+                if ((o1Expedition && o2Expedition) || (!o1Expedition && !o2Expedition)) {
+                    final String o1Name = DetailTypeFormatter.format(o1);
+                    final String o2Name = DetailTypeFormatter.format(o2);
+                    return Collator.getInstance().compare(o1Name, o2Name);
+                }
+                if (o1Expedition && !o2Expedition) {
+                    return 1;
+                }
+                if (o2Expedition && !o1Expedition) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+        
+        for (DetailType detailType : sortedAvailableDetailTypes) {
+            chartFirstTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
+            chartSecondTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
+            if (detailType == initialFirstDetailType) {
+                chartFirstTypeSelectionListBox.setSelectedIndex(i);
+            }
+            if (detailType == initialSecondDetailType) {
+                //add offset for empty item
+                chartSecondTypeSelectionListBox.setSelectedIndex(i+1);
             }
             i++;
         }
-        mainPanel.add(chartTypeSelectionListBox);
-
+        mainPanel.add(chartFirstTypeSelectionListBox);
+        mainPanel.add(chartSecondTypeSelectionListBox);
         mainPanel.add(new Label(stringMessages.stepSizeInSeconds()));
-        stepSizeBox = dialog.createDoubleBox(((double) getSettings().getStepSize()) / 1000, 5);
+        stepSizeBox = dialog.createDoubleBox(((double) getSettings().getStepSizeInMillis()) / 1000, 5);
         mainPanel.add(stepSizeBox);
-        
         return mainPanel;
     }
 
     @Override
     public MultiCompetitorRaceChartSettings getResult() {
-        DetailType newDetailType = null;
-        int selectedIndex = chartTypeSelectionListBox.getSelectedIndex();
-        String selectedDetailType = chartTypeSelectionListBox.getValue(selectedIndex);
-        for (DetailType detailType : availableDetailsTypes){
-            if (detailType.name().equals(selectedDetailType)){
-                newDetailType = detailType;
-                break;
+        DetailType newFirstDetailType = findSelectedTypeFor(chartFirstTypeSelectionListBox);
+        DetailType newSecondDetailType = findSelectedTypeFor(chartSecondTypeSelectionListBox);
+        if (com.sap.sse.common.Util.equalsWithNull(newFirstDetailType, newSecondDetailType)) {
+            newSecondDetailType = null;
+        }
+        return new MultiCompetitorRaceChartSettings(getAbstractResult(), newFirstDetailType, newSecondDetailType);
+    }
+
+    /**
+     * Determines a selected DetailType of a Checkbox, returns null if not available 
+     */
+    private DetailType findSelectedTypeFor(ListBox typeSelectionListBox) {
+        int itemIndex = typeSelectionListBox.getSelectedIndex();
+        String selectedDetailType = typeSelectionListBox.getValue(itemIndex);
+        for (DetailType detailType : availableDetailsTypes) {
+            if (detailType.name().equals(selectedDetailType)) {
+                return detailType;
             }
         }
-        return new MultiCompetitorRaceChartSettings(getAbstractResult(), newDetailType);
+        return null;
     }
 
     @Override
     public FocusWidget getFocusWidget() {
-        return chartTypeSelectionListBox;
+        return chartFirstTypeSelectionListBox;
     }
-
 }

@@ -5,8 +5,9 @@
     <string name="preference_server_checkout_path" translatable="false">/sailingserver/api/v1/leaderboards/{leaderboard-name}/device_mappings/end</string>
     <string name="preference_server_event_path" translatable="false">/sailingserver/api/v1/events/{event_id}</string>
     <string name="preference_server_event_url" translatable="false">/gwt/Home.html?navigationTab=Regattas#EventPlace:eventId=%s</string>
-    <string name="preference_server_leaderboard_path" translatable="false">/sailingserver/api/v1/leaderboards/{leaderboard_name}</string>
     <string name="preference_server_competitor_path" translatable="false">/sailingserver/api/v1/competitors/{competitor_id}</string>
     <string name="preference_server_team_info_path" translatable="false">/sailingserver/api/v1/competitors/{competitor_id}/team</string>
     <string name="preference_server_team_image_upload_path" translatable="false">/sailingserver/api/v1/competitors/{competitor_id}/team/image</string>
+    <string name="preference_server_mark_path" translatable="false">/sailingserver/api/v1/leaderboards/{leaderboardName}/marks/{mark_id}</string>
+    <string name="preference_server_boat_path" translatable="false">/sailingserver/api/v1/boats/{boat_id}</string>
 </resources>

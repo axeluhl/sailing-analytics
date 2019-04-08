@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:baselineAligned="false"
-    android:paddingTop="15dp">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:paddingTop="15dp">
 
-    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+    <TextView
         android:id="@+id/tracking_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:paddingLeft="10dp"
+        android:paddingLeft="@dimen/fragment_side_margin"
         android:paddingRight="10dp"
-        android:text="@string/tracking_time" />
+        android:text="@string/tracking_time"
+        android:textColor="@color/fiori_text_color"
+        android:textSize="@dimen/default_text_size"/>
 
-    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+    <TextView
         android:id="@+id/wait_for_gps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -24,7 +26,9 @@
         android:layout_toRightOf="@+id/tracking_time"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:text="@string/waiting_for_gps" />
+        android:text="@string/waiting_for_gps"
+        android:textColor="@color/fiori_text_color"
+        android:textSize="@dimen/default_text_size"/>
 
     <com.sap.sailing.android.shared.ui.customviews.AutoResizeLightTextView
         android:id="@+id/tracking_time_label"
@@ -33,10 +37,10 @@
         android:layout_marginBottom="0dp"
         android:gravity="center"
         android:paddingBottom="0dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+        android:paddingLeft="@dimen/fragment_side_margin"
+        android:paddingRight="@dimen/fragment_side_margin"
         android:text="@string/initial_timer_text_zerozero"
         android:textSize="100sp"
-        tools:ignore="InconsistentLayout" />
+        tools:ignore="InconsistentLayout"/>
 
 </RelativeLayout>

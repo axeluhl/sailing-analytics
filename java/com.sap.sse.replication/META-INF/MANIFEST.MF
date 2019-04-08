@@ -7,17 +7,20 @@ Bundle-Activator: com.sap.sse.replication.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: com.sap.sse.replication,
- com.sap.sse.replication.impl
+Export-Package: com.sap.sse.replication.impl
 Require-Bundle: com.sap.sse.common,
  com.sap.sse.operationaltransformation,
  com.sap.sse,
  lz4-java;bundle-version="1.3.0",
- org.apache.commons.lang
+ org.apache.commons.lang,
+ com.sap.sse.replication.interfaces;bundle-version="1.0.0",
+ org.json.simple
 Bundle-ClassPath: .
+Comment: The Web-ContextPath is referred to by ReplicationMasterDescriptorImpl.REPLICATION_SERVLET
 Web-ContextPath: /replication
 Import-Package: com.rabbitmq.client;version="2.8.4",
  javax.servlet;version="2.6.0",
  javax.servlet.http;version="2.6.0",
  org.osgi.framework;version="1.6.0",
  org.osgi.util.tracker;version="1.5.0"
+Automatic-Module-Name: com.sap.sse.replication

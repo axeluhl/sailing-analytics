@@ -4,13 +4,14 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
 import com.sap.sse.gwt.client.sapheader.SAPHeader;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
 /**
- * {@link SAPHeader} which is decorated by a authentication control on the right side. This is typically ised to
+ * {@link SAPHeader} which is decorated by a authentication control on the right side. This is typically used to
  * integrate with {@link GenericAuthentication}.
  */
 public class SAPHeaderWithAuthentication extends SAPHeader {
@@ -20,17 +21,21 @@ public class SAPHeaderWithAuthentication extends SAPHeader {
 
     private AuthenticationMenuView authenticationMenuView;
 
-    public SAPHeaderWithAuthentication(String applicationName, String headerTitle) {
-        this(applicationName);
+    public SAPHeaderWithAuthentication(String applicationName, String applicationBaseUrl, String headerTitle) {
+        this(applicationName, applicationBaseUrl);
         setHeaderTitle(headerTitle);
     }
 
-    public SAPHeaderWithAuthentication(String applicationName) {
-        super(applicationName);
+    public SAPHeaderWithAuthentication(String applicationName, String applicationBaseUrl) {
+        super(applicationName, applicationBaseUrl);
         res.css().ensureInjected();
         
         FlowPanel rightWithAuthentication = new FlowPanel();
         rightWithAuthentication.addStyleName(res.css().header_right_wrapper());
+
+        final LanguageSelector languageSelector = new LanguageSelector();
+        languageSelector.addStyleName(res.css().languageSelector());
+        rightWithAuthentication.add(languageSelector);
         
         Anchor authenticationMenu = new Anchor();
         authenticationMenu.addStyleName(res.css().usermanagement_icon());

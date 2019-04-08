@@ -58,6 +58,20 @@
         <item>PAPA</item>
         <item>INDIA</item>
         <item>BLACK</item>
+        <item>UNIFORM</item>
+        <item>ZULU</item>
+    </string-array>
+    <string name="preference_racing_procedure_swc_classflag_key" translatable="false">swcClassFlag</string>
+    <string name="preference_racing_procedure_swc_hasxray_key" translatable="false">swcIndividualRecall</string>
+    <bool name="preference_racing_procedure_swc_hasxray_default">true</bool>
+    <string name="preference_racing_procedure_swc_resultentryenabled_key" translatable="false">swcResultEntryEnabled</string>
+    <bool name="preference_racing_procedure_swc_resultentryenabled_default">false</bool>
+    <string name="preference_racing_procedure_swc_startmode_flags_key" translatable="false">swcStartmodeFlags</string>
+    <string-array name="preference_racing_procedure_swc_startmode_flags_default">
+        <item>PAPA</item>
+        <item>INDIA</item>
+        <item>BLACK</item>
+        <item>UNIFORM</item>
         <item>ZULU</item>
     </string-array>
     <string name="preference_racing_procedure_gatestart_classflag_key" translatable="false">gateStartClassFlag</string>
@@ -99,6 +113,11 @@
     <integer name="preference_dependent_races_offset_default">5</integer>
     <string name="preference_allow_edit_race_factor_key" translatable="false">raceFactor</string>
     <bool name="preference_allow_edit_race_factor_default">true</bool>
+    <string name="preference_protest_time_duration_key">protestTimeDuration</string>
+    <integer name="preference_protest_time_duration_default">90</integer>
+    <string name="preference_protest_time_duration_custom_key">protestTimeDurationCustom</string>
+    <string name="preference_protest_time_duration_custom_editable_key">protestTimeDurationCustomEditable</string>
+    <bool name="preference_protest_time_duration_custom_editable_default">true</bool>
 
     <string name="preference_allow_demo_key" translatable="false">allow_demo</string>
     <bool name="preference_allow_demo_default">false</bool>
@@ -109,17 +128,6 @@
     <string name="preference_developer_key" translatable="false">developer_options</string>
     <string name="preference_offline_key" translatable="false">is_data_offline</string>
     <bool name="preference_offline_default">false</bool>
-
-    <string name="preference_theme_key" translatable="false">theme</string>
-    <string name="preference_theme_default" translatable="false">light</string>
-    <string-array name="preference_theme_values">
-        <item>dark</item>
-        <item>light</item>
-    </string-array>
-    <string-array name="preference_theme_entries">
-        <item>Dark</item>
-        <item>Light</item>
-    </string-array>
 
     <string name="preference_non_public_events_key" translatable="false">show_non_public_events</string>
     <bool name="preference_non_public_events_default">false</bool>

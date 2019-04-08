@@ -11,6 +11,7 @@ import java.util.List;
 public enum RacingProcedureType {
     UNKNOWN("Unknown"),
     RRS26("Fix Line Start (RRS26)"),
+    SWC("Sailing World Cup Start"),
     GateStart("Gate Start"),
     ESS("\"Extreme Sailing Series\"-Start"),
     BASIC("Basic Countdown Start"),

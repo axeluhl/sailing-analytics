@@ -2,7 +2,9 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
-public class BoatClassDTO extends NamedDTO implements Serializable {
+import com.sap.sse.common.Distance;
+
+public class BoatClassDTO extends NamedDTO implements Serializable, Comparable<BoatClassDTO> {
     private static final long serialVersionUID = 1981789833769906676L;
     
     /**
@@ -11,27 +13,36 @@ public class BoatClassDTO extends NamedDTO implements Serializable {
      */
     public static final String DEFAULT_NAME = "Default";
     
-    private double hullLengthInMeters;
+    private Distance hullLength;
+    private Distance hullBeam;
     private String displayName;
     
     BoatClassDTO() {}
 
-    public BoatClassDTO(String name, String displayName, double hullLengthInMeters) {
+    public BoatClassDTO(String name, String displayName, Distance hullLength, Distance hullBeam) {
         super(name);
-        this.hullLengthInMeters = hullLengthInMeters;
+        this.hullLength = hullLength;
+        this.hullBeam = hullBeam;
     }
 
-    public BoatClassDTO(String name, double hullLengthInMeters) {
-        super(name);
-        this.hullLengthInMeters = hullLengthInMeters;
-        this.displayName = null;
+    public BoatClassDTO(String name, Distance hullLength, Distance hullBeam) {
+        this(name, /* display name */ null, hullLength, hullBeam);
     }
 
-    public double getHullLengthInMeters() {
-        return hullLengthInMeters;
+    public Distance getHullLength() {
+        return hullLength;
+    }
+    
+    public Distance getHullBeam() {
+        return hullBeam;
     }
 
     public String getDisplayName() {
         return displayName;
+    }
+    
+    @Override
+    public int compareTo(BoatClassDTO o) {
+        return getName().compareToIgnoreCase(o.getName());
     }
 }

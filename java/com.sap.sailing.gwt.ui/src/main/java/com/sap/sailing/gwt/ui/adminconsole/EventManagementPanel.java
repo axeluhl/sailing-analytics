@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -14,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sse.gwt.adminconsole.HandleTabSelectable;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
@@ -30,7 +32,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     private final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
     
     public EventManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
+            RegattaRefresher regattaRefresher, final StringMessages stringMessages, final HandleTabSelectable handleTabSelectable) {
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -39,8 +41,8 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         mainPanel.add(eventsPanel);
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
-        
-        eventListComposite = new EventListComposite(sailingService, errorReporter, regattaRefresher, this, stringMessages);
+
+        eventListComposite = new EventListComposite(sailingService, errorReporter, regattaRefresher, this, handleTabSelectable, stringMessages);
         eventListComposite.ensureDebugId("EventListComposite");
         eventsContentPanel.add(eventListComposite);
         
@@ -79,5 +81,10 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     @Override
     public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups) {
         eventListComposite.fillLeaderboardGroups(leaderboardGroups);
+    }
+
+    @Override
+    public void setupLeaderboardGroups(Map<String, String> params) {
+        eventListComposite.setupLeaderboardGroups(params);
     }
 }

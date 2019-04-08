@@ -8,18 +8,19 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sse.filestorage,
  com.sap.sse.filestorage.impl,
  com.sap.sse.filestorage.testsupport
-Import-Package: org.osgi.framework;version="1.8.0",
+Import-Package: org.apache.commons.logging,
+ org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
 Bundle-Activator: com.sap.sse.filestorage.impl.Activator
 Require-Bundle: org.apache.servicemix.bundles.aws-java-sdk;bundle-version="1.9.8",
  com.fasterxml.jackson.core.jackson-databind,
  com.fasterxml.jackson.core.jackson-core,
  com.fasterxml.jackson.core.jackson-annotations,
- org.apache.commons.logging;bundle-version="1.1.3",
  com.sap.sse.common,
  com.sap.sse.mongodb,
- com.sap.sse.replication,
+ com.sap.sse.replication.interfaces,
  com.sap.sse.operationaltransformation,
  com.sap.sse,
  org.apache.commons.io,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0"
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
+Automatic-Module-Name: com.sap.sse.filestorage

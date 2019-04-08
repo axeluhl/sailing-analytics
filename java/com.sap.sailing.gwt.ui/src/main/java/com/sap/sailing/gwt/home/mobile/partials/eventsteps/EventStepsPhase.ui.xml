@@ -4,12 +4,15 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventStepsResources" />
+	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
 	<g:HTMLPanel addStyleNames="{local_res.css.eventsteps_phases_phase}">
-		<div class="{local_res.css.eventsteps_phases_phase_progress}">
-			<div class="{local_res.css.eventsteps_phases_phase_name}" ui:field="nameUi"></div>
-			<img src="images/home/icon-green-check.svg" class="{local_res.css.eventsteps_phases_phase_progress_icon}" ui:field="checkUi"></img>
-			<div class="{local_res.css.eventsteps_phases_phase_progress_text}" ui:field="progressUi"></div>
-		</div>
-		<div class="{local_res.css.eventsteps_phases_phase_progressbar}" ui:field="fleetsContainerUi"></div>
+		<a class="{local_res.css.eventsteps_phases_phase_link}" ui:field="anchorUi">
+			<div class="{local_res.css.eventsteps_phases_phase_progress}">
+				<div class="{local_res.css.eventsteps_phases_phase_name}" ui:field="nameUi"></div>
+				<img src="{shr.greenCheck.getSafeUri}" class="{local_res.css.eventsteps_phases_phase_progress_icon}" ui:field="checkUi"></img>
+				<div class="{local_res.css.eventsteps_phases_phase_progress_text}" ui:field="progressUi"></div>
+			</div>
+			<div class="{local_res.css.eventsteps_phases_phase_progressbar}" ui:field="fleetsContainerUi"></div>
+		</a>
 	</g:HTMLPanel>
 </ui:UiBinder>

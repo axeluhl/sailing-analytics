@@ -1,39 +1,60 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
-    repositories {
-        jcenter()
+    if (project.hasProperty("xmake")) {
+        repositories {
+            maven {
+                url commonRepoURL
+            }
+        }
+    } else {
+        repositories {
+            jcenter()
+            google()
+        }
     }
-
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0'
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.5.0'
+        classpath "com.android.tools.build:gradle:3.3.2"
+        classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
+        classpath "org.ajoberstar:grgit:2.3.0"
     }
 }
-
 allprojects {
-    repositories {
-        jcenter()
+    if (project.hasProperty("xmake")) {
+        repositories {
+            maven {
+                url commonRepoURL
+            }
+        }
+    } else {
+        repositories {
+            jcenter()
+            google()
+        }
     }
 
     version = "1.0.0-SNAPSHOT"
 
-    tasks.withType(JavaCompile) { 
-	    sourceCompatibility = JavaVersion.VERSION_1_7
-	    targetCompatibility = JavaVersion.VERSION_1_7
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+        options.encoding = 'UTF-8'
     }
+    defaultTasks 'clean', 'assemble'
 }
 
 // dependency versions for all sub modules
 ext {
     // regular
-    buildTools = "22.0.1"
-    compileSdk = 22
-    minSdk = 14
-    targetSdk = 22
+    buildTools = "28.0.3"
+    compileSdk = 28
+    minSdk = 16
+    targetSdk = 28
 
-    support = "22.2.1"
-    play_services = "7.3.0"
+    sourceCompatibilityVersion = JavaVersion.VERSION_1_8
+    targetCompatibilityVersion = JavaVersion.VERSION_1_8
+
+    support = "27.1.1"
+    play_services = "12.0.1"
 
     license_dialog = "1.8.0"
 
@@ -44,4 +65,22 @@ ext {
     // testing - ui
     test = "0.2"
     espresso = "2.1"
+    isXmakeBuild = project.hasProperty("xmake")
+    isReleaseBuild = Boolean.parseBoolean(System.env.XMAKE_RELEASE_BUILD)
+
+    destinationFolder = new File("").absolutePath + "/java/com.sap.sailing.www/apps/"
 }
+
+apply plugin: "org.ajoberstar.grgit"
+if (project.hasProperty("xmake")) {
+    task wrapper(type: Wrapper) {
+        distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip"
+        System.setProperty("http.proxyHost", sapProxyHost)
+        System.setProperty("https.proxyHost", sapProxyHost)
+        System.setProperty("http.proxyPort", sapProxyPort)
+        System.setProperty("https.proxyPort", sapProxyPort)
+        System.setProperty("http.nonProxyHosts", sapNonProxyHosts)
+        System.setProperty("https.nonProxyHosts", sapNonProxyHosts)
+    }
+}
+

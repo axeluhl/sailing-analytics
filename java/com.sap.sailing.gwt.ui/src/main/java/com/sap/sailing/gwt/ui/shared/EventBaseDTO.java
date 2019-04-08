@@ -69,7 +69,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     public ImageDTO getLogoImage() {
         ImageDTO result = null;
         for (ImageDTO image : images) {
-            if (image.hasTag(MediaTagConstants.LOGO)) {
+            if (image.hasTag(MediaTagConstants.LOGO.getName())) {
                 result = image;
                 break;
             }
@@ -100,7 +100,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     public void setOfficialWebsiteURL(String officialWebsiteURL) {
         this.officialWebsiteURL = officialWebsiteURL;
     }
-
+    
     public Map<String, String> getSailorsInfoWebsiteURLs() {
         return sailorsInfoWebsiteURLs;
     }

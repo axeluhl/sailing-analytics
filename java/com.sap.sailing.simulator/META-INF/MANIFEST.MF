@@ -10,7 +10,7 @@ Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.domain.tractracadapter,
  com.sap.sse,
  com.sap.sse.common,
- org.apache.httpcomponents.httpclient;bundle-version="4.2.6",
+ org.apache.httpcomponents.httpclient;bundle-version="[4.2.6,4.3.0)",
  org.json.simple;bundle-version="1.1.0"
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osgi.framework;version="1.6.0"
@@ -21,3 +21,4 @@ Export-Package: com.sap.sailing.simulator,
  com.sap.sailing.simulator.windfield,
  com.sap.sailing.simulator.windfield.impl
 Bundle-Activator: com.sap.sailing.simulator.impl.Activator
+Automatic-Module-Name: com.sap.sailing.simulator

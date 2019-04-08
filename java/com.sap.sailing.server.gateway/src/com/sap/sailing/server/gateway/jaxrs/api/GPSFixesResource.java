@@ -16,9 +16,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -53,15 +52,12 @@ public class GPSFixesResource extends AbstractSailingServerResource {
         List<GPSFixMoving> fixes = data.getB();
 
         try {
-            for (GPSFixMoving fix : fixes) {
-                getService().getGPSFixStore().storeFix(device, fix);
-            }
+            getService().getSensorFixStore().storeFixes(device, fixes);
             logger.log(Level.INFO, "Added " + fixes.size() + " fixes for device " + device.toString()  + " to store");
-        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+        } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store fix for device " + device);
         }
 
         return Response.ok().build();
     }
 }
- 

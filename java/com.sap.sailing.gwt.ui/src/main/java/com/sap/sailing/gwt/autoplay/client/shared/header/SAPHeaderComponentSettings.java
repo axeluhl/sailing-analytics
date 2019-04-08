@@ -1,22 +1,24 @@
 package com.sap.sailing.gwt.autoplay.client.shared.header;
 
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.StringSetting;
 
-public class SAPHeaderComponentSettings extends AbstractSettings {
-    private final String title;
+public class SAPHeaderComponentSettings extends AbstractGenericSerializableSettings {
+    private static final long serialVersionUID = -4504543757235801224L;
+    
+    private StringSetting title;
 
-    /**
-     *  The default settings
-     */
-    public SAPHeaderComponentSettings() {
-        title = "";
+    @Override
+    protected void addChildSettings() {
+        super.addChildSettings();
+        title = new StringSetting("title", this,"");
     }
     
     public SAPHeaderComponentSettings(String title) {
-        this.title = title;
+        this.title.setValue(title);
     }
 
     public String getTitle() {
-        return title;
+        return title.getValue();
     }
 }

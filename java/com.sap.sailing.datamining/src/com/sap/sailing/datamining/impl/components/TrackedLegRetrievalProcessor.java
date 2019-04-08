@@ -14,8 +14,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class TrackedLegRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedRaceContext, HasTrackedLegContext> {
 
     public TrackedLegRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasTrackedLegContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasTrackedRaceContext.class, HasTrackedLegContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasTrackedLegContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasTrackedRaceContext.class, HasTrackedLegContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
     }
 
     @Override
@@ -23,6 +25,9 @@ public class TrackedLegRetrievalProcessor extends AbstractRetrievalProcessor<Has
         Collection<HasTrackedLegContext> trackedLegsWithContext = new ArrayList<>();
         int legNumber = 1;
         for (TrackedLeg trackedLeg : element.getTrackedRace().getTrackedLegs()) {
+            if (isAborted()) {
+                break;
+            }
             HasTrackedLegContext trackedLegWithContext = new TrackedLegWithContext(element, trackedLeg, legNumber);
             trackedLegsWithContext.add(trackedLegWithContext);
             legNumber++;

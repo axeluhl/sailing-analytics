@@ -6,11 +6,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -35,13 +34,15 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -64,7 +65,7 @@ public class SimulationServiceImpl implements SimulationService {
 
     private static final Logger logger = Logger.getLogger(SimulationService.class.getName());
 
-    final private Executor executor;
+    final private ScheduledExecutorService executor;
     final private SmartFutureCache<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval> cache;
     final private RacingEventService racingEventService;
     final private ScheduledExecutorService scheduler;
@@ -72,9 +73,9 @@ public class SimulationServiceImpl implements SimulationService {
     final private HashMap<RaceIdentifier, LegChangeListener> legListeners;
     final private long WAIT_MILLIS = 20000; // milliseconds to wait until earliest cache-update for simulation
     
-    public SimulationServiceImpl(Executor executor, RacingEventService racingEventService) {
+    public SimulationServiceImpl(ScheduledExecutorService executor, RacingEventService racingEventService) {
         this.executor = executor;
-        this.scheduler = Executors.newScheduledThreadPool(1);
+        this.scheduler = executor;
         this.racingEventService = racingEventService;
         if (racingEventService != null) {
             this.raceListeners = new HashMap<String, SimulationRaceListener>();
@@ -123,12 +124,26 @@ public class SimulationServiceImpl implements SimulationService {
         }
     }
     
+    /**
+     * A stateful listener whose {@link #legIdentifier} may change over time, updated to the most recent request. When
+     * changes to the race are received that are considered relevant for the simulation results, a cache update will be
+     * triggered {@link SimulationServiceImpl#WAIT_MILLIS} milliseconds after the change event. To avoid redundant
+     * triggers, more updates received before the wait period expires are ignored as long as they are for the same leg.<p>
+     * 
+     * TODO the {@link #covered} and {@link #legIdentifier} fields with the stateful design and the dependence on {@link #isLive}
+     * seem a bit "smelly." The {@link #legIdentifier} field is updated only in "live" mode when a simulator result is requested.
+     * It therefore remains at the last leg for which a result was requested while the race was in live mode. This doesn't
+     * necessarily have to be the race's last leg. When updates strike---such as a mark moving---then the simulation results
+     * for all of the race's legs at least need to be invalidated. The way the implementation looks right now it seems that
+     * results for legs that were requested earlier will not be updated because {@link #legIdentifier} does not point to them.
+     * And since {@link #legIdentifier} is no more updated for non-live races, updates to older leg simulation results will
+     * never happen...
+     */
     private class LegChangeListener extends AbstractRaceChangeListener {
         private final TrackedRace trackedRace;
         private LegIdentifier legIdentifier;
         private final ScheduledExecutorService scheduler;
         private boolean covered;
-        
 
         public LegChangeListener(TrackedRace trackedRace, ScheduledExecutorService scheduler) {
             this.trackedRace = trackedRace;
@@ -154,9 +169,9 @@ public class SimulationServiceImpl implements SimulationService {
         
         @Override
         protected void defaultAction() {
-            if ((!this.covered)&&(legIdentifier!=null)) {
+            if ((!this.covered) && (legIdentifier != null)) {
                 this.covered = true;
-                LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier, legIdentifier.getLegName());
+                LegIdentifier tmpLegIdentifier = new LegIdentifierImpl(legIdentifier.getRaceIdentifier(), legIdentifier.getLegName());
                 scheduler.schedule(() -> triggerUpdate(tmpLegIdentifier), WAIT_MILLIS, TimeUnit.MILLISECONDS);
             }
         }
@@ -189,12 +204,12 @@ public class SimulationServiceImpl implements SimulationService {
         }
 
         @Override
-        public void startOfTrackingChanged(TimePoint startOfTracking) {
+        public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
             // irrelevant for simulation
         }
 
         @Override
-        public void endOfTrackingChanged(TimePoint endOfTracking) {
+        public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
             // irrelevant for simulation
         }
 
@@ -204,9 +219,11 @@ public class SimulationServiceImpl implements SimulationService {
         }
 
         @Override
-        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+        public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
             // relevant for simulation
-            // TODO: identify influenced legs and update these legs
+            if (this.isLive()) {
+                defaultAction();
+            }
         }
 
         @Override
@@ -231,7 +248,7 @@ public class SimulationServiceImpl implements SimulationService {
         }
 
         @Override
-        public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor item, AddResult addedOrReplaced) {
             // irrelevant for simulation: covered by wind estimation
         }
 
@@ -283,7 +300,7 @@ public class SimulationServiceImpl implements SimulationService {
                 DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
                 SimulationRaceListener raceListener = new SimulationRaceListener(); 
                 raceListeners.put(legIdentifier.getRegattaName(), raceListener);
-                trackedRegatta.addRaceListener(raceListener);
+                trackedRegatta.addRaceListener(raceListener, /* Not replicated */ Optional.empty(), /* synchronous */ false);
             }
             if (!legListeners.containsKey(legIdentifier.getRaceIdentifier())) {
                 TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
@@ -330,6 +347,7 @@ public class SimulationServiceImpl implements SimulationService {
         SimulationResults result = null;
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
+            boolean isLive = trackedRace.isLive(simulationStartTime);
             int legNumber = legIdentifier.getLegNumber();
             Course raceCourse = trackedRace.getRace().getCourse();
             Leg leg = raceCourse.getLegs().get(legNumber);
@@ -349,6 +367,8 @@ public class SimulationServiceImpl implements SimulationService {
             }
             if (markPassing != null) {
                 startTimePoint = markPassing.getTimePoint();
+            } else if (isLive && (legNumber == 0)) {
+                startTimePoint = simulationStartTime;
             }
             markPassingIterator = trackedRace.getMarkPassingsInOrder(toWaypoint).iterator();
             if (markPassingIterator.hasNext()) {
@@ -362,6 +382,9 @@ public class SimulationServiceImpl implements SimulationService {
             long legDuration = 0;
             if ((startTimePoint != null) && (endTimePoint != null)) {
                 legDuration = endTimePoint.asMillis() - startTimePoint.asMillis();
+            }
+            if (isLive && (markPassing == null)) {
+                endTimePoint = simulationStartTime;
             }
             Position startPosition = null;
             List<Position> startLine = null;
@@ -436,31 +459,26 @@ public class SimulationServiceImpl implements SimulationService {
         Simulator simulator = new SimulatorImpl(simulationParameters);
         Map<PathType, Path> result = new HashMap<PathType, Path>();
 
-        FutureTask<Path> taskOmniscient = null;
+        Future<Path> taskOmniscient = null;
         if (simulationParameters.showOmniscient()) {
             // schedule omniscient task
-            taskOmniscient = new FutureTask<Path>(() -> simulator.getPath(PathType.OMNISCIENT));
-            executor.execute(taskOmniscient);
+            taskOmniscient = executor.submit(() -> simulator.getPath(PathType.OMNISCIENT));
         }
 
-        FutureTask<Path> task1TurnerLeft = null;
-        FutureTask<Path> task1TurnerRight = null;
+        Future<Path> task1TurnerLeft = null;
+        Future<Path> task1TurnerRight = null;
         if (simulationParameters.getLegType() != LegType.REACHING) {
             // schedule 1-turner tasks
-            task1TurnerLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
-            task1TurnerRight = new FutureTask<Path>(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
-            executor.execute(task1TurnerLeft);
-            executor.execute(task1TurnerRight);
+            task1TurnerLeft = executor.submit(() -> simulator.getPath(PathType.ONE_TURNER_LEFT));
+            task1TurnerRight = executor.submit(() -> simulator.getPath(PathType.ONE_TURNER_RIGHT));
         }
 
-        FutureTask<Path> taskOpportunistLeft = null;
-        FutureTask<Path> taskOpportunistRight = null;
+        Future<Path> taskOpportunistLeft = null;
+        Future<Path> taskOpportunistRight = null;
         if (simulationParameters.showOpportunist()) {        
             // schedule opportunist tasks (which depend on 1-turner results)
-            taskOpportunistLeft = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_LEFT));
-            taskOpportunistRight = new FutureTask<Path>(() -> simulator.getPath(PathType.OPPORTUNIST_RIGHT));
-            executor.execute(taskOpportunistLeft);
-            executor.execute(taskOpportunistRight);
+            taskOpportunistLeft = executor.submit(() -> simulator.getPath(PathType.OPPORTUNIST_LEFT));
+            taskOpportunistRight = executor.submit(() -> simulator.getPath(PathType.OPPORTUNIST_RIGHT));
         }
 
         Path path1TurnerLeft = null;

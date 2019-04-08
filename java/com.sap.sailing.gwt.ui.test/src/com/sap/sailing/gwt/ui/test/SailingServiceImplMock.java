@@ -25,8 +25,8 @@ import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationService;
@@ -47,7 +47,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
 
     public SailingServiceImplMock() {
         super();
-        service = new RacingEventServiceImpl(true, new MockSmartphoneImeiServiceFinderFactory());
+        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
         try {
             replicationService = new ReplicationServiceImpl("test exchange", "localhost", 0,
                     new ReplicationInstancesManager(), new AbstractReplicablesProvider() {
@@ -75,7 +75,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
                     public RaceHandle addSwissTimingRace(TrackerManager trackerManager,
                             RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
                             BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore,
-                            RegattaLogStore regattaLogStore, long timeoutInMilliseconds, boolean useInternalMarkPassingAlgorithm) throws InterruptedException,
+                            RegattaLogStore regattaLogStore, long timeoutInMilliseconds, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, String updateURL, String updateUsername, String updatePassword) throws InterruptedException,
                             UnknownHostException, IOException, ParseException, Exception {
                         // TODO Auto-generated method stub
                         return null;

@@ -4,6 +4,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventProcessor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -52,9 +53,13 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
     void removeChangedListener(RacingProcedureChangedListener listener);
 
     /**
-     * Returns <code>true</code> if the start phase of this {@link ReadonlyRacingProcedure is active given the current time and start time.
-     * @param startTime start time to be used to determine whether the start phase is active or not.
-     * @param now {@link TimePoint} used as the current time on determining whether the start phase is active or not.
+     * Returns <code>true</code> if the start phase of this {@link ReadonlyRacingProcedure is active given the current
+     * time and start time.
+     * 
+     * @param startTime
+     *            start time to be used to determine whether the start phase is active or not. Must not be {@code null}
+     * @param now
+     *            {@link TimePoint} used as the current time on determining whether the start phase is active or not.
      */
     boolean isStartphaseActive(TimePoint startTime, TimePoint now);
 
@@ -117,6 +122,13 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
      */
     RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             RacingProcedurePrerequisite.FulfillmentFunction function);
+
+
+    /**
+     * Delivers the time points and types of the events around the start, each optionally
+     * leading to a change in race status.
+     */
+    Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime);
 
     /**
      * This method is called by the framework. You don't need to call it.

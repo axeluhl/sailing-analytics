@@ -1,28 +1,30 @@
 package com.sap.sailing.datamining.impl.data;
 
-import java.util.Locale;
-
-import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
-import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sse.datamining.data.Cluster;
-import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
-import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.TimePoint;
 
 public class GPSFixWithContext implements HasGPSFixContext {
-    
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitorContext;
-    
     private final GPSFixMoving gpsFix;
-    private Wind wind;
 
     public GPSFixWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitorContext, GPSFixMoving gpsFix) {
         this.trackedLegOfCompetitorContext = trackedLegOfCompetitorContext;
         this.gpsFix = gpsFix;
     }
     
+    private TimePoint getTimePoint() {
+        return getGPSFix().getTimePoint();
+    }
+    
+    private TrackedRace getTrackedRace() {
+        return getTrackedLegOfCompetitorContext().getTrackedRace();
+    }
+
     @Override
     public HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext() {
         return trackedLegOfCompetitorContext;
@@ -32,20 +34,14 @@ public class GPSFixWithContext implements HasGPSFixContext {
     public GPSFixMoving getGPSFix() {
         return gpsFix;
     }
-    
+
     @Override
-    public ClusterDTO getWindStrengthAsBeaufortCluster(Locale locale, ResourceBundleStringMessages stringMessages) {
-        Wind wind = getWind();
-        Cluster<?> cluster = Activator.getWindStrengthInBeaufortClusterGroup().getClusterFor(wind);
-        return new ClusterDTO(cluster.asLocalizedString(locale, stringMessages));
+    public Bearing getTrueWindAngle() throws NoWindException {
+        return getTrackedRace().getTWA(getTrackedLegOfCompetitorContext().getCompetitor(), getTimePoint());
     }
 
-    private Wind getWind() {
-        if (wind == null) {
-            wind = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace()
-                    .getWind(gpsFix.getPosition(), gpsFix.getTimePoint());
-        }
-        return wind;
+    @Override
+    public Bearing getAbsoluteTrueWindAngle() throws NoWindException {
+        return getTrackedRace().getTWA(getTrackedLegOfCompetitorContext().getCompetitor(), getTimePoint()).abs();
     }
-    
 }

@@ -1,11 +1,11 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.test;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.mockito.Mockito.mock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,13 +13,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayParserImpl;
@@ -27,6 +30,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplaySer
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayToDomainAdapter;
 import com.sap.sailing.domain.test.DummyTrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 
 public class SwissTimingReplayAdapterServiceTest {
@@ -35,7 +39,7 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testLoadRaceJson() throws Exception {
         String swissTimingUrlText = "/2012_OSG.json";
         InputStream inputStream = getClass().getResourceAsStream(swissTimingUrlText);
-        final SwissTimingReplayServiceImpl swissTimingReplayService = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE, mock(RaceLogResolver.class));
+        final SwissTimingReplayServiceImpl swissTimingReplayService = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE);
         List<SwissTimingReplayRace> races = swissTimingReplayService.parseJSONObject(inputStream , swissTimingUrlText);
         assertEquals(201, races.size());
         assertEquals("446483", races.get(0).getRaceId());
@@ -76,7 +80,7 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testRaceData_SAW005905_20120805_EqualsOnlineVersion() throws Exception {
         byte[] localCopy = read(getClass().getResourceAsStream("/SAW005905.20120805.replay"));
         byte[] onlineCopy = read((InputStream) new URL(
-                "http://live.ota.st-sportservice.com/Replay?id=446495&_start=0").getContent());
+                "http://ota2.sportresult.com/Replay?id=446495&_start=0").getContent());
         assertArrayEquals(localCopy, onlineCopy);
     }
     
@@ -116,7 +120,7 @@ public class SwissTimingReplayAdapterServiceTest {
         SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
         // race ID is 450053, as extracted from http://live.ota.st-sportservice.com/service?cmd=unity_race_overview&id=91
         byte[] onlineCopy = read((InputStream) new URL(
-                "http://live.ota.st-sportservice.com/Replay?id=446495&_start=0").getContent());
+                "http://ota2.sportresult.com/Replay?id=446495&_start=0").getContent());
         new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(onlineCopy), replayCountListener);
         assertEquals(0, replayCountListener.keyFrameIndexSum);          
         assertEquals(715, replayCountListener.keyFrameIndexPositionCount);  
@@ -179,8 +183,9 @@ public class SwissTimingReplayAdapterServiceTest {
 
     @Test
     public void testRaceData_SAW010955_20120802_WithDomainAdapter() throws Exception {
-        SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
-                new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false, mock(RaceLogResolver.class));
+        SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, /* raceName */ "SAW005906",
+                "SAW005906", /* boatClass */ null, DomainFactory.INSTANCE, new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false,
+                mock(RaceLogResolver.class), EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* tracker creator */ null);
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         assertFalse(Util.isEmpty(trackedRaces));
@@ -193,14 +198,15 @@ public class SwissTimingReplayAdapterServiceTest {
 
     @Test
     public void testStartPerformanceDetection() throws Exception {
-        SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
-                new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false, mock(RaceLogResolver.class));
+        SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, /* raceName */ "SAW005905",
+                "SAW005905", /* boatClass */ null, DomainFactory.INSTANCE, new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false,
+                mock(RaceLogResolver.class), EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, /* tracker creator */ null);
         new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005905.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         TrackedRace trackedRace = trackedRaces.iterator().next();
-        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            assertSame(DomainFactory.INSTANCE.getBaseDomainFactory().getOrCreateBoatClass("470"), competitor.getBoat().getBoatClass());
-            Distance distanceToLineAtStart = trackedRace.getDistanceToStartLine(competitor, trackedRace.getStartOfRace());
+        for (Entry<Competitor, Boat> competitorAndBoatEntry : trackedRace.getRace().getCompetitorsAndTheirBoats().entrySet()) {
+            assertSame(DomainFactory.INSTANCE.getBaseDomainFactory().getOrCreateBoatClass("470"), competitorAndBoatEntry.getValue().getBoatClass());
+            Distance distanceToLineAtStart = trackedRace.getDistanceToStartLine(competitorAndBoatEntry.getKey(), trackedRace.getStartOfRace());
             assertTrue(distanceToLineAtStart.getMeters() > 0);
             assertTrue(distanceToLineAtStart.getMeters() < 20);
         }

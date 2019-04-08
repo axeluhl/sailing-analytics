@@ -9,15 +9,15 @@ import java.util.Map;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
 public class DeclinationServiceImpl implements DeclinationService {
     private final Distance defaultMaxDistance;
     private final DeclinationStore persistentStore;
-    private final NOAAImporter noaaImporter;
+    private final DeclinationImporter declinationImporter;
     
     /**
      * Keys are years
@@ -33,10 +33,14 @@ public class DeclinationServiceImpl implements DeclinationService {
      * Constructs a service that has a default position tolerance of <code>defaultMaxDistance</code>.
      */
     public DeclinationServiceImpl(Distance defaultMaxDistance) {
+        this(defaultMaxDistance, new NOAAImporter());
+    }
+    
+    public DeclinationServiceImpl(Distance defaultMaxDistance, DeclinationImporter declinationImporter) {
+        this.declinationImporter = declinationImporter;
         this.defaultMaxDistance = defaultMaxDistance;
         this.yearStore = new HashMap<Integer, QuadTree<Declination>>();
-        this.persistentStore = new DeclinationStore();
-        this.noaaImporter = new NOAAImporter();
+        this.persistentStore = new DeclinationStore(declinationImporter);
         this.importerCache = new HashMap<Integer, QuadTree<Declination>>();
     }
 
@@ -84,7 +88,7 @@ public class DeclinationServiceImpl implements DeclinationService {
                     // else it's further away from the requested position as demanded by maxDistance
                 }
             }
-            result = noaaImporter.getDeclination(position, timePoint, timeoutForOnlineFetchInMilliseconds);
+            result = declinationImporter.getDeclination(position, timePoint, timeoutForOnlineFetchInMilliseconds);
             if (result != null) {
                 if (importerCacheForYear == null) {
                     importerCacheForYear = new QuadTree<Declination>();

@@ -1,13 +1,16 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -15,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -29,10 +33,10 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
@@ -42,12 +46,12 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -87,7 +91,7 @@ public class LeaderboardCourseChangeTest {
         RaceColumn raceColumn = series.addRaceColumn(raceColumnName, trackedRegattaRegistry);
         ScoringScheme scoringScheme = new LowPoint();
         Regatta mockedRegatta = new RegattaImpl(RegattaImpl.getDefaultName("TestRegatta", boatClass.getName()), boatClass, 
-                /*startDate*/ null, /*endDate*/ null, seriesSet, false, scoringScheme,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, seriesSet, false, scoringScheme,
                 UUID.randomUUID(), mock(CourseArea.class), OneDesignRankingMetric::new);
         ControlPoint start = new MarkImpl("Start");
         ControlPoint m1 = new MarkImpl("M1");
@@ -116,7 +120,7 @@ public class LeaderboardCourseChangeTest {
         
         int[] ruleRaw = { 5, 3, 2 };
         ThresholdBasedResultDiscardingRule rule = new ThresholdBasedResultDiscardingRuleImpl(ruleRaw);
-        Leaderboard leaderboard = new RegattaLeaderboardImpl(mockedRegatta, rule);
+        Leaderboard leaderboard = createRegattaLeaderboard(mockedRegatta, rule);
         
         DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false,
@@ -135,11 +139,17 @@ public class LeaderboardCourseChangeTest {
 
     }
 
+    protected RegattaLeaderboard createRegattaLeaderboard(Regatta mockedRegatta,
+            ThresholdBasedResultDiscardingRule rule) {
+        return new RegattaLeaderboardImpl(mockedRegatta, rule);
+    }
+
     private TrackedRace createSpyedTrackedRace(Regatta regatta, Course course, TimePoint timePoint, BoatClass boatClass) {
         TrackedRegatta mockedTrackedRegatta = createMockedTrackedRegatta(regatta);
         RaceDefinition mockedRace = createMockedRace(course, boatClass);
         TrackedRace spyedTrackedRace = spy(new DynamicTrackedRaceImpl(mockedTrackedRegatta, mockedRace,
-                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, 5000, 20000, 20000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
+                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, 5000, 20000, 20000,
+                /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogResolver.class)));
 
         return spyedTrackedRace;
@@ -147,21 +157,24 @@ public class LeaderboardCourseChangeTest {
 
     private RaceDefinition createMockedRace(Course course, BoatClass boatClass) {
         RaceDefinition mockedRaceDefinition = mock(RaceDefinition.class);
-        when(mockedRaceDefinition.getCompetitors()).thenReturn(new HashSet<Competitor>());
         when(mockedRaceDefinition.getCourse()).thenReturn(course);
         when(mockedRaceDefinition.getBoatClass()).thenReturn(new BoatClassImpl("TestClass", true));
         when(mockedRaceDefinition.getName()).thenReturn("TestRace");
-        Iterable<Competitor> competitorSet = createCompetitorSet(boatClass);
-        when(mockedRaceDefinition.getCompetitors()).thenReturn(competitorSet);
+        Map<Competitor, Boat> competitorAndBoatMap = createCompetitorAndBoatMap(boatClass);
+        when(mockedRaceDefinition.getCompetitors()).thenReturn(competitorAndBoatMap.keySet());
+        when(mockedRaceDefinition.getCompetitorsAndTheirBoats()).thenReturn(competitorAndBoatMap);
+        Boat boat = competitorAndBoatMap.get(competitorAndBoatMap.keySet().iterator().next());
+        when(mockedRaceDefinition.getBoatOfCompetitor(any())).thenReturn(boat);
         return mockedRaceDefinition;
     }
 
-    private Iterable<Competitor> createCompetitorSet(BoatClass boatClass) {
-        Set<Competitor> competitors = new HashSet<>();
-        DynamicBoat mockedBoat = mock(DynamicBoat.class);
-        when(mockedBoat.getBoatClass()).thenReturn(boatClass);
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", Color.BLACK, null, null,
-                mock(DynamicTeam.class), mockedBoat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+    private Map<Competitor, Boat> createCompetitorAndBoatMap(BoatClass boatClass) {
+        Map<Competitor, Boat> competitors = new HashMap<>();
+        Competitor c = new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", "BYC", Color.BLACK, null, null,
+                mock(DynamicTeam.class),
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat b = new BoatImpl("Boot", "b", boatClass, null);
+        competitors.put(c, b);
         return competitors;
     }
 

@@ -3,16 +3,17 @@ package com.sap.sailing.simulator.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.simulator.BoatClassProperties;
 import com.sap.sailing.simulator.RaceProperties;
 import com.sap.sailing.simulator.impl.BoatClassPropertiesImpl;
 import com.sap.sailing.simulator.impl.ConfigurationManager;
 import com.sap.sailing.simulator.impl.RacePropertiesImpl;
+
+import org.junit.Assert;
 
 public class ConfigurationManagerTest {
 
@@ -21,11 +22,11 @@ public class ConfigurationManagerTest {
 
     @Before
     public void initialize() {
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er", 4.995, "PolarDiagram49.csv", 0));
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er Bethwaite", 4.876, "PolarDiagram49Bethwaite.csv", 1));
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er ORC", 4.995, "PolarDiagram49ORC.csv", 2));
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er STG", 4.876, "PolarDiagram49STG.csv", 3));
-        this._boatClassesInfo.add(new BoatClassPropertiesImpl("505 STG", 5.05, "PolarDiagram505STG.csv", 4));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er", new MeterDistance(4.995), "PolarDiagram49.csv", 0));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er Bethwaite", new MeterDistance(4.876), "PolarDiagram49Bethwaite.csv", 1));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er ORC", new MeterDistance(4.995), "PolarDiagram49ORC.csv", 2));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("49er STG", new MeterDistance(4.876), "PolarDiagram49STG.csv", 3));
+        this._boatClassesInfo.add(new BoatClassPropertiesImpl("505 STG", new MeterDistance(5.05), "PolarDiagram505STG.csv", 4));
 
         this._racesInfo
                 .add(new RacePropertiesImpl(

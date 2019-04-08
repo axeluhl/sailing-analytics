@@ -8,6 +8,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
@@ -16,7 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
+import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 /**
  * Shows the state of wind receivers regardless of them being attached to a race. 
@@ -43,6 +46,18 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
         out.println("<body>");
         out.println("<p>Reload wind connectors with parameter <a href=\"/sailingserver/windStatus?reloadWindReceiver=true\">reloadWindReceiver=true</a>. This will force a connection reset and a reloading of the wind receivers.</p>");
         out.println("<h3>Igtimi Wind Status ("+getIgtimiMessagesRawCount()+" raw messages received)</h3>");
+        Map<LiveDataConnection, IgtimiConnectionInfo> igtimiConnections = getIgtimiConnections();
+        if (!igtimiConnections.isEmpty()) {
+            out.println("<h4>Igtimi accounts used</h4>");
+            for (Map.Entry<LiveDataConnection, IgtimiConnectionInfo> entry: igtimiConnections.entrySet()) {
+                IgtimiConnectionInfo igtimiConnectionInfo = entry.getValue();
+                int deviceCount = Util.size(igtimiConnectionInfo.getDeviceIDs());
+                out.println("<b>Account " + igtimiConnectionInfo.getAccountName() + "</b><br/>");
+                out.println(deviceCount + " devices " + igtimiConnectionInfo.getDeviceIDs().toString() + "<br/>");
+                out.println("Connection used is " + igtimiConnectionInfo.getRemoteAddress().toString() + "<br/><br/>");
+            }
+            out.println("<br/>");
+        }
         if (getLastIgtimiMessages() != null && !getLastIgtimiMessages().isEmpty()) {
             for(Entry<String, Deque<IgtimiMessageInfo>> deviceAndMessagesList: getLastIgtimiMessages().entrySet()) {
                 final Deque<IgtimiMessageInfo> copyOfLastIgtimiMessages;

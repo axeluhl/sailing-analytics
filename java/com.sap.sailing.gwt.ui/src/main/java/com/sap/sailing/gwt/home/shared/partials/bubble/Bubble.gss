@@ -1,0 +1,80 @@
+@def BACKGROUND_COLOR #fff;
+@def BORDER_COLOR #ccc;
+@def BORDER_WIDTH -.55em;
+
+.bubble {
+    padding: .2em .5em;
+    border-radius: .3125em;
+    border: 1px solid BORDER_COLOR;
+    background-color: BACKGROUND_COLOR;
+}
+
+.bubble:before, .bubble:after {
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-width: .55em;
+}
+
+.top.bubble:before, .top.bubble:after {
+    top: 100%;
+    left: 50%;
+    margin-left: BORDER_WIDTH;
+}
+
+.top.bubble:before {
+    border-top-color: BORDER_COLOR;
+}
+
+.top.bubble:after {
+    border-top-color: BACKGROUND_COLOR;
+    margin-top: -1px;
+}
+
+.bottom.bubble:before, .bottom.bubble:after {
+    bottom: 100%;
+    left: 50%;
+    margin-left: BORDER_WIDTH;
+}
+
+.bottom.bubble:before {
+    border-bottom-color: BORDER_COLOR;
+}
+
+.bottom.bubble:after {
+    border-bottom-color: BACKGROUND_COLOR;
+    margin-bottom: -1px;
+}
+
+.left.bubble:before, .left.bubble:after {
+    left: 100%;
+    top: 50%;
+    margin-top: BORDER_WIDTH;
+}
+
+.left.bubble:before {
+    border-left-color: BORDER_COLOR;
+}
+
+.left.bubble:after {
+    border-left-color: BACKGROUND_COLOR;
+    margin-left: -1px;
+}
+
+.right.bubble:before, .right.bubble:after {
+    right: 100%;
+    top: 50%;
+    margin-top: BORDER_WIDTH;
+}
+
+.right.bubble:before {
+    border-right-color: BORDER_COLOR;
+}
+
+.right.bubble:after {
+    border-right-color: BACKGROUND_COLOR;
+    margin-right: -1px;
+}

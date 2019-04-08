@@ -15,3 +15,4 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sse.common
 Export-Package: com.sap.sailing.velum.resultimport,
  com.sap.sailing.velum.resultimport.impl
+Automatic-Module-Name: com.sap.sailing.velum.resultimport

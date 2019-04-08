@@ -9,13 +9,11 @@
 #ifndef SAPTracker_bridge_h
 #define SAPTracker_bridge_h
 
-#import <AFNetworking/AFNetworking.h>
-#import <TSMarkdownParser/TSMarkdownParser.h>
-#import "UIImageView+AFNetworking.h"
-#import "Appearance.h"
-
-#if DEBUG
-#import "AFNetworkActivityLogger.h"
-#endif
+#import "Libraries/AFNetworking/AFNetworking.h"
+#import "Libraries/TSMarkdownParser/TSMarkdownParser.h"
+#import "Libraries/SVProgressHUD/SVProgressHUD.h"
+#import "Libraries/UIKit+AFNetworking/UIImageView+AFNetworking.h"
+#import "Libraries/UIKit+AFNetworking/AFNetworkActivityIndicatorManager.h"
+#import "Libraries/SMTWiFiStatus/SMTWiFiStatus.h"
 
 #endif

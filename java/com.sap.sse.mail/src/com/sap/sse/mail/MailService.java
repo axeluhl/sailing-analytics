@@ -1,12 +1,14 @@
 package com.sap.sse.mail;
 
-import javax.mail.Multipart;
+import java.io.IOException;
+
+import javax.mail.MessagingException;
 
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.impl.ReplicableMailService;
 import com.sap.sse.replication.Replicable;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.util.ClearStateTestSupport;
 
 
@@ -29,5 +31,5 @@ public interface MailService extends ReplicableWithObjectInputStream<ReplicableM
     /**
      * Send mail with multipart content (e.g. inline image).
      */
-    void sendMail(String toAddress, String subject, Multipart multipartContent) throws MailException;
+    void sendMail(String toAddress, String subject, SerializableMultipartSupplier multipartContent) throws MailException, IOException, MessagingException;
 }

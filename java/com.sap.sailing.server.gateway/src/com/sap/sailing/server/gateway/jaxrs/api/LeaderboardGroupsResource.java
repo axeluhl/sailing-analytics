@@ -3,10 +3,8 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -34,6 +32,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v1/leaderboardgroups")
@@ -68,6 +67,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
             TimePoint timePoint = MillisecondsTimePoint.now();
             JSONObject jsonLeaderboardGroup = new JSONObject();
             jsonLeaderboardGroup.put("name", leaderboardGroup.getName());
+            jsonLeaderboardGroup.put("id", leaderboardGroup.getId().toString());
             jsonLeaderboardGroup.put("description", leaderboardGroup.getDescription());
             jsonLeaderboardGroup.put("timepoint", timePoint.toString());
             JSONArray jsonLeaderboardEntries = new JSONArray();
@@ -93,7 +93,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                     jsonLeaderboard.put("lastScoringUpdate", null);
                 }
 
-                final LinkedHashMap<String, Iterable<Fleet>> fleetsBySeriesName = new LinkedHashMap<>();
+                final List<Triple<String, Iterable<Fleet>, Iterable<? extends RaceColumn>>> seriesNameAndFleetsAndRaceColumnsOfSeries = new ArrayList<>();
                 final Map<String, Boolean> medalSeriesNames = new HashMap<>();
                 if (isRegattaLeaderboard) {
                     RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
@@ -103,25 +103,28 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                     for (final Series series : regatta.getSeries()) {
                         List<Fleet> fleets = new ArrayList<>();
                         Util.addAll(series.getFleets(), fleets);
-                        fleetsBySeriesName.put(series.getName(), fleets);
+                        seriesNameAndFleetsAndRaceColumnsOfSeries.add(new Triple<String, Iterable<Fleet>, Iterable<? extends RaceColumn>>(series.getName(), fleets, series.getRaceColumns()));
                         medalSeriesNames.put(series.getName(), series.isMedal());
                     }
                 } else {
                     jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
                     jsonLeaderboard.put("regattaName", null);
-                    // write a 'default' series to be conform with our common regatta structure 
-                    fleetsBySeriesName.put(LeaderboardNameConstants.DEFAULT_SERIES_NAME, Collections.singleton(leaderboard.getFleet(LeaderboardNameConstants.DEFAULT_FLEET_NAME)));
+                    // write a 'default' series to conform with our common regatta structure 
+                    seriesNameAndFleetsAndRaceColumnsOfSeries.add(new Triple<String, Iterable<Fleet>, Iterable<? extends RaceColumn>>(
+                            LeaderboardNameConstants.DEFAULT_SERIES_NAME,
+                            Collections.singleton(leaderboard.getFleet(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
+                            leaderboard.getRaceColumns()));
                 }
                 JSONArray jsonSeriesEntries = new JSONArray();
                 jsonLeaderboard.put("series", jsonSeriesEntries);
-                for (final Entry<String, Iterable<Fleet>> e : fleetsBySeriesName.entrySet()) {
+                for (final Triple<String, Iterable<Fleet>, Iterable<? extends RaceColumn>> e : seriesNameAndFleetsAndRaceColumnsOfSeries) {
                     JSONObject jsonSeries = new JSONObject();
                     jsonSeriesEntries.add(jsonSeries);
-                    jsonSeries.put("name", e.getKey());
-                    jsonSeries.put("isMedalSeries", medalSeriesNames.get(e.getKey()));
+                    jsonSeries.put("name", e.getA());
+                    jsonSeries.put("isMedalSeries", medalSeriesNames.get(e.getA()));
                     JSONArray jsonFleetsEntries = new JSONArray();
                     jsonSeries.put("fleets", jsonFleetsEntries);
-                    for (final Fleet fleet : e.getValue()) {
+                    for (final Fleet fleet : e.getB()) {
                         if (fleet != null) {
                             JSONObject jsonFleet = new JSONObject();
                             jsonFleet.put("name", fleet.getName());
@@ -130,7 +133,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                             jsonFleetsEntries.add(jsonFleet);
                             JSONArray jsonRacesEntries = new JSONArray();
                             jsonFleet.put("races", jsonRacesEntries);
-                            for (RaceColumn raceColumn: leaderboard.getRaceColumns()) {
+                            for (RaceColumn raceColumn : e.getC()) {
                                 JSONObject jsonRaceColumn = new JSONObject();
                                 jsonRaceColumn.put("name", raceColumn.getName());
                                 jsonRaceColumn.put("isMedalRace" , raceColumn.isMedalRace());

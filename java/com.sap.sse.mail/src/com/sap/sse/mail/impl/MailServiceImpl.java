@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -28,10 +27,13 @@ import javax.mail.internet.MimeUtility;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailServiceResolver;
+import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class MailServiceImpl implements ReplicableMailService {
@@ -46,10 +48,19 @@ public class MailServiceImpl implements ReplicableMailService {
     private ReplicationMasterDescriptor replicatingFromMaster;
     private final ConcurrentMap<OperationExecutionListener<ReplicableMailService>, OperationExecutionListener<ReplicableMailService>> operationExecutionListeners;
     private final Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication = new HashSet<>();
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
-            .withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    
+    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
     private final MailServiceResolver mailServiceResolver;
+    
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
+     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
+     * method.
+     */
+    private OperationsToMasterSendingQueue unsentOperationForMasterQueue;
 
     public MailServiceImpl(Properties mailProperties, MailServiceResolver mailServiceResolver) {
         this.mailProperties = mailProperties;
@@ -68,7 +79,7 @@ public class MailServiceImpl implements ReplicableMailService {
     protected static interface ContentSetter {
         void setContent(MimeMessage msg) throws MessagingException;
     }
-
+    
     private boolean canSendMail() {
         return mailProperties != null && mailProperties.containsKey("mail.transport.protocol");
     }
@@ -88,16 +99,12 @@ public class MailServiceImpl implements ReplicableMailService {
                         msg.setSubject(subject);
                     }
                     msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
-                    
                     // this fixes the DCH MIME type error 
                     // see http://tanyamadurapperuma.blogspot.de/2014/01/struggling-with-nosuchproviderexception.html
                     Thread.currentThread().setContextClassLoader(javax.mail.Session.class.getClassLoader());
-
                     contentSetter.setContent(msg);
-                    
                     // for testing with gmail
                     //Transport ts = session.getTransport("smtps");
-
                     Transport ts = session.getTransport();
                     ts.connect();
                     ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
@@ -134,19 +141,19 @@ public class MailServiceImpl implements ReplicableMailService {
     }
 
     @Override
-    public Void internalSendMail(String toAddress, String subject, Multipart multipartContent) throws MailException {
+    public Void internalSendMail(String toAddress, String subject, SerializableMultipartSupplier multipartSupplier) throws MailException {
         internalSendMail(toAddress, subject, new ContentSetter() {
             @Override
             public void setContent(MimeMessage msg) throws MessagingException {
-                msg.setContent(multipartContent);
+                msg.setContent(multipartSupplier.get());
             }
         });
         return null;
     }
 
     @Override
-    public void sendMail(String toAddress, String subject, Multipart multipartContent) throws MailException {
-        apply(s -> s.internalSendMail(toAddress, subject, multipartContent));
+    public void sendMail(String toAddress, String subject, SerializableMultipartSupplier multipartSupplier) throws MailException {
+        apply(s -> s.internalSendMail(toAddress, subject, multipartSupplier));
     }
 
     @Override
@@ -229,14 +236,35 @@ public class MailServiceImpl implements ReplicableMailService {
     }
 
     @Override
-    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
-        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
+    public boolean isCurrentlyFillingFromInitialLoad() {
+        return currentlyFillingFromInitialLoad.get();
     }
 
     @Override
-    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(
-            boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
-        this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster
-                .set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
+        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+    }
+
+    @Override
+    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
+        return currentlyApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
+        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
+    }
+
+    @Override
+    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
+        this.unsentOperationForMasterQueue = service;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationForMasterQueue != null) {
+            unsentOperationForMasterQueue.scheduleForSending(operationWithResult, sender);
+        }
     }
 }

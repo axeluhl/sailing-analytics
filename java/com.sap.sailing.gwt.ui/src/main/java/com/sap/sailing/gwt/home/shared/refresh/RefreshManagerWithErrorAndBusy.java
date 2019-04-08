@@ -6,6 +6,12 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 
+/**
+ * Specialized {@link AutoAttachingRefreshManager} that initially shows a busy widget that is replayced with the actual
+ * content when the first refresh is finished. In the case of an error while doing the first refresh, an error widget is
+ * shown. When an error occurs on a further refresh, the old content simply isn't exchanged an a refresh is triggered as
+ * described for {@link RefreshManager}.
+ */
 public class RefreshManagerWithErrorAndBusy extends AutoAttachingRefreshManager {
     private final AcceptsOneWidget container;
 

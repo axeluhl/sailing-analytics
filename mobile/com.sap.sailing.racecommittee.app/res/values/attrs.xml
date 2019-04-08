@@ -2,106 +2,116 @@
 <resources>
 
     <!-- custom colors -->
-    <attr name="black" format="color"/>
-    <attr name="sap_blue_1" format="color"/>
-    <attr name="sap_gray" format="color"/>
-    <attr name="sap_gray_black_20" format="color"/>
-    <attr name="sap_gray_black_30" format="color"/>
-    <attr name="sap_gray_black_40" format="color"/>
-    <attr name="sap_gray_white_10" format="color"/>
-    <attr name="sap_gray_white_20" format="color"/>
-    <attr name="sap_light_gray" format="color"/>
-    <attr name="sap_red_1" format="color"/>
-    <attr name="sap_yellow_1" format="color"/>
-    <attr name="white" format="color"/>
-    <attr name="white_invert" format="color"/>
+    <attr name="black" format="color" />
+    <attr name="sap_blue_1" format="color" />
+    <attr name="sap_gray" format="color" />
+    <attr name="sap_gray_black_20" format="color" />
+    <attr name="sap_gray_black_30" format="color" />
+    <attr name="sap_gray_black_40" format="color" />
+    <attr name="sap_gray_white_10" format="color" />
+    <attr name="sap_gray_white_20" format="color" />
+    <attr name="sap_light_gray" format="color" />
+    <attr name="sap_red_1" format="color" />
+    <attr name="sap_yellow_1" format="color" />
+    <attr name="white" format="color" />
+    <attr name="white_invert" format="color" />
 
     <!-- custom references (e.g. styles) -->
-    <attr name="button" format="reference"/>
-    <attr name="buttonSolidXSmall" format="reference"/>
-    <attr name="buttonSolidSmall" format="reference"/>
-    <attr name="buttonSolidNormal" format="reference"/>
-    <attr name="checkedItemBackground" format="reference"/>
-    <attr name="round" format="reference"/>
-    <attr name="round_transparent" format="reference"/>
-    <attr name="text" format="reference"/>
-    <attr name="textXXSmall" format="reference"/>
-    <attr name="textXSmall" format="reference"/>
-    <attr name="textSmall" format="reference"/>
-    <attr name="textNormal" format="reference"/>
-    <attr name="textLarge" format="reference"/>
-    <attr name="textXLarge" format="reference"/>
+    <attr name="button" format="reference" />
+    <attr name="buttonSolidXSmall" format="reference" />
+    <attr name="buttonSolidSmall" format="reference" />
+    <attr name="buttonSolidNormal" format="reference" />
+    <attr name="checkedItemBackground" format="reference" />
+    <attr name="round" format="reference" />
+    <attr name="round_transparent" format="reference" />
+    <attr name="text" format="reference" />
+    <attr name="textXXSmall" format="reference" />
+    <attr name="textXSmall" format="reference" />
+    <attr name="textSmall" format="reference" />
+    <attr name="textNormal" format="reference" />
+    <attr name="textLarge" format="reference" />
+    <attr name="textXLarge" format="reference" />
 
-    <attr name="textHeader" format="reference"/>
+    <attr name="textHeader" format="reference" />
 
-    <attr name="textPanelHeader" format="reference"/>
-    <attr name="textPanelCaption" format="reference"/>
-    <attr name="editText" format="reference"/>
-    <attr name="floatLabel" format="reference"/>
+    <attr name="textPanelHeader" format="reference" />
+    <attr name="textPanelCaption" format="reference" />
+    <attr name="editText" format="reference" />
+    <attr name="floatLabel" format="reference" />
 
-    <attr name="factor_background" format="reference"/>
+    <attr name="factor_background" format="reference" />
 
     <!-- drawable -->
-    <attr name="add" format="reference"/>
-    <attr name="access_time_18dp" format="reference"/>
-    <attr name="access_time_24dp" format="reference"/>
-    <attr name="access_time_36dp" format="reference"/>
-    <attr name="arrow_down" format="reference"/>
-    <attr name="arrow_down_large" format="reference"/>
-    <attr name="arrow_down_normal" format="reference"/>
-    <attr name="arrow_drop_down_24dp" format="reference"/>
-    <attr name="arrow_up" format="reference"/>
-    <attr name="arrow_up_large" format="reference"/>
-    <attr name="arrow_up_normal" format="reference"/>
-    <attr name="button_filled_bordered" format="reference"/>
-    <attr name="button_next" format="reference"/>
-    <attr name="button_prev" format="reference"/>
-    <attr name="check_18dp" format="reference"/>
-    <attr name="chevron_left" format="reference"/>
-    <attr name="chevron_left_24dp" format="reference"/>
-    <attr name="chevron_right" format="reference"/>
-    <attr name="create" format="reference"/>
-    <attr name="compass_back" format="reference"/>
-    <attr name="compass_needle" format="reference"/>
-    <attr name="course_triangle_48dp" format="reference"/>
-    <attr name="course_triangle_64dp" format="reference"/>
-    <attr name="course_updown_48dp" format="reference"/>
-    <attr name="course_updown_64dp" format="reference"/>
-    <attr name="dns" format="reference"/>
-    <attr name="hearing" format="reference"/>
-    <attr name="link_24dp" format="reference"/>
-    <attr name="lock_outline" format="reference"/>
-    <attr name="keyboard_control_36dp" format="reference"/>
-    <attr name="marker" format="reference"/>
-    <attr name="marker_race" format="reference"/>
-    <attr name="mic_48dp" format="reference"/>
-    <attr name="photo_camera" format="reference"/>
-    <attr name="play_arrow_36dp" format="reference"/>
-    <attr name="search_24dp_invert" format="reference"/>
-    <attr name="spinner_background" format="reference"/>
-    <attr name="swipe_idle" format="reference"/>
-    <attr name="swipe_left" format="reference"/>
-    <attr name="swipe_right" format="reference"/>
-    <attr name="tab_widget" format="reference"/>
-    <attr name="value_next" format="reference"/>
-    <attr name="value_prev" format="reference"/>
-    <attr name="wind_on" format="reference"/>
-    <attr name="wind_off" format="reference"/>
+    <attr name="add" format="reference" />
+    <attr name="access_time_18dp" format="reference" />
+    <attr name="access_time_24dp" format="reference" />
+    <attr name="access_time_36dp" format="reference" />
+    <attr name="arrow_down" format="reference" />
+    <attr name="arrow_down_large" format="reference" />
+    <attr name="arrow_down_normal" format="reference" />
+    <attr name="arrow_drop_down_24dp" format="reference" />
+    <attr name="arrow_up" format="reference" />
+    <attr name="arrow_up_large" format="reference" />
+    <attr name="arrow_up_normal" format="reference" />
+    <attr name="button_filled_bordered" format="reference" />
+    <attr name="button_next" format="reference" />
+    <attr name="button_prev" format="reference" />
+    <attr name="check_18dp" format="reference" />
+    <attr name="check_24dp_invert" format="reference" />
+    <attr name="chevron_left" format="reference" />
+    <attr name="chevron_left_24dp" format="reference" />
+    <attr name="chevron_right" format="reference" />
+    <attr name="clear_24dp" format="reference" />
+    <attr name="create" format="reference" />
+    <attr name="compass_back" format="reference" />
+    <attr name="compass_needle" format="reference" />
+    <attr name="competitor_list" format="reference" />
+    <attr name="course_triangle_48dp" format="reference" />
+    <attr name="course_triangle_64dp" format="reference" />
+    <attr name="course_updown_48dp" format="reference" />
+    <attr name="course_updown_64dp" format="reference" />
+    <attr name="dns" format="reference" />
+    <attr name="flag_18dp" format="reference" />
+    <attr name="flag_24dp" format="reference" />
+    <attr name="hearing" format="reference" />
+    <attr name="link_24dp" format="reference" />
+    <attr name="list_24dp" format="reference" />
+    <attr name="list_both_24dp" format="reference" />
+    <attr name="list_single_24dp" format="reference" />
+    <attr name="lock_outline" format="reference" />
+    <attr name="keyboard_control_36dp" format="reference" />
+    <attr name="marker" format="reference" />
+    <attr name="marker_race" format="reference" />
+    <attr name="mic_48dp" format="reference" />
+    <attr name="photo_camera" format="reference" />
+    <attr name="play_arrow_36dp" format="reference" />
+    <attr name="search_24dp" format="reference" />
+    <attr name="search_24dp_invert" format="reference" />
+    <attr name="sortby_24dp" format="reference" />
+    <attr name="spinner_background" format="reference" />
+    <attr name="swipe_idle" format="reference" />
+    <attr name="swipe_left" format="reference" />
+    <attr name="swipe_right" format="reference" />
+    <attr name="tab_widget" format="reference" />
+    <attr name="value_next" format="reference" />
+    <attr name="value_prev" format="reference" />
+    <attr name="wind_on" format="reference" />
+    <attr name="wind_off" format="reference" />
 
     <!-- flag drawables -->
-    <attr name="flag_blue_first" format="reference"/>
-    <attr name="flag_blue_last" format="reference"/>
+    <attr name="flag_blue_first" format="reference" />
+    <attr name="flag_blue_last" format="reference" />
 
-    <attr name="flag_ap_alpha_96dp" format="reference"/>
-    <attr name="flag_ap_hotel_96dp" format="reference"/>
-    <attr name="flag_november_alpha_96dp" format="reference"/>
-    <attr name="flag_november_hotel_96dp" format="reference"/>
+    <attr name="flag_ap_alpha_96dp" format="reference" />
+    <attr name="flag_ap_hotel_96dp" format="reference" />
+    <attr name="flag_november_alpha_96dp" format="reference" />
+    <attr name="flag_november_hotel_96dp" format="reference" />
 
-    <attr name="flags_abandon" format="reference"/>
-    <attr name="flags_blue_first" format="reference"/>
-    <attr name="flags_blue_last" format="reference"/>
-    <attr name="flags_course" format="reference"/>
-    <attr name="flags_postpone" format="reference"/>
-    <attr name="flags_recall" format="reference"/>
+    <attr name="flags_abandon" format="reference" />
+    <attr name="flags_blue_first" format="reference" />
+    <attr name="flags_blue_last" format="reference" />
+    <attr name="flags_course" format="reference" />
+    <attr name="flags_postpone" format="reference" />
+    <attr name="flags_recall" format="reference" />
 
 </resources>

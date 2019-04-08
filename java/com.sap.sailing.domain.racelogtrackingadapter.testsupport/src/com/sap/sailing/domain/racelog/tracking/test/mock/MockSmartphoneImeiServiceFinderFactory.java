@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -24,7 +24,7 @@ public class MockSmartphoneImeiServiceFinderFactory implements TypeBasedServiceF
     public MockSmartphoneImeiServiceFinderFactory() {
         serviceFinders.put(DeviceIdentifierMongoHandler.class, new MockServiceFinder<>(new SmartphoneImeiMongoHandler()));
         serviceFinders.put(DeviceIdentifierJsonHandler.class, new MockServiceFinder<>(new SmartphoneImeiJsonHandler()));
-        serviceFinders.put(GPSFixMongoHandler.class, new MockGPSFixMongoServiceFinder());
+        serviceFinders.put(FixMongoHandler.class, new MockGPSFixMongoServiceFinder());
         serviceFinders.put(GPSFixJsonHandler.class, new MockServiceFinder<>(new MockGPSFixJsonHandler()));
     }
 

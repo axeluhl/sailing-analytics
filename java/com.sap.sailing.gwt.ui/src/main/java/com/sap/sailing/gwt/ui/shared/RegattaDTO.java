@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -15,6 +16,8 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util.Pair;
 
 public class RegattaDTO extends NamedDTO {
@@ -25,15 +28,18 @@ public class RegattaDTO extends NamedDTO {
     public BoatClassDTO boatClass;
     public Date startDate;
     public Date endDate;
-    public List<RaceWithCompetitorsDTO> races;
+    public List<RaceWithCompetitorsAndBoatsDTO> races;
     public List<SeriesDTO> series;
     public ScoringSchemeType scoringScheme;
     public UUID defaultCourseAreaUuid;
     public String defaultCourseAreaName;
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
     public boolean useStartTimeInference = true;
+    public boolean controlTrackingFromStartAndFinishTimes = false;
+    public boolean canBoatsOfCompetitorsChangePerRace = false;
     public RankingMetrics rankingMetricType;
-
+    public Double buoyZoneRadiusInHullLengths;
+    
     public RegattaDTO() {}
     
     public RegattaDTO(String name, ScoringSchemeType scoringScheme) {
@@ -62,6 +68,9 @@ public class RegattaDTO extends NamedDTO {
         this.rankingMetricType = other.rankingMetricType;
         this.configuration = other.configuration;
         this.useStartTimeInference = other.useStartTimeInference;
+        this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
+        this.canBoatsOfCompetitorsChangePerRace = other.canBoatsOfCompetitorsChangePerRace;
+        this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;
     }
     
     public Pair<SeriesDTO, FleetDTO> getSeriesAndFleet(RegattaAndRaceIdentifier raceIdentifier) {
@@ -116,6 +125,12 @@ public class RegattaDTO extends NamedDTO {
             }
         }
         return false;
+    }
+
+    public Distance getCalculatedBuoyZoneRadius() {
+        Distance boatHullLength = boatClass == null ? null : boatClass.getHullLength();
+        double hullLengthFactor = this.buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS : this.buoyZoneRadiusInHullLengths;
+        return boatHullLength == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS : boatHullLength.scale(hullLengthFactor);
     }
 
     @Override

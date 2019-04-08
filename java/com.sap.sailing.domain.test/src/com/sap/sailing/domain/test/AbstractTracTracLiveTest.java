@@ -25,6 +25,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.event.CreateModelException;
@@ -36,6 +37,7 @@ import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.ISubscriberFactory;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
+import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 /**
  * Subclassing tests have to call {@link #addListenersForStoredDataAndStartController(Iterable)} to kick off
@@ -55,7 +57,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     private IRaceSubscriber raceSubscriber;
     private final Collection<Receiver> receivers;
 
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(3 * 60 * 1000);
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(3 * 60 * 1000);
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
         receivers = new HashSet<Receiver>();
@@ -65,6 +67,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
      * Default set-up for an STG training session in Weymouth, 2011
      * @throws SubscriberInitializationException 
      * @throws CreateModelException 
+     * @throws TimeOutException 
      */
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException, CreateModelException {
@@ -95,26 +98,31 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
 
     protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         // Read event data from configuration file
-        final IRace race = ModelLocator.getEventFactory().createRace(new URI(paramUrl.toString()));
-        this.race = race;
-        ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
-        if (storedUri == null) {
-            eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent());
-            raceSubscriber = subscriberFactory.createRaceSubscriber(race);
-        } else {
-            eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent(), liveUri, storedUri);
-            raceSubscriber = subscriberFactory.createRaceSubscriber(race, liveUri, storedUri);
-        }
-        assertNotNull(race);
-        // Initialize data controller using live and stored data sources
-        if (storedUri != null && storedUri.toString().startsWith("file:")) {
-            try {
-                URI oldStoredUri = storedUri;
-                storedUri = new URI(storedUri.toString().replaceFirst("file:/([^/])", "file:////$1"));
-                logger.info("Replaced storedUri "+oldStoredUri+" by "+storedUri);
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
+        try {
+            final IRace race = ModelLocator.getEventFactory().createRace(new URI(paramUrl.toString()), (int) /* timeout in milliseconds */ Duration.ONE_MINUTE.asMillis());
+            this.race = race;
+            logger.info("Using race "+race.getName()+" with ID "+race.getId()+" for this test");
+            ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
+            if (storedUri == null) {
+                eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent());
+                raceSubscriber = subscriberFactory.createRaceSubscriber(race);
+            } else {
+                eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent(), liveUri, storedUri);
+                raceSubscriber = subscriberFactory.createRaceSubscriber(race, liveUri, storedUri);
             }
+            assertNotNull(race);
+            // Initialize data controller using live and stored data sources
+            if (storedUri != null && storedUri.toString().startsWith("file:")) {
+                try {
+                    URI oldStoredUri = storedUri;
+                    storedUri = new URI(storedUri.toString().replaceFirst("file:/([^/])", "file:////$1"));
+                    logger.info("Replaced storedUri "+oldStoredUri+" by "+storedUri);
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (TimeOutException te) {
+            throw new RuntimeException(te);
         }
         // test cases need to start the thread calling addListenersForStoredDataAndStartController
         // after adding their listeners

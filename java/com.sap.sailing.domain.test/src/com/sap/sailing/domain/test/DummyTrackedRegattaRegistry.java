@@ -48,6 +48,11 @@ public class DummyTrackedRegattaRegistry implements TrackedRegattaRegistry {
     }
 
     @Override
+    public void removeRace(Regatta regatta, RaceDefinition race)
+            throws MalformedURLException, IOException, InterruptedException {
+    }
+
+    @Override
     public boolean isRaceBeingTracked(Regatta regattaContext, RaceDefinition r) {
         return false;
     }

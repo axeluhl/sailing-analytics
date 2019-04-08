@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
-import com.sap.sailing.server.MasterDataImportClassLoaderService;
+import com.sap.sse.MasterDataImportClassLoaderService;
 
 public class MasterDataImportClassLoaderServiceImpl implements MasterDataImportClassLoaderService {
 

@@ -28,6 +28,31 @@ public final class ChartPointRecalculator {
         
         return new Point(newPoint.getX(), bestNewY);
     }
+    
+    public static Point stayClosestToPreviousPointWithDeltaLimit(Point previousPoint, Point newPoint, int limit) {
+        double previousY = previousPoint.getY().doubleValue();
+        double newY = newPoint.getY().doubleValue();
+
+        // at max correct once
+        double bestNewY = newY;
+        double deltaPreviousYToNewY = Math.abs(previousY - bestNewY);
+        double deltaPreviousYToNewYUp = Math.abs(previousY - (bestNewY + 360));
+        double deltaPreviousYToNewYDown = Math.abs(previousY - (bestNewY - 360));
+
+        Point result = null;
+        if (deltaPreviousYToNewYUp < deltaPreviousYToNewY || deltaPreviousYToNewYDown < deltaPreviousYToNewY) {
+            bestNewY = deltaPreviousYToNewYUp <= deltaPreviousYToNewYDown ? bestNewY + 360 : bestNewY - 360;
+            //prevent moving to far away from 0-360 range, jump if necessary
+            if (bestNewY > (360 + limit) || bestNewY < -limit) {
+                result = newPoint;
+            } else {
+                result = new Point(newPoint.getX(), bestNewY);
+            }
+        } else {
+            result = newPoint;
+        }
+        return result;
+    }
 
     public static Point keepOverallDeltaMinimal(Double yMin, Double yMax, Point newPoint) {
         double y = newPoint.getY().doubleValue();
@@ -54,5 +79,4 @@ public final class ChartPointRecalculator {
     private static boolean isRecalculationNeeded(double deltaMin, double deltaMax, double deltaMinDown, double deltaMaxUp) {
         return (deltaMinDown < deltaMin || deltaMinDown < deltaMax) || (deltaMaxUp < deltaMin || deltaMaxUp < deltaMax);
     }
-
 }

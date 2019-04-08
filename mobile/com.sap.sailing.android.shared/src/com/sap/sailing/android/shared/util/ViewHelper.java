@@ -1,8 +1,14 @@
 package com.sap.sailing.android.shared.util;
 
+import com.sap.sse.common.impl.HSVColor;
+
+import android.graphics.Color;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 public class ViewHelper {
 
@@ -39,6 +45,23 @@ public class ViewHelper {
                     child.setVisibility(visibility);
                 }
             }
+        }
+    }
+
+    /**
+     * Set the background to the color and tint the text color to be readable
+     *
+     * @param view
+     *            TextView to colorize
+     * @param backgroundColor
+     *            background color
+     */
+    public static void setColors(@NonNull TextView view, @Nullable String backgroundColor) {
+        com.sap.sse.common.Color color = HSVColor.getCssColor(backgroundColor);
+        if (color != null) {
+            float textColor = (1 - color.getAsHSV().getC()) * 255f;
+            view.setTextColor(Color.argb(255, (int) textColor, (int) textColor, (int) textColor));
+            view.setBackgroundColor(Color.parseColor(backgroundColor));
         }
     }
 }

@@ -14,12 +14,14 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.GWTLocaleUtil;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObservable;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObserver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
+import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
@@ -27,7 +29,7 @@ import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
-public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
+public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements FileStorageServiceConnectionTestObserver {
     protected final StringMessages stringMessages;
     protected final URLFieldWithFileUpload videoURLAndUploadComposite;
     protected final Date creationDate;
@@ -61,7 +63,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         }
     }
 
-    public VideoDialog(Date createdAtDate, VideoParameterValidator validator, StringMessages stringMessages, DialogCallback<VideoDTO> callback) {
+    public VideoDialog(Date createdAtDate, VideoParameterValidator validator, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<VideoDTO> callback) {
         super(stringMessages.video(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
         this.stringMessages = stringMessages;
@@ -72,6 +74,8 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         mimeTypeListBox.addItem(MimeType.unknown.name());
         mimeTypeListBox.addItem(MimeType.aac.name());
         mimeTypeListBox.addItem(MimeType.mp4.name());
+        mimeTypeListBox.addItem(MimeType.mp4panorama.name());
+        mimeTypeListBox.addItem(MimeType.mp4panoramaflip.name());
         mimeTypeListBox.addItem(MimeType.ogg.name());
         mimeTypeListBox.addItem(MimeType.ogv.name());
         mimeTypeListBox.addItem(MimeType.qt.name());
@@ -81,17 +85,19 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         for (String locale : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
             localeListBox.addItem(GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(locale), locale == null ? "" : locale);
         }
-        videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false);
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                validate();
+                validateAndUpdate();
             }
         });
-        thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        MediaConstants.videoTagSuggestions, "Enter tags for the video", 50));
+                        MediaTagConstants.videoTagSuggestions, stringMessages.enterTagsForTheVideo(), 50));
+        //the observer has to be registered after creating the URLFieldWithFileUpload
+        storageServiceAvailable.registerObserver(this);
     }
 
     @Override
@@ -184,5 +190,11 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
     @Override
     protected FocusWidget getInitialFocusWidget() {
         return videoURLAndUploadComposite.getInitialFocusWidget();
+    }
+    
+    @Override
+    public void onFileStorageServiceTestPassed() {
+        videoURLAndUploadComposite.setUploadEnabled(true);
+        thumbnailURLAndUploadComposite.setUploadEnabled(true);
     }
 }

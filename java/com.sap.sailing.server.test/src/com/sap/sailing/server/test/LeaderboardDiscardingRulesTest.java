@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
@@ -21,8 +21,8 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -66,13 +66,13 @@ public class LeaderboardDiscardingRulesTest {
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
 
-        Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
+        CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorWithBoat("Dr. Hasso Plattner");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race1, "R1", /* medalRace */false);
         final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race2, "R2", /* medalRace */false);
 
-        Competitor wolfgang = AbstractLeaderboardTest.createCompetitor("Wolfgang Hunger");
+        CompetitorWithBoat wolfgang = AbstractLeaderboardTest.createCompetitorWithBoat("Wolfgang Hunger");
         final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race3, "R3", /* medalRace */false);
         final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 124, /* started */ true, boatClass);
@@ -105,19 +105,19 @@ public class LeaderboardDiscardingRulesTest {
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("ESS40", /* typicallyStartsUpwind */ true);
 
-        Competitor rasmus = AbstractLeaderboardTest.createCompetitor("Rasmus");
+        CompetitorWithBoat rasmus = AbstractLeaderboardTest.createCompetitorWithBoat("Rasmus");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(rasmus, /* rank */ 2, /* started */ true, boatClass); // score 2.0
         leaderboard.addRace(race1, "R1", /* medalRace */false);
         final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(rasmus, /* rank */ 2, /* started */ true, boatClass); // score 2.0
         leaderboard.addRace(race2, "R2", /* medalRace */false);
 
-        Competitor jes = AbstractLeaderboardTest.createCompetitor("Jes");
+        CompetitorWithBoat jes = AbstractLeaderboardTest.createCompetitorWithBoat("Jes");
         final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(jes, /* rank */ 2, /* started */ true, boatClass); // score 2.0
         leaderboard.addRace(race3, "R3", /* medalRace */false);
         final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(jes, /* rank */ 3, /* started */ true, boatClass); // score 1.0
         leaderboard.addRace(race4, "R4", /* medalRace */false);
         
-        Competitor nobody = AbstractLeaderboardTest.createCompetitor("Nobody");
+        CompetitorWithBoat nobody = AbstractLeaderboardTest.createCompetitorWithBoat("Nobody");
         final TrackedRace race5 = new MockedTrackedRaceWithFixedRank(nobody, /* rank */ 3, /* started */ true, boatClass); // score 1.0
         leaderboard.addRace(race5, "R5", /* medalRace */false);
 
@@ -149,13 +149,13 @@ public class LeaderboardDiscardingRulesTest {
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
 
-        Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
+        CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorWithBoat("Dr. Hasso Plattner");
         final TrackedRace race1 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race1, "R1", /* medalRace */false);
         final TrackedRace race2 = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race2, "R2", /* medalRace */false);
 
-        Competitor wolfgang = AbstractLeaderboardTest.createCompetitor("Wolfgang Hunger");
+        CompetitorWithBoat wolfgang = AbstractLeaderboardTest.createCompetitorWithBoat("Wolfgang Hunger");
         final TrackedRace race3 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 123, /* started */ true, boatClass);
         leaderboard.addRace(race3, "R3", /* medalRace */false);
         final TrackedRace race4 = new MockedTrackedRaceWithFixedRank(wolfgang, /* rank */ 124, /* started */ true, boatClass);

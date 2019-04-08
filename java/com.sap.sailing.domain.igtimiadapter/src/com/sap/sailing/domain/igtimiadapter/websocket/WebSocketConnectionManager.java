@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.websocket;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.util.thread.ShutdownThread;
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -31,13 +34,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class WebSocketConnectionManager extends WebSocketAdapter implements LiveDataConnection {
+public class WebSocketConnectionManager implements LiveDataConnection {
     private static final Logger logger = Logger.getLogger(WebSocketConnectionManager.class.getName());
     private final IgtimiConnectionFactoryImpl connectionFactory;
     private static enum TargetState { OPEN, CLOSED };
     private TargetState targetState;
-    private final WebSocketClient client;
-    private final ClientUpgradeRequest request;
+    private WebSocketClient client;
     private final JSONObject configurationMessage;
     private final Timer timer;
     private final Iterable<String> deviceIds;
@@ -47,6 +49,8 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     private final ConcurrentMap<BulkFixReceiver, BulkFixReceiver> listeners;
     private TimePoint igtimiServerTimepoint;
     private TimePoint localTimepointWhenServerTimepointWasReceived;
+    
+    private WebSocket currentSocket;
     
     /**
      * Counts the messages received. Every {@link #LOG_EVERY_SO_MANY_MESSAGES} an {@link Level#INFO} message is logged.
@@ -58,18 +62,25 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     private static final long CONNECTION_TIMEOUT_IN_MILLIS = 5000;
     
     public WebSocketConnectionManager(IgtimiConnectionFactoryImpl connectionFactory, Iterable<String> deviceSerialNumbers, Account account) throws Exception {
-        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account);
+        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account, /* isDaemon */ true);
         this.deviceIds = deviceSerialNumbers;
         this.account = account;
         this.fixFactory = new FixFactory();
         this.connectionFactory = connectionFactory;
         this.listeners = new ConcurrentHashMap<>();
-        client = new WebSocketClient(new SslContextFactory());
         configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceSerialNumbers);
-        request = new ClientUpgradeRequest();
         reconnect();
         startClientHeartbeat();
         startListeningForServerHeartbeat();
+    }
+    
+    private Session getSession() {
+        return currentSocket == null ? null : currentSocket.getSession();
+    }
+    
+    private RemoteEndpoint getRemote() {
+        final Session session = getSession();
+        return session == null ? null : session.getRemote();
     }
     
     /**
@@ -93,56 +104,119 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     }
     
     public void stop() throws Exception {
+        logger.info("Stopping connection mananager "+this);
         targetState = TargetState.CLOSED;
         timer.cancel();
-        client.stop();
-    }
-
-    @Override
-    public void onWebSocketConnect(Session session) {
-        super.onWebSocketConnect(session);
-        logger.info("received connection "+session+" for "+this);
-        try {
-            getRemote().sendString(configurationMessage.toString());
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Could not send configuration package to Igtimi web socket server in "+this, e);
-            throw new RuntimeException(e);
+        final Session session = getSession();
+        if (session != null) {
+            session.disconnect();
+        }
+        synchronized (this) {
+            if (client != null) {
+                client.stop();
+            }
         }
     }
 
-    @Override
-    public void onWebSocketText(String message) {
-        if (logger.isLoggable(Level.FINEST)) {
-            logger.finest("Received "+message+" in "+this);
+    private class WebSocket extends WebSocketAdapter {
+        /**
+         * Reconnects once when closed and clears this flag in the process. This way, the clean-up
+         * of the resources occupied by this socket and its client won't trigger yet another onWebSocketClose
+         * event handling.
+         */
+        private boolean reconnectWhenClosed = true;
+        
+        @Override
+        public synchronized void onWebSocketClose(int statusCode, String reason) {
+            if (reconnectWhenClosed) {
+                reconnectWhenClosed = false;
+                final Session session = getSession();
+                if (session != null) {
+                    session.close();
+                    try {
+                        session.disconnect();
+                    } catch (IOException e) {
+                        logger.info("Couldn't disconnect web socket session "+session+" after having closed it");
+                    }
+                }
+                super.onWebSocketClose(statusCode, reason);
+                if (targetState == TargetState.OPEN) {
+                    try {
+                        reconnect();
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Couldn't reconnect to Igtimi web socket in " + this, e);
+                    }
+                }
+            }
         }
-        if (message.equals("1")) {
-            logger.fine("Received server heartbeat for "+this);
+        
+        @Override
+        public void onWebSocketError(Throwable cause) {
+            logger.log(Level.SEVERE, "Error trying to open Igtimi web socket in "+this, cause);
+        }
+    
+        @Override
+        public void onWebSocketConnect(Session session) {
+            super.onWebSocketConnect(session);
+            logger.info("received connection "+session+" for "+this);
             receivedServerHeartbeatInInterval = true;
-        } else if (message.startsWith("[")) {
-            messageCount++;
-            if (messageCount % LOG_EVERY_SO_MANY_MESSAGES == 0) {
-                logger.info("Received another "+LOG_EVERY_SO_MANY_MESSAGES+" Igtimi messages. Last message was: "+message);
-            }
-            List<Fix> fixes = new ArrayList<>();
             try {
-                JSONArray jsonArray = (JSONArray) new JSONParser().parse(message);
-                for (Object o : jsonArray) {
-                    Util.addAll(fixFactory.createFixes((JSONObject) o), fixes);
-                }
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Received fixes"+fixes+" for "+this);
-                }
-                notifyListeners(fixes);
-            } catch (ParseException e) {
-                logger.log(Level.SEVERE, "Error trying to parse a web socket data package coming from Igtimi "+this, e);
+                getRemote().sendString(configurationMessage.toString());
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Could not send configuration package to Igtimi web socket server in "+this, e);
+                throw new RuntimeException(e);
             }
-        } else {
-            // try to parse server time stamp in response to the configuration message
-            synchronized (this) {
-                igtimiServerTimepoint = new MillisecondsTimePoint(Long.valueOf(message));
-                localTimepointWhenServerTimepointWasReceived = MillisecondsTimePoint.now();
-                logger.info("Received server timestamp "+igtimiServerTimepoint);
-                notifyAll();
+        }
+    
+        @Override
+        public void onWebSocketText(String message) {
+            logger.finest(()->"Received "+message+" in "+this);
+            if (message.equals("1")) {
+                logger.fine("Received server heartbeat for "+this);
+                receivedServerHeartbeatInInterval = true;
+            } else if (message.startsWith("[")) {
+                messageCount++;
+                if (messageCount % LOG_EVERY_SO_MANY_MESSAGES == 0) {
+                    logger.info("Received another "+LOG_EVERY_SO_MANY_MESSAGES+" Igtimi messages. Last message was: "+message);
+                }
+                List<Fix> fixes = new ArrayList<>();
+                try {
+                    JSONArray jsonArray = (JSONArray) new JSONParser().parse(message);
+                    for (Object o : jsonArray) {
+                        for (final Fix fix : fixFactory.createFixes((JSONObject) o)) {
+                            fixes.add(fix);
+                            if (!Util.contains(deviceIds, fix.getSensor().getDeviceSerialNumber())) {
+                                logger.warning("Received fix "+fix+" in message "+message+" which is from device "+fix.getSensor().getDeviceSerialNumber()+
+                                        " which this connection is not configured for: "+deviceIds);
+                            }
+                        }
+                    }
+                    logger.finest(()->"Received fixes"+fixes+" for "+this);
+                    notifyListeners(fixes);
+                } catch (ParseException e) {
+                    logger.log(Level.SEVERE, "Error trying to parse a web socket data package coming from Igtimi "+this, e);
+                }
+            } else {
+                // try to parse server time stamp in response to the configuration message
+                synchronized (this) {
+                    igtimiServerTimepoint = new MillisecondsTimePoint(Long.valueOf(message));
+                    localTimepointWhenServerTimepointWasReceived = MillisecondsTimePoint.now();
+                    logger.info("Received server timestamp "+igtimiServerTimepoint);
+                    notifyAll();
+                }
+            }
+        }
+        
+        @Override
+        public String toString() {
+            return getClass().getSimpleName()+", "+WebSocketConnectionManager.this.toString();
+        }
+
+        public void close() {
+            reconnectWhenClosed = false;
+            final Session session = getSession();
+            if (session != null) {
+                session.close();
             }
         }
     }
@@ -150,7 +224,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     public com.sap.sse.common.Util.Pair<TimePoint, TimePoint> getIgtimiServerTimePointAndWhenItWasReceived() {
         return new com.sap.sse.common.Util.Pair<TimePoint, TimePoint>(igtimiServerTimepoint, localTimepointWhenServerTimepointWasReceived);
     }
-    
+
     @Override
     public void addListener(BulkFixReceiver listener) {
         listeners.put(listener, listener);
@@ -172,22 +246,6 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     }
 
     @Override
-    public void onWebSocketClose(int statusCode, String reason) {
-        if (targetState == TargetState.OPEN) {
-            try {
-                reconnect();
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Couldn't reconnect to Igtimi web socket in "+this, e);
-            }
-        }
-    }
-    
-    @Override
-    public void onWebSocketError(Throwable cause) {
-        logger.log(Level.SEVERE, "Error trying to open Igtimi web socket in "+this, cause);
-    }
-
-    @Override
     public String toString() {
         return "Web Socket Connection Manager for devices "+deviceIds+" and account "+account+" with web socket session "+getSession();
     }
@@ -199,7 +257,6 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
                 try {
                     if (!receivedServerHeartbeatInInterval) {
                         logger.info("Didn't receive server heartbeat in interval for "+WebSocketConnectionManager.this+". Reconnecting...");
-                        client.stop();
                         reconnect();
                     } else {
                         receivedServerHeartbeatInInterval = false;
@@ -227,27 +284,53 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         }, /* delay */ 0, /* send ping message every other minute; has to be at least every five minutes, so this should be safe */ 120000l);
     }
 
-    private void reconnect() throws Exception {
+    private synchronized void reconnect() throws Exception {
+        if (currentSocket != null) {
+            currentSocket.close();
+        }
+        if (client != null) {
+            client.stop();
+            client.destroy();
+        }
         IOException lastException = null;
         for (URI uri : connectionFactory.getWebsocketServers()) {
             try {
                 if (uri.getScheme().equals("ws") || uri.getScheme().equals("wss")) {
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
+                    client = new WebSocketClient(new SslContextFactory()) {
+                        @Override
+                        public void destroy() {
+                            super.destroy();
+                            ShutdownThread.deregister(this); // this will make sure that after destroy() no reference is being held to this client
+                        }
+                    };
                     client.start();
-                    client.connect(this, uri, request);
+                    currentSocket = new WebSocket();
+                    igtimiServerTimepoint = null;
+                    client.connect(currentSocket, uri, new ClientUpgradeRequest());
                     if (waitForConnection(CONNECTION_TIMEOUT_IN_MILLIS)) {
                         logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
                         lastException = null;
                         break; // successfully connected
                     }
+                    // connection not successful; stop and destroy the client
+                    client.stop();
+                    client.destroy();
+                    client = null;
                 }
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Couldn't connect to "+uri+" for "+this, e);
                 lastException = e;
             }
         }
+        targetState = TargetState.OPEN;
         if (lastException != null) {
             throw lastException;
-        }        
+        }
+    }
+
+    @Override
+    public InetSocketAddress getRemoteAddress() {
+        return getSession().getRemoteAddress();
     }
 }

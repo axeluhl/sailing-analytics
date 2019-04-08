@@ -45,6 +45,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 
 /**
  * Write-enabled {@link RaceState}.
@@ -54,10 +55,6 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     
     private final AbstractLogEventAuthor author;
     
-    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog) {
-        return create(raceLogResolver, raceLog, /* forRaceLogIdentifier */ null, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
-    }
-
     /**
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */
@@ -81,7 +78,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     private RaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author, RaceStatusAnalyzer.Clock analyzersClock,
             RacingProcedureFactory procedureFactory) {
         super(raceLogResolver, raceLog, /* forRaceLogIdentifier */ null, analyzersClock, procedureFactory,
-                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap(), /* update */ true);
+                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
         this.author = author;
     }
     
@@ -157,6 +154,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     public void forceNewDependentStartTime(TimePoint now, final Duration startTimeDifference, final SimpleRaceLogIdentifier dependentOnRace) {
         raceLog.add(new RaceLogDependentStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), dependentOnRace, startTimeDifference));
     }
+    
 
     @Override
     public void setFinishingTime(TimePoint timePoint) {
@@ -165,12 +163,16 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
 
     @Override
     public void setFinishedTime(TimePoint timePoint) {
-        raceLog.add(new RaceLogRaceStatusEventImpl(timePoint, author, raceLog.getCurrentPassId(), RaceLogRaceStatus.FINISHED));
+        raceLog.add(new RaceLogRaceStatusEventImpl(timePoint, author, raceLog.getCurrentPassId(),
+                RaceLogRaceStatus.FINISHED));
+        // ensure caches are synched
+        forceUpdate();
     }
 
     @Override
-    public void setProtestTime(TimePoint now, TimePoint timePoint) {
-        raceLog.add(new RaceLogProtestStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), timePoint));
+    public void setProtestTime(TimePoint now, TimeRange protestTime) {
+        assert protestTime != null && protestTime.from() != null && protestTime.to() != null;
+        raceLog.add(new RaceLogProtestStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), protestTime));
     }
 
     @Override
@@ -196,9 +198,9 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
 
     @Override
-    public void setFinishPositioningConfirmed(TimePoint timePoint) {
+    public void setFinishPositioningConfirmed(TimePoint timePoint, CompetitorResults positionedCompetitors) {
         raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(
-                timePoint, author, raceLog.getCurrentPassId(), getFinishPositioningList()));
+                timePoint, author, raceLog.getCurrentPassId(), positionedCompetitors));
     }
 
     @Override
@@ -239,7 +241,5 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     @Override
     public void forceUpdate() {
         super.update();
-        registerListenerOnDependentRaceIfDependentStartTime(Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
     }
-
 }

@@ -1,20 +1,19 @@
 package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
-import java.util.List;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -22,6 +21,8 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Leg getLeg();
 
     Competitor getCompetitor();
+
+    Boat getBoat();
 
     /**
      * How much time did the {@link #getCompetitor competitor} spend in this {@link #getLeg() leg} at
@@ -91,6 +92,13 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * for the entire leg (and no further) is computed.
      */
     Speed getAverageSpeedOverGround(TimePoint timePoint);
+    
+    /**
+     * Computes the competitor's average ride height for this leg from the beginning of the leg up to time
+     * <code>timePoint</code>. If the competitor already completed the leg at <code>timePoint</code> and the respective
+     * mark passing event was already received, the average ride height for the entire leg (and no further) is computed.
+     */
+    Distance getAverageRideHeight(TimePoint timePoint);
 
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet, otherwise the fix where the maximum speed was
@@ -110,22 +118,19 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * may be part of the respective adjacent leg, depending on the maneuver's time point which may be slightly before, at, or
      * after the corresponding mark passing event.
      */
-    List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
+    Iterable<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
     /**
-     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
     Integer getNumberOfTacks(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
 
     /**
-     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
     Integer getNumberOfJibes(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
 
     /**
-     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
     Integer getNumberOfPenaltyCircles(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
@@ -152,20 +157,17 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Computes the gap in seconds to the leader / winner of this leg. Returns <code>null</code> in case this leg's
      * competitor hasn't started the leg yet.
-     * @param rankingInfo TODO
      */
     Duration getGapToLeader(TimePoint timePoint, RankingInfo rankingInfo, WindPositionMode windPositionMode);
     
     /**
      * Same as {@link #getGapToLeader(TimePoint, RankingInfo, WindPositionMode)}, only that a cache for wind and leg type data is used.
-     * @param rankingInfo TODO
      */
     Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 
     /**
      * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
      * can share this knowledge to speed up computation as compared to {@link #getGapToLeader(TimePoint, RankingInfo, WindPositionMode)}.
-     * @param rankingInfo TODO
      */
     Duration getGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint, RankingInfo rankingInfo, WindPositionMode windPositionMode) throws NoWindException;
 
@@ -173,7 +175,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getGapToLeader(TimePoint, Competitor, RankingInfo, WindPositionMode)}, only that an additional cache is used
      * to avoid redundant evaluations of leg types and wind field information across various calculations that
      * all can use the same basic information.
-     * @param rankingInfo TODO
      */
     Duration getGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
             WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
@@ -188,6 +189,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     TimePoint getStartTime();
     
+    /**
+     * @return <code>null</code> if the competitor hasn't finished this leg yet; the time point when the competitor passed
+     * the end waypoint of this leg otherwise
+     */
     TimePoint getFinishTime();
 
     /**
@@ -201,7 +206,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getVelocityMadeGood(TimePoint, WindPositionMode)}, only that a cache for wind data and leg type and bearing
      * is passed.
      */
-    Speed getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+    SpeedWithBearing getVelocityMadeGood(TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
 
     /**
@@ -220,7 +225,22 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * finished the leg, the speed over ground at the time the competitor finished the leg is returned.
      */
     SpeedWithBearing getSpeedOverGround(TimePoint at);
+    
+    /**
+     * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
+     * <code>timePoint</code>, returns the current ride height for this time point. If the competitor has already
+     * finished the leg, the ride height at the time the competitor finished the leg is returned.
+     */
+    Distance getRideHeight(TimePoint at);
 
+    Bearing getHeel(TimePoint at);
+
+    Bearing getPitch(TimePoint at);
+    
+    Distance getDistanceFoiled(TimePoint at);
+    
+    Duration getDurationFoiled(TimePoint at);
+    
     /**
      * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader
      * and competitor are in the same leg, this is simply the windward distance. If the leader is already one or more
@@ -241,7 +261,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Same as {@link #getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}, only that a cache for leg type
      * calculation is passed.
-     * @param rankingInfo TODO
      */
     Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 
@@ -262,29 +281,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
-    /**
-     * Computes the maneuver loss as the distance projected onto the average course between entering and exiting the
-     * maneuver that the boat lost compared to not having maneuvered. With this distance measure, the competitors speed
-     * and bearing before the maneuver, as defined by <code>timePointBeforeManeuver</code> is extrapolated until
-     * <code>timePointAfterManeuver</code>, and the resulting extrapolated position's "windward distance" is compared to
-     * the competitor's actual position at that time. This distance is returned as the result of this method.
-     */
-    Distance getManeuverLoss(TimePoint timePointBeforeManeuver, TimePoint maneuverTimePoint, TimePoint timePointAfterManeuver) throws NoWindException;
-
     TrackedLeg getTrackedLeg();
-
-    /**
-     * Computes the angle between the competitors direction and the wind's "from" direction. The angle's direction is chosen such that
-     * it can be added to the boat's course over ground to arrive at the wind's {@link Wind#getFrom() "from"} direction. Example: wind
-     * from the north (0deg), boat's course over ground 90deg (moving east), then the bearing returned is -90deg.
-     */
-    Bearing getBeatAngle(TimePoint at) throws NoWindException;
-
-    /**
-     * Same as {@link #getBeatAngle}, only that additionally a cache is provided that can allow the method to use
-     * cached wind and leg type values.
-     */
-    Bearing getBeatAngle(TimePoint at, WindLegTypeAndLegBearingCache cache) throws NoWindException;
 
     /**
      * Like {@link #getAverageVelocityMadeGood(TimePoint)}, only with an additional cache argument that allows the method to
@@ -301,4 +298,82 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
 
+    Double getExpeditionAWA(TimePoint at);
+    Double getExpeditionAWS(TimePoint at);
+    Double getExpeditionTWA(TimePoint at);
+    Double getExpeditionTWS(TimePoint at);
+    Double getExpeditionTWD(TimePoint at);
+    Double getExpeditionTargTWA(TimePoint at);
+    Double getExpeditionBoatSpeed(TimePoint at);
+    Double getExpeditionTargBoatSpeed(TimePoint at);
+    Double getExpeditionSOG(TimePoint at);
+    Double getExpeditionCOG(TimePoint at);
+    Double getExpeditionForestayLoad(TimePoint at);
+    Double getExpeditionRake(TimePoint at);
+    Double getExpeditionCourseDetail(TimePoint at);
+    Double getExpeditionHeading(TimePoint at);
+    Double getExpeditionVMG(TimePoint at);
+    Double getExpeditionVMGTargVMGDelta(TimePoint at);
+    Double getExpeditionRateOfTurn(TimePoint at);
+    Double getExpeditionRudderAngle(TimePoint at);
+    Double getExpeditionTargetHeel(TimePoint at);
+    Double getExpeditionTimeToPortLayline(TimePoint at);
+    Double getExpeditionTimeToStbLayline(TimePoint at);
+    Double getExpeditionDistToPortLayline(TimePoint at);
+    Double getExpeditionDistToStbLayline(TimePoint at);
+    Double getExpeditionTimeToGunInSeconds(TimePoint at);
+    Double getExpeditionTimeToCommitteeBoat(TimePoint at);
+    Double getExpeditionTimeToPin(TimePoint at);
+    Double getExpeditionTimeToBurnToLineInSeconds(TimePoint at);
+    Double getExpeditionTimeToBurnToCommitteeBoat(TimePoint at);
+    Double getExpeditionTimeToBurnToPin(TimePoint at);
+    Double getExpeditionDistanceToCommitteeBoat(TimePoint at);
+    Double getExpeditionDistanceToPinDetail(TimePoint at);
+    Double getExpeditionDistanceBelowLineInMeters(TimePoint at);
+    Double getExpeditionLineSquareForWindDirection(TimePoint at);
+    Double getExpeditionBaroIfAvailable(TimePoint at);
+    Double getExpeditionLoadSIfAvailable(TimePoint at);
+    Double getExpeditionLoadPIfAvailable(TimePoint at);
+    Double getExpeditionJibCarPortIfAvailable(TimePoint at);
+    Double getExpeditionJibCarStbdIfAvailable(TimePoint at);
+    Double getExpeditionMastButtIfAvailable(TimePoint at);
+    Double getAverageExpeditionAWA(TimePoint at);
+    Double getAverageExpeditionAWS(TimePoint at);
+    Double getAverageExpeditionTWA(TimePoint at);
+    Double getAverageExpeditionTWS(TimePoint at);
+    Double getAverageExpeditionTWD(TimePoint at);
+    Double getAverageExpeditionTargTWA(TimePoint at);
+    Double getAverageExpeditionBoatSpeed(TimePoint at);
+    Double getAverageExpeditionTargBoatSpeed(TimePoint at);
+    Double getAverageExpeditionSOG(TimePoint at);
+    Double getAverageExpeditionCOG(TimePoint at);
+    Double getAverageExpeditionForestayLoad(TimePoint at);
+    Double getAverageExpeditionRake(TimePoint at);
+    Double getAverageExpeditionCourseDetail(TimePoint at);
+    Double getAverageExpeditionHeading(TimePoint at);
+    Double getAverageExpeditionVMG(TimePoint at);
+    Double getAverageExpeditionVMGTargVMGDelta(TimePoint at);
+    Double getAverageExpeditionRateOfTurn(TimePoint at);
+    Double getAverageExpeditionRudderAngle(TimePoint at);
+    Double getAverageExpeditionTargetHeel(TimePoint at);
+    Double getAverageExpeditionTimeToPortLayline(TimePoint at);
+    Double getAverageExpeditionTimeToStbLayline(TimePoint at);
+    Double getAverageExpeditionDistToPortLayline(TimePoint at);
+    Double getAverageExpeditionDistToStbLayline(TimePoint at);
+    Double getAverageExpeditionTimeToGunInSeconds(TimePoint at);
+    Double getAverageExpeditionTimeToCommitteeBoat(TimePoint at);
+    Double getAverageExpeditionTimeToPin(TimePoint at);
+    Double getAverageExpeditionTimeToBurnToLineInSeconds(TimePoint at);
+    Double getAverageExpeditionTimeToBurnToCommitteeBoat(TimePoint at);
+    Double getAverageExpeditionTimeToBurnToPin(TimePoint at);
+    Double getAverageExpeditionDistanceToCommitteeBoat(TimePoint at);
+    Double getAverageExpeditionDistanceToPinDetail(TimePoint at);
+    Double getAverageExpeditionDistanceBelowLineInMeters(TimePoint at);
+    Double getAverageExpeditionLineSquareForWindDirection(TimePoint at);
+    Double getAverageExpeditionBaroIfAvailable(TimePoint at);
+    Double getAverageExpeditionLoadSIfAvailable(TimePoint at);
+    Double getAverageExpeditionLoadPIfAvailable(TimePoint at);
+    Double getAverageExpeditionJibCarPortIfAvailable(TimePoint at);
+    Double getAverageExpeditionJibCarStbdIfAvailable(TimePoint at);
+    Double getAverageExpeditionMastButtIfAvailable(TimePoint at);
 }

@@ -4,23 +4,59 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A data mining extraction function (Dimension or Statistic) that can be shared between client and server.
+ * Instances are usually constructed by a DataMiningDTOFactory based on a given backend Function. The
+ * corresponding backend instance can be determined using the DataMiningServer.
+ */
 public class FunctionDTO implements Serializable, Comparable<FunctionDTO> {
     private static final long serialVersionUID = 4587389541910498505L;
 
-    private boolean isDimension;
-    private String functionName;
-    private String sourceTypeName;
-    private String returnTypeName;
-    private List<String> parameterTypeNames;
-
-    private String displayName;
-    private int ordinal;
+    private final boolean isDimension;
+    /**
+     * The functions name including its parameters in parenthesis or empty parenthesis, if this function doesn't have
+     * parameters. Can consist of multiple concatenated function names, if the backend Function encapsulated multiple
+     * data mining functions.
+     */
+    private final String functionName;
+    /**
+     * The fully qualified name of the type that declares this function.
+     */
+    private final String sourceTypeName;
+    /**
+     * The fully qualified name of the type returned by this function.
+     */
+    private final String returnTypeName;
+    /**
+     * The fully qualified names of the functions parameter types.
+     */
+    private final List<String> parameterTypeNames;
 
     /**
-     * Constructor for the GWT-Serialization. Don't use this!
+     * Meta-data for the natural ordering of FunctionDTOs. Should be omitted when persisting a FunctionDTO.
      */
-    @Deprecated
-    FunctionDTO() {
+    private final int ordinal;
+    /**
+     * A human readable string representation. Should be omitted when persisting a FunctionDTO.
+     */
+    private String displayName;
+    /**
+     * If the {@link #displayName} is not set and this provider is valid, the {@F
+     */
+    private transient DisplayNameProvider displayNameProvider;
+
+    public static interface DisplayNameProvider {
+        String getDisplayName();
+    }
+    
+    /**
+     * Makes the construction of the {@link #displayName} lazy, using the {@code displayNameProvider}.
+     */
+    public FunctionDTO(boolean isDimension, String functionName, String sourceTypeName, String returnTypeName,
+            List<String> parameterTypeNames, DisplayNameProvider displayNameProvider, int ordinal) {
+        this(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames,
+                /* displayName is constructed lazily using the displayNameProvider */ (String) null, ordinal);
+        this.displayNameProvider = displayNameProvider;
     }
     
     public FunctionDTO(boolean isDimension, String functionName, String sourceTypeName, String returnTypeName,
@@ -46,12 +82,23 @@ public class FunctionDTO implements Serializable, Comparable<FunctionDTO> {
     public List<String> getParameterTypeNames() {
         return parameterTypeNames;
     }
-    
+
+    /**
+     * The functions name including its parameters in parenthesis or empty parenthesis, if this function doesn't have
+     * parameters. Can consist of multiple concatenated function names, if the backend Function encapsulated multiple
+     * data mining functions.
+     * 
+     * @return The functions name including its parameters in parenthesis or empty parenthesis, if this function doesn't
+     *         have parameters.
+     */
     public String getFunctionName() {
         return functionName;
     }
 
     public String getDisplayName() {
+        if (displayName == null && displayNameProvider != null) {
+            displayName = displayNameProvider.getDisplayName();
+        }
         return displayName;
     }
     

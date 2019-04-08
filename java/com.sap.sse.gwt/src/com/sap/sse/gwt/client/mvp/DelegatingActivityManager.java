@@ -10,6 +10,10 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
+/**
+ * Custom {@link ActivityManager} implementation that allows hooking into the lifecycle.
+ *
+ */
 public class DelegatingActivityManager extends ActivityManager {
     
     private final ActivityManager realActivityManager;
@@ -35,9 +39,19 @@ public class DelegatingActivityManager extends ActivityManager {
         realActivityManager.setDisplay(display);
     }
     
+    /**
+     * To be overwritten by sublcasses to hook into the lifecycle.
+     * 
+     * @param activity the activity to be started
+     */
     protected void beforeActivityStart(Activity activity) {
     }
     
+    /**
+     * To be overwritten by sublcasses to hook into the lifecycle.
+     * 
+     * @param activity the place that has been started
+     */
     protected void afterPlaceActivation(Place place) {
     }
 

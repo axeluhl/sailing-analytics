@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -30,6 +31,7 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
@@ -38,6 +40,7 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.mgt.CachingSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.Factory;
 import org.apache.shiro.web.config.WebIniSecurityManagerFactory;
@@ -68,8 +71,11 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
@@ -83,6 +89,7 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -114,8 +121,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
     
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
     
+    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+    
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
+     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
+     * method.
+     */
+    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
+
     private static Ini shiroConfiguration;
     static {
         shiroConfiguration = new Ini();
@@ -148,13 +165,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             Activator.setSecurityService(this);
         }
         operationsSentToMasterForReplication = new HashSet<>();
-        cacheManager = new ReplicatingCacheManager();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = store;
         this.mailServiceTracker = mailServiceTracker;
         // Create default users if no users exist yet.
         initEmptyStore();
         Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
+        cacheManager = loadReplicationCacheManagerContents();
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
         final Section urlsSection = shiroConfiguration.getSection("urls");
@@ -174,14 +191,40 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         this.securityManager = securityManager;
     }
 
-    @Override
-    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
-        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
+    private ReplicatingCacheManager loadReplicationCacheManagerContents() {
+        logger.info("Loading session cache manager contents");
+        int count = 0;
+        final ReplicatingCacheManager result = new ReplicatingCacheManager();
+        for (Entry<String, Set<Session>> cacheNameAndSessions : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSessionsByCacheName().entrySet()) {
+            final String cacheName = cacheNameAndSessions.getKey();
+            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName);
+            for (final Session session : cacheNameAndSessions.getValue()) {
+                cache.put(session.getId(), session, /* store */ false);
+                count++;
+            }
+        }
+        logger.info("Loaded "+count+" sessions");
+        return result;
     }
 
     @Override
-    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
-        this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+    public boolean isCurrentlyFillingFromInitialLoad() {
+        return currentlyFillingFromInitialLoad.get();
+    }
+
+    @Override
+    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
+        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+    }
+
+    @Override
+    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
+        return currentlyApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
+        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
     }
 
     /**
@@ -189,11 +232,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * is empty.
      */
     private void initEmptyStore() {
-        if (Util.isEmpty(store.getUsers())) {
+        if (!store.hasUsers()) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
-                        /* fullName */ null, /* company */ null, /* validationBaseURL */ null);
+                        /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null);
                 addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
             } catch (UserManagementException | MailException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
@@ -322,10 +365,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public User getUserByEmail(String email) {
         return store.getUserByEmail(email);
     }
-
+    
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
             String company, final String validationBaseURL) throws UserManagementException, MailException {
+        return createSimpleUser(username, email, password, fullName, company, /* locale */ null, validationBaseURL);
+    }
+
+    @Override
+    public User createSimpleUser(final String username, final String email, String password, String fullName,
+            String company, Locale locale, final String validationBaseURL) throws UserManagementException, MailException {
         if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -341,6 +390,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final User result = store.createUser(username, email, upa);
         result.setFullName(fullName);
         result.setCompany(company);
+        result.setLocale(locale);
         final String emailValidationSecret = result.startEmailValidation();
         // don't replicate exception handling; replicate only the effect on the user store
         apply(s->s.internalStoreUser(result));
@@ -391,17 +441,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void updateUserProperties(String username, String fullName, String company) throws UserManagementException {
+    public void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        updateUserProperties(user, fullName, company);
+        updateUserProperties(user, fullName, company, locale);
     }
 
-    private void updateUserProperties(User user, String fullName, String company) {
+    private void updateUserProperties(User user, String fullName, String company, Locale locale) {
         user.setFullName(fullName);
         user.setCompany(company);
+        user.setLocale(locale);
         apply(s->s.internalStoreUser(user));
     }
 
@@ -486,7 +537,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     public StringBuilder buildURL(String baseURL, Map<String, String> urlParameters) {
         StringBuilder url = new StringBuilder(baseURL);
-        boolean first = !baseURL.contains("?");
+        // Potentially contained hash is checked to support place-based mail verification
+        boolean first = !baseURL.contains("?") || baseURL.contains("#");
         for (Map.Entry<String, String> e : urlParameters.entrySet()) {
             if (first) {
                 url.append('?');
@@ -882,16 +934,29 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public ReplicatingCacheManager getCacheManager() {
         return cacheManager;
     }
+    
+    private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) {
+        final Subject subject = SecurityUtils.getSubject();
+        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
+                || !username.equals(subject.getPrincipal().toString()))) {
+            final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
+                    : subject.getPrincipal().toString();
+            throw new AuthorizationException(
+                    "User " + currentUserName + " does not have the permission required to access data of user " + username);
+        }
+    }
 
     @Override
     public void setPreference(final String username, final String key, final String value) {
-        final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            apply(s->s.internalSetPreference(username, key, value));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to set preference for user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        apply(s->s.internalSetPreference(username, key, value));
+    }
+
+    @Override
+    public void setPreferenceObject(final String username, final String key, final Object value) {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
+        apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
     }
 
     @Override
@@ -901,14 +966,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
+    public String internalSetPreferenceObject(final String username, final String key, final Object value) {
+        return store.setPreferenceObject(username, key, value);
+    }
+    
+    @Override
     public void unsetPreference(String username, String key) {
-        Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            apply(s->s.internalUnsetPreference(username, key));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to unset preference for user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        apply(s->s.internalUnsetPreference(username, key));
     }
 
     @Override
@@ -945,13 +1010,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public String getPreference(String username, String key) {
-        Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            return store.getPreference(username, key);
-        } else {
-            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to read preferences of user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        return store.getPreference(username, key);
+    }
+    
+    @Override
+    public Map<String, String> getAllPreferences(String username) {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        return store.getAllPreferences(username);
     }
     
     @Override
@@ -1069,6 +1135,40 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         CacheManager cm = getSecurityManager().getCacheManager();
         if (cm instanceof ReplicatingCacheManager) {
             ((ReplicatingCacheManager) cm).clear();
+        }
+    }
+
+    @Override
+    public <T> T getPreferenceObject(String username, String key) {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        return store.getPreferenceObject(username, key);
+    }
+
+    @Override
+    public void storeSession(String cacheName, Session session) {
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSession(cacheName, session);
+    }
+
+    @Override
+    public void removeSession(String cacheName, Session session) {
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().removeSession(cacheName, session);
+    }
+
+    @Override
+    public void removeAllSessions(String cacheName) {
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().removeAllSessions(cacheName);
+    }
+
+    @Override
+    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
+        this.unsentOperationsToMasterSender = service;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationsToMasterSender != null) {
+            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
         }
     }
 }

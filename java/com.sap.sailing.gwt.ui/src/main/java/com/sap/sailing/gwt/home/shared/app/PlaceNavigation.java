@@ -1,14 +1,17 @@
 package com.sap.sailing.gwt.home.shared.app;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.sap.sse.gwt.client.LinkUtil;
+import com.sap.sse.gwt.settings.UrlBuilderUtil;
 
 public class PlaceNavigation<T extends Place> {
     private final PlaceNavigator placeNavigator;
@@ -40,6 +43,10 @@ public class PlaceNavigation<T extends Place> {
         return buildPlaceUrl();
     }
 
+    public SafeUri getSafeTargetUrl() {
+        return UriUtils.fromString(getTargetUrl());
+    }
+
     public String getHistoryUrl() {
         String placeUrl = buildPlaceUrl();
         if (placeUrl.startsWith("#")) {
@@ -53,27 +60,25 @@ public class PlaceNavigation<T extends Place> {
     }
 
     private String buildPlaceUrl() {
-        String url = "";
         if (isRemotePlace()) {
-            url = baseUrl + "/gwt/Home.html";
-            if (!GWT.isProdMode()) {
-                url += "?gwt.codesvr=127.0.0.1:9997";
-            }
-            String localeValue = Window.Location.getParameter("locale");
-            if (localeValue != null) {
-                url += "?locale=" + localeValue;
-            }
+            final UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromBaseURLAndPathWithCleanParameters(baseUrl,
+                    "/gwt/Home.html");
+            urlBuilder.setHash(getPlaceToken());
+            return urlBuilder.buildString();
         }
-        return url + getPlaceToken();
+        return getPlaceTokenWithHash();
     }
 
     public boolean isRemotePlace() {
         return isDestinationOnRemoteServer;
     }
+    
+    private String getPlaceTokenWithHash() {
+        return "#" + getPlaceToken();
+    }
 
     private String getPlaceToken() {
-        return "#" + mapper.getToken(destinationPlace);
-
+        return mapper.getToken(destinationPlace);
     }
 
     private boolean isLocationOnDefaultSapSailingServer(String urlToCheck) {

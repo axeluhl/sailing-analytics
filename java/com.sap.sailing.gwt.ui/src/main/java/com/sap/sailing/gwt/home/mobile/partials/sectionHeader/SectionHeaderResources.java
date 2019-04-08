@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.mobile.partials.sectionHeader;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 
-public interface SectionHeaderResources extends ClientBundle {
+public interface SectionHeaderResources extends SharedHomeResources {
     public static final SectionHeaderResources INSTANCE = GWT.create(SectionHeaderResources.class);
 
     @Source("SectionHeader.gss")
@@ -21,11 +21,18 @@ public interface SectionHeaderResources extends ClientBundle {
         String sectionheader_item_title();
         String sectionheader_item_label();
         String sectionheader_item_subtitle();
+        String sectionheader_itemright_container();
         String sectionheader_item_infotext();
+        String sectionheader_item_indicators();
         String sectionheader_item_arrow();
-        String sectionheader_item_adjust_title();
-        String sectionheader_item_select();
+        String sectionheader_item_adjust_title_left();
+        String sectionheader_item_adjust_title_right();
         String accordion();
         String collapsed();
+        String sectionheader_element();
+        String iconHeaderGPS();
+        String iconHeaderWind();
+        String iconHeaderVideo();
+        String iconHeaderAudio();
     }
 }

@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderbo
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 
@@ -35,9 +36,11 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     @UiField DivElement scoreInformationUi;
     
     private final boolean finished;
+    private final FlagImageResolver flagImageResolver;
 
-    public StandingsList(boolean finished, PlaceNavigation<?> headerNavigation) {
+    public StandingsList(boolean finished, PlaceNavigation<?> headerNavigation, FlagImageResolver flagImageResolver) {
         this.finished = finished;
+        this.flagImageResolver = flagImageResolver;
         StandingsResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         setVisible(false);
@@ -70,7 +73,7 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
         
         boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {
-            itemContainerUi.appendChild(new StandingsListCompetitor(item, showRaceCounts).getElement());
+            itemContainerUi.appendChild(new StandingsListCompetitor(item, showRaceCounts, flagImageResolver).getElement());
         }
     }
 
@@ -89,8 +92,7 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
         }
         if (data.getLastScoreUpdate() != null) {
             DivElement lastUpdateElement = Document.get().createDivElement();
-            String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(data.getLastScoreUpdate()) + " "
-                    + DateAndTimeFormatterUtil.formatElapsedTime(data.getLastScoreUpdate().getTime());
+            String lastUpdate = DateAndTimeFormatterUtil.formatLongDateAndTimeGMT(data.getLastScoreUpdate());
             lastUpdateElement.setInnerText(StringMessages.INSTANCE.lastScoreUpdate() + ": " + lastUpdate);
             scoreInformationUi.appendChild(lastUpdateElement);
         }

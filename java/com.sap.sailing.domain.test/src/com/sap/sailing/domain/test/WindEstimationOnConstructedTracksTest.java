@@ -18,15 +18,15 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -42,25 +42,33 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest {
-    private List<Competitor> competitors;
+    private List<CompetitorWithBoat> competitors;
     private static final String[] competitorNames = new String[] { "Wolfgang Hunger", "Dr. Hasso Plattner",  "Robert Stanjek", "Simon Grotelueschen" };
     
     @Before
     public void setUp() {
-        competitors = new ArrayList<Competitor>();
+        competitors = new ArrayList<>();
         for (String name : competitorNames) {
-            competitors.add(createCompetitor(name));
+            CompetitorWithBoat competitor = createCompetitorWithBoat(name);
+            competitors.add(competitor);
         }
     }
     
     private void initRace(int numberOfCompetitorsToUse, int[] numberOfMarksPassed, TimePoint timePointForFixes) {
+        List<CompetitorWithBoat> subList = competitors.subList(0, numberOfCompetitorsToUse);
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        for (CompetitorWithBoat competitor: subList) {
+            competitorsAndBoats.put(competitor, competitor.getBoat());
+        }
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505",
-                competitors.subList(0, numberOfCompetitorsToUse), timePointForFixes, /* useMarkPassingCalculator */ false));
+                competitorsAndBoats, timePointForFixes, /* useMarkPassingCalculator */ false));
         for (int i=0; i<numberOfCompetitorsToUse; i++) {
             initializeMarkPassingForStartGate(competitors.get(i), numberOfMarksPassed[i], timePointForFixes);
         }
@@ -186,9 +194,9 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         };
         Wind estimatedWindDirection = track.getAveragedWind(/* position */ null, checkTime);
         assertNotNull(estimatedWindDirection);
-        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.1);
         assertFalse(cachedFixes.isEmpty());
-        assertEquals(185., cachedFixes.values().iterator().next().getObject().getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., cachedFixes.values().iterator().next().getObject().getBearing().getDegrees(), 0.1);
         // now invert leg's type by moving the top mark along the wind from the leeward gate:
         Iterator<Waypoint> waypointsIter = getTrackedRace().getRace().getCourse().getWaypoints().iterator();
         Waypoint leewardMark = waypointsIter.next();
@@ -202,7 +210,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertEquals(LegType.DOWNWIND, firstLeg.getLegType(fixTime));
         Wind estimatedWindDirectionDownwind = track.getAveragedWind(/* position */ null, checkTime);
         assertNotNull(estimatedWindDirectionDownwind);
-        assertEquals(185., estimatedWindDirectionDownwind.getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., estimatedWindDirectionDownwind.getBearing().getDegrees(), 0.1);
     }
     
     @Test
@@ -229,15 +237,15 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         };
         Wind estimatedWindDirection = track.getAveragedWind(/* position */ null, checkTime);
         assertNotNull(estimatedWindDirection);
-        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.1);
         assertFalse(cachedFixes.isEmpty());
-        assertEquals(185., cachedFixes.values().iterator().next().getObject().getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., cachedFixes.values().iterator().next().getObject().getBearing().getDegrees(), 0.1);
         // now clear set of cached fixes, ask again and ensure nothing is cached again:
         cachedFixes.clear();
         Wind estimatedWindDirectionCached = track.getAveragedWind(/* position */ null, checkTime);
         assertTrue(cachedFixes.isEmpty());
         assertNotNull(estimatedWindDirectionCached);
-        assertEquals(185., estimatedWindDirectionCached.getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., estimatedWindDirectionCached.getBearing().getDegrees(), 0.1);
         // now add a GPS fix and make sure the cache is invalidated by adding it inside the averaging interval
         now = new MillisecondsTimePoint(checkTime.asMillis() + track.getMillisecondsOverWhichToAverageWind()/2);
         setBearingForCompetitor(competitors.get(0), now, 330);
@@ -257,7 +265,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 50);
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(now);
-        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.1);
     }
 
     @Test
@@ -268,7 +276,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(1), now, 50);
         setBearingForCompetitor(competitors.get(2), new MillisecondsTimePoint(0), 100); // this shouldn't disturb the estimation because it's too old
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(now);
-        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.1);
     }
 
     @Test
@@ -280,7 +288,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(1), now, 50);
         setBearingForCompetitor(competitors.get(2), markPassingTimePoint, 100); // this shouldn't disturb the estimation because it's too old
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(now);
-        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.1);
     }
 
     @Test
@@ -318,7 +326,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(2), now, 135);
         setBearingForCompetitor(competitors.get(3), now, 220); // on the same tack, should give no read-out
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(now);
-        assertEquals(177.5, estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+        assertEquals(177.5, estimatedWindDirection.getBearing().getDegrees(), 0.1);
     }
 
     @Test

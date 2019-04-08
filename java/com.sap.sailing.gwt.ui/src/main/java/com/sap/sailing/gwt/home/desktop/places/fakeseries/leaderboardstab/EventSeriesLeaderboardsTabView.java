@@ -1,13 +1,17 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries.leaderboardstab;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -18,13 +22,19 @@ import com.sap.sailing.gwt.home.desktop.partials.old.multileaderboard.OldMultiLe
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
-import com.sap.sailing.gwt.home.desktop.utils.EventParamUtils;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultipleMultiLeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
-import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 public class EventSeriesLeaderboardsTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardsPlace>,
         LeaderboardUpdateListener {
@@ -60,44 +70,102 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
 
     @Override
     public void start(final EventSeriesLeaderboardsPlace myPlace, final AcceptsOneWidget contentArea) {
-        contentArea.setWidget(new Placeholder());
+        contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         
-        if (leaderboardName != null && !leaderboardName.isEmpty()) {          
-            EventSeriesAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
-            boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-            final LeaderboardSettings leaderboardSettings = EventParamUtils.createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
-            final RaceIdentifier preselectedRace = EventParamUtils.getPreselectedRace(Window.Location.getParameterMap());
+        if (leaderboardName != null && !leaderboardName.isEmpty()) {
+            final EventSeriesAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx()
+                    .getAnalyticsManager();
 
-            MultiLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(leaderboardSettings,
-                    null, // TODO: preselectedLeaderboardName
-                    preselectedRace,
-                    "leaderboardGroupName",
-                    leaderboardName,
-                    true, // TODO @FM this information came from place, now hard coded. check with frank
-                    autoExpandLastRaceColumn);
+            regattaAnalyticsManager.getAvailableDetailTypesForLeaderboard(leaderboardName,
+                    null, new AsyncCallback<Iterable<DetailType>>() {
 
-            initWidget(ourUiBinder.createAndBindUi(this));
+                        @Override
+                        public void onSuccess(Iterable<DetailType> result) {
 
-            leaderboard.setMultiLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
-            leaderboardPanel.addLeaderboardUpdateListener(this);
-            if (currentPresenter.getSeriesDTO().getState() != EventSeriesState.RUNNING) {
-                // TODO: this.leaderboard.hideRefresh();
-            } else {
-                // TODO: start autorefresh?
-            }
-            regattaAnalyticsManager.hideCompetitorChart();
-            leaderboardPanel.setVisible(true);
-            contentArea.setWidget(this);
+                            final boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
+                                    LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
+
+                            final ComponentContext<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(
+                                    leaderboardName, currentPresenter.getUserService(), /* FIXME placeToken */ null, result);
+                            componentContext.getInitialSettings(
+                                    new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
+                                        @Override
+                                        public void onSuccess(MultiRaceLeaderboardSettings settings) {
+                                            MultiLeaderboardProxyPanel leaderboardPanel = regattaAnalyticsManager
+                                                    .createMultiLeaderboardPanel(null, componentContext, settings, null, // TODO:
+                                                                                                                         // preselectedLeaderboardName
+                                                            "leaderboardGroupName", leaderboardName, true, // TODO @FM
+                                                                                                           // this
+                                                                                                           // information
+                                                                                                           // came from
+                                                                                                           // place, now
+                                                                                                           // hard
+                                                                                                           // coded.
+                                                                                                           // check with
+                                                                                                           // frank
+                                                            autoExpandLastRaceColumn, result);
+                                            leaderboardPanel.addAttachHandler(new Handler() {
+
+                                                @Override
+                                                public void onAttachOrDetach(AttachEvent event) {
+                                                    if (!event.isAttached()) {
+                                                        componentContext.dispose();
+                                                    }
+                                                }
+
+                                            });
+
+                                            initWidget(
+                                                    ourUiBinder.createAndBindUi(EventSeriesLeaderboardsTabView.this));
+
+                                            leaderboard.setMultiLeaderboard(leaderboardPanel,
+                                                    currentPresenter.getAutoRefreshTimer());
+                                            leaderboardPanel
+                                                    .addLeaderboardUpdateListener(EventSeriesLeaderboardsTabView.this);
+                                            if (currentPresenter.getSeriesDTO()
+                                                    .getState() != EventSeriesState.RUNNING) {
+                                                // TODO: this.leaderboard.hideRefresh();
+                                            } else {
+                                                // Turn on auto refresh button at parent leaderboard
+                                                leaderboard.turnOnAutoPlay();
+                                            }
+                                            regattaAnalyticsManager.hideCompetitorChart();
+                                            leaderboardPanel.setVisible(true);
+                                            contentArea.setWidget(EventSeriesLeaderboardsTabView.this);
+
+                                        }
+                                    });
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            showMessageLabelAndGoToHome("Could not load detaillist", contentArea);
+                        }
+                    });
         } else {
-            contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
-            new com.google.gwt.user.client.Timer() {
-                @Override
-                public void run() {
-                    currentPresenter.getHomeNavigation().goToPlace();
-                }
-            }.schedule(3000);
+            showMessageLabelAndGoToHome("No leaderboard specified, cannot proceed to leaderboardpage", contentArea);
         }
+    }
+
+    private void showMessageLabelAndGoToHome(final String message, final AcceptsOneWidget contentArea) {
+        contentArea.setWidget(new Label(message));
+        new Timer() {
+            @Override
+            public void run() {
+                currentPresenter.getHomeNavigation().goToPlace();
+            }
+        }.schedule(3000);
+    }
+
+    private ComponentContext<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
+            String placeToken, Iterable<DetailType> availableDetailTypes) {
+        final MultipleMultiLeaderboardPanelLifecycle lifecycle = new MultipleMultiLeaderboardPanelLifecycle(StringMessages.INSTANCE, availableDetailTypes);
+        final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForSeriesRegattaLeaderboards(leaderboardName);
+
+        final ComponentContext<MultiRaceLeaderboardSettings> componentContext = new PlaceBasedComponentContextWithSettingsStorage<>(
+                lifecycle, userService, storageDefinition, placeToken);
+        return componentContext;
     }
 
     @Override

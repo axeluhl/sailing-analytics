@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/list_item_background_color"
+        android:minHeight="@dimen/list_row_height">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="@dimen/list_arrow_right_margin"
+            android:layout_marginRight="@dimen/list_arrow_right_margin"
+            android:contentDescription="@string/empty"
+            android:src="@drawable/white_arrow_right"
+            android:textColor="@color/fiori_text_color" />
+
+        <TextView
+            android:id="@+id/mark_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="@dimen/fragment_side_margin"
+            android:layout_marginTop="15dp"
+            android:paddingRight="16dp"
+            android:maxLines="1"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/mark_set"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/mark_name"
+            android:layout_marginBottom="15dp"
+            android:layout_marginLeft="@dimen/fragment_side_margin"
+            android:layout_marginTop="2dp"
+            android:paddingRight="16dp"
+            android:maxLines="1"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="14sp" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

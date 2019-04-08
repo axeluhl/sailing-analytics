@@ -1,17 +1,20 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
-	  xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'>
+      xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'
+      xmlns:sp='urn:import:com.sap.sailing.gwt.home.shared.partials'>
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <g:HTMLPanel>
     <div class="{res.mediaCss.grid}">
       <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="regattaInfoContainerUi"/>
-	  <dp:liveraces.LiveRacesList ui:field="liveRacesListUi" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermargintopmedium}" />
+      <dp:liveraces.LiveRacesList ui:field="liveRacesListUi" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermargintopmedium}" />
     </div>
     <dp:eventstage.EventOverviewStage ui:field="stageUi" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopsmall}" />
     <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+        <g:SimplePanel ui:field="descriptionUi" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" />
         <dp:standings.StandingsList ui:field="standingsUi" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" />
-        <dp:statistics.StatisticsBox addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium} {res.mainCss.spacermarginbottommedium}" ui:field="statisticsBoxUi" />
+        <sp:statistics.EventStatisticsBox addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium} {res.mainCss.spacermarginbottommedium}" ui:field="statisticsBoxUi" />
       </div>
     </div>
+    <dp:raceoffice.RaceOfficeSection ui:field="raceOfficeSectionUi" />
   </g:HTMLPanel>
 </ui:UiBinder>

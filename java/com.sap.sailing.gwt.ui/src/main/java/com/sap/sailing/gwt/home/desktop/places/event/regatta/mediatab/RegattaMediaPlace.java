@@ -2,12 +2,12 @@ package com.sap.sailing.gwt.home.desktop.places.event.regatta.mediatab;
 
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
-import com.sap.sailing.gwt.home.shared.app.MobileSupport;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 
-public class RegattaMediaPlace extends AbstractEventRegattaPlace implements MobileSupport {
+public class RegattaMediaPlace extends AbstractEventRegattaPlace implements HasMobileVersion {
     public RegattaMediaPlace(String id, String regattaId) {
         super(id, regattaId);
     }
@@ -28,10 +28,5 @@ public class RegattaMediaPlace extends AbstractEventRegattaPlace implements Mobi
         protected RegattaMediaPlace getRealPlace(EventContext context) {
             return new RegattaMediaPlace(context);
         }
-    }
-    
-    @Override
-    public boolean hasMobileVersion() {
-        return true;
     }
 }

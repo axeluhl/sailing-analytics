@@ -8,4 +8,8 @@ public interface LeaderboardBase extends Named {
      * this method returns it; otherwise, <code>null</code> is returned.
      */
     String getDisplayName();
+    
+    void addLeaderboardChangeListener(LeaderboardChangeListener listener);
+    
+    void removeLeaderboardChangeListener(LeaderboardChangeListener listener);
 }

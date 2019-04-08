@@ -218,7 +218,7 @@
       <RaceResult RaceID="e18498ce-3885-4a4a-8ad5-be92893cdb55" TeamID="faddda24-6fab-4db4-8657-cdb471d12cc1" RacePoints="29" Discard="true" />
       <SeriesResult TeamID="faddda24-6fab-4db4-8657-cdb471d12cc1" TotalPoints="151" NetPoints="93" Rank="50" />
       <RaceResult RaceID="b68b5758-e172-417a-ba4f-bfd7b441940e" TeamID="01723ea5-2910-4e7c-a8dc-c69ca8535cbb" RacePoints="20" />
-      <RaceResult RaceID="3c4563fe-b12b-4dec-8b0f-222ee079c7d5" TeamID="01723ea5-2910-4e7c-a8dc-c69ca8535cbb" RacePoints="29" Discard="true" />
+      <RaceResult RaceID="3c4563fe-b12b-4dec-8b0f-222ee079c7d5" TeamID="01723ea5-2910-4e7c-a8dc-c69ca8535cbb" RacePoints="29" Discard="true" ScoreCode="UFD" />
       <RaceResult RaceID="857d4587-9e52-46e1-ab3a-8892a6aac167" TeamID="01723ea5-2910-4e7c-a8dc-c69ca8535cbb" RacePoints="21" />
       <RaceResult RaceID="87dfaa87-1d6c-4e92-820e-dd8e96ae3690" TeamID="01723ea5-2910-4e7c-a8dc-c69ca8535cbb" RacePoints="12" />
       <RaceResult RaceID="62ed6be3-281a-44a3-885e-f0edbbf85409" TeamID="01723ea5-2910-4e7c-a8dc-c69ca8535cbb" RacePoints="35" Discard="true" ScoreCode="BFD" />

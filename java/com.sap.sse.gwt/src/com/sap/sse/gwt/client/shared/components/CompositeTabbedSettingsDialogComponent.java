@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,7 +35,7 @@ public class CompositeTabbedSettingsDialogComponent implements SettingsDialogCom
     }
 
     private <SettingsType extends Settings> ComponentAndDialogComponent<SettingsType> createComponentAndDialogComponent(Component<SettingsType> component) {
-        return new ComponentAndDialogComponent<SettingsType>(component, component.getSettingsDialogComponent());
+        return new ComponentAndDialogComponent<SettingsType>(component, component.getSettingsDialogComponent(component.getSettings()));
     }
 
     @Override
@@ -52,7 +51,7 @@ public class CompositeTabbedSettingsDialogComponent implements SettingsDialogCom
 
     @Override
     public CompositeSettings getResult() {
-        Map<Serializable, Settings> settings = new HashMap<>();
+        Map<String, Settings> settings = new HashMap<>();
         for (ComponentAndDialogComponent<?> component : components) {
             settings.put(component.getA().getId(), component.getB().getResult());
         }

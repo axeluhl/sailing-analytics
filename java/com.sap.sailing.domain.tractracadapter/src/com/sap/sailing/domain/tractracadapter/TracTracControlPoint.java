@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tractracadapter;
 
 import java.util.UUID;
 
-import com.sap.sse.common.WithID;
+import com.sap.sse.common.NamedWithID;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.route.IControlPoint;
 
@@ -14,17 +14,19 @@ import com.tractrac.model.lib.api.route.IControlPoint;
  * @author Axel Uhl (D043530)
  *
  */
-public interface TracTracControlPoint extends WithID {
+public interface TracTracControlPoint extends NamedWithID {
     /**
      * Refining the return type helps in looking up a control point by its UUID in {@link IEvent}.
      */
     UUID getId();
-    
-    String getName();
     
     String getMetadata();
     
     String getShortName();
     
     boolean getHasTwoPoints();
+    
+    UUID getFirstMarkId();
+    
+    UUID getSecondMarkId();
 }

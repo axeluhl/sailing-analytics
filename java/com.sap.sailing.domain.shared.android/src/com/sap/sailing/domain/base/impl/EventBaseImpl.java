@@ -38,6 +38,7 @@ public abstract class EventBaseImpl implements EventBase {
     private TimePoint startDate;
     private TimePoint endDate;
     private URL officialWebsiteURL;
+    private URL baseURL;
     private CopyOnWriteHashMap<Locale, URL> sailorsInfoWebsiteURLs;
     private ConcurrentLinkedQueue<ImageDescriptor> images;
     private ConcurrentLinkedQueue<VideoDescriptor> videos;
@@ -144,10 +145,20 @@ public abstract class EventBaseImpl implements EventBase {
     public URL getOfficialWebsiteURL() {
         return officialWebsiteURL;
     }
-
+    
     @Override
     public void setOfficialWebsiteURL(URL officialWebsiteURL) {
         this.officialWebsiteURL = officialWebsiteURL;
+    }
+    
+    @Override
+    public URL getBaseURL() {
+        return baseURL;
+    }
+
+    @Override
+    public void setBaseURL(URL baseURL) {
+        this.baseURL = baseURL;
     }
     
     @Override
@@ -298,11 +309,11 @@ public abstract class EventBaseImpl implements EventBase {
                 ImageDescriptor image = migrateImageURLtoImage(url, getStartDate(), imageSizes.get(url));
                 String urlAsString = url.toString();
                 if (urlAsString.toLowerCase().indexOf("stage") > 0) {
-                    image.addTag(MediaTagConstants.STAGE);
+                    image.addTag(MediaTagConstants.STAGE.getName());
                 } else if (urlAsString.toLowerCase().indexOf("eventteaser") > 0) {
-                    image.addTag(MediaTagConstants.TEASER);
+                    image.addTag(MediaTagConstants.TEASER.getName());
                 } else {
-                    image.addTag(MediaTagConstants.GALLERY);
+                    image.addTag(MediaTagConstants.GALLERY.getName());
                 }
                 addImage(image);
                 changed = true;
@@ -311,7 +322,7 @@ public abstract class EventBaseImpl implements EventBase {
         for (URL url : sponsorImageURLs) {
             if (!hasMedia(images, url)) {
                 ImageDescriptor image = migrateImageURLtoImage(url, getStartDate(), imageSizes.get(url));
-                image.addTag(MediaTagConstants.SPONSOR);
+                image.addTag(MediaTagConstants.SPONSOR.getName());
                 addImage(image);
                 changed = true;
             }
@@ -319,7 +330,7 @@ public abstract class EventBaseImpl implements EventBase {
         
         if (logoImageURL != null && !hasMedia(images, logoImageURL)) {
             ImageDescriptor image = migrateImageURLtoImage(logoImageURL, getStartDate(), imageSizes.get(logoImageURL));
-            image.addTag(MediaTagConstants.LOGO);
+            image.addTag(MediaTagConstants.LOGO.getName());
             addImage(image);
             changed = true;
         }

@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.actions.GetRaceTimesInfoAction;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
@@ -33,6 +34,30 @@ public class RaceTimesInfoProvider {
     
     private final HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos;
     private final Set<RaceTimesInfoProviderListener> listeners;
+    private boolean terminated = false;
+
+    /**
+     * If set to true, {@link com.sap.sailing.domain.common.dto.TagDTO tags} will also be requested from server by this
+     * {@link RaceTimesInfoProvider}. This is only a temporarily workaround to save a new repeating request which is
+     * only used for tags. This attribute will be set by {@link com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel
+     * TaggingPanel} by calling methods {@link #enableTagRequests()} and {@link #disableTagRequests()} and should not
+     * affect any data of the other attributes of {@link RaceTimesInfoDTO}.
+     */
+    // TODO: remove this workaround as soon as bug 4736 is resolved
+    private boolean requestTags = false;
+    /**
+     * Used to save timepoints of the client for differential transmission of
+     * {@link com.sap.sailing.domain.common.dto.TagDTO tags} from the server. The {@link RaceTimesInfoProvider} will
+     * only request {@link com.sap.sailing.domain.common.dto.TagDTO tags} since the saved timepoint of the requested
+     * race. The saved timepoint does equal the latest {@link com.sap.sailing.domain.common.dto.TagDTO#createdAt
+     * createdAt} or {@link com.sap.sailing.domain.common.dto.TagDTO#revokedAt revokedAt} timepoint of all already
+     * received tags of the current client. This allows the server to filter all tags only for updates for this specific
+     * client and therefor only updates will be transmitted over network. The saved timepoint can be <code>null</code>
+     * or <code>0</code> to request all tags from server.<br/>
+     * Timepoints can be updated via method call {@link #setLatestReceivedTagTime(RegattaAndRaceIdentifier, TimePoint)}
+     * and should be updated everytime the client receives a change of the tags to use minimal network bandwidth.
+     */
+    private Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes;
     
     /**
      * The <code>raceIdentifiers</code> has to be non-<code>null</code>, but can be empty.
@@ -46,12 +71,15 @@ public class RaceTimesInfoProvider {
         this.requestIntervalInMillis = requestIntervalInMillis;
         raceTimesInfos = new HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO>();
         listeners = new HashSet<RaceTimesInfoProviderListener>();
+        latestReceivedTagTimes = new HashMap<RegattaAndRaceIdentifier, TimePoint>();
         RepeatingCommand command = new RepeatingCommand() {
             @Override
             public boolean execute() {
-                readTimesInfos();
-                Scheduler.get().scheduleFixedPeriod(this, (int) RaceTimesInfoProvider.this.requestIntervalInMillis);
-                // don't execute *this* particular scheduled repeating command again; the line above re-scheduled already
+                if(!terminated){
+                    readTimesInfos();
+                    Scheduler.get().scheduleFixedPeriod(this, (int) RaceTimesInfoProvider.this.requestIntervalInMillis);
+                    // don't execute *this* particular scheduled repeating command again; the line above re-scheduled already
+                }
                 return false;
             }
         };
@@ -79,7 +107,7 @@ public class RaceTimesInfoProvider {
         raceIdentifiers.add(raceIdentifier);
         if (forceTimesInfoRequest) {
             final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-            sailingService.getRaceTimesInfo(raceIdentifier, new AsyncCallback<RaceTimesInfoDTO>() {
+            AsyncCallback<RaceTimesInfoDTO> callback = new AsyncCallback<RaceTimesInfoDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to obtain the time infos for race "
@@ -94,14 +122,25 @@ public class RaceTimesInfoProvider {
                         notifyListeners(clientTimeWhenRequestWasSent, raceTimesInfo.currentServerTime, clientTimeWhenResponseWasReceived);
                     }
                 }
-            });
+            };
+            if (requestTags) {
+                sailingService.getRaceTimesInfoIncludingTags(raceIdentifier, latestReceivedTagTimes.get(raceIdentifier), callback);
+            } else {
+                sailingService.getRaceTimesInfo(raceIdentifier, callback);
+            }
         }
     }
     
     private void readTimesInfos() {
         if (!raceIdentifiers.isEmpty()) {
             final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-            GetRaceTimesInfoAction getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers);
+            GetRaceTimesInfoAction getRaceTimesInfoAction;
+            if (requestTags) {
+                getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers, latestReceivedTagTimes);
+            } else {                
+                getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers);
+            }
+
             asyncActionsExecutor.execute(getRaceTimesInfoAction, new AsyncCallback<List<RaceTimesInfoDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -216,4 +255,55 @@ public class RaceTimesInfoProvider {
         }
     }
     
+    public void terminate(){
+        terminated = true;
+        listeners.clear();
+        raceIdentifiers.clear();
+        raceTimesInfos.clear();
+    }
+
+    /**
+     * Returns the saved timepoint for the given <code>raceIdentifier</code> which is used as known point of time when
+     * data is requested from server and {@link #requestTags} is set to <code>true</code>.
+     * 
+     * @param raceIdentifier
+     *            identifies race
+     * @return timepoint of latest received tag, may be <code>null</code> when no timepoint is saved
+     */
+    public TimePoint getLatestReceivedTagTime(RegattaAndRaceIdentifier raceIdentifier) {
+        return latestReceivedTagTimes.get(raceIdentifier);
+    }
+
+    /**
+     * Sets the timepoint to request {@link com.sap.sailing.domain.common.dto.TagDTO tags} from when request is send to
+     * {@link SailingService}. <code>latestReceivedTagTime</code> may be <code>null</code> or <code>0</code> to request
+     * all tags.
+     * 
+     * @param raceIdentifier
+     *            identifies race
+     * @param latestReceivedTagTime
+     *            timepoint to request {@link com.sap.sailing.domain.common.dto.TagDTO tags} from. Should be
+     *            {@link com.sap.sailing.domain.common.dto.TagDTO#createdAt createdAt} or
+     *            {@link com.sap.sailing.domain.common.dto.TagDTO#revokedAt revokedAt} timepoint of tags of the latests
+     *            known tag to optimize network bandwidth.
+     */
+    public void setLatestReceivedTagTime(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime) {
+        latestReceivedTagTimes.put(raceIdentifier, latestReceivedTagTime);
+    }
+
+    /**
+     * Enables the repeating request to receive also {@link com.sap.sailing.domain.common.dto.TagDTO tags} from
+     * {@link SailingService}.
+     */
+    public void enableTagRequests() {
+        requestTags = true;
+    }
+
+    /**
+     * Disables the repeating request to receive {@link com.sap.sailing.domain.common.dto.TagDTO tags} from
+     * {@link SailingService}.
+     */
+    public void disableTagRequests() {
+        requestTags = false;
+    }
 }

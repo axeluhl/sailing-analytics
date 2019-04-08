@@ -1,25 +1,28 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.sap.sailing.domain.swisstimingadapter.Mark;
+import com.sap.sse.common.Util;
 
 public class MarkImpl implements Mark {
     private final String description;
     private final int index;
-    private final Iterable<String> devices;
+    private final Iterable<Serializable> deviceIds;
     private final MarkType markType;
     
-    public MarkImpl(String description, int index, Iterable<String> devices, MarkType markType) {
+    public MarkImpl(String description, int index, Iterable<Serializable> devices, MarkType markType) {
         super();
         this.description = description;
         this.index = index;
         this.markType = markType;
-        ArrayList<String> l = new ArrayList<String>();
-        for (String device : devices) {
+        List<Serializable> l = new ArrayList<>();
+        for (Serializable device : devices) {
             l.add(device);
         }
-        this.devices = l;
+        this.deviceIds = l;
     }
 
     @Override
@@ -38,8 +41,8 @@ public class MarkImpl implements Mark {
     }
 
     @Override
-    public Iterable<String> getDevices() {
-        return devices;
+    public Iterable<Serializable> getDeviceIds() {
+        return deviceIds;
     }
     
     @Override
@@ -49,11 +52,7 @@ public class MarkImpl implements Mark {
         result.append(": ");
         result.append(getDescription());
         result.append(" [");
-        for (String device : getDevices()) {
-            result.append(device);
-            result.append(", ");
-        }
-        result.delete(result.length()-2, result.length());
+        result.append(Util.join(", ", getDeviceIds()));
         result.append("]");
         return result.toString();
     }

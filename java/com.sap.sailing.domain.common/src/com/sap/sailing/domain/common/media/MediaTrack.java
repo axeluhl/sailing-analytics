@@ -25,6 +25,10 @@ public class MediaTrack implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Deprecated, as the server only used undefined in all cases. Left in, to not break serialisation/storage
+     */
+    @Deprecated
     public enum Status {
         UNDEFINED('?'), CANNOT_PLAY('-'), NOT_REACHABLE('#'), REACHABLE('+');
 
@@ -45,6 +49,7 @@ public class MediaTrack implements Serializable {
     public TimePoint startTime;
     public Duration duration;
     public MimeType mimeType;
+    @Deprecated
     public Status status = Status.UNDEFINED;
     public Set<RegattaAndRaceIdentifier> assignedRaces;
 
@@ -69,7 +74,6 @@ public class MediaTrack implements Serializable {
             Set<RegattaAndRaceIdentifier> assignedRaces) {
         this(title, url, startTime, duration, mimeType, assignedRaces);
         this.dbId = dbId;
-        
     }
 
     public String toString() {
@@ -77,7 +81,7 @@ public class MediaTrack implements Serializable {
     }
 
     public TimePoint deriveEndTime() {
-        if (startTime != null) {
+        if (startTime != null && duration != null) {
             return startTime.plus(duration);
         } else {
             return null;
@@ -154,5 +158,4 @@ public class MediaTrack implements Serializable {
             return false;
         }
     }
-
 }

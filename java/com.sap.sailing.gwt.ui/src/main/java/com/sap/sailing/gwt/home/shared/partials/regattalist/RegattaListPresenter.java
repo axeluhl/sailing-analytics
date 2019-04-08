@@ -10,24 +10,27 @@ import java.util.Set;
 
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
+import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueProvider;
 import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListView.RegattaListItem;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
-public class RegattaListPresenter<D extends DTO> implements FilterValueChangeHandler<RegattaMetadataDTO, String>{
-    
+public class RegattaListPresenter<D extends DTO>
+        implements FilterValueProvider<String>, FilterValueChangeHandler<RegattaMetadataDTO> {
+
     private final RegattaListView view;
     private final Map<RegattaListItem, RegattaMetadataDTO> stucture = new HashMap<>();
-    private Filter<RegattaMetadataDTO> latestBoatCategoryFilter;
-    
+    private Filter<RegattaMetadataDTO> latestLeaderboardGroupFilter;
+
     public <V extends RegattaListView & RefreshableWidget<D>> RegattaListPresenter(V view) {
         this.view = view;
     }
 
     @Override
     public void onFilterValueChanged(Filter<RegattaMetadataDTO> filter) {
-        this.latestBoatCategoryFilter = filter;
+        this.latestLeaderboardGroupFilter = filter;
         for (Entry<RegattaListItem, RegattaMetadataDTO> entry : stucture.entrySet()) {
             entry.getKey().doFilter(!filter.matches(entry.getValue()));
         }
@@ -37,13 +40,13 @@ public class RegattaListPresenter<D extends DTO> implements FilterValueChangeHan
     public Collection<String> getFilterableValues() {
         Set<String> filterableValues = new HashSet<>();
         for (RegattaMetadataDTO regattaMetadata : stucture.values()) {
-            if (regattaMetadata.getBoatCategory() != null) {
-                filterableValues.add(regattaMetadata.getBoatCategory());
+            if (regattaMetadata.getLeaderboardGroupNames() != null) {
+                Util.addAll(regattaMetadata.getLeaderboardGroupNames(), filterableValues);
             }
         }
-        return filterableValues.size() > 1 ? filterableValues : Collections.<String>emptySet();
+        return filterableValues.size() > 1 ? filterableValues : Collections.<String> emptySet();
     }
-    
+
     public RefreshableWidget<D> getRefreshableWidgetWrapper(final RefreshableWidget<D> wrappedWidget) {
         return new RefreshableWidget<D>() {
             @Override
@@ -51,8 +54,8 @@ public class RegattaListPresenter<D extends DTO> implements FilterValueChangeHan
                 stucture.clear();
                 wrappedWidget.setData(data);
                 stucture.putAll(view.getItemMap());
-                if (latestBoatCategoryFilter != null) {
-                    RegattaListPresenter.this.onFilterValueChanged(latestBoatCategoryFilter);
+                if (latestLeaderboardGroupFilter != null) {
+                    RegattaListPresenter.this.onFilterValueChanged(latestLeaderboardGroupFilter);
                 }
             }
         };

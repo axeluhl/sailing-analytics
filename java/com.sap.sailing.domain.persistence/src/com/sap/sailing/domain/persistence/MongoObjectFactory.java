@@ -1,10 +1,14 @@
 package com.sap.sailing.domain.persistence;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.mongodb.DB;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoDatabase;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -15,12 +19,15 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Offers methods to construct {@link DBObject MongoDB objects} from domain objects.
@@ -116,20 +123,44 @@ public interface MongoObjectFactory {
     void storeRegattaForRaceID(String id, Regatta regatta);
 
     void removeRegattaForRaceID(String raceIDAsString, Regatta regatta);
-    
+
     /**
-     * Stores a competitor, including the team and boat. This should not be done for competitors for which
+     * Stores a competitor. This should not be done for competitors for which
      * the master data is supplied by other systems, such as TracTrac, but rather for smartphone tracking,
      * where this data is otherwise not recoverable.
      * @param competitor the competitor to store/update in the database
      */
     void storeCompetitor(Competitor competitor);
 
+    /**
+     * Like {@link #storeCompetitor(Competitor)}, but for a collection of competitors that are all
+     * expected to be new, having a unique {@link Competitor#getId() ID}.
+     */
+    void storeCompetitors(Iterable<? extends Competitor> competitors);
+
     void removeAllCompetitors();
 
     void removeCompetitor(Competitor competitor);
+    
+    /**
+     * Stores a boat. This should not be done for boats for which
+     * the master data is supplied by other systems, such as TracTrac, but rather for smartphone tracking,
+     * where this data is otherwise not recoverable.
+     * @param boat the boat to store/update in the database
+     */
+    void storeBoat(Boat boat);
 
-    DB getDatabase();
+    /**
+     * Like {@link #storeBoat(Boat)}, but for a collection of boats that are all
+     * expected to be new, having a unique {@link Boat#getId() ID}.
+     */
+    void storeBoats(Iterable<? extends Boat> boats);
+
+    void removeAllBoats();
+
+    void removeBoat(Boat boat);
+
+    MongoDatabase getDatabase();
 
     void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
 
@@ -137,10 +168,46 @@ public interface MongoObjectFactory {
     
     void removeRaceLog(RaceLogIdentifier identifier);
     
+    void removeAllRaceLogs();
+    
     void removeRegattaLog(RegattaLikeIdentifier identifier);
+    
+    void removeAllRegattaLogs();
 
     void storeResultUrl(String resultProviderName, URL url);
 
     void removeResultUrl(String resultProviderName, URL url);
 
+    
+    /**
+     * Updates the database such that the next call to
+     * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)} won't return an object equivalent to
+     * {@code params} anymore; in other words, the race whose connectivity parameters are described by {@code params}
+     * will no longer be considered as to be restored.
+     * 
+     * @see #addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
+     */
+    void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) throws MalformedURLException;
+    
+    /**
+     * Updates the database such that the next call to
+     * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)} will return an object equivalent to
+     * {@code params}; in other words, the race whose connectivity parameters are described by {@code params} will be
+     * considered as to be restored.
+     * 
+     * @see #removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
+     */
+    void addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params);
+
+    /**
+     * Removes all {@link RaceTrackingConnectivityParameters} objects from those to restore; short for calling
+     * {@link #removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)} for all parameter
+     * objects obtained through {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)}.
+     */
+    void removeAllConnectivityParametersForRacesToRestore();
+
+    /**
+     * Stores determined Anniversary races.
+     */
+    void storeAnniversaryData(ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries);
 }

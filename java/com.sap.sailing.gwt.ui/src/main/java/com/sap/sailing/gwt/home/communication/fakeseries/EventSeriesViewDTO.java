@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.home.communication.fakeseries;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
@@ -11,13 +13,13 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 public class EventSeriesViewDTO implements Result, HasLogo {
-    private UUID id;
+    private UUID leaderboardGroupUUID;
     private String displayName;
-    private ArrayList<EventMetadataDTO> events = new ArrayList<>();
+    private ArrayList<EventMetadataDTO> eventsAscending = new ArrayList<>();
+    private ArrayList<EventAndLeaderboardReferenceWithStateDTO> eventsAndRegattasOfSeriesAscending = new ArrayList<>();
     private ImageDTO logoImage;
     private boolean hasMedia;
     private boolean hasAnalytics;
-
     private String leaderboardId;
 
     public enum EventSeriesState {
@@ -36,15 +38,12 @@ public class EventSeriesViewDTO implements Result, HasLogo {
 
     public EventSeriesState state;
 
-    public EventSeriesViewDTO() {
+    public UUID getLeaderboardGroupUUID() {
+        return leaderboardGroupUUID;
     }
     
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
+    public void setLeaderboardGroupUUID(UUID leaderboardGroupUUID) {
+        this.leaderboardGroupUUID = leaderboardGroupUUID;
     }
 
     public String getDisplayName() {
@@ -55,12 +54,34 @@ public class EventSeriesViewDTO implements Result, HasLogo {
         this.displayName = displayName;
     }
 
-    public List<EventMetadataDTO> getEvents() {
-        return events;
+    public List<EventMetadataDTO> getEventsAscending() {
+        return eventsAscending;
+    }
+    
+    public List<EventMetadataDTO> getEventsDescending() {
+        return reverseList(eventsAscending);
     }
 
     public void addEvent(EventMetadataDTO event) {
-        this.events.add(event);
+        this.eventsAscending.add(event);
+    }
+    
+    public List<EventAndLeaderboardReferenceWithStateDTO> getEventsAndRegattasOfSeriesAscending() {
+        return eventsAndRegattasOfSeriesAscending;
+    }
+    
+    public List<EventAndLeaderboardReferenceWithStateDTO> getEventsAndRegattasOfSeriesDescending() {
+        return reverseList(eventsAndRegattasOfSeriesAscending);
+    }
+
+    public void addEventAndLeaderboard(EventAndLeaderboardReferenceWithStateDTO event) {
+        this.eventsAndRegattasOfSeriesAscending.add(event);
+    }
+
+    private <T> List<T> reverseList(final ArrayList<T> ordered) {
+        final ArrayList<T> reversed = new ArrayList<>(ordered);
+        Collections.reverse(reversed);
+        return reversed;
     }
 
     public ImageDTO getLogoImage() {

@@ -28,22 +28,53 @@
     - http://code.google.com/p/selenium/wiki/SafariDriver
     - http://code.google.com/p/selenium/wiki/RemoteWebDriverServer
     
-    NOTE: For the Chrome and the InternetExplorer driver an additional "server", which acts as a bridge between the
+    NOTE: For the Chrome, Firefox and InternetExplorer driver an additional "server", which acts as a bridge between the
           browser and the driver, is needed.
   -->
   <system-properties>
+     <!--
+        You need chromedriver to be able to run Selenium tests on Chrome/Chromium.
+        This is the path to chromedriver, not Chrome.
+        The chromedriver download is linked on the official selenium download page:
+        https://www.seleniumhq.org/download/
+     -->
      <system-property>
         <name>webdriver.chrome.driver</name>
         <value>C:\apps\ChromeSeleniumDriver\chromedriver.exe</value>
      </system-property>
+     <!--
+        You need geckodriver to be able to run Selenium tests on Firefox.
+        This is the path to geckodriver, not Firefox.
+        The geckodriver download is linked on the official selenium download page:
+        https://www.seleniumhq.org/download/
+     -->
+     <system-property>
+        <name>webdriver.gecko.driver</name>
+        <value>/path/to/geckodriver.exe</value>
+     </system-property>
+     <!--
+        geckodriver automatically finds an installed version of Firefox.
+        If no Firefox is installed on the system or another version should be used,
+        the property "webdriver.firefox.bin" may be set to specify the path.
+        The default on Windows is "C:\Program Files\Mozilla Firefox\firefox.exe"
+      -->
+     <!--
      <system-property>
         <name>webdriver.firefox.bin</name>
-        <!-- Default binary location on Windows: -->
-        <value>c:\Program Files (x86)\Mozilla Firefox 24\firefox.exe</value>
-        <!--  -->
-        <!-- Default binary location on Linux: -->
-        <!-- <value>/usr/bin/firefox</value> --> 
+        <value>/path/to/firefox.exe</value> 
      </system-property>
+     -->
+     <!--
+       You need IEDriverServer.exe to successfully run selenium tests using IE 11.
+       
+       See selenium-ui-tests.md for details!
+     -->
+     <!--
+     <system-property>
+        <name>webdriver.ie.driver</name>
+        <value>C:\path\to\IEDriverServer.exe</value> 
+     </system-property>
+     -->
   </system-properties>
   
   
@@ -55,10 +86,24 @@
     The capabilities section can be used for fine tuning of the driver (e.g. version). For more informations see the
     pages mentioned above.
   -->
+  <!--
   <driver-definition class="org.openqa.selenium.firefox.FirefoxDriver">
   </driver-definition>
-  <!--
+  -->
   <driver-definition class="org.openqa.selenium.chrome.ChromeDriver">
   </driver-definition>
+  <!--
+  <driver-definition class="org.openqa.selenium.ie.InternetExplorerDriver">
+    <capabilities>
+      <capability>
+        <name>ignoreZoomSetting</name>
+        <value>true</value>
+      </capability>
+    </capabilities>
+  </driver-definition>
   -->
+  <!-- <driver-definition class="com.sap.sailing.selenium.core.HeadlessFirefoxDriver">
+  </driver-definition> -->
+  <!-- <driver-definition class="com.sap.sailing.selenium.core.HeadlessChromeDriver">
+  </driver-definition> -->
 </test-environment>

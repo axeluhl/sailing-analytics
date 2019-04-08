@@ -1,46 +1,49 @@
 package com.sap.sailing.datamining.impl.components;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.NavigableSet;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
-import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.MarkPassingWithContext;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.datamining.impl.data.TrackedLegOfCompetitorWithSpecificTimePointWithContext;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
-public class MarkPassingRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedRaceContext, HasMarkPassingContext> {
+public class MarkPassingRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasMarkPassingContext> {
 
     public MarkPassingRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasMarkPassingContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasTrackedRaceContext.class, HasMarkPassingContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasMarkPassingContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasTrackedLegOfCompetitorContext.class, HasMarkPassingContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override
-    protected Iterable<HasMarkPassingContext> retrieveData(HasTrackedRaceContext element) {
-        TrackedRace trackedRace = element.getTrackedRace();
-        Set<HasMarkPassingContext> result = new HashSet<>();
-        trackedRace.getRace().getCourse().lockForRead();
-        try {
-            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                NavigableSet<MarkPassing> markPassingsForCompetitor = trackedRace.getMarkPassings(competitor);
-                trackedRace.lockForRead(markPassingsForCompetitor);
-                try {
-                    markPassingsForCompetitor.stream().forEach(mp->result.add(new MarkPassingWithContext(element, mp)));
-                } finally {
-                    trackedRace.unlockAfterRead(markPassingsForCompetitor);
+    protected Iterable<HasMarkPassingContext> retrieveData(HasTrackedLegOfCompetitorContext element) {
+        Collection<HasMarkPassingContext> maneuversWithContext = new ArrayList<>();
+        TimePoint finishTime = element.getTrackedLegOfCompetitor().getFinishTime();
+        if (finishTime != null) {
+            try {
+                Iterable<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
+                for (Maneuver maneuver : maneuvers) {
+                    if (isAborted()) {
+                        break;
+                    }
+                    if (maneuver.isMarkPassing()) {
+                        maneuversWithContext.add(new MarkPassingWithContext(new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
+                                element.getTrackedLegContext(), element.getTrackedLegOfCompetitor(), maneuver.getTimePoint()), maneuver));
+                    }
                 }
+            } catch (NoWindException e) {
+                throw new IllegalStateException("No wind retrieving the mark passings", e);
             }
-        } finally {
-            trackedRace.getRace().getCourse().unlockAfterRead();
         }
-        return result;
+        return maneuversWithContext;
     }
 
 }

@@ -3,17 +3,16 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-  <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.header.HeaderResources" />
   <g:HTMLPanel tag="header" addStyleNames="{local_res.css.siteheader}">
     <!-- Website header-->
       <div class="{res.mediaCss.grid}">
         <div class="{local_res.css.siteheader_logo} {res.mediaCss.small2} {res.mediaCss.medium2} {res.mediaCss.large3} {res.mediaCss.columns}">
-          <a href="http://sapsponsorships.com">
-            <img src="images/home/logo-small@2x.png" alt="{i18n_ubi.headerLogo}" class="{local_res.css.siteheader_logo_image}"></img>
+          <a href="https://www.sap.com/sponsorships">
+            <img src="images/home/logo-small@2x.png" alt="{i18n.headerLogo}" class="{local_res.css.siteheader_logo_image}"></img>
             <p class="{local_res.css.siteheader_logo_title}">
-              <ui:text from='{i18n_ubi.headerLogo}' />
+              <ui:text from='{i18n.headerLogo}' />
             </p>
           </a>
         </div>
@@ -23,9 +22,7 @@
           <g:Anchor ui:field="eventsPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.events}" />
 	  <g:Anchor ui:field="solutionsPageLink"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n_ubi.solutions}" />
-	  <g:Anchor href="https://blog.sapsailing.com"
-            styleName="{local_res.css.sitenavigation_link}" text="{i18n_ubi.blog}" />
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n.solutions}" />
           <!-- 
           <g:Anchor ui:field="sponsoringPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" />

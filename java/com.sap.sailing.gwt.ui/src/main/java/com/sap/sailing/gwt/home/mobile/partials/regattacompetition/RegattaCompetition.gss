@@ -39,16 +39,18 @@
   padding: 1.333333333333333em 0.333333333333333em 0.333333333333333em 0.333333333333333em;
   vertical-align: top;
 }
-.regattacompetition_phase_fleet:first-child {
-  padding-left: 0.666666666666667em;
-}
-.regattacompetition_phase_fleet:last-child {
-  padding-right: 0.666666666666667em;
-}
+/* .regattacompetition_phase_fleet:first-child { */
+/*   padding-left: 0.666666666666667em; */
+/* } */
+/* .regattacompetition_phase_fleet:last-child { */
+/*   padding-right: 0.666666666666667em; */
+/* } */
 .regattacompetition_phase_fleetfullwidth .regattacompetition_phase_fleet_race {
   height: 3.466666666666666666em;
+  text-align: center;
 }
 .regattacompetition_phase_fleetfullwidth .regattacompetition_phase_fleet_race_title {
+  text-overflow: ellipsis;
   position: absolute;
   top: 50%;
   left: 1.133333333333333em;
@@ -67,20 +69,28 @@
 /* } */
 .regattacompetition_phase_fleetfullwidth .regattacompetition_phase_fleet_race_arrow {
   display: block;
+  width: 1.6666666667em;
+  height: 1.4444444444em;
 }
 .regattacompetition_phase_fleet_title {
   font-size: 1.066666666666667em;
   font-weight: 700;
   min-height: 2.8125em;
-  padding-left: 0.9375em;
-  margin-bottom: 0.9375em;
+  margin-bottom: 0.375em;
+  text-align: center;
+}
+.regattacompetition_phase_fleetcompact .regattacompetition_phase_fleet_title {
+  font-size: 0.966666666666667em;
+}
+.regattacompetition_phase_fleetcompact .regattacompetition_phase_fleet_race_title:after {
+  width: 1.066666666666667em;
 }
 .regattacompetition_phase_fleet_race {
   position: relative;
   background: #008fcc;
   margin-bottom: 0.666666666666667em;
-  text-align: center;
-  padding: .8em 0;
+/*   text-align: center; */
+  padding: .8em .4em;
   border-radius: 0.333333333333333em;
   color: #fff;
   /* color: #f6f9fc; alternative white*/
@@ -93,7 +103,7 @@
   color: #008fcc;
   background-color: #fff;
   border: 0.133333333333333em solid #008fcc;
-  padding: .666666666666667em 0;
+  padding: .666666666666667em 0.266666666666667em;
   cursor: default;
 }
 .regattacompetition_phase_fleet_raceuntracked .regattacompetition_phase_fleet_race_title:after {
@@ -109,9 +119,6 @@
   background-color: #999;
   font-style: italic;
 }
-.regattacompetition_phase_fleet_raceplanned .regattacompetition_phase_fleet_race_title:after {
-  display: none;
-}
 .regattacompetition_phase_fleet_racelive.regattacompetition_phase_fleet_raceuntracked {
   color: #e94a1b;
   background-color: #fff;
@@ -125,19 +132,24 @@
 .regattacompetition_phase_fleet_race_title {
   font-size: 1.222222222222222em;
   font-weight: 700;
+  position: relative;
 }
 .regattacompetition_phase_fleet_race_title:after {
   content: '';
   display: inline-block;
-  width: 0.75em;
-  height: 0.75em;
-  background: url("images/home/skip-forward.png") no-repeat center center;
+  width: 1.666666666666667em;
+  height: 1.1em;
+  background: resourceUrl("launchLoupe") no-repeat center center;
+  position: absolute;
+  right: 0;
+  top: 0.133333333333333em;
 }
 .regattacompetition_phase_fleet_race_subtitle {
   font-size: 0.7em;
 }
 .regattacompetition_phase_fleet_race_arrow {
   display: none;
+  background: resourceUrl("launchLoupe") no-repeat center center;
   position: absolute;
   top: 50%;
   right: 1em;
@@ -145,6 +157,12 @@
      -moz-transform: translateY(-50%);
       -ms-transform: translateY(-50%);
           transform: translateY(-50%);
+}
+.regattacompetition_phase_fleet_raceplanned .regattacompetition_phase_fleet_race_title:after {
+  background: resourceUrl("launchPlay") no-repeat center center;
+}
+.regattacompetition_phase_fleet_raceplanned .regattacompetition_phase_fleet_race_arrow {
+  background: resourceUrl("launchPlay") no-repeat center center;
 }
 .regattacompetition_phase_fleet_raceuntracked .regattacompetition_phase_fleet_race_arrow {
   display: none;
@@ -162,3 +180,18 @@
   text-overflow: ellipsis;
 }
 
+.regattacompetition_phase_fleet_race_title_big {
+  width: 27%;
+}
+
+@media (min-width: 375px) {
+  .regattacompetition_phase_fleet_race_title_big {
+    width: 33%;
+  }
+}
+
+@media (min-width: 700px) {
+  .regattacompetition_phase_fleet_race_title_big {
+    width: 40%;
+  }
+}

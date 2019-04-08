@@ -100,7 +100,8 @@ public class StructureImporter {
             final TimePoint endDate = null; // TODO can regatta end time be inferred from XRR document?
             RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
-                    baseDomainFactory.getOrCreateBoatClass(result.getA().getBoatClass()), startDate, endDate, getSeries(buildStructure), false,
+                    baseDomainFactory.getOrCreateBoatClass(result.getA().getBoatClass()), 
+                    /* canBoatsOfCompetitorsChangePerRace */ true, startDate, endDate, getSeries(buildStructure), false,
                     this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null, OneDesignRankingMetric::new);
             addSpecificRegattas.add(regatta);
         }
@@ -201,6 +202,7 @@ public class StructureImporter {
                     Person person = (Person) obj;
                     String idAsString = person.getPersonID();
                     String name = person.getGivenName() + " " + person.getFamilyName();
+                    String shortName = null; // Can we get a short name from Manage2Sail?
                     Color color = null;
                     String email = null;
                     URI flagImage = null;
@@ -208,7 +210,7 @@ public class StructureImporter {
                             .toString());
                     BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
                     this.baseDomainFactory.convertToCompetitorDTO(this.baseDomainFactory.getOrCreateCompetitor(
-                            UUID.fromString(idAsString), name, color, email, flagImage, boatAndTeam.getTeam(), boatAndTeam.getBoat(),
+                            UUID.fromString(idAsString), name, shortName, color, email, flagImage, boatAndTeam.getTeam(),
                             /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
                 } else {
                     break;
@@ -271,7 +273,7 @@ public class StructureImporter {
     }
 
     private DynamicBoat createBoat(String name, Boat boat, BoatClass boatClass) {
-        DynamicBoat boat1 = new BoatImpl(name + " boat", boatClass, boat.getSailNumber());
+        DynamicBoat boat1 = new BoatImpl(name + " boat", name + " boat", boatClass, boat.getSailNumber());
         return boat1;
     }
 

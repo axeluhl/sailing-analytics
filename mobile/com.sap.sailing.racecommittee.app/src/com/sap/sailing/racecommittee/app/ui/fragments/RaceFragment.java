@@ -4,15 +4,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.support.annotation.IdRes;
-import android.support.annotation.IntDef;
-import android.view.View;
-import android.widget.ImageView;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -32,11 +23,21 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.support.annotation.IdRes;
+import android.support.annotation.IntDef;
+import android.view.View;
+import android.widget.ImageView;
+
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 
-    @IntDef({MOVE_DOWN, MOVE_NONE, MOVE_UP})
+    @IntDef({ MOVE_DOWN, MOVE_NONE, MOVE_UP })
     @Retention(RetentionPolicy.SOURCE)
-    protected @interface MOVE_VALUES {}
+    protected @interface MOVE_VALUES {
+    }
 
     private static final String TAG = RaceFragment.class.getName();
 
@@ -53,7 +54,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
-        arguments.putString(AppConstants.RACE_ID_KEY, race.getId());
+        arguments.putString(AppConstants.INTENT_EXTRA_RACE_ID, race.getId());
         return arguments;
     }
 
@@ -72,7 +73,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
      */
     protected Bundle getRecentArguments() {
         Bundle args = new Bundle();
-        args.putString(AppConstants.RACE_ID_KEY, managedRace.getId());
+        args.putString(AppConstants.INTENT_EXTRA_RACE_ID, managedRace.getId());
         return args;
     }
 
@@ -89,10 +90,11 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (getArguments() != null) {
-            String raceId = getArguments().getString(AppConstants.RACE_ID_KEY);
+            String raceId = getArguments().getString(AppConstants.INTENT_EXTRA_RACE_ID);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
             if (managedRace == null) {
-                throw new IllegalStateException("Unable to obtain ManagedRace " + raceId + " from datastore on start of " + getClass().getName());
+                throw new IllegalStateException("Unable to obtain ManagedRace " + raceId
+                        + " from datastore on start of " + getClass().getName());
             }
         } else {
             ExLog.i(getActivity(), TAG, "no arguments!?");
@@ -148,7 +150,8 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
                 if (Util.isEmpty(courseDesign.getWaypoints())) {
                     courseName = courseDesign.getName();
                 } else {
-                    courseName = String.format(getString(R.string.course_design_number_waypoints), Util.size(courseDesign.getWaypoints()));
+                    courseName = String.format(getString(R.string.course_design_number_waypoints),
+                            Util.size(courseDesign.getWaypoints()));
                 }
             } else {
                 courseName = getString(R.string.no_course_active);
@@ -157,7 +160,8 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         return courseName;
     }
 
-    protected @IdRes int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame, boolean changeVisibility) {
+    protected @IdRes int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame,
+            boolean changeVisibility) {
         int frame = 0;
         View view = activity.findViewById(defaultFrame);
         if (view != null) {

@@ -9,14 +9,14 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -25,20 +25,21 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
+import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -47,13 +48,14 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 
 public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLiveTest {
 
-    private Mongo mongo;
-    private DB db;
+    private MongoClient mongo;
+    private MongoDatabase db;
     
     private final MongoDBConfiguration dbConfiguration;
 
@@ -62,17 +64,16 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
     }
     
-    private Mongo newMongo() throws UnknownHostException, MongoException {
-        return new MongoClient(dbConfiguration.getHostName(),
-                dbConfiguration.getPort());
+    private MongoClient newMongo() throws UnknownHostException, MongoException {
+        return new MongoClient(dbConfiguration.getMongoClientURI());
     }
     
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException {
         mongo = newMongo();
         assertNotNull(mongo);
-        mongo.dropDatabase(dbConfiguration.getDatabaseName());
-        db = mongo.getDB(dbConfiguration.getDatabaseName());
+        mongo.dropDatabase(dbConfiguration.getMongoClientURI().getDatabase());
+        db = mongo.getDatabase(dbConfiguration.getMongoClientURI().getDatabase());
         assertNotNull(db);
     }
     
@@ -89,22 +90,24 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /* trackedRegattaRegistry */ null, mock(RaceLogResolver.class),
-                /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, ReceiverType.RACECOURSE);
+                }, /* trackedRegattaRegistry */ null, mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class),
+                /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
         for (final Receiver receiver : typeControllers) {
             addReceiverToStopDuringTearDown(receiver);
         }
         RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getTracTracEvent().getRaces().iterator().next().getId());
-        DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
+        DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(),
+                EmptyWindStore.INSTANCE, 
                     /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 10000, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class));
+                }, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class),
+                Optional.empty());
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
-        Mongo myFirstMongo = newMongo();
-        DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());
+        MongoClient myFirstMongo = newMongo();
+        MongoDatabase firstDatabase = myFirstMongo.getDatabase(dbConfiguration.getDatabaseName());
         new MongoObjectFactoryImpl(firstDatabase).addWindTrackDumper(trackedRegatta, trackedRace, windSource);
         WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
         Position pos = new DegreePosition(54, 9);
@@ -115,17 +118,17 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         }
         Thread.sleep(2000); // give MongoDB some time to make written data available to other connections
         
-        Mongo mySecondMongo = newMongo();
-        DB secondDatabase = mySecondMongo.getDB(dbConfiguration.getDatabaseName());
+        MongoClient mySecondMongo = newMongo();
+        MongoDatabase secondDatabase = mySecondMongo.getDatabase(dbConfiguration.getDatabaseName());
         WindTrack result = new DomainObjectFactoryImpl(secondDatabase, com.sap.sailing.domain.base.DomainFactory.INSTANCE).loadWindTrack(domainEvent.getName(), race, windSource, /* millisecondsOverWhichToAverage */
                 30000);
         double myBearingDeg = 123.4;
         result.lockForRead();
         try {
             for (Wind wind : result.getRawFixes()) {
-                assertEquals(pos, wind.getPosition());
-                assertEquals(10., wind.getKnots(), 0.000000000001);
-                assertEquals(myBearingDeg, wind.getBearing().getDegrees(), 0.000000001);
+                PositionAssert.assertPositionEquals(pos, wind.getPosition(), /* deg delta */ 0.000001);
+                assertEquals(10., wind.getKnots(), 0.01);
+                assertEquals(myBearingDeg, wind.getBearing().getDegrees(), 0.01);
                 myBearingDeg += 1.1;
             }
         } finally {

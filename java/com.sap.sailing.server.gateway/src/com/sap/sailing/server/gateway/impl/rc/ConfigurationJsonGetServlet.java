@@ -40,6 +40,7 @@ public class ConfigurationJsonGetServlet extends AbstractJsonHttpServlet {
         if (configuration != null) {
             JsonSerializer<DeviceConfiguration> serializer = DeviceConfigurationJsonSerializer.create();
             JSONObject json = serializer.serialize(configuration);
+            response.setCharacterEncoding("UTF-8");
             json.writeJSONString(response.getWriter());
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No configuration for given identifier.");

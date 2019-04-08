@@ -56,18 +56,18 @@ public class QueryManagerMemoryMonitor implements MemoryMonitor {
     private void checkMemory() {
         final long freeMemory = infoProvider.freeMemory();
         final long totalMemory = infoProvider.totalMemory();
-        final double freeMemoryInPercent = (double) freeMemory / totalMemory;
+        final double freeMemoryRatio = (double) freeMemory / totalMemory;
         final int numberOfRunningQueries = queryManager.getNumberOfRunningQueries();
         
         if (numberOfRunningQueries > 0) {
-            logStatus(freeMemory, totalMemory, freeMemoryInPercent, numberOfRunningQueries);
+            logStatus(freeMemory, totalMemory, freeMemoryRatio, numberOfRunningQueries);
         }
         
         boolean actionHasBeenPerformed = false;
         final Iterator<MemoryMonitorAction> actionsIterator = actions.iterator();
         while (!actionHasBeenPerformed && actionsIterator.hasNext()) {
             MemoryMonitorAction action = actionsIterator.next();
-            actionHasBeenPerformed = action.checkMemoryAndPerformAction(freeMemoryInPercent);
+            actionHasBeenPerformed = action.checkMemoryAndPerformAction(freeMemoryRatio);
             if (actionHasBeenPerformed) {
                 //Also perform actions, that are equally important
                 while (actionsIterator.hasNext()) {
@@ -75,18 +75,18 @@ public class QueryManagerMemoryMonitor implements MemoryMonitor {
                     if (action.compareTo(nextAction) != 0) {
                         break;
                     }
-                    nextAction.checkMemoryAndPerformAction(freeMemoryInPercent);
+                    nextAction.checkMemoryAndPerformAction(freeMemoryRatio);
                 }
             }
         }
     }
     
-    private void logStatus(long freeMemory, long totalMemory, double freeMemoryInPercent, int numberOfRunningQueries) {
+    private void logStatus(long freeMemory, long totalMemory, double freeMemoryRatio, int numberOfRunningQueries) {
         double freeMemoryMB = (double) freeMemory / 1024 / 1024;
         double totalMemoryMB = (double) totalMemory / 1024 / 1024;
         logInfo(MEMORY_STATUS_LOG_PREFIX + "Free " + String.format("%1$,.2f", freeMemoryMB) + " MB, Total " +
                 String.format("%1$,.2f", totalMemoryMB) + " MB, Free in Percent " +
-                String.format("%1$,.2f", freeMemoryInPercent * 100) + "% with " + numberOfRunningQueries + " queries running.");
+                String.format("%1$,.2f", freeMemoryRatio * 100) + "% with " + numberOfRunningQueries + " queries running.");
     }
 
     @Override

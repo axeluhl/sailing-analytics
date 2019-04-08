@@ -1,5 +1,6 @@
 package com.sap.sailing.expeditionconnector.impl;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -8,9 +9,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -18,7 +17,9 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ExpeditionMessageImpl implements ExpeditionMessage {
@@ -42,19 +43,7 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
      * {@link #getTimePoint() time point}.
      */
     public ExpeditionMessageImpl(int boatID, Map<Integer, Double> values, boolean valid, String originalMessage) {
-        this.boatID = boatID;
-        // ensure that nobody can manipulate the map used by this message object from outside
-        this.values = new HashMap<Integer, Double>(values);
-        this.valid = valid;
-        this.originalMessage = originalMessage;
-        this.createdAtMillis = System.currentTimeMillis();
-        if (hasValue(ID_GPS_TIME)) {
-            timePoint = new MillisecondsTimePoint((long)
-                    (getValue(ID_GPS_TIME)*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
-                    cal.getTimeInMillis());
-        } else {
-            timePoint = new MillisecondsTimePoint(createdAtMillis);
-        }
+        this(boatID, values, valid, /* defaultTimePoint */ null, originalMessage, /* unused */ true);
     }
     
     /**
@@ -63,9 +52,13 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
      *            stamp
      */
     public ExpeditionMessageImpl(int boatID, Map<Integer, Double> values, boolean valid, TimePoint defaultTimePoint, String originalMessage) {
+        this(boatID, values, valid, defaultTimePoint, originalMessage, /* unused */ true);
         if (defaultTimePoint == null) {
-            throw new IllegalArgumentException("defaultTimePoint for ExpeditionMessageImpl constructor must not be null");
+            throw new IllegalArgumentException("defaultTimePoint for this ExpeditionMessageImpl constructor must not be null");
         }
+    }
+    
+    private ExpeditionMessageImpl(int boatID, Map<Integer, Double> values, boolean valid, TimePoint defaultTimePoint, String originalMessage, boolean unused) {
         this.boatID = boatID;
         // ensure that nobody can manipulate the map used by this message object from outside
         this.values = new HashMap<Integer, Double>(values);
@@ -73,9 +66,25 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
         this.originalMessage = originalMessage;
         this.createdAtMillis = System.currentTimeMillis();
         if (hasValue(ID_GPS_TIME)) {
+            final double gpsTimeValue = getValue(ID_GPS_TIME);
+            final long referenceTime;
+            if (gpsTimeValue <= 1.0) { // "Phoenix" law: if between 0 and 1 then it's likely a day-relative time point
+                // so add the millis of today midnight UTC
+                Calendar todayMidnightUTC = new GregorianCalendar();
+                todayMidnightUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+                todayMidnightUTC.set(Calendar.HOUR_OF_DAY, 0);
+                todayMidnightUTC.set(Calendar.MINUTE, 0);
+                todayMidnightUTC.set(Calendar.SECOND, 0);
+                todayMidnightUTC.set(Calendar.MILLISECOND, 0);
+                referenceTime = todayMidnightUTC.getTimeInMillis();
+            } else {
+                referenceTime = cal.getTimeInMillis();
+            }
             timePoint = new MillisecondsTimePoint((long)
-                    (getValue(ID_GPS_TIME)*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
-                    cal.getTimeInMillis());
+                    (gpsTimeValue*24*3600*1000) +   // this is the milliseconds since 31.12.1899 0:00:00 UTC
+                    referenceTime);
+        } else if (defaultTimePoint == null) {
+            timePoint = new MillisecondsTimePoint(createdAtMillis);
         } else {
             timePoint = defaultTimePoint;
         }

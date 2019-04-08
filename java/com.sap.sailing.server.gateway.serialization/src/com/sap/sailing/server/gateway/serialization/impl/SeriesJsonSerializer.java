@@ -19,6 +19,8 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
     public static final String FIELD_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING = "hasSplitFleetContiguousScoring";
     public static final String FIELD_IS_MEDAL_SERIES = "isMedalSeries";
     public static final String FIELD_FLEETS_CAN_RUN_IN_PARALLEL = "fleetsCanRunInParallel";
+    public static final String FIELD_MAXIMUM_NUMBER_OF_DISCARDS = "maximumNumberOfDiscards";
+    public static final String FIELD_FIRST_COLUMS_IS_NON_DISCARDABLE_CARRY_FORWARD = "firstColumnIsNonDiscardableCarryForward";
 
     private final JsonSerializer<Fleet> fleetSerializer;
 
@@ -34,6 +36,8 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
         result.put(FIELD_FLEETS_CAN_RUN_IN_PARALLEL, series.isFleetsCanRunInParallel());
         result.put(FIELD_STARTS_WITH_ZERO_SCORE, series.isStartsWithZeroScore());
         result.put(FIELD_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING, series.hasSplitFleetContiguousScoring());
+        result.put(FIELD_MAXIMUM_NUMBER_OF_DISCARDS, series.getMaximumNumberOfDiscards());
+        result.put(FIELD_FIRST_COLUMS_IS_NON_DISCARDABLE_CARRY_FORWARD, series.isFirstColumnIsNonDiscardableCarryForward());
 
         JSONArray fleetsJson = new JSONArray();
         for (Fleet fleet : series.getFleets()) {

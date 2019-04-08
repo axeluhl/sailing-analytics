@@ -1,46 +1,40 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="99">
+<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="149">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
-<repository location="http://p2.sapsailing.com/p2/sailing/"/>
+<unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
+<unit id="javax.ws.rs.source" version="1.1.1.v20130318-1750"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.2.2.201407241931"/>
-<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.2.2.v20140723/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.osgi" version="3.10.2.v20150203-1939"/>
-<unit id="org.eclipse.osgi.source" version="3.10.2.v20150203-1939"/>
-<unit id="org.eclipse.osgi.services" version="3.4.0.v20140312-2051"/>
-<unit id="org.eclipse.osgi.services.source" version="3.4.0.v20140312-2051"/>
-<unit id="org.eclipse.equinox.common" version="3.6.200.v20130402-1505"/>
-<unit id="org.eclipse.equinox.common.source" version="3.6.200.v20130402-1505"/>
-<unit id="org.eclipse.equinox.util" version="1.0.500.v20130404-1337"/>
-<unit id="org.eclipse.equinox.util.source" version="1.0.500.v20130404-1337"/>
-<unit id="org.eclipse.equinox.simpleconfigurator" version="1.1.0.v20131217-1203"/>
-<unit id="org.eclipse.equinox.simpleconfigurator.source" version="1.1.0.v20131217-1203"/>
-<unit id="org.eclipse.equinox.console" version="1.1.0.v20140131-1639"/>
-<unit id="org.eclipse.equinox.console.source" version="1.1.0.v20140131-1639"/>
-<unit id="org.eclipse.equinox.launcher" version="1.3.0.v20140415-2008"/>
-<unit id="org.eclipse.equinox.launcher.source" version="1.3.0.v20140415-2008"/>
-<unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215"/>
-<unit id="org.apache.felix.gogo.command.source" version="0.10.0.v201209301215"/>
-<unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>
-<unit id="org.apache.felix.gogo.runtime.source" version="0.10.0.v201209301036"/>
-<unit id="org.apache.felix.gogo.shell" version="0.10.0.v201212101605"/>
-<unit id="org.apache.felix.gogo.shell.source" version="0.10.0.v201212101605"/>
-<unit id="org.apache.commons.collections" version="3.2.0.v2013030210310"/>
-<unit id="org.apache.commons.collections.source" version="3.2.0.v2013030210310"/>
+<unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.core" version="1.3.0.v20180420-1519"/>
+<unit id="org.hamcrest.generator" version="1.3.0.v201305210900"/>
+<unit id="org.hamcrest.integration" version="1.3.0.v201305210900"/>
+<unit id="org.hamcrest.library" version="1.3.0.v20180524-2246"/>
+<unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
+<unit id="org.junit" version="4.12.0.v201504281640"/>
+<unit id="org.junit.source" version="4.12.0.v201504281640"/>
+<unit id="com.fasterxml.jackson.core.jackson-annotations" version="2.9.2.v20180207-1730"/>
+<unit id="com.fasterxml.jackson.core.jackson-core" version="2.9.2.v20180207-1730"/>
+<unit id="com.fasterxml.jackson.core.jackson-databind" version="2.9.2.v20180207-1730"/>
+<unit id="com.sun.jersey" version="1.17.0.v201503170330"/>
+<unit id="com.sun.jersey.source" version="1.17.0.v201503170330"/>
+<unit id="javax.servlet" version="3.1.0.v201410161800"/>
+<unit id="javax.servlet.source" version="3.1.0.v201410161800"/>
+<unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
+<unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
+<unit id="javax.xml" version="1.3.4.v201005080400"/>
+<unit id="javax.xml.bind" version="2.2.0.v201105210648"/>
+<unit id="javax.xml.bind.source" version="2.2.0.v201105210648"/>
+<unit id="javax.xml.stream" version="1.0.1.v201004272200"/>
+<unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
 <unit id="org.apache.commons.beanutils" version="1.8.0.v201205091237"/>
 <unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
-<repository location="http://download.eclipse.org/releases/luna"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.apache.commons.codec" version="1.6.0.v201305230611"/>
+<unit id="org.apache.commons.codec.source" version="1.6.0.v201305230611"/>
+<unit id="org.apache.commons.collections" version="3.2.2.v201511171945"/>
+<unit id="org.apache.commons.collections.source" version="3.2.2.v201511171945"/>
 <unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
 <unit id="org.apache.commons.fileupload.source" version="1.2.2.v20111214-1400"/>
 <unit id="org.apache.commons.io" version="2.2.0.v201405211200"/>
@@ -48,55 +42,112 @@
 <unit id="org.apache.commons.lang" version="2.6.0.v201404270220"/>
 <unit id="org.apache.commons.lang.source" version="2.6.0.v201404270220"/>
 <unit id="org.apache.commons.math" version="2.1.0.v201105210652"/>
-<unit id="org.jdom" version="1.1.1.v201101151400"/>
-<unit id="org.jdom.source" version="1.1.1.v201101151400"/>
-<unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
-<unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
-<unit id="com.sun.jersey" version="1.17.0.v20130314-2020"/>
-<unit id="com.sun.jersey.source" version="1.17.0.v20130314-2020"/>
-<unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
-<unit id="javax.ws.rs.source" version="1.1.1.v20130318-1750"/>
-<unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
-<unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
 <unit id="org.apache.httpcomponents.httpclient" version="4.2.6.v201311072007"/>
+<unit id="org.apache.httpcomponents.httpclient.source" version="4.2.6.v201311072007"/>
 <unit id="org.apache.httpcomponents.httpcore" version="4.2.5.v201311072007"/>
-<unit id="org.apache.commons.logging" version="1.1.1.v201101211721"/>
-<unit id="javax.servlet" version="3.1.0.v20140303-1611"/>
-<unit id="javax.servlet.source" version="3.1.0.v20140303-1611"/>
-<unit id="org.dom4j" version="1.6.1.v201312101416"/>
-<unit id="org.apache.xmlbeans" version="2.3.0.v201405241900"/>
+<unit id="org.apache.httpcomponents.httpcore.source" version="4.2.5.v201311072007"/>
 <unit id="org.apache.poi" version="3.9.0.v201405241750"/>
 <unit id="org.apache.poi.ooxml" version="3.9.0.v201405241905"/>
 <unit id="org.apache.poi.ooxml.schemas" version="3.9.0.v201405241750"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/"/>
+<unit id="org.apache.xmlbeans" version="2.3.0.v201605172150"/>
+<unit id="org.dom4j" version="1.6.1.v20170815-1500"/>
+<unit id="org.jdom" version="1.1.1.v201101151400"/>
+<unit id="org.jdom.source" version="1.1.1.v201101151400"/>
+<unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
+<unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.8.201802270002"/>
+<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215"/>
+<unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>
+<unit id="org.apache.felix.gogo.shell" version="0.10.0.v201212101605"/>
+<unit id="org.eclipse.equinox.app" version="1.3.400.v20150715-1528"/>
+<unit id="org.eclipse.equinox.cm" version="1.2.0.v20170105-1446"/>
+<unit id="org.eclipse.equinox.common" version="3.9.0.v20170207-1454"/>
+<unit id="org.eclipse.equinox.concurrent" version="1.1.0.v20130327-1442"/>
+<unit id="org.eclipse.equinox.console" version="1.1.300.v20170512-2111"/>
+<unit id="org.eclipse.equinox.coordinator" version="1.3.300.v20170512-2111"/>
+<unit id="org.eclipse.equinox.device" version="1.0.400.v20130327-1442"/>
+<unit id="org.eclipse.equinox.ds" version="1.5.0.v20170307-1429"/>
+<unit id="org.eclipse.equinox.event" version="1.4.0.v20170105-1446"/>
+<unit id="org.eclipse.equinox.http.jetty" version="3.4.0.v20170503-2025"/>
+<unit id="org.eclipse.equinox.http.registry" version="1.1.400.v20150715-1528"/>
+<unit id="org.eclipse.equinox.http.servletbridge" version="1.0.300.v20130327-1442"/>
+<unit id="org.eclipse.equinox.http.servletbridge" version="1.0.300.v20130327-1442"/>
+<unit id="org.eclipse.equinox.http.servletbridge" version="1.0.300.v20130327-1442"/>
+<unit id="org.eclipse.equinox.io" version="1.1.100.v20150430-1834"/>
+<unit id="org.eclipse.equinox.ip" version="1.1.400.v20161007-1324"/>
+<unit id="org.eclipse.equinox.jsp.jasper" version="1.0.500.v20150119-1358"/>
+<unit id="org.eclipse.equinox.jsp.jasper.registry" version="1.0.300.v20130327-1442"/>
+<unit id="org.eclipse.equinox.launcher" version="1.4.0.v20161219-1356"/>
+<unit id="org.eclipse.equinox.metatype" version="1.4.300.v20170105-1446"/>
+<unit id="org.eclipse.equinox.preferences" version="3.7.0.v20170126-2132"/>
+<unit id="org.eclipse.equinox.region" version="1.4.0.v20170117-1425"/>
+<unit id="org.eclipse.equinox.registry" version="3.7.0.v20170222-1344"/>
+<unit id="org.eclipse.equinox.servletbridge" version="1.3.200.v20160128-1435"/>
+<unit id="org.eclipse.equinox.simpleconfigurator" version="1.2.1.v20180131-1435"/>
+<unit id="org.eclipse.equinox.supplement" version="1.7.0.v20170329-1416"/>
+<unit id="org.eclipse.equinox.transforms.hook" version="1.2.0.v20170105-1446"/>
+<unit id="org.eclipse.equinox.transforms.xslt" version="1.0.300.v20130327-1442"/>
+<unit id="org.eclipse.equinox.useradmin" version="1.1.400.v20130327-1442"/>
+<unit id="org.eclipse.equinox.util" version="1.0.500.v20130404-1337"/>
+<unit id="org.eclipse.equinox.wireadmin" version="1.0.600.v20150715-1528"/>
+<unit id="org.eclipse.jetty.continuation" version="9.4.8.v20171121"/>
+<unit id="org.eclipse.jetty.http" version="9.4.8.v20171121"/>
+<unit id="org.eclipse.jetty.io" version="9.4.8.v20171121"/>
+<unit id="org.eclipse.jetty.security" version="9.4.8.v20171121"/>
+<unit id="org.eclipse.jetty.server" version="9.4.8.v20171121"/>
+<unit id="org.eclipse.jetty.servlet" version="9.4.8.v20171121"/>
+<unit id="org.eclipse.jetty.util" version="9.4.8.v20171121"/>
+<unit id="org.eclipse.osgi" version="3.12.100.v20180210-1608"/>
+<unit id="org.eclipse.osgi.services" version="3.6.0.v20170228-1906"/>
+<unit id="org.eclipse.osgi.util" version="3.4.0.v20170111-1608"/>
+<repository location="http://download.eclipse.org/releases/oxygen/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
+<repository location="https://p2.sapsailing.com/p2/sailing/"/>
 </location>
 </locations>
 <includeBundles>
 <plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
 <plugin id="com.fasterxml.jackson.core.jackson-core"/>
 <plugin id="com.fasterxml.jackson.core.jackson-databind"/>
-<plugin id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-base"/>
-<plugin id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider"/>
 <plugin id="com.rabbitmq.client"/>
+<plugin id="com.sun.activation.javax.activation"/>
+<plugin id="com.sun.istack.commons-runtime"/>
 <plugin id="com.sun.jersey"/>
 <plugin id="com.sun.jersey.contribs.jersey-multipart"/>
 <plugin id="com.sun.jersey.source"/>
 <plugin id="com.sun.mail.javax.mail"/>
+<plugin id="com.sun.xml.bind.jaxb-impl"/>
 <plugin id="jackson-core-asl"/>
 <plugin id="jackson-jaxrs"/>
 <plugin id="jackson-mapper-asl"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
-<plugin id="javax.servlet" version="3.1.0.v20140303-1611"/>
-<plugin id="javax.servlet.source" version="3.1.0.v20140303-1611"/>
+<plugin id="javax.servlet" version="3.1.0.v201410161800"/>
+<plugin id="javax.servlet.source" version="3.1.0.v201410161800"/>
 <plugin id="javax.validation"/>
 <plugin id="javax.validation.source"/>
 <plugin id="javax.ws.rs"/>
 <plugin id="javax.ws.rs.source"/>
+<plugin id="javax.xml"/>
+<plugin id="jaxb-api"/>
+<plugin id="javax.xml.stream"/>
+<plugin id="javax.xml.ws"/>
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
 <plugin id="lz4-java"/>
-<plugin id="org.apache.commons.beanutils"/>
+<plugin id="org.apache.commons.beanutils" version="1.9.0"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
 <plugin id="org.apache.commons.collections"/>
@@ -107,8 +158,6 @@
 <plugin id="org.apache.commons.io.source"/>
 <plugin id="org.apache.commons.lang"/>
 <plugin id="org.apache.commons.lang.source"/>
-<plugin id="org.apache.commons.logging"/>
-<plugin id="org.apache.commons.logging.source"/>
 <plugin id="org.apache.commons.math"/>
 <plugin id="org.apache.felix.gogo.command"/>
 <plugin id="org.apache.felix.gogo.command.source"/>
@@ -135,6 +184,8 @@
 <plugin id="org.apache.xmlbeans"/>
 <plugin id="org.codehaus.jettison.jettison"/>
 <plugin id="org.dom4j"/>
+<plugin id="org.eclipse.equinox.cm"/>
+<plugin id="org.eclipse.equinox.cm.source"/>
 <plugin id="org.eclipse.equinox.common"/>
 <plugin id="org.eclipse.equinox.common.source"/>
 <plugin id="org.eclipse.equinox.console"/>
@@ -149,57 +200,33 @@
 <plugin id="org.eclipse.jetty.annotations.source"/>
 <plugin id="org.eclipse.jetty.client"/>
 <plugin id="org.eclipse.jetty.client.source"/>
-<plugin id="org.eclipse.jetty.continuation"/>
-<plugin id="org.eclipse.jetty.continuation.source"/>
 <plugin id="org.eclipse.jetty.deploy"/>
 <plugin id="org.eclipse.jetty.deploy.source"/>
-<plugin id="org.eclipse.jetty.http"/>
-<plugin id="org.eclipse.jetty.http.source"/>
-<plugin id="org.eclipse.jetty.io"/>
-<plugin id="org.eclipse.jetty.io.source"/>
+<plugin id="org.eclipse.jetty.http" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.http.source" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.io" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.io.source" version="9.4.8.v20171121"/>
 <plugin id="org.eclipse.jetty.jaas"/>
-<plugin id="org.eclipse.jetty.jaspi"/>
-<plugin id="org.eclipse.jetty.jaspi.source"/>
 <plugin id="org.eclipse.jetty.jmx"/>
 <plugin id="org.eclipse.jetty.jmx.source"/>
-<plugin id="org.eclipse.jetty.jndi"/>
-<plugin id="org.eclipse.jetty.jndi.source"/>
 <plugin id="org.eclipse.jetty.osgi.boot"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
 <plugin id="org.eclipse.jetty.osgi.boot.source"/>
 <plugin id="org.eclipse.jetty.osgi.boot.warurl"/>
 <plugin id="org.eclipse.jetty.osgi.boot.warurl.source"/>
-<plugin id="org.eclipse.jetty.osgi.httpservice"/>
-<plugin id="org.eclipse.jetty.osgi.httpservice.source"/>
-<plugin id="org.eclipse.jetty.osgi.npn.fragment"/>
-<plugin id="org.eclipse.jetty.plus"/>
-<plugin id="org.eclipse.jetty.plus.source"/>
 <plugin id="org.eclipse.jetty.proxy"/>
 <plugin id="org.eclipse.jetty.rewrite"/>
 <plugin id="org.eclipse.jetty.rewrite.source"/>
-<plugin id="org.eclipse.jetty.security"/>
-<plugin id="org.eclipse.jetty.security.source"/>
-<plugin id="org.eclipse.jetty.server"/>
-<plugin id="org.eclipse.jetty.server.source"/>
-<plugin id="org.eclipse.jetty.servlet"/>
-<plugin id="org.eclipse.jetty.servlet.source"/>
-<plugin id="org.eclipse.jetty.servlets"/>
+<plugin id="org.eclipse.jetty.security" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.security.source" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.server" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.server.source" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.servlet" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.servlet.source" version="9.4.8.v20171121"/>
 <plugin id="org.eclipse.jetty.servlets.source"/>
-<plugin id="org.eclipse.jetty.spdy.client"/>
-<plugin id="org.eclipse.jetty.spdy.client.source"/>
-<plugin id="org.eclipse.jetty.spdy.core"/>
-<plugin id="org.eclipse.jetty.spdy.core.source"/>
-<plugin id="org.eclipse.jetty.spdy.http.common"/>
-<plugin id="org.eclipse.jetty.spdy.http.common.source"/>
-<plugin id="org.eclipse.jetty.spdy.http.server"/>
-<plugin id="org.eclipse.jetty.spdy.http.server.source"/>
-<plugin id="org.eclipse.jetty.spdy.server"/>
-<plugin id="org.eclipse.jetty.spdy.server.source"/>
-<plugin id="org.eclipse.jetty.util"/>
+<plugin id="org.eclipse.jetty.util" version="9.4.8.v20171121"/>
 <plugin id="org.eclipse.jetty.util.ajax"/>
 <plugin id="org.eclipse.jetty.util.ajax.source"/>
-<plugin id="org.eclipse.jetty.util.source"/>
+<plugin id="org.eclipse.jetty.util.source" version="9.4.8.v20171121"/>
 <plugin id="org.eclipse.jetty.webapp"/>
 <plugin id="org.eclipse.jetty.webapp.source"/>
 <plugin id="org.eclipse.jetty.websocket.api"/>
@@ -208,20 +235,14 @@
 <plugin id="org.eclipse.jetty.websocket.client.source"/>
 <plugin id="org.eclipse.jetty.websocket.common"/>
 <plugin id="org.eclipse.jetty.websocket.common.source"/>
-<plugin id="org.eclipse.jetty.websocket.javax.websocket"/>
-<plugin id="org.eclipse.jetty.websocket.javax.websocket.server"/>
-<plugin id="org.eclipse.jetty.websocket.javax.websocket.server.source"/>
-<plugin id="org.eclipse.jetty.websocket.javax.websocket.source"/>
-<plugin id="org.eclipse.jetty.websocket.server"/>
-<plugin id="org.eclipse.jetty.websocket.server.source"/>
-<plugin id="org.eclipse.jetty.websocket.servlet"/>
-<plugin id="org.eclipse.jetty.websocket.servlet.source"/>
 <plugin id="org.eclipse.jetty.xml"/>
 <plugin id="org.eclipse.jetty.xml.source"/>
 <plugin id="org.eclipse.osgi"/>
 <plugin id="org.eclipse.osgi.services"/>
 <plugin id="org.eclipse.osgi.services.source"/>
 <plugin id="org.eclipse.osgi.source"/>
+<plugin id="org.eclipse.osgi.util"/>
+<plugin id="org.eclipse.osgi.util.source"/>
 <plugin id="org.hamcrest"/>
 <plugin id="org.hamcrest.core"/>
 <plugin id="org.hamcrest.integration"/>
@@ -230,7 +251,8 @@
 <plugin id="org.hyperic.sigar"/>
 <plugin id="org.jdom"/>
 <plugin id="org.jdom.source"/>
-<plugin id="org.junit4"/>
+<plugin id="org.junit"/>
+<plugin id="org.junit.source"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
 <plugin id="org.mongodb.mongo-java-driver"/>

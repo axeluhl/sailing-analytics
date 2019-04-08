@@ -6,8 +6,10 @@ import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
+import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 
 public class RegattaConfigurationImpl implements RegattaConfiguration {
 
@@ -15,8 +17,10 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
 
     private RacingProcedureType defaultRacingProcedureType;
     private CourseDesignerMode defaultCourseDesignerMode;
+    private Duration defaultProtestTimeDuration;
     
     private RRS26Configuration rrs26Configuration;
+    private SWCStartConfiguration swcStartConfiguration;
     private GateStartConfiguration gateStartConfiguration;
     private ESSConfiguration essConfiguration;
     private LeagueConfiguration leagueConfiguration;
@@ -41,12 +45,30 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
     }
 
     @Override
+    public Duration getDefaultProtestTimeDuration() {
+        return defaultProtestTimeDuration;
+    }
+
+    public void setDefaultProtestTimeDuration(Duration defaultProtestTimeDuration) {
+        this.defaultProtestTimeDuration = defaultProtestTimeDuration;
+    }
+
+    @Override
     public RRS26Configuration getRRS26Configuration() {
         return rrs26Configuration;
     }
 
     public void setRRS26Configuration(RRS26Configuration rrs26Configuration) {
         this.rrs26Configuration = rrs26Configuration;
+    }
+
+    @Override
+    public SWCStartConfiguration getSWCStartConfiguration() {
+        return swcStartConfiguration;
+    }
+
+    public void setSWCStartConfiguration(SWCStartConfiguration swcStartConfiguration) {
+        this.swcStartConfiguration = swcStartConfiguration;
     }
 
     @Override
@@ -90,7 +112,9 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         RegattaConfigurationImpl copy = new RegattaConfigurationImpl();
         copy.setDefaultRacingProcedureType(defaultRacingProcedureType);
         copy.setDefaultCourseDesignerMode(defaultCourseDesignerMode);
+        copy.setDefaultProtestTimeDuration(defaultProtestTimeDuration);
         copy.setRRS26Configuration(rrs26Configuration);
+        copy.setSWCStartConfiguration(swcStartConfiguration);
         copy.setGateStartConfiguration(gateStartConfiguration);
         copy.setESSConfiguration(essConfiguration);
         copy.setBasicConfiguration(basicConfiguration);
@@ -108,9 +132,16 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         if (update.getDefaultRacingProcedureType() != null) {
             target.setDefaultRacingProcedureType(update.getDefaultRacingProcedureType());
         }
+        if (update.getDefaultProtestTimeDuration() != null) {
+            target.setDefaultProtestTimeDuration(update.getDefaultProtestTimeDuration());
+        }
         if (update.getRRS26Configuration() != null) {
             target.setRRS26Configuration(
                     (RRS26Configuration) target.getRRS26Configuration().merge(update.getRRS26Configuration()));
+        }
+        if (update.getSWCStartConfiguration() != null) {
+            target.setSWCStartConfiguration(
+                    (SWCStartConfiguration) target.getSWCStartConfiguration().merge(update.getSWCStartConfiguration()));
         }
         if (update.getGateStartConfiguration() != null) {
             target.setGateStartConfiguration(

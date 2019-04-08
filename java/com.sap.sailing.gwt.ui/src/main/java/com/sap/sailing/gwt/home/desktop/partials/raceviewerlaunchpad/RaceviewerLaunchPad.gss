@@ -1,0 +1,160 @@
+.raceviewerlaunchpad {
+  font-size: 1rem;
+  color: #fff;
+  font-weight: 700;
+  background: #008fcc;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -moz-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0;
+     -moz-box-flex: 0;
+      -ms-flex: 0;
+          flex: 0;
+  text-align: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+     -moz-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  height: 2.666666666666667em;
+  padding: 0 0.333333333333333em 0 1em;
+  border-radius: 0.2em;
+  position: relative;
+}
+.raceviewerlaunchpadwithname {
+  padding: 0.333333333333333em 0.333333333333333em 0.666666666666667em 1em;
+  height: 5.333333333333333em;
+  margin: 0.666666666666667em 0 0 0.666666666666667em;
+  vertical-align: top;
+}
+.raceviewerlaunchpad_wrapper {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+     -moz-box-orient: vertical;
+     -moz-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+     -moz-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+}
+.raceviewerlaunchpad_name {
+  font-size: 1.466666666666667em;
+  margin-bottom: 0.333333333333333em;
+}
+.raceviewerlaunchpad_date {
+  font-size: 0.666666666666667em;
+}
+.raceviewerlaunchpad_cta {
+  font-size: 0.666666666666667em;
+  text-transform: uppercase;
+}
+.raceviewerlaunchpad:hover {
+  cursor: pointer;
+  background: #0081b8;
+  text-decoration: none;
+}
+.raceviewerlaunchpadlive {
+  background: #e94a1b;
+}
+.raceviewerlaunchpadlive:hover {
+  background: #d54115;
+}
+.raceviewerlaunchpadlive .raceviewerlaunchpad_content_item {
+  color: #e94a1b;
+}
+.raceviewerlaunchpadlive .raceviewerlaunchpad_content_item:hover {
+  background: #e94a1b;
+}
+.raceviewerlaunchpadlive .raceviewerlaunchpad_content_item_icon svg {
+  fill: #e94a1b;
+}
+.raceviewerlaunchpadplanned {
+  background: #999999;
+}
+.raceviewerlaunchpadplanned:hover {
+  background: #8a8a8a;
+}
+.raceviewerlaunchpadplanned .raceviewerlaunchpad_content_item {
+  color: #999999;
+}
+.raceviewerlaunchpadplanned .raceviewerlaunchpad_content_item:hover {
+  background: #999999;
+}
+.raceviewerlaunchpadplanned .raceviewerlaunchpad_content_item_icon svg {
+  fill: #999999;
+}
+.raceviewerlaunchpad_icon {
+  margin-left: 0.666666666666667em;
+  width: 1.666666666666667em;
+  height: 1.333333333333333em;
+}
+.raceviewerlaunchpad_icon img {
+  height: 100%;
+}
+.raceviewerlaunchpad_icon svg {
+  width: 100%;
+  height: 100%;
+  fill: #fff;
+}
+.raceviewerlaunchpad_content {
+  display: block;
+  bottom: 0;
+  right: 0;
+  box-shadow: 0px 0px 0.666666666666667em 0px rgba(0,0,0,0.2);
+}
+.raceviewerlaunchpad_content_item {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+     -moz-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  height: 3em;
+  padding: 0 1.333333333333333em 0 0.666666666666667em;
+  background: #fff;
+  color: #008fcc;
+  font-weight: normal;
+}
+.raceviewerlaunchpad_content_item:hover {
+  background: #008fcc;
+  color: #fff;
+  text-decoration: underline;
+}
+.raceviewerlaunchpad_content_item:hover .raceviewerlaunchpad_content_item_icon svg {
+  fill: #fff;
+}
+.raceviewerlaunchpad_content_item_icon {
+  margin-right: 1em;
+}
+.raceviewerlaunchpad_content_item_icon svg {
+  width: 1.333333333333333em;
+  height: 1.666666666666667em;
+  fill: #008fcc;
+  stroke: none;
+}
+.raceviewerlaunchpad_content_item_title {
+  white-space: nowrap;
+}
+.raceviewerlaunchpad_not_tracked {
+  text-transform: uppercase;
+  font-size: 0.933333333333333rem;
+  padding: 0.714285714285714em 1.071428571428571em;
+  color: #666;
+  min-height: 2.533333333333333rem;
+}

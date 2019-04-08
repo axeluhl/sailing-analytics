@@ -14,8 +14,6 @@ java/com.sap.sse.security.ui/WEB-INF/deploy/*
 sailing_debug0*
 dist
 build
-/java/.settings/org.eclipse.jdt.core.prefs
-/java/com.sap.sailing.server.gateway.serialization.test/.settings/*.prefs
 .DS_Store
 java/com.sap.sailing.simulator/bin/com/sap/sailing/simulator/Simulator.gwt.xml
 /mobile/com.sap.sailing.racecommittee.app/res/values/keys.xml
@@ -34,3 +32,4 @@ local.properties
 git.xml
 mobile/github-advrecyclerview_lib/bin
 captures
+/.recommenders/

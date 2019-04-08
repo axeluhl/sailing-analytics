@@ -3,8 +3,8 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
   xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.socialfooter.SocialFooterResources" />
   <g:HTMLPanel>
     <!-- The search/social media page footer-->
@@ -15,7 +15,7 @@
         </h3>
         <div class="{local_res.css.socialfooter_item} {local_res.css.socialfooter_itemleft} {res.mediaCss.small6} {res.mediaCss.columns}">
           <a href="http://twitter.com/SAPSports" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrappertwitter}">
-            <img src="images/home/twitter-logo.svg" class="{local_res.css.socialfooter_item_icon}"></img>
+            <img src="{shr.twitter.getSafeUri}" class="{local_res.css.socialfooter_item_icon}"></img>
             <div class="{local_res.css.socialfooter_item_text}">
               <div class="{local_res.css.socialfooter_item_text_top}">
                 <ui:text from='{i18n.sapSportsOn}' />
@@ -26,7 +26,7 @@
         </div>
         <div class="{local_res.css.socialfooter_item} {local_res.css.socialfooter_itemright} {res.mediaCss.small6} {res.mediaCss.columns}">
           <a href="http://www.facebook.com/SAPSports" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrapperfacebook}">
-            <img src="images/home/facebook-logo.svg" class="{local_res.css.socialfooter_item_icon}"></img>
+            <img src="{shr.facebook.getSafeUri}" class="{local_res.css.socialfooter_item_icon}"></img>
             <div class="{local_res.css.socialfooter_item_text}">
               <div class="{local_res.css.socialfooter_item_text_top}">
                 <ui:text from='{i18n.sapSportsOn}' />

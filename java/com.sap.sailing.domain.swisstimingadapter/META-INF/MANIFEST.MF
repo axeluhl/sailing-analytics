@@ -14,9 +14,12 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.common,
  com.sap.sse,
  com.sap.sailing.xrr.schema,
- com.sap.sailing.domain.shared.android
+ com.sap.sailing.domain.shared.android,
+ com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0"
 Export-Package: com.sap.sailing.domain.swisstimingadapter,
- com.sap.sailing.domain.swisstimingadapter.impl;x-friends:="com.sap.sailing.server.test"
+ com.sap.sailing.domain.swisstimingadapter.impl;x-friends:="com.sap.sailing.server.test,com.sap.sailing.mongodb.test,com.sap.sailing.domain.swisstimingadapter.persistence"
 Import-Package: com.sap.sailing.xrr.schema,
+ javax.xml.bind,
  org.osgi.framework
 Bundle-Activator: com.sap.sailing.domain.swisstimingadapter.impl.Activator
+Automatic-Module-Name: com.sap.sailing.domain.swisstimingadapter

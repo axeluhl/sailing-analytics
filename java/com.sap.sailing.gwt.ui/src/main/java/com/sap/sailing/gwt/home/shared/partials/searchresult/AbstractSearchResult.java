@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -24,7 +23,7 @@ public abstract class AbstractSearchResult extends Composite {
     
     protected final void init(final AbstractPlaceNavigator navigator, Widget widget) {
         super.initWidget(widget);
-        getSearchTextInputUi().getElement().setAttribute("placeholder", TextMessages.INSTANCE.searchResultHeaderPlaceholder());
+        getSearchTextInputUi().getElement().setAttribute("placeholder", StringMessages.INSTANCE.searchResultHeaderPlaceholder());
         getSearchTextInputUi().addKeyPressHandler(new KeyPressHandler() {
             @Override
             public void onKeyPress(KeyPressEvent event) {

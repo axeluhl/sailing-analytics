@@ -8,16 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
-import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
-import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
+import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
+import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingWithRegattaLogEventImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.WithID;
@@ -36,7 +35,8 @@ import com.sap.sse.common.impl.TimeRangeImpl;
  * {@code DeviceMapping}, the only changes being introduced by closing open time ranges in cases where an
  * according {@code CloseOpenEndedDeviceMappingEvent} exists.
  */
-public abstract class RegattaLogDeviceMappingFinder<ItemT extends WithID> extends RegattaLogAnalyzer<Map<ItemT, List<DeviceMapping<ItemT>>>> {
+public class RegattaLogDeviceMappingFinder<ItemT extends WithID>
+        extends RegattaLogAnalyzer<Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>>> {
     private static Logger logger = Logger.getLogger(RegattaLogDeviceMappingFinder.class.getName());
     
     public RegattaLogDeviceMappingFinder(RegattaLog log) {
@@ -47,10 +47,10 @@ public abstract class RegattaLogDeviceMappingFinder<ItemT extends WithID> extend
         return mapping instanceof RegattaLogDeviceMappingEvent;
     }
 
-    protected DeviceMapping<ItemT> createMapping(DeviceIdentifier device, ItemT item,
-            TimePoint from, TimePoint to, Serializable originalEventId) {
-        return new DeviceMappingImpl<ItemT>(item, device, new TimeRangeImpl(from, to),
-                Collections.singletonList(originalEventId));
+    protected DeviceMappingWithRegattaLogEvent<ItemT> createMapping(DeviceIdentifier device, ItemT item,
+            TimePoint from, TimePoint toInclusive, Serializable originalEventId, RegattaLogDeviceMappingEvent<ItemT> event) {
+        return new DeviceMappingWithRegattaLogEventImpl<ItemT>(item, device, new TimeRangeImpl(from, toInclusive, /* inclusive */ true),
+                Collections.singletonList(originalEventId), event);
     }
 
     private List<RegattaLogDeviceMappingEvent<ItemT>> getMappingEventsForItem(Map<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>> map, ItemT item) {
@@ -63,18 +63,18 @@ public abstract class RegattaLogDeviceMappingFinder<ItemT extends WithID> extend
     }
     
     @Override
-    protected Map<ItemT, List<DeviceMapping<ItemT>>> performAnalysis() {
-        Map<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>> events = new HashMap<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>>();
-        Map<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents = new HashMap<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent>();
+    protected Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> performAnalysis() {
+        Map<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>> events = new HashMap<>();
+        Map<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents = new HashMap<>();
         findUnrevokedMappingAndClosingEvents(events, closingEvents);
-        Map<ItemT, List<DeviceMapping<ItemT>>> mappings = new HashMap<ItemT, List<DeviceMapping<ItemT>>>();
+        Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> mappings = new HashMap<>();
         for (ItemT item : events.keySet()) {
             mappings.put(item, closeOpenRanges(events.get(item), item, closingEvents));
         }
         return mappings;
     }
 
-    private void findUnrevokedMappingAndClosingEvents(Map<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>> events,
+    protected void findUnrevokedMappingAndClosingEvents(Map<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>> events,
             Map<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents) {
         for (RegattaLogEvent e : getLog().getUnrevokedEvents()) {
             if (e instanceof RegattaLogDeviceMappingEvent && isValidMapping(((RegattaLogDeviceMappingEvent<?>) e))) {
@@ -89,56 +89,24 @@ public abstract class RegattaLogDeviceMappingFinder<ItemT extends WithID> extend
         }
     }
     
-    private List<DeviceMapping<ItemT>> closeOpenRanges(List<RegattaLogDeviceMappingEvent<ItemT>> events, ItemT item,
+    private List<DeviceMappingWithRegattaLogEvent<ItemT>> closeOpenRanges(
+            List<RegattaLogDeviceMappingEvent<ItemT>> events, ItemT item,
             Map<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents) {
-        List<DeviceMapping<ItemT>> result = new ArrayList<DeviceMapping<ItemT>>();
+        List<DeviceMappingWithRegattaLogEvent<ItemT>> result = new ArrayList<>();
         for (final RegattaLogDeviceMappingEvent<ItemT> event : events) {
             TimePoint from = event.getFrom();
-            TimePoint to = event.getTo();
-            TimePoint closingTimePoint = closingEvents.containsKey(event.getId()) ? closingEvents.get(event.getId())
-                    .getClosingTimePoint() : null;
+            TimePoint toInclusive = event.getToInclusive();
+            TimePoint closingTimePointInclusive = closingEvents.containsKey(event.getId()) ? closingEvents.get(event.getId())
+                    .getClosingTimePointInclusive() : null;
             if (from == null) {
                 logger.severe("No start time set for DeviceMappingEvent with ID: " + event.getId());
             }
-            if (to == null) {
-                to = closingTimePoint;
+            if (toInclusive == null) {
+                toInclusive = closingTimePointInclusive;
             }
-            result.add(createMapping(event.getDevice(), item, from, to, event.getId()));
+            result.add(createMapping(event.getDevice(), item, from, toInclusive, event.getId(), event));
         }
         return result;
     }
 
-    /**
-     * By revoking existing mappings for {@code item} and replacing them by mappings that exclude {@code fixTimePoint}, any
-     * fix at {@code fixTimePoint} will no longer be linked to {@code item}. If a mapping is limited to the exact fix time point,
-     * the mapping is only revoked and not replaced. If one boundary is exactly the fix time point, the interval is revoked and
-     * replaced by a single interval with that border adjusted so it excludes the fix.
-     */
-    public void removeTimePointFromMapping(ItemT item, TimePoint fixTimePoint) throws NotRevokableException {
-        Map<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>> events = new HashMap<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>>();
-        Map<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents = new HashMap<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent>();
-        findUnrevokedMappingAndClosingEvents(events, closingEvents);
-        for (final RegattaLogDeviceMappingEvent<ItemT> event : events.get(item)) {
-            final TimePoint from = event.getFrom();
-            final RegattaLogCloseOpenEndedDeviceMappingEvent closingEvent = closingEvents.get(event.getId());
-            final TimePoint to = closingEvent!= null ? closingEvent.getClosingTimePoint() : event.getTo();
-            final TimeRange mappingTimeRange = new TimeRangeImpl(from, to);
-            if (mappingTimeRange.includes(fixTimePoint)) {
-                if (closingEvent != null) {
-                    log.revokeEvent(closingEvent.getAuthor(), closingEvent, "removing single time point "+fixTimePoint+" from mapping for "+item);
-                }
-                log.revokeEvent(event.getAuthor(), event, "removing single time point "+fixTimePoint+" from mapping for "+item);
-                final TimePoint endOfFirstHalf = fixTimePoint.minus(1);
-                final TimePoint startOfSecondHalf = fixTimePoint.plus(1);
-                if (!endOfFirstHalf.before(from)) {
-                    log.add(createDeviceMappingEvent(item, event.getAuthor(), from, endOfFirstHalf, event.getDevice()));
-                }
-                if (!to.before(startOfSecondHalf)) {
-                    log.add(createDeviceMappingEvent(item, event.getAuthor(), startOfSecondHalf, to, event.getDevice()));
-                }
-            }
-        }
-    }
-
-    protected abstract RegattaLogDeviceMappingEvent<ItemT> createDeviceMappingEvent(ItemT item, AbstractLogEventAuthor author, TimePoint plus, TimePoint to, DeviceIdentifier deviceId);
 }

@@ -1,47 +1,143 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Tack;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
+import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public interface HasRaceOfCompetitorContext {
     
     @Connector(scanForStatistics=false)
-    public HasTrackedRaceContext getTrackedRaceContext();
+    HasTrackedRaceContext getTrackedRaceContext();
     
     @Connector(messageKey="Competitor")
-    public Competitor getCompetitor();
+    @Statistic(messageKey="Competitor")
+    Competitor getCompetitor();
+    
+    @Dimension(messageKey="TackAtStart", ordinal=12)
+    Tack getTackAtStart() throws NoWindException;
+    
+    @Dimension(messageKey="SailID")
+    public String getSailID();
+    
+    @Dimension(messageKey="DistanceToStarboardSideAtStartOfCompetitor", ordinal=13)
+    ClusterDTO getPercentageClusterForDistanceToStarboardSideAtStart();
+    
+    @Dimension(messageKey="RelativeScoreInPercent", ordinal=14)
+    ClusterDTO getPercentageClusterForRelativeScore();
     
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
-    public Distance getDistanceToStartLineAtStart();
+    Distance getDistanceToStartLineAtStart();
 
-    @Statistic(messageKey="DistanceToStarboardSideAtStart", resultDecimals=2, ordinal=1)
-    public Double getNormalizedDistanceToStarboardSideAtStart();
+    @Statistic(messageKey="DistanceToStarboardSideAtStartOfCompetitor", resultDecimals=2, ordinal=1)
+    Double getNormalizedDistanceToStarboardSideAtStartOfCompetitor();
     
-    @Connector(messageKey="SpeedWhenStarting", ordinal=2)
-    public Speed getSpeedWhenStarting();
+    @Statistic(messageKey="DistanceToStarboardSideAtStartOfCompetitorVsRankAtFirstMark", resultDecimals=2, ordinal=1)
+    Pair<Double, Integer> getNormalizedDistanceToStarboardSideAtStartOfCompetitorVsRankAtFirstMark();
     
-    @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=3)
-    public Speed getSpeedTenSecondsBeforeStart();
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineAtStartOfRace", resultDecimals=2, ordinal=2)
+    Distance getWindwardDistanceToAdvantageousLineEndAtStartofRace();
     
-    @Statistic(messageKey="RankAtFirstMark", resultDecimals=2, ordinal=4)
-    public Double getRankAtFirstMark();
-    
-    @Statistic(messageKey="NumberOfManeuvers", resultDecimals=0, ordinal=5)
-    public int getNumberOfManeuvers();
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineAtStartOfCompetitor", resultDecimals=2, ordinal=2)
+    Distance getWindwardDistanceToAdvantageousLineEndAtStartofCompetitor();
 
-    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=6)
-    public int getNumberOfTacks();
-
-    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=7)
-    public int getNumberOfJibes();
-
-    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=8)
-    public int getNumberOfPenaltyCircles();
+    @Connector(messageKey="SpeedWhenStarting", ordinal=3)
+    Speed getSpeedWhenStarting();
+    
+    @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=4)
+    Speed getSpeedTenSecondsBeforeStart();
+    
+    @Connector(messageKey="SpeedTenSecondsAfterStart", ordinal=5)
+    Speed getSpeedTenSecondsAfterStartOfRace();
+    
+    @Statistic(messageKey="RankThirtySecondsAfterStart", resultDecimals=2, ordinal=6)
+    Integer getRankThirtySecondsAfterStartOfRace();
+    
+    @Statistic(messageKey="RankAfterHalfOfTheFirstLeg", resultDecimals=2, ordinal=7)
+    Double getRankAfterHalfOfTheFirstLeg();
+    
+    @Statistic(messageKey="RankAtFirstMark", resultDecimals=2, ordinal=8)
+    Integer getRankAtFirstMark();
     
     @Statistic(messageKey="RankGainsOrLossesBetweenFirstMarkAndFinish", resultDecimals=2, ordinal=9)
-    public Double getRankGainsOrLossesBetweenFirstMarkAndFinish();
+    Integer getRankGainsOrLossesBetweenFirstMarkAndFinish();
     
+    @Statistic(messageKey="NumberOfManeuvers", resultDecimals=0, ordinal=10)
+    int getNumberOfManeuvers();
+    
+    @Statistic(messageKey="NumberOfTacks", resultDecimals=0, ordinal=11)
+    int getNumberOfTacks();
+
+    @Statistic(messageKey="NumberOfJibes", resultDecimals=0, ordinal=12)
+    int getNumberOfJibes();
+
+    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=0, ordinal=13)
+    int getNumberOfPenaltyCircles();
+    
+    @Statistic(messageKey="DistanceTraveled", resultDecimals=1)
+    Distance getDistanceTraveled();
+    
+    @Statistic(messageKey="LineLengthAtStart", resultDecimals=1)
+    Distance getLineLengthAtStart();
+
+    @Statistic(messageKey="AbsoluteWindwardDistanceToStarboardSideAtStartOfCompetitor", resultDecimals=2)
+    Distance getAbsoluteWindwardDistanceToStarboardSideAtStartOfCompetitor();
+    
+    @Statistic(messageKey="DistanceToStarboardSideAtStartOfCompetitorVsFinalRank", resultDecimals=2)
+    Pair<Double, Integer> getRelativeDistanceToStarboardSideAtStartOfCompetitorVsFinalRank();
+    
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLineAtStartOfRaceVsRelativeDistanceToAdvantageousEndOfLine", resultDecimals=2)
+    Pair<Double, Double> getWindwardDistanceToAdvantageousEndOfLineAtStartOfRaceVsRelativeDistanceToAdvantageousEndOfLineAtStartOfRace();
+    
+    @Statistic(messageKey="RelativeDistanceToAdvantageousEndOfLineAtStartOfRace", resultDecimals=2)
+    Double getRelativeDistanceToAdvantageousEndOfLineAtStartOfRace();
+    
+    @Statistic(messageKey="RaceDuration")
+    Duration getDuration();
+    
+    @Statistic(messageKey="DistanceToStarboardSideAtStartOfRace", resultDecimals=2)
+    public Double getRelativeDistanceToStarboardSideAtStartOfRace();
+
+    @Statistic(messageKey="VMG5SecondsBeforeStartOfRace", resultDecimals=2)
+    public Speed getVMG5SecondsBeforeStartOfRace();
+
+    @Statistic(messageKey="VMGAtStartOfRace", resultDecimals=2)
+    public Speed getVMGAtStartOfRace();
+
+    @Statistic(messageKey="VMG5SecondsAfterStartOfRace", resultDecimals=2)
+    public Speed getVMG5SecondsAfterStartOfRace();
+    
+    @Statistic(messageKey="DistanceToAdvantageousSideAtStartOfRaceVsRankAtFirstMark", resultDecimals=2)
+    public Pair<Double, Integer> getRelativeDistanceToAdvantageousSideAtStartOfRaceVsRankAtFirstMark();
+
+    @Statistic(messageKey="RankAtFirstMarkVsFinalRank", resultDecimals=2)
+    public Pair<Integer, Integer> getRankAtFirstMarkVsFinalRank();
+    
+    @Statistic(messageKey="RankSixtySecondsAfterStart", resultDecimals=2)
+    public Integer getRankSixtySecondsAfterStartOfRace();
+    
+    @Statistic(messageKey="RankNinetySecondsAfterStart", resultDecimals=2)
+    public Integer getRankNinetySecondsAfterStartOfRace();
+    
+    @Statistic(messageKey="FinalRank", resultDecimals=2, ordinal=8)
+    public Integer getFinalRank();
+    
+    @Statistic(messageKey="DistanceToAdvantageousSideAtStartOfRaceVsFinalRank", resultDecimals=2)
+    Pair<Double, Integer> getRelativeDistanceToAdvantageousSideAtStartOfRaceVsFinalRank();
+    
+    @Statistic(messageKey="AverageRaceWindSpeed")
+    Speed getAverageRaceWindSpeed();
+    
+    @Statistic(messageKey="BiasAtStartOfRace", resultDecimals=2)
+    Double getBiasAtStartOfRace();
+    
+    @Statistic(messageKey="Bias30SecondsAfterRaceStart", resultDecimals=2)
+    Double getBias30SecondsAfterRaceStart();
 }

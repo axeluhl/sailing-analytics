@@ -17,6 +17,8 @@ public class DateAndTimeFormatterUtil {
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     public static DateTimeFormatRenderer shortTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_SHORT));
+    public static DateTimeFormatRenderer mediumTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat(PredefinedFormat.TIME_MEDIUM));
 
     public static DateTimeFormatRenderer weekdayMonthAbbrDayDateFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("EEE, " + LocaleInfo.getCurrentLocale().getDateTimeFormatInfo().formatMonthAbbrevDay()));
@@ -24,6 +26,10 @@ public class DateAndTimeFormatterUtil {
             DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG));
     public static DateTimeFormatRenderer longTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("HH:mm:ss zzz"), timeZoneWithoutOffset);
+    public static DateTimeFormatRenderer minutesTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat("m"), timeZoneWithoutOffset);
+    public static DateTimeFormatRenderer hoursAndMinutesTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat("HH:mm"), timeZoneWithoutOffset);
 
     private static DateTimeFormatRenderer secondsTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("m:ss"), timeZoneWithoutOffset);
@@ -36,6 +42,16 @@ public class DateAndTimeFormatterUtil {
         return defaultDateFormatter.render(startDate) + " - " + defaultDateFormatter.render(endDate);
     }
 
+    /**
+     * Formats a duration in a compact format so that hours and minutes are only shown if the duration is >1h to avoid
+     * unnecessary 00:yy or 00:xx:yy values.
+     * 
+     * Be aware that this method doesn't work for durations >= 24h.
+     * 
+     * @param timeInMilliseconds
+     *            the duration in milliseconds to format
+     * @return the formatted duration
+     */
     public static String formatElapsedTime(long timeInMilliseconds) {
         String result = "";
         int seconds = (int) (timeInMilliseconds / 1000) % 60 ;
@@ -61,6 +77,10 @@ public class DateAndTimeFormatterUtil {
         return result;
     }
     
+    public static String formatLongDateAndTimeGMT(Date date) {
+        return longDateFormatter.render(date) + ", " + longTimeFormatter.render(date);
+    }
+
     public static String getClientTimeZoneAsGMTString() {
         Date now = new Date();
         @SuppressWarnings("deprecation")

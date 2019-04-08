@@ -28,21 +28,12 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"/>
 
-        <TextView
-            android:text=":"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:paddingRight="15dp"/>
-
         <NumberPicker
             android:id="@+id/second_picker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:descendantFocusability="blocksDescendants"
-            android:visibility="gone"
-            tools:visibility="visible"/>
+            android:descendantFocusability="blocksDescendants"/>
     </LinearLayout>
 
     <Button

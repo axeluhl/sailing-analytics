@@ -1,5 +1,7 @@
 package com.sap.sse.security.impl;
 
+import org.apache.shiro.session.Session;
+
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.UserManagementException;
@@ -17,6 +19,11 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalStoreUser(User user);
 
     Void internalSetPreference(String username, String key, String value);
+
+    /**
+     * @return the {@link String}-ified preference object value
+     */
+    String internalSetPreferenceObject(String username, String key, Object value);
 
     Void internalUnsetPreference(String username, String key);
     
@@ -37,5 +44,11 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalRemovePermissionForUser(String username, String permissionToRemove) throws UserManagementException;
 
     Void internalDeleteUser(String username) throws UserManagementException;
+
+    void storeSession(String cacheName, Session value);
+
+    void removeSession(String cacheName, Session result);
+
+    void removeAllSessions(String cacheName);
 
 }

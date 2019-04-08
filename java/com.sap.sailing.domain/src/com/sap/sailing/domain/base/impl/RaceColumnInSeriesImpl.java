@@ -2,13 +2,18 @@ package com.sap.sailing.domain.base.impl;
 
 
 import java.util.Iterator;
+import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -136,6 +141,35 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     @Override
     public RegattaLog getRegattaLog() {
         Regatta regatta = getRegatta();
-        return regatta.getRegattaLog();
+        return regatta == null ? null : regatta.getRegattaLog();
     }
+    
+    @Override
+    public void registerCompetitor(CompetitorWithBoat competitorWithBoat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        // this method can only be called if the competitors using the same boat for all races of the regatta  
+        assert(!getRegatta().canBoatsOfCompetitorsChangePerRace());
+        super.registerCompetitor(competitorWithBoat, fleet);
+    }
+
+    @Override
+    public void registerCompetitors(Iterable<CompetitorWithBoat> competitorWithBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        // this method can only be called if the competitors using the same boat for all races of the regatta  
+        assert(!getRegatta().canBoatsOfCompetitorsChangePerRace());
+        super.registerCompetitors(competitorWithBoats, fleet);
+    }
+
+    @Override
+    public void registerCompetitor(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        // this method can only be called if the competitors changing the boats during the regatta  
+        assert(getRegatta().canBoatsOfCompetitorsChangePerRace());
+        super.registerCompetitor(competitor, boat, fleet);
+    }
+
+    @Override
+    public void registerCompetitors(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {    
+        // this method can only be called if the competitors changing the boats during the regatta  
+        assert(getRegatta().canBoatsOfCompetitorsChangePerRace());
+        super.registerCompetitors(competitorsAndBoats, fleet);
+    }
+
 }

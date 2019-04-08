@@ -1,22 +1,20 @@
 package com.sap.sailing.gwt.home.mobile.partials.regattacompetition;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.AbstractRegattaCompetitionFleetRace;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionPresenter;
 
 public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleetRace {
 
     private static RegattaCompetitionFleetRaceUiBinder uiBinder = GWT.create(RegattaCompetitionFleetRaceUiBinder.class);
 
-    interface RegattaCompetitionFleetRaceUiBinder extends UiBinder<AnchorElement, RegattaCompetitionFleetRace> {
+    interface RegattaCompetitionFleetRaceUiBinder extends UiBinder<Element, RegattaCompetitionFleetRace> {
     }
     
     @UiField RegattaCompetitionResources local_res;
@@ -24,8 +22,8 @@ public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleet
     @UiField DivElement raceStateUi;
     @UiField DivElement raceDateUi;
 
-    public RegattaCompetitionFleetRace(SimpleRaceMetadataDTO race, String raceViewerUrl) {
-        super(race, raceViewerUrl);
+    public RegattaCompetitionFleetRace(SimpleRaceMetadataDTO race, RegattaCompetitionPresenter presenter) {
+        super(race, presenter);
     }
 
     @Override
@@ -34,7 +32,7 @@ public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleet
     }
 
     @Override
-    protected AnchorElement getMainUiElement() {
+    protected Element getMainUiElement() {
         return uiBinder.createAndBindUi(this);
     }
 
@@ -67,10 +65,9 @@ public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleet
     protected String getRaceUntrackedStyleName() {
         return local_res.css().regattacompetition_phase_fleet_raceuntracked();
     }
-    
-    @Override
-    protected boolean isUntrackedRace(RaceTrackingState trackingState) {
-        return super.isUntrackedRace(trackingState) || !ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE;
+
+    public void removeBigRaceTitleCSS() {
+        raceNameUi.removeClassName(local_res.css().regattacompetition_phase_fleet_race_title_big());
     }
     
 }

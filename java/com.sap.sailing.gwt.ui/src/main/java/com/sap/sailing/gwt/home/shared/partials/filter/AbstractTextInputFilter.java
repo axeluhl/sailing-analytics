@@ -26,7 +26,7 @@ public abstract class AbstractTextInputFilter<T, C> extends AbstractFilterWidget
     private void initTextInputWidget(Widget textInputWidget, String placeholderText, KeyUpHandler handler) {
         textInputWidget.getElement().setAttribute("placeholder", placeholderText);
         textInputWidget.addStyleName(FilterWidgetResources.INSTANCE.css().input_filter_text_input());
-        textInputWidget.addHandler(handler, KeyUpEvent.getType());
+        textInputWidget.addDomHandler(handler, KeyUpEvent.getType());
         containerUi.add(textInputWidget);
     }
     
@@ -58,17 +58,21 @@ public abstract class AbstractTextInputFilter<T, C> extends AbstractFilterWidget
         notifyValueChangeHandlers();
     }
     
+    protected void clear() {
+        textInputUi.setValue(null);
+        update();
+    }
+    
     protected abstract Filter<T> getFilter(String searchString);
     
     private class TextInputFilterHandler implements ClickHandler, KeyUpHandler {
         @Override
         public void onKeyUp(KeyUpEvent event) {
-            update();
+            AbstractTextInputFilter.this.update();
         }
         @Override
         public void onClick(ClickEvent event) {
-            textInputUi.setValue(null);
-            update();
+            AbstractTextInputFilter.this.clear();
         }
     }
 

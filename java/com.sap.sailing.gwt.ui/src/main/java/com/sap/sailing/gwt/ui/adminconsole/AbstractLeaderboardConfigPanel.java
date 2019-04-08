@@ -13,6 +13,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Window;
@@ -49,7 +50,10 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -67,7 +71,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected final SailingServiceAsync sailingService;
 
-    protected final ListDataProvider<StrippedLeaderboardDTO> leaderboardList;
+    protected final ListDataProvider<StrippedLeaderboardDTO> filteredLeaderboardList;
 
     protected final ErrorReporter errorReporter;
 
@@ -94,11 +98,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     
     private final LeaderboardsRefresher leaderboardsRefresher;
     
-    public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Util.Pair<RaceColumnDTO, FleetDTO> {
+    public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
 
-        public RaceColumnDTOAndFleetDTOWithNameBasedEquality(RaceColumnDTO a, FleetDTO b) {
-            super(a, b);
+        public RaceColumnDTOAndFleetDTOWithNameBasedEquality(RaceColumnDTO a, FleetDTO b, StrippedLeaderboardDTO c) {
+            super(a, b, c);
         }
 
         @Override
@@ -138,7 +142,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             StringMessages theStringConstants, boolean multiSelection) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
-        leaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
+        filteredLeaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
         allRegattas = new ArrayList<RegattaDTO>();
         this.errorReporter = errorReporter;
         this.leaderboardsRefresher = leaderboardsRefresher;
@@ -164,7 +168,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
         filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents,
-                availableLeaderboardList, leaderboardTable, leaderboardList) {
+                availableLeaderboardList, filteredLeaderboardList) {
             @Override
             public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -172,23 +176,33 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 strings.add(t.displayName);
                 return strings;
             }
+
+            @Override
+            public AbstractCellTable<StrippedLeaderboardDTO> getCellTable() {
+                return leaderboardTable;
+            }
         };
         filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
 
         leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
-        addColumnsToLeaderboardTableAndSetSelectionModel(leaderboardTable, tableRes, leaderboardList);
+        addColumnsToLeaderboardTableAndSetSelectionModel(leaderboardTable, tableRes,
+                filterLeaderboardPanel.getAllListDataProvider());
         @SuppressWarnings("unchecked")
-        RefreshableMultiSelectionModel<StrippedLeaderboardDTO> multiSelectionModel = (RefreshableMultiSelectionModel<StrippedLeaderboardDTO>) leaderboardTable.getSelectionModel();
+        RefreshableMultiSelectionModel<StrippedLeaderboardDTO> multiSelectionModel = (RefreshableMultiSelectionModel<StrippedLeaderboardDTO>) leaderboardTable
+                .getSelectionModel();
         leaderboardSelectionModel = multiSelectionModel;
         leaderboardTable.setWidth("100%");
         leaderboardSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
+                if (trackedRacesListComposite != null) {
+                    trackedRacesListComposite.setRegattaFilterValue(getSelectedLeaderboardName());
+                }
                 leaderboardSelectionChanged();
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
             }
         });
-        leaderboardList.addDataDisplay(leaderboardTable);
+        filteredLeaderboardList.addDataDisplay(leaderboardTable);
         leaderboardsPanel.add(leaderboardTable);
         mainPanel.add(new Grid(1, 1));
 
@@ -215,35 +229,55 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
 
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
+                regattaRefresher,
                 stringMessages, /* multiselection */false, isActionButtonsEnabled());
         refreshableTrackedRaceSelectionModel = trackedRacesListComposite.getSelectionModel();
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
         trackedRaceListHandler = new SelectionChangeEvent.Handler() {
-        @Override
+            @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 Set<RaceDTO> selectedRaces = refreshableTrackedRaceSelectionModel.getSelectedSet();
-                // if no leaderboard column is selected, ignore the race selection change
                 RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName = getSelectedRaceColumnWithFleet();
+                // if no leaderboard column is selected, ignore the race selection change
                 if (selectedRaceColumnAndFleetName != null) {
+                    RaceColumnDTO selectedRaceColumn = selectedRaceColumnAndFleetName.getA();
+                    FleetDTO selectedRaceColumnFleet = selectedRaceColumnAndFleetName.getB();
                     if (selectedRaces.isEmpty()) {
-                        if (selectedRaceColumnAndFleetName.getA()
-                                .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null) {
-                            unlinkRaceColumnFromTrackedRace(selectedRaceColumnAndFleetName.getA().getRaceColumnName(),
-                                    selectedRaceColumnAndFleetName.getB());
+                        if (hasLink(selectedRaceColumnAndFleetName)) {
+                            unlinkRaceColumnFromTrackedRace(selectedRaceColumn.getRaceColumnName(),
+                                    selectedRaceColumnFleet);
                         }
                     } else {
-                        linkTrackedRaceToSelectedRaceColumn(selectedRaceColumnAndFleetName.getA(),
-                                selectedRaceColumnAndFleetName.getB(),
-                                selectedRaces.iterator().next().getRaceIdentifier());
+                        RaceDTO selectedRace = selectedRaces.iterator().next();
+                        if (hasLink(selectedRaceColumnAndFleetName)
+                                && !isLinkedToRace(selectedRaceColumnAndFleetName, selectedRace)) {
+                            if (Window.confirm(stringMessages.trackedRaceAlreadyLinked())) {
+                                linkTrackedRaceToSelectedRaceColumn(selectedRaceColumn, selectedRaceColumnFleet,
+                                        selectedRace.getRaceIdentifier());
+                            } else {
+                                selectTrackedRaceInRaceList();
+                            }
+                        } else {
+                            linkTrackedRaceToSelectedRaceColumn(selectedRaceColumn, selectedRaceColumnFleet,
+                                    selectedRace.getRaceIdentifier());
+                        }
                     }
                 }
             }
+
+            private boolean hasLink(RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName) {
+                return selectedRaceColumnAndFleetName.getA()
+                        .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null;
+            }
+            
+            private boolean isLinkedToRace(RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName, RaceDTO selectedRace){
+                return selectedRaceColumnAndFleetName.getA().getRaceIdentifier(selectedRaceColumnAndFleetName.getB()).equals(selectedRace.getRaceIdentifier());
+            }
         };
         trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
-
         Button reloadAllRaceLogs = new Button(stringMessages.reloadAllRaceLogs());
         reloadAllRaceLogs.ensureDebugId("ReloadAllRaceLogsButton");
         reloadAllRaceLogs.addClickHandler(new ClickHandler() {
@@ -255,7 +289,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                         refreshRaceLog(column, fleet, false);
                     }
                 }
-                Window.alert(stringMessages.raceLogReloaded());
+                Notification.notify(stringMessages.raceLogReloaded(), NotificationType.ERROR);
             }
         });
         vPanel.add(reloadAllRaceLogs);
@@ -348,7 +382,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                             filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList provider
                             leaderboardSelectionModel.setSelected(leaderboard, true);
                             leaderboardSelectionChanged();
-                            getLeaderboardsRefresher().updateLeaderboards(leaderboardList.getList(), AbstractLeaderboardConfigPanel.this);
+                            getLeaderboardsRefresher().updateLeaderboards(filteredLeaderboardList.getList(), AbstractLeaderboardConfigPanel.this);
                         }
             
                         @Override
@@ -404,7 +438,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                     @Override
                     public void onSuccess(Void result) {
                         if (showAlerts) {
-                            Window.alert(stringMessages.raceLogReloaded());
+                            Notification.notify(stringMessages.raceLogReloaded(), NotificationType.SUCCESS);
                         }
                     }
                 }));
@@ -474,6 +508,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         return getSelectedLeaderboard() != null ? getSelectedLeaderboard().name : null;
     }
 
+    protected boolean canBoatsOfCompetitorsChangePerRace() {
+        return getSelectedLeaderboard() != null ? getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace: false;
+    }
+
     protected abstract void leaderboardSelectionChanged();
 
     @Override
@@ -496,7 +534,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     @Override
     public void racesRemoved(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
         for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
-            for (StrippedLeaderboardDTO leaderboard : leaderboardList.getList()) {
+            for (StrippedLeaderboardDTO leaderboard : filteredLeaderboardList.getList()) {
                 for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
                     for (FleetDTO fleet : raceColumn.getFleets()) {
                         if (Util.equalsWithNull(raceColumn.getRaceIdentifier(fleet), regattaAndRaceIdentifier)) {
@@ -697,5 +735,31 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                         .addSelectionChangeHandler(trackedRaceListHandler);
             }
         });
+    }
+
+    /**
+     * Looks up the regatta for the selected leaderboard by name in {@link #allRegattas}
+     */
+    protected RegattaDTO getSelectedRegatta() {
+        final String regattaName = getSelectedLeaderboard() == null ? "" : getSelectedLeaderboard().regattaName;
+        return getRegattaByName(regattaName);
+    }
+
+    /**
+     * Looks up a regatta with name {@code regattaName} in {@link #allRegattas}
+     */
+    protected RegattaDTO getRegattaByName(final String regattaName) {
+        RegattaDTO regatta = null;
+        if (regattaName != null) {
+            if (allRegattas != null) {
+                for (RegattaDTO i : allRegattas) {
+                    if (regattaName.equals(i.getName())) {
+                        regatta = i;
+                        break;
+                    }
+                }
+            }
+        }
+        return regatta;
     }
 }

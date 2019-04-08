@@ -9,11 +9,11 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.shared.utils.Countdown;
 import com.sap.sailing.gwt.home.shared.utils.Countdown.CountdownListener;
 import com.sap.sailing.gwt.home.shared.utils.Countdown.RemainingTime;
 import com.sap.sailing.gwt.home.shared.utils.Countdown.Unit;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CountdownTimer extends Widget {
@@ -52,7 +52,7 @@ public class CountdownTimer extends Widget {
                 container.getStyle().clearDisplay();
                 value.setInnerText(String.valueOf(time.value));
                 unit.setInnerText(time.unit == Unit.DAYS && hasStartingInHeader ? 
-                        TextMessages.INSTANCE.countdownStartingInDays() : time.unitI18n());
+                        StringMessages.INSTANCE.countdownStartingInDays() : time.unitI18n());
             }
         }
     }

@@ -1,14 +1,14 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
+import com.sap.sse.common.Bearing;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sailing.domain.common.Bearing;
 
 public class CompassFragment extends BaseFragment {
 

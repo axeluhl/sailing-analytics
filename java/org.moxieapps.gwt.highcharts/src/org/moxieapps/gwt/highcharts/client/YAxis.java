@@ -19,6 +19,9 @@ package org.moxieapps.gwt.highcharts.client;
 import org.moxieapps.gwt.highcharts.client.labels.StackLabels;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayString;
+
 /**
  * Provides access to an object that can abe used to configure and manage the y-axis of the chart.
  * Note that you can not instance an instance of this object directly, and instead should use the
@@ -46,6 +49,51 @@ public class YAxis extends Axis<YAxis> {
     }
 
     /**
+     * Sets category names to use for the xAxis (instead of using numbers).  If categories are present for the
+     * xAxis, names are used instead of numbers for that axis. Example: setCategories("Apples", "Bananas", "Oranges").
+     * Defaults to an empty array, which will use numbers for the categories instead of names when categories
+     * are present.
+     * <p/>
+     * Note that this method will automatically redraw the categories on the chart if invoked after the
+     * chart has been rendered.  For more control over when the categories are redrawn, you can utilize
+     * the {@link #setCategories(boolean, String...)} method instead.
+     *
+     * @param categories An array of category names to use for the axis.
+     * @return A reference to this {@link XAxis} instance for convenient method chaining.
+     */
+    public YAxis setCategories(String... categories) {
+        return this.setCategories(true, categories);
+    }
+
+    /**
+     * Sets category names to use for the xAxis (instead of using numbers), explicitly controlling whether
+     * or not the axis will be redrawn in the case that the chart has already been rendered to the DOM.
+     * If categories are present for the xAxis, names are used instead of numbers for that axis.
+     * Example: setCategories("Apples", "Bananas", "Oranges"). Defaults to an empty array, which will
+     * use numbers for the categories instead of names when categories are present.
+     * <p/>
+     *
+     * @param redraw     Whether to redraw the axis or wait for an explicit call to {@link org.moxieapps.gwt.highcharts.client.BaseChart#redraw()}
+     * @param categories An array of category names to use for the axis.
+     * @return A reference to this {@link XAxis} instance for convenient method chaining.
+     * @since 1.1.1
+     */
+    public YAxis setCategories(boolean redraw, String... categories) {
+        final JavaScriptObject nativeAxis = getNativeAxis();
+        if (nativeAxis != null) {
+            JsArrayString jsArray = JavaScriptObject.createArray().<JsArrayString>cast();
+            for (int i = 0; i < categories.length; i++) {
+                String category = categories[i];
+                jsArray.set(i, category);
+            }
+            nativeSetCategories(nativeAxis, jsArray, redraw);
+            return this;
+        } else {
+            return this.setOption("categories", categories);
+        }
+    }
+
+    /**
      * Convenience method for setting the 'top' option of the axis.  Equivalent to:
      * <pre><code>
      *     axis.setOption("top", 300);
@@ -56,7 +104,8 @@ public class YAxis extends Axis<YAxis> {
      * @since 1.6.0
      */
     public YAxis setHeight(Number height) {
-        return this.setOption("height", height);
+        this.setOption("height", height);
+        return update(this);
     }
 
     /**
@@ -72,7 +121,8 @@ public class YAxis extends Axis<YAxis> {
      * @since 1.6.0
      */
     public YAxis setTop(Number top) {
-        return this.setOption("top", top);
+        this.setOption("top", top);
+        return update(this);
     }
 
     private YAxisLabels yAxisLabels;
@@ -99,7 +149,9 @@ public class YAxis extends Axis<YAxis> {
      */
     public YAxis setLabels(YAxisLabels labels) {
         this.yAxisLabels = labels;
-        return this.setOption("labels", labels != null ? labels.getOptions() : null);
+        this.setOption("labels", labels != null ? labels.getOptions() : null);
+        update(this);
+        return this;
     }
 
     // Purposefully restricted to package scope
@@ -135,12 +187,16 @@ public class YAxis extends Axis<YAxis> {
      */
     public YAxis setStackLabels(StackLabels stackLabels) {
         this.stackLabels = stackLabels;
-        return this.setOption("stackLabels", stackLabels != null ? stackLabels.getOptions() : null);
-    }
+        this.setOption("stackLabels", stackLabels != null ? stackLabels.getOptions() : null);
+        return update(this);
+     }
 
     // Purposefully restricted to package scope
     StackLabels getStackLabels() {
         return stackLabels;
     }
 
+    private static native void nativeSetCategories(JavaScriptObject nativeAxis, JsArrayString categories, boolean redraw) /*-{
+        return nativeAxis.setCategories(categories, redraw);
+    }-*/;
 }

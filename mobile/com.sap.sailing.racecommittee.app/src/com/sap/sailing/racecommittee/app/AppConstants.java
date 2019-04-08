@@ -2,35 +2,38 @@ package com.sap.sailing.racecommittee.app;
 
 public class AppConstants {
 
-    //TODO replace it later with BuildConfig.APPLICATION_ID (Eclipse didn't know it)
+    // TODO replace it later with BuildConfig.APPLICATION_ID (Eclipse didn't know it)
     private final static String PACKAGE_NAME = "com.sap.sailing.racecommittee.app";
 
     // Intent extra fields
     public final static String COURSE_AREA_UUID_KEY = "courseUuid";
-    public final static String RACE_ID_KEY = "raceUuid";
-    public final static String SERVICE_UNIQUE_ID = "serviceUID";
-    public final static String STARTPROCEDURE_SPECIFIC_EVENT_ID = "startProcedureSpecificEventId";
-    public final static String EXTRAS_RACE_STATE_EVENT = "raceStateEvent";
-    public final static String FLAG_KEY = "raceFlag";
-    public final static String EXTRAS_WIND_FIX = "windfix";
+    public final static String INTENT_EXTRA_RACE_ID = PACKAGE_NAME + ".raceUuid";
+    public final static String INTENT_EXTRA_TIMEPOINT_MILLIS = PACKAGE_NAME + ".timePoint.millis";
+    public final static String INTENT_EXTRA_EVENTNAME = PACKAGE_NAME + ".eventName";
+    public final static String FLAG_KEY = PACKAGE_NAME + ".raceFlag";
+    public final static String EXTRA_FORCE_REFRESH = PACKAGE_NAME + ".forceRefresh";
 
-    public final static String AUTHOR_TYPE_OFFICER_START = "Race Officer on Start Vessel";
-    public final static String AUTHOR_TYPE_OFFICER_FINISH = "Race Officer on Finish Vessel";
+    public final static String AUTHOR_TYPE_OFFICER_VESSEL = "Race Officer on Vessel";
     public final static String AUTHOR_TYPE_SHORE_CONTROL = "Shore Control";
     public final static String AUTHOR_TYPE_VIEWER = "Viewer";
+    public final static String AUTHOR_TYPE_SUPERUSER = "Super User";
 
     public final static String DARK_THEME = "dark";
     public final static String LIGHT_THEME = "light";
 
     private final static String INTENT_ACTION = PACKAGE_NAME + ".action";
     public final static String INTENT_ACTION_RESET = INTENT_ACTION + ".reset";
-    public final static String INTENT_ACTION_REGISTER_RACE = INTENT_ACTION + ".registerRace";
-    public final static String INTENT_ACTION_UNREGISTER_RACE = INTENT_ACTION + ".unregisterRace";
     public final static String INTENT_ACTION_CLEAR_RACES = INTENT_ACTION + ".clearRaces";
     public final static String INTENT_ACTION_CLEANUP_RACES = INTENT_ACTION + ".cleanupRaces";
     public final static String INTENT_ACTION_ALARM_ACTION = INTENT_ACTION + ".alarmAction";
     public final static String INTENT_ACTION_RELOAD_RACES = INTENT_ACTION + ".reloadRaces";
-    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = INTENT_ACTION + ".startProcedureSpecificAction";
+    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = INTENT_ACTION
+            + ".startProcedureSpecificAction";
+
+    public final static String INTENT_ACTION_POLLING_STOP = ".stopPolling";
+    public final static String INTENT_ACTION_POLLING_RACE_ADD = ".addRace";
+    public final static String INTENT_ACTION_POLLING_RACE_REMOVE = ".removeRace";
+    public final static String INTENT_ACTION_POLLING_POLL = ".poll";
 
     // Login activity
     public final static String EventIdTag = "EventId";
@@ -39,8 +42,15 @@ public class AppConstants {
 
     // Inner process events
     public final static String INTENT_ACTION_TOGGLE = PACKAGE_NAME + ".action.toggle";
+    public final static String INTENT_ACTION_ON_LIFECYCLE = PACKAGE_NAME + ".action.on";
+    public final static String INTENT_ACTION_EXTRA = PACKAGE_NAME + ".action.extra";
+    public final static String INTENT_ACTION_EXTRA_FORCED = INTENT_ACTION_EXTRA + ".forced";
 
-    public final static String INTENT_ACTION_EXTRA = "extra";
+    // Lifecycle events as extra
+    public final static String INTENT_ACTION_EXTRA_LIFECYCLE = INTENT_ACTION_EXTRA + ".lifecycle";
+    public final static String INTENT_ACTION_EXTRA_START = "start";
+    public final static String INTENT_ACTION_EXTRA_STOP = "stop";
+
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE = "procedure";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE = "more_mode";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER = "more_pathfinder";
@@ -54,6 +64,7 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE_RECALL = "recall";
     public final static String INTENT_ACTION_TOGGLE_BLUE_FIRST = "more";
     public final static String INTENT_ACTION_TOGGLE_BLUE_LAST = "blue_last";
+    public final static String INTENT_ACTION_TOGGLE_COMPETITOR = "competitor";
 
     public final static String INTENT_ACTION_TOGGLE_REPLAY = "replay";
     public final static String INTENT_ACTION_TOGGLE_PHOTOS = "photos";

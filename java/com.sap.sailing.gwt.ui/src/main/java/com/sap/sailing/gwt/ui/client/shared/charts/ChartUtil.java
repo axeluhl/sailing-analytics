@@ -20,33 +20,24 @@ public class ChartUtil {
      */
     static protected void useCheckboxesToShowAndHide(final Chart chart) {
         chart.setLegend(new Legend().setEnabled(true).setBorderWidth(0).setSymbolPadding(25)); // make room for checkbox
-        chart.setSeriesPlotOptions(new SeriesPlotOptions().setSeriesCheckboxClickEventHandler(new SeriesCheckboxClickEventHandler() {
+        chart.setSeriesPlotOptions(new SeriesPlotOptions().setShowCheckbox(true)
+                .setSeriesCheckboxClickEventHandler(new SeriesCheckboxClickEventHandler() {
                     @Override
                     public boolean onClick(SeriesCheckboxClickEvent seriesCheckboxClickEvent) {
+                        // we want to change the visiblity not the selection state, so own handler is necessary
                         Series series = chart.getSeries(seriesCheckboxClickEvent.getSeriesId());
-                        if (seriesCheckboxClickEvent.isChecked()) {
-                            ChartUtil.onSeriesSelectionChanged(series, true);
-                        } else {
-                            ChartUtil.onSeriesSelectionChanged(series, false);
-                        }
+                        series.setVisible(seriesCheckboxClickEvent.isChecked());
                         return false; // don't toggle the select state of the series
                     }
-                }).setShowCheckbox(true).
-                setSeriesLegendItemClickEventHandler(new SeriesLegendItemClickEventHandler() {
-                    @Override
-                    public boolean onClick(SeriesLegendItemClickEvent seriesLegendItemClickEvent) {
-                        // disable toggling visibility by clicking the legend item; force user to use checkbox instead
-                        return false;
-                    }
-                }));
-    }
-
-    static protected void onSeriesSelectionChanged(Series series, boolean selected) {
-        if (selected) {
-            series.show();
-        } else {
-            series.hide();
-        }
+                }).setSeriesLegendItemClickEventHandler(new SeriesLegendItemClickEventHandler() {
+            @Override
+            public boolean onClick(SeriesLegendItemClickEvent seriesLegendItemClickEvent) {
+                Series series = chart.getSeries(seriesLegendItemClickEvent.getSeriesId());
+                series.setVisible(!series.isVisible());
+                series.select(series.isVisible());
+                return false;
+            }
+        }));
     }
 
 }

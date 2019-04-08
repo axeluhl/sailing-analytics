@@ -1,7 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
 import android.content.Context;
-import android.preference.EditTextPreference;
+import android.support.v7.preference.EditTextPreference;
 import android.util.AttributeSet;
 
 public class IntegerEditTextPreference extends EditTextPreference {

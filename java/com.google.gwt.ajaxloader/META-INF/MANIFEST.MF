@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Google Maps API
+Bundle-SymbolicName: com.google.gwt.ajaxloader
+Bundle-Version: 1.1.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Require-Bundle: com.google.gwt.user;bundle-version="2.8.2";resolution:=optional,
+ com.google.gwt.dev;bundle-version="2.8.2";resolution:=optional
+Automatic-Module-Name: com.google.gwt.ajaxloader
+Bundle-ClassPath: .
+Export-Package: com.google.gwt.ajaxloader.client

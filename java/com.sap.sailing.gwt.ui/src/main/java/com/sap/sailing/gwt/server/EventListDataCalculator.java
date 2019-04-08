@@ -6,19 +6,23 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.util.EventUtil;
 
 public class EventListDataCalculator implements EventVisitor {
     
-    private final Map<String, EventListEventDTO> lastestEventPerSeries = new HashMap<>();
-    private final Map<String, Integer> numberOfEventsPerSeries = new HashMap<>();
+    private final Map<UUID, EventListEventDTO> lastestEventPerSeries = new HashMap<>();
+    private final Map<UUID, Integer> numberOfEventsPerSeries = new HashMap<>();
+    private final Map<UUID, String> seriesNames = new HashMap<>();
     private final EventListViewDTO result = new EventListViewDTO();
     private final RacingEventService service;
 
@@ -28,33 +32,41 @@ public class EventListDataCalculator implements EventVisitor {
 
     @Override
     public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
-        EventListEventDTO eventDTO = HomeServiceUtil.convertToEventListDTO(event, baseURL, onRemoteServer, service);
-        if (HomeServiceUtil.calculateEventState(event) != EventState.UPCOMING && HomeServiceUtil.isFakeSeries(event)) {
-            String seriesName = HomeServiceUtil.getSeriesName(event);
-            EventListEventDTO latestEvent = lastestEventPerSeries.get(seriesName);
-            if (latestEvent == null || latestEvent.getStartDate().before(eventDTO.getStartDate())) {
-                lastestEventPerSeries.put(seriesName, eventDTO);
+        if (event.getStartDate() != null) {
+            EventListEventDTO eventDTO = HomeServiceUtil.convertToEventListDTO(event, baseURL, onRemoteServer, service);
+            if (HomeServiceUtil.calculateEventState(event) != EventState.UPCOMING && EventUtil.isFakeSeries(event)) {
+                final LeaderboardGroupBase seriesLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
+                final UUID seriesLeaderboardGroupId = seriesLeaderboardGroup.getId();
+                if (!seriesNames.containsKey(seriesLeaderboardGroupId)) {
+                    seriesNames.put(seriesLeaderboardGroupId, HomeServiceUtil.getLeaderboardDisplayName(seriesLeaderboardGroup));
+                }
+                EventListEventDTO latestEvent = lastestEventPerSeries.get(seriesLeaderboardGroupId);
+                if (latestEvent == null || latestEvent.getStartDate().before(eventDTO.getStartDate())) {
+                    lastestEventPerSeries.put(seriesLeaderboardGroupId, eventDTO);
+                }
+                increaseNumberOfEvents(seriesLeaderboardGroupId);
+            } else {
+                addEventToResults(eventDTO);
             }
-            increaseNumberOfEvents(seriesName);
-        } else {
-            addEventToResults(eventDTO);
         }
     }
     
-    private void increaseNumberOfEvents(String seriesName) {
-        Integer currentValue = numberOfEventsPerSeries.get(seriesName);
+    private void increaseNumberOfEvents(final UUID seriesLeaderboardGroupId) {
+        Integer currentValue = numberOfEventsPerSeries.get(seriesLeaderboardGroupId);
         currentValue = currentValue == null ? 0 : currentValue;
-        numberOfEventsPerSeries.put(seriesName, ++currentValue);
+        numberOfEventsPerSeries.put(seriesLeaderboardGroupId, ++currentValue);
     }
     
     public EventListViewDTO getResult() {
-        for (Entry<String, EventListEventDTO> latestEventInSeries : lastestEventPerSeries.entrySet()) {
-            String seriesName = latestEventInSeries.getKey();
+        for (Entry<UUID, EventListEventDTO> latestEventInSeries : lastestEventPerSeries.entrySet()) {
+            final UUID seriesLeaderboardGroupId = latestEventInSeries.getKey();
             EventListEventDTO latestEvent = latestEventInSeries.getValue();
-            latestEvent.setEventSeries(new EventListEventSeriesDTO(latestEvent.getId(), seriesName));
-            latestEvent.getEventSeries().setEventsCount(numberOfEventsPerSeries.get(seriesName));
+            latestEvent.setEventSeries(new EventListEventSeriesDTO(
+                    seriesNames.get(seriesLeaderboardGroupId), seriesLeaderboardGroupId));
+            latestEvent.getEventSeries().setEventsCount(numberOfEventsPerSeries.get(seriesLeaderboardGroupId));
             addEventToResults(latestEvent);
         }
+        result.addStatistics(service.getOverallStatisticsByYear());
         return result;
     }
     

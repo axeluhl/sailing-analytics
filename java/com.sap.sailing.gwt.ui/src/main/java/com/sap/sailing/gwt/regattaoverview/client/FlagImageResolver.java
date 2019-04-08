@@ -38,6 +38,13 @@ public class FlagImageResolver {
         flagImageMap.put(Flags.UNIFORM, resources.flagUniform());
         flagImageMap.put(Flags.XRAY, resources.flagXray());
         flagImageMap.put(Flags.ZULU, resources.flagZulu());
+        flagImageMap.put(Flags.OSCAR, resources.flagOscar());
+        flagImageMap.put(Flags.SWC_ZERO, resources.flagSWCZero());
+        flagImageMap.put(Flags.SWC_ONE, resources.flagSWCOne());
+        flagImageMap.put(Flags.SWC_TWO, resources.flagSWCTwo());
+        flagImageMap.put(Flags.SWC_THREE, resources.flagSWCThree());
+        flagImageMap.put(Flags.SWC_FOUR, resources.flagSWCFour());
+        flagImageMap.put(Flags.SWC_FIVE, resources.flagSWCFive());
     }
     
     public ImageResource resolveFlagToImage(Flags flag, boolean isDisplayed, boolean displayStateChanged) {

@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_category_energy_saving">Batterie Sparen</string>
-    <string name="energy_saving_enabled">Batteriesparmodus</string>
-    <string name="preference_energy_saving_is_enabled">Ein</string>
-    <string name="preference_energy_saving_is_disabled">Aus</string>
-    <string name="prefrence_energy_saving_summary_is_enabled">GPS Updates werden alle 30 Sekunden verschickt.</string>
-    <string name="prefrence_energy_saving_summary_is_disabled">GPS Updates werden alle 3 Sekunden verschickt.</string>
+    
+    <string name="preference_energy_saving_sending_interval">Sendeintervall für GPS-Updates auswählen</string> 
+    <string name="preference_energy_saving_sending_interval_summary">Wählen Sie den größtmöglichen Wert, der dennoch eine dem Anwendungsfall entsprechend hohe Aktualisierungsrate ermöglicht.</string>
+   
+    <string name="preference_energy_saving_sending_interval_message">GPS Updates werden%1$s %2$s an den Server gesendet.</string>
+    <string name="preference_energy_saving_sending_interval_message_every">alle</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>sofort</item>
+    	<item>5 Sekunden</item>
+    	<item>10 Sekunden</item>
+    	<item>20 Sekunden</item>
+    	<item>60 Sekunden</item>
+	</string-array>
+    
     <string name="preference_heading_with_declination_subtracted_is_enabled">Ein</string>
     <string name="preference_heading_with_declination_subtracted_is_disabled">Aus</string>
     <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Anzeige: Missweisend</string>

@@ -23,7 +23,7 @@
   <profiles>
     <profile>
       <id>sailing.analytics</id>
-	  <activation>
+      <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
       <properties>

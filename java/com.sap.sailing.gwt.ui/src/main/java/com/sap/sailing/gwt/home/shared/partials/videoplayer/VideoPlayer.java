@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.shared.partials.videoplayer;
 
-import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
@@ -10,6 +9,9 @@ import com.sap.sailing.gwt.ui.client.media.PlayEvent;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
+/**
+ * Video player with custom play button.
+ */
 public class VideoPlayer extends Composite {
     private final VideoPlayerResources.LocalCss style = VideoPlayerResources.INSTANCE.css();
     private VideoJSPlayer videoJSPlayer;
@@ -62,6 +64,7 @@ public class VideoPlayer extends Composite {
         playButton.setVisible(true);
     }
     
+
     public void setVideo(VideoDTO video) {
         if(!initialized) {
             initialize();
@@ -69,13 +72,15 @@ public class VideoPlayer extends Composite {
         videoJSPlayer.setVideo(video.getMimeType(), video.getSourceRef());
     }
     
-    public VideoElement getVideoElement() {
-        return videoJSPlayer.getVideoElement();
-    }
     public boolean isFullscreen() {
         return videoJSPlayer.isFullscreen();
     }
+
     public boolean paused() {
         return videoJSPlayer.paused();
+    }
+
+    public void play() {
+        videoJSPlayer.play();
     }
 }

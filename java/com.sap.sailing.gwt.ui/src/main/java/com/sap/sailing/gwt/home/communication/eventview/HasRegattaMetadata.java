@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.communication.eventview;
 
 import java.util.Date;
 
+import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 
 public interface HasRegattaMetadata {
@@ -11,6 +12,11 @@ public interface HasRegattaMetadata {
         
         private final LabelType stateMarker;
 
+        private RegattaState() {
+            // For GWT serialization only
+            stateMarker = null;
+        }
+        
         private RegattaState(LabelType stateMarker) {
             this.stateMarker = stateMarker;
         }
@@ -28,7 +34,7 @@ public interface HasRegattaMetadata {
 
     String getBoatClass();
     
-    String getBoatCategory();
+    Iterable<String> getLeaderboardGroupNames();
 
     Date getStartDate();
 
@@ -41,4 +47,6 @@ public interface HasRegattaMetadata {
     boolean isFlexibleLeaderboard();
 
     String getDefaultCourseAreaId();
+    
+    EventSeriesReferenceDTO getSeriesReference();
 }

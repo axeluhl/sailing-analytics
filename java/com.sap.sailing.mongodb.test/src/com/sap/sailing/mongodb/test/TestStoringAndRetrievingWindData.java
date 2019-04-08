@@ -5,15 +5,13 @@ import static org.junit.Assert.assertNotNull;
 
 import java.net.UnknownHostException;
 
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoCollection;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -21,6 +19,7 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
@@ -39,29 +38,29 @@ public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
     
     @Test
     public void testDBConnection() throws UnknownHostException, MongoException {
-        DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
+        MongoCollection<Document> coll = db.getCollection(WIND_TEST_COLLECTION);
         assertNotNull(coll);
-        BasicDBObject doc = new BasicDBObject();
+        Document doc = new Document();
         doc.put("truebearingdeg", 234.3);
         doc.put("knotspeed", 10.7);
-        coll.insert(doc);
+        coll.insertOne(doc);
     }
 
     @Test
     public void testDBRead() throws UnknownHostException, MongoException, InterruptedException {
         {
-            DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
+            MongoCollection<Document> coll = db.getCollection(WIND_TEST_COLLECTION);
             assertNotNull(coll);
-            BasicDBObject doc = new BasicDBObject();
+            Document doc = new Document();
             doc.put("truebearingdeg", 234.3);
             doc.put("knotspeed", 10.7);
-            coll.insert(doc);
+            coll.insertOne(doc);
         }
 
         {
-            DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
+            MongoCollection<Document> coll = db.getCollection(WIND_TEST_COLLECTION);
             assertNotNull(coll);
-            DBObject object = coll.findOne();
+            Document object = coll.find().first();
             assertEquals(234.3, object.get("truebearingdeg"));
             assertEquals(10.7, object.get("knotspeed"));
         }
@@ -73,15 +72,15 @@ public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
         Wind wind = new WindImpl(new DegreePosition(123, 45), now, new KnotSpeedWithBearingImpl(10.4,
                 new DegreeBearingImpl(355.5)));
         {
-            DBObject windForMongo = ((MongoObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory()).storeWind(wind);
-            DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
-            coll.insert(windForMongo);
+            Document windForMongo = ((MongoObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory()).storeWind(wind);
+            MongoCollection<Document> coll = db.getCollection(WIND_TEST_COLLECTION);
+            coll.insertOne(windForMongo);
         }
         
         {
-            DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
+            MongoCollection<Document> coll = db.getCollection(WIND_TEST_COLLECTION);
             assertNotNull(coll);
-            DBObject object = coll.findOne();
+            Document object = coll.find().first();
             Wind readWind = ((DomainObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()).loadWind(object);
             assertEquals(wind.getPosition(), readWind.getPosition());
             assertEquals(wind.getKnots(), readWind.getKnots(), 0.00000001);

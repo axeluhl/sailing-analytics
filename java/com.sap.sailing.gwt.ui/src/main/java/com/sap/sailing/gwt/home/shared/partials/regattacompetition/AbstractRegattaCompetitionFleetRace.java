@@ -6,48 +6,70 @@ import static com.sap.sse.common.impl.MillisecondsTimePoint.now;
 
 import java.util.Date;
 
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
-import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
+import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPadController;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public abstract class AbstractRegattaCompetitionFleetRace extends UIObject implements RegattaCompetitionRaceView {
+public abstract class AbstractRegattaCompetitionFleetRace extends Widget implements RegattaCompetitionRaceView {
     
     private static final StringMessages I18N = StringMessages.INSTANCE;
-    protected final AnchorElement anchorUiElement;
+    private final RaceviewerLaunchPadController launchPadController;
+    protected final Element mainElement;
+    private final SimpleRaceMetadataDTO race;
 
-    protected AbstractRegattaCompetitionFleetRace(SimpleRaceMetadataDTO race, String raceViewerUrl) {
-        this.anchorUiElement = getMainUiElement();
-        if (raceViewerUrl != null) {
-            anchorUiElement.setTarget("_blank");
-            anchorUiElement.setHref(raceViewerUrl);
-        }
-        setupRaceState(race.getTrackingState(), race.getViewState());
+    protected AbstractRegattaCompetitionFleetRace(final SimpleRaceMetadataDTO race,
+            RegattaCompetitionPresenter presenter) {
+        this.race = race;
+        this.launchPadController = new RaceviewerLaunchPadController(presenter::getRaceViewerURL);
+        this.mainElement = getMainUiElement();
+        setupRaceState(race);
         getRaceNameUiElement().setInnerText(race.getRaceName());
         setupRaceStart(race.getStart());
-        setElement(anchorUiElement);
+        setElement(mainElement);
+        if (race.hasValidTrackingData()) {
+            sinkEvents(Event.ONCLICK);
+        }
     }
     
-    private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {
-        // boolean isUntrackedRace = trackingState != RaceTrackingState.TRACKED_VALID_DATA;
-        boolean isUntrackedRace = isUntrackedRace(trackingState);
-        if (viewState == RaceViewState.RUNNING) {
-            anchorUiElement.addClassName(getRaceLiveStyleName());
-            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.live() : I18N.actionWatch());
-        } else if (viewState == RaceViewState.FINISHED) {
-            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.raceIsFinished() : I18N.actionAnalyze());
-        } else {
-            anchorUiElement.addClassName(getRacePlannedStyleName());
-            if (viewState == RaceViewState.SCHEDULED) getRaceStateUiElement().setInnerText(I18N.raceIsPlanned());
-            else getRaceStateUiElement().setInnerText(viewState.getLabel());
+    @Override
+    public void onBrowserEvent(Event event) {
+        // Only handle click events if valid tracking data is available
+        if (!race.hasValidTrackingData() || event.getTypeInt() != Event.ONCLICK) {
+            return; 
         }
-        setStyleName(anchorUiElement, getRaceUntrackedStyleName(), isUntrackedRace);
+
+        // If rendered as direct link button, open link in new tab directly instead of showing the menu popup
+        if (launchPadController.renderAsDirectLink(race)) {
+            Window.open(launchPadController.getDirectLinkUrl(race), "_blank", "");
+            return;
+        }
+        
+        launchPadController.showLaunchPad(race, this.getElement());
+    }
+    
+    private void setupRaceState(SimpleRaceMetadataDTO race) {
+        final boolean isUntrackedRace = !race.hasValidTrackingData();
+        if (race.isRunning()) {
+            mainElement.addClassName(getRaceLiveStyleName());
+            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.live() : I18N.actionWatch());
+        } else if (race.isFinished()) {
+            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.raceIsFinished() : I18N.tracking());
+        } else {
+            mainElement.addClassName(getRacePlannedStyleName());
+            if (race.isScheduled()) {
+                getRaceStateUiElement().setInnerText(I18N.raceIsPlanned());
+            } else {
+                getRaceStateUiElement().setInnerText(race.getViewState().getLabel());
+            }
+        }
+        setStyleName(mainElement, getRaceUntrackedStyleName(), isUntrackedRace);
     }
     
     private void setupRaceStart(Date startDate) {
@@ -58,7 +80,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends UIObject imple
         }
     }
 
-    protected abstract AnchorElement getMainUiElement();
+    protected abstract Element getMainUiElement();
     
     protected abstract Element getRaceNameUiElement();
     
@@ -72,9 +94,4 @@ public abstract class AbstractRegattaCompetitionFleetRace extends UIObject imple
     
     protected abstract String getRaceUntrackedStyleName();
     
-    // TODO: As long as there is no mobile race viewer, show all races as untracked
-    //       This is a temporary method to be able to fulfill this requirement
-    protected boolean isUntrackedRace(RaceTrackingState trackingState) {
-        return trackingState != RaceTrackingState.TRACKED_VALID_DATA;
-    }
 }

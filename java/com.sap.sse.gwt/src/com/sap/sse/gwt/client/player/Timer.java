@@ -6,6 +6,8 @@ import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Manages a timer and can auto-advance it at a given acceleration/deceleration rate, with a given delay compared to
@@ -391,6 +393,15 @@ public class Timer {
     
     public Date getLiveTimePointAsDate() {
         return new Date(getLiveTimePointInMillis());
+    }
+    
+    public TimePoint getLiveTimePoint() {
+        return new MillisecondsTimePoint(getLiveTimePointInMillis());
+    }
+
+    public void reset() {
+        timeListeners.clear();
+        playStateListeners.clear();
     }
 
 }

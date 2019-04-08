@@ -5,12 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
-import com.sap.sailing.android.shared.logging.ExLog;
 
 public class SelectionBuilder {
 

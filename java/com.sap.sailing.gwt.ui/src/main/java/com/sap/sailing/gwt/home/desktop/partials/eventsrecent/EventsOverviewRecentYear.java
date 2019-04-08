@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -15,10 +14,14 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListYearDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.partials.statistics.DesktopStatisticsBoxView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.statistics.YearStatisticsBox;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -31,12 +34,6 @@ public class EventsOverviewRecentYear extends Composite {
 
     @UiField SpanElement year;
     @UiField SpanElement eventsCount;
-    @UiField SpanElement countriesCount;
-    @UiField SpanElement sailorsCount;
-    @UiField SpanElement trackedRacesCount;
-    @UiField Element countriesContainer;
-    @UiField Element sailorsContainer;
-    @UiField Element trackedRacesContainer;
     @UiField FlowPanel recentEventsTeaserPanel;
     @UiField DivElement contentDiv;
     @UiField HTMLPanel headerDiv;
@@ -54,31 +51,22 @@ public class EventsOverviewRecentYear extends Composite {
         
         this.year.setInnerText(String.valueOf(yearDTO.getYear()));
         this.eventsCount.setInnerText(i18n.eventsCount(yearDTO.getEventCount()));
-        if(yearDTO.getSailorCount() > 0) {
-            sailorsCount.setInnerText(i18n.competitorsCount(yearDTO.getSailorCount()));
-        } else {
-            sailorsContainer.removeFromParent();
-        }
-        if(yearDTO.getCountryCount() > 0) {
-            countriesCount.setInnerText(i18n.countriesCount(yearDTO.getCountryCount()));
-        } else {
-            countriesContainer.removeFromParent();
-        }
-        if(yearDTO.getTrackedRacesCount() > 0) {
-            trackedRacesCount.setInnerText(i18n.trackedRacesCount(yearDTO.getTrackedRacesCount()));
-        } else {
-            trackedRacesContainer.removeFromParent();
-        }
+        
         for (EventListEventDTO eventDTO : events) {
-            PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
-            RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO, eventDTO.getState().getListStateMarker());
-            if (eventDTO.getEventSeries() != null) {
-                String seriesId = eventDTO.getEventSeries().getId().toString(), baseUrl = eventDTO.getBaseURL();
-                PlaceNavigation<?> seriesNavigation = navigator.getEventSeriesNavigation(seriesId, baseUrl, eventDTO.isOnRemoteServer());
+            final PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
+            final RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO, eventDTO.getState().getListStateMarker());
+            final EventListEventSeriesDTO eventSeriesData = eventDTO.getEventSeries();
+            if (eventSeriesData != null) {
+                final SeriesContext ctx = SeriesContext
+                        .createWithLeaderboardGroupId(eventSeriesData.getSeriesLeaderboardGroupId());
+                final String baseUrl = eventDTO.getBaseURL();
+                final PlaceNavigation<?> seriesNavigation = navigator.getEventSeriesNavigation(ctx, baseUrl, eventDTO.isOnRemoteServer());
                 recentEvent.setSeriesInformation(seriesNavigation, eventDTO.getEventSeries());
             }
             recentEventsTeaserPanel.add(recentEvent);
         }
+        recentEventsTeaserPanel.add(new YearStatisticsBox(new DesktopStatisticsBoxView(true,
+                StringMessages.INSTANCE.statisticsFor(Integer.toString(yearDTO.getYear()))), yearDTO));
         headerDiv.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

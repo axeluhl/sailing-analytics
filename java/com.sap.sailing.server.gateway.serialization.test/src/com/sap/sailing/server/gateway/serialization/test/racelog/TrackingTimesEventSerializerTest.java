@@ -12,8 +12,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
@@ -44,8 +44,8 @@ public class TrackingTimesEventSerializerTest {
         return new RaceLogStartOfTrackingEventDeserializer(createCompetitorDeserializer());
     }
 
-    private JsonDeserializer<Competitor> createCompetitorDeserializer() {
-        return new CompetitorJsonDeserializer(DomainFactory.INSTANCE.getCompetitorStore());
+    private JsonDeserializer<DynamicCompetitor> createCompetitorDeserializer() {
+        return new CompetitorJsonDeserializer(DomainFactory.INSTANCE.getCompetitorAndBoatStore());
     }
 
     private JsonDeserializer<RaceLogEvent> createEndOfTrackingEventDeserializer() {
@@ -54,8 +54,7 @@ public class TrackingTimesEventSerializerTest {
 
     private CompetitorJsonSerializer createCompetitorSerializer() {
         return new CompetitorJsonSerializer(new TeamJsonSerializer(
-                new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(
-                new BoatClassJsonSerializer()));
+                new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()));
     }
 
     @Test

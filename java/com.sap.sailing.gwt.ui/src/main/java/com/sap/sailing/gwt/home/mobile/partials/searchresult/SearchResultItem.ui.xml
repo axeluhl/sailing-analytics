@@ -4,9 +4,11 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.searchresult.SearchResultResources" />
-	<a class="{local_res.css.searchresult_item} {res.mediaCss.small12} {res.mediaCss.columns}">
-		<div class="{local_res.css.searchresult_item_headline}" ui:field="resultTitleUi"> </div>
+	<div class="{local_res.css.searchresult_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+		<a class="{local_res.css.searchresult_item_link}" ui:field="anchorUi" >
+			<div class="{local_res.css.searchresult_item_headline}" ui:field="resultTitleUi"> </div>
+			<div class="{local_res.css.searchresult_item_arrow}"></div>
+		</a>
 		<div ui:field="eventInfoContainerUi"></div>
-		<div class="{local_res.css.searchresult_item_arrow}"></div>
-	</a>
+	</div>
 </ui:UiBinder>

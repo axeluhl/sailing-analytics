@@ -4,18 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.bson.Document;
 import org.junit.Test;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
@@ -23,9 +18,11 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.mongodb.MongoDBService;
+
+import junit.framework.TestCase;
 
 public class LeaderboardStorageTest extends TestCase {
 
@@ -58,25 +55,24 @@ public class LeaderboardStorageTest extends TestCase {
         List<DynamicPerson> sailorList = new ArrayList<DynamicPerson>();
         sailorList.add(new PersonImpl("sailor", new NationalityImpl("GER"), null, ""));
         DynamicTeam team = new TeamImpl("team", sailorList, null);
-        DynamicBoat boat = new BoatImpl("woot", service.getBaseDomainFactory().getOrCreateBoatClass("H16"), "70155");
         String competitorId = "testC";
-        Competitor competitor = service.getBaseDomainFactory().getOrCreateCompetitor(competitorId, "Test C", null,
-                null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        Competitor competitor = service.getBaseDomainFactory().getOrCreateCompetitor(competitorId, "Test C", null, null,
+                null, null, team, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
 
         double carriedPoints = 2.0;
         leaderboard.setCarriedPoints(competitor, carriedPoints);
         service.getMongoObjectFactory().storeLeaderboard(leaderboard);
 
         // Test in db
-        DBCollection leaderboardCollection = MongoDBService.INSTANCE.getDB().getCollection("LEADERBOARDS");
+        MongoCollection<Document> leaderboardCollection = MongoDBService.INSTANCE.getDB().getCollection("LEADERBOARDS");
         BasicDBObject query = new BasicDBObject();
         query.put("LEADERBOARD_NAME", LEADERBOARD_NAME);
-        DBCursor leaderboardObjectCursor = leaderboardCollection.find();
-        DBObject dbLeaderboard = leaderboardObjectCursor.next();
-        BasicDBList carriedPointsById = (BasicDBList) dbLeaderboard.get("LEADERBOARD_CARRIED_POINTS_BY_ID");
+        FindIterable<Document> leaderboardObjectCursor = leaderboardCollection.find();
+        Document dbLeaderboard = leaderboardObjectCursor.iterator().next();
+        Iterable<?> carriedPointsById = (Iterable<?>) dbLeaderboard.get("LEADERBOARD_CARRIED_POINTS_BY_ID");
         if (carriedPointsById != null) {
             for (Object o : carriedPointsById) {
-                DBObject competitorIdAndCarriedPoints = (DBObject) o;
+                Document competitorIdAndCarriedPoints = (Document) o;
                 Serializable competitorIdFromDB = (Serializable) competitorIdAndCarriedPoints.get("COMPETITOR_ID");
                 Double carriedPointsForCompetitor = ((Number) competitorIdAndCarriedPoints
                         .get("LEADERBOARD_CARRIED_POINTS")).doubleValue();

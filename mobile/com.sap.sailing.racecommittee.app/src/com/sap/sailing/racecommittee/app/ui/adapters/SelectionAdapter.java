@@ -1,5 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.List;
+
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
+
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,13 +16,6 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
-
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
-
-import java.util.List;
 
 public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.ViewHolder> {
 
@@ -72,7 +72,7 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.View
             holder.mSwitch.setVisibility(View.VISIBLE);
         }
 
-        if (AppUtils.with(mContext).is10inch() && AppUtils.with(mContext).isLand()) {
+        if (AppUtils.with(mContext).is10inch() && AppUtils.with(mContext).isLandscape()) {
             int minHeight = mContext.getResources().getDimensionPixelSize(R.dimen.selector_header_min_height);
             int height = mParent.getMeasuredHeight() / mItems.size();
             int maxHeight = mContext.getResources().getDimensionPixelSize(R.dimen.selector_header_height);

@@ -16,6 +16,11 @@ import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 
+/**
+ * {@link RaceCallback} implementation, which prepares races information to be displayed in the competition format.
+ * Therefore, it builds a hierarchy of DTOs representing the {@link RaceCompetitionFormatSeriesDTO series},
+ * {@link RaceCompetitionFormatFleetDTO fleets} and {@link SimpleRaceMetadataDTO races} of a regatta.
+ */
 public class RaceCompetitionFormatDataCalculator implements RaceCallback {
     
     private final Map<String, Map<FleetMetadataDTO, SeriesFleetData>> dataPerSeriesAndFleet = new LinkedHashMap<>();
@@ -39,6 +44,10 @@ public class RaceCompetitionFormatDataCalculator implements RaceCallback {
         return seriesFleetData;
     }
     
+    /**
+     * @return collection of {@link RaceCompetitionFormatSeriesDTO}s representing the regattas hierarchy, containing the
+     *         various series, fleets and races.
+     */
     public Collection<RaceCompetitionFormatSeriesDTO> getResult() {
         Set<RaceCompetitionFormatSeriesDTO> result = new LinkedHashSet<>();
         for (Entry<String, Map<FleetMetadataDTO, SeriesFleetData>> seriesData : dataPerSeriesAndFleet.entrySet()) {
@@ -65,7 +74,7 @@ public class RaceCompetitionFormatDataCalculator implements RaceCallback {
     }
     
     private class SeriesFleetData {
-        private final Set<SimpleRaceMetadataDTO> races = new HashSet<>();
+        private final Set<SimpleRaceMetadataDTO> races = new LinkedHashSet<>();
         private final Set<SimpleCompetitorDTO> competitors = new HashSet<>();
     }
 

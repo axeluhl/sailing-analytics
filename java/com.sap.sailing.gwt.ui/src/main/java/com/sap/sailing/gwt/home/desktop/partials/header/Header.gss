@@ -112,16 +112,16 @@
   background-repeat: no-repeat;
   background-position: center center;
   background-size: contain;
-  background-image: url('images/home/loggedout.svg');
+  background-image: resourceUrl('loggedoutOpen');
   margin-left: 1rem;
   cursor: pointer;
 }
 .user_menu_button.open {
-  background-image: url('images/home/loggedout-open.svg');
+  background-image: resourceUrl('loggedout');
 }
 .user_menu_button.loggedin {
-  background-image: url('images/home/loggedin.svg');
+  background-image: resourceUrl('loggedin');
 }
 .user_menu_button.loggedin.open {
-  background-image: url('images/home/loggedin-open.svg');
+  background-image: resourceUrl('loggedinOpen');
 }

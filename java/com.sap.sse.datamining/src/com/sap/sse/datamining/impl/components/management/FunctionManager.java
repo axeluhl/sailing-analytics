@@ -20,10 +20,12 @@ import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.management.FunctionProvider;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.exceptions.MultipleDataMiningComponentsFoundForDTOException;
+import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.functions.ConcatenatingCompoundFunction;
+import com.sap.sse.datamining.impl.functions.IdentityFunction;
 import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
@@ -67,6 +69,9 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
 
     private final FunctionFactory functionFactory;
     
+    protected final IdentityFunction identityFunction;
+    protected final FunctionDTO identityFunctionDTO;
+    
     protected final Map<Class<?>, Set<Function<?>>> statistics;
     protected final Map<Class<?>, Set<Function<?>>> dimensions;
     protected final Map<Class<?>, Set<Function<?>>> externalFunctions;
@@ -75,6 +80,9 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
 
     public FunctionManager() {
         functionFactory = new FunctionFactory();
+        
+        identityFunction = new IdentityFunction();
+        identityFunctionDTO = new DataMiningDTOFactory().createFunctionDTO(identityFunction);
         
         statistics = new HashMap<>();
         dimensions = new HashMap<>();
@@ -112,7 +120,8 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             boolean functionHasBeenRegistered = false;
             if (isValidDimension.matches(method) || (scanForStatistics && isValidStatistic.matches(method) )) {
                 functionHasBeenRegistered = registerFunction(previousFunctions, method);
-            } else if (isValidConnector.matches(method)) {
+            }
+            if (isValidConnector.matches(method)) {
                 functionHasBeenRegistered = handleConnectorMethod(method, previousFunctions, scanForStatistics);
             }
             functionsHaveBeenRegistered = functionsHaveBeenRegistered ? true : functionHasBeenRegistered;
@@ -209,6 +218,11 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
     
     @Override
+    public IdentityFunction getIdentityFunction() {
+        return identityFunction;
+    }
+    
+    @Override
     public Collection<Function<?>> getAllStatistics() {
         return asSet(statistics);
     }
@@ -284,52 +298,86 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
     
     @Override
-    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
+    public ReducedDimensions getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsMappedByLevel = getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
-        Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensions = new HashMap<>();
         List<? extends DataRetrieverLevel<?, ?>> retrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();
+        ReducedDimensions reducedDimensions = new ReducedDimensions();
         for (DataRetrieverLevel<?, ?> retrieverLevel : retrieverLevels) {
-            Iterable<Function<?>> dimensions = dimensionsMappedByLevel.get(retrieverLevel);
+            Iterable<Function<?>> dimensionsOfLevel = dimensionsMappedByLevel.get(retrieverLevel);
             DataRetrieverLevel<?, ?> previousRetrieverLevel = retrieverLevel.getLevel() > 0 ? retrieverLevels.get(retrieverLevel.getLevel() - 1) : null;
-            if (reducedDimensions.isEmpty() || previousRetrieverLevel == null) {
-                reducedDimensions.put(retrieverLevel, dimensions);
+            final ReducedDimensions reducedDimensionsForLevel;
+            if (previousRetrieverLevel == null) {
+                assert reducedDimensions.getReducedDimensions().isEmpty();
+                // for the first retriever level no reduction takes place; create a ReducedDimensions object
+                // to "add" onto the empty ReducedDimensions object using the full set of dimensions of this level
+                final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> currentLevelToAllItsDimensions = new HashMap<>();
+                final Map<Function<?>, Function<?>> fromOriginalToReducedDimension = new HashMap<>();
+                currentLevelToAllItsDimensions.put(retrieverLevel, dimensionsOfLevel);
+                for (final Function<?> dimension : dimensionsOfLevel) {
+                    fromOriginalToReducedDimension.put(dimension, dimension);
+                }
+                reducedDimensionsForLevel = new ReducedDimensions(currentLevelToAllItsDimensions, fromOriginalToReducedDimension);
             } else {
-                reducedDimensions.put(retrieverLevel, reduce(dimensions, previousRetrieverLevel, dimensionsMappedByLevel.get(previousRetrieverLevel)));
+                reducedDimensionsForLevel = reduce(dimensionsOfLevel, previousRetrieverLevel,
+                        dimensionsMappedByLevel.get(previousRetrieverLevel), retrieverLevel);
             }
+            reducedDimensions = reducedDimensions.createByAdd(reducedDimensionsForLevel,
+                    /* replaceExistingMappingsFromOriginalToReducedDimension */ true);
         }
         return reducedDimensions;
     }
     
-    private Iterable<Function<?>> reduce(Iterable<Function<?>> dimensionsToReduce, DataRetrieverLevel<?, ?> previousRetrieverLevel, Iterable<Function<?>> previousDimensions) {
+    private ReducedDimensions reduce(Iterable<Function<?>> dimensionsToReduce,
+            DataRetrieverLevel<?, ?> previousRetrieverLevel, Iterable<Function<?>> previousDimensions,
+            DataRetrieverLevel<?, ?> currentRetrieverLevel) {
+        final Iterable<Function<?>> reducedDimensions;
+        final Map<Function<?>, Function<?>> fromOriginalToReducedDimensions = new HashMap<>();
         if (Util.isEmpty(previousDimensions)) {
-            return dimensionsToReduce;
-        }
-        
-        Collection<Function<?>> reducedDimensions = new HashSet<>();
-        for (Function<?> dimension : dimensionsToReduce) {
-            boolean isAllowed = true;
-            if (ConcatenatingCompoundFunction.class.isAssignableFrom(dimension.getClass())) {
-                ConcatenatingCompoundFunction<?> compoundDimension = (ConcatenatingCompoundFunction<?>) dimension;
-                List<MethodWrappingFunction<?>> simpleFunctions = compoundDimension.getSimpleFunctions();
-                if (previousRetrieverLevel.getRetrievedDataType().isAssignableFrom(simpleFunctions.get(0).getReturnType())) {
-                    List<MethodWrappingFunction<?>> subList = simpleFunctions.subList(1, compoundDimension.getSimpleFunctions().size());
-                    Function<?> subFunction = subList.size() == 1 ? subList.get(0)
-                                                                        : functionFactory.createCompoundFunction(subList);
-                    if (Util.contains(previousDimensions, subFunction)) {
-                        isAllowed = false;
+            reducedDimensions = dimensionsToReduce;
+            for (final Function<?> dimensionToReduce : dimensionsToReduce) {
+                fromOriginalToReducedDimensions.put(dimensionToReduce, dimensionToReduce);
+            }
+        } else {
+            final Set<Function<?>> modifiableReducedDimensions = new HashSet<>();
+            reducedDimensions = modifiableReducedDimensions;
+            for (Function<?> dimension : dimensionsToReduce) {
+                boolean isAllowed = true;
+                if (ConcatenatingCompoundFunction.class.isAssignableFrom(dimension.getClass())) {
+                    ConcatenatingCompoundFunction<?> compoundDimension = (ConcatenatingCompoundFunction<?>) dimension;
+                    List<MethodWrappingFunction<?>> simpleFunctions = compoundDimension.getSimpleFunctions();
+                    if (previousRetrieverLevel.getRetrievedDataType().isAssignableFrom(simpleFunctions.get(0).getReturnType())) {
+                        List<MethodWrappingFunction<?>> subList = simpleFunctions.subList(1, simpleFunctions.size());
+                        Function<?> subFunction = subList.size() == 1 ? subList.get(0)
+                                                                            : functionFactory.createCompoundFunction(subList);
+                        if (Util.contains(previousDimensions, subFunction)) {
+                            isAllowed = false; // TODO record the reduction process, mapping original dimension to equal element from previousDimensions
+                            for (final Function<?> previousDimension : previousDimensions) {
+                                if (previousDimension.equals(subFunction)) {
+                                    fromOriginalToReducedDimensions.put(dimension, previousDimension);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
-            }
-            if (isAllowed) {
-                reducedDimensions.add(dimension);
+                if (isAllowed) {
+                    modifiableReducedDimensions.add(dimension);
+                    fromOriginalToReducedDimensions.put(dimension, dimension);
+                }
             }
         }
-        return reducedDimensions;
+        final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensionsPerRetrieverLevel = new HashMap<>();
+        reducedDimensionsPerRetrieverLevel.put(currentRetrieverLevel, reducedDimensions);
+        return new ReducedDimensions(reducedDimensionsPerRetrieverLevel, fromOriginalToReducedDimensions);
     }
     
     @Override
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO, ClassLoader classLoader) {
+        if (identityFunctionDTO.equals(functionDTO)) {
+            return identityFunction;
+        }
+        
         Function<?> function = null;
         if (functionDTO != null) {
             try {

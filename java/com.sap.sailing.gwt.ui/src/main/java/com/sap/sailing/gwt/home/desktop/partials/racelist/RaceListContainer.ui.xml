@@ -1,14 +1,19 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" 
-		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
-		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
-	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources" />
-	<g:HTMLPanel addStyleNames="{local_res.css.raceslistlive}">
-    	<h3 ui:field="titleUi"></h3>
-    	<div style="display: none;" ui:field="infoUi"></div>
-    	<div style="display: none; font-weight: bold; font-style: italic;" ui:field="noContentPlaceholderUi"></div>
-    	<dp:racelist.AbstractRaceList ui:field="raceListUi"/>
-	</g:HTMLPanel>
+        xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
+        xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources" />
+    <g:HTMLPanel addStyleNames="{local_res.css.raceslistlive}">
+        <h3 ui:field="titleUi" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mediaCss.large4}"/>
+        <div ui:field="legend" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mediaCss.large8} {local_res.css.legend}">
+            <div ui:field="iconWind" class="{local_res.css.iconWind}"><ui:text from='{i18n.eventRegattaRacesLegendWind}'/></div>
+            <div ui:field="iconVideo" class="{local_res.css.iconVideo}"><ui:text from='{i18n.eventRegattaRacesLegendVideo}'/></div>
+            <div ui:field="iconAudio" class="{local_res.css.iconAudio}"><ui:text from='{i18n.eventRegattaRacesLegendAudio}'/></div>
+        </div>
+        <div style="display: none;" ui:field="infoUi"></div>
+        <div style="display: none; font-weight: bold; font-style: italic;" ui:field="noContentPlaceholderUi"></div>
+        <dp:racelist.AbstractRaceList ui:field="raceListUi"/>
+    </g:HTMLPanel>
 </ui:UiBinder> 

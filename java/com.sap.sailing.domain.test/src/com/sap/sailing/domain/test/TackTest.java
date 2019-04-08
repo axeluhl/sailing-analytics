@@ -4,10 +4,14 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -18,7 +22,6 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -26,6 +29,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 
@@ -35,13 +39,17 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
     @Override
     @Before
     public void setUp() {
-        competitor = new CompetitorImpl(123, "Wolfgang Hunger", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+        BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
+        competitor = new CompetitorImpl(123, "Wolfgang Hunger", "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                 new PersonImpl("Wolfgang Hunger", new NationalityImpl("GER"),
                                 /* dateOfBirth */null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas",
                                         new NationalityImpl("NED"),
-                                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", Collections.singleton(competitor),
+                                        /* dateOfBirth */null, "This is Rigo, the coach")),
+                                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat boat = new BoatImpl(competitor.getId(), "Wolfgang Hunger's boat", boatClass, "123", null);
+        Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(competitor, boat);
+        setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", competitorsAndBoats,
                 new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()), /* useMarkPassingCalculator */ false));
     }
     

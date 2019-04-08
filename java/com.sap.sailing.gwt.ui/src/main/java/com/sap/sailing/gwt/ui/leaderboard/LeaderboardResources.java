@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
-interface LeaderboardResources extends ClientBundle {
+public interface LeaderboardResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/arrow-gain.png")
     ImageResource arrowGainIcon();
 
@@ -48,5 +48,8 @@ interface LeaderboardResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/jump_forward_button_disabled.png")
     ImageResource jumpForwardButtonDisabled();
+    
+    @Source("medal_small.png")
+    ImageResource medalSmall();
 
 }

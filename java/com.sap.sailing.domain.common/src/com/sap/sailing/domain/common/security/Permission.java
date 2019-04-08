@@ -6,14 +6,17 @@ package com.sap.sailing.domain.common.security;
 public enum Permission implements com.sap.sse.security.shared.Permission {
     // AdminConsole permissions
     MANAGE_EVENTS,
+    MANAGE_PAIRING_LISTS,
     MANAGE_REGATTAS,
     MANAGE_TRACKED_RACES,
     SHOW_TRACKED_RACES,
     MANAGE_RACELOG_TRACKING,
     MANAGE_ALL_COMPETITORS,
+    MANAGE_ALL_BOATS,
     MANAGE_COURSE_LAYOUT,
     MANAGE_WIND,
     MANAGE_IGTIMI_ACCOUNTS,
+    MANAGE_EXPEDITION_DEVICE_CONFIGURATIONS,
     MANAGE_LEADERBOARDS,
     MANAGE_LEADERBOARD_RESULTS,
     MANAGE_LEADERBOARD_GROUPS,
@@ -30,6 +33,7 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     MANAGE_MARK_PASSINGS,
     MANAGE_MARK_POSITIONS,
     CAN_REPLAY_DURING_LIVE_RACES,
+    DETAIL_TIMER,
     
     // back-end permissions
     EVENT,
@@ -37,6 +41,7 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     LEADERBOARD,
     LEADERBOARD_GROUP,
     TRACKED_RACE,
+    DATA_MINING,
     ;
 
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface

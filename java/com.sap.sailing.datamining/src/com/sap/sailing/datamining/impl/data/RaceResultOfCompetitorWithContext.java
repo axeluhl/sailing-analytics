@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.datamining.Activator;
+import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
@@ -14,7 +16,6 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableSpeed;
@@ -26,10 +27,13 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.datamining.data.Cluster;
+import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompetitorContext {
     private final static Logger logger = Logger.getLogger(RaceResultOfCompetitorWithContext.class.getName());
@@ -62,15 +66,22 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
-    public double getRelativeRank() {
-        Leaderboard leaderboard = getLeaderboard();
-        final TimePoint now = MillisecondsTimePoint.now();
-        double competitorCount = Util.size(leaderboard.getCompetitors());
-        double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
-        double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ?
-                competitorCount - points : points;
-        final double result = relativeLowPoints / competitorCount;
+    public String getRegattaName() {
+        Leaderboard leaderboard = getLeaderboard();;
+        final String result = leaderboard.getName();
         return result;
+    }
+    
+    @Override
+    public ClusterDTO getPercentageClusterForRelativeScore() {
+        Double relativeScore = getRelativeRank();
+        if (relativeScore == null) {
+            return null;
+        }
+        
+        SailingClusterGroups clusterGroups = Activator.getClusterGroups();
+        Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(relativeScore);
+        return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
     }
 
     @Override
@@ -157,10 +168,30 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
-    public String getRegattaName() {
-        Leaderboard leaderboard = getLeaderboard();;
-        final String result = leaderboard.getName();
-        return result;
+    public Double getRelativeRank() {
+        Leaderboard leaderboard = getLeaderboard();
+        final TimePoint now = MillisecondsTimePoint.now();
+        double competitorCount = Util.size(leaderboard.getCompetitors());
+        Double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
+        if (points != null) {
+            double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ?
+                    // calculate the points for first rank (doesn't necessarily need to be the number
+                    // of competitors!) and subtract the points
+                    leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
+                            /* rank */ 1, // which score does the winner get in this high-point scheme?
+                            /* numberOfCompetitorsInRaceFetcher */ ()->Util.size(raceColumn.getAllCompetitors()),
+                            /* numberOfCompetitorsInLeaderboardFetcher */ leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(),
+                            now) - points
+                    : points;
+            final double result = relativeLowPoints / competitorCount;
+            return result;
+        }
+        return null;
+    }
+    
+    @Override
+    public Double getAbsoluteRank() {
+        return getLeaderboard().getTotalPoints(competitor, raceColumn, MillisecondsTimePoint.now());
     }
 
     @Override
@@ -178,15 +209,8 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
 
     @Override
     public Boolean isWin() {
-        Leaderboard leaderboard = getLeaderboard();
         final TimePoint now = MillisecondsTimePoint.now();
-        double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
-        if (leaderboard.getScoringScheme().isHigherBetter()) {
-            double competitorCount = Util.size(leaderboard.getCompetitors());
-            return points >= (competitorCount - 0.05);
-        } else {
-            return points <= 1.05;
-        }
+        return getLeaderboard().isWin(competitor, raceColumn, now);
     }
     
 }

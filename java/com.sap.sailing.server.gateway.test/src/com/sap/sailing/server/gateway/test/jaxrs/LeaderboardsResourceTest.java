@@ -31,6 +31,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.gateway.jaxrs.api.AbstractLeaderboardsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -42,12 +43,12 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     private String regattaBaseName = "TestRegatta";
     
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
     }
     
     private void dropAndCreateRegatta() {
-        service.getDB().dropDatabase();
+        service.getDB().drop();
         List<Series> series = new ArrayList<Series>();
         List<Fleet> fleets = new ArrayList<Fleet>();
         List<String> raceColumnNames = new ArrayList<String>();
@@ -57,8 +58,9 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
                 raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
         regatta = racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaBaseName, boatClassName), boatClassName, 
-                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series, /*persistent*/ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true, OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series, /*persistent*/ true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
         List<Competitor> competitors = createCompetitors(4);
@@ -82,7 +84,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         dropAndCreateRegatta();
         
         LeaderboardsResource resource = spyResource(new LeaderboardsResource());
-        Response leaderboardReponse = resource.getLeaderboard(regatta.getName(), LeaderboardsResource.ResultStates.Final, null);
+        Response leaderboardReponse = resource.getLeaderboard(regatta.getName(), AbstractLeaderboardsResource.ResultStates.Final, null);
 
         String jsonString = (String) leaderboardReponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
@@ -92,7 +94,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         String jsonResultState = (String) jsonObject.get("resultState");
         
         assertTrue(regattaLeaderboard.getName().equals(jsonLeaderboardName));
-        assertTrue(LeaderboardsResource.ResultStates.Final.name().equals(jsonResultState));
+        assertTrue(AbstractLeaderboardsResource.ResultStates.Final.name().equals(jsonResultState));
 
         // resultTimepoint should be null if there are no 'final' results yet 
         TimePoint resultTimePoint = parseTimepointFromJsonNumber((Long) jsonObject.get("resultTimepoint"));
@@ -107,7 +109,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         dropAndCreateRegatta();
         
         LeaderboardsResource resource = spyResource(new LeaderboardsResource());
-        Response leaderboardReponse = resource.getLeaderboard(regatta.getName(), LeaderboardsResource.ResultStates.Final, null);
+        Response leaderboardReponse = resource.getLeaderboard(regatta.getName(), AbstractLeaderboardsResource.ResultStates.Final, null);
 
         String jsonString = (String) leaderboardReponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
@@ -116,8 +118,8 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         String jsonLeaderboardName = (String) jsonObject.get("name");
         String jsonResultState = (String) jsonObject.get("resultState");
         
-        assertTrue(regattaLeaderboard.getName().equals(jsonLeaderboardName));
-        assertTrue(LeaderboardsResource.ResultStates.Final.name().equals(jsonResultState));
+        assertEquals(regattaLeaderboard.getName(), jsonLeaderboardName);
+        assertEquals(AbstractLeaderboardsResource.ResultStates.Final.name(), jsonResultState);
 
         TimePoint resultTimePoint = parseTimepointFromJsonNumber((Long) jsonObject.get("resultTimepoint"));
         assertNull(resultTimePoint);
@@ -125,7 +127,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         regattaLeaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(MillisecondsTimePoint.now());
         
         LeaderboardsResource resource2 = spyResource(new LeaderboardsResource());
-        Response leaderboardReponse2 = resource2.getLeaderboard(regatta.getName(), LeaderboardsResource.ResultStates.Final, null);
+        Response leaderboardReponse2 = resource2.getLeaderboard(regatta.getName(), AbstractLeaderboardsResource.ResultStates.Final, null);
 
         String jsonString2 = (String) leaderboardReponse2.getEntity();        
         obj= JSONValue.parse(jsonString2);
@@ -138,23 +140,17 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
     @Test
     public void testExportLeaderboardWithLiveResultStateAsJson() throws Exception {
         dropAndCreateRegatta();
-        
         LeaderboardsResource resource = spyResource(new LeaderboardsResource());
-        Response leaderboardReponse = resource.getLeaderboard(regatta.getName(), LeaderboardsResource.ResultStates.Live, null);
-
+        Response leaderboardReponse = resource.getLeaderboard(regatta.getName(), AbstractLeaderboardsResource.ResultStates.Live, null);
         String jsonString = (String) leaderboardReponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
         JSONObject jsonObject = (JSONObject) obj;
-        
         String jsonLeaderboardName = (String) jsonObject.get("name");
         String jsonResultState = (String) jsonObject.get("resultState");
-        
         assertTrue(regattaLeaderboard.getName().equals(jsonLeaderboardName));
-        assertTrue(LeaderboardsResource.ResultStates.Live.name().equals(jsonResultState));
-
+        assertTrue(AbstractLeaderboardsResource.ResultStates.Live.name().equals(jsonResultState));
         TimePoint resultTimePoint = parseTimepointFromJsonNumber((Long) jsonObject.get("resultTimepoint"));
         assertNotNull(resultTimePoint);
-        
         JSONArray jsonCompetitors = (JSONArray) jsonObject.get("competitors");
         assertTrue(jsonCompetitors.size() == 4);
     }
@@ -170,7 +166,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
 
         // call the servlet for the first time
         LeaderboardsResource resource = spyResource(new LeaderboardsResource());
-        Response leaderboardReponse = resource.getLeaderboard(regatta.getName(), LeaderboardsResource.ResultStates.Final, null);
+        Response leaderboardReponse = resource.getLeaderboard(regatta.getName(), AbstractLeaderboardsResource.ResultStates.Final, null);
 
         String jsonString = (String) leaderboardReponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
@@ -180,7 +176,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         String jsonResultState = (String) jsonObject.get("resultState");
         
         assertTrue(regattaLeaderboard.getName().equals(jsonLeaderboardName));
-        assertTrue(LeaderboardsResource.ResultStates.Final.name().equals(jsonResultState));
+        assertTrue(AbstractLeaderboardsResource.ResultStates.Final.name().equals(jsonResultState));
 
         TimePoint resultTimePoint = parseTimepointFromJsonNumber((Long) jsonObject.get("resultTimepoint"));
         assertNotNull(resultTimePoint);
@@ -189,7 +185,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Thread.sleep(100);
 
         LeaderboardsResource resource2 = spyResource(new LeaderboardsResource());
-        Response leaderboardReponse2 = resource2.getLeaderboard(regatta.getName(), LeaderboardsResource.ResultStates.Final, null);
+        Response leaderboardReponse2 = resource2.getLeaderboard(regatta.getName(), AbstractLeaderboardsResource.ResultStates.Final, null);
 
         String jsonString2 = (String) leaderboardReponse2.getEntity();
         Object obj2= JSONValue.parse(jsonString2);
@@ -212,7 +208,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         Integer maxCompetitorsCount = 2;
         
         LeaderboardsResource resource = spyResource(new LeaderboardsResource());
-        Response leaderboardReponse = resource.getLeaderboard(regatta.getName(), LeaderboardsResource.ResultStates.Final, null);
+        Response leaderboardReponse = resource.getLeaderboard(regatta.getName(), AbstractLeaderboardsResource.ResultStates.Final, null);
 
         String jsonString = (String) leaderboardReponse.getEntity();
         Object obj= JSONValue.parse(jsonString);
@@ -222,7 +218,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         String jsonResultState = (String) jsonObject.get("resultState");
         
         assertTrue(regattaLeaderboard.getName().equals(jsonLeaderboardName));
-        assertTrue(LeaderboardsResource.ResultStates.Final.name().equals(jsonResultState));
+        assertTrue(AbstractLeaderboardsResource.ResultStates.Final.name().equals(jsonResultState));
 
         TimePoint resultTimePoint = parseTimepointFromJsonNumber((Long) jsonObject.get("resultTimepoint"));
         assertNull(resultTimePoint);
@@ -231,7 +227,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
 
         // first call for 'all' competitors
         LeaderboardsResource resource2 = spyResource(new LeaderboardsResource());
-        Response leaderboardReponse2 = resource2.getLeaderboard(regatta.getName(), LeaderboardsResource.ResultStates.Final, null);
+        Response leaderboardReponse2 = resource2.getLeaderboard(regatta.getName(), AbstractLeaderboardsResource.ResultStates.Final, null);
 
         jsonString = (String) leaderboardReponse2.getEntity();
         obj= JSONValue.parse(jsonString);
@@ -243,7 +239,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
 
         // second call with maxCompetitorsCount set
         LeaderboardsResource resource3 = spyResource(new LeaderboardsResource());
-        Response leaderboardReponse3 = resource3.getLeaderboard(regatta.getName(), LeaderboardsResource.ResultStates.Final, maxCompetitorsCount);
+        Response leaderboardReponse3 = resource3.getLeaderboard(regatta.getName(), AbstractLeaderboardsResource.ResultStates.Final, maxCompetitorsCount);
 
         jsonString = (String) leaderboardReponse3.getEntity();
         obj= JSONValue.parse(jsonString);
@@ -255,7 +251,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
 
         // third call for 'all' competitors
         LeaderboardsResource resource4 = spyResource(new LeaderboardsResource());
-        Response leaderboardReponse4 = resource4.getLeaderboard(regatta.getName(), LeaderboardsResource.ResultStates.Final, null);
+        Response leaderboardReponse4 = resource4.getLeaderboard(regatta.getName(), AbstractLeaderboardsResource.ResultStates.Final, null);
 
         jsonString = (String) leaderboardReponse4.getEntity();
         obj= JSONValue.parse(jsonString);

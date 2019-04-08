@@ -4,5 +4,6 @@ Bundle-Name: Data Mining Annotations
 Bundle-SymbolicName: com.sap.sse.datamining.annotations
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sse.datamining.annotations
+Automatic-Module-Name: com.sap.sse.datamining.annotations

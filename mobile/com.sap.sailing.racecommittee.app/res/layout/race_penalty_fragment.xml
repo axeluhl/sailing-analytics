@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:headerText="@string/tracking_list_01" />
+
+    <include
+        android:id="@+id/tools_layout"
+        layout="@layout/competitor_tools_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp" />
+
+    <include
+        android:id="@+id/button_bar"
+        layout="@layout/race_penalty_button_bar" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/competitor_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/button_bar"
+        android:layout_below="@id/tools_layout"
+        android:clipToPadding="false"
+        android:padding="16dp"
+        tools:listitem="@layout/race_penalty_row_item" />
+</RelativeLayout>

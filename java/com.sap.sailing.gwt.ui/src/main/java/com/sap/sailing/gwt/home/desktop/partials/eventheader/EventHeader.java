@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
@@ -31,6 +30,7 @@ import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.LinkUtil;
 
 public class EventHeader extends Composite {
@@ -101,29 +101,29 @@ public class EventHeader extends Composite {
         if(presenter.showRegattaMetadata()) {
             HasRegattaMetadata regattaMetadata = presenter.getRegattaMetadata();
             String regattaDisplayName = regattaMetadata.getDisplayName();
-            if(regattaDisplayName.toLowerCase().contains(eventDisplayName.toLowerCase())) {
+            if (regattaDisplayName.toLowerCase().contains(eventDisplayName.toLowerCase())) {
                 nameToShow = regattaDisplayName;
             } else {
                 nameToShow = eventDisplayName + " - " + regattaDisplayName;
             }
             
-            if(regattaMetadata.getCompetitorsCount() > 0) {
+            if (regattaMetadata.getCompetitorsCount() > 0) {
                 competitors.setInnerText((i18n.competitorsCount(regattaMetadata.getCompetitorsCount())));
             } else {
                 hide(competitors);
             }
-            if(regattaMetadata.getRaceCount() > 0) {
+            if (regattaMetadata.getRaceCount() > 0) {
                 races.setInnerText((i18n.racesCount(regattaMetadata.getRaceCount())));
             } else {
                 hide(races);
             }
-            if(regattaMetadata.getDefaultCourseAreaName() != null) {
+            if (regattaMetadata.getDefaultCourseAreaName() != null) {
                 courseAreaUi.setInnerText(i18n.courseAreaName(regattaMetadata.getDefaultCourseAreaName()));
             } else {
                 hide(courseAreaUi);
             }
-            if(regattaMetadata.getBoatCategory() != null) {
-                eventCategory.setInnerText(regattaMetadata.getBoatCategory());
+            if (regattaMetadata.getLeaderboardGroupNames() != null) {
+                eventCategory.setInnerText(Util.joinStrings(", ", regattaMetadata.getLeaderboardGroupNames()));
             } else {
                 hide(eventCategory);
             }
@@ -140,22 +140,20 @@ public class EventHeader extends Composite {
             if(event.getOfficialWebsiteURL() != null) {
                 String title = withoutPrefix(event.getOfficialWebsiteURL(), "http://", "https://");
                 if(title.length() > 35) {
-                    title = TextMessages.INSTANCE.officalEventWebsite();
+                    title = StringMessages.INSTANCE.officalEventWebsite();
                 }
                 eventLink.setInnerText(title);
                 eventLink.setHref(event.getOfficialWebsiteURL());
             } else {
                 hide(eventLink);
             }
-            
             hide(competitors, races, courseAreaUi, eventCategory);
         }
-        
         initTitleAndSelection(nameToShow);
     }
 
     private void initTitleAndSelection(String nameToShow) {
-        if(!presenter.needsSelectionInHeader()) {
+        if (!presenter.needsSelectionInHeader()) {
             eventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(eventState, event.getState().getStateMarker());
             UIObject.ensureDebugId(eventState, "EventStateLabelDiv");

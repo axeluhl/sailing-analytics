@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sap.sailing.racecommittee.app"
-          android:versionCode="19"
-          android:versionName="1.11">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.sap.sailing.racecommittee.app">
 
-    <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="22" />
+    <uses-sdk />
 
     <permission
         android:name="com.sap.sailing.racecommittee.app.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!--<uses-permission android:name="android.permission.CAMERA"/>-->
-    <uses-permission android:name="android.permission.INTERNET" />
+
     <!--<uses-permission android:name="android.permission.RECORD_AUDIO"/>-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <!--<uses-permission android:name="com.sap.sailing.racecommittee.app.MAPS_RECEIVE" />-->
 
@@ -36,10 +30,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="false"
-        android:theme="@style/AppTheme.Light">
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+        android:theme="@style/AppTheme"
+        tools:replace="android:name">
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyDH-Dwy5yFlyBa2-VUgiZ3qGGUO8M_0MPY" />
@@ -51,20 +43,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                    android:host="*"
-                    android:scheme="http"
-                    android:pathPattern="/apps/com.sap.sailing.racecommittee.app.apk"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
                     android:host="*"
-                    android:scheme="https"
-                    android:pathPattern="apps/com.sap.sailing.racecommittee.app.apk"/>
+                    android:pathPattern="/apps/com.sap.sailing.racecommittee.app.apk"
+                    android:scheme="http" />
+
+                <data
+                    android:host="*"
+                    android:pathPattern="apps/com.sap.sailing.racecommittee.app.apk"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity android:name=".ui.activities.RacingActivity" />
@@ -81,8 +73,17 @@
         <activity android:name=".ui.activities.SystemInformationActivity" />
 
         <service
+            android:name=".services.polling.RaceLogPollingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.sap.sailing.racecommittee.app.action.stopPoller" />
+                <action android:name="com.sap.sailing.racecommittee.app.action.addRace" />
+                <action android:name="com.sap.sailing.racecommittee.app.action.removeRace" />
+                <action android:name="com.sap.sailing.racecommittee.app.action.poll" />
+            </intent-filter>
+        </service>
+        <service
             android:name=".services.RaceStateService"
-            android:enabled="true"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.sap.sailing.racecommittee.app.action.startProcedureSpecificAction" />
@@ -101,10 +102,14 @@
                 android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
         </service>
 
-        <receiver android:name="com.sap.sailing.android.shared.services.sending.ConnectivityChangedReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
+        <provider
+                android:name="android.support.v4.content.FileProvider"
+                android:authorities="${applicationId}.fileprovider"
+                android:grantUriPermissions="true"
+                android:exported="false">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/filepaths" />
+        </provider>
     </application>
 </manifest>

@@ -24,6 +24,8 @@ import com.sap.sse.security.ui.authentication.view.AuthenticationView;
  */
 public class AuthenticationPlaceManagementController extends WrappedPlaceManagementController {
     
+    private final AuthenticationClientFactory clientFactory;
+
     /**
      * Creates a new {@link AuthenticationPlaceManagementController} instance with the given parameters.
      * 
@@ -35,14 +37,25 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
     public AuthenticationPlaceManagementController(AuthenticationClientFactory clientFactory,
             AuthenticationCallback callback, AuthenticationView authenticationView, EventBus globalEventBus) {
         super(new Configuration(clientFactory, callback, authenticationView));
-        globalEventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
-            @Override
-            public void onUserChangeEvent(AuthenticationContextEvent event) {
-                AuthenticationPlaceManagementController.this.fireEvent(event);
-            }
-        });
+        this.clientFactory = clientFactory;
+        globalEventBus.addHandler(AuthenticationContextEvent.TYPE, this::fireEvent);
     }
-    
+
+    /**
+     * Tells the wrapped framework to go to the {@link Place} represented by the given {@link AuthenticationPlaces}
+     * instance is no user is logged in. Otherwise the wrapped framework will go to the {@link LoggedInUserInfoPlace
+     * user info} page.
+     * 
+     * @param authPlace
+     *            {@link AuthenticationPlaces} instance representing a {@link Place} instance to go to
+     * 
+     * @see #goTo(Place)
+     */
+    public void goTo(AuthenticationPlaces authPlace) {
+        final boolean isLoggedIn = clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn();
+        super.goTo(isLoggedIn ? new LoggedInUserInfoPlace() : authPlace.getPlace());
+    }
+
     private static class Configuration implements PlaceManagementConfiguration {
         private final AuthenticationClientFactory clientFactory;
         private final AuthenticationCallback callback;

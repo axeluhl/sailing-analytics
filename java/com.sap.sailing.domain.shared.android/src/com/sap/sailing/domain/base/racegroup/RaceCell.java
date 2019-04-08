@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.racegroup;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 
@@ -33,4 +34,11 @@ public interface RaceCell extends Named {
      * index 0.
      */
     int getZeroBasedIndexInFleet();
+
+    /**
+     * If there is a tracked race for this race and we have sufficient information about wind and the boat class's
+     * polar / VPP data this method will return an estimated duration for how long the race will take based on the
+     * current course.
+     */
+    TargetTimeInfo getTargetTime();
 }

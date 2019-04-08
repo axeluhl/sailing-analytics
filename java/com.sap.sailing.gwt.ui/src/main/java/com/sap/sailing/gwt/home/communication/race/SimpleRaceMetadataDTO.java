@@ -37,6 +37,12 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
                 return StringMessages.INSTANCE.raceIsFinished();
             }
         },
+        FINISHING {      // the blue flag has gone up but has not gone down yet
+            @Override
+            public String getLabel() {
+                return StringMessages.INSTANCE.raceIsFinishing();
+            }
+        },
         POSTPONED {     // the start has been postponed
             @Override
             public String getLabel() {
@@ -135,4 +141,45 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
         final int compareByRaceName = new NaturalComparator().compare(getRaceName(), o.getRaceName());
         return compareByRaceName != 0 ? compareByRaceName : Util.compareToWithNull(getStart(), o.getStart(), true);
     }
+    
+    /**
+     * Convenience method to check if this {@link SimpleRaceMetadataDTO race} has valid tracking data.
+     * 
+     * @return <code>true</code> if the {@link #getTrackingState() tracking state} is
+     *         {@link RaceTrackingState#TRACKED_VALID_DATA}, <code>false</code> otherwise
+     */
+    public boolean hasValidTrackingData() {
+        return getTrackingState() == RaceTrackingState.TRACKED_VALID_DATA;
+    }
+    
+    /**
+     * Convenience method to check if this {@link SimpleRaceMetadataDTO race} is already finished.
+     * 
+     * @return <code>true</code> if the {@link #getViewState() view state} is {@link RaceViewState#FINISHED},
+     *         <code>false</code> otherwise
+     */
+    public boolean isFinished() {
+        return getViewState() == RaceViewState.FINISHED;
+    }
+    
+    /**
+     * Convenience method to check if this {@link SimpleRaceMetadataDTO race} is currently running.
+     * 
+     * @return <code>true</code> if the {@link #getViewState() view state} is {@link RaceViewState#RUNNING} or
+     *         {@link RaceViewState#FINISHING}, <code>false</code> otherwise
+     */
+    public boolean isRunning() {
+        return getViewState() == RaceViewState.RUNNING || getViewState() == RaceViewState.FINISHING;
+    }
+    
+    /**
+     * Convenience method to check if this {@link SimpleRaceMetadataDTO race} is scheduled.
+     * 
+     * @return <code>true</code> if the {@link #getViewState() view state} is {@link RaceViewState#SCHEDULED},
+     *         <code>false</code> otherwise
+     */
+    public boolean isScheduled() {
+        return getViewState() == RaceViewState.SCHEDULED;
+    }
+    
 }

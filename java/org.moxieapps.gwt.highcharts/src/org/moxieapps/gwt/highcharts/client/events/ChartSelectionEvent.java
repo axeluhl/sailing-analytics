@@ -46,20 +46,25 @@ public class ChartSelectionEvent extends MouseEvent {
      *
      * @return The minimum value of the selected range on the first X axis.
      */
-    public double getXAxisMin() {
-        return getXAxisMin(0);
+    public Double getXAxisMinOrNull() {
+        return getXAxisMinOrNull(0);
     }
 
     /**
      * Return the minimum value of the selection range of the first X axis, converting the
-     * value to a long value first.  See the {@link #getXAxisMinAsLong(int)} method
+     * value to a long value first.  See the {@link #getXAxisMinAsLongOrNull(int)} method
      * if you need the value of a different X axis, or the {@link #getXAxisMin()}
      * method if you need a floating point value instead.
      *
      * @return The minimum value of the selected range on the first X axis, as a long.
      */
-    public long getXAxisMinAsLong() {
-        return ((Double)getXAxisMin()).longValue();
+    public Long getXAxisMinAsLongOrNull() {
+        Long rv = null;
+        Double minOrNull = getXAxisMinOrNull();
+        if (minOrNull != null) {
+            rv = minOrNull.longValue();
+        }
+        return rv;
     }
 
     /**
@@ -70,8 +75,12 @@ public class ChartSelectionEvent extends MouseEvent {
      *                  to retrieve the minimum value of the selection event.
      * @return The minimum value of the selection range on the requested X axis.
      */
-    public native double getXAxisMin(int axisIndex) /*-{
-        return this.@org.moxieapps.gwt.highcharts.client.events.MouseEvent::event.xAxis[axisIndex].min;
+    public native Double getXAxisMinOrNull(int axisIndex) /*-{
+        var event = this.@org.moxieapps.gwt.highcharts.client.events.MouseEvent::event;
+        if (event.xAxis && event.xAxis[axisIndex]) {
+            return event.xAxis[axisIndex].min;
+        }
+        return null;
     }-*/;
 
     /**
@@ -83,30 +92,40 @@ public class ChartSelectionEvent extends MouseEvent {
      *                  to retrieve the minimum value of the selection event.
      * @return The minimum value of the selection range on the requested X axis, as a long.
      */
-    public long getXAxisMinAsLong(int axisIndex) {
-        return ((Double)getXAxisMin(axisIndex)).longValue();
+    public Long getXAxisMinAsLongOrNull(int axisIndex) {
+        Long rv = null;
+        Double minOrNull = getXAxisMinOrNull(axisIndex);
+        if (minOrNull != null) {
+            rv = minOrNull.longValue();
+        }
+        return rv;
     }
 
     /**
      * Return the maximum value of the selection range of the first X axis.  See the
-     * {@link #getXAxisMax(int)} method if you need the value of a different X axis.
+     * {@link #getXAxisMaxOrNull(int)} method if you need the value of a different X axis.
      *
      * @return The maximum value of the selected range on the first X axis.
      */
-    public double getXAxisMax() {
-        return getXAxisMax(0);
+    public Double getXAxisMaxOrNull() {
+        return getXAxisMaxOrNull(0);
     }
 
     /**
      * Return the maximum value of the selection range of the first X axis, converting the
-     * value to a long value first.  See the {@link #getXAxisMaxAsLong(int)} method
-     * if you need the value of a different X axis, or the {@link #getXAxisMax()}
+     * value to a long value first.  See the {@link #getXAxisMaxAsLongOrNull(int)} method
+     * if you need the value of a different X axis, or the {@link #getXAxisMaxOrNull()}
      * method if you need a floating point value instead.
      *
      * @return The maximum value of the selected range on the first X axis, as a long.
      */
-    public long getXAxisMaxAsLong() {
-        return ((Double)getXAxisMax()).longValue();
+    public Long getXAxisMaxAsLongOrNull() {
+        Long rv = null;
+        Double maxOrNull = getXAxisMaxOrNull();
+        if (maxOrNull != null) {
+            rv = maxOrNull.longValue();
+        }
+        return rv;
     }
 
     /**
@@ -117,8 +136,12 @@ public class ChartSelectionEvent extends MouseEvent {
      *                  to retrieve the maximum value of the selection event.
      * @return The maximum value of the selection range on the requested X axis.
      */
-    public native double getXAxisMax(int axisIndex) /*-{
-        return this.@org.moxieapps.gwt.highcharts.client.events.MouseEvent::event.xAxis[axisIndex].max;
+    public native Double getXAxisMaxOrNull(int axisIndex) /*-{
+        var event = this.@org.moxieapps.gwt.highcharts.client.events.MouseEvent::event;
+        if (event.xAxis && event.xAxis[axisIndex]) {
+            return event.xAxis[axisIndex].max;
+        }
+        return null;
     }-*/;
 
     /**
@@ -130,8 +153,8 @@ public class ChartSelectionEvent extends MouseEvent {
      *                  to retrieve the maximum value of the selection event.
      * @return The maximum value of the selection range on the requested X axis, as a long.
      */
-    public long getXAxisMaxAsLong(int axisIndex) {
-        return ((Double)getXAxisMax(axisIndex)).longValue();
+    public long getXAxisMaxAsLongOrNull(int axisIndex) {
+        return ((Double)getXAxisMaxOrNull(axisIndex)).longValue();
     }  
     
     /**

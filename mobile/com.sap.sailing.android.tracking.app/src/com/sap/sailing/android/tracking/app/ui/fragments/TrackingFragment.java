@@ -1,49 +1,64 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
+import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.util.LocationHelper;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TrackingService;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+
 import android.annotation.TargetApi;
-import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
-import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
-import com.sap.sailing.android.tracking.app.BuildConfig;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
-import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-
 public class TrackingFragment extends BaseFragment {
 
-    static final String SIS_MODE = "instanceStateMode";
-    static final String SIS_STATUS = "instanceStateStatus";
-    static final String SIS_GPS_QUALITY = "instanceStateGpsQuality";
-    static final String SIS_GPS_ACCURACY = "instanceStateGpsAccuracy";
-    static final String SIS_GPS_UNSENT_FIXES = "instanceStateGpsUnsentFixes";
+    static final String SIS_MODE = "mode";
+    static final String SIS_STATUS = "status";
+    static final String SIS_GPS_ACCURACY = "gpsAccuracy";
+    static final String SIS_GPS_UNSENT_FIXES = "gpsUnsentFixes";
 
-    private AppPreferences prefs;
-    private long lastGPSQualityUpdate;
+    private BroadcastReceiver gpsDisabledReceiver;
 
-    private String TAG = TrackingFragment.class.getName();
+    private TextView modeText;
+    private TextView statusText;
+    private TextView accuracyText;
+    private TextView unsentFixesText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-
-        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_tracking, container, false);
-
+        ViewGroup layout = (ViewGroup) inflater.inflate(R.layout.fragment_tracking, container, false);
         prefs = new AppPreferences(getActivity());
 
-        return view;
+        modeText = (TextView) layout.findViewById(R.id.mode);
+        statusText = (TextView) layout.findViewById(R.id.tracking_status);
+        accuracyText = (TextView) layout.findViewById(R.id.gps_accuracy_label);
+        unsentFixesText = (TextView) layout.findViewById(R.id.tracking_unsent_fixes);
+
+        if (savedInstanceState != null) {
+            modeText.setText(savedInstanceState.getString(SIS_MODE));
+            statusText.setText(savedInstanceState.getString(SIS_STATUS));
+            accuracyText.setText(savedInstanceState.getString(SIS_GPS_ACCURACY));
+            unsentFixesText.setText(savedInstanceState.getString(SIS_GPS_UNSENT_FIXES));
+        } else {
+            // initially set quality to "No GPS" on start tracking
+            updateTrackingStatus(GPSQuality.noSignal);
+        }
+
+        return layout;
     }
 
     @Override
@@ -51,56 +66,38 @@ public class TrackingFragment extends BaseFragment {
         super.onResume();
         // so it initally updates to "battery-saving" etc.
         setAPIConnectivityStatus(APIConnectivity.noAttempt);
+
+        // setup receiver to get message from tracking service if GPS is disabled while tracking
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(TrackingService.GPS_DISABLED_MESSAGE);
+
+        gpsDisabledReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
+            }
+        };
+        getActivity().registerReceiver(gpsDisabledReceiver, filter);
+        if (!isLocationEnabled(getActivity())) {
+            LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
+        }
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            TextView modeText = (TextView) getActivity().findViewById(R.id.mode);
-            TextView statusText = (TextView) getActivity().findViewById(R.id.tracking_status);
-            SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView) getActivity().findViewById(
-                    R.id.gps_quality_indicator);
-            TextView accuracyText = (TextView) getActivity().findViewById(R.id.gps_accuracy_label);
-            TextView unsentFixesText = (TextView) getActivity().findViewById(R.id.tracking_unsent_fixes);
+    public void onStop() {
+        super.onStop();
 
-            modeText.setText(savedInstanceState.getString(SIS_MODE));
-            statusText.setText(savedInstanceState.getString(SIS_STATUS));
-            qualityIndicator.setSignalQuality(savedInstanceState.getInt(SIS_GPS_QUALITY));
-            accuracyText.setText(savedInstanceState.getString(SIS_GPS_ACCURACY));
-            unsentFixesText.setText(savedInstanceState.getString(SIS_GPS_UNSENT_FIXES));
-        }
+        getActivity().unregisterReceiver(gpsDisabledReceiver);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        TextView modeText = (TextView) getActivity().findViewById(R.id.mode);
-        TextView statusText = (TextView) getActivity().findViewById(R.id.tracking_status);
-        SignalQualityIndicatorView qualityIndicator = (SignalQualityIndicatorView) getActivity().findViewById(
-                R.id.gps_quality_indicator);
-        TextView accuracyText = (TextView) getActivity().findViewById(R.id.gps_accuracy_label);
-        TextView unsentFixesText = (TextView) getActivity().findViewById(R.id.tracking_unsent_fixes);
-
         outState.putString(SIS_MODE, modeText.getText().toString());
         outState.putString(SIS_STATUS, statusText.getText().toString());
-        outState.putInt(SIS_GPS_QUALITY, qualityIndicator.getSignalQuality());
         outState.putString(SIS_GPS_ACCURACY, accuracyText.getText().toString());
         outState.putString(SIS_GPS_UNSENT_FIXES, unsentFixesText.getText().toString());
-    }
-
-    /**
-     * If last GPS update is too long ago, let's assume there's no signal and set quality to .noSignal
-     */
-    public void checkLastGPSReceived() {
-        if (System.currentTimeMillis() - lastGPSQualityUpdate > 3000 && !isLocationEnabled(getActivity())) {
-            if (BuildConfig.DEBUG) {
-                ExLog.i(getActivity(), TAG,
-                        "Setting GPS Quality to 0 because timeout occurred and location is reported as disabled.");
-            }
-            setGPSQualityAndAcurracy(GPSQuality.noSignal, 0);
-        }
     }
 
     /**
@@ -110,48 +107,44 @@ public class TrackingFragment extends BaseFragment {
      */
     public void updateTrackingStatus(GPSQuality quality) {
         if (isAdded()) {
-            TextView textView = (TextView) getActivity().findViewById(R.id.tracking_status);
-
             if (quality == GPSQuality.noSignal) {
-                textView.setText(getString(R.string.tracking_status_no_gps_signal));
-                textView.setTextColor(getResources().getColor(R.color.sap_red));
+                statusText.setText(getString(R.string.tracking_status_no_gps_signal));
+                statusText.setTextColor(getResources().getColor(R.color.sap_red));
             } else {
-                textView.setText(getString(R.string.tracking_status_tracking));
-                textView.setTextColor(getResources().getColor(R.color.sap_green));
+                statusText.setText(getString(R.string.tracking_status_tracking));
+                statusText.setTextColor(getResources().getColor(R.color.fiori_text_color));
             }
         }
     }
 
     /**
      * Update UI and tell user if app is caching or sending fixes to api
-     *
-     * @param apiConnectivity
      */
     public void setAPIConnectivityStatus(final APIConnectivity apiConnectivity) {
         if (isAdded()) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    TextView textView = (TextView) getActivity().findViewById(R.id.mode);
+                    switch (apiConnectivity) {
+                    case transmissionSuccess:
+                        modeText.setText(getString(R.string.tracking_mode_live));
+                        modeText.setTextColor(getResources().getColor(R.color.fiori_text_color));
+                        break;
 
-                    if (apiConnectivity == APIConnectivity.transmissionSuccess) {
-                        if (prefs.getEnergySavingEnabledByUser()) {
-                            textView.setText(getString(R.string.tracking_mode_battery_saving));
-                            textView.setTextColor(getResources().getColor(R.color.sap_yellow));
-                        } else {
-                            textView.setText(getString(R.string.tracking_mode_live));
-                            textView.setTextColor(getResources().getColor(R.color.sap_green));
-                        }
+                    case noAttempt:
+                        modeText.setText(getString(R.string.tracking_mode_no_attempt));
+                        modeText.setTextColor(getResources().getColor(R.color.fiori_text_color));
+                        break;
 
-                    } else if (apiConnectivity == APIConnectivity.noAttempt) {
-                        textView.setText(getString(R.string.tracking_mode_offline));
-                        textView.setTextColor(getResources().getColor(R.color.sap_green));
-                    } else if (apiConnectivity == APIConnectivity.transmissionError) {
-                        textView.setText(getString(R.string.tracking_mode_api_error));
-                        textView.setTextColor(getResources().getColor(R.color.sap_red));
-                    } else {
-                        textView.setText(getString(R.string.tracking_mode_caching));
-                        textView.setTextColor(getResources().getColor(R.color.sap_green));
+                    case transmissionError:
+                        modeText.setText(getString(R.string.tracking_mode_api_error));
+                        modeText.setTextColor(getResources().getColor(R.color.sap_red));
+                        break;
+
+                    default:
+                        modeText.setText(getString(R.string.tracking_mode_caching));
+                        modeText.setTextColor(getResources().getColor(R.color.fiori_text_color));
+
                     }
                 }
             });
@@ -174,7 +167,6 @@ public class TrackingFragment extends BaseFragment {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 try {
                     locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-
                 } catch (SettingNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -184,7 +176,7 @@ public class TrackingFragment extends BaseFragment {
             } else {
                 locationProviders = Settings.Secure.getString(context.getContentResolver(),
                         Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-                return !TextUtils.isEmpty(locationProviders);
+                return locationProviders.contains(LocationManager.GPS_PROVIDER);
             }
         } else {
             return false;
@@ -196,18 +188,20 @@ public class TrackingFragment extends BaseFragment {
         activity.showStopTrackingConfirmationDialog();
     }
 
-    public void setGPSQualityAndAcurracy(GPSQuality quality, float gpsAccurracy) {
+    public void setGPSQualityAndAccuracy(GPSQuality quality, float accuracy) {
         if (isAdded()) {
-            Activity activity = getActivity();
-            SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) activity.findViewById(R.id.gps_quality_indicator);
-            indicatorView.setSignalQuality(quality.toInt());
-
-            TextView accuracyTextView = (TextView) getActivity().findViewById(R.id.gps_accuracy_label);
-            accuracyTextView.setText("~ " + String.valueOf(Math.round(gpsAccurracy)) + " m");
-
-            updateTrackingStatus(quality);
-
-            lastGPSQualityUpdate = System.currentTimeMillis();
+            View layout = getView();
+            if (layout != null) {
+                SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) layout
+                        .findViewById(R.id.gps_quality_indicator);
+                indicatorView.setSignalQuality(quality);
+                updateTrackingStatus(quality);
+                if (quality != GPSQuality.noSignal) {
+                    accuracyText.setText("~ " + Math.round(accuracy) + " m");
+                } else {
+                    accuracyText.setText(null);
+                }
+            }
         }
     }
 

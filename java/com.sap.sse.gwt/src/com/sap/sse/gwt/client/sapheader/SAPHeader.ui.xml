@@ -7,18 +7,14 @@
     <g:HTMLPanel>
         <header class="{local_res.css.siteheader}">
             <div class="{local_res.css.siteheaderLeft}">
-                <g:Image resource="{local_res.logo}" pixelSize="80, 40" altText="SAP Sailing Analytics" styleName="{local_res.css.logo}"/>
-                <div ui:field="applicationNameUi" class="{local_res.css.logotitle}"></div>
+                <a class="{local_res.css.logo}" ui:field="logoAnchor" target="_blank"></a>
+                <a class="{local_res.css.logotitle}" target="_blank" ui:field="applicationNameAnchor"></a>
             </div>
-            <div 
-                ui:field="pageTitleUi" 
-                class="{local_res.css.siteheader2ndCol}"
-                >
+            <div ui:field="pageTitleUi" class="{local_res.css.siteheader2ndCol}">
                 <div ui:field="titleUi" style="margin-top:14px;" class="{local_res.css.siteHeaderTitle}"></div>
                 <div ui:field="subTitleUi" style="display:none;" class="{local_res.css.siteHeaderSubTitle}"></div>
             </div>
-            <g:SimplePanel ui:field="rightSideUi" styleName="{local_res.css.siteheaderRight}">
-            </g:SimplePanel>
+            <g:SimplePanel ui:field="rightSideUi" styleName="{local_res.css.siteheaderRight}" />
         </header>
     </g:HTMLPanel>
 </ui:UiBinder>

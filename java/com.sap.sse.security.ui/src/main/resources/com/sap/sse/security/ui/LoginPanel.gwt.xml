@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Could not determine the version of your GWT SDK; using the module DTD from GWT 1.6.4. You may want to change this. -->
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
 <module>
-
-  <!-- Inherit the core Web Toolkit stuff.                        -->
-  <inherits name='com.google.gwt.user.User'/> 
+  <inherits name="com.sap.sse.security.ui.SecurityOauthCommon" />
   
   <inherits name="com.google.gwt.resources.Resources" />
-  <inherits name="com.google.gwt.logging.Logging"/>
   
   <!-- Other module inherits                                      -->
-  <inherits name="com.sap.sse.gwt.EmulatedJRE" /> -->
-  <inherits name="com.sap.sse.gwt.SSESharedGWT" />
-  <inherits name="com.sap.sse.SSECommon" />
+  <inherits name='com.sap.sse.gwt.Settings'/>
+  <inherits name="com.sap.sse.gwt.Settings" />
   <inherits name="com.sap.sse.Security" />
+  <inherits name="com.sap.sse.security.ui.SecurityLocalesAllPermutations" />
   <inherits name="com.sap.sse.security.SSESecuritySerializers" />
   
-  <super-source path="jre" />
-
   <set-property name="gwt.logging.enabled" value="TRUE"/> 
   <set-property name="gwt.logging.logLevel" value="FINE"/>
   
@@ -27,9 +21,5 @@
   <set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
   <!-- Specify the paths for translatable code                    -->
-  <extend-property name="locale" values="de"/>
   <source path='loginpanel'/>
-  <source path='shared'/>
-  <source path='client'/>
-  <source path='oauth'/>
 </module>

@@ -5,25 +5,31 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorAndBoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
@@ -43,25 +49,37 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOver
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie2017;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointMatchRacing;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEight;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterpolation;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinTwoRaces;
 import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LowPointTieBreakBasedOnLastSeriesOnly;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
+import com.sap.sailing.domain.leaderboard.impl.LowPointWithAutomaticRDG;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminationsAndRoundsWinnerGets07;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.impl.CourseDesignUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
+import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
@@ -69,13 +87,13 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     
     /**
-     * Uses a transient competitor store
+     * Uses a transient competitor and boat store
      */
     public DomainFactoryImpl(RaceLogResolver raceLogResolver) {
-        super(new TransientCompetitorStoreImpl(), raceLogResolver);
+        super(new TransientCompetitorAndBoatStoreImpl(), raceLogResolver);
     }
     
-    public DomainFactoryImpl(CompetitorStore competitorStore, RaceLogResolver raceLogResolver) {
+    public DomainFactoryImpl(CompetitorAndBoatStore competitorStore, RaceLogResolver raceLogResolver) {
         super(competitorStore, raceLogResolver);
     }
 
@@ -114,23 +132,55 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPointWinnerGetsSix();
         case HIGH_POINT_WINNER_GETS_EIGHT:
             return new HighPointWinnerGetsEight();
+        case HIGH_POINT_MATCH_RACING:
+            return new HighPointMatchRacing();
         case HIGH_POINT_WINNER_GETS_EIGHT_AND_INTERPOLATION:
             return new HighPointWinnerGetsEightAndInterpolation();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return new HighPointFirstGets10Or8AndLastBreaksTie();
         case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT:
             return new HighPointFirstGets12Or8AndLastBreaksTie();
+        case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT_2017:
+            return new HighPointFirstGets12Or8AndLastBreaksTie2017();
         case LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07:
             return new LowPointWithEliminationsAndRoundsWinnerGets07();
         case LOW_POINT_LEAGUE_OVERALL:
             return new LowPointForLeagueOverallLeaderboard();
+        case LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY:
+            return new LowPointTieBreakBasedOnLastSeriesOnly();
+        case LOW_POINT_WITH_AUTOMATIC_RDG:
+            return new LowPointWithAutomaticRDG();
+        case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
+            return new LowPointFirstToWinTwoRaces();
+        default:
+            break;
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
 
     @Override
-    public CompetitorDTO convertToCompetitorDTO(Competitor c) {
-        return competitorStore.convertToCompetitorDTO(c);
+    public CompetitorAndBoatDTO convertToCompetitorAndBoatDTO(Competitor competitor, Boat boat) {
+        return new CompetitorAndBoatDTO(competitorAndBoatStore.convertToCompetitorDTO(competitor), competitorAndBoatStore.convertToBoatDTO(boat));
+    }
+
+    @Override
+    public CompetitorDTO convertToCompetitorDTO(Competitor competitor) {
+        return competitorAndBoatStore.convertToCompetitorWithOptionalBoatDTO(competitor);
+    }
+
+    @Override
+    public CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(CompetitorWithBoat competitor) {
+        return competitorAndBoatStore.convertToCompetitorWithBoatDTO(competitor);
+    }
+
+    @Override
+    public Map<CompetitorDTO, BoatDTO> convertToCompetitorAndBoatDTOs(Map<Competitor, ? extends Boat> competitorsAndBoats) {
+        return competitorAndBoatStore.convertToCompetitorAndBoatDTOs(competitorsAndBoats);
+    }
+
+    @Override
+    public BoatDTO convertToBoatDTO(Boat boat) {
+        return competitorAndBoatStore.convertToBoatDTO(boat);
     }
 
     @Override
@@ -156,11 +206,12 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         assert trackedRace != null;
         raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
         raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+        raceDTO.raceFinishedTime = trackedRace.getFinishedTime() == null ? null : trackedRace.getFinishedTime().asDate();
         raceDTO.status = new RaceStatusDTO();
         raceDTO.status.status = trackedRace.getStatus() == null ? null : trackedRace.getStatus().getStatus();
         raceDTO.status.loadingProgress = trackedRace.getStatus() == null ? 0.0 : trackedRace.getStatus().getLoadingProgress();
     }
-
+    
     @Override
     public TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace) {
         TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
@@ -194,8 +245,9 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
                 }
             }
             if (leaderOrWinner != null) {
+                final Boat leaderOrWinnerBoat = trackedRace.getBoatOfCompetitor(leaderOrWinner);
                 statisticsDTO.hasLeaderOrWinnerData = true;
-                statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner);
+                statisticsDTO.leaderOrWinner = convertToCompetitorAndBoatDTO(leaderOrWinner, leaderOrWinnerBoat);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);
                 if (track != null) {
                     statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenRawFixes();
@@ -219,23 +271,25 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         // media data
         if (mediaTracks != null) {
             for (MediaTrack track : mediaTracks) {
-                switch (track.mimeType.mediaType) {
-                case audio:
-                    statisticsDTO.hasAudioData = true;
-                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
-                            : statisticsDTO.audioTracksCount++;
-                    break;
-                case video:
-                    statisticsDTO.hasVideoData = true;
-                    statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
-                            : statisticsDTO.videoTracksCount++;
-                    break;
-                case image: // TODO should this add to an image count?
-                    break;
-                case unknown: // TODO should this add to an "unknown media" count? Probably not
-                    break;
-                default:
-                    break;
+                if (track.mimeType != null) {
+                    switch (track.mimeType.mediaType) {
+                    case audio:
+                        statisticsDTO.hasAudioData = true;
+                        statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
+                                : statisticsDTO.audioTracksCount++;
+                        break;
+                    case video:
+                        statisticsDTO.hasVideoData = true;
+                        statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
+                                : statisticsDTO.videoTracksCount++;
+                        break;
+                    case image: // TODO should this add to an image count?
+                        break;
+                    case unknown: // TODO should this add to an "unknown media" count? Probably not
+                        break;
+                    default:
+                        break;
+                    }
                 }
             }
         }
@@ -329,12 +383,39 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitors) {
-        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
+    public List<CompetitorAndBoatDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors) {
+        List<CompetitorAndBoatDTO> result = new ArrayList<>();
+        for (Entry<Competitor, Boat> competitorAndBoatEntry : competitors.entrySet()) {
+            result.add(convertToCompetitorAndBoatDTO(competitorAndBoatEntry.getKey(), competitorAndBoatEntry.getValue()));
+        }
+        return result;
+    }
+
+    @Override
+    public List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors) {
+        List<CompetitorDTO> result = new ArrayList<>();
         for (Competitor competitor : competitors) {
             result.add(convertToCompetitorDTO(competitor));
         }
         return result;
     }
+    
+    @Override
+    public List<CompetitorAndBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors) {
+        List<CompetitorAndBoatDTO> result = new ArrayList<>();
+        for (Pair<Competitor, Boat> competitorAndBoat : competitors) {
+            result.add(convertToCompetitorAndBoatDTO(competitorAndBoat.getA(), competitorAndBoat.getB()));
+        }
+        return result;
+    }
 
+    @Override
+    public void addUpdateHandlers(DynamicTrackedRace trackedRace, CourseDesignUpdateHandler courseDesignHandler,
+            StartTimeUpdateHandler startTimeHandler, RaceAbortedHandler raceAbortedHandler,
+            final FinishTimeUpdateHandler finishTimeUpdateHandler) {
+        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
+        trackedRace.addStartTimeChangedListener(startTimeHandler);
+        trackedRace.addRaceAbortedListener(raceAbortedHandler);
+        trackedRace.addListener(finishTimeUpdateHandler.getListener());
+    }
 }

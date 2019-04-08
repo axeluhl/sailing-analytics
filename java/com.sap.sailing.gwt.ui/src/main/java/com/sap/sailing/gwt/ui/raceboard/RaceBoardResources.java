@@ -2,9 +2,10 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sse.gwt.common.CommonSharedResources;
+import com.sap.sse.security.ui.authentication.generic.resource.AuthenticationResources;
 
 
-public interface RaceBoardResources extends CommonSharedResources {
+public interface RaceBoardResources extends CommonSharedResources, AuthenticationResources {
     public static final RaceBoardResources INSTANCE = GWT.create(RaceBoardResources.class);
     
     @Source({CommonSharedResources.RESET, CommonSharedResources.MAIN, "raceboard-main.gss"})
@@ -12,6 +13,8 @@ public interface RaceBoardResources extends CommonSharedResources {
     
     @Source({CommonSharedResources.MEDIA, "raceboard-media.gss"})
     RaceBoardMediaCss mediaCss();
+    
+
     
     public interface RaceBoardMainCss extends CommonMainCss {
         String button();

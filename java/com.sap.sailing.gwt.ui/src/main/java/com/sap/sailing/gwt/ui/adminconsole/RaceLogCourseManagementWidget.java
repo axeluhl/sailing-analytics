@@ -12,15 +12,16 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RaceLogCourseManagementWidget extends CourseManagementWidget {
-    protected final String leaderboardName;
-    protected final String raceColumnName;
-    protected final String fleetName;
-    private Button removeMark; 
+    private final String leaderboardName;
+    private final String raceColumnName;
+    private final String fleetName;
+    private final Button removeMark; 
 
     public RaceLogCourseManagementWidget(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
@@ -42,7 +43,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                                 sailingService.addMarkToRegattaLog(leaderboardName, mark, new AsyncCallback<Void>() {
                                     @Override
                                     public void onSuccess(Void result) {
-                                        refresh();
+                                        refreshMarks();
                                     }
 
                                     @Override
@@ -72,7 +73,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    refresh();
+                                    refreshMarks();
                                 }
 
                                 @Override
@@ -94,12 +95,11 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
             public void update(int index, final MarkDTO markDTO, String value) {
                 if (RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell.ACTION_PING.equals(value)) {
                     new PositionEntryDialog(stringMessages.pingPosition(stringMessages.mark()), stringMessages,
-                            new DataEntryDialog.DialogCallback<Position>() {
+                            new DataEntryDialog.DialogCallback<Pair<Position, TimePoint>>() {
                                 @Override
-                                public void ok(Position position) {
-                                    sailingService.pingMark(leaderboardName, markDTO, position,
-                                            new AsyncCallback<Void>() {
-
+                                public void ok(Pair<Position, TimePoint> positionAndTimePoint) {
+                                    sailingService.pingMark(leaderboardName, markDTO,
+                                            positionAndTimePoint.getB(), positionAndTimePoint.getA(), new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(Void result) {
                                                     refresh();
@@ -160,7 +160,14 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                         errorReporter.reportError("Could not load course: " + caught.getMessage());
                     }
                 });
+        refreshMarks();
+    }
 
+    /**
+     * Loads the marks data from the server using {@link SailingServiceAsync#getMarksInRegattaLog(String, AsyncCallback)} and updates
+     * the {@link #marks} table with the results.
+     */
+    protected void refreshMarks() {
         sailingService.getMarksInRegattaLog(leaderboardName, new AsyncCallback<Iterable<MarkDTO>>() {
             @Override
             public void onSuccess(Iterable<MarkDTO> result) {

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/navigation_drawer_cell_height">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/navigation_drawer_cell_height">
 
     <RelativeLayout
         android:id="@+id/panel_right"
@@ -18,13 +18,13 @@
             android:layout_centerVertical="true"
             android:orientation="vertical">
 
-            <TextView
+            <com.sap.sailing.racecommittee.app.ui.views.RaceTimeView
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:textAppearance="?attr/textXLarge"
-                tools:text="13:36"/>
+                tools:text="13:36" />
 
             <TextView
                 android:id="@+id/race_started"
@@ -32,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_started"
-                android:textAppearance="?attr/textXSmall"/>
+                android:textAppearance="?attr/textXSmall" />
 
             <TextView
                 android:id="@+id/race_finished"
@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_finished"
-                android:textAppearance="?attr/textXSmall"/>
+                android:textAppearance="?attr/textXSmall" />
         </LinearLayout>
 
         <TextView
@@ -51,7 +51,7 @@
             android:text="@string/race_unscheduled"
             android:textColor="?attr/sap_light_gray"
             android:textSize="@dimen/textSize_18"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/update_badge"
@@ -62,7 +62,18 @@
             android:scaleType="matrix"
             android:src="@drawable/updated"
             android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/panel_additional_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="2dp"
+            android:src="@drawable/ic_warning_yellow"
+            android:visibility="gone"
+            tools:visibility="visible" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -76,7 +87,7 @@
             android:id="@+id/race_marker"
             android:layout_width="@dimen/obesity_line"
             android:layout_height="match_parent"
-            android:src="?attr/marker_race"/>
+            android:src="?attr/marker_race" />
 
         <LinearLayout
             android:id="@+id/additional_info"
@@ -93,7 +104,7 @@
                 android:layout_margin="5dp"
                 android:src="?attr/link_24dp"
                 android:visibility="gone"
-                tools:visibility="visible"/>
+                tools:visibility="visible" />
 
             <LinearLayout
                 android:id="@+id/race_flag"
@@ -110,7 +121,7 @@
                     android:layout_height="25dp"
                     android:layout_gravity="center"
                     android:scaleType="centerInside"
-                    tools:src="@drawable/flag_alpha_64dp"/>
+                    tools:src="@drawable/flag_alpha_64dp" />
 
                 <TextView
                     android:id="@+id/flag_timer"
@@ -119,7 +130,7 @@
                     android:layout_gravity="center"
                     android:drawableLeft="?attr/arrow_down"
                     android:textAppearance="?attr/textXSmall"
-                    tools:text="01:12"/>
+                    tools:text="01:12" />
             </LinearLayout>
         </LinearLayout>
 
@@ -135,13 +146,13 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/race_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textAppearance="?attr/textNormal"
-                tools:text="Race 3"/>
+                    android:id="@+id/race_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:singleLine="true"
+                    android:textAppearance="?attr/textNormal"
+                    tools:text="Race 3" />
 
             <TextView
                 android:id="@+id/depends_on"
@@ -152,7 +163,7 @@
                 android:textAppearance="?attr/textXSmall"
                 android:visibility="gone"
                 tools:text="5 minutes after ABC"
-                tools:visibility="visible"/>
+                tools:visibility="visible" />
         </LinearLayout>
     </RelativeLayout>
 
@@ -164,11 +175,11 @@
         android:background="?attr/factor_background"
         android:textAppearance="?attr/textXSmall"
         android:textColor="?attr/white_invert"
-        tools:text="x 3.5"/>
+        tools:text="x 3.5" />
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
-        android:background="?attr/black"/>
+        android:background="?attr/black" />
 </RelativeLayout>

@@ -10,11 +10,13 @@ import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sse.common.Named;
+import com.sap.sailing.util.RegattaUtil;
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.WithID;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * The name shall be unique across all regattas tracked concurrently. In particular, if you want to keep apart regattas
@@ -23,7 +25,16 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Regatta extends Named, WithID, IsRegattaLike, HasRaceColumnsAndRegattaLike {
+public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike {
+
+    /**
+     * As taken from the Racing Rules of Sailing:
+     * <p>
+     * <em>Zone</em> The area around a mark within a distance of three hull lengths of the boat nearer to it. A boat is
+     * in the zone when any part of her hull is in the zone.
+     */
+    static final double DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS = 3;
+
     ScoringScheme getScoringScheme();
 
     /**
@@ -111,6 +122,15 @@ public interface Regatta extends Named, WithID, IsRegattaLike, HasRaceColumnsAnd
     Iterable<Competitor> getAllCompetitors();
 
     /**
+     * Same as {@link #getAllCompetitors()}, only that additionally the method returns as a first element of a pair
+     * which {@link RaceDefinition}s' {@link RaceDefinition#getCompetitors() competitors} were used in assembling the
+     * result.
+     */
+    Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered();
+
+    Iterable<Boat> getAllBoats();
+
+    /**
      * Will remove the series from this regatta. Will also call {@link RaceColumn#removeRaceIdentifier(Fleet)} to make
      * sure that all raceLogs and race associations get removed for all race columns in this series.
      */
@@ -156,6 +176,14 @@ public interface Regatta extends Named, WithID, IsRegattaLike, HasRaceColumnsAnd
     RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
 
     /**
+     * Define the value which would be multipled by hull length from {@link BoatClass}. 
+     * Next the calculated value {@link RegattaUtil} would be used to fill out radius of buoy on race map setting.
+     */
+    public Double getBuoyZoneRadiusInHullLengths();
+
+    public void setBuoyZoneRadiusInHullLengths(Double buoyZoneRadiusInHullLengths);
+
+    /**
      * When there is no race committee app in place and no operator is managing the race start times for this regatta,
      * start times can optionally be inferred from the start mark passings by the {@link TrackedRace}s in this regatta.
      * The default for this is <code>true</code>, particularly because the race committee app has not been used for all
@@ -182,17 +210,29 @@ public interface Regatta extends Named, WithID, IsRegattaLike, HasRaceColumnsAnd
      */
     void setUseStartTimeInference(boolean useStartTimeInference);
 
-    /**
-     * {@link Event} manages an association to its {@link Event#getRegattas() regattas}. When something on the
-     * regatta changes (in particular, the implicit link to an event through an event's {@link CourseArea} that
-     * is assigned as this regatta's {@link #setDefaultCourseArea(CourseArea) default course area}), the
-     * opposite end of the association needs to be maintained on the event's side.
-     */
-    void adjustEventToRegattaAssociation(EventFetcher eventFetcher);
-    
     RaceExecutionOrderProvider getRaceExecutionOrderProvider();
 
     default RankingMetrics getRankingMetricType() {
         return RankingMetricsFactory.getForClass(getRankingMetricConstructor().apply(/* trackedRace */ null).getClass());
     }
+
+    /**
+     * When a regatta has well-managed {@link TrackedRace#getStartOfRace() start} and
+     * {@link TrackedRace#getFinishedTime() finish times} it can make sense to drive the tracking infrastructure based
+     * on these times. This may include automatically starting the tracking for a race a certain number of minutes
+     * before the race starts, and finishing the tracking some time after the race has finished. This capability can be
+     * activated using this flag. Tracking connectors can optionally evaluate it and take measures to drive their
+     * {@link RaceTracker} and adjust start and end of tracking times accordingly.
+     * <p>
+     * 
+     * See also
+     * <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3588">https://bugzilla.sapsailing.com/bugzilla/
+     * show_bug.cgi?id=3588</a>.
+     */
+    boolean isControlTrackingFromStartAndFinishTimes();
+
+    /**
+     * @see #isControlTrackingFromStartAndFinishTimes()
+     */
+    void setControlTrackingFromStartAndFinishTimes(boolean controlTrackingFromStartAndFinishTimes);
 }

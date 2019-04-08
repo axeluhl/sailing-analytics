@@ -18,9 +18,6 @@ import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -36,15 +33,13 @@ import com.sap.sse.filestorage.testsupport.AmazonS3TestSupport;
 public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {    
     private static final String name = "Heiko KRÖGER";
     private static final String id = "af855a56-9726-4a9c-a77e-da955bd289be";
-    private static final String boatClassName = "49er";
-    private static final String sailID = "GER 1";
     private static final String nationality = "GER";
     private static final String teamImageFile = "Bundesliga2014_Regatta6_eventteaser.jpg";
     
     private FileStorageService storageService;
 
     @Before
-    public void setUpSubClass() throws InvalidPropertiesException {
+    public void setUpSubClass() throws Exception {
         super.setUp();
         racingEventService = spy(racingEventService);
         storageService = AmazonS3TestSupport.createService();
@@ -53,8 +48,7 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
         doReturn(storageService).when(fsmsMock).getActiveFileStorageService();
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(
                 nationality), null, null)), null);
-        DynamicBoat boat = new BoatImpl(null, new BoatClassImpl(boatClassName, false), sailID);
-        racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, null, null, null, team, boat,
+        racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, null, null, null, null, team,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     }
 

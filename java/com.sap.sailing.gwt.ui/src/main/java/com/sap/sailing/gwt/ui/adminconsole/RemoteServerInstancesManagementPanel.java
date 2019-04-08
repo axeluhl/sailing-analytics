@@ -12,10 +12,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -30,6 +30,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -40,6 +42,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
+    private CellTable<RemoteSailingServerReferenceDTO> remoteServersTable; 
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider;
@@ -64,11 +67,9 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         remoteServersPanel.setContentWidget(remoteServersContentPanel);
         
         serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
-        CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createRemoteServersTable();
-        serverDataProvider.addDataDisplay(remoteServersTable);
-
         filteredServerTablePanel = new LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO>(
-                new Label(stringMessages.filterBy() + ":"), Collections.<RemoteSailingServerReferenceDTO>emptyList(), remoteServersTable, serverDataProvider) {
+                new Label(stringMessages.filterBy() + ":"), Collections.<RemoteSailingServerReferenceDTO> emptyList(),
+                serverDataProvider) {
             @Override
             public List<String> getSearchableStrings(RemoteSailingServerReferenceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -81,7 +82,14 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                 }
                 return strings;
             }
+
+            @Override
+            public AbstractCellTable<RemoteSailingServerReferenceDTO> getCellTable() {
+                return remoteServersTable;
+            }
         };
+        remoteServersTable = createRemoteServersTable();
+        serverDataProvider.addDataDisplay(remoteServersTable);
 
         remoteServersContentPanel.add(filteredServerTablePanel);
         remoteServersContentPanel.add(remoteServersTable);
@@ -173,7 +181,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                     public int hashCode(RemoteSailingServerReferenceDTO t) {
                         return t.getUrl().hashCode();
                     }
-                }, serverDataProvider);
+                }, filteredServerTablePanel.getAllListDataProvider());
         serverTable.setSelectionModel(refreshableServerSelectionModel);
 
         return serverTable;
@@ -208,7 +216,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
             @Override
             public void onSuccess(Void result) {
                 refreshSailingServerList();
-                Window.setStatus(stringMessages.successfullyUpdatedSailingServers());
+                Notification.notify(stringMessages.successfullyUpdatedSailingServers(), NotificationType.INFO);
             }
         });
     }
@@ -229,8 +237,8 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
 
                     @Override
                     public void onSuccess(RemoteSailingServerReferenceDTO result) {
-                    	filteredServerTablePanel.add(result);
-                        Window.setStatus(stringMessages.successfullyUpdatedSailingServers());
+                        filteredServerTablePanel.add(result);
+                        Notification.notify(stringMessages.successfullyUpdatedSailingServers(), NotificationType.INFO);
                     }
                 });
             }

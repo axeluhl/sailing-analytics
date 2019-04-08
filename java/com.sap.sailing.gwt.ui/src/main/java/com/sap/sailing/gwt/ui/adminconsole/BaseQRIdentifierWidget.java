@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeWrapper;
 
 public abstract class BaseQRIdentifierWidget implements IsWidget {
     
@@ -30,7 +31,7 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
     StringMessages stringMessages;
 
     public BaseQRIdentifierWidget(int qrCodeSize, StringMessages stringMessages) {
-        this(qrCodeSize, stringMessages, QRCodeComposite.ERROR_CORRECTION_LEVEL_H);
+        this(qrCodeSize, stringMessages, QRCodeWrapper.ERROR_CORRECTION_LEVEL_H);
     }
     
     public BaseQRIdentifierWidget(int qrCodeSize, StringMessages stringMessages, int errorCorrectionLevel) {
@@ -83,7 +84,7 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
     public void generateQRCode() {
         try {
             String qrCodeUrl = generateEncodedQRCodeContent();
-            qrCodeComposite.generateQRCode(qrCodeUrl);
+            qrCodeComposite.setQrCodeContent(qrCodeUrl);
             error.setText("");
             url.setText(qrCodeUrl);
         } catch (QRCodeURLCreationException e) {

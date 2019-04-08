@@ -2,9 +2,17 @@ package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.user.client.ui.LazyPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public abstract class AbstractLazyComponent<SettingsType extends AbstractSettings> extends LazyPanel implements LazyComponent<SettingsType> {
+public abstract class AbstractLazyComponent<SettingsType extends Settings> extends LazyPanel implements LazyComponent<SettingsType> {
+    private Component<?> parent;
+    private ComponentContext<?> componentContext;
+
+    public AbstractLazyComponent(Component<?> parent, ComponentContext<?> componentContext) {
+        this.parent = parent;
+        this.componentContext = componentContext;
+    }
 
     @Override
     public Widget getEntryWidget() {
@@ -18,7 +26,13 @@ public abstract class AbstractLazyComponent<SettingsType extends AbstractSetting
     }
 
     @Override
-    public String getId() {
-        return getLocalizedShortName();
+    public Component<?> getParentComponent() {
+        return parent;
     }
+
+    @Override
+    public ComponentContext<?> getComponentContext() {
+        return componentContext;
+    }
+
 }

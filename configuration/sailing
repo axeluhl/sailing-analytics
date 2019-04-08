@@ -4,6 +4,18 @@
 #
 # chkconfig: 2345 95 10
 # description: Sailing contains all sailing services
+#
+### BEGIN INIT INFO
+# Provides:          sailing
+# Required-Start:    $local_fs $network $named $remote_fs
+# Should-Start:      
+# Required-Stop:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: The sailing service
+# Description:       Start all sailing services required for this instance
+### END INIT INFO
 
 # Source function library.
 . /etc/init.d/functions
@@ -14,8 +26,8 @@ JAVA_START_INSTANCES="server"
 SERVERS_DIR=/home/sailing/servers
 GIT_REPOSITORY=/home/sailing/code
 APACHE_CONFIG_DIR=/etc/httpd/conf.d
-rm /var/log/sailing.out
-rm /var/log/sailing.err
+
+echo "Executing with $1" >>/var/log/sailing.out
 
 start_tmux() {
 	su - sailing -c "/home/sailing/bin/tmuxConsole.sh unattended"
@@ -23,6 +35,7 @@ start_tmux() {
 }
 
 start_servers() {
+	su - sailing -c "cd $GIT_REPOSITORY && git fetch && git merge origin/master" 2>>/var/log/sailing.err >>/var/log/sailing.out
 	NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
 	MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 * 0.75 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
 	echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
@@ -40,7 +53,6 @@ start_servers() {
                         echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
 			echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
             echo "## EVENT ${server_name}" >>$APACHE_CONFIG_DIR/001-events.conf
-			echo "Use Event ${server_name}.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
 			echo "Use Event-SSL ${server_name}.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
             # check if an secondary event shall be pasted to 001-events.conf
             if [[ ${HTTP_SEC_EVENT} && ${HTTP_SEC_EVENT_ID} ]]; then
@@ -63,11 +75,19 @@ start_servers() {
 
 stop_servers() {
 	for conf in $JAVA_START_INSTANCES; do
-		echo "Stopping Java server $conf"
+		echo "Stopping Java server $conf" >> /var/log/sailing.out
 		su - sailing -c "cd $SERVERS_DIR/$conf && ./stop"
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && success || failure
+		stop_httpd
+		sync_logs
 	done
+}
+
+sync_logs() {
+	echo "Executing logrotate followed by a sync to ensure that logs are synchronized" >> /var/log/sailing.out
+	logrotate -f /etc/logrotate.conf
+	sync
 }
 
 # launch_httpd(server_name, port, event_id)
@@ -78,7 +98,7 @@ launch_httpd() {
 		source $SERVERS_DIR/$FIRST_SERVER/env.sh
 		# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to $APACHE_CONFIG_DIR/001-events.conf
 		echo "Appending macro usage for $INSTANCE_DNS/internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf" >>/var/log/sailing.out
-        echo "## SERVER STATUS" >>$APACHE_CONFIG_DIR/001-events.conf
+		echo "## SERVER STATUS" >>$APACHE_CONFIG_DIR/001-events.conf
 		echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
 		echo "Launching httpd..." >>/var/log/sailing.out
 		service httpd start
@@ -87,13 +107,23 @@ launch_httpd() {
 	fi
 }
 
+stop_httpd() {
+	if [ -x /etc/init.d/httpd ]; then
+		service httpd stop
+		echo "Stopped httpd..." >>/var/log/sailing.out
+	fi
+}
+
 # See how we were called.
 case "$1" in
   start)
+	/usr/sbin/update-motd
 	start_servers
+	touch /var/lock/subsys/sailing
     ;;
   stop)
 	stop_servers
+	rm -f /var/lock/subsys/sailing
 	;;
   status)
 	status java

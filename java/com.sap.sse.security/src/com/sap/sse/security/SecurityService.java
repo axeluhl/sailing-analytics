@@ -1,5 +1,6 @@
 package com.sap.sse.security;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.DefaultRoles;
@@ -52,12 +53,17 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
     User createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException;
+    
+    /**
+     * @param validationBaseURL if <code>null</code>, no validation will be attempted
+     */
+    User createSimpleUser(String username, String email, String password, String fullName, String company, Locale locale, String validationBaseURL) throws UserManagementException, MailException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException;
     
-    void updateUserProperties(String username, String fullName, String company) throws UserManagementException;
+    void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
     User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 
@@ -139,6 +145,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     void setPreference(String username, String key, String value);
 
+    void setPreferenceObject(String name, String preferenceKey, Object preference);
+
     /**
      * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
      * <code>username</code>.
@@ -149,6 +157,17 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
     String getPreference(String username, String key);
+    
+    /**
+     * Gets a preference object. Always returns null if there is no converter associated with the given key -> see
+     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     */
+    <T> T getPreferenceObject(String username, String key);
+
+    /**
+     * @return all preferences of the given user
+     */
+    Map<String, String> getAllPreferences(String username);
 
     /**
      * Issues a new access token and remembers it so that later the user identified by <code>username</code> can be
@@ -182,5 +201,4 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void removeAccessToken(String username);
 
     User loginByAccessToken(String accessToken);
-
 }

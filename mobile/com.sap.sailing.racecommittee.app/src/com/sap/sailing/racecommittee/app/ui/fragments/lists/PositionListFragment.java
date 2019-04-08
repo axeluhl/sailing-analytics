@@ -1,8 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,14 +17,19 @@ import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PositionListFragment extends LoggableListFragment {
 
     private LogEventAuthorImpl author;
     private AppPreferences preferences;
+    private List<LoginTypeItem> values;
 
     private PositionSelectedListenerHost host;
 
     public PositionListFragment() {
+        values = new ArrayList<>();
     }
 
     public static PositionListFragment newInstance() {
@@ -36,26 +38,26 @@ public class PositionListFragment extends LoggableListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
-        if (view != null) {
-            parent.addView(view, 1);
-        }
+        View view = inflater.inflate(R.layout.list_fragment, container, false);
 
         preferences = AppPreferences.on(getActivity());
 
-        final ArrayList<String> values = new ArrayList<>();
-        values.add(getString(R.string.login_type_officer_on_start_vessel));
-        values.add(getString(R.string.login_type_officer_on_finish_vessel));
-        values.add(getString(R.string.login_type_shore_control));
+        values.add(new LoginTypeItem(1, getString(R.string.login_type_officer_on_vessel),
+                AppConstants.AUTHOR_TYPE_OFFICER_VESSEL, LoginType.OFFICER));
+        values.add(new LoginTypeItem(2, getString(R.string.login_type_shore_control),
+                AppConstants.AUTHOR_TYPE_SHORE_CONTROL, LoginType.OFFICER));
+        // TODO define configuration to activate super user
+        // values.add(new LoginTypeItem(0, getString(R.string.login_type_superuser), AppConstants.AUTHOR_TYPE_SUPERUSER,
+        // LoginType.OFFICER));
         if (preferences.isDemoAllowed()) {
-            values.add(getString(R.string.login_type_viewer));
+            values.add(new LoginTypeItem(3, getString(R.string.login_type_viewer), AppConstants.AUTHOR_TYPE_VIEWER,
+                    LoginType.VIEWER));
         }
 
         final List<CheckedItem> items = new ArrayList<>();
-        for (String displayedText : values) {
+        for (LoginTypeItem loginType : values) {
             CheckedItem item = new CheckedItem();
-            item.setText(displayedText);
+            item.setText(loginType.mLabel);
             items.add(item);
         }
 
@@ -64,7 +66,7 @@ public class PositionListFragment extends LoggableListFragment {
 
         host = (PositionSelectedListenerHost) getActivity();
 
-        return parent;
+        return view;
     }
 
     @Override
@@ -75,35 +77,13 @@ public class PositionListFragment extends LoggableListFragment {
             checkedItemAdapter.setCheckedPosition(position);
             checkedItemAdapter.notifyDataSetChanged();
         }
-        LoginType selectedLoginType;
-        switch (position) {
-            // see loginTypeDescriptions for the indices of the login types
-            case 0:
-                selectedLoginType = LoginType.OFFICER;
-                preferences.setSendingActive(true);
-                author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_OFFICER_START, 0);
-                break;
-            case 1:
-                selectedLoginType = LoginType.OFFICER;
-                preferences.setSendingActive(true);
-                author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_OFFICER_FINISH, 1);
-                break;
-            case 2:
-                selectedLoginType = LoginType.OFFICER;
-                preferences.setSendingActive(true);
-                author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_SHORE_CONTROL, 2);
-                break;
-            case 3:
-                selectedLoginType = LoginType.VIEWER;
-                preferences.setSendingActive(false);
-                author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_VIEWER, 3);
-                break;
-            default:
-                selectedLoginType = LoginType.NONE;
-                break;
-        }
+        LoginTypeItem item = values.get(position);
+        LoginType selectedLoginType = item.mType;
+        author = new LogEventAuthorImpl(item.mName, item.mPrio);
+        preferences.setSendingActive(item.mType == LoginType.OFFICER);
         preferences.setAuthor(author);
-        ExLog.i(getActivity(), PositionListFragment.class.getName(), "Logging in as: " + selectedLoginType + "->" + author);
+        ExLog.i(getActivity(), PositionListFragment.class.getName(),
+                "Logging in as: " + selectedLoginType + "->" + author);
         if (host != null) {
             host.onPositionSelected(selectedLoginType);
         }
@@ -112,4 +92,20 @@ public class PositionListFragment extends LoggableListFragment {
     public LogEventAuthorImpl getAuthor() {
         return author;
     }
+
+    private static class LoginTypeItem {
+
+        private int mPrio;
+        private String mLabel;
+        private String mName;
+        private LoginType mType;
+
+        LoginTypeItem(int prio, String label, String name, LoginType type) {
+            mPrio = prio;
+            mLabel = label;
+            mName = name;
+            mType = type;
+        }
+    }
+
 }

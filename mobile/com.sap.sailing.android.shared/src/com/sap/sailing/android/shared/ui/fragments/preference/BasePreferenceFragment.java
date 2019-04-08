@@ -6,28 +6,30 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import android.preference.CheckBoxPreference;
-import android.preference.ListPreference;
-import android.preference.MultiSelectListPreference;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-
 import com.sap.sailing.android.shared.ui.utils.MultiplePreferenceChangeListener;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
+
+import android.os.Bundle;
+import android.support.v14.preference.MultiSelectListPreference;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.preference.CheckBoxPreference;
+import android.support.v7.preference.ListPreference;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.Preference.OnPreferenceChangeListener;
+import android.support.v7.preference.PreferenceFragmentCompat;
+import android.support.v7.preference.PreferenceScreen;
 
 /**
  * Created by I074137 on 18.09.13.
  */
-public class BasePreferenceFragment extends PreferenceFragment {
-    
+public class BasePreferenceFragment extends PreferenceFragmentCompat {
+
     @SuppressWarnings("unchecked")
     protected <T extends Preference> T findPreference(int resourceId) {
         return (T) findPreference(getString(resourceId));
     }
-    
-    protected static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
+
+    protected Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
@@ -35,10 +37,7 @@ public class BasePreferenceFragment extends PreferenceFragment {
             if (preference instanceof ListPreference) {
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
+                preference.setSummary(index >= 0 ? listPreference.getEntries()[index] : null);
 
             } else if (preference instanceof MultiSelectListPreference || preference instanceof EditSetPreference) {
                 @SuppressWarnings("unchecked")
@@ -53,34 +52,28 @@ public class BasePreferenceFragment extends PreferenceFragment {
         }
     };
 
-    protected static void bindPreferenceSummaryToValue(Preference preference) {
+    protected void bindPreferenceSummaryToValue(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
+                getPreferenceManager().getSharedPreferences().getString(preference.getKey(), ""));
     }
-    
-    protected static void bindPreferenceSummaryToInteger(Preference preference) {
+
+    protected void bindPreferenceSummaryToInteger(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getInt(preference.getKey(), 0));
+                getPreferenceManager().getSharedPreferences().getInt(preference.getKey(), 0));
     }
-    
-    protected static void bindPreferenceSummaryToSet(Preference preference) {
+
+    protected void bindPreferenceSummaryToSet(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getStringSet(preference.getKey(), new HashSet<String>()));
+                getPreferenceManager().getSharedPreferences().getStringSet(preference.getKey(), new HashSet<String>()));
     }
 
-    protected static void bindPreferenceToCheckbox(CheckBoxPreference checkboxPreference, final Preference target) {
+    protected void bindPreferenceToCheckbox(CheckBoxPreference checkboxPreference, final Preference target) {
         target.setEnabled(checkboxPreference.isChecked());
         addOnPreferenceChangeListener(checkboxPreference, new Preference.OnPreferenceChangeListener() {
             @Override
@@ -91,7 +84,7 @@ public class BasePreferenceFragment extends PreferenceFragment {
         });
     }
 
-    protected static void bindPreferenceToListEntry(Preference preference, final String defaultValue) {
+    protected void bindPreferenceToListEntry(Preference preference, final String defaultValue) {
         final ListPreference listPreference = (ListPreference) preference;
         if (listPreference.getValue() == null) {
             listPreference.setValue(defaultValue);
@@ -111,7 +104,7 @@ public class BasePreferenceFragment extends PreferenceFragment {
         });
     }
 
-    protected static void addOnPreferenceChangeListener(Preference preference, OnPreferenceChangeListener newListener) {
+    protected void addOnPreferenceChangeListener(Preference preference, OnPreferenceChangeListener newListener) {
         OnPreferenceChangeListener oldListener = preference.getOnPreferenceChangeListener();
         if (oldListener == null) {
             MultiplePreferenceChangeListener multiListener = new MultiplePreferenceChangeListener();
@@ -125,6 +118,31 @@ public class BasePreferenceFragment extends PreferenceFragment {
             multiListener.addOnPreferenceChangeListener(oldListener);
             multiListener.addOnPreferenceChangeListener(newListener);
             preference.setOnPreferenceChangeListener(multiListener);
+        }
+    }
+
+    /**
+     * Called during {@link #onCreate(Bundle)} to supply the preferences for this fragment. Subclasses are expected to
+     * call {@link #setPreferenceScreen(PreferenceScreen)} either directly or via helper methods such as
+     * {@link #addPreferencesFromResource(int)}.
+     *
+     * @param savedInstanceState
+     *            If the fragment is being re-created from a previous saved state, this is the state.
+     * @param rootKey
+     *            If non-null, this preference fragment should be rooted at the {@link PreferenceScreen} with this key.
+     */
+    @Override
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    }
+
+    @Override
+    public void onDisplayPreferenceDialog(Preference preference) {
+        if (preference instanceof EditSetPreference) {
+            DialogFragment dialogFragment = EditSetPreferenceDialogFragmentCompat.newInstance(preference);
+            dialogFragment.setTargetFragment(this, 0);
+            dialogFragment.show(getFragmentManager(), null);
+        } else {
+            super.onDisplayPreferenceDialog(preference);
         }
     }
 }

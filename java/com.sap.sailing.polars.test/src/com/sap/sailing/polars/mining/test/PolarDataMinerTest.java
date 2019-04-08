@@ -29,12 +29,11 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -46,6 +45,7 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
@@ -53,8 +53,10 @@ import com.sap.sailing.polars.mining.BearingClusterGroup;
 import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
 import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.mining.SpeedRegressionPerAngleClusterProcessor;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.ClusterGroup;
 
@@ -82,7 +84,7 @@ public class PolarDataMinerTest {
         return new BearingClusterGroup(0, 180, 5);
     }
 
-    @Ignore
+    @Ignore("The test did work before DataMining was used for polars; maybe rework in the future...")
     @Test
     public void testGrouping() throws InterruptedException, TimeoutException, NoSuchMethodException,
             NotEnoughDataHasBeenAddedException {
@@ -203,7 +205,9 @@ public class PolarDataMinerTest {
             MarkPassing markpassing = createMockedStartMarkPassing();
             when(trackedRace.getMarkPassing(eq(competitor), eq(startWaypoint))).thenReturn(markpassing);
         }
-
+        TrackedRaceStatus status = mock(TrackedRaceStatus.class);
+        when(status.getStatus()).thenReturn(TrackedRaceStatusEnum.FINISHED);
+        when(trackedRace.getStatus()).thenReturn(status);
 
 
         when(trackedRace.getStartOfRace()).thenReturn(startOfRace);

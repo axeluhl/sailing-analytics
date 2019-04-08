@@ -8,7 +8,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
@@ -38,19 +38,22 @@ public class SeriesHeader extends Composite {
 
     private void setUiFieldValues(EventSeriesViewDTO event, PlaceNavigation<?> logoNavigation) {
         LogoUtil.setEventLogo(eventLogoUi, event);
-        if(logoNavigation != null) {
+        if (logoNavigation != null) {
             logoNavigation.configureAnchorElement(eventLogoUi);
         }
         eventNameUi.setInnerText(event.getDisplayName());
         LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getStateMarker());
         StringBuilder locationsBuilder = new StringBuilder();
         boolean first = true;
-        for (EventMetadataDTO eventOfSeries : event.getEvents()) {
+        for (EventAndLeaderboardReferenceWithStateDTO eventOfSeries : event.getEventsAndRegattasOfSeriesAscending()) {
             if(!first) {
                 locationsBuilder.append(", ");
             }
-            locationsBuilder.append(eventOfSeries.getLocation());
-            first = false;
+            final String location = eventOfSeries.getDisplayName();
+            if (location != null && !location.isEmpty()) {
+                locationsBuilder.append(location);
+                first = false;
+            }
         }
         locationsUi.setInnerText(locationsBuilder.toString());
     }

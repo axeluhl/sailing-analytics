@@ -21,11 +21,19 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
+import com.sap.sailing.racecommittee.app.services.RaceStateService;
 import com.sap.sse.common.Util.Triple;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
 
+    private Context mContext;
     private LinkedHashMap<Serializable, EventBase> eventsById;
     private LinkedHashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
     private LinkedHashMap<Serializable, Mark> marksById;
@@ -35,8 +43,20 @@ public enum InMemoryDataStore implements DataStore {
     private Serializable eventUUID;
     private UUID courseUUID;
 
+    private RaceStateService mService;
+    private boolean mBound;
+
     InMemoryDataStore() {
         reset();
+    }
+
+    @Override
+    public void setContext(Context context) {
+        if (mContext == null) {
+            mContext = context.getApplicationContext();
+        }
+        Intent intent = new Intent(mContext, RaceStateService.class);
+        mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -49,6 +69,11 @@ public enum InMemoryDataStore implements DataStore {
 
         eventUUID = null;
         courseUUID = null;
+
+        if (mContext != null && mBound) {
+            mContext.unbindService(mConnection);
+            mBound = false;
+        }
     }
 
     @Override
@@ -57,9 +82,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * *
-     *  EVENTS *
-     * * * * * *
+     * * * * * * EVENTS * * * * * *
      */
 
     @Override
@@ -83,9 +106,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * * * *
-     * COURSE AREA *
-     * * * * * * * *
+     * * * * * * * * COURSE AREA * * * * * * * *
      */
 
     @Override
@@ -140,9 +161,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * * *  *
-     * MANAGED RACE *
-     * * * * * * *  *
+     * * * * * * * * MANAGED RACE * * * * * * * *
      */
 
     @Override
@@ -179,17 +198,20 @@ public enum InMemoryDataStore implements DataStore {
             managedRaceById.putAll(output);
             output.clear();
         } else {
-            throw new IndexOutOfBoundsException("index " + index + " must be greater than zero and less than size of the map");
+            throw new IndexOutOfBoundsException(
+                    "index " + index + " must be greater than zero and less than size of the map");
         }
     }
 
     @Override
     public void removeRace(ManagedRace race) {
+        unregisterRace(race);
         managedRaceById.remove(convertManagedRaceIdentifierToSimpleRaceLogIdentifier(race.getIdentifier()));
     }
 
     private SimpleRaceLogIdentifier convertManagedRaceIdentifierToSimpleRaceLogIdentifier(ManagedRaceIdentifier id) {
-        return new SimpleRaceLogIdentifierImpl(id.getRaceGroup().getName(), id.getRaceColumnName(), id.getFleet().getName());
+        return new SimpleRaceLogIdentifierImpl(id.getRaceGroup().getName(), id.getRaceColumnName(),
+                id.getFleet().getName());
     }
 
     @Override
@@ -208,17 +230,18 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /**
-     * Parses a serialized version of a ManagedRaceIdentifier and creates a SimpleRaceLogIdentifier
-     * this is needed as the serialized version is passed around in the bundle context, but the
-     * InMemoryDataStore now has to use SimpleRaceLogIdentifier as key in the managedRaces HashMap in
-     * order to allow for retrieving a managed race with exclusively the information provided by a
-     * SimpleRaceLogIdentifier (which is less than the information provided by a ManagedRaceIdentifier)
+     * Parses a serialized version of a ManagedRaceIdentifier and creates a SimpleRaceLogIdentifier this is needed as
+     * the serialized version is passed around in the bundle context, but the InMemoryDataStore now has to use
+     * SimpleRaceLogIdentifier as key in the managedRaces HashMap in order to allow for retrieving a managed race with
+     * exclusively the information provided by a SimpleRaceLogIdentifier (which is less than the information provided by
+     * a ManagedRaceIdentifier)
      *
-     * @param escapedId serialized version of a ManagedRaceIdentifier
+     * @param escapedId
+     *            serialized version of a ManagedRaceIdentifier
      * @return corresponding SimpleRaceLogIdentifier
      */
     public SimpleRaceLogIdentifier parseManagedRaceLogIdentifier(final String escapedId) {
-        //Undo escaping
+        // Undo escaping
         final Triple<String, String, String> id = FleetIdentifierImpl.unescape(escapedId);
         return new SimpleRaceLogIdentifierImpl(id.getA(), id.getB(), id.getC());
     }
@@ -229,9 +252,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * *
-     *  MARKS  *
-     * * * * * *
+     * * * * * * MARKS * * * * * *
      */
 
     @Override
@@ -303,4 +324,32 @@ public enum InMemoryDataStore implements DataStore {
         courseUUID = uuid;
     }
 
+    public void registerRaces(Collection<ManagedRace> races) {
+        if (mBound) {
+            for (ManagedRace race : races) {
+                mService.registerRace(race);
+            }
+        }
+    }
+
+    private void unregisterRace(ManagedRace race) {
+        if (mBound) {
+            mService.unregisterRace(race);
+        }
+    }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            RaceStateService.RaceStateServiceBinder binder = (RaceStateService.RaceStateServiceBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBound = false;
+        }
+    };
 }
