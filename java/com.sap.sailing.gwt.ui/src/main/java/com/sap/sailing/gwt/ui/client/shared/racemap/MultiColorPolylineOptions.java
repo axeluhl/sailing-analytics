@@ -32,6 +32,18 @@ public class MultiColorPolylineOptions {
         zIndex = options.getZindex();
         this.colorProvider = colorProvider;
     }
+    public MultiColorPolylineOptions(MultiColorPolylineOptions options) {
+        colorMode = options.getColorMode();
+        colorProvider = options.getColorProvider();
+        clickable = options.getClickable();
+        draggable = options.getDraggable();
+        editable = options.getEditable();
+        geodesic = options.getGeodesic();
+        visible = options.getVisible();
+        strokeWeight = options.getStrokeWeight();
+        strokeOpacity = options.getStrokeOpacity();
+        zIndex = options.getZIndex();
+    }
     
     
     public Polyline newPolylineInstance(int index) {

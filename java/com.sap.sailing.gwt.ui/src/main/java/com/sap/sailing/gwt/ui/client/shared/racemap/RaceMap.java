@@ -136,6 +136,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.ColorMapper;
+import com.sap.sse.common.ColorMapperChangedListener;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -1639,7 +1640,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (timeForPositionTransitionMillis > 3 * timer.getRefreshInterval()) {
                 fixesAndTails.clearTails();
             }
-            fixesAndTails.updateDetailValueBoundaries(competitorsToShow);
+            if (selectedDetailType != null) {
+                fixesAndTails.updateDetailValueBoundaries(competitorSelection.getSelectedCompetitors());
+            }
             for (CompetitorDTO competitorDTO : competitorsToShow) {
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
                     if (!fixesAndTails.hasTail(competitorDTO)) {
@@ -1667,6 +1670,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 }
                 for (CompetitorDTO unusedTailCompetitorDTO : competitorDTOsOfUnusedTails) {
                     fixesAndTails.removeTail(unusedTailCompetitorDTO);
+                    //competitorSelection.removeCompetitorSelectionChangeListener();
                 }
             }
         }
@@ -2512,8 +2516,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 }
                 if (selectedDetailType != previous) {
                     selectedDetailTypeChanged = true; // Causes an overwrite of what are now wrong detailValues
-                    fixesAndTails.resetColorMapper(new ValueRangeFlexibleBoundaries(0, 1, 0.2, 0.5));
-                    redraw(); //TODO Somehow doesn't redraw any MultiColorPolylines
+                    fixesAndTails.resetColorMapper(new ValueRangeFlexibleBoundaries(0, 1, 0.2, 0.5), new ColorMapperChangedListener() {
+                        @Override
+                        public void onColorMappingChanged() {
+                            for (CompetitorDTO competitor : competitorSelection.getAllCompetitors()) {
+                                MultiColorPolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
+                                fixesAndTails.getTail(competitor).setOptions(options);
+                            }
+                        }
+                    });
                 }
             }
         });
@@ -2759,6 +2770,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     boatCanvas.draw();
                 }
                 showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
+            }
+        }
+        // Now update tails for all competitors because selection change may also affect all unselected competitors
+        for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
+            MultiColorPolyline tail = fixesAndTails.getTail(oneOfAllCompetitors);
+            if (tail != null) {
+                MultiColorPolylineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
+                tail.setOptions(newOptions);
             }
         }
         //Trigger auto-zoom if needed
@@ -3083,7 +3102,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
         result.setPath(pointsAsArray);
         result.setMap(map);
-        Hoverline resultHoverline = new Hoverline(result, options, this);
+        MultiColorPolylineOptions hoverlineOptions = new MultiColorPolylineOptions(options);
+        hoverlineOptions.setColorMode(MultiColorPolylineColorMode.MONOCHROMATIC);
+        hoverlineOptions.setColorProvider((i) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
+        Hoverline resultHoverline = new Hoverline(result, hoverlineOptions, this);
         final ClickMapHandler clickHandler = new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
