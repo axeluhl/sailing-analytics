@@ -291,7 +291,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         /* CONNECTORS */
         final HorizontalTabLayoutPanel connectorsTabPanel = panel.addVerticalTab(getStringMessages().connectors(), "TrackingProviderPanel");
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
-                getSailingService(), getUserService(), this, this, getStringMessages());
+                getSailingService(), getUserService(), this, this, getStringMessages(), tableResources);
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tractracEventManagementPanel),
                 getStringMessages().tracTracEvents(),

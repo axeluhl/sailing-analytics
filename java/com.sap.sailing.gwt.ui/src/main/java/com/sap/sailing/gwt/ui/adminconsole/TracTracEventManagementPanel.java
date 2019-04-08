@@ -37,6 +37,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -48,6 +49,7 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
@@ -88,11 +90,17 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
     private FlushableCellTable<TracTracRaceRecordDTO> racesTable;
-    
+
+    private final UserService userService;
+    private final CellTableWithCheckboxResources tableResources;
+
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, UserService userService,
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages) {
+            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
+            final CellTableWithCheckboxResources tableResources) {
         super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);
+        this.userService = userService;
         this.errorReporter = errorReporter;
+        this.tableResources = tableResources;
         this.previousConfigurations = new HashMap<String, TracTracConfigurationWithSecurityDTO>();
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
         this.raceList = new ListDataProvider<TracTracRaceRecordDTO>();
@@ -122,8 +130,18 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         connectionsPanel.setStyleName("bold");
 
         Grid grid = new Grid(10, 3);
-        connectionsPanel.setContentWidget(grid);
         
+        // FIXME
+        VerticalPanel vpTemp = new VerticalPanel();
+        final TracTracConnectionTableWrapper accountsTable = new TracTracConnectionTableWrapper(userService, sailingService, stringMessages, errorReporter,
+                true, tableResources, () -> {
+                });
+        accountsTable.refreshTracTracAccountList();
+        vpTemp.add(accountsTable);
+        vpTemp.add(grid);
+
+        connectionsPanel.setContentWidget(vpTemp);
+
         // Existing TracTrac connections
         Label connectionsHistoryLabel = new Label("TracTrac " + stringMessages.connections() + ":");
 
