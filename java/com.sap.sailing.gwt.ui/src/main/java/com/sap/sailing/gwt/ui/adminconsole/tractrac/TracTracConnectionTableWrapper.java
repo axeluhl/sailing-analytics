@@ -14,11 +14,13 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -43,8 +45,7 @@ public class TracTracConnectionTableWrapper extends
 
     public TracTracConnectionTableWrapper(final UserService userService, final SailingServiceAsync sailingServiceAsync,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
-            final boolean enablePager,
-            final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
+            final boolean enablePager, final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
         super(stringMessages, errorReporter, false, enablePager,
                 new EntityIdentityComparator<TracTracConfigurationWithSecurityDTO>() {
                     @Override
@@ -77,10 +78,6 @@ public class TracTracConnectionTableWrapper extends
                 dto -> dto.getTracTracUsername(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountPasswordColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getTracTracPassword(), tracTracAccountColumnListHandler);
-        // FIXME
-        final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountRacesWithStateHiddenColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
-                dto -> dto.getName(), tracTracAccountColumnListHandler);
-
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountCreatorNameColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getCreatorName(), tracTracAccountColumnListHandler);
 
@@ -88,7 +85,37 @@ public class TracTracConnectionTableWrapper extends
         final AccessControlledActionsColumn<TracTracConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_UPDATE, DefaultActions.UPDATE, dto -> {
-            // TODO
+            new EditTracTracConnectionDialog(dto, new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
+
+                @Override
+                public void ok(TracTracConfigurationWithSecurityDTO editedObject) {
+                    final String eventName = editedObject.getName();
+                    final String jsonURL = editedObject.getJSONURL();
+                    final String liveDataURI = editedObject.getLiveDataURI();
+                    final String storedDataURI = editedObject.getStoredDataURI();
+                    final String courseDesignUpdateURI = editedObject.getCourseDesignUpdateURI();
+                    final String tractracUsername = editedObject.getTracTracUsername();
+                    final String tractracPassword = editedObject.getTracTracPassword();
+                    sailingServiceAsync.storeTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI,
+                            courseDesignUpdateURI, tractracUsername, tractracPassword,
+                            new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError(
+                                            "Exception trying to store configuration in DB: " + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(Void voidResult) {
+                                    refreshTracTracAccountList();
+                                }
+                            }));
+                }
+
+                @Override
+                public void cancel() {
+                }
+            }, userService, errorReporter).show();
         });
 
         final EditOwnershipDialog.DialogConfig<TracTracConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
@@ -131,7 +158,6 @@ public class TracTracConnectionTableWrapper extends
         table.addColumn(tracTracAccountUsernameColumn, stringMessagesClient.tractracUsername());
         table.addColumn(tracTracAccountPasswordColumn, stringMessagesClient.tractracPassword());
         // TODO: i18n
-        table.addColumn(tracTracAccountRacesWithStateHiddenColumn, stringMessagesClient.racesWithHiddenState());
         table.addColumn(tracTracAccountCreatorNameColumn, "Creator Name");
         SecuredDTOOwnerColumn.configureOwnerColumns(table, tracTracAccountColumnListHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());

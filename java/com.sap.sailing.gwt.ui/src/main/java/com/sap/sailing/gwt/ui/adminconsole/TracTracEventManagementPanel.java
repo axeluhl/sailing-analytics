@@ -131,7 +131,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
         Grid grid = new Grid(10, 3);
         
-        // FIXME
+        // FIXME: remove temporary vertical panel
         VerticalPanel vpTemp = new VerticalPanel();
         final TracTracConnectionTableWrapper accountsTable = new TracTracConnectionTableWrapper(userService, sailingService, stringMessages, errorReporter,
                 true, tableResources, () -> {
