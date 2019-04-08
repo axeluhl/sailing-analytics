@@ -96,7 +96,7 @@ public class TracTracConnectionTableWrapper extends
                     final String courseDesignUpdateURI = editedObject.getCourseDesignUpdateURI();
                     final String tractracUsername = editedObject.getTracTracUsername();
                     final String tractracPassword = editedObject.getTracTracPassword();
-                    sailingServiceAsync.storeTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI,
+                    sailingServiceAsync.createTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI,
                             courseDesignUpdateURI, tractracUsername, tractracPassword,
                             new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                 @Override

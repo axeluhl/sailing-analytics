@@ -1426,18 +1426,40 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     return config;
                 });
     }
-
+    
     @Override
-    public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
+    public void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
         final String currentUserName = getSecurityService().getCurrentUser().getName();
+        final TypeRelativeObjectIdentifier identifier = TracTracConfiguration.getTypeRelativeObjectIdentifier(jsonURL, currentUserName);
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.TRACTRAC_ACCOUNT,
-                TracTracConfiguration.getTypeRelativeObjectIdentifier(jsonURL, currentUserName), name,
-                () -> tractracMongoObjectFactory.storeTracTracConfiguration(
+                identifier, name,
+                () -> tractracMongoObjectFactory.createTracTracConfiguration(
                         getTracTracAdapter().createTracTracConfiguration(currentUserName, name, jsonURL, liveDataURI,
                                 storedDataURI,
                                 courseDesignUpdateURI, tracTracUsername, tracTracPassword)));
+    }
+
+    @Override
+    public void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration) {
+        getSecurityService().checkCurrentUserDeletePermission(tracTracConfiguration);
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(tracTracConfiguration,
+                () ->
+        tractracMongoObjectFactory.deleteTracTracConfiguration(tracTracConfiguration.getCreatorName(),
+                tracTracConfiguration.getJSONURL()));
+    }
+
+    @Override
+    public void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
+            throws Exception {
+        getSecurityService().checkCurrentUserUpdatePermission(tracTracConfiguration);
+        tractracMongoObjectFactory.updateTracTracConfiguration(
+                getTracTracAdapter().createTracTracConfiguration(tracTracConfiguration.getCreatorName(),
+                tracTracConfiguration.getName(), tracTracConfiguration.getJSONURL(),
+                tracTracConfiguration.getLiveDataURI(), tracTracConfiguration.getStoredDataURI(),
+                tracTracConfiguration.getCourseDesignUpdateURI(), tracTracConfiguration.getTracTracUsername(),
+                        tracTracConfiguration.getTracTracPassword()));
     }
 
     private RaceDefinition getRaceByName(Regatta regatta, String raceName) {

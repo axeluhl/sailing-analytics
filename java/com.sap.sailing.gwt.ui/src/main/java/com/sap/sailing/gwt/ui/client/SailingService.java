@@ -151,6 +151,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<TracTracConfigurationWithSecurityDTO> getPreviousTracTracConfigurations()
             throws UnauthorizedException, Exception;
 
+    void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
+            throws UnauthorizedException, Exception;
+
+    void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
+            throws UnauthorizedException, Exception;
+
     List<RegattaDTO> getRegattas() throws UnauthorizedException;
 
     List<RegattaDTO> getRegattasWithUpdatePermission() throws UnauthorizedException;
@@ -177,7 +183,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm)
             throws UnauthorizedException;
 
-    void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
+    void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword)
             throws UnauthorizedException, Exception;
 

@@ -18,8 +18,26 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {
+    public void createTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {
         MongoCollection<Document> ttConfigCollection = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
+        final Document result = storeTracTracConfiguration(tracTracConfiguration);
+        ttConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).insertOne(result);
+    }
+
+    @Override
+    public void updateTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {
+        MongoCollection<Document> ttConfigCollection = database
+                .getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
+        final Document result = storeTracTracConfiguration(tracTracConfiguration);
+        // Object with given name is updated or created if it does not exist yet
+        final Document updateQuery = new Document(FieldNames.TT_CONFIG_JSON_URL.name(),
+                tracTracConfiguration.getJSONURL());
+        updateQuery.put(FieldNames.TT_CONFIG_CREATOR_NAME.name(), tracTracConfiguration.getCreatorName());
+        ttConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(updateQuery, result,
+                new UpdateOptions().upsert(true));
+    }
+
+    private Document storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {
         final Document result = new Document();
         result.put(FieldNames.TT_CONFIG_CREATOR_NAME.name(), tracTracConfiguration.getCreatorName());
         result.put(FieldNames.TT_CONFIG_NAME.name(), tracTracConfiguration.getName());
@@ -29,10 +47,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.TT_CONFIG_COURSE_DESIGN_UPDATE_URI.name(), tracTracConfiguration.getCourseDesignUpdateURI());
         result.put(FieldNames.TT_CONFIG_TRACTRAC_USERNAME.name(), tracTracConfiguration.getTracTracUsername());
         result.put(FieldNames.TT_CONFIG_TRACTRAC_PASSWORD.name(), tracTracConfiguration.getTracTracPassword());
-        // Object with given name is updated or created if it does not exist yet
-        final Document updateQuery = new Document(FieldNames.TT_CONFIG_JSON_URL.name(),
-                tracTracConfiguration.getJSONURL());
-        ttConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(updateQuery, result,
-                new UpdateOptions().upsert(true));
+        return result;
+    }
+
+    @Override
+    public void deleteTracTracConfiguration(String creatorName, String jsonUrl) {
+        MongoCollection<Document> ttConfigCollection = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
+        final Document deleteQuery = new Document(FieldNames.TT_CONFIG_JSON_URL.name(),
+                jsonUrl);
+        deleteQuery.put(FieldNames.TT_CONFIG_CREATOR_NAME.name(), creatorName);
+        ttConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(deleteQuery);
     }
 }

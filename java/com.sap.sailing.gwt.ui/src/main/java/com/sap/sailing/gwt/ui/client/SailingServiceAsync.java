@@ -183,8 +183,14 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationWithSecurityDTO>> callback);
 
-    void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
+    void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
+
+    void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
+            AsyncCallback<Void> callback);
+
+    void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
+            AsyncCallback<Void> callback);
 
     void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking, AsyncCallback<Void> asyncCallback);
 

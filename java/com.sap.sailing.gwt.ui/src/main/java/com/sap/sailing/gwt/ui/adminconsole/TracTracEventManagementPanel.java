@@ -141,7 +141,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
-                                sailingService.storeTracTracConfiguration(editedConnection.getName(),
+                                sailingService.createTracTracConfiguration(editedConnection.getName(),
                                         editedConnection.getJSONURL(), editedConnection.getLiveDataURI(),
                                         editedConnection.getStoredDataURI(),
                                         editedConnection.getCourseDesignUpdateURI(),
@@ -437,14 +437,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 .getSelectedObject();
         if (selectedConnection != null) {
 
-        final String jsonURL = selectedConnection.getJSONURL();
-        final String liveDataURI = selectedConnection.getLiveDataURI();
-        final String storedDataURI = selectedConnection.getStoredDataURI();
-        final String courseDesignUpdateURI = selectedConnection.getCourseDesignUpdateURI();
-        final String tractracUsername = selectedConnection.getTracTracUsername();
-        final String tractracPassword = selectedConnection.getTracTracPassword();
-
-        sailingService.listTracTracRacesInEvent(jsonURL, listHiddenRaces, new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
+            sailingService.listTracTracRacesInEvent(selectedConnection.getJSONURL(), listHiddenRaces,
+                    new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
                 new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -456,7 +450,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     public void onSuccess(final com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>> result) {
                         loadingMessageLabel.setText("Building resultset and saving configuration...");
                         TracTracEventManagementPanel.this.availableTracTracRaces.clear();
-                        final String eventName = result.getA();
+                                    final TracTracConfigurationWithSecurityDTO updatedConnection = new TracTracConfigurationWithSecurityDTO(
+                                            selectedConnection,
+                                            result.getA());
                         final List<TracTracRaceRecordDTO> eventRaces = result.getB();
                         if (eventRaces != null) {
                             TracTracEventManagementPanel.this.availableTracTracRaces.addAll(eventRaces);
@@ -471,8 +467,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         loadingMessageLabel.setText("");
                         
                         // store a successful configuration in the database for later retrieval
-                        sailingService.storeTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI,
-                                courseDesignUpdateURI, tractracUsername, tractracPassword, new MarkedAsyncCallback<Void>(
+                                    sailingService.updateTracTracConfiguration(updatedConnection,
+                                            new MarkedAsyncCallback<Void>(
                                         new AsyncCallback<Void>() {
                                             @Override
                                             public void onFailure(Throwable caught) {

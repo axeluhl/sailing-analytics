@@ -40,6 +40,19 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
         this.creatorName = creatorName;
     }
 
+    /** Copy constructor with new name */
+    public TracTracConfigurationWithSecurityDTO(TracTracConfigurationWithSecurityDTO config, final String name) {
+        super();
+        this.name = name;
+        this.jsonUrl = config.getJSONURL();
+        this.liveDataURI = config.getLiveDataURI();
+        this.storedDataURI = config.getStoredDataURI();
+        this.courseDesignUpdateURI = config.getCourseDesignUpdateURI();
+        this.tracTracUsername = config.getTracTracUsername();
+        this.tracTracPassword = config.getTracTracPassword();
+        this.creatorName = config.getCreatorName();
+    }
+
     @Override
     public AccessControlListDTO getAccessControlList() {
         return securityInformation.getAccessControlList();
