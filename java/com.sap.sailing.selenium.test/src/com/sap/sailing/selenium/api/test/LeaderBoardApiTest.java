@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.util.UUID;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
@@ -13,8 +15,11 @@ import com.sap.sailing.selenium.api.core.AbstractApiTest;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
+import com.sap.sailing.selenium.api.event.RegattaApi;
 
 public class LeaderBoardApiTest extends AbstractApiTest {
+
+    private static final String leaderboardName = "loggingsession";
 
     @Before
     public void setUp() {
@@ -25,15 +30,14 @@ public class LeaderBoardApiTest extends AbstractApiTest {
     public void testGetLeaderboardForCreatedEvent() {
         ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
 
-        String eventName = "<ppp> loggingsession";
         EventApi eventApi = new EventApi();
         LeaderboardApi leaderboardApi = new LeaderboardApi();
 
-        eventApi.createEvent(ctx, eventName, "75QMNATIONALEKREUZER", "CLOSED", "default");
+        eventApi.createEvent(ctx, leaderboardName, "75QMNATIONALEKREUZER", "CLOSED", "default");
 
-        JSONObject leaderBoard = leaderboardApi.getLeaderboard(ctx, eventName);
-        assertEquals("read: leaderboard.name is different", eventName, leaderBoard.get("name"));
-        assertEquals("read: leaderboard.displayName is different", eventName, leaderBoard.get("displayName"));
+        JSONObject leaderBoard = leaderboardApi.getLeaderboard(ctx, leaderboardName);
+        assertEquals("read: leaderboard.name is different", leaderboardName, leaderBoard.get("name"));
+        assertEquals("read: leaderboard.displayName is different", leaderboardName, leaderBoard.get("displayName"));
         assertNotNull("read: leaderboard.resultTimepoint is missing", leaderBoard.get("resultTimepoint"));
         assertEquals("read: leaderboard.resultState is different", "Live", leaderBoard.get("resultState"));
         assertEquals("read: leaderboard.type is different", "RegattaLeaderboard", leaderBoard.get("type"));
@@ -47,12 +51,32 @@ public class LeaderBoardApiTest extends AbstractApiTest {
         assertEquals("read: leaderboard.competitors should be empty", 0,
                 ((JSONArray) leaderBoard.get("competitors")).size());
         assertEquals("read: leaderboard.ShardingLeaderboardName is different",
-                "/leaderboard/" + eventName.replaceAll(" ", "_").replaceAll("<", "_").replaceAll(">", "_"),
+                "/leaderboard/" + leaderboardName.replaceAll(" ", "_").replaceAll("<", "_").replaceAll(">", "_"),
                 leaderBoard.get("ShardingLeaderboardName"));
     }
-    
+
     @Test
-    public void testDeviceMappingStartAndEnd() {
+    public void testDeviceMappingStartAndEnd() throws Exception {
+        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        EventApi eventApi = new EventApi();
+        RegattaApi regattaApi = new RegattaApi();
+        LeaderboardApi leaderboardApi = new LeaderboardApi();
+
+        eventApi.createEvent(ctx, leaderboardName, "75QMNATIONALEKREUZER", "CLOSED", "default");
+        JSONObject competitor = regattaApi.createAndAddCompetitor(ctx, leaderboardName, "75QMNATIONALEKREUZER",
+                "test@de", "Max Mustermann", "USA");
+        String competitorId = competitor.get("id").toString();
         
+        String boatId = "sdjkfhsdkjfh!";
+        String markId = "kjashfkfhskh";
+        String deviceUuid = UUID.randomUUID().toString();
+        String secret = "dskjshfkdjhfksh";
+        Long fromMillis = System.currentTimeMillis();
+        JSONObject dmStart = leaderboardApi.deviceMappingsStart(ctx, leaderboardName, competitorId, boatId, markId,
+                deviceUuid, secret, fromMillis);
+        
+        JSONObject dmEnd = leaderboardApi.deviceMappingsEnd(ctx, leaderboardName, competitorId, boatId, markId,
+                deviceUuid, secret, fromMillis);
+
     }
 }

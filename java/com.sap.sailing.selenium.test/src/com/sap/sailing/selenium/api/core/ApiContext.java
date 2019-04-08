@@ -53,9 +53,10 @@ public class ApiContext {
         try {
             result = auth(wres.getRequestBuilder()).post(String.class);
         } catch (UniformInterfaceException e) {
-            logger.severe("API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
-                    + e.getResponse().getEntity(String.class));
-            throw new RuntimeException(e.getResponse().getEntity(String.class));
+            String error = "API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
+                    + e.getResponse().getEntity(String.class);
+            logger.severe(error);
+            throw new RuntimeException(error);
         }
         return (JSONObject) JSONValue.parse(result);
     }
@@ -71,23 +72,25 @@ public class ApiContext {
         try {
             result = auth(wres.getRequestBuilder()).entity(form).post(String.class);
         } catch (UniformInterfaceException e) {
-            logger.severe("API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
-                    + e.getResponse().getEntity(String.class));
-            throw new RuntimeException(e.getResponse().getEntity(String.class));
+            String error = "API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
+                    + e.getResponse().getEntity(String.class);
+            logger.severe(error);
+            throw new RuntimeException(error);
         }
         return (JSONObject) JSONValue.parse(result);
     }
 
-    public JSONObject post(String url, Map<String, String> queryParams, String payload) {
+    public JSONObject post(String url, Map<String, String> queryParams, JSONObject body) {
         WebResource wres = getWebResource().path(url);
         wres = addQueryParams(wres, queryParams);
         String result;
         try {
-            result = auth(wres.getRequestBuilder()).entity(payload).post(String.class);
+            result = auth(wres.getRequestBuilder()).entity(body.toJSONString(), MediaType.APPLICATION_JSON).post(String.class);
         } catch (UniformInterfaceException e) {
-            logger.severe("API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
-                    + e.getResponse().getEntity(String.class));
-            throw new RuntimeException(e.getResponse().getEntity(String.class));
+            String error = "API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
+                    + e.getResponse().getEntity(String.class);
+            logger.severe(error);
+            throw new RuntimeException(error);
         }
         return (JSONObject) JSONValue.parse(result);
     }
@@ -100,8 +103,9 @@ public class ApiContext {
             result = auth(wres.getRequestBuilder()).entity(body.toJSONString(), MediaType.APPLICATION_JSON)
                     .put(String.class);
         } catch (UniformInterfaceException e) {
-            String error = e.getResponse().getEntity(String.class);
-            logger.severe("API PUT request " + url + " failed (rc=" + e.getResponse().getStatus() + "): " + error);
+            String error = "API PUT request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
+                    + e.getResponse().getEntity(String.class);
+            logger.severe(error);
             throw new RuntimeException(error);
         }
         return (JSONObject) JSONValue.parse(result);
@@ -112,9 +116,10 @@ public class ApiContext {
         try {
             auth(wres.getRequestBuilder()).delete();
         } catch (UniformInterfaceException e) {
-            logger.severe("API PUT request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
-                    + e.getResponse().getEntity(String.class));
-            throw new RuntimeException(e.getResponse().getEntity(String.class));
+            String error = "API DELETE request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
+                    + e.getResponse().getEntity(String.class);
+            logger.severe(error);
+            throw new RuntimeException(error);
         }
     }
 
@@ -147,9 +152,10 @@ public class ApiContext {
                         + "<no content>");
                 return null;
             } else {
-                logger.severe("API GET request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
-                        + e.getResponse().getEntity(String.class));
-                throw new RuntimeException(e.getResponse().getEntity(String.class));
+                String error = "API GET request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
+                        + e.getResponse().getEntity(String.class);
+                logger.severe(error);
+                throw new RuntimeException(error);
             }
 
         }
@@ -159,7 +165,9 @@ public class ApiContext {
     private WebResource addQueryParams(WebResource wres, Map<String, String> queryParams) {
         if (queryParams != null) {
             for (Entry<String, String> e : queryParams.entrySet()) {
-                wres = wres.queryParam(e.getKey(), e.getValue());
+                if (e.getKey() != null && e.getValue() != null) {
+                    wres = wres.queryParam(e.getKey(), e.getValue());
+                }
             }
         }
         return wres;
