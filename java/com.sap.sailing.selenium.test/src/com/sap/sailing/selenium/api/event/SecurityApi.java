@@ -21,7 +21,7 @@ public class SecurityApi {
         queryParams.put("company", company);
         // queryParams.put("email", email); //if email is provided a validation mail would be sent
         queryParams.put("password", password);
-        return ctx.post(CREATE_USER_URL, queryParams, null);
+        return ctx.post(CREATE_USER_URL, queryParams);
     }
 
     public JSONObject getUser(ApiContext ctx, String username) {

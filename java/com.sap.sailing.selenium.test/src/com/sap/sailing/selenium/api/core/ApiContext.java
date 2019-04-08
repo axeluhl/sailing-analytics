@@ -46,6 +46,20 @@ public class ApiContext {
         return client.resource(contextRoot + context);
     }
 
+    public JSONObject post(String url, Map<String, String> queryParams) {
+        WebResource wres = getWebResource().path(url);
+        wres = addQueryParams(wres, queryParams);
+        String result;
+        try {
+            result = auth(wres.getRequestBuilder()).post(String.class);
+        } catch (UniformInterfaceException e) {
+            logger.severe("API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
+                    + e.getResponse().getEntity(String.class));
+            throw new RuntimeException(e.getResponse().getEntity(String.class));
+        }
+        return (JSONObject) JSONValue.parse(result);
+    }
+
     public JSONObject post(String url, Map<String, String> queryParams, Map<String, String> formParams) {
         WebResource wres = getWebResource().path(url);
         wres = addQueryParams(wres, queryParams);
@@ -56,6 +70,20 @@ public class ApiContext {
         String result;
         try {
             result = auth(wres.getRequestBuilder()).entity(form).post(String.class);
+        } catch (UniformInterfaceException e) {
+            logger.severe("API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
+                    + e.getResponse().getEntity(String.class));
+            throw new RuntimeException(e.getResponse().getEntity(String.class));
+        }
+        return (JSONObject) JSONValue.parse(result);
+    }
+
+    public JSONObject post(String url, Map<String, String> queryParams, String payload) {
+        WebResource wres = getWebResource().path(url);
+        wres = addQueryParams(wres, queryParams);
+        String result;
+        try {
+            result = auth(wres.getRequestBuilder()).entity(payload).post(String.class);
         } catch (UniformInterfaceException e) {
             logger.severe("API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
                     + e.getResponse().getEntity(String.class));

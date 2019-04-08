@@ -29,6 +29,6 @@ public class RegattaApi {
         queryparams.put("competitorEmail", competitorEmail);
         queryparams.put("competitorName", competitorName);
         queryparams.put("nationalityIOC", nationalityIOC);
-        return ctx.post(url, queryparams, null);
+        return ctx.post(url, queryparams);
     }
 }

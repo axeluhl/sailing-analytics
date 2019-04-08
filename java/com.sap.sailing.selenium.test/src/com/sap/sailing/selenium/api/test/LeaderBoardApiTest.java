@@ -50,4 +50,9 @@ public class LeaderBoardApiTest extends AbstractApiTest {
                 "/leaderboard/" + eventName.replaceAll(" ", "_").replaceAll("<", "_").replaceAll(">", "_"),
                 leaderBoard.get("ShardingLeaderboardName"));
     }
+    
+    @Test
+    public void testDeviceMappingStartAndEnd() {
+        
+    }
 }
