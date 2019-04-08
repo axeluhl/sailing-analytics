@@ -88,16 +88,8 @@ public class TracTracConnectionTableWrapper extends
             new EditTracTracConnectionDialog(dto, new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
 
                 @Override
-                public void ok(TracTracConfigurationWithSecurityDTO editedObject) {
-                    final String eventName = editedObject.getName();
-                    final String jsonURL = editedObject.getJSONURL();
-                    final String liveDataURI = editedObject.getLiveDataURI();
-                    final String storedDataURI = editedObject.getStoredDataURI();
-                    final String courseDesignUpdateURI = editedObject.getCourseDesignUpdateURI();
-                    final String tractracUsername = editedObject.getTracTracUsername();
-                    final String tractracPassword = editedObject.getTracTracPassword();
-                    sailingServiceAsync.createTracTracConfiguration(eventName, jsonURL, liveDataURI, storedDataURI,
-                            courseDesignUpdateURI, tractracUsername, tractracPassword,
+                public void ok(final TracTracConfigurationWithSecurityDTO editedObject) {
+                    sailingServiceAsync.updateTracTracConfiguration(editedObject,
                             new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -117,6 +109,7 @@ public class TracTracConnectionTableWrapper extends
                 }
             }, userService, errorReporter).show();
         });
+
 
         final EditOwnershipDialog.DialogConfig<TracTracConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, dto -> refreshTracTracAccountList(),
