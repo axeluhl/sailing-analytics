@@ -39,8 +39,7 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
             final ErrorReporter errorReporter) {
         // TODO: i18n
         super(stringMessages.editTracTracConnection(), null, stringMessages.ok(), stringMessages.cancel(),
-                /* validator */ null,
-                /* animationEnabled */true, callback);
+                /* validator */ null, /* animationEnabled */true, callback);
         this.dtoToEdit = dtotoEdit;
         this.ensureDebugId("EditTracTracConnectionDialog");
         createUi();
@@ -58,8 +57,8 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
 
     private void createUi() {
 
-        grid = new Grid(8, 3);
-        grid.setWidget(1, 0, new Label(stringMessages.details() + ":"));
+        grid = new Grid(7, 2);
+        grid.setWidget(0, 0, new Label(stringMessages.details() + ":"));
 
         Label liveURILabel = new Label(stringMessages.liveUri() + ":");
         liveURILabel.setTitle(stringMessages.leaveEmptyForDefault());
@@ -69,8 +68,8 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
         liveURITextBox.setVisibleLength(40);
         liveURITextBox.setTitle(stringMessages.leaveEmptyForDefault());
 
-        grid.setWidget(2, 0, liveURILabel);
-        grid.setWidget(2, 1, liveURITextBox);
+        grid.setWidget(1, 0, liveURILabel);
+        grid.setWidget(1, 1, liveURITextBox);
 
         Label storedURILabel = new Label(stringMessages.storedUri() + ":");
         storedURILabel.setTitle(stringMessages.leaveEmptyForDefault());
@@ -80,8 +79,8 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
         storedURITextBox.setVisibleLength(40);
         storedURITextBox.setTitle(stringMessages.leaveEmptyForDefault());
 
-        grid.setWidget(3, 0, storedURILabel);
-        grid.setWidget(3, 1, storedURITextBox);
+        grid.setWidget(2, 0, storedURILabel);
+        grid.setWidget(2, 1, storedURITextBox);
 
         // JSON URL
         Label jsonURLLabel = new Label(stringMessages.jsonUrl() + ":");
@@ -90,8 +89,12 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
         jsonURLTextBox.ensureDebugId("JsonURLTextBox");
         jsonURLTextBox.setVisibleLength(100);
 
-        grid.setWidget(4, 0, jsonURLLabel);
-        grid.setWidget(4, 1, jsonURLTextBox);
+        // validation: User should not create empty connections
+        jsonURLTextBox.addKeyUpHandler(e -> super.getOkButton().setEnabled(!jsonURLTextBox.getText().isEmpty()));
+        super.getOkButton().setEnabled(false);
+
+        grid.setWidget(3, 0, jsonURLLabel);
+        grid.setWidget(3, 1, jsonURLTextBox);
 
         // Course design Update URL
         Label tracTracUpdateURLLabel = new Label(stringMessages.tracTracUpdateUrl() + ":");
@@ -100,24 +103,24 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
         tracTracUpdateURITextBox.ensureDebugId("TracTracUpdateURITextBox");
         tracTracUpdateURITextBox.setVisibleLength(100);
 
-        grid.setWidget(5, 0, tracTracUpdateURLLabel);
-        grid.setWidget(5, 1, tracTracUpdateURITextBox);
+        grid.setWidget(4, 0, tracTracUpdateURLLabel);
+        grid.setWidget(4, 1, tracTracUpdateURITextBox);
 
         // TracTrac Username
         tractracUsernameTextBox = new TextBox();
         tractracUsernameTextBox.ensureDebugId("TracTracUsernameTextBox");
         tractracUsernameTextBox.setVisibleLength(40);
 
-        grid.setWidget(6, 0, new Label(stringMessages.tractracUsername() + ":"));
-        grid.setWidget(6, 1, tractracUsernameTextBox);
+        grid.setWidget(5, 0, new Label(stringMessages.tractracUsername() + ":"));
+        grid.setWidget(5, 1, tractracUsernameTextBox);
 
         // TracTrac Password
         tractracPasswordTextBox = new PasswordTextBox();
         tractracPasswordTextBox.ensureDebugId("TracTracPasswordTextBox");
         tractracPasswordTextBox.setVisibleLength(40);
 
-        grid.setWidget(7, 0, new Label(stringMessages.tractracPassword() + ":"));
-        grid.setWidget(7, 1, tractracPasswordTextBox);
+        grid.setWidget(6, 0, new Label(stringMessages.tractracPassword() + ":"));
+        grid.setWidget(6, 1, tractracPasswordTextBox);
     }
 
     @Override
