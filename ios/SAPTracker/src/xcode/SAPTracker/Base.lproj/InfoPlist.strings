@@ -6,6 +6,7 @@
 //  Copyright © 2016 com.sap.sailing. All rights reserved.
 //
 
+"NSLocationAlwaysUsageDescription" = "In order to track your entire race your phone needs to continue tracking also when you switch off or lock the screen which helps save battery and avoids unintentionally stopping the tracking process.";
 "NSLocationWhenInUseUsageDescription" = "In order to track your entire race your phone needs to continue tracking also when you switch off or lock the screen which helps save battery and avoids unintentionally stopping the tracking process.";
 "NSLocationAlwaysAndWhenInUseUsageDescription" = "In order to track your entire race your phone needs to continue tracking also when you switch off or lock the screen which helps save battery and avoids unintentionally stopping the tracking process.";
 "NSCameraUsageDescription" = "The camera is required to perform a check-in using QR code.";
