@@ -98,7 +98,7 @@ public class TracTracConnectionTableWrapper extends
 
                                 @Override
                                 public void onSuccess(Void voidResult) {
-                                    refreshTracTracAccountList();
+                                    refreshTracTracConnectionList();
                                 }
                             }));
                 }
@@ -118,13 +118,13 @@ public class TracTracConnectionTableWrapper extends
 
                 @Override
                 public void onSuccess(Void result) {
-                    refreshTracTracAccountList();
+                    refreshTracTracConnectionList();
                 }
             });
         });
 
         final EditOwnershipDialog.DialogConfig<TracTracConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, dto -> refreshTracTracAccountList(),
+                .create(userService.getUserManagementService(), type, dto -> refreshTracTracConnectionList(),
                         stringMessages);
 
         final EditACLDialog.DialogConfig<TracTracConfigurationWithSecurityDTO> configACL = EditACLDialog.create(
@@ -171,10 +171,9 @@ public class TracTracConnectionTableWrapper extends
         return filterField;
     }
 
-    public void refreshTracTracAccountList() {
+    public void refreshTracTracConnectionList() {
         sailingServiceAsync
                 .getPreviousTracTracConfigurations(new AsyncCallback<List<TracTracConfigurationWithSecurityDTO>>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter

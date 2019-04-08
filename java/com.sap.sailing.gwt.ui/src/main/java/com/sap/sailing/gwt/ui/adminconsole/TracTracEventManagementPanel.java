@@ -118,7 +118,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         connectionsTable = new TracTracConnectionTableWrapper(userService, sailingService, stringMessages,
                 errorReporter, true, tableResources, () -> {
                 });
-        connectionsTable.refreshTracTracAccountList();
+        connectionsTable.refreshTracTracConnectionList();
 
         connectionsPanel.setContentWidget(tableAndConfigurationPanel);
 
@@ -135,7 +135,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.TRACKED_RACE);
         tableAndConfigurationPanel.add(buttonPanel);
-        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshTracTracAccountList());
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshTracTracConnectionList());
         buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
                 () -> new EditTracTracConnectionDialog(new TracTracConfigurationWithSecurityDTO(),
                         new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
@@ -155,7 +155,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                                             @Override
                                             public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshTracTracAccountList();
+                                                connectionsTable.refreshTracTracConnectionList();
                                             }
                                         }));
                             }
@@ -175,7 +175,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                         @Override
                         public void onSuccess(Void result) {
-                            connectionsTable.refreshTracTracAccountList();
+                            connectionsTable.refreshTracTracConnectionList();
                         }
                     });
         });
@@ -496,7 +496,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 
                                             @Override
                                             public void onSuccess(Void voidResult) {
-                                                connectionsTable.refreshTracTracAccountList();
+                                                connectionsTable.refreshTracTracConnectionList();
                                             }
                                         }));
                     }
@@ -545,5 +545,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         }
                     }));
         }
+    }
+
+    public void refreshTracTracConnectors() {
+        connectionsTable.refreshTracTracConnectionList();
+        raceList.getList().clear();
     }
 }

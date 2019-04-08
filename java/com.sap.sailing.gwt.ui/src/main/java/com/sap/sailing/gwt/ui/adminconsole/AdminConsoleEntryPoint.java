@@ -293,7 +293,13 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
                 getSailingService(), getUserService(), this, this, getStringMessages(), tableResources);
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
-        panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tractracEventManagementPanel),
+        panel.addToTabPanel(connectorsTabPanel,
+                new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tractracEventManagementPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        tractracEventManagementPanel.refreshTracTracConnectors();
+                    }
+                },
                 getStringMessages().tracTracEvents(),
                 SecuredDomainType.TRACTRAC_ACCOUNT.getPermission(DefaultActions.values()));
         regattasDisplayers.add(tractracEventManagementPanel);
