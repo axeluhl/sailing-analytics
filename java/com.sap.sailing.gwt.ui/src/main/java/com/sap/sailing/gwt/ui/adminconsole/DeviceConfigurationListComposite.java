@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -130,8 +131,12 @@ public class DeviceConfigurationListComposite extends Composite  {
             }
         };
         identifierNameColumn.setSortable(true);
-        columnSortHandler.setComparator(identifierNameColumn, (r1, r2)->r1.name.compareTo(r2.name));
+        columnSortHandler.setComparator(identifierNameColumn, (r1, r2) -> r1.name.compareTo(r2.name));
         table.addColumn(identifierNameColumn, stringMessages.device());
+
+        final TextColumn<DeviceConfigurationWithSecurityDTO> deviceConfigurationUUidColumn = new AbstractSortableTextColumn<DeviceConfigurationWithSecurityDTO>(
+                config -> config.id == null ? "<null>" : config.id.toString());
+
 
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
         final AccessControlledActionsColumn<DeviceConfigurationWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
@@ -165,6 +170,7 @@ public class DeviceConfigurationListComposite extends Composite  {
 
 
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
+        table.addColumn(deviceConfigurationUUidColumn, stringMessages.id());
         table.addColumn(actionColumn, stringMessages.actions());
         return table;
     }

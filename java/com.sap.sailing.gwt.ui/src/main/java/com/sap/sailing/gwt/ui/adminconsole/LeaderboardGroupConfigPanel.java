@@ -71,6 +71,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -532,6 +533,10 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         removeButton.setEnabled(false);
 
         AnchorCell anchorCell = new AnchorCell();
+
+        final TextColumn<LeaderboardGroupDTO> groupUUidColumn = new AbstractSortableTextColumn<LeaderboardGroupDTO>(
+                group -> group.getId() == null ? "<null>" : group.getId().toString());
+
         Column<LeaderboardGroupDTO, SafeHtml> groupNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
@@ -661,6 +666,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         groupsTable.addColumn(groupDisplayNameColumn, stringMessages.displayName());
         groupsTable.addColumn(hasOverallLeaderboardColumn, stringMessages.useOverallLeaderboard());
         SecuredDTOOwnerColumn.configureOwnerColumns(groupsTable, leaderboardGroupsListHandler, stringMessages);
+        groupsTable.addColumn(groupUUidColumn, stringMessages.id());
         groupsTable.addColumn(actionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 
@@ -903,7 +909,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         removeButton.setText(selectedLeaderboardGroups.size() <= 1 ? stringMessages.remove() : stringMessages.removeNumber(selectedLeaderboardGroups.size()));
         boolean canDeleteAllSelected = true;
         for (LeaderboardGroupDTO group : selectedLeaderboardGroups) {
-            if (userService.hasPermission(group, DefaultActions.DELETE)) {
+            if (!userService.hasPermission(group, DefaultActions.DELETE)) {
                 canDeleteAllSelected = false;
             }
         }

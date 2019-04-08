@@ -210,15 +210,6 @@ public final class HomeServiceUtil {
     public static boolean hasVideos(Event event) {
         return !Util.isEmpty(event.getVideos());
     }
-
-    public static boolean isPartOfEvent(EventBase event, Leaderboard regattaEntity) {
-        for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-            if(courseArea.equals(regattaEntity.getDefaultCourseArea())) {
-                return true;
-            }
-        }
-        return false;
-    }
     
     public static VideoDescriptor getRandomVideo(Iterable<VideoDescriptor> urls) {
         if(Util.isEmpty(urls)) {
@@ -394,7 +385,7 @@ public final class HomeServiceUtil {
         final Event event = (Event) eventBase;
         String displayNameOfSingleAssociatedRegatta = null;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
-            if (HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+            if (leaderboard.isPartOfEvent(event)) {
                 if (displayNameOfSingleAssociatedRegatta != null) {
                     // more than one Regatta is associated to the specific event
                     return null;
@@ -517,7 +508,7 @@ public final class HomeServiceUtil {
                 // for events that are locally available, we can see if there are any leaderboards
                 LeaderboardGroup leaderboardGroup = (LeaderboardGroup) leaderboardGroupBase;
                 for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                    if(!fakeSeries || isPartOfEvent(event, leaderboard)) {
+                    if(!fakeSeries || leaderboard.isPartOfEvent(event)) {
                         return true;
                     }
                 }

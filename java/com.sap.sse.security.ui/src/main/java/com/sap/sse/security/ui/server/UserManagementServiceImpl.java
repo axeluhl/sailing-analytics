@@ -121,7 +121,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name) {
-        RoleDefinition role = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+        RoleDefinition role = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString), name,
                 new Callable<RoleDefinition>() {
 
@@ -343,7 +343,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     String.format("A user group with the name '%s' already exists.", name));
         }
 
-        UserGroup group = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+        UserGroup group = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER_GROUP, UserGroupImpl.getTypeRelativeObjectIdentifier(newTenantId), name, () -> {
                     
                     UserGroup userGroup;
@@ -880,7 +880,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
 
             final String message = "added role " + role.getName() + " for user " + username;
-            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+            getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredSecurityTypes.ROLE_ASSOCIATION, associationTypeIdentifier,
                     associationTypeIdentifier.toString(), new Action() {
 
@@ -1025,7 +1025,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(permission,
                     user);
             final String message = "Added permission " + permission + " for user " + username;
-            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+            getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredSecurityTypes.PERMISSION_ASSOCIATION, associationTypeIdentifier,
                     associationTypeIdentifier.toString(), new Action() {
 

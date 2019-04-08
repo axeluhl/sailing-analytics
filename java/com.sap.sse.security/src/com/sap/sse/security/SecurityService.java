@@ -564,4 +564,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      *      com.sap.sse.security.shared.AbstractOwnership)
      */
     boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck);
+
+    <T> T setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult);
+
+    void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
+            Action actionToCreateObject);
 }

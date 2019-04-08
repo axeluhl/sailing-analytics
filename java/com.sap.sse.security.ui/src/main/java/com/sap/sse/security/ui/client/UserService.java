@@ -509,13 +509,19 @@ public class UserService {
         return allKnownHasPermissions;
     }
 
+    public boolean hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(
+            HasPermissions type) {
+        final WildcardPermission createPermission = type.getPermission(DefaultActions.CREATE);
+        final OwnershipDTO ownershipOfNewlyCreatedObject = new OwnershipDTO(
+                currentUser == null ? null : currentUser.asStrippedUser(), getCurrentTenant());
+        return this.hasCurrentUserAnyPermission(createPermission, ownershipOfNewlyCreatedObject);
+    }
+
     public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
         if (!hasServerPermission(ServerActions.CREATE_OBJECT)) {
             return false;
         }
-        final WildcardPermission createPermission = type.getPermission(DefaultActions.CREATE);
-        final OwnershipDTO ownershipOfNewlyCreatedObject = new OwnershipDTO(currentUser == null ? null : currentUser.asStrippedUser(), getCurrentTenant());
-        return this.hasCurrentUserAnyPermission(createPermission, ownershipOfNewlyCreatedObject);
+        return hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
     }
     
     public boolean hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions type) {

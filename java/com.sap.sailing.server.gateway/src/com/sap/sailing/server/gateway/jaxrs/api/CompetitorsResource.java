@@ -88,7 +88,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                             + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
-            boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+            boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
             boolean competitorInRegatta = false;
             if (skip) {
                 Regatta regatta = getService().getRegattaByName(leaderboardName);
@@ -152,7 +152,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                     .entity("Could not find competitor with id " +
                             StringEscapeUtils.escapeHtml(competitorId)).type(MediaType.TEXT_PLAIN).build());
         }
-        boolean skip = skipChecksDueToCorrectSecret(leaderboardName, secret);
+        boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
         boolean competitorInRegatta = false;
         if (skip) {
             Regatta regatta = getService().getRegattaByName(leaderboardName);

@@ -874,4 +874,25 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Required for replicated operations, so they can obtain a valid instance of the SecurityService
      */
     SecurityService getSecurityService();
+
+    /**
+     * If the leaderboard can be resolved to a regatta, and the given secret is correct, return true
+     */
+    default boolean skipChecksDueToCorrectSecret(String leaderboardName, String secret) {
+        final boolean result;
+        if (leaderboardName == null && secret == null) {
+            result = false;
+        } else {
+            Regatta regatta = getRegattaByName(leaderboardName);
+            if (regatta == null && secret != null) {
+                logger.warning(
+                        "Attempt to skip security checks using regatta secret \"" + secret + "\" for leaderboard \""
+                                + leaderboardName + "\", but a regatta with the same name could not be resolved");
+                result = false;
+            } else {
+                result = Util.equalStringsWithEmptyIsNull(regatta.getRegistrationLinkSecret(), secret);
+            }
+        }
+        return result;
+    }
 }

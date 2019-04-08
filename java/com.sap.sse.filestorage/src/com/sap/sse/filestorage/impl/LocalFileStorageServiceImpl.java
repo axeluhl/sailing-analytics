@@ -13,11 +13,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.UnauthorizedException;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.FileStorageServiceProperty;
 import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 /**
  * Service for storing files in the local file system. Files get stored in localPath+fileName and can be accessed at
@@ -27,8 +32,11 @@ import com.sap.sse.filestorage.InvalidPropertiesException;
  * The accessibility of the files is ensured prior to activating the local file storage service by saving a testfile in
  * localPath, which is then accessed via basePath.
  * 
- * For testing purposes the baseUrl can be set to a file url: e.g. file://localhost/home/jan/sailing_test
- * and the local path subsequently: /home/jan/sailing_test
+ * For testing purposes the baseUrl can be set to a file url: e.g. file://localhost/home/jan/sailing_test and the local
+ * path subsequently: /home/jan/sailing_test
+ * 
+ * For Windows, this could be e.g. file:///C://Data/projects/sap-sailing/local-file-storage as baseUrl and
+ * C:\Data\projects\sap-sailing\local-file-storage as localPath
  * 
  * @author Jan Broß
  *
@@ -52,11 +60,14 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     }
 
     @Override
-    public URI storeFile(InputStream is, String fileExtension, long lengthInBytes) throws IOException {
+    public URI storeFile(InputStream is, String fileExtension, long lengthInBytes)
+            throws IOException, UnauthorizedException {
         OutputStream outputStream = null;
         String fileName = getKey(fileExtension);
         String pathToFile = localPath.getValue() + "/" + fileName;
-        // TODO bug 2583: use something like SecurityUtil.getSubject().checkPermission("file:store:"+pathToFile)
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(DefaultActions.CREATE,
+                        new TypeRelativeObjectIdentifier(pathToFile)));
 
         File outputFile = new File(pathToFile);
         logger.log(Level.FINE, "Storing file in " + outputFile.getAbsolutePath());
@@ -99,13 +110,20 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     }
 
     @Override
-    public void removeFile(URI uri) throws IOException {
+    public void removeFile(URI uri) throws IOException, UnauthorizedException {
         String filePath = uri.getPath();
         String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-        File file = new File(localPath.getValue() + "/" + fileName);
+        final String pathToFile = localPath.getValue() + "/" + fileName;
+        File file = new File(pathToFile);
         if (!file.exists()) {
             throw new FileNotFoundException(uri.toString());
         }
+
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(
+                        DefaultActions.DELETE,
+                        new TypeRelativeObjectIdentifier(pathToFile)));
+
         if (!file.delete()) {
             logger.warning("Could not delete file with path " + filePath);
             throw new IOException("Could not delete file with path "+filePath);
@@ -164,5 +182,15 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
             value = value.substring(0, value.length() - 1);
         }
         return value;
+    }
+
+    @Override
+    public void doPermissionCheckForGetFile(URI uri) throws UnauthorizedException {
+        String filePath = uri.getPath();
+        String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+        final String pathToFile = localPath.getValue() + "/" + fileName;
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ,
+                        new TypeRelativeObjectIdentifier(pathToFile)));
     }
 }

@@ -329,7 +329,7 @@ public class ImagesListComposite extends Composite {
         sailingService.resizeImage(resizingTask, new AsyncCallback<Set<ImageDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.resizeUnsuccessfull(), NotificationType.ERROR);
+                Notification.notify(stringMessages.resizeUnsuccessful(caught.getMessage()), NotificationType.ERROR);
             }
 
             @Override

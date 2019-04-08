@@ -22,5 +22,7 @@ public interface AclDialogResources extends ClientBundle {
         String additionalWidget();
 
         String userGroupTextBox();
+
+        String dialogHeader();
     }
 }

@@ -48,9 +48,11 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
     private EditACLDialog(UserManagementServiceAsync userManagementService,
             QualifiedObjectIdentifier qualifiedObjectIdentifier, Action[] availableActions,
             StringMessages stringMessages, DialogCallback<AclDialogResult> callback) {
-        super(stringMessages.acl(), stringMessages.editACLForObject(qualifiedObjectIdentifier.toString()),
+        super(stringMessages.acl(), stringMessages.editACL(),
                 stringMessages.ok(), stringMessages.cancel(), new Validator(), callback);
-        aclEditPanel = new AclEditPanel(userManagementService, availableActions, stringMessages);
+        final String typeString = qualifiedObjectIdentifier.getTypeIdentifier();
+        final String id = qualifiedObjectIdentifier.getTypeRelativeObjectIdentifier().toString();
+        aclEditPanel = new AclEditPanel(userManagementService, availableActions, stringMessages, typeString, id);
         userManagementService.getAccessControlListWithoutPruning(qualifiedObjectIdentifier,
                 new AsyncCallback<AccessControlListDTO>() {
 

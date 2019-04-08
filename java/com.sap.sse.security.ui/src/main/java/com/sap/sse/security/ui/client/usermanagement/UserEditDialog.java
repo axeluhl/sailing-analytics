@@ -81,11 +81,12 @@ public class UserEditDialog extends DataEntryDialog<UserDTO> {
             accountPanelContent.add(new Label(stringMessages.account(a.getAccountType())));
             if (a instanceof UsernamePasswordAccountDTO) {
                 final Button changePasswordButton = new Button(stringMessages.changePassword());
+                changePasswordButton.ensureDebugId("ChangePasswordButton");
                 accountPanelContent.add(changePasswordButton);
                 changePasswordButton.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        new ChangePasswordDialog(stringMessages, getUserManagementService(), userToEdit, new DataEntryDialog.DialogCallback<UserData>() {
+                        final ChangePasswordDialog changePasswordDialog = new ChangePasswordDialog(stringMessages, getUserManagementService(), userToEdit, new DataEntryDialog.DialogCallback<UserData>() {
                             @Override
                             public void ok(UserData userData) {
                                 getUserManagementService().updateSimpleUserPassword(userToEdit.getName(), /* admin doesn't need to provide old password */ null,
@@ -115,7 +116,9 @@ public class UserEditDialog extends DataEntryDialog<UserDTO> {
                                         }));
                             }
                             @Override public void cancel() { }
-                        }).show();
+                        });
+                        changePasswordDialog.ensureDebugId("ChangePasswordDialog");
+                        changePasswordDialog.show();
                     }
                 });
             } else if (a instanceof SocialUserDTO) {

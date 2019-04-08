@@ -33,6 +33,10 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static Iterable<HasPermissions> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
+
+    public static final HasPermissions SIMULATOR = new SecuredDomainType("SIMULATOR");
+
+    public static final HasPermissions FILE_STORAGE = new SecuredDomainType("FILE_STORAGE");
     
     // AdminConsole permissions
     public static final HasPermissions EVENT = new SecuredDomainType("EVENT");
@@ -72,12 +76,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions MEDIA_TRACK = new SecuredDomainType("MEDIA_TRACK");
 
     public static final HasPermissions RESULT_IMPORT_URL = new SecuredDomainType("RESULT_IMPORT_URL");
-
-    public static enum ReplicatorActions implements Action {
-        START, STOP, DROP_CONNECTION
-    };
-
-    public static final HasPermissions REPLICATOR = new SecuredDomainType("REPLICATOR", ReplicatorActions.values());
 
     public static final HasPermissions RACE_MANAGER_APP_DEVICE_CONFIGURATION = new SecuredDomainType(
             "RACE_MANAGER_APP_DEVICE_CONFIGURATION");

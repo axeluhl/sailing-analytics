@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -549,7 +550,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             UserGroup group, String permission) {
         final AccessControlList result;
         if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
-            final UUID groupId = group.getId();
+            final UUID groupId = group == null ? null : group.getId();
             apply(s->s.internalAclRemovePermission(idOfAccessControlledObjectAsString, groupId, permission));
             result = accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString).getAnnotation();
         } else {
@@ -1639,6 +1640,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
             HasPermissions type, TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName,
             Callable<T> actionWithResult) {
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeIdentifier,
+                securityDisplayName, actionWithResult, true);
+    }
+
+    private <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult,
+            boolean doServerCreateObjectCheck) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         T result = null;
         boolean didSetOwnership = false;
@@ -1650,11 +1658,28 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             } else {
                 logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
             }
-            SecurityUtils.getSubject()
-                    .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
-                            ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
-            SecurityUtils.getSubject()
-                    .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
+
+            if (doServerCreateObjectCheck) {
+                SecurityUtils.getSubject()
+                        .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                                ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+            }
+            try {
+                SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
+            } catch (AuthorizationException e) {
+                if (didSetOwnership) {
+                    throw e;
+                } else {
+                    // An ownership for this ID already exists and the user is not permitted
+                    // -> a nicer error is produced to explain the user that a name clash is most probably the cause
+                    throw new UnauthorizedException(MessageFormat.format(
+                            "You are not permitted to create a \"{0}\" with name or identifier \"{1}\". "
+                                    + "This is most probably caused by an already existing entry with the same name/identifier. "
+                                    + "Please try to use a different name.",
+                            identifier.getTypeIdentifier(), identifier.getTypeRelativeObjectIdentifier().toString()),
+                            e);
+                }
+            }
             result = actionWithResult.call();
         } catch (AuthorizationException e) {
             if (didSetOwnership) {
@@ -1668,6 +1693,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public <T> T setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult) {
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeIdentifier, securityDisplayName,
+                actionWithResult, false);
+    }
+
+    @Override
     public void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description) {
         setOwnership(identifier, getCurrentUser(), getDefaultTenantForCurrentUser(), description);
     }
@@ -1677,6 +1709,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
             Action actionToCreateObject) {
         setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeRelativeObjectIdentifier,
+                securityDisplayName, () -> {
+                    actionToCreateObject.run();
+                    return null;
+                });
+    }
+
+    @Override
+    public void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
+            Action actionToCreateObject) {
+        setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(type, typeRelativeObjectIdentifier,
                 securityDisplayName, () -> {
                     actionToCreateObject.run();
                     return null;

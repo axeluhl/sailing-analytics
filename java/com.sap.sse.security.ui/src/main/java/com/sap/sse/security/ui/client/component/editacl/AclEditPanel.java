@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
@@ -64,6 +65,10 @@ public class AclEditPanel extends Composite {
     FlowPanel userGroupCellListPanelUi;
     @UiField
     FlowPanel permissionsCellListPanelUi;
+    @UiField
+    Label lblId;
+    @UiField
+    Label lblType;
 
     private final Button removeUserGroupButtonUi;
     private final Button addUserGroupButtonUi;
@@ -85,7 +90,7 @@ public class AclEditPanel extends Composite {
     private final StrippedUserGroupDTO nullUserGroup;
 
     public AclEditPanel(final UserManagementServiceAsync userManagementService, final Action[] availableActions,
-            final StringMessages stringMessages) {
+            final StringMessages stringMessages, String typeIdentifier, String id) {
         this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
         this.nullUserGroup = new StrippedUserGroupDTO(null, stringMessages.nullUserGroup());
@@ -120,6 +125,9 @@ public class AclEditPanel extends Composite {
                 .put(userGroupSelectionModel.getSelectedObject(), toDeniedActionSet(e.getValue())));
         permissionsCellListPanelUi.add(deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
                 deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable()));
+
+        lblId.setText(id);
+        lblType.setText(typeIdentifier);
     }
 
     private CaptionPanel createActionsContainer(final SafeHtml caption, final Widget content, final String styleName) {

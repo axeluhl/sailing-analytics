@@ -83,6 +83,12 @@ fi
 #
 # REPLICATE_MASTER_EXCHANGE_NAME=
 
+# Credentials for replication access to the master server
+# Make sure, the user is granted the permission SERVER:REPLICATE:<server-name>
+# 
+# REPLICATE_MASTER_USERNAME=
+# REPLICATE_MASTER_PASSWORD=
+
 # Automatic build and test configuration
 DEPLOY_TO=server
 BUILD_BEFORE_START=False

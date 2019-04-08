@@ -881,4 +881,18 @@ public class SecurityServiceMock implements SecurityService {
         return false;
     }
 
+    @Override
+    public <T> T setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult) {
+        return null;
+    }
+
+    @Override
+    public void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
+            Action actionToCreateObject) {
+        // TODO Auto-generated method stub
+
+    }
+
 }

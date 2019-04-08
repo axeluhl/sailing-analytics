@@ -98,7 +98,8 @@ public class RoleDefinitionsPanel extends VerticalPanel {
 
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, ROLE_DEFINITION);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateRoleDefinitions);
-        buttonPanel.addCreateAction(stringMessages.add(), this::createRoleDefinition);
+        buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.add(),
+                this::createRoleDefinition);
         buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
             final String roles = String.join(", ", Util.map(getSelectedRoleDefinitions(), RoleDefinitionDTO::getName));
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roles))) {
@@ -172,6 +173,8 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         ListHandler<RoleDefinitionDTO> columnSortHandler = new ListHandler<>(rolesListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
         columnSortHandler.setComparator(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getComparator());
+        final TextColumn<RoleDefinitionDTO> roleDefinitionUUidColumn = new AbstractSortableTextColumn<RoleDefinitionDTO>(
+                role -> role.getId() == null ? "<null>" : role.getId().toString(), columnSortHandler);
         TextColumn<RoleDefinitionDTO> roleDefinitionNameColumn = new AbstractSortableTextColumn<RoleDefinitionDTO>(role->role.getName(), columnSortHandler);
         Column<RoleDefinitionDTO, SafeHtml> permissionsColumn = new Column<RoleDefinitionDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
@@ -217,6 +220,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         table.addColumn(roleDefinitionNameColumn, stringMessages.name());
         table.addColumn(permissionsColumn, stringMessages.permissions());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
+        table.addColumn(roleDefinitionUUidColumn, stringMessages.id());
         table.addColumn(roleActionColumn, stringMessages.actions());
         table.setSelectionModel(roleSelectionCheckboxColumn.getSelectionModel(), roleSelectionCheckboxColumn.getSelectionManager());
         return table;

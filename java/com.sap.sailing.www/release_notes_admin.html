@@ -21,6 +21,33 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+                    <h2 class="articleSubheadline">April 2019</h2>
+                    <ul class="bulletList">
+			<li>Filtering the leaderboard groups during a Master Data Import now also
+			    handles quoted strings correctly. With this, e.g., searching for a
+			    leaderboard group containing "Apr 2" in its name is doable.
+			</li>
+			<li>In AdminConsole.html all tables and lists are now filtered to only show domain objects readable by the current user.
+                This means additional objects may exist and cause e.g. errors due to name conflicts.<br>
+                To allow users to grant others permissions for their stuff, it is possible to manage permissions for users whose username is known without having a read permission for that user.
+                In addition, users may be added to groups by only knowing their username.
+			</li>
+			<li>The permission system was extended to allow groups to directly grant roles to their users or all users (including anonymous ones) restricted to domain objects owned by that group.
+                With this it isn't necessary to grant the same a scoped role to every user manually, but adding a user implies this elegantly.
+                By associating the <tt>sailing_viewer</tt> role to a group with "for all users" enabled makes the object owned by that group publicly readable.
+			</li>
+			<li>When loading or tracking wind from Igtimi, only accounts readable by the current user will get included.
+                For event servers the Account should be configured in the server group to make it consistently be visible to all server admins.
+			</li>
+			<li>Replication is now also secured by several actions of the SERVER security type.
+                To enable permission checks on the master side, it is now necessary to provide credentials of a user on the master server that is used when a replica contacts the master.
+                This user at least needs to have the permission <tt>SERVER:REPLICATE:&amp;server-name&amp;</tt> granted on the master. <br>
+                Start scripts and documentation is updated regarding configuration of those credentials for auto replication.
+                Newly created servers should automatically contain adjusted versions of the relevant scripts.
+                The configuration of existing servers needs to get updated accordingly.
+			</li>
+                    </ul>
+                    
                     <h2 class="articleSubheadline">March 2019</h2>
                     <ul class="bulletList">
 			<li>By caching serialized results of leaderboard requests the server now requires

@@ -249,7 +249,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
-            boolean skip = skipChecksDueToCorrectSecret(regattaName, regattaSecret);
+            boolean skip = getService().skipChecksDueToCorrectSecret(regattaName, regattaSecret);
             if (!skip) {
                 getSecurityService().checkCurrentUserReadPermission(regatta);
             }
@@ -1294,7 +1294,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
                 .build();
         } else {
-            boolean skip = skipChecksDueToCorrectSecret(regattaName, regattaSecret);
+            boolean skip = getService().skipChecksDueToCorrectSecret(regattaName, regattaSecret);
             if (!skip) {
                 getSecurityService().checkCurrentUserReadPermission(regatta);
             }
@@ -1601,7 +1601,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         } else {
-            boolean skip = skipChecksDueToCorrectSecret(regattaName, regattaSecret);
+            boolean skip = getService().skipChecksDueToCorrectSecret(regattaName, regattaSecret);
             if (!skip) {
                 getSecurityService().checkCurrentUserReadPermission(regatta);
             }

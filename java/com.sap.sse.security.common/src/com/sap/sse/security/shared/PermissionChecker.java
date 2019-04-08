@@ -88,7 +88,7 @@ public class PermissionChecker {
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean isPermitted(
             WildcardPermission permission, U user,
             Iterable<G> groupsOfWhichUserIsMember, U allUser,
-            Iterable<G> allUserGroupsOfWhichUserIsMember, O ownership, A acl) {
+            Iterable<G> groupsOfWhichAllUserIsMember, O ownership, A acl) {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
         // and data object part only has one sub-part
@@ -111,13 +111,13 @@ public class PermissionChecker {
             }
             Set<G> allGroups = new HashSet<>();
             Util.addAll(groupsOfWhichUserIsMember, allGroups);
-            Util.addAll(allUserGroupsOfWhichUserIsMember, allGroups);
+            Util.addAll(groupsOfWhichAllUserIsMember, allGroups);
             result = acl.hasPermission(action, allGroups);
         }
 
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
-            PermissionState anonymous = checkUserPermissions(permission, allUser, allUserGroupsOfWhichUserIsMember,
+            PermissionState anonymous = checkUserPermissions(permission, allUser, groupsOfWhichAllUserIsMember,
                     ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
             if (anonymous == PermissionState.GRANTED) {
                 result = anonymous;

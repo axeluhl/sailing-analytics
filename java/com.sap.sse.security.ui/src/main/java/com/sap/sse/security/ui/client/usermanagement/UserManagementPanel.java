@@ -57,14 +57,16 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER);
         west.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateUsers);
-        buttonPanel.addCreateAction(stringMessages.createUser(),
+        buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),
                 () -> new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService)
                         .show());
-
         userNameTextbox = buttonPanel.addUnsecuredTextBox(stringMessages.username());
-        buttonPanel.addUnsecuredAction(stringMessages.editRolesAndPermissionsForUser(""),
+        final Button editRolesAndPermissionsForUserButton = buttonPanel.addUnsecuredAction(
+                stringMessages.editRolesAndPermissionsForUser(""),
                 () -> showRolesAndPermissionsEditDialog(userService, tableResources, errorReporter));
-
+        userNameTextbox.addKeyUpHandler(
+                e -> editRolesAndPermissionsForUserButton.setEnabled(checkIfUserExists(userNameTextbox.getText())));
+        editRolesAndPermissionsForUserButton.setEnabled(false);
         userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
                 /* multiSelection */ true, /* enablePager */ true, tableResources);
         userSelectionModel = userList.getSelectionModel();
@@ -105,7 +107,6 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
             deleteButton.setText(stringMessages.remove() + " (" + userSelectionModel.getSelectedSet().size() + ")");
             deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
         });
-
         ScrollPanel scrollPanel = new ScrollPanel(userList.asWidget());
         LabeledAbstractFilterablePanel<UserDTO> filterBox = userList.getFilterField();
         filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
@@ -146,6 +147,20 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         west.add(detailsPanel);
     }
     
+    /** @return true, if the given username correlates with a visible UserDTO */
+    private boolean checkIfUserExists(final String username) {
+        boolean result = false;
+        if (username != null && !username.isEmpty()) {
+            for (UserDTO user : userList.getAllUsers()) {
+                if (username.equals(user.getName())) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
     /** shows the edit dialog */
     private void showRolesAndPermissionsEditDialog(UserService userService,
             final CellTableWithCheckboxResources tableResources, final ErrorReporter errorReporter) {
