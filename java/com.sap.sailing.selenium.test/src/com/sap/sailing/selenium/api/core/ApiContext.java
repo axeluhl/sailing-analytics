@@ -13,6 +13,7 @@ import org.json.simple.JSONValue;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.representation.Form;
 
 public class ApiContext {
@@ -37,28 +38,24 @@ public class ApiContext {
         return new ApiContext(contextRoot, context, token);
     }
 
+    public static ApiContext createAnonymousApiContext(String contextRoot, String context) {
+        return new ApiContext(contextRoot, context, null);
+    }
+
     private WebResource getWebResource() {
-        logger.info("creating web resource for " + context);
         return client.resource(contextRoot + context);
     }
 
     public JSONObject post(String url, Map<String, String> queryParams, Map<String, String> formParams) {
         WebResource wres = getWebResource().path(url);
+        wres = addQueryParams(wres, queryParams);
         Form form = new Form();
         if (formParams != null) {
             formParams.forEach(form::putSingle);
         }
         String result;
         try {
-            if (queryParams != null) {
-                for (Entry<String, String> e : queryParams.entrySet()) {
-                    if (e.getKey() != null && e.getValue() != null) {
-                        wres = wres.queryParam(e.getKey(), e.getValue());
-                    }
-                }
-            }
-            result = wres.getRequestBuilder().header("Authorization", "Bearer " + token).entity(form)
-                    .post(String.class);
+            result = auth(wres.getRequestBuilder()).entity(form).post(String.class);
         } catch (UniformInterfaceException e) {
             logger.severe("API POST request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
                     + e.getResponse().getEntity(String.class));
@@ -69,15 +66,11 @@ public class ApiContext {
 
     public JSONObject put(String url, Map<String, String> queryParams, JSONObject body) {
         WebResource wres = getWebResource().path(url);
+        wres = addQueryParams(wres, queryParams);
         String result;
         try {
-            if (queryParams != null) {
-                for (Entry<String, String> e : queryParams.entrySet()) {
-                    wres = wres.queryParam(e.getKey(), e.getValue());
-                }
-            }
-            result = wres.getRequestBuilder().header("Authorization", "Bearer " + token)
-                    .entity(body.toJSONString(), MediaType.APPLICATION_JSON).put(String.class);
+            result = auth(wres.getRequestBuilder()).entity(body.toJSONString(), MediaType.APPLICATION_JSON)
+                    .put(String.class);
         } catch (UniformInterfaceException e) {
             String error = e.getResponse().getEntity(String.class);
             logger.severe("API PUT request " + url + " failed (rc=" + e.getResponse().getStatus() + "): " + error);
@@ -89,7 +82,7 @@ public class ApiContext {
     public void delete(String url) {
         WebResource wres = getWebResource().path(url);
         try {
-            wres.getRequestBuilder().header("Authorization", "Bearer " + token).delete();
+            auth(wres.getRequestBuilder()).delete();
         } catch (UniformInterfaceException e) {
             logger.severe("API PUT request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
                     + e.getResponse().getEntity(String.class));
@@ -98,18 +91,27 @@ public class ApiContext {
     }
 
     public JSONObject get(String url) {
-        return (JSONObject) getObject(url);
+        return (JSONObject) getObject(url, null);
+    }
+
+    public JSONObject get(String url, Map<String, String> queryParams) {
+        return (JSONObject) getObject(url, queryParams);
     }
 
     public JSONArray getList(String url) {
-        return (JSONArray) getObject(url);
+        return (JSONArray) getObject(url, null);
     }
 
-    private Object getObject(String url) {
+    public JSONArray getList(String url, Map<String, String> queryParams) {
+        return (JSONArray) getObject(url, queryParams);
+    }
+
+    private Object getObject(String url, Map<String, String> queryParams) {
         String result;
         WebResource wres = getWebResource().path(url);
+        wres = addQueryParams(wres, queryParams);
         try {
-            result = wres.getRequestBuilder().header("Authorization", "Bearer " + token).get(String.class);
+            result = auth(wres.getRequestBuilder()).get(String.class);
         } catch (UniformInterfaceException e) {
             int rc = e.getResponse().getStatus();
             if (rc == 204) {
@@ -124,6 +126,22 @@ public class ApiContext {
 
         }
         return JSONValue.parse(result);
+    }
+
+    private WebResource addQueryParams(WebResource wres, Map<String, String> queryParams) {
+        if (queryParams != null) {
+            for (Entry<String, String> e : queryParams.entrySet()) {
+                wres = wres.queryParam(e.getKey(), e.getValue());
+            }
+        }
+        return wres;
+    }
+
+    private Builder auth(Builder builder) {
+        if (token != null) {
+            return builder.header("Authorization", "Bearer " + token);
+        }
+        return builder;
     }
 
 }
