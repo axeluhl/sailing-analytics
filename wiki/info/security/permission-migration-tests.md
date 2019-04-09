@@ -140,13 +140,17 @@ In addition for the verifications for the basic security model (described above)
 * The user having "data_mining" permission must still be able to use DataMining on the server. Others must not be able to access the DataMining UI.
 * In RaceBoard, the user having role "mediaeditor" needs to be able to manage media. Others must not.
 
-## Usage based scenarios for the security model
+## Common use-cases for the security model
 
-### verification
+Beside the migration of and state of existing data, several use-cases need to be covered by the tests.
 
-TODO:
-* one user creates an event model -> not visible by another user
-* one user adds another user by name to his group and adds "sailing_viewer" to his group -> stuff needs to be visible to the other user, but not editable
+### Verification of common use-cases
+
+The verification of the following usage scenarios is necessary:
+
+* One user creates an event model -> not visible by another user
+* One user adds another user by name to his group and adds "sailing_viewer" to his group -> stuff needs to be visible to the other user, but not editable
+* One user adds the "user:<my-group-name>" role to another user -> the other user must be allowed to update the contents of that group
 
 ## Changed semantics in the sse model
 
@@ -156,13 +160,26 @@ The semantics (requirements and behavior) of several parts of the sse model were
 
 Due to the fact that servers and their data are now secured by default, the interface providing data on existing servers during MDI is also affected. To make it possible to import data from secured servers, credentials must now be given in the MDI import. Those credentials need to be valid on the target server and provide all the required READ permissions for the data intended to be imported.
 
+In addition, MDI will behave differently in case of a shared SecurityService compared with local ones. In case of the shared SecurityService, ownerships/ACLs will be unchanged on import. In case of a local SecurityService, objects will have new ownerships associated on the target system, while ACLs are lost. If intended, object hierarchies may be migrated to another group afterwards.
+
 ### Replication
 
 The replication is also affected by the new security model. A server may not register itself as a replica without further authorization. This means, credentials for the master server need to be provided on the replica. This user needs to have the SERVER:REPLICATE:<server-name> permission on the master server. The required credentials can be provided by system properties for auto replication as well as via UI for manual replication setup.
 
 ### Verification scenarios of changed sse semantics
 
-TODO
+The following verifications need to be done regarding MDI changes:
+
+* Using a user that does not have the required READ permissions must cause the whole import to fail.
+* MDI must succeed for a user having the required READ permissions.
+* It needs to be verified, that all imported objects consistently have ownerships assigned on the target system.
+
+To verify the replication changes, the following needs to get checked:
+
+* Providing no credentials, credentials of an normal user or wrong credentials must prevent a server from registering as a replica.
+* A replication setup needs to be created using both, auto replication as well as manually triggered replication. All data needs to be replicated from the master to a replica.
+* Operations sent from a replica to the master need to get processed on the master.
+* The start scripts as well as the replication documentation needs to get verified for correctness of that aspect.
 
 ## Changed semantics in the sailing domain model
 
@@ -180,7 +197,11 @@ DeviceConfigurations for the race manager app were changed to now have an identi
 
 ### Verification scenarios of changed sailing semantics
 
-TODO
+For wind tracking, the following tests need to be done:
+
+* When a user adds an Igtimi account and tracks a race, this race needs to get the wind correctly loaded.
+* When one user adds an Igtimi account, and another user who can't read that account tracks a race, the race must not contain the wind data from Igtimi.
+* When tracking a race with wind tracking turned on, new wind data must still be loaded after a server restart, if the user who tracked the race is allowed to read the account.
 
 ## Deployment scenarios
 
@@ -266,7 +287,7 @@ The following operational scenarios need to be checked
 A test setup needs to be created to cover an end to end scenarios using our various apps. The following scenarios should be verified in this test:
 
 * Different types of invitations and QR codes
-* Integration of branch.io and redirects of the QRCodePlace
+* Integration of branch.io and roundtrip/redirects of the QRCodePlace
 * Compatibility with the old and new tracking apps
 * Non-authenticated access and tracking based on the secret
 * App based race management
@@ -293,11 +314,9 @@ In addition to the tracking tests, this setup needs to get managed by the race m
 
 ### Public self-service setup
 
-An additional deployment scenario is the self-service case that will be covered by my.sapsailing.com. This case is already well covered from the perspective of the app development but several backend-focused validations need to be ensured as well. The following scenarios need to be covered:
+An additional deployment scenario is the self-service case that will be delivered by my.sapsailing.com. Testing of this case is already well covered from the perspective of the app development but several backend-focused validations need to be ensured as well. The following scenarios need to be covered in addition:
 
-* Setup and management of open regattas from the App and AdminConsole
+* Setup and management of open regattas from the AdminConsole
 * Inviting others to track
 * Migrate parts of my stuff to a new group for sharing
 * Share my stuff with others
-
-TODO more detail
