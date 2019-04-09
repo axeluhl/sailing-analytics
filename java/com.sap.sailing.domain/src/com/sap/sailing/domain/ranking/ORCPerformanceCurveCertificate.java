@@ -96,6 +96,7 @@ public class ORCPerformanceCurveCertificate implements Serializable {
     }
 
     private Map<Speed, PolynomialFunctionLagrangeForm> createLagrangePolynomials() {
+        // TODO Interpolation should start with the Beat Angle, go over the fixed Values and end with the Downwind Angle
         Map<Speed, PolynomialFunctionLagrangeForm> writeableLagrange = new HashMap<>();
         for (Entry<Speed, Map<Bearing, Duration>> twsAndTwaToDuration : durationPerNauticalMileAtTrueWindAngleAndSpeed.entrySet()) {
             final int numberOfTrueWindAngles = twsAndTwaToDuration.getValue().size();
