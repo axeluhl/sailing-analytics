@@ -72,11 +72,11 @@ public class LeaderBoardApiTest extends AbstractApiTest {
         String deviceUuid = UUID.randomUUID().toString();
         String secret = "dskjshfkdjhfksh";
         Long fromMillis = System.currentTimeMillis();
+        @SuppressWarnings("unused")//TODO: check result
         JSONObject dmStart = leaderboardApi.deviceMappingsStart(ctx, leaderboardName, competitorId, boatId, markId,
                 deviceUuid, secret, fromMillis);
-        
+        @SuppressWarnings("unused") //TODO: check result
         JSONObject dmEnd = leaderboardApi.deviceMappingsEnd(ctx, leaderboardName, competitorId, boatId, markId,
                 deviceUuid, secret, fromMillis);
-
     }
 }

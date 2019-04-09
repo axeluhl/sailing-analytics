@@ -21,7 +21,7 @@ public class LeaderboardApi {
             + "/{leaderboardname}/device_mappings/end";
 
     public JSONArray getLeaderboards(ApiContext ctx) {
-        return ctx.getList(LEADERBOARDS_LIST_URL);
+        return ctx.get(LEADERBOARDS_LIST_URL);
     }
 
     public JSONObject getLeaderboard(ApiContext ctx, String leaderboardName) {
