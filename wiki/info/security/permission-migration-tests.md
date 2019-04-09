@@ -140,6 +140,14 @@ In addition for the verifications for the basic security model (decribed above) 
 * The user having "data_mining" permission must still be able to use DataMining on the server. Others must not be able to access the DataMining UI.
 * In RaceBoard, the user having role "mediaeditor" needs to be able to manage media. Others must not.
 
+## Usage based scenarios for the security model
+
+### verification
+
+TODO:
+* one user creates event model -> not visible by another user
+* one user adds another user by name to his group and adds "sailing_viewer" to his group -> stuff needs to be visible to the other user, but not editable
+
 ## Changed semantics in the sse model
 
 The semantics (requirements and behavior) of several parts of the sse model was changed based on the new security model.
