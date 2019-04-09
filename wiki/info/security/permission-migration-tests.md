@@ -94,7 +94,7 @@ Any security enabled server needs to initially meet some criteria caused by the 
 
 ### Verification of the basic security model setup
 
-The following criterias must be fulfilled for new or initially migrated servers after startup:
+The following criteria must be fulfilled for new or initially migrated servers after startup:
 
 * Predefined RoleDefinitions need to exist as described. All initial RoleDefinitions need to have an ACL attached granting "READ" to all users.
 * Any existing security or domain objects (matching types in SecuredSecurityTypes or SecuredDomainTypes) need to have an initial ownership associated.
@@ -181,3 +181,123 @@ DeviceConsigurations for the race manager app were changed to now have an identi
 ### Verification scenarios of changed sailing semantics
 
 TODO
+
+## Deployment scenarios
+
+This chapter is intended to sum up the aspects to be tested along specific deployment scenarios. While the writing above focuses on relevant changes introduced by the security model or specific migration details, the following write up is meant as a checklist to do a system test within the borders of a distinct scenario.
+
+### Migrate a public server with a big amount of historic event data (aka archive migration)
+
+A server with a big amount of historic event data needs to get migrated to the new security model. After the initial loading is finished, the following verifications need to be done. This scenario is intended to be focussed on the following aspects:
+
+* migration of existing data
+* consistent restore of data
+* availability and publicity of migrated data
+* basic visibility activation states of admins vs non admins
+* integration of external systems
+* possibility for deeper technical evaluations (e.g. memory consumption)
+
+To verify that all data is migrated as intended, several checks need to get fulfilled as an admin user. The described checks should be done using the global "admin" user as well as a server admin. The results must be identical in both cases for the following criteria:
+
+* The loaded TrackedRaces need to exactly match the old server
+* All existing domain data is shown in tables and provides the full set of actions
+* Identify regattas that are tracked using the various tracking technologies (TracTrac, Swiss Timing, Smartphone Tracking) and verify the correctness regarding the following aspects:
+    * On the Homepage verify statistics, wind information, results, contens of the leaderboard
+    * Show the stand-alone leaderboard and verify the contents
+* External servers need to still be referenced
+* Several technical parts of the AdminConsole need to be accessible and provide all available actions:
+    * Local server
+    * MDI
+    * Remote servers
+    * Replication
+    * File storage
+
+The following checks must be repeated with all kinds of users (admin, normal user, anonymous) to ensure the correct functionality regarding publicity of the server:
+
+* In the global event list, check the statistics of each year to be sure, that all events are available with their respective contents
+* Events originating from external servers need to still be visible in the event list
+* For an event of each kind (single regatta, multi regatta, series), show the following views (if available for that type):
+    * Event page
+    * Regatta page
+    * series page
+    * stand-alone leaderboard
+    * RegattaOverview
+* Identify TrackedRaces that are tracked using the various tracking technologies and verify the following for those races:
+    * The RaceBoard works and shows a valid leaderboard containing all competitors
+    * In the RaceBoard, all expandable panels show valid data (competitor chart, wind, ...)
+    * EmbeddedMapAndWindChart can be shown
+* Identify a TrackedRace with attached media and verify that the media is correctly played
+
+The following checks need to be done using a normal user:
+
+* Technical tabs in the AdminConsole need to be unavailable (e.g. local server)
+* Many publicly readable domain objects must not provide update actions in the respective AdminConsole tabs (events, leaderboards, ...)
+* Other sensible data must be invisible (either absence of the tab or empty list) to normal users (e.g. Tracking connections, Igtimi accounts, ...)
+* The server group may not be available in the default creation tenant selection of the user profile page
+* The whole user profile page needs to be available and usable
+
+### New event server setup
+
+In addition of the migration test it is intended to do a test setup as shadow server for a real event. The focus for this scenario is defined as follows:
+
+* Setup of a new server
+* consistency of operational tasks
+* Replication
+* Definition of different user types
+* Integration of live tracking technologies
+
+Note for the tester: All users intended to do administrative tasks need to be added as members of the server group. All such users must set their default creation tenant to the server group to consistently to make all created objects consistently be owned by the server group. This is very important to make the publicity aspect of the server work as intended.
+
+An event setup needs to be created including various types of domain objects (event, regatta, leaderboard, ...). For each of those objects, the following validations need to be fulfilled:
+
+* all object consistently have the server group set as owner
+* all server admin users as well as the global admin can mutate those object regardless which admin created those objects
+
+The following operational scenarios need to be checked
+
+* At least one replica needs to be created using admin credentials to connect to the master server
+* One user created an Igtimi account in the server group and another admin tracks a race. The wind needs to be available in this race.
+* Users only having specific instance-based mutation permissions (e.g. LEADERBOARD:UPDATE:<name>) only see mutation action for that domain object but not others
+* A user having LEADERBOARD:UPDATE:<name> and REGATTA:UPDATE:<name> permissions must be able to edit score corrections
+* A moderator only has specific permissions in RaceBoard but none in AdminConsole
+
+### Smartphone tracking and App interaction test
+
+A test setup needs to be created to cover an end to end scenarios using our various apps. The following scenarios should be verified in this test:
+
+* Different types of invitations and QR codes
+* Integration of branch.io and redirects of the QRCodePlace
+* Compatibility with the old and new tracking apps
+* Non-authenticated access and tracking based on the secret
+* App based race management
+
+For the tests of this scenario, we need a fully featured setup consisting of the following domain objects:
+
+* A public event hierarchy
+* A private event hierarchy (not just listed==false, but also not publicly readable)
+* A regatta having static competitor/boat assignments
+* A regatta having dynamic competitor/boat assignments
+* Pinged marks as well as tracked marks
+
+The a smartphone tracking setup needs to get repeated using the following invitation and app combinations (some cases can be tested in parallel):
+
+* Legacy invitations/QR codes with the old apps
+* Legacy invitations/QR codes with Sail Insight 2.0
+* Branch.io invitations for the old apps
+* Branch.io invitations for the new apps
+
+In addition to the tracking tests, this setup needs to get managed by the race manager app. Due to the fact that the DeviceConfiguration model changed during development of the permission model and this change also affected the app code, both versions need to be tested:
+
+* The latest store release
+* A build that includes the security model changes
+
+### Public self-service setup
+
+An additional deployment scenario is the self-service case that will be covered by my.sapsailing.com. This case is already well covered from the perspective of the app development but several backend-focussed validations need ensured as well. The following scenarios need to be covered:
+
+* Setup and management of open regattas from the App and AdminConsole
+* Inviting others to track
+* Migrate parts of my stuff to a new group for sharing
+* Share my stuff with others
+
+TODO more detail
