@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaManagementControl;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
@@ -135,8 +136,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 mediaSelectionButton.setText(caption);
                 mediaSelectionButton.setTitle(tooltip);
                 mediaManagementButton.setVisible(
-                        mediaPlayerManagerComponent.getAssignedMediaTracks().stream().anyMatch(
-                                track->mediaPlayerManagerComponent.allowsEditing(track.dbId)));
+                        isMediaManagementVisible(mediaPlayerManagerComponent));
             }
         });
         this.leftScrollPanel = new ScrollPanel();
@@ -345,8 +345,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
             if (forceLayout) {
                 forceLayout();
             }
-            mediaManagementButton.setVisible(mediaPlayerManagerComponent.getAssignedMediaTracks().stream()
-                    .anyMatch(track -> mediaPlayerManagerComponent.allowsEditing(track.dbId)));
+            mediaManagementButton.setVisible(isMediaManagementVisible(mediaPlayerManagerComponent));
         });
     }
     
@@ -408,5 +407,15 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     
     public Panel getRightPanel() {
         return rightPanel;
+    }
+
+    private boolean isMediaManagementVisible(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
+        boolean canCreateNew = userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.MEDIA_TRACK);
+        boolean canUpdateRace = userService.hasPermission(SecuredDomainType.TRACKED_RACE
+                .getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, mediaPlayerManagerComponent
+                        .getCurrentRace().getIdentifier().getTypeRelativeObjectIdentifier()));
+        boolean canDirectlyUpdateAnyExistingTrack = mediaPlayerManagerComponent.getAssignedMediaTracks().stream()
+                .anyMatch(track -> mediaPlayerManagerComponent.allowsEditing(track.dbId));
+        return canCreateNew && canUpdateRace || canDirectlyUpdateAnyExistingTrack;
     }
 }
