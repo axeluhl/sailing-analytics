@@ -39,23 +39,23 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
             final DialogCallback<SwissTimingConfigurationWithSecurityDTO> callback, final UserService userService,
             final ErrorReporter errorReporter) {
         // TODO: i18n
-        super("Edit Swiss Timing Connection", null, stringMessages.ok(), stringMessages.cancel(),
-                /* validator */ null, /* animationEnabled */true, callback);
+        super("Edit Swiss Timing Connection", null, stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
+                /* animationEnabled */true, callback);
         this.dtoToEdit = dtotoEdit;
         this.ensureDebugId("EditTracTracConnectionDialog");
         createUi();
         setData(dtotoEdit);
     }
 
-    private void setData(final SwissTimingConfigurationWithSecurityDTO dtotoEdit) {
+    private void setData(final SwissTimingConfigurationWithSecurityDTO dtoToEdit) {
         // TODO
         manage2SailEventIdTextBox.setText("?");
-        manage2SailEventUrlJsonTextBox.setText(dtotoEdit.getJsonURL());
-        hostnameTextBox.setText(dtotoEdit.getHostname());
-        portTextBox.setText("" + dtotoEdit.getPort());
-        updateUrlTextBox.setText(dtotoEdit.getUpdateURL());
-        updateUsernameTextBox.setText(dtotoEdit.getUpdateUsername());
-        updatePasswordTextBox.setText(dtotoEdit.getUpdatePassword());
+        manage2SailEventUrlJsonTextBox.setText(dtoToEdit.getJsonURL());
+        hostnameTextBox.setText(dtoToEdit.getHostname());
+        portTextBox.setText(dtoToEdit.getPort() == null ? "" : ("" + dtoToEdit.getPort()));
+        updateUrlTextBox.setText(dtoToEdit.getUpdateURL());
+        updateUsernameTextBox.setText(dtoToEdit.getUpdateUsername());
+        updatePasswordTextBox.setText(dtoToEdit.getUpdatePassword());
         super.getOkButton().setEnabled(!manage2SailEventUrlJsonTextBox.getText().isEmpty());
     }
 
@@ -77,16 +77,20 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
         grid.setWidget(1, 1, manage2SailEventIdTextBox);
 
         // Manage2SailEventUrl
-        final Label manage2SailEventUrlJsonLabel = new Label(stringMessages.liveUri() + ":");
+        final Label manage2SailEventUrlJsonLabel = new Label(stringMessages.swissTimingUpdateURL() + ":");
         manage2SailEventUrlJsonLabel.setTitle(stringMessages.leaveEmptyForDefault());
 
         manage2SailEventUrlJsonTextBox = new TextBox();
         manage2SailEventUrlJsonTextBox.ensureDebugId("Manage2SailEventUrlJsonTextBox");
         manage2SailEventUrlJsonTextBox.setVisibleLength(40);
-        manage2SailEventUrlJsonTextBox.setTitle(stringMessages.manage2SailEventIdBox());
+        manage2SailEventUrlJsonTextBox.setTitle(stringMessages.swissTimingUpdateURL());
 
         grid.setWidget(2, 0, manage2SailEventUrlJsonLabel);
         grid.setWidget(2, 1, manage2SailEventUrlJsonTextBox);
+
+        // validation: User should not create empty connections
+        manage2SailEventUrlJsonTextBox.addKeyUpHandler(
+                e -> super.getOkButton().setEnabled(!manage2SailEventUrlJsonTextBox.getText().isEmpty()));
 
         // Hostname
         final Label hostnameLabel = new Label(stringMessages.hostname() + ":");
