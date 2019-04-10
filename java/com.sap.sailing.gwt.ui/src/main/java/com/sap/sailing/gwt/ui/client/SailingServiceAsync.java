@@ -1124,4 +1124,10 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
      */
     void getCompetitor(UUID competitorId, String leaderboardName, String regattaRegistrationLinkSecret,
             AsyncCallback<CompetitorDTO> asyncCallback);
+
+    void existsSwissTimingConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
+
+    void existsSwissTimingArchiveConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
+
+    void existsTracTracConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
 }

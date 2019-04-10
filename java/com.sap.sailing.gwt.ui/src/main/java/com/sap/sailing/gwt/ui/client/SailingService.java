@@ -1179,4 +1179,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     CompetitorDTO getCompetitor(UUID competitorId, String leaderboardName,
             String regattaRegistrationLinkSecret);
+
+    boolean existsSwissTimingConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException;
+
+    boolean existsSwissTimingArchiveConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException;
+
+    boolean existsTracTracConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException;
 }
