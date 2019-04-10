@@ -125,10 +125,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     public void createSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration) {
         MongoCollection<org.bson.Document> stConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
         Document result = storeSwissTimingConfiguration(swissTimingConfiguration);
-        final Document updateQuery = new Document(FieldNames.ST_CONFIG_JSON_URL.name(),
-                swissTimingConfiguration.getJsonURL());
-        stConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(updateQuery, result,
-                new UpdateOptions().upsert(true));
+        stConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).insertOne(result);
     }
 
     private Document storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration) {
@@ -180,20 +177,23 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
 
     @Override
     public void deleteSwissTimingConfiguration(String creatorName, String jsonURL) {
-        MongoCollection<org.bson.Document> stArchiveConfigCollection = database
-                .getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
-        Document result = new Document();
-        result.put(FieldNames.ST_CONFIG_JSON_URL.name(), jsonURL);
-        result.put(FieldNames.ST_CONFIG_CREATOR_NAME.name(), creatorName);
-        stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(result);
+        MongoCollection<org.bson.Document> stConfigCollection = database
+                .getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
+        Document deleteQuery = new Document(FieldNames.ST_CONFIG_JSON_URL.name(), jsonURL);
+        deleteQuery.put(FieldNames.ST_CONFIG_CREATOR_NAME.name(), creatorName);
+        stConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteMany(deleteQuery);
     }
 
     @Override
     public void updateSwissTimingConfiguration(SwissTimingConfiguration config) {
-        MongoCollection<org.bson.Document> stArchiveConfigCollection = database
+        MongoCollection<org.bson.Document> stConfigCollection = database
                 .getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
         Document result = storeSwissTimingConfiguration(config);
-        stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(result, result,
+
+        Document updateQuery = new Document(FieldNames.ST_CONFIG_JSON_URL.name(), config.getJsonURL());
+        updateQuery.put(FieldNames.ST_CONFIG_CREATOR_NAME.name(), config.getCreatorName());
+
+        stConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(updateQuery, result,
                 new UpdateOptions().upsert(true));
     }
 }
