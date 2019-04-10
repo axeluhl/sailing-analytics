@@ -53,7 +53,8 @@ public interface SwissTimingFactory {
 
     SailMasterTransceiver createSailMasterTransceiver();
 
-    SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, Integer port, String updateURL, String updateUsername, String updatePassword);
+    SwissTimingConfiguration createSwissTimingConfiguration(String name, String jsonURL, String hostname, Integer port,
+            String updateURL, String updateUsername, String updatePassword, String creatorName);
     
     SwissTimingRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore,
             DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams,

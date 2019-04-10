@@ -507,7 +507,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 final String hostname = result.trackingDataHost;
                 final Integer port = result.trackingDataPort;
                 final String configName = result.eventName;
-                sailingService.storeSwissTimingConfiguration(configName, jsonUrl, hostname, port, updateURL, updateUsername, updatePassword,
+                sailingService.createSwissTimingConfiguration(configName, jsonUrl, hostname, port, updateURL,
+                        updateUsername, updatePassword,
                         new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {

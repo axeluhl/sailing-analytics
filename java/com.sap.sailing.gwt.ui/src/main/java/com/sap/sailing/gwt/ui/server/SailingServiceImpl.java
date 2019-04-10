@@ -3177,9 +3177,48 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public List<SwissTimingConfigurationWithSecurityDTO> getPreviousSwissTimingConfigurations() {
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, configs,
-                stConfig -> new SwissTimingConfigurationWithSecurityDTO(stConfig.getName(), stConfig.getJsonURL(),
+                stConfig -> {
+                    final SwissTimingConfigurationWithSecurityDTO config = new SwissTimingConfigurationWithSecurityDTO(
+                            stConfig.getName(), stConfig.getJsonURL(),
                         stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(),
-                        stConfig.getUpdateUsername(), stConfig.getUpdatePassword(), null));
+                            stConfig.getUpdateUsername(), stConfig.getUpdatePassword(), null);
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
+                    return config;
+                });
+    }
+
+    @Override
+    public void createSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
+            String updateURL, String updateUsername, String updatePassword) throws Exception {
+        if (!jsonURL.equalsIgnoreCase("test")) {
+            final String currentUserName = getSecurityService().getCurrentUser().getName();
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.SWISS_TIMING_ACCOUNT,
+                    SwissTimingConfiguration.getTypeRelativeObjectIdentifier(jsonURL, currentUserName), configName,
+                    () -> swissTimingAdapterPersistence
+                            .createSwissTimingConfiguration(
+                                    swissTimingFactory.createSwissTimingConfiguration(configName,
+                                            jsonURL, hostname, port, updateURL, updateUsername, updatePassword,
+                                            currentUserName)));
+        }
+    }
+
+    @Override
+    public void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration) {
+        getSecurityService().checkCurrentUserDeletePermission(configuration);
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(configuration,
+                () -> swissTimingAdapterPersistence.deleteSwissTimingConfiguration(configuration.getCreatorName(),
+                        configuration.getJsonURL()));
+    }
+
+    @Override
+    public void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration)
+            throws Exception {
+        getSecurityService().checkCurrentUserUpdatePermission(configuration);
+        swissTimingAdapterPersistence.updateSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(
+                configuration.getName(), configuration.getJsonURL(), configuration.getHostname(),
+                configuration.getPort(), configuration.getUpdateURL(), configuration.getUpdateUsername(),
+                configuration.getUpdatePassword(), configuration.getCreatorName()));
     }
 
     @Override
@@ -3212,19 +3251,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     eventResult.getTrackingDataPort(), swissTimingRaces);
         }
         return result;
-    }
-
-    @Override
-    public void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
-            String updateURL, String updateUsername, String updatePassword) throws Exception {
-        if (!jsonURL.equalsIgnoreCase("test")) {
-            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.SWISS_TIMING_ACCOUNT, SwissTimingConfiguration.getTypeRelativeObjectIdentifier(jsonURL),
-                    configName,
-                    () -> swissTimingAdapterPersistence
-                            .storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName,
-                                    jsonURL, hostname, port, updateURL, updateUsername, updatePassword)));
-        }
     }
     
     private RaceLogStore getRaceLogStore() {

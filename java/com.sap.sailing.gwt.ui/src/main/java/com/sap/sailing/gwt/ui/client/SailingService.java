@@ -375,8 +375,14 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     SwissTimingEventRecordDTO getRacesOfSwissTimingEvent(String eventJsonURL) throws UnauthorizedException, Exception;
 
-    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
+    void createSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             String updateURL, String updateUsername, String updatePassword) throws UnauthorizedException, Exception;
+
+    void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration)
+            throws UnauthorizedException, Exception;
+
+    void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration)
+            throws UnauthorizedException, Exception;
 
     String[] getCountryCodes() throws UnauthorizedException;
 

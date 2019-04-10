@@ -367,8 +367,14 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
 
     void getRacesOfSwissTimingEvent(String eventJsonUrl, AsyncCallback<SwissTimingEventRecordDTO> asyncCallback);
 
-    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
+    void createSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             String updateURL, String updateUsername, String updatePassword, AsyncCallback<Void> asyncCallback);
+
+    void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
+            AsyncCallback<Void> asyncCallback);
+
+    void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
+            AsyncCallback<Void> asyncCallback);
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
