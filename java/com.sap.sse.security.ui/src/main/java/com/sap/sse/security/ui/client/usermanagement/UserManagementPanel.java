@@ -65,7 +65,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 stringMessages.editRolesAndPermissionsForUser(""),
                 () -> showRolesAndPermissionsEditDialog(userService, tableResources, errorReporter));
         userNameTextbox.addKeyUpHandler(
-                e -> editRolesAndPermissionsForUserButton.setEnabled(checkIfUserExists(userNameTextbox.getText())));
+                e -> editRolesAndPermissionsForUserButton.setEnabled(!userNameTextbox.getText().isEmpty()));
         editRolesAndPermissionsForUserButton.setEnabled(false);
         userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
                 /* multiSelection */ true, /* enablePager */ true, tableResources);
@@ -146,36 +146,38 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
 
         west.add(detailsPanel);
     }
-    
-    /** @return true, if the given username correlates with a visible UserDTO */
-    private boolean checkIfUserExists(final String username) {
-        boolean result = false;
-        if (username != null && !username.isEmpty()) {
-            for (UserDTO user : userList.getAllUsers()) {
-                if (username.equals(user.getName())) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
 
-    /** shows the edit dialog */
+    /** shows the edit dialog if the user exists */
     private void showRolesAndPermissionsEditDialog(UserService userService,
             final CellTableWithCheckboxResources tableResources, final ErrorReporter errorReporter) {
-        new EditUserRolesAndPermissionsDialog(userNameTextbox.getText(), userService, errorReporter, tableResources,
-                new DialogCallback<Void>() {
-                    @Override
-                    public void ok(Void editedObject) {
-                        updateUsers();
-                    }
+        userService.getUserManagementService().userExists(userNameTextbox.getText(), new AsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                if (result) {
+                    new EditUserRolesAndPermissionsDialog(userNameTextbox.getText(), userService, errorReporter,
+                            tableResources, new DialogCallback<Void>() {
+                                @Override
+                                public void ok(Void editedObject) {
+                                    updateUsers();
+                                }
 
-                    @Override
-                    public void cancel() {
-                        updateUsers();
-                    }
-                }).show();
+                                @Override
+                                public void cancel() {
+                                    updateUsers();
+                                }
+                            }).show();
+                }
+                else {
+                    Notification.notify(StringMessages.INSTANCE.userNotFound(userNameTextbox.getText()),
+                            NotificationType.ERROR);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+        });
     }
 
     public void updateUsers() {
