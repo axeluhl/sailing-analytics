@@ -18,10 +18,6 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTimingConfigurationWithSecurityDTO> {
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
-    private final String eventIdPattern = "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}";
-    private final String manage2sailBaseAPIUrl = "http://manage2sail.com/api/public/links/event/";
-    private final String manage2sailAPIaccessToken = "?accesstoken=bDAv8CwsTM94ujZ";
-    private final String manage2sailUrlAppendix = "&mediaType=json&includeRaces=true";
 
     private Grid grid;
 
@@ -169,9 +165,9 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
      * Url.
      */
     private void updateEventIdFromUrl(String eventUrl) {
-        if (eventUrl.matches("http://manage2sail.com/.*" + eventIdPattern + ".*")) {
-            final String inferredEventId = eventUrl.replaceFirst(".*(" + eventIdPattern + ").*", "$1");
-            manage2SailEventIdTextBox.setValue(inferredEventId);
+        final String result = SwissTimingEventIdUrlUtil.getEventIdFromUrl(eventUrl);
+        if (result != null) {
+            manage2SailEventIdTextBox.setValue(result);
         }
     }
 
@@ -181,11 +177,9 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
      * detected event Id. The ID pattern is defined in {@link eventIdPattern}.
      */
     private void updateUrlFromEventId(String eventIdText) {
-        if (eventIdText.matches(".*" + eventIdPattern + ".*")) {
-            final String inferredEventId = eventIdText.replaceFirst(".*(" + eventIdPattern + ").*", "$1");
-            manage2SailEventUrlJsonTextBox.setValue(
-                    manage2sailBaseAPIUrl + inferredEventId + manage2sailAPIaccessToken + manage2sailUrlAppendix);
-            manage2SailEventIdTextBox.setValue(inferredEventId);
+        final String result = SwissTimingEventIdUrlUtil.getUrlFromEventId(eventIdText);
+        if (result != null) {
+            manage2SailEventUrlJsonTextBox.setValue(result);
         }
     }
 
