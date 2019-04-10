@@ -1652,8 +1652,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (!updateTailsOnly) {
                             competitorDTOsOfUnusedTails.remove(competitorDTO);
                         }
-                        MultiColorPolylineOptions newOptions = createTailStyle(competitorDTO, displayHighlighted(competitorDTO));
-                        fixesAndTails.getTail(competitorDTO).setOptions(newOptions);
                     }
                     boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, newTime,
                             timeForPositionTransitionMillis);
