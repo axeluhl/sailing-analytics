@@ -165,7 +165,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
-        RaceTimesInfoProviderListener, TailFactory, RequiresDataInitialization, RequiresResize, QuickRankProvider {
+        RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickRankProvider {
     /* Line colors */
     static final String ADVANTAGE_LINE_COLOR = "#ff9900"; // orange
     static final String START_LINE_COLOR = "#ffffff";
@@ -2514,15 +2514,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 }
                 if (selectedDetailType != previous) {
                     selectedDetailTypeChanged = true; // Causes an overwrite of what are now wrong detailValues
-                    fixesAndTails.resetColorMapper(new ValueRangeFlexibleBoundaries(0, 1, 0.2, 0.5), new ColorMapperChangedListener() {
-                        @Override
-                        public void onColorMappingChanged() {
-                            for (CompetitorDTO competitor : competitorSelection.getAllCompetitors()) {
-                                MultiColorPolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
-                                fixesAndTails.getTail(competitor).setOptions(options);
-                            }
-                        }
-                    });
+                    fixesAndTails.resetColorMapper(new ValueRangeFlexibleBoundaries(0, 1, 0.2, 0.5), RaceMap.this);
+                    redraw();
                 }
             }
         });
@@ -3053,6 +3046,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
             FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
         // nothing to do; if the list of filtered competitors has changed, a separate call to filteredCompetitorsListChanged will occur
+    }
+    
+    @Override
+    public void onColorMappingChanged() {
+        for (CompetitorDTO competitor : competitorSelection.getAllCompetitors()) {
+            MultiColorPolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
+            fixesAndTails.getTail(competitor).setOptions(options);
+        }
     }
 
     @Override

@@ -699,7 +699,9 @@ public class FixesAndTails {
     protected void searchMinMaxDetailValue(CompetitorDTO competitor) {
         Integer startIndex = null;
         
-        Double min = null;
+        double min = 0;
+        boolean minSet = false;
+        int minIndex = -1;
         // Check if the previously found minimum is still shown and use its value
         if (minDetailValueFix.containsKey(competitor)) {
             int minFix = minDetailValueFix.get(competitor);
@@ -708,10 +710,13 @@ public class FixesAndTails {
                 startIndex = getFirstShownFix(competitor);
             } else if (minFix < fixes.get(competitor).size() && fixes.get(competitor).get(minFix).detailValue != null) {
                 min = fixes.get(competitor).get(minFix).detailValue;
+                minSet = true;
             }
         }
         
-        Double max = null;
+        double max = 0;
+        boolean maxSet = false;
+        int maxIndex = -1;
         // Check if the previously found maximum is still shown and use its value
         if (maxDetailValueFix.containsKey(competitor)) {
             int maxFix = maxDetailValueFix.get(competitor);
@@ -724,6 +729,7 @@ public class FixesAndTails {
                 }
             } else if (maxFix < fixes.get(competitor).size() && fixes.get(competitor).get(maxFix).detailValue != null) {
                 max = fixes.get(competitor).get(maxFix).detailValue;
+                maxSet = true;
             }
         }
 
@@ -743,7 +749,7 @@ public class FixesAndTails {
                     && lastShownFix.get(competitor).get() != null && lastShownFix.get(competitor).get() != -1 ?
                     lastShownFix.get(competitor).get() + 1 : fixes.get(competitor).size();
 
-        
+
         for (int i = startIndex; i < end; i++) {
             Double value;
             try {
@@ -752,18 +758,27 @@ public class FixesAndTails {
                 break;
             }
             if (value != null) {
-                if (min == null) min = value;
-                if (max == null) max = value;
+                if (!minSet) {
+                    min = value;
+                    minSet = true;
+                }
+                if (!maxSet) {
+                    max = value;
+                    maxSet = true;
+                }
                 if (value <= min) {
                     min = value;
-                    minDetailValueFix.put(competitor, i);
+                    minIndex = i;
                 }
                 if (value >= max) {
                     max = value;
-                    maxDetailValueFix.put(competitor, i);
+                    maxIndex = i;
                 }
             }
         }
+        
+        if (minIndex > -1) minDetailValueFix.put(competitor, minIndex);
+        if (maxIndex > -1) maxDetailValueFix.put(competitor, maxIndex);
         lastSearchedFix.put(competitor, end - 1);
     }
 
