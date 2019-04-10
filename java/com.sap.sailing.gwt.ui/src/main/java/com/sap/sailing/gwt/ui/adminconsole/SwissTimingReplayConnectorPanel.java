@@ -260,7 +260,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                         new DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(SwissTimingArchiveConfigurationWithSecurityDTO editedConnection) {
-                                sailingService.createSwissTimingArchiveConfiguration(editedConnection,
+                                sailingService.createSwissTimingArchiveConfiguration(editedConnection.getJsonUrl(),
                                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                             @Override
                                             public void onFailure(Throwable caught) {

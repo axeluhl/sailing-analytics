@@ -580,7 +580,7 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getPreviousSwissTimingArchiveConfigurations(
             AsyncCallback<List<SwissTimingArchiveConfigurationWithSecurityDTO>> asyncCallback);
 
-    void createSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
+    void createSwissTimingArchiveConfiguration(String jsonUrl,
             AsyncCallback<Void> asyncCallback);
 
     void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,

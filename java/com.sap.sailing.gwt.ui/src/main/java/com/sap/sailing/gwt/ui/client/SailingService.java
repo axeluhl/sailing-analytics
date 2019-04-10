@@ -514,7 +514,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<SwissTimingArchiveConfigurationWithSecurityDTO> getPreviousSwissTimingArchiveConfigurations() throws UnauthorizedException;
 
-    void createSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+    void createSwissTimingArchiveConfiguration(String jsonUrl)
             throws UnauthorizedException, Exception;
 
     void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
