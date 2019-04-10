@@ -2054,13 +2054,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
-        this.migrateOwnership(identifier, null, displayName);
+        this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
     }
     
     @Override
     public void migrateUser(final User user) {
         // If no ownership migration was necessary, this is not a migration
-        if (migrateOwnership(user.getIdentifier(), user, user.getName())) {
+        if (migrateOwnership(user.getIdentifier(), user, /* setServerGroupAsOwner */ false, user.getName())) {
             final String tenantNameForUsername = getDefaultTenantNameForUsername(user.getName());
             // if there is already a default creation tenant set for the user, this is not a migration
             // If the user's tenant already exists, this is no migration
@@ -2116,18 +2116,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         migrateOwnership(associationQualifiedIdentifier, associationQualifiedIdentifier.toString());
     }
     
-    private boolean migrateOwnership(final QualifiedObjectIdentifier identifier, User userOwnerToSet, final String displayName) {
+    private boolean migrateOwnership(final QualifiedObjectIdentifier identifier, User userOwnerToSet,
+            boolean setServerGroupAsOwner, final String displayName) {
         boolean wasNecessaryToMigrate = false;
         final OwnershipAnnotation owner = this.getOwnership(identifier);
-        final UserGroup defaultTenant = this.getDefaultTenant();
-        // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
-        // users correctly
+        // initialize ownerships on migration and fix objects that were orphaned by e.g. deleting the owning user/group
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
+            final UserGroup tenantOwnerToSet = setServerGroupAsOwner ? this.getDefaultTenant() : null;
             logger.info("missing Ownership fixed: Setting ownership for: " + identifier
-                    + " to default tenant: "
-                    + defaultTenant + "; user: " + userOwnerToSet);
-            this.setOwnership(identifier, userOwnerToSet, defaultTenant, displayName);
+                    + " to tenant: "
+                    + tenantOwnerToSet + "; user: " + userOwnerToSet);
+            this.setOwnership(identifier, userOwnerToSet, tenantOwnerToSet, displayName);
             wasNecessaryToMigrate = true;
         }
         migratedHasPermissionTypes.add(identifier.getTypeIdentifier());
