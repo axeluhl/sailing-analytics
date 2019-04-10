@@ -2505,42 +2505,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
         }
-        ListBox lb = new ListBox();
-        lb.addItem(stringMessages.none(), "none");
-        if (sortedAvailableDetailTypes != null) {
-            for (int i = 0; i < sortedAvailableDetailTypes.size(); i++) {
-                DetailType detail = sortedAvailableDetailTypes.get(i);
-                lb.addItem(DetailTypeFormatter.format(detail), detail.name());
-                if (detail == selectedDetailType) {
-                    lb.setSelectedIndex(i + 1);
-                }
-            }
-        }
-        lb.setVisibleItemCount(1);
-        lb.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                String value = lb.getSelectedValue();
-                DetailType previous = selectedDetailType;
-                if (value == null || value.equals("none")) {
-                    selectedDetailType = null;
-                } else {
-                    selectedDetailType = DetailType.valueOfString(value);
-                    if (!competitorSelection.isSelected(competitorDTO)) {
-                        competitorSelection.setSelected(competitorDTO, true);
-                    }
-                }
-                if (selectedDetailType != previous) {
-                    selectedDetailTypeChanged = true; // Causes an overwrite of what are now wrong detailValues
-                    setTailVisualizer();
-                    if (timer.getPlayState() == PlayStates.Paused) {
-                        redraw();
-                    }
-                }
-            }
-        });
 
-        vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), lb));
+        vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), createDetailTypeDropwdown(competitorDTO)));
+
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {
@@ -2573,6 +2540,42 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
         return vPanel;
+    }
+
+    private ListBox createDetailTypeDropwdown(CompetitorDTO competitor) {
+        ListBox lb = new ListBox();
+        lb.addItem(stringMessages.none(), "none");
+        if (sortedAvailableDetailTypes != null) {
+            for (int i = 0; i < sortedAvailableDetailTypes.size(); i++) {
+                DetailType detail = sortedAvailableDetailTypes.get(i);
+                lb.addItem(DetailTypeFormatter.format(detail), detail.name());
+                if (detail == selectedDetailType) {
+                    lb.setSelectedIndex(i + 1);
+                }
+            }
+        }
+        lb.setVisibleItemCount(1);
+        lb.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                String value = lb.getSelectedValue();
+                DetailType previous = selectedDetailType;
+                if (value == null || value.equals("none")) {
+                    selectedDetailType = null;
+                } else {
+                    selectedDetailType = DetailType.valueOfString(value);
+                    if (!competitorSelection.isSelected(competitor)) {
+                        competitorSelection.setSelected(competitor, true);
+                    }
+                }
+                if (selectedDetailType != previous) {
+                    selectedDetailTypeChanged = true; // Causes an overwrite of what are now wrong detailValues
+                    setTailVisualizer();
+                    redraw();
+                }
+            }
+        });
+        return lb;
     }
 
     /**
