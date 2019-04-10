@@ -65,7 +65,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 stringMessages.editRolesAndPermissionsForUser(""),
                 () -> showRolesAndPermissionsEditDialog(userService, tableResources, errorReporter));
         userNameTextbox.addKeyUpHandler(
-                e -> editRolesAndPermissionsForUserButton.setEnabled(checkIfUserExists(userNameTextbox.getText())));
+                e -> editRolesAndPermissionsForUserButton.setEnabled(!userNameTextbox.getText().isEmpty()));
         editRolesAndPermissionsForUserButton.setEnabled(false);
         userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
                 /* multiSelection */ true, /* enablePager */ true, tableResources);
@@ -145,20 +145,6 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         detailsPanel.add(userPermissionPanel);
 
         west.add(detailsPanel);
-    }
-    
-    /** @return true, if the given username correlates with a visible UserDTO */
-    private boolean checkIfUserExists(final String username) {
-        boolean result = false;
-        if (username != null && !username.isEmpty()) {
-            for (UserDTO user : userList.getAllUsers()) {
-                if (username.equals(user.getName())) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
     }
 
     /** shows the edit dialog */
