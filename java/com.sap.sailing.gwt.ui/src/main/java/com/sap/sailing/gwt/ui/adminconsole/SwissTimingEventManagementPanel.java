@@ -89,9 +89,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         verticalPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(),
                 () -> connectionsTable.refreshSwissTimingConnectionList());
-        // TODO: i18n
         // Add SwissTiming Connection
-        buttonPanel.addCreateAction("Add Swiss Timing Connection",
+        buttonPanel.addCreateAction(stringMessages.addSwissTimingConnection(),
                 () -> new EditSwissTimingConnectionDialog(new SwissTimingConfigurationWithSecurityDTO(),
                         new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
                             @Override

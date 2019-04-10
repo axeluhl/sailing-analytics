@@ -141,8 +141,7 @@ public class SwissTimingConnectionTableWrapper extends
                 u -> configACL.openDialog(u));
 
         filterField = new LabeledAbstractFilterablePanel<SwissTimingConfigurationWithSecurityDTO>(
-                // TODO: i18n
-                new Label("Filter Swiss Timing Connections"),
+                new Label(stringMessagesClient.filterSwissTimingConnections()),
                 new ArrayList<SwissTimingConfigurationWithSecurityDTO>(), dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingConfigurationWithSecurityDTO t) {
@@ -165,9 +164,9 @@ public class SwissTimingConnectionTableWrapper extends
         table.addColumn(swissTimingConnectionJsonUrlColumn, stringMessagesClient.manage2SailEventURLBox());
         table.addColumn(swissTimingConnectionHostnameColumn, stringMessagesClient.hostname());
         table.addColumn(swissTimingConnectionPortColumn, stringMessagesClient.manage2SailPort());
-        table.addColumn(swissTimingConnectionUpdateUrlColumn, stringMessagesClient.swissTimingUpdateURL());
-        table.addColumn(swissTimingConnectionUpdateUsernameColumn, stringMessagesClient.swissTimingUpdateUsername());
-        table.addColumn(swissTimingConnectionUpdatePasswordColumn, stringMessagesClient.swissTimingUpdatePassword());
+        table.addColumn(swissTimingConnectionUpdateUrlColumn, stringMessagesClient.updateURL());
+        table.addColumn(swissTimingConnectionUpdateUsernameColumn, stringMessagesClient.username());
+        table.addColumn(swissTimingConnectionUpdatePasswordColumn, stringMessagesClient.password());
         table.addColumn(swissTimingConnectionCreatorNameColumn, stringMessagesClient.creatorName());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, swissTimingConectionColumnListHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());

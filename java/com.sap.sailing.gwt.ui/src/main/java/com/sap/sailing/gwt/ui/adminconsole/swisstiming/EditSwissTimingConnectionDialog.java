@@ -39,8 +39,8 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
     public EditSwissTimingConnectionDialog(final SwissTimingConfigurationWithSecurityDTO dtotoEdit,
             final DialogCallback<SwissTimingConfigurationWithSecurityDTO> callback, final UserService userService,
             final ErrorReporter errorReporter) {
-        // TODO: i18n
-        super("Edit Swiss Timing Connection", null, stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
+        super(stringMessages.editSwissTimingConnections(), null, stringMessages.ok(), stringMessages.cancel(),
+                /* validator */ null,
                 /* animationEnabled */true, callback);
         this.dtoToEdit = dtotoEdit;
         this.ensureDebugId("EditTracTracConnectionDialog");
