@@ -82,7 +82,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
     private SwissTimingArchiveConfiguration loadSwissTimingArchiveConfiguration(Document object) {
-        return swissTimingFactory.createSwissTimingArchiveConfiguration((String) object.get(FieldNames.ST_ARCHIVE_JSON_URL.name()));
+        return swissTimingFactory.createSwissTimingArchiveConfiguration(
+                object.getString(FieldNames.ST_ARCHIVE_JSON_URL.name()),
+                object.getString(FieldNames.ST_ARCHIVE_CREATOR_NAME.name()));
     }
 
     @Override
@@ -103,12 +105,36 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
     @Override
-    public void storeSwissTimingArchiveConfiguration(
-            SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration) {
+    public void createSwissTimingArchiveConfiguration(
+            SwissTimingArchiveConfiguration config) {
         MongoCollection<org.bson.Document> stArchiveConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
-        Document result = new Document();
-        result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonURL());
+        Document result = storeSwissTimingArchiveConfiguration(config);
+        stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).insertOne(result);
+    }
+
+    @Override
+    public void updateSwissTimingArchiveConfiguration(
+            SwissTimingArchiveConfiguration config) {
+        MongoCollection<org.bson.Document> stArchiveConfigCollection = database
+                .getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+        Document result = storeSwissTimingArchiveConfiguration(config);
         stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(result, result,
                 new UpdateOptions().upsert(true));
+    }
+
+    private Document storeSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration config) {
+        Document result = new Document();
+        result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), config.getJsonURL());
+        result.put(FieldNames.ST_ARCHIVE_CREATOR_NAME.name(), config.getCreatorName());
+        return result;
+    }
+
+    @Override
+    public void deleteSwissTimingArchiveConfiguration(
+            SwissTimingArchiveConfiguration config) {
+        MongoCollection<org.bson.Document> stArchiveConfigCollection = database
+                .getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
+        Document result = storeSwissTimingArchiveConfiguration(config);
+        stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(result);
     }
 }

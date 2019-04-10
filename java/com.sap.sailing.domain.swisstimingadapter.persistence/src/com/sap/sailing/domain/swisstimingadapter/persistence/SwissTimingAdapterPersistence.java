@@ -16,5 +16,9 @@ public interface SwissTimingAdapterPersistence {
     
     void storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration);
     
-    void storeSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration);
+    void createSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration swissTimingArchiveConfiguration);
+
+    void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration swissTimingArchiveConfiguration);
+
+    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration swissTimingArchiveConfiguration);
 }
