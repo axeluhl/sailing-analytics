@@ -8,11 +8,11 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.selenium.api.core.AbstractApiTest;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
+import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-public class EventApiTest extends AbstractApiTest {
+public class EventApiTest extends AbstractSeleniumTest {
 
     @Before
     public void setUp() {
@@ -21,7 +21,7 @@ public class EventApiTest extends AbstractApiTest {
 
     @Test
     public void createAndGetEventTest() {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
 
         String eventName = "<ppp> loggingsession";
         EventApi eventApi = new EventApi();
@@ -39,7 +39,7 @@ public class EventApiTest extends AbstractApiTest {
         assertEquals("read: event.name is different", eventName, foundEvent.get("name"));
         assertEquals("read: event.description is different", eventName, foundEvent.get("description"));
         assertEquals("read: event.officialWebsiteURL is different", null, foundEvent.get("officialWebsiteURL"));
-        assertEquals("read: event.baseUrl is different", getContextRoot() + SERVER_CONTEXT + "/api/",
+        assertEquals("read: event.baseUrl is different", getContextRoot() + ApiContext.SERVER_CONTEXT + "/api/",
                 foundEvent.get("baseURL"));
         assertNotNull("read: event.startDate is missing", foundEvent.get("startDate"));
         assertNotNull("read: event.endDate is missing", foundEvent.get("endDate"));

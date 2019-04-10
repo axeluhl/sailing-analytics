@@ -10,11 +10,11 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.selenium.api.core.AbstractApiTest;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.PreferencesApi;
+import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-public class PreferencesApiTest extends AbstractApiTest {
+public class PreferencesApiTest extends AbstractSeleniumTest {
 
     @Before
     public void setUp() {
@@ -23,7 +23,7 @@ public class PreferencesApiTest extends AbstractApiTest {
 
     @Test
     public void createAndGetPreferencesTest() {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
 
         Map<String, String> prefObjectAttr = new HashMap<String, String>();
         prefObjectAttr.put("key1", "value1");
@@ -39,7 +39,7 @@ public class PreferencesApiTest extends AbstractApiTest {
 
     @Test
     public void createAndDeletePreferencesTest() {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
 
         Map<String, String> prefObjectAttr = new HashMap<String, String>();
         prefObjectAttr.put("key1", "value1");

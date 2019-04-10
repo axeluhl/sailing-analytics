@@ -11,13 +11,13 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.selenium.api.core.AbstractApiTest;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.RegattaApi;
+import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-public class LeaderBoardApiTest extends AbstractApiTest {
+public class LeaderBoardApiTest extends AbstractSeleniumTest {
 
     private static final String leaderboardName = "loggingsession";
 
@@ -28,7 +28,7 @@ public class LeaderBoardApiTest extends AbstractApiTest {
 
     @Test
     public void testGetLeaderboardForCreatedEvent() {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
 
         EventApi eventApi = new EventApi();
         LeaderboardApi leaderboardApi = new LeaderboardApi();
@@ -57,7 +57,7 @@ public class LeaderBoardApiTest extends AbstractApiTest {
 
     @Test
     public void testDeviceMappingStartAndEnd() throws Exception {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
         EventApi eventApi = new EventApi();
         RegattaApi regattaApi = new RegattaApi();
         LeaderboardApi leaderboardApi = new LeaderboardApi();

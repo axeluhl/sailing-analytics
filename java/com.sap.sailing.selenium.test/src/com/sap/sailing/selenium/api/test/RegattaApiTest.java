@@ -9,12 +9,12 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.selenium.api.core.AbstractApiTest;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.RegattaApi;
+import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-public class RegattaApiTest extends AbstractApiTest {
+public class RegattaApiTest extends AbstractSeleniumTest {
 
     private static String EVENT_NAME = "<ppp> loggingsession";
     private static String BOAT_CLASS = "75QMNATIONALEKREUZER";
@@ -26,7 +26,7 @@ public class RegattaApiTest extends AbstractApiTest {
 
     @Test
     public void testGetRegattaForCreatedEvent() {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
 
         String competitorRegistrationType = "CLOSED";
         EventApi eventApi = new EventApi();
@@ -57,7 +57,7 @@ public class RegattaApiTest extends AbstractApiTest {
 
     @Test
     public void testGetRacesForRegattaForCreateEvent() {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
         EventApi eventApi = new EventApi();
         RegattaApi regattaApi = new RegattaApi();
 
@@ -71,7 +71,7 @@ public class RegattaApiTest extends AbstractApiTest {
 
     @Test
     public void testCreateAndAddCompetitor() {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
         EventApi eventApi = new EventApi();
         RegattaApi regattaApi = new RegattaApi();
 
@@ -83,7 +83,7 @@ public class RegattaApiTest extends AbstractApiTest {
     
     @Test
     public void testAddRaceColumns() {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
         EventApi eventApi = new EventApi();
         RegattaApi regattaApi = new RegattaApi();
         
