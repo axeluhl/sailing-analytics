@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
 
-public class MultiColorPolylineOptions {
-    private MultiColorPolylineColorMode colorMode = MultiColorPolylineColorMode.MONOCHROMATIC;
+public class ColorlineOptions {
+    private ColorlineMode colorMode = ColorlineMode.MONOCHROMATIC;
     
     private boolean clickable = true;
     private boolean draggable = false;
@@ -17,13 +17,13 @@ public class MultiColorPolylineOptions {
     
     private int zIndex = 0;
     
-    private MultiColorPolylineColorProvider colorProvider;
+    private ColorlineColorProvider colorProvider;
     
-    public MultiColorPolylineOptions() {}
-    public MultiColorPolylineOptions(MultiColorPolylineColorProvider colorProvider) {
+    public ColorlineOptions() {}
+    public ColorlineOptions(ColorlineColorProvider colorProvider) {
         this.colorProvider = colorProvider;
     }
-    public MultiColorPolylineOptions(PolylineOptions options, MultiColorPolylineColorProvider colorProvider) {
+    public ColorlineOptions(PolylineOptions options, ColorlineColorProvider colorProvider) {
         clickable = options.getClickable();
         geodesic = options.getGeodesic();
         visible = options.getVisible();
@@ -32,7 +32,7 @@ public class MultiColorPolylineOptions {
         zIndex = options.getZindex();
         this.colorProvider = colorProvider;
     }
-    public MultiColorPolylineOptions(MultiColorPolylineOptions options) {
+    public ColorlineOptions(ColorlineOptions options) {
         colorMode = options.getColorMode();
         colorProvider = options.getColorProvider();
         clickable = options.getClickable();
@@ -70,17 +70,17 @@ public class MultiColorPolylineOptions {
         return opt;
     }
     
-    public MultiColorPolylineColorMode getColorMode() {
+    public ColorlineMode getColorMode() {
         return colorMode;
     }
-    public void setColorMode(MultiColorPolylineColorMode colorMode) {
+    public void setColorMode(ColorlineMode colorMode) {
         this.colorMode = colorMode;
     }
     
-    public MultiColorPolylineColorProvider getColorProvider() {
+    public ColorlineColorProvider getColorProvider() {
         return colorProvider;
     }
-    public void setColorProvider(MultiColorPolylineColorProvider colorProvider) {
+    public void setColorProvider(ColorlineColorProvider colorProvider) {
         this.colorProvider = colorProvider;
     }
     

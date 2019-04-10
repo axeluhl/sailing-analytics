@@ -19,20 +19,20 @@ import com.google.gwt.maps.client.overlays.Polyline;
  * 
  * @author Tim Hessenmüller (D062243)
  */
-public class MultiColorPolyline {
-    private MultiColorPolylineOptions options;
+public class Colorline {
+    private ColorlineOptions options;
     
     /**
-     * Container for {@link Polyline}s which together build up the {@code MultiColorPolyline}.
+     * Container for {@link Polyline}s which together build up the {@code Colorline}.
      */
     private List<Polyline> polylines;
     
     private MapWidget map;
     
     /**
-     * A {@link Set} of {@code MultiColorPolylines} which will receive all path changes applied to this object.
+     * A {@link Set} of {@code Colorlines} which will receive all path changes applied to this object.
      */
-    private Set<MultiColorPolyline> pathChangeListeners;
+    private Set<Colorline> pathChangeListeners;
     
     private Set<ClickMapHandler> clickMapHandlers;
     private Set<MouseOverMapHandler> mouseOverMapHandlers;
@@ -40,10 +40,10 @@ public class MultiColorPolyline {
     private Set<MouseUpMapHandler> mouseUpMapHandlers;
     private Set<MouseOutMapHandler> mouseOutMapHandlers;
     
-    public MultiColorPolyline(MultiColorPolylineColorProvider colorProvider) {
-        this(new MultiColorPolylineOptions(colorProvider));
+    public Colorline(ColorlineColorProvider colorProvider) {
+        this(new ColorlineOptions(colorProvider));
     }
-    public MultiColorPolyline(MultiColorPolylineOptions options) {
+    public Colorline(ColorlineOptions options) {
         this.options = options;
         polylines = new ArrayList<>();
         
@@ -56,10 +56,10 @@ public class MultiColorPolyline {
         mouseOutMapHandlers = new HashSet<>();
     }
     
-    /*public MultiColorPolylineOptions getOptions() {
+    /*public ColorlineOptions getOptions() {
         return options;
     }*/
-    public void setOptions(final MultiColorPolylineOptions options) {
+    public void setOptions(final ColorlineOptions options) {
         if (this.options.getColorMode() != options.getColorMode()) {
             // If colorMode changed the path needs to change from one polyline to multiple polylines and vice versa
             MVCArray<LatLng> path = MVCArray.newInstance(getPath().toArray(new LatLng[0]));
@@ -76,7 +76,7 @@ public class MultiColorPolyline {
     }
     
     /**
-     * Creates an ordered {@link List} of all {@link LatLng} vertices in this {@code MultiColorPolyline}.
+     * Creates an ordered {@link List} of all {@link LatLng} vertices in this {@code Colorline}.
      * @return ordered {@link List} of {@link LatLng}.
      */
     public List<LatLng> getPath() {
@@ -101,7 +101,7 @@ public class MultiColorPolyline {
      * @param path ordered {@link MVCArray} of {@link LatLng}.
      */
     public void setPath(final MVCArray<LatLng> path) {
-        for (MultiColorPolyline line : pathChangeListeners) {
+        for (Colorline line : pathChangeListeners) {
             line.setPath(path);
         }
         clearPolylines();
@@ -129,7 +129,7 @@ public class MultiColorPolyline {
      */
     public void insertAt(int index, LatLng position) throws IllegalArgumentException, IndexOutOfBoundsException {
         if (position == null) throw new IllegalArgumentException("Cannot insert value: null");
-        for (MultiColorPolyline line : pathChangeListeners) {
+        for (Colorline line : pathChangeListeners) {
             line.insertAt(index, position);
         }
         switch (options.getColorMode()) {
@@ -192,7 +192,7 @@ public class MultiColorPolyline {
         if (index < 0 || index >= getLength()) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + getLength());
         }
-        for (MultiColorPolyline line : pathChangeListeners) {
+        for (Colorline line : pathChangeListeners) {
             line.removeAt(index);
         }
         switch (options.getColorMode()) {
@@ -240,7 +240,7 @@ public class MultiColorPolyline {
      * @throws IndexOutOfBoundsException if {@code index} is not in bounds of path.
      */
     public void setAt(int index, LatLng position) throws IndexOutOfBoundsException {
-        for (MultiColorPolyline line : pathChangeListeners) {
+        for (Colorline line : pathChangeListeners) {
             line.setAt(index, position);
         }
         switch (options.getColorMode()) {
@@ -261,7 +261,7 @@ public class MultiColorPolyline {
     }
     
     /**
-     * Gets the map this {@code MultiColorPolyline} is displayed on.
+     * Gets the map this {@code Colorline} is displayed on.
      * @return {@link MapWidget}
      */
     public MapWidget getMap() {
@@ -269,7 +269,7 @@ public class MultiColorPolyline {
     }
     
     /**
-     * Sets the map this {@code MultiColorPolyline} is displayed on.
+     * Sets the map this {@code Colorline} is displayed on.
      * @param map {@link MapWidget}
      */
     public void setMap(MapWidget map) {
@@ -280,10 +280,10 @@ public class MultiColorPolyline {
     }
     
     /**
-     * Clears the {@code MultiColorPolyline} and all its {@link #pathChangeListeners}.
+     * Clears the {@code Colorline} and all its {@link #pathChangeListeners}.
      */
     public void clear() {
-        for (MultiColorPolyline line : pathChangeListeners) {
+        for (Colorline line : pathChangeListeners) {
             line.clear();
         }
         clearPolylines();
@@ -341,10 +341,10 @@ public class MultiColorPolyline {
         return line;
     }
     
-    public void addPathChangeListener(MultiColorPolyline listener) {
+    public void addPathChangeListener(Colorline listener) {
         pathChangeListeners.add(listener);
     }
-    public boolean removePathChangeListener(MultiColorPolyline listener) {
+    public boolean removePathChangeListener(Colorline listener) {
         return pathChangeListeners.remove(listener);
     }
     

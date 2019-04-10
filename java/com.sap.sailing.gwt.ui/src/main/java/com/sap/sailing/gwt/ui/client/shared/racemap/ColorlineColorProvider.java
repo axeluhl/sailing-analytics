@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 @FunctionalInterface
-public interface MultiColorPolylineColorProvider {
+public interface ColorlineColorProvider {
     public String getColor(int index);
 }

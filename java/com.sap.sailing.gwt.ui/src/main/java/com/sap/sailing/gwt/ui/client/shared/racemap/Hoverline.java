@@ -20,12 +20,12 @@ public class Hoverline {
     private static final double TRANSPARENT = 0;
     private static final double VISIBLE = 0.2d;
     
-    private final MultiColorPolyline hoverline;
-    private final MultiColorPolylineOptions options;
+    private final Colorline hoverline;
+    private final ColorlineOptions options;
     protected boolean doNotProcessMouseMoveOut;
     
     public Hoverline(final Polyline polyline, PolylineOptions polylineOptions, final RaceMap map) {   
-        options = new MultiColorPolylineOptions();
+        options = new ColorlineOptions();
         options.setClickable(polylineOptions.getClickable());
         options.setEditable(polyline.getEditable());
         options.setGeodesic(polylineOptions.getGeodesic());
@@ -35,9 +35,9 @@ public class Hoverline {
             // the Z-index of polylineOptions most likely was undefined and therefore cannot be copied (GWT DevMode problem, mostly)
         }
         options.setVisible(false);
-        options.setColorMode(MultiColorPolylineColorMode.MONOCHROMATIC);
+        options.setColorMode(ColorlineMode.MONOCHROMATIC);
         options.setColorProvider((i) -> polylineOptions.getStrokeColor());
-        hoverline = new MultiColorPolyline(options);
+        hoverline = new Colorline(options);
         hoverline.setMap(polyline.getMap());
         hoverline.setPath(polyline.getPath());
         polyline.addMouseOverHandler(new MouseOverMapHandler() {
@@ -83,16 +83,16 @@ public class Hoverline {
         });
     }
     
-    public Hoverline(final MultiColorPolyline multiColorPolyline,
-            final MultiColorPolylineOptions multiColorPolylineOptions, final RaceMap map) {
-        options = multiColorPolylineOptions;
-        hoverline = new MultiColorPolyline(options);
-        hoverline.setMap(multiColorPolyline.getMap());
-        hoverline.setPath(MVCArray.newInstance(multiColorPolyline.getPath().toArray(new LatLng[0])));
-        multiColorPolyline.addPathChangeListener(hoverline);
+    public Hoverline(final Colorline colorline,
+            final ColorlineOptions colorlineOptions, final RaceMap map) {
+        options = colorlineOptions;
+        hoverline = new Colorline(options);
+        hoverline.setMap(colorline.getMap());
+        hoverline.setPath(MVCArray.newInstance(colorline.getPath().toArray(new LatLng[0])));
+        colorline.addPathChangeListener(hoverline);
         
         options.setVisible(false);
-        multiColorPolyline.addMouseOverHandler(new MouseOverMapHandler() {
+        colorline.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
                 options.setStrokeOpacity(map.getSettings().getTransparentHoverlines() ? TRANSPARENT : VISIBLE);
@@ -131,11 +131,8 @@ public class Hoverline {
             }
         });
     }
-    
-    /*public MultiColorPolyline getHoverline() {
-        return hoverline;
-    }*/
-    
+
+
     public void addClickHandler(ClickMapHandler handler) {
         hoverline.addClickHandler(handler);
     }

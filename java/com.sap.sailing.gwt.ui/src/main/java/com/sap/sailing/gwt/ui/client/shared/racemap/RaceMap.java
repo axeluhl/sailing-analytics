@@ -2741,9 +2741,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
-            MultiColorPolyline tail = fixesAndTails.getTail(oneOfAllCompetitors);
+            Colorline tail = fixesAndTails.getTail(oneOfAllCompetitors);
             if (tail != null) {
-                MultiColorPolylineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
+                ColorlineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
                 tail.setOptions(newOptions);
             }
         }
@@ -2788,9 +2788,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
         for (CompetitorDTO oneOfAllCompetitors : competitorSelection.getAllCompetitors()) {
-            MultiColorPolyline tail = fixesAndTails.getTail(oneOfAllCompetitors);
+            Colorline tail = fixesAndTails.getTail(oneOfAllCompetitors);
             if (tail != null) {
-                MultiColorPolylineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
+                ColorlineOptions newOptions = createTailStyle(oneOfAllCompetitors, displayHighlighted(oneOfAllCompetitors));
                 tail.setOptions(newOptions);
             }
         }
@@ -2955,7 +2955,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             LatLngBounds newBounds = null;
             Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors(racemap) ? racemap.competitorSelection.getSelectedCompetitors() : racemap.getCompetitorsToShow();
             for (CompetitorDTO competitor : competitors) {
-                MultiColorPolyline tail = racemap.fixesAndTails.getTail(competitor);
+                Colorline tail = racemap.fixesAndTails.getTail(competitor);
                 LatLngBounds bounds = null;
                 // TODO: Find a replacement for missing Polyline function getBounds() from v2
                 // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3; 
@@ -3074,26 +3074,26 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public void onColorMappingChanged() {
         for (CompetitorDTO competitor : competitorSelection.getSelectedCompetitors()) {
-            MultiColorPolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
+            ColorlineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
             fixesAndTails.getTail(competitor).setOptions(options);
         }
     }
 
     @Override
-    public MultiColorPolylineOptions createTailStyle(CompetitorDTO competitor, DisplayMode displayMode) {
-        MultiColorPolylineOptions options = new MultiColorPolylineOptions();
+    public ColorlineOptions createTailStyle(CompetitorDTO competitor, DisplayMode displayMode) {
+        ColorlineOptions options = new ColorlineOptions();
         options.setClickable(true);
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
 
         switch (displayMode) {
         case DEFAULT:
-            options.setColorMode(MultiColorPolylineColorMode.MONOCHROMATIC);
+            options.setColorMode(ColorlineMode.MONOCHROMATIC);
             options.setColorProvider((i) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
             options.setStrokeWeight(1);
             break;
         case SELECTED:
-            options.setColorMode(MultiColorPolylineColorMode.POLYCHROMATIC);
+            options.setColorMode(ColorlineMode.POLYCHROMATIC);
             options.setColorProvider(i -> {
                 Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
                 if (detailValue != null) {
@@ -3104,7 +3104,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             options.setStrokeWeight(2);
             break;
         case NOT_SELECTED:
-            options.setColorMode(MultiColorPolylineColorMode.MONOCHROMATIC);
+            options.setColorMode(ColorlineMode.MONOCHROMATIC);
             options.setColorProvider((i) -> LOWLIGHTED_TAIL_COLOR.getAsHtml());
             options.setStrokeOpacity(LOWLIGHTED_TAIL_OPACITY);
             break;
@@ -3115,15 +3115,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
     
     @Override
-    public MultiColorPolyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
+    public Colorline createTail(final CompetitorDTO competitor, List<LatLng> points) {
         final BoatDTO boat = competitorSelection.getBoat(competitor);
-        MultiColorPolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
-        MultiColorPolyline result = new MultiColorPolyline(options);
+        ColorlineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
+        Colorline result = new Colorline(options);
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
         result.setPath(pointsAsArray);
         result.setMap(map);
-        MultiColorPolylineOptions hoverlineOptions = new MultiColorPolylineOptions(options);
-        hoverlineOptions.setColorMode(MultiColorPolylineColorMode.MONOCHROMATIC);
+        ColorlineOptions hoverlineOptions = new ColorlineOptions(options);
+        hoverlineOptions.setColorMode(ColorlineMode.MONOCHROMATIC);
         hoverlineOptions.setColorProvider((i) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
         Hoverline resultHoverline = new Hoverline(result, hoverlineOptions, this);
         final ClickMapHandler clickHandler = new ClickMapHandler() {
@@ -3148,7 +3148,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         });
         return result;
     }
-    
+
     protected void setTailVisualizer() {
         ValueRangeFlexibleBoundaries boundaries = new ValueRangeFlexibleBoundaries(0, 10, 0.15, 1);
         createTailColorMapper(boundaries);

@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
  *
  */
 public interface TailFactory {
-    MultiColorPolyline createTail(CompetitorDTO competitor, List<LatLng> points);
+    Colorline createTail(CompetitorDTO competitor, List<LatLng> points);
     
-    MultiColorPolylineOptions createTailStyle(CompetitorDTO competitor, DisplayMode displayMode);
+    ColorlineOptions createTailStyle(CompetitorDTO competitor, DisplayMode displayMode);
 }

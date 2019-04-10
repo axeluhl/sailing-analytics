@@ -59,7 +59,7 @@ public class FixesAndTails {
      * empty} {@link Polyline#getPath()}. In this case, {@link #firstShownFix} and {@link #lastShownFix} will hold
      * <code>-1</code> for that competitor key.
      */
-    private final Map<CompetitorDTO, Trigger<MultiColorPolyline>> tails;
+    private final Map<CompetitorDTO, Trigger<Colorline>> tails;
 
     /**
      * Key set is equal to that of {@link #tails} and tells what the index in {@link #fixes} of the first fix shown
@@ -121,8 +121,8 @@ public class FixesAndTails {
      * triggers any {@link Triggerable} {@link Trigger#register(Triggerable) registered} with the {@code competitor}'s
      * tail
      */
-    public MultiColorPolyline getTail(CompetitorDTO competitor) {
-        final Trigger<MultiColorPolyline> trigger = tails.get(competitor);
+    public Colorline getTail(CompetitorDTO competitor) {
+        final Trigger<Colorline> trigger = tails.get(competitor);
         return trigger == null ? null : trigger.get();
     }
 
@@ -170,7 +170,7 @@ public class FixesAndTails {
      * 
      * Precondition: <code>tails.containsKey(competitorDTO) == false</code>
      */
-    protected MultiColorPolyline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to, TailFactory tailFactory) {
+    protected Colorline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to, TailFactory tailFactory) {
         List<LatLng> points = new ArrayList<LatLng>();
         List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
         int indexOfFirst = -1;
@@ -206,7 +206,7 @@ public class FixesAndTails {
             firstShownFix.put(competitorDTO, new Trigger<>(indexOfFirst));
             lastShownFix.put(competitorDTO, new Trigger<>(indexOfLast));
         }
-        final MultiColorPolyline result = tailFactory.createTail(competitorDTO, points);
+        final Colorline result = tailFactory.createTail(competitorDTO, points);
         tails.put(competitorDTO, new Trigger<>(result));
         return result;
     }
@@ -290,7 +290,7 @@ public class FixesAndTails {
      * invariants all must be established, hence the trigger pattern.
      */
     private void registerTriggerable(final CompetitorDTO competitor, final Triggerable triggerable) {
-        final Trigger<MultiColorPolyline> tailTrigger = tails.get(competitor);
+        final Trigger<Colorline> tailTrigger = tails.get(competitor);
         if (tailTrigger != null) {
             tailTrigger.register(triggerable);
         }
@@ -338,7 +338,7 @@ public class FixesAndTails {
                 : firstShownFixForCompetitor.get();
         final Trigger<Integer> lastShownFixForCompetitor = lastShownFix.get(competitorDTO);
         int indexOfLastShownFix = (lastShownFixForCompetitor == null || lastShownFixForCompetitor.get() == null) ? -1 : lastShownFixForCompetitor.get();
-        final MultiColorPolyline tail = getTail(competitorDTO);
+        final Colorline tail = getTail(competitorDTO);
         int intoThisIndex = 0;
         int earliestMergeIndex = -1;
         final Comparator<GPSFixDTOWithSpeedWindTackAndLegType> fixByTimePointComparator = new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
@@ -503,7 +503,7 @@ public class FixesAndTails {
         Timer delayedOrImmediateExecutor = new Timer() {
             @Override
             public void run() {
-                final MultiColorPolyline tail = getTail(competitorDTO);
+                final Colorline tail = getTail(competitorDTO);
                 if (tail != null) {
                     int vertexCount = tail.getLength();
                     final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
@@ -570,7 +570,7 @@ public class FixesAndTails {
      * data from {@link #firstShownFix} and {@link #lastShownFix}.
      */
     protected void removeTail(CompetitorDTO competitor) {
-        final Trigger<MultiColorPolyline> removedTail = tails.remove(competitor);
+        final Trigger<Colorline> removedTail = tails.remove(competitor);
         if (removedTail != null) {
             removedTail.get().setMap(null);
         }
@@ -583,7 +583,7 @@ public class FixesAndTails {
      * {@link #firstShownFix} and {@link #lastShownFix} entries for <code>competitor</code> are set to <code>-1</code>.
      */
     private void clearTail(CompetitorDTO competitor) {
-        final Trigger<MultiColorPolyline> tail = tails.get(competitor);
+        final Trigger<Colorline> tail = tails.get(competitor);
         if (tail != null) {
             tail.get().clear();
             firstShownFix.put(competitor, new Trigger<>(-1));
@@ -852,7 +852,7 @@ public class FixesAndTails {
      * {@link #createTailAndUpdateIndices(CompetitorWithBoatDTO, Date, Date, TailFactory)}.
      */
     protected void clearTails() {
-        for (final Trigger<MultiColorPolyline> tail : tails.values()) {
+        for (final Trigger<Colorline> tail : tails.values()) {
             tail.get().clear();
         }
         tails.clear();
