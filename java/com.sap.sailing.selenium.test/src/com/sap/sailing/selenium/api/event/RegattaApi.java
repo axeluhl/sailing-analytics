@@ -34,6 +34,19 @@ public class RegattaApi {
         return ctx.post(url, queryParams);
     }
     
+    public JSONObject createAndAddCompetitorWithSecret(ApiContext ctx, String regattaName, String boatclass,
+            String competitorEmail, String competitorName, String nationalityIOC, String secret, String deviceUuid) {
+        String url = REGATTAS + "/" + regattaName + COMPETITOR_CREATE_AND_ADD_WITH_BOAT;
+        Map<String, String> queryParams = new TreeMap<>();
+        queryParams.put("boatclass", boatclass);
+        queryParams.put("competitorEmail", competitorEmail);
+        queryParams.put("competitorName", competitorName);
+        queryParams.put("nationalityIOC", nationalityIOC);
+        queryParams.put("secret", secret);
+        queryParams.put("deviceUuid", deviceUuid);
+        return ctx.post(url, queryParams);
+    }
+    
     public JSONArray addRaceColumn(ApiContext ctx, String regattaName, String prefix, Integer numberOfRaces) {
         String url = REGATTAS + "/" + regattaName + ADD_RACE_COLUMN_URL;
         Map<String, String> queryParams = new TreeMap<>();
