@@ -1430,6 +1430,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
+        if (existsTracTracConfigurationForCurrentUser(jsonURL)) {
+            throw new RuntimeException("A configuration for the current user with this json URL already exists.");
+        }
         final String currentUserName = getSecurityService().getCurrentUser().getName();
         final TypeRelativeObjectIdentifier identifier = TracTracConfiguration.getTypeRelativeObjectIdentifier(jsonURL, currentUserName);
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
@@ -3232,6 +3235,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public void createSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             String updateURL, String updateUsername, String updatePassword) throws Exception {
         if (!jsonURL.equalsIgnoreCase("test")) {
+            if (existsSwissTimingConfigurationForCurrentUser(jsonURL)) {
+                throw new RuntimeException("A Configuration for the current user with this json URL already exists.");
+            }
             final String currentUserName = getSecurityService().getCurrentUser().getName();
             final TypeRelativeObjectIdentifier identifier = SwissTimingConfiguration.getTypeRelativeObjectIdentifier(jsonURL, currentUserName);
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
@@ -5297,6 +5303,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void createSwissTimingArchiveConfiguration(final String jsonURL)
             throws Exception {
+        if (existsSwissTimingArchiveConfigurationForCurrentUser(jsonURL)) {
+            throw new RuntimeException("A configuration for the current user with this json URL already exists.");
+        }
         final String currentUserName = getSecurityService().getCurrentUser().getName();
         final TypeRelativeObjectIdentifier identifier = SwissTimingArchiveConfiguration
                 .getTypeRelativeObjectIdentifier(jsonURL, currentUserName);
