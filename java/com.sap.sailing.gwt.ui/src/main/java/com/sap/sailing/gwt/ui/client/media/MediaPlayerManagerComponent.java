@@ -52,7 +52,9 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
 
 public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSettings> implements PlayStateListener, TimeListener,
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
@@ -102,8 +104,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         this.timeChanged(raceTimer.getTime(), null);
         this.playStateChanged(raceTimer.getPlayState(), raceTimer.getPlayMode());
         this.mediaService = mediaService;
-        mediaService.getMediaTracksForRace(this.getCurrentRace(), getAssignedMediaCallback());
-        mediaService.getMediaTracksInTimeRange(this.getCurrentRace(), getOverlappingMediaCallback());
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
@@ -111,6 +111,14 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         this.settings = settings;
         Window.addCloseHandler(this);
         Window.addWindowClosingHandler(this);
+
+        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                mediaService.getMediaTracksForRace(getCurrentRace(), getAssignedMediaCallback());
+                mediaService.getMediaTracksInTimeRange(getCurrentRace(), getOverlappingMediaCallback());
+            }
+        }, true);
     }
 
     private boolean isPotentiallyPlayable(MediaTrack mediaTrack) {
@@ -136,19 +144,19 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     native void addLoadMetadataHandler(MediaElement mediaElement, MediaTrack mediaTrack) /*-{
-		var that = this;
-		mediaElement
-				.addEventListener(
-						'loadedmetadata',
-						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
-						});
-		mediaElement
-				.addEventListener(
-						'error',
-						function() {
-							that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
-						});
+        var that = this;
+        mediaElement
+                .addEventListener(
+                        'loadedmetadata',
+                        function() {
+                            that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
+                        });
+        mediaElement
+                .addEventListener(
+                        'error',
+                        function() {
+                            that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
+                        });
     }-*/;
 
     public void loadedmetadata(MediaTrack mediaTrack) {
@@ -567,8 +575,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public boolean allowsEditing(String mediaTrackDbId) {
         return userService.hasPermission(
                 SecuredDomainType.MEDIA_TRACK.getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
-                        MediaTrack.getTypeRelativeObjectIdentifier(mediaTrackDbId)),
-                /* TODO media track ownership */ null, /* TODO media track ACL */ null);
+                        MediaTrack.getTypeRelativeObjectIdentifier(mediaTrackDbId)));
     }
 
     @Override

@@ -45,7 +45,6 @@ public class MediaSynchControl implements EditFlag {
     private final Button discardButton;
 
     private boolean isEditing = false;
-    private boolean isEditingAllowed = false;
     private UserService userservice;
 
     /**
@@ -66,7 +65,6 @@ public class MediaSynchControl implements EditFlag {
         this.errorReporter = errorReporter;
         this.userservice = userservice;
         MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack();
-        isEditingAllowed = hasRightToEdit(videoTrack);
         backupVideoTrack = new MediaTrack(videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration,
                 videoTrack.mimeType, videoTrack.assignedRaces);
         mainPanel = new FlowPanel();
@@ -249,8 +247,10 @@ public class MediaSynchControl implements EditFlag {
         }
         mediaSynchAdapter.setControlsVisible(showEditUI);
         previewButton.setEnabled(showEditUI);
-        editButton.setEnabled(isEditingAllowed && !showEditUI);
-        mainPanel.getElement().getStyle().setDisplay(showEditUI && isEditingAllowed ? Display.BLOCK : Display.NONE);
+        MediaTrack videoTrack = mediaSynchAdapter.getMediaTrack();
+        editButton.setEnabled(hasRightToEdit(videoTrack) && !showEditUI);
+        mainPanel.getElement().getStyle()
+                .setDisplay(showEditUI && hasRightToEdit(videoTrack) ? Display.BLOCK : Display.NONE);
         boolean isDirty = isDirty();
         saveButton.setEnabled(showEditUI || isDirty);
         discardButton.setEnabled(showEditUI || isDirty);
@@ -258,8 +258,7 @@ public class MediaSynchControl implements EditFlag {
 
     private boolean hasRightToEdit(MediaTrack video) {
         return userservice.hasPermission(
-                SecuredDomainType.MEDIA_TRACK.getPermissionForObject(DefaultActions.UPDATE, video),
-                /* TODO ownership */ null);
+                SecuredDomainType.MEDIA_TRACK.getPermissionForObject(DefaultActions.UPDATE, video));
     }
 
     private boolean isDirty() {
