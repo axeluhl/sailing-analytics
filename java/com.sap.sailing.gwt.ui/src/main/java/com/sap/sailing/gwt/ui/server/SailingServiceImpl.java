@@ -5259,7 +5259,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final TypeRelativeObjectIdentifier identifier = SwissTimingArchiveConfiguration
                 .getTypeRelativeObjectIdentifier(jsonURL, currentUserName);
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.SWISS_TIMING_ACCOUNT,
+                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT,
                 identifier, currentUserName,
                 () -> swissTimingAdapterPersistence.createSwissTimingArchiveConfiguration(
                         swissTimingFactory.createSwissTimingArchiveConfiguration(jsonURL,
