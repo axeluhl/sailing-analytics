@@ -1,41 +1,30 @@
 package com.sap.sailing.domain.ranking;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import org.json.simple.*;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+/**
+ * Extracts ORC-Certificates from different sources and different formats. Returns ORC-Certificate objects for given
+ * identification (sailnumber).
+ * 
+ * @author Daniel Lisunkin (i505543)
+ * 
+ **/
+public interface ORCCertificateImporter {
 
-public class ORCCertificateImporter {
+    /**
+     * Imports and processes the given Data for accessing and creating ORCCertificates by identification. 
+     * **/
+    public void importData();
     
-    private final JSONObject main;
+    /**
+     * Returns an ORCCertificate object to a given sailnumber.
+     * **/
+    ORCCertificate getCertificate(String sailnumber);
+    
+    
+    /**
+     * Returns a map of ORCCertificate objects to a given array of sailnumbers.
+     * **/
+    Map<String, ORCCertificate> getCertificates(String[] sailnumbers);
 
-    ORCCertificateImporter (String url) {
-        main = readJsonFromUrl(url);
-        
-    }
-    
-    public static JSONObject readJsonFromUrl(String url) {
-        try (InputStream is = new URL(url).openStream();) {
-          Object obj = new JSONParser().parse(new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)));
-          return (JSONObject) obj;
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
-      }
-    
-    private Map<String, JSONObject> createCertificateMap() {
-        return null;
-    }
 }
