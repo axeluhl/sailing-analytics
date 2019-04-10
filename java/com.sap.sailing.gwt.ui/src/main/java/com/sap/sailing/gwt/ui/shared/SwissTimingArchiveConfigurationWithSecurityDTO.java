@@ -17,7 +17,7 @@ public class SwissTimingArchiveConfigurationWithSecurityDTO implements IsSeriali
     private String creatorName;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
-    SwissTimingArchiveConfigurationWithSecurityDTO() {
+    public SwissTimingArchiveConfigurationWithSecurityDTO() {
     }
 
     public SwissTimingArchiveConfigurationWithSecurityDTO(String jsonUrl, String creatorName) {

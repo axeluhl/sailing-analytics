@@ -305,7 +305,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         regattasDisplayers.add(tractracEventManagementPanel);
         
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(
-                getSailingService(), getUserService(), this, this, getStringMessages());
+                getSailingService(), getUserService(), this, this, getStringMessages(), tableResources);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingReplayConnectorPanel>(swissTimingReplayConnectorPanel),
                 getStringMessages().swissTimingArchiveConnector(),
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getPermission(DefaultActions.values()));
