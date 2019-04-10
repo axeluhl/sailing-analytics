@@ -5227,14 +5227,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void createSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+    public void createSwissTimingArchiveConfiguration(final SwissTimingArchiveConfigurationWithSecurityDTO dto)
             throws Exception {
         final String currentUserName = getSecurityService().getCurrentUser().getName();
+        final SwissTimingArchiveConfigurationWithSecurityDTO dtoWithCreator = new SwissTimingArchiveConfigurationWithSecurityDTO(
+                dto.getJsonUrl(), currentUserName);
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.SWISS_TIMING_ACCOUNT, dto.getIdentifier().getTypeRelativeObjectIdentifier(),
-                dto.getName(),
+                SecuredDomainType.SWISS_TIMING_ACCOUNT,
+                dtoWithCreator.getIdentifier().getTypeRelativeObjectIdentifier(), dtoWithCreator.getName(),
                 () -> swissTimingAdapterPersistence.createSwissTimingArchiveConfiguration(
-                        swissTimingFactory.createSwissTimingArchiveConfiguration(dto.getJsonUrl(), currentUserName)));
+                        swissTimingFactory.createSwissTimingArchiveConfiguration(dtoWithCreator.getJsonUrl(),
+                                dtoWithCreator.getCreatorName())));
     }
 
     @Override

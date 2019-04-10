@@ -29,17 +29,17 @@ public class EditSwissTimingArchivedConnectionDialog
      * @param userToEdit
      *            The 'userToEdit' parameter contains the user which should be changed or initialized.
      */
-    public EditSwissTimingArchivedConnectionDialog(final SwissTimingArchiveConfigurationWithSecurityDTO dtotoEdit,
+    public EditSwissTimingArchivedConnectionDialog(final SwissTimingArchiveConfigurationWithSecurityDTO dtoToEdit,
             final DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO> callback,
             final UserService userService,
             final ErrorReporter errorReporter) {
         // TODO: i18n
         super("Edit swiss timing archived connection", null, stringMessages.ok(), stringMessages.cancel(),
                 /* validator */ null, /* animationEnabled */true, callback);
-        this.dtoToEdit = dtotoEdit;
+        this.dtoToEdit = dtoToEdit;
         this.ensureDebugId("EditSwissTimingArchivedConnectionDialog");
         createUi();
-        setData(dtotoEdit);
+        setData(dtoToEdit);
     }
 
     private void setData(final SwissTimingArchiveConfigurationWithSecurityDTO dtotoEdit) {
