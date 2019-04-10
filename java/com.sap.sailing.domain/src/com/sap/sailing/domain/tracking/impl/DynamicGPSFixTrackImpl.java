@@ -20,8 +20,8 @@ public class DynamicGPSFixTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, 
         super(trackedItem, millisecondsOverWhichToAverage, losslessCompaction);
     }
 
-    public void addGPSFix(GPSFix gpsFix) {
-        add(gpsFix, /* replace */ true);
+    public boolean addGPSFix(GPSFix gpsFix) {
+        return add(gpsFix, /* replace */ true);
     }
     
     @Override
