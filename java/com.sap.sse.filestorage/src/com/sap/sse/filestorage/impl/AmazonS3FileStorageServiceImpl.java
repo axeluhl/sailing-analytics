@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.osgi.framework.BundleContext;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentials;
@@ -53,8 +54,8 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     private final FileStorageServicePropertyImpl bucketName = new FileStorageServicePropertyImpl("bucketName", true,
             "s3BucketNameDesc");
 
-    public AmazonS3FileStorageServiceImpl() {
-        super(NAME, "s3Desc");
+    public AmazonS3FileStorageServiceImpl(BundleContext bundleContext) {
+        super(NAME, "s3Desc", bundleContext);
         addProperties(accessId, accessKey, bucketName);
     }
 
@@ -98,48 +99,42 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
         final ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(lengthInBytes);
         final String key = getKey(fileExtension);
-
-        SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(DefaultActions.CREATE,
-                        new TypeRelativeObjectIdentifier(key)));
-
-        final PutObjectRequest request = new PutObjectRequest(bucketName.getValue(), key, is, metadata)
-                .withCannedAcl(CannedAccessControlList.PublicRead);
-        final AmazonS3Client s3Client = createS3Client();
-        try {
-            s3Client.putObject(request);
-        } catch (AmazonClientException e) {
-            logger.log(Level.SEVERE, "Could not store file", e);
-            throw new OperationFailedException(e.getMessage(), e);
-        }
-        URI uri = getUri(key);
-        logger.info("Stored file " + uri);
-        return uri;
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.FILE_STORAGE, new TypeRelativeObjectIdentifier(key),
+                key, () -> {
+                    final PutObjectRequest request = new PutObjectRequest(bucketName.getValue(), key, is, metadata)
+                            .withCannedAcl(CannedAccessControlList.PublicRead);
+                    final AmazonS3Client s3Client = createS3Client();
+                    try {
+                        s3Client.putObject(request);
+                    } catch (AmazonClientException e) {
+                        logger.log(Level.SEVERE, "Could not store file", e);
+                        throw new OperationFailedException(e.getMessage(), e);
+                    }
+                    URI uri = getUri(key);
+                    logger.info("Stored file " + uri);
+                    return uri;
+                });
     }
 
     @Override
     public void removeFile(URI uri) throws InvalidPropertiesException, OperationFailedException, UnauthorizedException {
         String key = uri.getPath().substring(uri.getPath().lastIndexOf("/")+1);
-
-        SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(DefaultActions.DELETE,
-                        new TypeRelativeObjectIdentifier(key)));
-
-        AmazonS3Client s3Client = createS3Client();
-
-        try {
-            s3Client.deleteObject(new DeleteObjectRequest(bucketName.getValue(), key));
-        } catch (AmazonClientException e) {
-            throw new OperationFailedException("Could not remove file " + uri.toString(), e);
-        }
-        logger.info("Removed file " + uri);
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredDomainType.FILE_STORAGE.getQualifiedObjectIdentifier(
+                new TypeRelativeObjectIdentifier(key)), () -> {
+                    AmazonS3Client s3Client = createS3Client();
+                    try {
+                        s3Client.deleteObject(new DeleteObjectRequest(bucketName.getValue(), key));
+                    } catch (AmazonClientException e) {
+                        throw new OperationFailedException("Could not remove file " + uri.toString(), e);
+                    }
+                    logger.info("Removed file " + uri);
+                });
     }
 
     @Override
     public void testProperties() throws InvalidPropertiesException {
         AmazonS3Client s3 = createS3Client();
-
-        
         if (bucketName.getValue().equals("")) {
             throw new InvalidPropertiesException("empty bucketname is not allowed");
         }
@@ -152,7 +147,6 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
                     new Pair<FileStorageServiceProperty, String>(accessId, "seems to be invalid"),
                     new Pair<FileStorageServiceProperty, String>(accessKey, "seems to be invalid"));
         }
-
         // test if bucket exists
         if (!s3.doesBucketExist(bucketName.getValue())) {
             throw new InvalidPropertiesException("invalid bucket", new Pair<FileStorageServiceProperty, String>(
@@ -163,9 +157,8 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     @Override
     public void doPermissionCheckForGetFile(URI uri) throws UnauthorizedException {
         String key = uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1);
-
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(DefaultActions.DELETE,
+                SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ,
                         new TypeRelativeObjectIdentifier(key)));
     }
 }

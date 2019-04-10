@@ -27,9 +27,11 @@ Any permissions directly or indirectly associated with the <all> user will be us
 All pre existing users will receive the following additions:
 
 * A group named by the user with suffix "-tenant" is created.
+* The new group owns itself; the user is the group's owning user.
 * The user is a member of the newly created tenant group
 * The user is the owner of itself and the associated group
-* The user has the role "user" qualified by the user itself but without a group qualification
+* The user has the role "user" qualified by the user itself
+* The user has another role "user" qualified by the newly created tenant group as a group qualification
 
 ### User called "admin"
 
@@ -51,14 +53,14 @@ There are several RoleDefinitions that are automatically created for new or migr
 
 These roles are system roles that are intended to be used by any user. To ensure this, an ACL entry is generated for those roles granting action "READ" to the null group (all users).
 
-Most of those default RoleDefinitions also had role with the same name in the old role model (all but sailing_viewer). On existing servers, users having any old role, need to get an equivalent role associated. Any user having one of these old roles (excluding the "admin" case described below) will have the new version of this role qualified by the server's default group associated.
+Most of those default RoleDefinitions also had a role with the same name in the old role model (all but sailing_viewer). On existing servers, users having any old role need to get an equivalent role associated. Any user having one of these old roles (excluding the "admin" case described below) will have the new version of this role qualified by the server's default group associated.
 This means those users should still have equivalent permissions but only for objects owned by the mentioned server group.
 
 Any other role would be lost. This is most probably an unlikely case due to the fact that the old permission UI had no possibility to define new roles.
 
 ### Tenants
 
-Existing users (including the "admin" but excluding "<all>) will automatically get a UserGroup created named like the user with the suffix "-tenant". This means the admin's tenant is called "admin-tenant".
+Existing users (including the "admin" but excluding "<all>") will automatically get a UserGroup created named like the user with the suffix "-tenant". This means the admin's tenant is called "admin-tenant".
 
 ### Default creation tenant
 
@@ -80,7 +82,7 @@ Any security and domain object being loaded will receive an initial ownership. T
 
 ### ACLs
 
-The only ACLs that are automatically created on migration or server initialization are those to make the initial RoleDefinitions publicly readable. No other ACLs are intended to exist for new or initially migrated servers.
+The only ACLs that are automatically created on migration or server initialization are those to make the initial RoleDefinitions publicly readable. No other ACLs are intended to exist for new or initially migrated server.
 
 ### Users having specific permissions
 

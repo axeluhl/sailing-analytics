@@ -39,7 +39,7 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
     @Before
     public void setUpSubClass() throws Exception {
         super.setUp();
-        storageService = AmazonS3TestSupport.createService();
+        storageService = AmazonS3TestSupport.createService(securityService);
         FileStorageManagementService fsmsMock = mock(FileStorageManagementService.class);
         doReturn(fsmsMock).when(racingEventService).getFileStorageManagementService();
         doReturn(storageService).when(fsmsMock).getActiveFileStorageService();
@@ -52,26 +52,21 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
     @Test
     public void storeAndRemoveTeamImage() throws URISyntaxException, ParseException, MalformedURLException,
             IOException, OperationFailedException, InvalidPropertiesException {
-        //set team image
+        // set team image
         String fileExtension = teamImageFile.substring(teamImageFile.lastIndexOf("."));;
         InputStream stream = getClass().getResourceAsStream("/" + teamImageFile);
-        
         // this is not ideal, as this #available() is not supposed to be used for getting the file size
         // however, working with a File() descriptor does not work, as when running via maven/tycho the
         // URL has the bundleresource:// scheme instead of file:, which File() can't handle
         long length = stream.available();
-        
         String jsonString = competitorsResource.setTeamImage(id, stream, fileExtension, length, null, null);
-        
-        //now download and compare
+        // now download and compare
         JSONObject json = (JSONObject) JSONValue.parseWithException(jsonString);
         String imageUriString = (String) json.get(DeviceMappingConstants.JSON_TEAM_IMAGE_URI);
         URI imageUri = new URI(imageUriString);
-        
         InputStream downloadStream = imageUri.toURL().openStream();
         stream = getClass().getResourceAsStream("/" + teamImageFile);
         IOUtils.contentEquals(downloadStream, stream);
-        
         storageService.removeFile(imageUri);
     }
 }

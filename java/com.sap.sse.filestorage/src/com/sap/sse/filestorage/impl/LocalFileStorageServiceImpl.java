@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Util.Pair;
@@ -54,44 +55,38 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
     private final FileStorageServicePropertyImpl localPath = new FileStorageServicePropertyImpl("localPath", true, "localLocalPathDesc");
 
     
-    protected LocalFileStorageServiceImpl() {
-        super(NAME, "localDesc");
+    protected LocalFileStorageServiceImpl(BundleContext bundleContext) {
+        super(NAME, "localDesc", bundleContext);
         addProperties(baseURL, localPath);
     }
 
     @Override
     public URI storeFile(InputStream is, String fileExtension, long lengthInBytes)
             throws IOException, UnauthorizedException {
-        OutputStream outputStream = null;
         String fileName = getKey(fileExtension);
         String pathToFile = localPath.getValue() + "/" + fileName;
-        SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(DefaultActions.CREATE,
-                        new TypeRelativeObjectIdentifier(pathToFile)));
-
-        File outputFile = new File(pathToFile);
-        logger.log(Level.FINE, "Storing file in " + outputFile.getAbsolutePath());
-        outputStream = new FileOutputStream(outputFile);
-
-        try {
-            int read = 0;
-            byte[] bytes = new byte[1024];
-
-            while ((read = is.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, read);
-            }
-
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-            if (outputStream != null) {
-                outputStream.flush();
-                outputStream.close();
-            }
-        }
-
-        return getUri(fileName);
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.FILE_STORAGE,
+                new TypeRelativeObjectIdentifier(pathToFile), pathToFile, () -> {
+                    final File outputFile = new File(pathToFile);
+                    logger.log(Level.FINE, "Storing file in " + outputFile.getAbsolutePath());
+                    final OutputStream outputStream = new FileOutputStream(outputFile);
+                    try {
+                        int read = 0;
+                        byte[] bytes = new byte[1024];
+                        while ((read = is.read(bytes)) != -1) {
+                            outputStream.write(bytes, 0, read);
+                        }
+                    } finally {
+                        if (is != null) {
+                            is.close();
+                        }
+                        if (outputStream != null) {
+                            outputStream.flush();
+                            outputStream.close();
+                        }
+                    }
+                    return getUri(fileName);
+                });
     }
 
     private static String getKey(String fileEnding) {
@@ -118,16 +113,13 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
         if (!file.exists()) {
             throw new FileNotFoundException(uri.toString());
         }
-
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredDomainType.FILE_STORAGE.getStringPermissionForTypeRelativeIdentifier(
-                        DefaultActions.DELETE,
-                        new TypeRelativeObjectIdentifier(pathToFile)));
-
-        if (!file.delete()) {
-            logger.warning("Could not delete file with path " + filePath);
-            throw new IOException("Could not delete file with path "+filePath);
-        }
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredDomainType.FILE_STORAGE.
+                getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(pathToFile)), () -> {
+                    if (!file.delete()) {
+                        logger.warning("Could not delete file with path " + filePath);
+                        throw new IOException("Could not delete file with path "+filePath);
+                    }
+                });
     }
 
     @Override

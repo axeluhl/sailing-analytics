@@ -191,7 +191,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         public Iterable<RegattaAndRaceIdentifier> fixReceived(DeviceIdentifier device, Timed fix) {
             Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
-
             if (!preemptiveStopRequested.get() && trackedRace.getStartOfTracking() != null) {
                 final TimePoint timePoint = fix.getTimePoint();
                 deviceMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(),

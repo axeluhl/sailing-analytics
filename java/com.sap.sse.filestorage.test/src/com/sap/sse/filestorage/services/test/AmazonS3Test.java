@@ -18,18 +18,18 @@ import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
 import com.sap.sse.filestorage.testsupport.AmazonS3TestSupport;
+import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
 public class AmazonS3Test {
    @Before
     public void setup() throws InvalidPropertiesException {
        setUpSecurity();
-        storageService = AmazonS3TestSupport.createService();
+        storageService = AmazonS3TestSupport.createService(SecurityServiceMockFactory.mockSecurityService());
     }
    
    private void setUpSecurity() {
        org.apache.shiro.mgt.SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
        Subject fakeSubject = Mockito.mock(Subject.class);
-
        SecurityUtils.setSecurityManager(securityManager);
        Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
        Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
@@ -42,14 +42,11 @@ public class AmazonS3Test {
     @Test
     public void testStoreAndRemoveFileTest() throws URISyntaxException, IOException, OperationFailedException, InvalidPropertiesException {
         InputStream stream = getClass().getClassLoader().getResourceAsStream(teamImageFile);
-        
         // this is not ideal, as this #available() is not supposed to be used for getting the file size
         // however, working with a File() descriptor does not work, as when running via maven/tycho the
         // URL has the bundleresource:// scheme instead of file:, which File() can't handle
         long length = stream.available();
-
         URI uri = storageService.storeFile(stream, teamImageFile, length);
-        
         InputStream downloadStream = uri.toURL().openStream();
         stream = getClass().getClassLoader().getResourceAsStream(teamImageFile);
         try {

@@ -21,7 +21,7 @@ public class DummyFileStorageService extends BaseFileStorageServiceImpl implemen
     private static final long serialVersionUID = -3871744982404841496L;
 
     public DummyFileStorageService() {
-        super(NAME, "");
+        super(NAME, "", /* bundleContext */ null);
         addProperties(property);
     }
 
