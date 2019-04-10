@@ -125,7 +125,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration(String jsonUrl) {
-        return new SwissTimingArchiveConfigurationImpl(jsonUrl);
+    public SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration(String jsonUrl, String creatorName) {
+        return new SwissTimingArchiveConfigurationImpl(jsonUrl, creatorName);
     }
 }

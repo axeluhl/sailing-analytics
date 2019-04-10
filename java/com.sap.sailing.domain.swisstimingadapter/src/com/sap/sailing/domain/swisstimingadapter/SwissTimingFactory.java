@@ -69,6 +69,6 @@ public interface SwissTimingFactory {
 
     SailMasterMessage createMessage(String message);
 
-    SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration(String string);
+    SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration(String jsonUrl, String creatorName);
 
 }

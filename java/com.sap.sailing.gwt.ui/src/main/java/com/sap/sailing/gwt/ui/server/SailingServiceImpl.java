@@ -454,7 +454,7 @@ import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
-import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -5213,20 +5213,44 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations() {
+    public List<SwissTimingArchiveConfigurationWithSecurityDTO> getPreviousSwissTimingArchiveConfigurations() {
         Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence
                 .getSwissTimingArchiveConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, configs,
-                stArchiveConfig -> new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonURL()));
+                stArchiveConfig -> {
+                    SwissTimingArchiveConfigurationWithSecurityDTO config = new SwissTimingArchiveConfigurationWithSecurityDTO(
+                            stArchiveConfig.getJsonURL(), stArchiveConfig.getCreatorName());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
+                    return config;
+                });
     }
 
     @Override
-    public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) throws Exception {
+    public void createSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+            throws Exception {
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.SWISS_TIMING_ACCOUNT, SwissTimingArchiveConfiguration.getTypeRelativeObjectIdentifier(swissTimingJsonUrl),
-                swissTimingJsonUrl, () -> swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(
-                        swissTimingFactory.createSwissTimingArchiveConfiguration(swissTimingJsonUrl)));
+                SecuredDomainType.SWISS_TIMING_ACCOUNT, dto.getIdentifier().getTypeRelativeObjectIdentifier(),
+                dto.getName(),
+                () -> swissTimingAdapterPersistence.createSwissTimingArchiveConfiguration(
+                        swissTimingFactory.createSwissTimingArchiveConfiguration(dto.getJsonUrl(), currentUserName)));
+    }
+
+    @Override
+    public void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+            throws Exception {
+        getSecurityService().checkCurrentUserUpdatePermission(dto);
+        swissTimingAdapterPersistence.updateSwissTimingArchiveConfiguration(
+                swissTimingFactory.createSwissTimingArchiveConfiguration(dto.getJsonUrl(), dto.getCreatorName()));
+    }
+
+    @Override
+    public void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+            throws Exception {
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(dto.getIdentifier(),
+                () -> swissTimingAdapterPersistence.deleteSwissTimingArchiveConfiguration(swissTimingFactory
+                        .createSwissTimingArchiveConfiguration(dto.getJsonUrl(), dto.getCreatorName())));
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {

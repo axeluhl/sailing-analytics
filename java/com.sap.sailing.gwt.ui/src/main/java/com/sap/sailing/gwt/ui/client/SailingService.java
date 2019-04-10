@@ -110,7 +110,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
-import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -512,9 +512,16 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<String> getOverallLeaderboardNamesContaining(String leaderboardName) throws UnauthorizedException;
 
-    List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations() throws UnauthorizedException;
+    List<SwissTimingArchiveConfigurationWithSecurityDTO> getPreviousSwissTimingArchiveConfigurations() throws UnauthorizedException;
 
-    void storeSwissTimingArchiveConfiguration(String swissTimingUrl) throws UnauthorizedException, Exception;
+    void createSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+            throws UnauthorizedException, Exception;
+
+    void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+            throws UnauthorizedException, Exception;
+
+    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+            throws UnauthorizedException, Exception;
 
     void createCourseAreas(UUID eventId, String[] courseAreaNames) throws UnauthorizedException;
 
