@@ -61,8 +61,23 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         String updateUsername = (String) object.get(FieldNames.ST_CONFIG_UPDATE_USERNAME.name());
         String updatePassword = (String) object.get(FieldNames.ST_CONFIG_UPDATE_PASSWORD.name());
         String creatorName = object.getString(FieldNames.ST_CONFIG_CREATOR_NAME.name());
-        return swissTimingFactory.createSwissTimingConfiguration(name, jsonURL, hostname, port, updateURL,
+
+        // migration code
+        final boolean needsUpdate = (creatorName == null);
+        if (needsUpdate) {
+            // No creator is set yet -> existing configurations are assumed to belong to the admin
+            creatorName = "admin";
+        }
+        final SwissTimingConfiguration loadedSwissTimingConfiguration = swissTimingFactory.createSwissTimingConfiguration(name, jsonURL, hostname, port, updateURL,
                 updateUsername, updatePassword, creatorName);
+
+        if (needsUpdate) {
+            // recreating the config on the DB because the composite key changed
+            deleteSwissTimingConfiguration(null, jsonURL);
+            createSwissTimingConfiguration(loadedSwissTimingConfiguration);
+        }
+
+        return loadedSwissTimingConfiguration;
     }
 
     @Override
