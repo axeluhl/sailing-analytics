@@ -91,7 +91,7 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
         manage2SailEventUrlJsonTextBox = new TextBox();
         manage2SailEventUrlJsonTextBox.ensureDebugId("Manage2SailEventUrlJsonTextBox");
         manage2SailEventUrlJsonTextBox.setVisibleLength(40);
-        manage2SailEventUrlJsonTextBox.setTitle(stringMessages.swissTimingUpdateURL());
+        manage2SailEventUrlJsonTextBox.setTitle(stringMessages.manage2SailEventURLBox());
 
         grid.setWidget(2, 0, manage2SailEventUrlJsonLabel);
         grid.setWidget(2, 1, manage2SailEventUrlJsonTextBox);

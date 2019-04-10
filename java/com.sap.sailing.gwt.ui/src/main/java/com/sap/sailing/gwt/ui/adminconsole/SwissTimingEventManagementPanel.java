@@ -108,13 +108,14 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 });
         verticalPanel.add(connectionsTable);
         connectionsTable.refreshSwissTimingConnectionList();
-        // Add TracTrac Connection
+        // Add Swiss Timing Connection
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.TRACKED_RACE);
         verticalPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(),
                 () -> connectionsTable.refreshSwissTimingConnectionList());
-        buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
+        // TODO: i18n
+        buttonPanel.addCreateAction("Add Swiss Timing Connection",
                 () -> new EditSwissTimingConnectionDialog(new SwissTimingConfigurationWithSecurityDTO(),
                         new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
                             @Override
