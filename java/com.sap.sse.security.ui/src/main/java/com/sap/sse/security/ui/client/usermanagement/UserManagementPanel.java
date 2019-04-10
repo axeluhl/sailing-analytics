@@ -147,21 +147,37 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         west.add(detailsPanel);
     }
 
-    /** shows the edit dialog */
+    /** shows the edit dialog if the user exists */
     private void showRolesAndPermissionsEditDialog(UserService userService,
             final CellTableWithCheckboxResources tableResources, final ErrorReporter errorReporter) {
-        new EditUserRolesAndPermissionsDialog(userNameTextbox.getText(), userService, errorReporter, tableResources,
-                new DialogCallback<Void>() {
-                    @Override
-                    public void ok(Void editedObject) {
-                        updateUsers();
-                    }
+        userService.getUserManagementService().userExists(userNameTextbox.getText(), new AsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                if (result) {
+                    new EditUserRolesAndPermissionsDialog(userNameTextbox.getText(), userService, errorReporter,
+                            tableResources, new DialogCallback<Void>() {
+                                @Override
+                                public void ok(Void editedObject) {
+                                    updateUsers();
+                                }
 
-                    @Override
-                    public void cancel() {
-                        updateUsers();
-                    }
-                }).show();
+                                @Override
+                                public void cancel() {
+                                    updateUsers();
+                                }
+                            }).show();
+                }
+                else {
+                    Notification.notify(StringMessages.INSTANCE.userNotFound(userNameTextbox.getText()),
+                            NotificationType.ERROR);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+        });
     }
 
     public void updateUsers() {
