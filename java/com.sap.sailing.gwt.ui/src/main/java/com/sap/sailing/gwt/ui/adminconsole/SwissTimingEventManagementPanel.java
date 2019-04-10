@@ -559,59 +559,44 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     private void fillRaces(final SailingServiceAsync sailingService) {
-        final String jsonUrl = jsonUrlBox.getValue();
-        final String updateURL = updateURLBox.getValue();
-        final String updateUsername = updateUsernameBox.getValue();
-        final String updatePassword = updatePasswordBox.getValue();
-        sailingService.getRacesOfSwissTimingEvent(jsonUrl, new AsyncCallback<SwissTimingEventRecordDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                SwissTimingEventManagementPanel.this.errorReporter.reportError("Error trying to list races: "
-                        + caught.getMessage());
-            }
+        final SwissTimingConfigurationWithSecurityDTO selectedObject = connectionsTable.getSelectionModel()
+                .getSelectedObject();
+        sailingService.getRacesOfSwissTimingEvent(selectedObject.getJsonURL(),
+                new AsyncCallback<SwissTimingEventRecordDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        SwissTimingEventManagementPanel.this.errorReporter
+                                .reportError("Error trying to list races: " + caught.getMessage());
+                    }
 
-            @Override
-            public void onSuccess(final SwissTimingEventRecordDTO result) {
-                availableSwissTimingRaces.clear();
-                if (result != null) {
-                    availableSwissTimingRaces.addAll(result.races);
-                }
-                raceList.getList().clear();
-                raceList.getList().addAll(availableSwissTimingRaces);
-                filterablePanelEvents.getTextBox().setText(null);
-                filterablePanelEvents.updateAll(result.races);
-                // store a successful configuration in the database for later retrieval
-                final String hostname = result.trackingDataHost;
-                final Integer port = result.trackingDataPort;
-                final String configName = result.eventName;
-                sailingService.createSwissTimingConfiguration(configName, jsonUrl, hostname, port, updateURL,
-                        updateUsername, updatePassword,
-                        new AsyncCallback<Void>() {
+                    @Override
+                    public void onSuccess(final SwissTimingEventRecordDTO result) {
+                        availableSwissTimingRaces.clear();
+                        if (result != null) {
+                            availableSwissTimingRaces.addAll(result.races);
+                        }
+                        raceList.getList().clear();
+                        raceList.getList().addAll(availableSwissTimingRaces);
+                        filterablePanelEvents.getTextBox().setText(null);
+                        filterablePanelEvents.updateAll(result.races);
+                        // store a successful configuration in the database for later retrieval
+                        final SwissTimingConfigurationWithSecurityDTO updatedDTO = new SwissTimingConfigurationWithSecurityDTO(
+                                selectedObject, result.trackingDataHost, result.trackingDataPort, result.eventName);
+
+                        sailingService.updateSwissTimingConfiguration(updatedDTO, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Exception trying to store configuration in DB: "
-                                        + caught.getMessage());
+                                errorReporter.reportError(
+                                        "Exception trying to update configuration in DB: " + caught.getMessage());
                             }
 
                             @Override
                             public void onSuccess(Void voidResult) {
-                                // refresh list of previous configurations
-                                SwissTimingConfigurationWithSecurityDTO stConfig = new SwissTimingConfigurationWithSecurityDTO(configName, jsonUrl,
-                                        hostname, port, updateURL, updateUsername, updatePassword, null);
-                                if (previousConfigurations.put(stConfig.getName(), stConfig) == null) {
-                                    previousConfigurationsComboBox.addItem(stConfig.getName());
-                                }
-                                for (int i=0; i<previousConfigurationsComboBox.getItemCount(); i++) {
-                                    if (previousConfigurationsComboBox.getValue(i).equals(stConfig.getName())) {
-                                        previousConfigurationsComboBox.setSelectedIndex(i);
-                                        break;
-                                    }
-                                }
-                                updatePanelFromSelectedStoredConfiguration();
+                                connectionsTable.refreshSwissTimingConnectionList();
                             }
                         });
-            }
-        });
+                    }
+                });
     }
 
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm) {

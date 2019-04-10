@@ -52,6 +52,18 @@ public class SwissTimingConfigurationWithSecurityDTO implements IsSerializable, 
         this.creatorName = creatorName;
     }
 
+    public SwissTimingConfigurationWithSecurityDTO(SwissTimingConfigurationWithSecurityDTO dto, String hostname,
+            Integer port, String eventName) {
+        this.name = eventName;
+        this.jsonURL = dto.getJsonURL();
+        this.hostname = hostname;
+        this.port = port;
+        this.updateURL = dto.getUpdateURL();
+        this.updateUsername = dto.getUpdateUsername();
+        this.updatePassword = dto.getUpdatePassword();
+        this.creatorName = dto.getCreatorName();
+    }
+
     public String getName() {
         return name;
     }
