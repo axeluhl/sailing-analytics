@@ -500,22 +500,25 @@ public class TaggingPanel extends ComponentWithoutSettings
      * SailingService}, adds them to the {@link TagListProvider} and updates the UI via {@link #updateContent()}.
      */
     private void reloadPrivateTags() {
-        sailingService.getPrivateTags(leaderboardName, raceColumn.getName(), fleet.getName(),
-                new AsyncCallback<List<TagDTO>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log(caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(List<TagDTO> result) {
-                        tagListProvider.removePrivateTags();
-                        if (result != null && !result.isEmpty()) {
-                            tagListProvider.addAll(result);
+        tagListProvider.removePrivateTags();
+        if (userService.getCurrentUser() != null) {
+            sailingService.getPrivateTags(leaderboardName, raceColumn.getName(), fleet.getName(),
+                    new AsyncCallback<List<TagDTO>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log(caught.getMessage());
                         }
-                        updateContent();
-                    }
-                });
+
+                        @Override
+                        public void onSuccess(List<TagDTO> result) {
+                            tagListProvider.removePrivateTags();
+                            if (result != null && !result.isEmpty()) {
+                                tagListProvider.addAll(result);
+                            }
+                            updateContent();
+                        }
+                    });
+        }
     }
 
     /**

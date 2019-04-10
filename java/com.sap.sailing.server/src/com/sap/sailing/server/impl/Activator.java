@@ -212,6 +212,9 @@ public class Activator implements BundleActivator {
                 (SecurityInitializationCustomizer) securityService -> {
                     final RoleDefinition sailingViewerRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(SailingViewerRole.getInstance());
                     if (securityService.isInitialOrMigration()) {
+                        
+                        // The server is initially set to be public by adding sailing_viewer role to the server group
+                        // with forAll=true
                         securityService.putRoleDefinitionToUserGroup(securityService.getDefaultTenant(),
                                 sailingViewerRoleDefinition, true);
                         
@@ -301,7 +304,6 @@ public class Activator implements BundleActivator {
 
         // do initial setup/migration logic
         racingEventService.ensureOwnerships();
-        racingEventService.ensureServerIsInitiallyPublic();
     }
 
     private class MasterDataImportClassLoaderServiceTrackerCustomizer implements

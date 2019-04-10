@@ -104,7 +104,7 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
     public AbstractUserDialog(final StringMessages stringMessages, final String title, final String message,
             final UserManagementServiceAsync userManagementService, final UserDTO user,
             DataEntryDialog.Validator<UserData> validator, final DialogCallback<UserData> callback) {
-        this(stringMessages, title, message, userManagementService, user, validator, callback, true);
+        this(stringMessages, title, message, userManagementService, user, validator, callback, /* checkUsernameForExistence */ true);
     }
 
     /**
@@ -142,7 +142,7 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
     public AbstractUserDialog(StringMessages stringMessages, String title,
             UserManagementServiceAsync userManagementService, UserDTO user,
             DialogCallback<UserData> callback) {
-        this(stringMessages, title, userManagementService, user, callback, true);
+        this(stringMessages, title, userManagementService, user, callback, /* checkUsernameForExistence */ true);
     }
 
     private void checkIfUsernameExists() {

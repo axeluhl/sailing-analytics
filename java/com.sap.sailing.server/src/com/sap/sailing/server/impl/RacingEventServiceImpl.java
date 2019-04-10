@@ -258,7 +258,6 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
-import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
 import com.sap.sailing.server.statistics.StatisticsCalculator;
@@ -296,10 +295,6 @@ import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.impl.Role;
-import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -854,26 +849,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 new QuarterChecker(), new SameDigitChecker());
         raceChangeObserverForAnniversaryDetection = new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator);
         this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
-    }
-
-    public void ensureServerIsInitiallyPublic() {
-        try {
-            final User allUser = getSecurityService().getAllUser();
-            String initializedKey = ("serverInitialized " + ServerInfo.getName()).replaceAll("[\\W]|_", "");
-            if (!Boolean.TRUE.equals(getSecurityService().getSetting(initializedKey, Boolean.class))) {
-                getSecurityService().addSetting(initializedKey, Boolean.class);
-                final RoleDefinition viewerRole = getSecurityService()
-                        .getRoleDefinition(SailingViewerRole.getInstance().getId());
-                final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
-                // role ownership handling left out on purpose, initially only an admin can set this server to be non
-                // public
-                final Role publicAccessForServerRole = new Role(viewerRole, defaultServerTenant, null);
-                getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
-                getSecurityService().setSetting(initializedKey, true);
-            }
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Error determining Server initialisation state", e);
-        }
     }
 
     private void restoreTrackedRaces() {

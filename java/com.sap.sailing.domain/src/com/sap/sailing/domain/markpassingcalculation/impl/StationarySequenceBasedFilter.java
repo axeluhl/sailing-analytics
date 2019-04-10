@@ -75,7 +75,13 @@ import com.sap.sse.common.Util.Pair;
 public class StationarySequenceBasedFilter {
     /**
      * Set of sequences managed here; ordered by their {@link StationarySequence#getFirst() first} candidate,
-     * based on the candidate comparator passed to the constructor.
+     * based on the candidate comparator passed to the constructor. This implies that {@link StationarySequence} objects
+     * added to this set must not be empty when adding and must not be empty when removing them. Furthermore,
+     * before a {@link StationarySequence} changes its first element, e.g., by inserting a new first element before
+     * the one that used to be the first, or by removing the first element (in particular when removing a single
+     * candidate, turning the {@link StationarySequence} empty) it must be removed before the change and re-added
+     * afterwards again if not empty. For this, a {@link StationarySequence} knows the set in which is has been
+     * inserted and manages its position in the set, based on changes to its first element.
      */
     private final NavigableSet<StationarySequence> stationarySequences;
     
@@ -281,7 +287,7 @@ public class StationarySequenceBasedFilter {
                                             stationarySequences.higher(createStationarySequence(newCandidate));
         if (earliestStationarySequenceStartingAfterNewCandidate == null
                 || !earliestStationarySequenceStartingAfterNewCandidate.tryToExtendBeforeFirst(newCandidate,
-                        candidatesEffectivelyAdded, candidatesEffectivelyRemoved)) {
+                        candidatesEffectivelyAdded, candidatesEffectivelyRemoved, /* StationarySequence set to update */ stationarySequences)) {
             // no later sequence found, or extending it backwards to newCandidate wasn't validly possible;
             // request a new sequence to be constructed; newCandidate will pass the filter as it's one of
             // only two candidates in the new sequence.
@@ -346,7 +352,8 @@ public class StationarySequenceBasedFilter {
                         .before(removedCandidate.getTimePoint())) {
                     // within the sequence; remove:
                     latestStationarySequenceStartingAtOrBeforeRemovedCandidate.remove(removedCandidate,
-                            candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                            candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
+                            /* StationarySequence set to update */ stationarySequences);
                     if (Util.size(latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getAllCandidates()) <= 1) {
                         stationarySequences.remove(latestStationarySequenceStartingAtOrBeforeRemovedCandidate);
                     }
@@ -413,7 +420,7 @@ public class StationarySequenceBasedFilter {
                         StationarySequence.createDummyCandidate(newFix.getTimePoint())));
                 if (lastSequenceStartingAtOrBeforeFix != null && !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(newFix.getTimePoint())) {
                     // fix falls into the existing StationarySequence; update its bounding box:
-                    final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                    final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved, /* StationarySequence set to update */ stationarySequences);
                     if (Util.size(lastSequenceStartingAtOrBeforeFix.getAllCandidates()) <= 1) {
                         stationarySequences.remove(lastSequenceStartingAtOrBeforeFix);
                     }
@@ -446,7 +453,9 @@ public class StationarySequenceBasedFilter {
                                 final StationarySequence firstSequenceStartingAfterFix = stationarySequences.higher(dummyStationarySequenceForFix);
                                 if (firstCandidateAfterReplacementFix == firstSequenceStartingAfterFix.getFirst()) {
                                     // next candidate is start of a sequence; try to extend
-                                    firstSequenceStartingAfterFix.tryToExtendBeforeFirst(lastCandidateBeforeReplacementFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+                                    firstSequenceStartingAfterFix.tryToExtendBeforeFirst(lastCandidateBeforeReplacementFix,
+                                            candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
+                                            /* StationarySequence set to update */ stationarySequences);
                                 } else {
                                     // none of the adjacent candidates is part of a sequence; try to create a new one:
                                     final StationarySequence newSequence = createStationarySequence(lastCandidateBeforeReplacementFix);
