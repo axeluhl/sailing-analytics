@@ -590,18 +590,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userOwner == null && tenantOwner == null) {
             throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
         }
-        final UUID tenantId;
-        if (userOwner == null) {
-            tenantId = tenantOwner.getId();
-        } else {
-            // check if a default owner is existing
-            if (tenantOwner == null) {
-                tenantOwner = getDefaultTenantForUser(userOwner);
-            }
-            tenantId = tenantOwner==null?null:tenantOwner.getId();
-        }
-
+        UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
+
         return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
     }
@@ -1702,6 +1693,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description) {
         setOwnership(identifier, getCurrentUser(), getDefaultTenantForCurrentUser(), description);
+    }
+
+    @Override
+    public void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier) {
+        final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
+        if (preexistingOwnership == null) {
+            setDefaultOwnership(identifier, identifier.toString());
+        }
     }
 
     @Override

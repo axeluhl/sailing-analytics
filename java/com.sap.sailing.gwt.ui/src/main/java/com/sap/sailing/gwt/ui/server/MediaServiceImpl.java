@@ -111,8 +111,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         }
         racingEventService().mediaTrackAdded(mediaTrack);
         SecurityService securityService = racingEventService().getSecurityService();
-        securityService.setOwnershipIfNotSet(mediaTrack.getIdentifier(), securityService.getCurrentUser(),
-                securityService.getDefaultTenantForCurrentUser());
+        securityService.setDefaultOwnershipIfNotSet(mediaTrack.getIdentifier());
         return mediaTrack.dbId;
     }
 

@@ -556,6 +556,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /** Sets the default ownership based on the current user. */
     void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description);
 
+    void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier);
+
     /**
      * Checks if a user has at least one permission implied by the given {@link WildcardPermission}.
      * 
@@ -571,4 +573,5 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
             Action actionToCreateObject);
+
 }

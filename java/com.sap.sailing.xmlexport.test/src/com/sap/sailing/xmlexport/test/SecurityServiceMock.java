@@ -895,4 +895,8 @@ public class SecurityServiceMock implements SecurityService {
 
     }
 
+    @Override
+    public void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier) {
+    }
+
 }
