@@ -84,9 +84,26 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     }
 
     private SwissTimingArchiveConfiguration loadSwissTimingArchiveConfiguration(Document object) {
-        return swissTimingFactory.createSwissTimingArchiveConfiguration(
-                object.getString(FieldNames.ST_ARCHIVE_JSON_URL.name()),
-                object.getString(FieldNames.ST_ARCHIVE_CREATOR_NAME.name()));
+        final String jsonUrl = object.getString(FieldNames.ST_ARCHIVE_JSON_URL.name());
+        String creatorName = object.getString(FieldNames.ST_ARCHIVE_CREATOR_NAME.name());
+        
+        final boolean needsUpdate = (creatorName == null);
+        if (needsUpdate) {
+            // No creator is set yet -> existing configurations are assumed to belong to the admin
+            creatorName = "admin";
+        }
+        
+        final SwissTimingArchiveConfiguration loadedSwissTimingArchiveConfiguration = swissTimingFactory.createSwissTimingArchiveConfiguration(
+                jsonUrl,
+                creatorName);
+        
+        if (needsUpdate) {
+            // recreating the config on the DB because the composite key changed
+            deleteSwissTimingArchiveConfiguration(
+                    swissTimingFactory.createSwissTimingArchiveConfiguration(jsonUrl, null));
+            createSwissTimingArchiveConfiguration(loadedSwissTimingArchiveConfiguration);
+        }
+        return loadedSwissTimingArchiveConfiguration;
     }
 
     @Override
