@@ -16,7 +16,7 @@ public class SwissTimingConfigurationWithSecurityDTO implements IsSerializable, 
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
     private String name;
-    private String jsonURL;
+    private String jsonUrl;
     private String hostname;
     private Integer port;
     private String creatorName;
@@ -39,11 +39,11 @@ public class SwissTimingConfigurationWithSecurityDTO implements IsSerializable, 
 
     public SwissTimingConfigurationWithSecurityDTO() {}
 
-    public SwissTimingConfigurationWithSecurityDTO(String name, String jsonURL, String hostname, Integer port,
+    public SwissTimingConfigurationWithSecurityDTO(String name, String jsonUrl, String hostname, Integer port,
             String updateURL, String updateUsername, String updatePassword, String creatorName) {
         super();
         this.name = name;
-        this.jsonURL = jsonURL;
+        this.jsonUrl = jsonUrl;
         this.hostname = hostname;
         this.port = port;
         this.updateURL = updateURL;
@@ -55,7 +55,7 @@ public class SwissTimingConfigurationWithSecurityDTO implements IsSerializable, 
     public SwissTimingConfigurationWithSecurityDTO(SwissTimingConfigurationWithSecurityDTO dto, String hostname,
             Integer port, String eventName) {
         this.name = eventName;
-        this.jsonURL = dto.getJsonURL();
+        this.jsonUrl = dto.getJsonUrl();
         this.hostname = hostname;
         this.port = port;
         this.updateURL = dto.getUpdateURL();
@@ -68,8 +68,8 @@ public class SwissTimingConfigurationWithSecurityDTO implements IsSerializable, 
         return name;
     }
 
-    public String getJsonURL() {
-        return jsonURL;
+    public String getJsonUrl() {
+        return jsonUrl;
     }
 
     public String getHostname() {
@@ -122,8 +122,8 @@ public class SwissTimingConfigurationWithSecurityDTO implements IsSerializable, 
     }
 
     private TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return creatorName == null ? new TypeRelativeObjectIdentifier(jsonURL)
-                : new TypeRelativeObjectIdentifier(jsonURL, creatorName);
+        return creatorName == null ? new TypeRelativeObjectIdentifier(jsonUrl)
+                : new TypeRelativeObjectIdentifier(jsonUrl, creatorName);
     }
 
     @Override

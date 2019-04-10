@@ -1450,7 +1450,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(tracTracConfiguration,
                 () ->
         tractracMongoObjectFactory.deleteTracTracConfiguration(tracTracConfiguration.getCreatorName(),
-                tracTracConfiguration.getJSONURL()));
+                tracTracConfiguration.getJsonUrl()));
     }
 
     @Override
@@ -1459,7 +1459,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         getSecurityService().checkCurrentUserUpdatePermission(tracTracConfiguration);
         tractracMongoObjectFactory.updateTracTracConfiguration(
                 getTracTracAdapter().createTracTracConfiguration(tracTracConfiguration.getCreatorName(),
-                tracTracConfiguration.getName(), tracTracConfiguration.getJSONURL(),
+                tracTracConfiguration.getName(), tracTracConfiguration.getJsonUrl(),
                 tracTracConfiguration.getLiveDataURI(), tracTracConfiguration.getStoredDataURI(),
                 tracTracConfiguration.getCourseDesignUpdateURI(), tracTracConfiguration.getTracTracUsername(),
                         tracTracConfiguration.getTracTracPassword()));
@@ -3182,7 +3182,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         boolean found = false;
         final String currentUserName = getSecurityService().getCurrentUser().getName();
         for (final SwissTimingConfigurationWithSecurityDTO dto : getPreviousSwissTimingConfigurations()) {
-            if (dto.getJsonURL().equals(jsonUrl) && currentUserName.equals(dto.getCreatorName())) {
+            if (dto.getJsonUrl().equals(jsonUrl) && currentUserName.equals(dto.getCreatorName())) {
                 found = true;
                 break;
             }
@@ -3209,7 +3209,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         boolean found = false;
         final String currentUserName = getSecurityService().getCurrentUser().getName();
         for (final TracTracConfigurationWithSecurityDTO dto : getPreviousTracTracConfigurations()) {
-            if (dto.getJSONURL().equals(jsonUrl) && currentUserName.equals(dto.getCreatorName())) {
+            if (dto.getJsonUrl().equals(jsonUrl) && currentUserName.equals(dto.getCreatorName())) {
                 found = true;
                 break;
             }
@@ -3256,7 +3256,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         getSecurityService().checkCurrentUserDeletePermission(configuration);
         getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(configuration,
                 () -> swissTimingAdapterPersistence.deleteSwissTimingConfiguration(configuration.getCreatorName(),
-                        configuration.getJsonURL()));
+                        configuration.getJsonUrl()));
     }
 
     @Override
@@ -3264,7 +3264,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             throws Exception {
         getSecurityService().checkCurrentUserUpdatePermission(configuration);
         swissTimingAdapterPersistence.updateSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(
-                configuration.getName(), configuration.getJsonURL(), configuration.getHostname(),
+                configuration.getName(), configuration.getJsonUrl(), configuration.getHostname(),
                 configuration.getPort(), configuration.getUpdateURL(), configuration.getUpdateUsername(),
                 configuration.getUpdatePassword(), configuration.getCreatorName()));
     }

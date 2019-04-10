@@ -73,7 +73,7 @@ public class TracTracConnectionTableWrapper extends
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountStoredUriColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getStoredDataURI(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountJsonUrlColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
-                dto -> dto.getJSONURL(), tracTracAccountColumnListHandler);
+                dto -> dto.getJsonUrl(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountTracTracServerUpdateUriColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getCourseDesignUpdateURI(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountUsernameColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(

@@ -69,10 +69,10 @@ public class SwissTimingConnectionTableWrapper extends
         final TextColumn<SwissTimingConfigurationWithSecurityDTO> swissTimingConnectionNameColumn = new AbstractSortableTextColumn<SwissTimingConfigurationWithSecurityDTO>(
                 dto -> dto.getName(), swissTimingConectionColumnListHandler);
         final TextColumn<SwissTimingConfigurationWithSecurityDTO> swissTimingConnectionManage2SailEventIdColumn = new AbstractSortableTextColumn<SwissTimingConfigurationWithSecurityDTO>(
-                dto -> SwissTimingEventIdUrlUtil.getEventIdFromUrl(dto.getJsonURL()),
+                dto -> SwissTimingEventIdUrlUtil.getEventIdFromUrl(dto.getJsonUrl()),
                 swissTimingConectionColumnListHandler);
         final TextColumn<SwissTimingConfigurationWithSecurityDTO> swissTimingConnectionJsonUrlColumn = new AbstractSortableTextColumn<SwissTimingConfigurationWithSecurityDTO>(
-                dto -> dto.getJsonURL(), swissTimingConectionColumnListHandler);
+                dto -> dto.getJsonUrl(), swissTimingConectionColumnListHandler);
         final TextColumn<SwissTimingConfigurationWithSecurityDTO> swissTimingConnectionHostnameColumn = new AbstractSortableTextColumn<SwissTimingConfigurationWithSecurityDTO>(
                 dto -> dto.getHostname(), swissTimingConectionColumnListHandler);
         final TextColumn<SwissTimingConfigurationWithSecurityDTO> swissTimingConnectionPortColumn = new AbstractSortableTextColumn<SwissTimingConfigurationWithSecurityDTO>(

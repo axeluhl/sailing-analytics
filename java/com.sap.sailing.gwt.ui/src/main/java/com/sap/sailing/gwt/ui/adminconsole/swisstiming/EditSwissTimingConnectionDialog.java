@@ -49,7 +49,7 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
     }
 
     private void setData(final SwissTimingConfigurationWithSecurityDTO dtoToEdit) {
-        manage2SailEventUrlJsonTextBox.setText(dtoToEdit.getJsonURL());
+        manage2SailEventUrlJsonTextBox.setText(dtoToEdit.getJsonUrl());
         hostnameTextBox.setText(dtoToEdit.getHostname());
         portTextBox.setText(dtoToEdit.getPort() == null ? "" : ("" + dtoToEdit.getPort()));
         updateUrlTextBox.setText(dtoToEdit.getUpdateURL());
@@ -57,7 +57,7 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
         updatePasswordTextBox.setText(dtoToEdit.getUpdatePassword());
         super.getOkButton().setEnabled(!manage2SailEventUrlJsonTextBox.getText().isEmpty());
 
-        updateEventIdFromUrl(dtoToEdit.getJsonURL());
+        updateEventIdFromUrl(dtoToEdit.getJsonUrl());
     }
 
     private void createUi() {

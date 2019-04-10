@@ -142,7 +142,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                             @Override
                             public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
                                 sailingService.createTracTracConfiguration(editedConnection.getName(),
-                                        editedConnection.getJSONURL(), editedConnection.getLiveDataURI(),
+                                        editedConnection.getJsonUrl(), editedConnection.getLiveDataURI(),
                                         editedConnection.getStoredDataURI(),
                                         editedConnection.getCourseDesignUpdateURI(),
                                         editedConnection.getTracTracUsername(), editedConnection.getTracTracPassword(),
@@ -456,7 +456,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 .getSelectedObject();
         if (selectedConnection != null) {
 
-            sailingService.listTracTracRacesInEvent(selectedConnection.getJSONURL(), listHiddenRaces,
+            sailingService.listTracTracRacesInEvent(selectedConnection.getJsonUrl(), listHiddenRaces,
                     new MarkedAsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>(
                 new AsyncCallback<com.sap.sse.common.Util.Pair<String, List<TracTracRaceRecordDTO>>>() {
                     @Override

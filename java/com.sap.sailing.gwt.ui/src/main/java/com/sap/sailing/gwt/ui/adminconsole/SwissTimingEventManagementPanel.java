@@ -96,7 +96,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                             @Override
                             public void ok(SwissTimingConfigurationWithSecurityDTO editedConnection) {
                                 sailingService.createSwissTimingConfiguration(editedConnection.getName(),
-                                        editedConnection.getJsonURL(), editedConnection.getHostname(),
+                                        editedConnection.getJsonUrl(), editedConnection.getHostname(),
                                         editedConnection.getPort(), editedConnection.getUpdateURL(),
                                         editedConnection.getUpdateUsername(), editedConnection.getUpdatePassword(),
                                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
@@ -420,7 +420,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private void fillRaces(final SailingServiceAsync sailingService) {
         final SwissTimingConfigurationWithSecurityDTO selectedObject = connectionsTable.getSelectionModel()
                 .getSelectedObject();
-        sailingService.getRacesOfSwissTimingEvent(selectedObject.getJsonURL(),
+        sailingService.getRacesOfSwissTimingEvent(selectedObject.getJsonUrl(),
                 new AsyncCallback<SwissTimingEventRecordDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {

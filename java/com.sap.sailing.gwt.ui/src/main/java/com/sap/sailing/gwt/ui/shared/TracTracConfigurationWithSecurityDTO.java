@@ -27,11 +27,11 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
     public TracTracConfigurationWithSecurityDTO() {
     }
 
-    public TracTracConfigurationWithSecurityDTO(String name, String jsonURL, String liveDataURI, String storedDataURI,
+    public TracTracConfigurationWithSecurityDTO(String name, String jsonUrl, String liveDataURI, String storedDataURI,
             String courseDesignUpdateUrl, String tractracUsername, String tractracPassword, String creatorName) {
         super();
         this.name = name;
-        this.jsonUrl = jsonURL;
+        this.jsonUrl = jsonUrl;
         this.liveDataURI = liveDataURI;
         this.storedDataURI = storedDataURI;
         this.courseDesignUpdateURI = courseDesignUpdateUrl;
@@ -44,7 +44,7 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
     public TracTracConfigurationWithSecurityDTO(TracTracConfigurationWithSecurityDTO config, final String name) {
         super();
         this.name = name;
-        this.jsonUrl = config.getJSONURL();
+        this.jsonUrl = config.getJsonUrl();
         this.liveDataURI = config.getLiveDataURI();
         this.storedDataURI = config.getStoredDataURI();
         this.courseDesignUpdateURI = config.getCourseDesignUpdateURI();
@@ -81,7 +81,7 @@ public class TracTracConfigurationWithSecurityDTO implements IsSerializable, Sec
         return name;
     }
 
-    public String getJSONURL() {
+    public String getJsonUrl() {
         return jsonUrl;
     }
 

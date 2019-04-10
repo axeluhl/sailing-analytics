@@ -48,7 +48,7 @@ public class EditTracTracConnectionDialog extends DataEntryDialog<TracTracConfig
     private void setData(final TracTracConfigurationWithSecurityDTO dtotoEdit) {
         storedURITextBox.setText(dtotoEdit.getStoredDataURI());
         liveURITextBox.setText(dtotoEdit.getLiveDataURI());
-        jsonURLTextBox.setText(dtotoEdit.getJSONURL());
+        jsonURLTextBox.setText(dtotoEdit.getJsonUrl());
         tracTracUpdateURITextBox.setText(dtotoEdit.getCourseDesignUpdateURI());
         tractracUsernameTextBox.setText(dtotoEdit.getTracTracUsername());
         tractracPasswordTextBox.setText(dtotoEdit.getTracTracPassword());
