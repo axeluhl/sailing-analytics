@@ -20,7 +20,6 @@ import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sse.common.ColorMapper;
-import com.sap.sse.common.ColorMapperChangedListener;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.ValueRangeFlexibleBoundaries;
@@ -94,7 +93,6 @@ public class FixesAndTails {
      * boundaries so that a {@link ColorMapper} can be used.
      */
     private ValueRangeFlexibleBoundaries detailValueBoundaries;
-    private ColorMapper colorMapper;
 
     private final CoordinateSystem coordinateSystem;
 
@@ -625,7 +623,7 @@ public class FixesAndTails {
                             new TimeRangeImpl(new MillisecondsTimePoint(timepointOfFirstKnownFix), new MillisecondsTimePoint(timepointOfLastKnownFix))));
             if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
-                    && !tailstart.after(timepointOfLastKnownFix)) {
+                    && !tailstart.after(timepointOfLastKnownFix) && !detailTypeChanged) {
                 // the beginning of what we need is contained in the interval we already have; skip what we already have
                 fromDate = new Date(timepointOfLastKnownFix.getTime()+1l); // "from" is "inclusive", so add 1ms to also skip the last fix we have
             } else {
@@ -744,26 +742,28 @@ public class FixesAndTails {
                         ? getFirstShownFix(competitor) : 0;
             }
         }
+        if (startIndex < 0) {
+            // If a tail is present but has no path getFirstShownFix will return -1
+            if (fixes.get(competitor).size() == 0) return;
+            startIndex = 0;
+        }
 
-        int end = lastShownFix.containsKey(competitor) && lastShownFix.get(competitor) != null
+        int endIndex = lastShownFix.containsKey(competitor) && lastShownFix.get(competitor) != null
                     && lastShownFix.get(competitor).get() != null && lastShownFix.get(competitor).get() != -1 ?
-                    lastShownFix.get(competitor).get() + 1 : fixes.get(competitor).size();
+                    lastShownFix.get(competitor).get() : fixes.get(competitor).size() - 1;
 
-
-        for (int i = startIndex; i < end; i++) {
-            Double value;
-            try {
-                value = fixes.get(competitor).get(i).detailValue;
-            } catch (IndexOutOfBoundsException e) {
-                break;
-            }
+        List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.get(competitor);
+        for (int i = startIndex; i <= endIndex; i++) {
+            Double value = fixesForCompetitor.get(i).detailValue;
             if (value != null) {
                 if (!minSet) {
                     min = value;
+                    minIndex = i;
                     minSet = true;
                 }
                 if (!maxSet) {
                     max = value;
+                    maxIndex = i;
                     maxSet = true;
                 }
                 if (value <= min) {
@@ -776,10 +776,10 @@ public class FixesAndTails {
                 }
             }
         }
-        
+
         if (minIndex > -1) minDetailValueFix.put(competitor, minIndex);
         if (maxIndex > -1) maxDetailValueFix.put(competitor, maxIndex);
-        lastSearchedFix.put(competitor, end - 1);
+        lastSearchedFix.put(competitor, endIndex);
     }
 
     /**
@@ -823,21 +823,15 @@ public class FixesAndTails {
                 }
             }
         }
-        
+
         // If possible update detailValueBoundaries
         if (min != null && max != null) {
             detailValueBoundaries.setMinMax(min, max);
         }
     }
 
-    protected void resetColorMapper(ValueRangeFlexibleBoundaries boundaries, ColorMapperChangedListener colorMapperChangedListener) {
+    protected void setDetailValueBoundaries(ValueRangeFlexibleBoundaries boundaries) {
         detailValueBoundaries = boundaries;
-        colorMapper = new ColorMapper(detailValueBoundaries, false);
-        colorMapper.addListener(colorMapperChangedListener);
-    }
-
-    protected ColorMapper getColorMapper() {
-        return colorMapper;
     }
 
     protected Double getDetailValueAt(CompetitorDTO competitorDTO, int index) {

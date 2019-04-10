@@ -450,9 +450,20 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * Needed to get some metrics from {@link SailingServiceImpl.getCompetitorRaceDataEntry}.
      */
     private final String leaderboardName;
+    /**
+     * Needed to get some metrics from {@link SailingServiceImpl.getCompetitorRaceDataEntry}.
+     */
     private final String leaderboardGroupName;
-    
+
+    /**
+     * Contains all available {@link DetailType}s for this race. Gets filled by {@link #loadAvailableDetailTypes()} and
+     * is used in {@link #getInfoWindowContent(WindSource, WindTrackInfoDTO)} to build a dropdown selection.
+     * See {@link #selectedDetailType}.
+     */
     private List<DetailType> sortedAvailableDetailTypes;
+    /**
+     * The currently selected {@link DetailType}.
+     */
     private DetailType selectedDetailType;
     /**
      * Indicates if {@link #selectedDetailType} has changed. If that is the case {@link FixesAndTails} needs to
@@ -462,6 +473,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * to {@code false}.
      */
     private boolean selectedDetailTypeChanged;
+    /**
+     * Used to visualize the {@link #selectedDetailType} on the tails of {@link #fixesAndTails}.
+     */
+    private ColorMapper tailColorMapper;
 
     private final MultiHashSet<Date> remoteCallsInExecution = new MultiHashSet<>();
     private final MultiHashSet<Date> remoteCallsToSkipInExecution = new MultiHashSet<>();
@@ -742,8 +757,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 return 0;
                             }
                         });
+                        sortedAvailableDetailTypes.remove(DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES);
                     }
-        });
+                });
     }
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {
@@ -1640,15 +1656,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (timeForPositionTransitionMillis > 3 * timer.getRefreshInterval()) {
                 fixesAndTails.clearTails();
             }
-            if (selectedDetailType != null) {
-                fixesAndTails.updateDetailValueBoundaries(competitorSelection.getSelectedCompetitors());
-            }
             for (CompetitorDTO competitorDTO : competitorsToShow) {
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
                     if (!fixesAndTails.hasTail(competitorDTO)) {
                         fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
                     } else {
-                        fixesAndTails.updateTail(competitorDTO, tailsFromTime, tailsToTime, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
+                        fixesAndTails.updateTail(competitorDTO, tailsFromTime, tailsToTime,
+                                (int) (timeForPositionTransitionMillis == -1 ? -1
+                                        : timeForPositionTransitionMillis / 2));
                         if (!updateTailsOnly) {
                             competitorDTOsOfUnusedTails.remove(competitorDTO);
                         }
@@ -1659,6 +1674,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         competitorDTOsOfUnusedBoatCanvases.remove(competitorDTO);
                     }
                 }
+            }
+            if (selectedDetailType != null) {
+                fixesAndTails.updateDetailValueBoundaries(competitorSelection.getSelectedCompetitors());
             }
             if (!updateTailsOnly) {
                 for (CompetitorDTO unusedBoatCanvasCompetitorDTO : competitorDTOsOfUnusedBoatCanvases) {
@@ -2514,12 +2532,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 }
                 if (selectedDetailType != previous) {
                     selectedDetailTypeChanged = true; // Causes an overwrite of what are now wrong detailValues
-                    fixesAndTails.resetColorMapper(new ValueRangeFlexibleBoundaries(0, 1, 0.2, 0.5), RaceMap.this);
-                    redraw();
+                    setTailVisualizer();
+                    if (timer.getPlayState() == PlayStates.Paused) {
+                        redraw();
+                    }
                 }
             }
         });
-        
+
         vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), lb));
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
@@ -3050,7 +3070,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     @Override
     public void onColorMappingChanged() {
-        for (CompetitorDTO competitor : competitorSelection.getAllCompetitors()) {
+        for (CompetitorDTO competitor : competitorSelection.getSelectedCompetitors()) {
             MultiColorPolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
             fixesAndTails.getTail(competitor).setOptions(options);
         }
@@ -3063,20 +3083,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
 
-        switch(displayMode){
+        switch (displayMode) {
         case DEFAULT:
             options.setColorMode(MultiColorPolylineColorMode.MONOCHROMATIC);
             options.setColorProvider((i) -> competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
             options.setStrokeWeight(1);
             break;
         case SELECTED:
-            ColorMapper colorMapper = fixesAndTails.getColorMapper();
             options.setColorMode(MultiColorPolylineColorMode.POLYCHROMATIC);
             options.setColorProvider(i -> {
                 Double detailValue = fixesAndTails.getDetailValueAt(competitor, i);
                 if (detailValue != null) {
-                    String color = colorMapper.getColor(detailValue);
-                    return color;
+                    return tailColorMapper.getColor(detailValue);
                 }
                 return competitorSelection.getColor(competitor, raceIdentifier).getAsHtml();
             });
@@ -3126,6 +3144,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         });
         return result;
+    }
+    
+    protected void setTailVisualizer() {
+        ValueRangeFlexibleBoundaries boundaries = new ValueRangeFlexibleBoundaries(0, 10, 0.15, 1);
+        createTailColorMapper(boundaries);
+        fixesAndTails.setDetailValueBoundaries(boundaries);
+    }
+    
+    protected void createTailColorMapper(ValueRangeFlexibleBoundaries valueRange) {
+        tailColorMapper = new ColorMapper(valueRange, /*isGrey*/ false);
+        tailColorMapper.addListener(this);
     }
 
     @Override
