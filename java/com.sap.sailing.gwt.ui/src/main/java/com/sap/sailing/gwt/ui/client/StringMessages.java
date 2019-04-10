@@ -31,6 +31,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String map();
     String race();
     String races();
+    String racesAndTracking();
     String tracked();
     String time();
     String playSpeed();
@@ -150,6 +151,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showEstimatedWind();
     String timing();
     String raceDetailsToShow();
+    String tracking();
     String legDetailsToShow();
     String columnMoveUp();
     String columnMoveDown();
@@ -2111,8 +2113,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String resizeSuccessfull();
     String resizeUnsuccessfull();
     String automaticResizeNeedsStorageService();
-    String qrCodeTitle(String competitorName, String leaderName);
+    String qrCodeBoatInviteTitle(String boatDisplayName, String leaderboardName);
+    String qrCodeMarkInviteTitle(String markName, String leaderboardName);
+    String qrCodeCompetitorInviteTitle(String competitorName, String leaderboardName);
+    String qrCodeTitle(String leaderboardName);
     String qrCodeSubtitle(String eventName, String eventLocationAndVenue);
+    String qrCodeTitleOpenRegatta(String regattaName);
+    String qrCodeUnsecureServerRedirect(String hostName);
+    String qrCodeUnsecureServerRedirectTitle(String hostName);
     String qrCodeInfoMessage();
     String qrCodeErrorMessage();
     String qrCodeTitleBouy(String leaderboardName);

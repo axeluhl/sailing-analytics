@@ -653,8 +653,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     private static final int LEADERBOARD_DIFFERENCE_CACHE_SIZE = 50;
 
-    private static final String MAILTYPE_PROPERTY = "com.sap.sailing.domain.tracking.MailInvitationType";
-
     private ResourceBundleStringMessages serverStringMessages;
 
     private final LinkedHashMap<String, LeaderboardDTO> leaderboardByNameResultsCacheById;
@@ -6746,7 +6744,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             competitors.add(getCompetitor(c));
         }
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+                .valueOf(System.getProperty(MailInvitationType.SYSTEM_PROPERTY_NAME, MailInvitationType.LEGACY.name()));
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
                 competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
@@ -6759,7 +6757,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Event event = getService().getEvent(eventDto.id);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+                .valueOf(System.getProperty(MailInvitationType.SYSTEM_PROPERTY_NAME, MailInvitationType.LEGACY.name()));
         getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash, emails,
                 iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
     }
@@ -8187,7 +8185,40 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public MailInvitationType getMailType() {
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+                .valueOf(System.getProperty(MailInvitationType.SYSTEM_PROPERTY_NAME, MailInvitationType.LEGACY.name()));
         return type;
+    }
+
+    @Override
+    public BoatDTO getBoat(UUID boatId, String regattaName, String regattaRegistrationLinkSecret) {
+        BoatDTO result = null;
+        Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
+        if (leaderboard != null && leaderboard instanceof RegattaLeaderboard) {
+            for (Boat boat : leaderboard.getAllBoats()) {
+                // TODO add visibility check on permission-vertical here
+                if (Util.equalsWithNull(boatId, boat.getId())) {
+                    result = getBaseDomainFactory().convertToBoatDTO(boat);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public MarkDTO getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret) {
+        // TODO add visibility check on permission-vertical here
+        MarkDTO result = null;
+        Leaderboard leaderboard = getService().getLeaderboardByName(regattaName);
+        if (leaderboard != null && leaderboard instanceof RegattaLeaderboard) {
+            for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                for (final Mark availableMark : raceColumn.getAvailableMarks()) {
+                    if (Util.equalsWithNull(availableMark.getId(), markId)) {
+                        result = convertToMarkDTO((RegattaLeaderboard) leaderboard, availableMark);
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
     }
 }

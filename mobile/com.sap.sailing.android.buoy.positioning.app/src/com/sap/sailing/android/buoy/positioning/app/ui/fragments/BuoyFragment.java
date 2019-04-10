@@ -1,25 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningActivity;
-import com.sap.sailing.android.buoy.positioning.app.util.PingHelper;
-import com.sap.sailing.android.buoy.positioning.app.util.PingServerReplyCallback;
-import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
-import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
-import com.sap.sailing.android.shared.data.LeaderboardInfo;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
-import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
-import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
-import com.sap.sailing.android.shared.util.LocationHelper;
-import com.sap.sailing.android.shared.util.ViewHelper;
-
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -40,6 +21,30 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningActivity;
+import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
+import com.sap.sailing.android.buoy.positioning.app.util.PingHelper;
+import com.sap.sailing.android.buoy.positioning.app.util.PingServerReplyCallback;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
+import com.sap.sailing.android.shared.data.CheckinUrlInfo;
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
+import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
+import com.sap.sailing.android.shared.util.LocationHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+
+import static com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants.URL_SECRET;
 
 public class BuoyFragment extends BaseFragment implements android.location.LocationListener, OnMapReadyCallback {
 
@@ -309,9 +314,11 @@ public class BuoyFragment extends BaseFragment implements android.location.Locat
                 if (lastKnownLocation != null) {
                     MarkInfo mark = positioningActivity.getMarkInfo();
                     LeaderboardInfo leaderBoard = positioningActivity.getLeaderBoard();
+                    CheckinUrlInfo checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(requireContext(), leaderBoard.checkinDigest);
+                    String secret = Uri.parse(checkinUrl.urlString).getQueryParameter(URL_SECRET);
                     helper.storePingInDatabase(getActivity(), lastKnownLocation, mark);
                     helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark,
-                            PingServerReplyCallback.class);
+                            secret, PingServerReplyCallback.class);
                     ((PositioningActivity) getActivity()).updatePing();
                     savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                     pingListener.updatePing();

@@ -4,7 +4,7 @@ Bundle-Name: Common
 Bundle-SymbolicName: com.sap.sse.security.common
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sse.security.shared
 Require-Bundle: com.sap.sse.common
 Automatic-Module-Name: com.sap.sse.security.common

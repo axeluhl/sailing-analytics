@@ -872,7 +872,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             for (final Competitor c : trackedRace.getRace().getCompetitors()) {
                 final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(c);
                 if (track != null) {
-                    final Position position = track.getEstimatedPosition(timePointForCogAndSogRetrieval, extrapolate);
+                    final Position position = track.getEstimatedPosition(timePointForCogAndSogRetrieval, extrapolate); // TODO for short tracks and a reasonable start, why extrapolate?
                     final SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(timePointForCogAndSogRetrieval);
                     if (position != null && speedWithBearing != null) {
                         result.add(new Pair<>(position, speedWithBearing));

@@ -8,7 +8,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.8.0 ["Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr)), [http://www.eclipse.org](http://www.eclipse.org)
+1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.11.0 ["2019-03"]https://www.eclipse.org/downloads/packages/release/2019-03/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
 2. Install the eclipse plugins (see Automatic Eclipse plugin installation below)
 3. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
 4. MongoDB (e.g. Production Release 2.6.7), download: [https://www.mongodb.com/](https://www.mongodb.com/)
@@ -21,9 +21,9 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.8.0 "Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr) by using the script "configuration/installPluginsForEclipsePhoton.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.11.0 "2019-03"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr) by using the script "configuration/installPluginsForEclipse2019-03.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipsePhoton.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipse2019-03.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
@@ -90,7 +90,6 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Check that the both JDKs are available (Windows->Preferences->Java->Installed JREs)
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
-  * Go to Windows->Preferences->GWT->Errors/Warnings and set "Missing SDK" to "Ignore"
   * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard <del>"Git->Projects from Git"</del> "Import->General->Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)

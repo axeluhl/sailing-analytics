@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -32,7 +33,13 @@ public class ValueFilterJsonDeSerializerUtil {
         String filterName = filterNameValue.stringValue();
         String operator = filterOperatorValue.stringValue();
         String value = filterValueValue.stringValue();
-        FilterWithUI<CompetitorDTO> filter = CompetitorFilterWithUIFactory.createFilter(filterName);
+        FilterWithUI<CompetitorDTO> filter = null;
+        try {
+            filter = CompetitorFilterWithUIFactory.createFilter(filterName);
+        } catch (UnsupportedOperationException e) {
+            filter = null;
+            GWT.log("Couldn't restore competitor filter with name "+filterName);
+        }
         if (filter != null && operator != null && value != null) {
             if (filter instanceof NumberFilter<?,?>) {
                 @SuppressWarnings("unchecked")

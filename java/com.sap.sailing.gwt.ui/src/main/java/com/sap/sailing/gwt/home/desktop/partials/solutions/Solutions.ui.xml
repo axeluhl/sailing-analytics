@@ -71,12 +71,6 @@
 										<ui:text from='{i18n.contentSapInSailing7}' />
 									</li>
 									<li>
-										<ui:text from='{i18n.contentSapInSailing8}' />
-									</li>
-									<li>
-										<ui:text from='{i18n.contentSapInSailing9}' />
-									</li>
-									<li>
 										<ui:text from='{i18n.contentSapInSailing10}' />
 									</li>
 									<li>

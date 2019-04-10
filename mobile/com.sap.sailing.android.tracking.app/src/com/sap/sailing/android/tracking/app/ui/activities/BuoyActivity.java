@@ -3,6 +3,7 @@ package com.sap.sailing.android.tracking.app.ui.activities;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -25,6 +26,7 @@ import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.BoatInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 
 import org.json.JSONObject;
 
@@ -36,6 +38,7 @@ public class BuoyActivity extends AbstractBaseActivity {
     private MarkInfo mark;
     private BoatInfo boat;
     private LeaderboardInfo leaderboard;
+    private CheckinUrlInfo checkinUrl;
     private String checkinDigest;
 
     private AppPreferences prefs;
@@ -51,6 +54,7 @@ public class BuoyActivity extends AbstractBaseActivity {
         boat = DatabaseHelper.getInstance().getBoatInfo(this, checkinDigest);
         event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
         leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
+        checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
 
         setContentView(R.layout.fragment_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -147,9 +151,10 @@ public class BuoyActivity extends AbstractBaseActivity {
      */
     public void checkout() {
         CheckoutHelper checkoutHelper = new CheckoutHelper();
+        String secret = Uri.parse(checkinUrl.urlString).getQueryParameter(DeviceMappingConstants.URL_SECRET);
         String id = TextUtils.isEmpty(mark.markId) ? boat.boatId : mark.markId;
         int type = TextUtils.isEmpty(mark.markId) ? CheckinUrlInfo.TYPE_BOAT : CheckinUrlInfo.TYPE_MARK;
-        checkoutHelper.checkoutMark(this, leaderboard.name, event.server, id, type,
+        checkoutHelper.checkoutMark(this, secret, leaderboard.name, event.server, id, type,
                 new NetworkHelper.NetworkHelperSuccessListener() {
                     @Override
                     public void performAction(JSONObject response) {
