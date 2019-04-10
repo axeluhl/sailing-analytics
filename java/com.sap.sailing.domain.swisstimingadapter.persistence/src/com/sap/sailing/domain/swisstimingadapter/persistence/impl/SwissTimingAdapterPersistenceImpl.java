@@ -161,9 +161,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         MongoCollection<org.bson.Document> stArchiveConfigCollection = database
                 .getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
         Document result = storeSwissTimingConfiguration(config);
-        final Document updateQuery = new Document(FieldNames.ST_CONFIG_JSON_URL.name(), config.getJsonURL());
-        updateQuery.put(FieldNames.ST_CONFIG_CREATOR_NAME.name(), config.getCreatorName());
-        stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(updateQuery, result,
+        stArchiveConfigCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(result, result,
                 new UpdateOptions().upsert(true));
     }
 }

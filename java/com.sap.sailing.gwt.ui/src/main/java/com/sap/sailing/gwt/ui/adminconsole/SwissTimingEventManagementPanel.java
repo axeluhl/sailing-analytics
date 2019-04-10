@@ -34,6 +34,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.swisstiming.EditSwissTimingConnectionDialog;
+import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -44,11 +47,15 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 /**
  * Allows the user to start and stop tracking of races using the SwissTiming connector. In particular,
@@ -78,10 +85,11 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final String manage2sailAPIaccessToken = "?accesstoken=bDAv8CwsTM94ujZ";
     private final String manage2sailUrlAppendix = "&mediaType=json&includeRaces=true";
     private final String eventIdPattern = "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}";
+    private final SwissTimingConnectionTableWrapper connectionsTable;
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, UserService userService,
             ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, StringMessages stringConstants) {
+            RegattaRefresher regattaRefresher, StringMessages stringConstants, final CellTableWithCheckboxResources tableResources) {
         super(sailingService, userService, regattaRefresher, errorReporter, true, stringConstants);
         this.errorReporter = errorReporter;
         VerticalPanel mainPanel = new VerticalPanel();
@@ -94,6 +102,74 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         captionPanelConnections.setStyleName("bold");
         Grid connectionsGrid = new Grid(9, 2);
         verticalPanel.add(connectionsGrid);
+
+        connectionsTable = new SwissTimingConnectionTableWrapper(userService, sailingService, stringConstants,
+                errorReporter, true, tableResources, () -> {
+                });
+        verticalPanel.add(connectionsTable);
+        connectionsTable.refreshSwissTimingConnectionList();
+        // Add TracTrac Connection
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
+                SecuredDomainType.TRACKED_RACE);
+        verticalPanel.add(buttonPanel);
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(),
+                () -> connectionsTable.refreshSwissTimingConnectionList());
+        buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
+                () -> new EditSwissTimingConnectionDialog(new SwissTimingConfigurationWithSecurityDTO(),
+                        new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
+                            @Override
+                            public void ok(SwissTimingConfigurationWithSecurityDTO editedConnection) {
+                                sailingService.createSwissTimingConfiguration(editedConnection.getName(),
+                                        editedConnection.getJsonURL(), editedConnection.getHostname(),
+                                        editedConnection.getPort(), editedConnection.getUpdateURL(),
+                                        editedConnection.getUpdateUsername(), editedConnection.getUpdatePassword(),
+                                        new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                errorReporter
+                                                        .reportError("Exception trying to create configuration in DB: "
+                                                                + caught.getMessage());
+                                            }
+
+                                            @Override
+                                            public void onSuccess(Void voidResult) {
+                                                connectionsTable.refreshSwissTimingConnectionList();
+                                            }
+                                        }));
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                        }, userService, errorReporter).show());
+        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+            sailingService.deleteSwissTimingConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(
+                                    "Exception trying to delete configuration in DB: " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            connectionsTable.refreshSwissTimingConnectionList();
+                        }
+                    });
+        });
+
+        final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
+            fillRaces(sailingService);
+        });
+        listRacesButton.setEnabled(false);
+        removeButton.setEnabled(false);
+
+        connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
+            final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedObject() != null;
+            listRacesButton.setEnabled(objectSelected);
+            removeButton.setEnabled(objectSelected);
+        });
+        
         previousConfigurations = new HashMap<String, SwissTimingConfigurationWithSecurityDTO>();
         previousConfigurationsComboBox = new ListBox();
         connectionsGrid.setWidget(0, 1, previousConfigurationsComboBox);

@@ -312,7 +312,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         regattasDisplayers.add(swissTimingReplayConnectorPanel);
 
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(
-                getSailingService(), getUserService(), this, this, getStringMessages());
+                getSailingService(), getUserService(), this, this, getStringMessages(), tableResources);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingEventManagementPanel>(swisstimingEventManagementPanel),
                 getStringMessages().swissTimingEvents(),
                 SecuredDomainType.SWISS_TIMING_ACCOUNT.getPermission(DefaultActions.values()));
