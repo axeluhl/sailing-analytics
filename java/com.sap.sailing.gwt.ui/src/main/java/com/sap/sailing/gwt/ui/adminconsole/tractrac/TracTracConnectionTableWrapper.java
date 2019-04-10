@@ -33,9 +33,11 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
- * A wrapper for a CellTable displaying an overview over the existing UserGroups. It shows the User-Group name, the
- * group and user each user group is owned by and options to delete the group, change the ownership or edit the
- * associated ACL.
+ * A wrapper for a CellTable displaying an overview over the existing TracTracConnections. It shows the name, the Live
+ * URI, the Stored Uri, the JSON URL, the TracTrac Server Update URI, the TracTrac user name, the TracTrac password, the
+ * name of the creator, the group and user each user group is owned by. There are options edit or to delete the
+ * connection, change the ownership or edit the associated ACL. Editing the connection will open a new instance of
+ * {@link EditTracTracConnectionDialog}.
  */
 public class TracTracConnectionTableWrapper extends
         TableWrapper<TracTracConfigurationWithSecurityDTO, RefreshableSingleSelectionModel<TracTracConfigurationWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
