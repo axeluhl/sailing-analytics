@@ -51,16 +51,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String courseDesignUpdateUri = courseDesignUpdateUriObject == null ? "" : (String) courseDesignUpdateUriObject;
         String tracTracUsername = tracTracUsernameObject == null ? "" : (String) tracTracUsernameObject;
         String tracTracPassword = tracTracPasswordObject == null ? "" : (String) tracTracPasswordObject;
+        String creatorName = (String) object.get(FieldNames.TT_CONFIG_CREATOR_NAME.name());
+        String jsonURL = (String) object.get(FieldNames.TT_CONFIG_JSON_URL.name());
         
-        return tracTracDomainFactory.createTracTracConfiguration(
-                (String) object.get(FieldNames.TT_CONFIG_CREATOR_NAME.name()),
+        final boolean needsUpdate = (creatorName == null);
+        if (needsUpdate) {
+            // No creator is set yet -> existing configurations are assumed to belong to the admin
+            creatorName = "admin";
+        }
+        
+        final TracTracConfiguration loadedTracTracConfiguration = tracTracDomainFactory.createTracTracConfiguration(
+                creatorName,
                 (String) object.get(FieldNames.TT_CONFIG_NAME.name()),
-                (String) object.get(FieldNames.TT_CONFIG_JSON_URL.name()),
+                jsonURL,
                 (String) object.get(FieldNames.TT_CONFIG_LIVE_DATA_URI.name()),
                 (String) object.get(FieldNames.TT_CONFIG_STORED_DATA_URI.name()),
                 courseDesignUpdateUri,
                 tracTracUsername,
                 tracTracPassword);
+        
+        if (needsUpdate) {
+            // recreating the config on the DB because the composite key changed
+            new MongoObjectFactoryImpl(database).deleteTracTracConfiguration(null, jsonURL);
+            new MongoObjectFactoryImpl(database).createTracTracConfiguration(loadedTracTracConfiguration);
+        }
+        return loadedTracTracConfiguration;
     }
 
 }
