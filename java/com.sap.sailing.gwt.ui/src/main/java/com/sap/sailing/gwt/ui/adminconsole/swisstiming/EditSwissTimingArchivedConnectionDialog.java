@@ -33,8 +33,7 @@ public class EditSwissTimingArchivedConnectionDialog
             final DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO> callback,
             final UserService userService,
             final ErrorReporter errorReporter) {
-        // TODO: i18n
-        super("Edit swiss timing archived connection", null, stringMessages.ok(), stringMessages.cancel(),
+        super(stringMessages.editSwissTimingAchivedConnection(), null, stringMessages.ok(), stringMessages.cancel(),
                 /* validator */ null, /* animationEnabled */true, callback);
         this.dtoToEdit = dtoToEdit;
         this.ensureDebugId("EditSwissTimingArchivedConnectionDialog");

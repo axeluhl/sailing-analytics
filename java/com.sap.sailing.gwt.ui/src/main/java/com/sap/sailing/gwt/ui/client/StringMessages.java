@@ -2247,4 +2247,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editTracTracConnection();
     String filterTracTracConnections();
     String creatorName();
+    String editSwissTimingAchivedConnection();
+    String addSwissTimingAchivedConnection();
+    String filterSwissTimingAchivedConnections();
 }

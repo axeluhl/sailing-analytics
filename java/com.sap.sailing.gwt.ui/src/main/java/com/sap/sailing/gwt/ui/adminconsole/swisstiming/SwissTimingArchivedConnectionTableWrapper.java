@@ -126,8 +126,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
                 u -> configACL.openDialog(u));
 
         filterField = new LabeledAbstractFilterablePanel<SwissTimingArchiveConfigurationWithSecurityDTO>(
-                // TODO: i18n
-                new Label("Filter Swiss Timing Connections"),
+                new Label(stringMessages.filterSwissTimingAchivedConnections()),
                 new ArrayList<SwissTimingArchiveConfigurationWithSecurityDTO>(), dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingArchiveConfigurationWithSecurityDTO t) {

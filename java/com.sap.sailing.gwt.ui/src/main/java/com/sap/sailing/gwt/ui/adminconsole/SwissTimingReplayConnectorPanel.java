@@ -255,7 +255,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshConnectionList());
 
         // Create action
-        buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
+        buttonPanel.addCreateAction(stringMessages.addSwissTimingAchivedConnection(),
                 () -> new EditSwissTimingArchivedConnectionDialog(new SwissTimingArchiveConfigurationWithSecurityDTO(),
                         new DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO>() {
                             @Override
