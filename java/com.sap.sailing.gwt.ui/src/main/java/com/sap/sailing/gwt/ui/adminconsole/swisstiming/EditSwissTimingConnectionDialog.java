@@ -18,6 +18,11 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTimingConfigurationWithSecurityDTO> {
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
+    private final String eventIdPattern = "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}";
+    private final String manage2sailBaseAPIUrl = "http://manage2sail.com/api/public/links/event/";
+    private final String manage2sailAPIaccessToken = "?accesstoken=bDAv8CwsTM94ujZ";
+    private final String manage2sailUrlAppendix = "&mediaType=json&includeRaces=true";
+
     private Grid grid;
 
     private TextBox manage2SailEventIdTextBox;
@@ -48,8 +53,6 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
     }
 
     private void setData(final SwissTimingConfigurationWithSecurityDTO dtoToEdit) {
-        // TODO
-        manage2SailEventIdTextBox.setText("?");
         manage2SailEventUrlJsonTextBox.setText(dtoToEdit.getJsonURL());
         hostnameTextBox.setText(dtoToEdit.getHostname());
         portTextBox.setText(dtoToEdit.getPort() == null ? "" : ("" + dtoToEdit.getPort()));
@@ -57,6 +60,8 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
         updateUsernameTextBox.setText(dtoToEdit.getUpdateUsername());
         updatePasswordTextBox.setText(dtoToEdit.getUpdatePassword());
         super.getOkButton().setEnabled(!manage2SailEventUrlJsonTextBox.getText().isEmpty());
+
+        updateEventIdFromUrl(dtoToEdit.getJsonURL());
     }
 
     private void createUi() {
@@ -73,6 +78,9 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
         manage2SailEventIdTextBox.setVisibleLength(40);
         manage2SailEventIdTextBox.setTitle(stringMessages.manage2SailEventIdBox());
 
+        // update url with changed event id
+        manage2SailEventIdTextBox.addKeyUpHandler(e -> updateUrlFromEventId(manage2SailEventIdTextBox.getText()));
+
         grid.setWidget(1, 0, manage2SailEventIdLabel);
         grid.setWidget(1, 1, manage2SailEventIdTextBox);
 
@@ -88,10 +96,12 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
         grid.setWidget(2, 0, manage2SailEventUrlJsonLabel);
         grid.setWidget(2, 1, manage2SailEventUrlJsonTextBox);
 
-        // validation: User should not create empty connections
+        // validation: User should not create empty connections + update event id from changed url
         manage2SailEventUrlJsonTextBox.addKeyUpHandler(
-                e -> super.getOkButton().setEnabled(!manage2SailEventUrlJsonTextBox.getText().isEmpty()));
-
+                e -> {
+                    super.getOkButton().setEnabled(!manage2SailEventUrlJsonTextBox.getText().isEmpty());
+                    updateEventIdFromUrl(manage2SailEventUrlJsonTextBox.getText());
+                });
         // Hostname
         final Label hostnameLabel = new Label(stringMessages.hostname() + ":");
         manage2SailEventUrlJsonLabel.setTitle(stringMessages.leaveEmptyForDefault());
@@ -151,6 +161,32 @@ public class EditSwissTimingConnectionDialog extends DataEntryDialog<SwissTiming
 
         grid.setWidget(7, 0, updatePasswordLabel);
         grid.setWidget(7, 1, updatePasswordTextBox);
+    }
+
+    /**
+     * Similar to {@link #updateUrlFromEventId} this function tries to extract a M2S event Id by looking at the given
+     * url in the Json Url Textbox. The value of {@link eventIdBox} is then set to the event ID inferred from the Json
+     * Url.
+     */
+    private void updateEventIdFromUrl(String eventUrl) {
+        if (eventUrl.matches("http://manage2sail.com/.*" + eventIdPattern + ".*")) {
+            final String inferredEventId = eventUrl.replaceFirst(".*(" + eventIdPattern + ").*", "$1");
+            manage2SailEventIdTextBox.setValue(inferredEventId);
+        }
+    }
+
+    /**
+     * This function tries to infer a valid JsonUrl for any input given that matches the pattern of an event Id from
+     * M2S. If there is an event id detected the Json Url gets updated and the event Id textbox is filled with the
+     * detected event Id. The ID pattern is defined in {@link eventIdPattern}.
+     */
+    private void updateUrlFromEventId(String eventIdText) {
+        if (eventIdText.matches(".*" + eventIdPattern + ".*")) {
+            final String inferredEventId = eventIdText.replaceFirst(".*(" + eventIdPattern + ").*", "$1");
+            manage2SailEventUrlJsonTextBox.setValue(
+                    manage2sailBaseAPIUrl + inferredEventId + manage2sailAPIaccessToken + manage2sailUrlAppendix);
+            manage2SailEventIdTextBox.setValue(inferredEventId);
+        }
     }
 
     @Override
