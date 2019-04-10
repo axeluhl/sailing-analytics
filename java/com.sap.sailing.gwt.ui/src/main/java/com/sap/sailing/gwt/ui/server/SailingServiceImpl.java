@@ -455,7 +455,7 @@ import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
@@ -3174,12 +3174,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations() {
+    public List<SwissTimingConfigurationWithSecurityDTO> getPreviousSwissTimingConfigurations() {
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, configs,
-                stConfig -> new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(),
+                stConfig -> new SwissTimingConfigurationWithSecurityDTO(stConfig.getName(), stConfig.getJsonURL(),
                         stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(),
-                        stConfig.getUpdateUsername(), stConfig.getUpdatePassword()));
+                        stConfig.getUpdateUsername(), stConfig.getUpdatePassword(), null));
     }
 
     @Override

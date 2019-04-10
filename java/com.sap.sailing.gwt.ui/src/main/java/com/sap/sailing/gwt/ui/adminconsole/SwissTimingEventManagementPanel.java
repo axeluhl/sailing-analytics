@@ -38,7 +38,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sse.common.util.NaturalComparator;
@@ -64,7 +64,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO> filterablePanelEvents;
     private final ListDataProvider<SwissTimingRaceRecordDTO> raceList;
     private final FlushableCellTable<SwissTimingRaceRecordDTO> raceTable;
-    private final Map<String, SwissTimingConfigurationDTO> previousConfigurations;
+    private final Map<String, SwissTimingConfigurationWithSecurityDTO> previousConfigurations;
     private final ListBox previousConfigurationsComboBox;
     private final TextBox eventIdBox;
     private final TextBox jsonUrlBox;
@@ -94,7 +94,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         captionPanelConnections.setStyleName("bold");
         Grid connectionsGrid = new Grid(9, 2);
         verticalPanel.add(connectionsGrid);
-        previousConfigurations = new HashMap<String, SwissTimingConfigurationDTO>();
+        previousConfigurations = new HashMap<String, SwissTimingConfigurationWithSecurityDTO>();
         previousConfigurationsComboBox = new ListBox();
         connectionsGrid.setWidget(0, 1, previousConfigurationsComboBox);
         previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
@@ -457,7 +457,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     private void fillConfigurations() {
-        sailingService.getPreviousSwissTimingConfigurations(new AsyncCallback<List<SwissTimingConfigurationDTO>>() {
+        sailingService.getPreviousSwissTimingConfigurations(new AsyncCallback<List<SwissTimingConfigurationWithSecurityDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "
@@ -465,12 +465,12 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
             }
 
             @Override
-            public void onSuccess(List<SwissTimingConfigurationDTO> result) {
+            public void onSuccess(List<SwissTimingConfigurationWithSecurityDTO> result) {
                 while (previousConfigurationsComboBox.getItemCount() > 0) {
                     previousConfigurationsComboBox.removeItem(0);
                 }
                 Collections.sort(result, (c1, c2) -> c1.getName().compareTo(c2.getName()));
-                for (SwissTimingConfigurationDTO stConfig : result) {
+                for (SwissTimingConfigurationWithSecurityDTO stConfig : result) {
                     previousConfigurations.put(stConfig.getName(), stConfig);
                     previousConfigurationsComboBox.addItem(stConfig.getName());
                 }
@@ -518,8 +518,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                             @Override
                             public void onSuccess(Void voidResult) {
                                 // refresh list of previous configurations
-                                SwissTimingConfigurationDTO stConfig = new SwissTimingConfigurationDTO(configName, jsonUrl,
-                                        hostname, port, updateURL, updateUsername, updatePassword);
+                                SwissTimingConfigurationWithSecurityDTO stConfig = new SwissTimingConfigurationWithSecurityDTO(configName, jsonUrl,
+                                        hostname, port, updateURL, updateUsername, updatePassword, null);
                                 if (previousConfigurations.put(stConfig.getName(), stConfig) == null) {
                                     previousConfigurationsComboBox.addItem(stConfig.getName());
                                 }
@@ -576,7 +576,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     private void updatePanelFromSelectedStoredConfiguration() {
         if (previousConfigurationsComboBox.getSelectedIndex() >= 0) {
-            SwissTimingConfigurationDTO stConfig = previousConfigurations.get(previousConfigurationsComboBox
+            SwissTimingConfigurationWithSecurityDTO stConfig = previousConfigurations.get(previousConfigurationsComboBox
                     .getItemText(previousConfigurationsComboBox.getSelectedIndex()));
             if (stConfig != null) {
                 hostnameTextbox.setValue(stConfig.getHostname());

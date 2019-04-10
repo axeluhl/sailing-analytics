@@ -111,7 +111,7 @@ import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
@@ -371,7 +371,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace) throws UnauthorizedException;
 
-    List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations() throws UnauthorizedException;
+    List<SwissTimingConfigurationWithSecurityDTO> getPreviousSwissTimingConfigurations() throws UnauthorizedException;
 
     SwissTimingEventRecordDTO getRacesOfSwissTimingEvent(String eventJsonURL) throws UnauthorizedException, Exception;
 
