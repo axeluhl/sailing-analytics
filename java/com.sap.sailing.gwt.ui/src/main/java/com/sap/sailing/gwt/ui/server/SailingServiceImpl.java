@@ -3181,7 +3181,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     final SwissTimingConfigurationWithSecurityDTO config = new SwissTimingConfigurationWithSecurityDTO(
                             stConfig.getName(), stConfig.getJsonURL(),
                         stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(),
-                            stConfig.getUpdateUsername(), stConfig.getUpdatePassword(), null);
+                            stConfig.getUpdateUsername(), stConfig.getUpdatePassword(), stConfig.getCreatorName());
                     SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
                     return config;
                 });
@@ -3192,9 +3192,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             String updateURL, String updateUsername, String updatePassword) throws Exception {
         if (!jsonURL.equalsIgnoreCase("test")) {
             final String currentUserName = getSecurityService().getCurrentUser().getName();
+            final TypeRelativeObjectIdentifier identifier = SwissTimingConfiguration.getTypeRelativeObjectIdentifier(jsonURL, currentUserName);
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.SWISS_TIMING_ACCOUNT,
-                    SwissTimingConfiguration.getTypeRelativeObjectIdentifier(jsonURL, currentUserName), configName,
+                    identifier, configName,
                     () -> swissTimingAdapterPersistence
                             .createSwissTimingConfiguration(
                                     swissTimingFactory.createSwissTimingConfiguration(configName,
@@ -5260,7 +5261,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 .getTypeRelativeObjectIdentifier(jsonURL, currentUserName);
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT,
-                identifier, currentUserName,
+                identifier, identifier.toString(),
                 () -> swissTimingAdapterPersistence.createSwissTimingArchiveConfiguration(
                         swissTimingFactory.createSwissTimingArchiveConfiguration(jsonURL,
                                 currentUserName)));
