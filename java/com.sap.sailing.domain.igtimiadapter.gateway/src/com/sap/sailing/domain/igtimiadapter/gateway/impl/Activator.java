@@ -3,8 +3,6 @@ package com.sap.sailing.domain.igtimiadapter.gateway.impl;
 import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -12,6 +10,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
@@ -27,6 +26,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
 public class Activator implements BundleActivator {
     private static Activator INSTANCE;
     private ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiConnectionFactoryTracker;
+    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
     }
@@ -37,6 +37,8 @@ public class Activator implements BundleActivator {
         
         igtimiConnectionFactoryTracker = ServiceTrackerFactory
                 .createAndOpen(context, IgtimiConnectionFactory.class);
+
+        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
     }
     
     public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
@@ -50,30 +52,15 @@ public class Activator implements BundleActivator {
         return igtimiConnectionFactoryTracker.getService();
     }
 
+    public SecurityService getSecurityService() {
+        return securityServiceTracker.getService();
+    }
+
     @Override
     public void stop(BundleContext context) throws Exception {
         igtimiConnectionFactoryTracker.close();
         igtimiConnectionFactoryTracker = null;
-    }
-
-    public static String getCurrentUsername() {
-        final String result;
-        final Subject subject = SecurityUtils.getSubject();
-        if (subject == null || !subject.isAuthenticated()) {
-            result = null;
-        } else {
-            final Object principal = subject.getPrincipal();
-            if (principal == null) {
-                result = null;
-            } else {
-                final String username = principal.toString();
-                if (username == null || username.length() <= 0) {
-                    result = null;
-                } else {
-                    result = username;
-                }
-            }
-        }
-        return result;
+        securityServiceTracker.close();
+        securityServiceTracker = null;
     }
 }

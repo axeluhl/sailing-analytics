@@ -43,6 +43,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -53,6 +54,7 @@ import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.TokenAndCreator;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
@@ -81,12 +83,21 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     @Override
-    public Account registerAccountForWhichClientIsAuthorized(String creatorName, String accessToken) throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+    public Account registerAccountForWhichClientIsAuthorized(String creatorName, String accessToken)
+            throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         Account account = getAccount(creatorName, accessToken);
-        accountsByEmail.put(account.getUser().getEmail(), account);
-        accessTokensByAccount.put(account, accessToken);
-        mongoObjectFactory.storeAccessToken(creatorName, accessToken);
-        return account;
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.IGTIMI_ACCOUNT, account.getIdentifier().getTypeRelativeObjectIdentifier(),
+                account.getUser().getEmail(), () -> {
+                    accountsByEmail.put(account.getUser().getEmail(), account);
+                    accessTokensByAccount.put(account, accessToken);
+                    mongoObjectFactory.storeAccessToken(creatorName, accessToken);
+                    return account;
+                });
+    }
+
+    protected SecurityService getSecurityService() throws ClientProtocolException, IOException, ParseException {
+        return Activator.getInstance().getSecurityService();
     }
 
     private Account getAccount(String creatorName, String accessToken) throws ClientProtocolException, IOException, IllegalStateException, ParseException {

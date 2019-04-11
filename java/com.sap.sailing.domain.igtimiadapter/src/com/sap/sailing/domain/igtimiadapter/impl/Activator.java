@@ -54,6 +54,7 @@ public class Activator implements BundleActivator {
     private static final String CLIENT_REDIRECT_PORT_PROPERTY_NAME = "igtimi.client.redirect.port";
     private final Future<IgtimiConnectionFactoryImpl> connectionFactory;
     private final Future<IgtimiWindTrackerFactory> windTrackerFactory;
+    private ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
@@ -99,9 +100,8 @@ public class Activator implements BundleActivator {
             }
         });
         
+        securityServiceServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
         new Thread(() -> {
-            final ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker = ServiceTrackerFactory
-                    .createAndOpen(context, SecurityService.class);
             try {
                 final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
                 IgtimiConnectionFactoryImpl igtimiConnectionFactory = connectionFactory.get();
@@ -132,6 +132,10 @@ public class Activator implements BundleActivator {
         }
     }
     
+    public SecurityService getSecurityService() {
+        return securityServiceServiceTracker.getService();
+    }
+
     public IgtimiWindTrackerFactory getWindTrackerFactory() {
         try {
             return windTrackerFactory.get();
@@ -143,5 +147,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        securityServiceServiceTracker.close();
+        securityServiceServiceTracker = null;
     }
 }

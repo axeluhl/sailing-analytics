@@ -21,6 +21,8 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.igtimiadapter.gateway.impl.Activator;
 import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.User;
 
 @Path(AuthorizationCallback.V1)
 public class AuthorizationCallback {
@@ -57,8 +59,18 @@ public class AuthorizationCallback {
         } else {
             if (code != null) {
                 try {
-                    connectionFactory.obtainAccessTokenFromAuthorizationCode(Activator.getCurrentUsername(), code);
-                    result = Response.ok().entity("SAP Sailing Analytics authorized successfully to access user's tracks").build();
+                    final SecurityService securityService = Activator.getInstance().getSecurityService();
+                    final User currentUser = securityService.getCurrentUser();
+                    if (currentUser != null) {
+                        connectionFactory.obtainAccessTokenFromAuthorizationCode(currentUser.getName(), code);
+                        result = Response.ok()
+                                .entity("SAP Sailing Analytics authorized successfully to access user's tracks")
+                                .build();
+                    } else {
+                        result = Response.status(Status.UNAUTHORIZED).entity(
+                                "SAP Sailing Analytics could not authorize access user's tracks: Current user not found.")
+                                .build();
+                    }
                 } catch (Exception e) {
                     result = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();
                     logger.log(Level.SEVERE, "Error trying to obtain access token from authentication code " + code, e);
