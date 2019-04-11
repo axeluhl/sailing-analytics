@@ -19,7 +19,7 @@ public abstract class BaseFileStorageServiceImpl implements FileStorageService {
     private final String name;
     private final String descriptionKey;
     protected final Map<String, FileStorageServicePropertyImpl> propertiesByNameInInsertionOrder = new LinkedHashMap<>();
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private transient ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     
     protected BaseFileStorageServiceImpl(String name, String descriptionKey, BundleContext bundleContext) {
         this.name = name;

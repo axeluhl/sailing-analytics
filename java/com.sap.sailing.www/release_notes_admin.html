@@ -42,11 +42,17 @@
                 This ensures, that all server admins will consistently use this account while tracking races.
 			</li>
 			<li>Replication is now also secured by several actions of the SERVER security type.
-                Due to permission checks on the master side, it is now necessary to provide credentials of a user on the master server that is used when a replica contacts the master.
+                Due to permission checks on the master side, it is now necessary to provide credentials of a user that exists
+                on the master server that is used when a replica contacts the master.
                 This user at least needs to have the permission <tt>SERVER:REPLICATE:&amp;server-name&amp;</tt> granted on the master.<br>
                 Server start scripts as well as the replication documentation have been updated to include details about configuring credentials for auto replication.
                 Newly created servers should automatically contain adjusted versions of the relevant scripts.
-                The configuration of existing servers needs to get updated accordingly.
+                The configuration of existing servers needs to get updated accordingly. The environment variables considered by the
+                start script are: <tt>REPLICATE_MASTER_USERNAME</tt> and <tt>REPLICATE_MASTER_PASSWORD</tt>, or alternatively,
+                <tt>REPLICATE_MASTER_BEARER_TOKEN</tt> which can be obtained from the master server, e.g., by
+                <tt>curl -d "username=myuser&amp;password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token</tt>.
+                These map to the system properties <tt>replicate.master.username</tt>, <tt>replicate.master.password</tt>, and
+                <tt>replicate.master.bearer_token</tt>, respectively.
 			</li>
                     </ul>
                     

@@ -87,6 +87,7 @@ public class Activator implements BundleActivator {
     public static final String PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME = "replicate.master.exchange.name";
     public static final String PROPERTY_NAME_REPLICATE_MASTER_USERNAME = "replicate.master.username";
     public static final String PROPERTY_NAME_REPLICATE_MASTER_PASSWORD = "replicate.master.password";
+    public static final String PROPERTY_NAME_REPLICATE_MASTER_BEARER_TOKEN = "replicate.master.bearer_token";
 
     private ReplicationInstancesManager replicationInstancesManager;
 
@@ -174,9 +175,14 @@ public class Activator implements BundleActivator {
                 }
                 final String servletHost = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST);
                 final int servletPort = Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim());
-                final String bearerToken = RemoteServerUtil.resolveBearerTokenForRemoteServer(servletHost, servletPort,
-                        System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_USERNAME),
-                        System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_PASSWORD));
+                final String bearerToken;
+                if (System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_BEARER_TOKEN) != null) {
+                    bearerToken = System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_BEARER_TOKEN).trim();
+                } else {
+                    bearerToken = RemoteServerUtil.resolveBearerTokenForRemoteServer(servletHost, servletPort,
+                            System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_USERNAME),
+                            System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_PASSWORD));
+                }
                 ReplicationMasterDescriptorImpl master = new ReplicationMasterDescriptorImpl(
                         System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_HOST),
                         replicateFromExchangeName,
