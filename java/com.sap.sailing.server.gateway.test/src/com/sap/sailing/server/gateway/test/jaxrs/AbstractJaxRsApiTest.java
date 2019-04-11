@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 
 import javax.ws.rs.core.Response;
 
@@ -21,8 +19,6 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.SubjectThreadState;
 import org.apache.shiro.util.ThreadState;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -39,13 +35,11 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.OwnershipAnnotation;
-import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.security.shared.impl.UserGroupImpl;
+import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
 public abstract class AbstractJaxRsApiTest {
     protected RacingEventService racingEventService;
@@ -60,52 +54,17 @@ public abstract class AbstractJaxRsApiTest {
 
     protected static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
-    @SuppressWarnings("unchecked")
     public void setUp() throws Exception {
         service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().drop();
         racingEventService = Mockito.spy(new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
                 new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false));
-
-        UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
-
-        securityService = Mockito.mock(SecurityService.class);
         SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
         Subject fakeSubject = Mockito.mock(Subject.class);
-
+        Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
         SecurityUtils.setSecurityManager(securityManager);
         Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
-
-        Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();
-
-        Mockito.doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArgumentAt(4, Callable.class).call();
-            }
-        }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(Action.class));
-        Mockito.doAnswer(new Answer<Object>() {
-            @SuppressWarnings("rawtypes")
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                for (Object arg : invocation.getArguments()) {
-                    if (arg instanceof Callable) {
-                        return ((Callable) arg).call();
-                    }
-                }
-                return null;
-            }
-        }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.any(),
-                Mockito.any(), Mockito.any(), Mockito.any(Callable.class));
-
-        Mockito.doReturn(true).when(securityService)
-                .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
-
-        Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());
-
-        Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
-
+        securityService = SecurityServiceMockFactory.mockSecurityService();
         OwnershipAnnotation mockedOwnership = Mockito.mock(OwnershipAnnotation.class);
         Ownership ownership = Mockito.mock(Ownership.class);
         Mockito.doReturn(mockedOwnership).when(securityService).getOwnership(Mockito.any());

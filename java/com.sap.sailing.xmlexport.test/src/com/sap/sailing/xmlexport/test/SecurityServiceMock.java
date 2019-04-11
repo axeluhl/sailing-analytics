@@ -788,7 +788,11 @@ public class SecurityServiceMock implements SecurityService {
 
     @Override
     public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
-
+        return false;
+    }
+    
+    @Override
+    public boolean hasCurrentUserMetaPermissionWithOwnershipLookup(WildcardPermission permissionToCheck) {
         return false;
     }
 

@@ -209,7 +209,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimeInterval) {
+    public boolean recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimeInterval) {
+        return false;
     }
 
     @Override

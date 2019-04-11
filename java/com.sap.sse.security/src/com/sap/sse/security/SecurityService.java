@@ -498,6 +498,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             RoleDefinition roleToCheck);
 
     boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);
+    
+    boolean hasCurrentUserMetaPermissionWithOwnershipLookup(WildcardPermission permissionToCheck);
 
     void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User userOwner, UserGroup defaultTenant);
 

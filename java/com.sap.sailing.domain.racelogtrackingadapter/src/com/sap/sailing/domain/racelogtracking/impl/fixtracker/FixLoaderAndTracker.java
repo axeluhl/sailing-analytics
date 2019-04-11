@@ -191,7 +191,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         public Iterable<RegattaAndRaceIdentifier> fixReceived(DeviceIdentifier device, Timed fix) {
             Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
-
             if (!preemptiveStopRequested.get() && trackedRace.getStartOfTracking() != null) {
                 final TimePoint timePoint = fix.getTimePoint();
                 deviceMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(),
@@ -250,10 +249,15 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                             private void recordForCompetitor(Competitor comp) {
                                 if (!preemptiveStopRequested.get()) {
                                     if (fix instanceof GPSFixMoving) {
-                                        trackedRace.recordFix(comp, (GPSFixMoving) fix);
-                                        RegattaAndRaceIdentifier maneuverChangedAnswer = detectIfManeuverChanged(comp);
-                                        if (maneuverChangedAnswer != null) {
-                                            maneuverChanged.add(maneuverChangedAnswer);
+                                        // try to record the fix, and only if it was really to the track,
+                                        // check for maneuvers; otherwise, the fix may not have been accepted
+                                        // by the race or the track, e.g., because the race's end-of-tracking
+                                        // comes before the fix's time point
+                                        if (trackedRace.recordFix(comp, (GPSFixMoving) fix)) {
+                                            RegattaAndRaceIdentifier maneuverChangedAnswer = detectIfManeuverChanged(comp);
+                                            if (maneuverChangedAnswer != null) {
+                                                maneuverChanged.add(maneuverChangedAnswer);
+                                            }
                                         }
                                     } else {
                                         logger.log(Level.WARNING,

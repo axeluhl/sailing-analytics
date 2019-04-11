@@ -25,5 +25,6 @@ Require-Bundle: org.apache.servicemix.bundles.aws-java-sdk;bundle-version="1.9.8
  org.apache.commons.io,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  org.apache.shiro.core,
- com.sap.sailing.domain.common
+ com.sap.sailing.domain.common,
+ com.sap.sse.security
 Automatic-Module-Name: com.sap.sse.filestorage
