@@ -1,7 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.util.List;
-import java.util.Map;
+import android.content.Context;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -9,12 +13,8 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.racecommittee.app.R;
 
-import android.content.Context;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import java.util.List;
+import java.util.Map;
 
 public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAndBoatAdapter.ViewHolder> {
 
@@ -26,7 +26,7 @@ public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAnd
     private CompetitorClick mListener;
 
     public CompetitorAndBoatAdapter(Context context, List<Map.Entry<Competitor, Boat>> data,
-            boolean canBoatsOfCompetitorsChangePerRace) {
+                                    boolean canBoatsOfCompetitorsChangePerRace) {
         mContext = context;
         mData = data;
         mCanBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
@@ -49,11 +49,7 @@ public class CompetitorAndBoatAdapter extends RecyclerView.Adapter<CompetitorAnd
                     ViewHelper.setColors(holder.vesselId, boat.getColor().getAsHtml());
                 }
             }
-            String name = "";
-            if (competitor.getShortInfo() != null) {
-                name += competitor.getShortInfo() + " - ";
-            }
-            name += competitor.getName();
+            String name = competitor.getDisplayName();
             if (holder.competitor != null) {
                 holder.competitor.setText(name);
             }
