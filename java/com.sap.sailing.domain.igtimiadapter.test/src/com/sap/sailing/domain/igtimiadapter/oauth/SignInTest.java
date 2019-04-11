@@ -45,7 +45,7 @@ public class SignInTest {
         final String code = igtimiConnectionFactory.authorizeAndReturnAuthorizedCode("axel.uhl@gmx.de", "123456");
         logger.info("Igtimi OAuth code is "+code);
         assertNotNull(code);
-        Account account = igtimiConnectionFactory.obtainAccessTokenFromAuthorizationCode(code);
+        Account account = igtimiConnectionFactory.obtainAccessTokenFromAuthorizationCode("admin", code);
         assertEquals("axel.uhl@gmx.de", account.getUser().getEmail());
     }
   
@@ -76,7 +76,7 @@ public class SignInTest {
         MongoDBService mongoTestService = mongoTestConfig.getService();
         final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
-        final Account account = igtimiConnectionFactory.createAccountToAccessUserData("axel.uhl@gmx.de", "123456");
+        final Account account = igtimiConnectionFactory.createAccountToAccessUserData("admin", "axel.uhl@gmx.de", "123456");
         assertNotNull(account);
         logger.info("Igtimi account is "+account);
     }
@@ -84,7 +84,7 @@ public class SignInTest {
     @Test
     public void testAddToken() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("de2d6531236200f7c9fb69a0463ffe8d6b13f62bd7aad8de98c22862e4928e8a");
+        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("admin", "de2d6531236200f7c9fb69a0463ffe8d6b13f62bd7aad8de98c22862e4928e8a");
         assertEquals("axel.uhl@gmx.de", account.getUser().getEmail());
         assertSame(account, connectionFactory.getExistingAccountByEmail("axel.uhl@gmx.de"));
     }

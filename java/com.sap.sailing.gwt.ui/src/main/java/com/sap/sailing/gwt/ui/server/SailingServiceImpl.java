@@ -6527,10 +6527,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailAddress);
         final Account account;
         if (existingAccount == null) {
+            final String creatorName = getSecurityService().getCurrentUser().getName();
             account = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     SecuredDomainType.IGTIMI_ACCOUNT, Account.getTypeRelativeObjectIdentifier(eMailAddress),
                     eMailAddress,
-                    () -> getIgtimiConnectionFactory().createAccountToAccessUserData(eMailAddress, password));
+                    () -> getIgtimiConnectionFactory().createAccountToAccessUserData(creatorName, eMailAddress, password));
         } else {
             logger.warning("Igtimi account "+eMailAddress+" already exists.");
             account = null; // account with that e-mail already exists

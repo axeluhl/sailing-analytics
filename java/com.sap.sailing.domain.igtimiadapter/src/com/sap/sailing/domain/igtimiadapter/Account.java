@@ -11,6 +11,8 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  */
 public interface Account extends WithQualifiedObjectIdentifier {
     User getUser();
+    
+    String getCreatorName();
 
     @Override
     default HasPermissions getType() {
