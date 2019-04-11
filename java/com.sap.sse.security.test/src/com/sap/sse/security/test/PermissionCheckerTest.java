@@ -322,6 +322,19 @@ public class PermissionCheckerTest {
     }
     
     @Test
+    public void testMetaPermissionWithOwnershipandWildcardAction() {
+        RoleDefinition rd = new RoleDefinitionImpl(UUID.randomUUID(), "admin",
+                Collections.singleton(WildcardPermission.builder().build()));
+        user.addRole(new Role(rd, userTenant, null));
+        final String objectId = "someid";
+        
+        // wildcard for the action part
+        assertTrue(PermissionChecker.checkMetaPermissionWithOwnershipResolution(
+                WildcardPermission.builder().withTypes(type1).withIds(objectId).build(), allHasPermissions, user, null,
+                id -> new Ownership(null, userTenant)));
+    }
+    
+    @Test
     public void testMetaPermissionWithOwnershipResolutionForOneId() {
         RoleDefinition rd = new RoleDefinitionImpl(UUID.randomUUID(), "some_role",
                 Collections.singleton(type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
