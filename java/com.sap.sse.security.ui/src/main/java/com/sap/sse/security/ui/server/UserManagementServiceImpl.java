@@ -1016,7 +1016,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             User user = getOrThrowUser(username);
 
             // check permissions
-            if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
+            if (!getSecurityService().hasCurrentUserMetaPermissionWithOwnershipLookup(permission)) {
                 throw new UnauthorizedException(
                         "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
             }
@@ -1056,7 +1056,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             User user = getOrThrowUser(username);
 
             // check permissions
-            if (!getSecurityService().hasCurrentUserMetaPermission(permission, null)) {
+            if (!getSecurityService().hasCurrentUserMetaPermissionWithOwnershipLookup(permission)) {
                 throw new UnauthorizedException(
                         "Not permitted to grant/revoke permission " + permission + " for user " + user.getName());
             }

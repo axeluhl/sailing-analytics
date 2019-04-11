@@ -3,9 +3,11 @@ package com.sap.sse.security.shared;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions.Action;
@@ -190,11 +192,46 @@ public class PermissionChecker {
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermission(
             WildcardPermission permission,
             Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
+        return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> ownership);
+    }
+    
+    /**
+     * This is not the fully featured permission check!<br>
+     * See {@link #checkMetaPermission(WildcardPermission, Iterable, SecurityUser, SecurityUser, AbstractOwnership)} for
+     * more information about the check.<br>
+     * This version of the meta permission check relies on dynamic resolution of ownerships via the given
+     * ownershipResolver. Due to the absence of ownership information this check is not possible in the UI.
+     */
+    public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermissionWithOwnershipResolution(
+            WildcardPermission permission, Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
+            Function<QualifiedObjectIdentifier, O> ownershipResolver) {
+        return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> {
+            final Iterable<QualifiedObjectIdentifier> qualifiedObjectIdentifiers = wp.getQualifiedObjectIdentifiers();
+            final O ownership;
+            Iterator<QualifiedObjectIdentifier> iterator = qualifiedObjectIdentifiers.iterator();
+            if (!iterator.hasNext()) {
+                ownership = null;
+            } else {
+                QualifiedObjectIdentifier firstIdentifier = iterator.next();
+                if (iterator.hasNext() || firstIdentifier == null) {
+                    // No single distinct identifier
+                    ownership = null;
+                } else {
+                    ownership = ownershipResolver.apply(firstIdentifier);
+                }
+            }
+            return ownership;
+        });
+    }
+    
+    private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermissionInternal(
+            WildcardPermission permission,
+            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, Function<WildcardPermission, O> ownershipResolver) {
         assert permission != null;
         assert allPermissionTypes != null;
-        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
-
+        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes, true);
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
+            final O ownership = ownershipResolver.apply(effectiveWildcardPermissionToCheck);
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
                     impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED
                     && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser),
@@ -206,7 +243,7 @@ public class PermissionChecker {
     }
 
     private static Set<WildcardPermission> expandSingleToPermissions(WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes) {
+            Iterable<HasPermissions> allPermissionTypes, boolean expandToSingleIds) {
         List<Set<String>> parts = permission.getParts();
         final Set<String> typeParts;
         final boolean isTypePartWildcard;
@@ -243,10 +280,15 @@ public class PermissionChecker {
             allPermissionTypesByName.put(hasPermissions.getName(), hasPermissions);
         }
 
-        final Set<WildcardPermission> effectivePermissionsToCheck = new HashSet<>();
-        final String effectiveIdPartToCheck = isIdPartWildcard ? ""
-                : (WildcardPermission.PART_DIVIDER_TOKEN
-                        + Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
+        final Set<String> effectiveIdPartsToCheck;
+        if (isIdPartWildcard) {
+            effectiveIdPartsToCheck = Collections.singleton("");
+        } else if(expandToSingleIds) {
+            effectiveIdPartsToCheck = idParts;
+        } else {
+            effectiveIdPartsToCheck = Collections.singleton(Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
+        }
+        
         final Set<String> effectiveTypePartsToCheck;
         if (isTypePartWildcard) {
             effectiveTypePartsToCheck = allPermissionTypesByName.keySet();
@@ -254,6 +296,7 @@ public class PermissionChecker {
             effectiveTypePartsToCheck = typeParts;
         }
 
+        final Set<WildcardPermission> effectivePermissionsToCheck = new HashSet<>();
         for (String typePart : effectiveTypePartsToCheck) {
             HasPermissions hasPermissions = allPermissionTypesByName.get(typePart);
             final Set<String> effectiveActionPartsToCheck;
@@ -269,8 +312,11 @@ public class PermissionChecker {
             }
 
             for (String actionPart : effectiveActionPartsToCheck) {
-                effectivePermissionsToCheck.add(new WildcardPermission(
-                        typePart + WildcardPermission.PART_DIVIDER_TOKEN + actionPart + effectiveIdPartToCheck));
+                for (String idPart : effectiveIdPartsToCheck) {
+                    String idSuffix = idPart.isEmpty() ? "" : WildcardPermission.PART_DIVIDER_TOKEN + idPart;
+                    effectivePermissionsToCheck.add(new WildcardPermission(
+                            typePart + WildcardPermission.PART_DIVIDER_TOKEN + actionPart + idSuffix));
+                }
             }
         }
         return effectivePermissionsToCheck;
@@ -288,7 +334,7 @@ public class PermissionChecker {
             O ownership) {
         assert permission != null;
         assert allPermissionTypes != null;
-        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
+        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes, false);
         
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker,
