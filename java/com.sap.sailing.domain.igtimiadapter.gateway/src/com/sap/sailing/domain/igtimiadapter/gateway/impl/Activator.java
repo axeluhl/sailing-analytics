@@ -3,6 +3,8 @@ package com.sap.sailing.domain.igtimiadapter.gateway.impl;
 import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -52,5 +54,26 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
         igtimiConnectionFactoryTracker.close();
         igtimiConnectionFactoryTracker = null;
+    }
+
+    public static String getCurrentUsername() {
+        final String result;
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject == null || !subject.isAuthenticated()) {
+            result = null;
+        } else {
+            final Object principal = subject.getPrincipal();
+            if (principal == null) {
+                result = null;
+            } else {
+                final String username = principal.toString();
+                if (username == null || username.length() <= 0) {
+                    result = null;
+                } else {
+                    result = username;
+                }
+            }
+        }
+        return result;
     }
 }

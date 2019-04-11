@@ -57,7 +57,7 @@ public class AuthorizationCallback {
         } else {
             if (code != null) {
                 try {
-                    connectionFactory.obtainAccessTokenFromAuthorizationCode(code);
+                    connectionFactory.obtainAccessTokenFromAuthorizationCode(Activator.getCurrentUsername(), code);
                     result = Response.ok().entity("SAP Sailing Analytics authorized successfully to access user's tracks").build();
                 } catch (Exception e) {
                     result = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();
