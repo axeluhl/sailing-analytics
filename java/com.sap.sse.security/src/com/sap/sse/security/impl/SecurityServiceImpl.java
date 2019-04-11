@@ -2118,8 +2118,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void migratePermission(final User user, final WildcardPermission permissionToMigrate, final com.sap.sse.common.Util.Function<WildcardPermission, WildcardPermission> permissionReplacement) {
-        final WildcardPermission replacementPermissionOrNull = permissionReplacement.get(permissionToMigrate);
+    public void migratePermission(final User user, final WildcardPermission permissionToMigrate, final Function<WildcardPermission, WildcardPermission> permissionReplacement) {
+        final WildcardPermission replacementPermissionOrNull = permissionReplacement.apply(permissionToMigrate);
         final WildcardPermission effectivePermission;
         if (replacementPermissionOrNull != null) {
             // replacing legacy permission with a replacement

@@ -770,7 +770,7 @@ public class SecurityServiceMock implements SecurityService {
 
     @Override
     public void migratePermission(User user, WildcardPermission permissionToMigrate,
-            com.sap.sse.common.Util.Function<WildcardPermission, WildcardPermission> permissionReplacement) {
+            Function<WildcardPermission, WildcardPermission> permissionReplacement) {
 
     }
 

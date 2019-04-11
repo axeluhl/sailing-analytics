@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.settingstab;
 
 import java.util.List;
+import java.util.function.Function;
 
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -17,7 +18,6 @@ import com.sap.sailing.gwt.home.shared.partials.filter.UserSettingsByKeyTextBoxF
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsEntry;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Util.Function;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.common.util.NaturalComparator;
@@ -118,8 +118,8 @@ public class UserSettings extends Composite implements UserSettingsView {
 
         @Override
         public int compare(UserSettingsEntry o1, UserSettingsEntry o2) {
-            final String s1 = valueExtractor.get(o1);
-            final String s2 = valueExtractor.get(o2);
+            final String s1 = valueExtractor.apply(o1);
+            final String s2 = valueExtractor.apply(o2);
             return innerComnparator.compare(s1, s2);
         }
     }

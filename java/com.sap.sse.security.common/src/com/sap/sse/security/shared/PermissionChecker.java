@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.sap.sse.common.Util;
@@ -32,26 +33,9 @@ public class PermissionChecker {
         NONE
     }
     
-    // TODO use BiFunction and Method reference when we can use Java 8
-    private interface WildcardPermissionChecker {
-        boolean check(WildcardPermission grantedPermission, WildcardPermission permissionToCheck);
-    }
+    private static final BiFunction<WildcardPermission, WildcardPermission, Boolean> impliesChecker = WildcardPermission::implies;
     
-    private static final WildcardPermissionChecker impliesChecker = new WildcardPermissionChecker() {
-        
-        @Override
-        public boolean check(WildcardPermission grantedPermission, WildcardPermission permissionToCheck) {
-            return grantedPermission.implies(permissionToCheck);
-        }
-    };
-    
-    private static final WildcardPermissionChecker impliesAnyChecker = new WildcardPermissionChecker() {
-        
-        @Override
-        public boolean check(WildcardPermission grantedPermission, WildcardPermission permissionToCheck) {
-            return grantedPermission.impliesAny(permissionToCheck);
-        }
-    };
+    private static final BiFunction<WildcardPermission, WildcardPermission, Boolean> impliesAnyChecker = WildcardPermission::impliesAny;
     
     private static <U extends SecurityUser<?, ?, G>, G extends SecurityUserGroup<?>> Iterable<G> getGroupsOfUser(U user) {
         return (Iterable<G>) (user == null ? Collections.<G>emptySet() : user.getUserGroups());
@@ -401,12 +385,12 @@ public class PermissionChecker {
      */
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> PermissionState checkUserPermissions(
             WildcardPermission permission, U user, Iterable<G> groupsOfWhichUserIsMember, O ownership,
-            WildcardPermissionChecker permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
+            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
         PermissionState result = PermissionState.NONE;
         // 2. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
             for (WildcardPermission directPermission : user.getPermissions()) {
-                if (permissionChecker.check(directPermission, permission)) {
+                if (permissionChecker.apply(directPermission, permission)) {
                     result = PermissionState.GRANTED;
                     break;
                 }
@@ -448,12 +432,12 @@ public class PermissionChecker {
     
     private static <RD extends RoleDefinition, U extends SecurityUser<RD, ?, G>, G extends SecurityUserGroup<RD>> boolean isPermissionGrantedByGroup(
             WildcardPermission permission, G groupToCheck, boolean userIsMemberOfGroup,
-            WildcardPermissionChecker permissionChecker) {
+            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker) {
         for (Map.Entry<RD, Boolean> entry : groupToCheck.getRoleDefinitionMap().entrySet()) {
             if (Boolean.TRUE.equals(entry.getValue()) || userIsMemberOfGroup) {
                 final RD roleDefinition = entry.getKey();
                 for (WildcardPermission grantedPermission : roleDefinition.getPermissions()) {
-                    if (permissionChecker.check(grantedPermission, permission)) {
+                    if (permissionChecker.apply(grantedPermission, permission)) {
                         return true;
                     }
                 }
@@ -490,7 +474,7 @@ public class PermissionChecker {
      */
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean implies(
             R role, WildcardPermission permission, O ownership,
-            WildcardPermissionChecker permissionChecker,
+            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker,
            boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
        final boolean roleIsTenantQualified = role.getQualifiedForTenant() != null;
        final boolean roleIsUserQualified = role.getQualifiedForUser() != null;
@@ -511,7 +495,7 @@ public class PermissionChecker {
        if (permissionsApply) {
            result = false; // if the role grants no permissions at all or no permission implies the one requested for, access is not granted
             for (WildcardPermission rolePermission : role.getPermissions()) {
-                if (permissionChecker.check(rolePermission, permission)) {
+                if (permissionChecker.apply(rolePermission, permission)) {
                     result = true;
                     break;
                 }
