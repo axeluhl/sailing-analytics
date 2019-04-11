@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.shiro.subject.PrincipalCollection;
@@ -26,6 +28,7 @@ import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -316,6 +319,65 @@ public class PermissionCheckerTest {
                 new Ownership(null, userTenant)));
         assertTrue(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
                 new Ownership(user, userTenant)));
+    }
+    
+    @Test
+    public void testMetaPermissionWithOwnershipResolutionForOneId() {
+        RoleDefinition rd = new RoleDefinitionImpl(UUID.randomUUID(), "some_role",
+                Collections.singleton(type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
+        final String objectId = "someid";
+        WildcardPermission permissionToCheck = type1.getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
+                new TypeRelativeObjectIdentifier(objectId));
+        
+        Function<QualifiedObjectIdentifier, Ownership> ownershipResolver = id -> {
+            final String typeRelativeIdentifierString = id.getTypeRelativeObjectIdentifier().toString();
+            if (objectId.equals(typeRelativeIdentifierString)) {
+                return new Ownership(null, userTenant);
+            }
+            return null;
+        };
+        
+        BooleanSupplier permissionCheck = () -> PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck, allHasPermissions,
+                user, null, ownershipResolver);
+        
+        assertFalse(permissionCheck.getAsBoolean());
+        // Not the right qualification -> check still fails
+        user.addRole(new Role(rd, adminTenant, null));
+        assertFalse(permissionCheck.getAsBoolean());
+        // The right qualification
+        user.addRole(new Role(rd, userTenant, null));
+        assertTrue(permissionCheck.getAsBoolean());
+    }
+    
+    @Test
+    public void testMetaPermissionWithOwnershipResolutionForTwoIds() {
+        RoleDefinition rd = new RoleDefinitionImpl(UUID.randomUUID(), "some_role",
+                Collections.singleton(type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
+        final String id1 = "id1";
+        final String id2 = "id2";
+        WildcardPermission permissionToCheck = WildcardPermission.builder().withTypes(type1)
+                .withActions(DefaultActions.READ)
+                .withIds(new TypeRelativeObjectIdentifier(id1), new TypeRelativeObjectIdentifier(id2)).build();
+        
+        Function<QualifiedObjectIdentifier, Ownership> ownershipResolver = id -> {
+            final String typeRelativeIdentifierString = id.getTypeRelativeObjectIdentifier().toString();
+            if (id1.equals(typeRelativeIdentifierString)) {
+                return new Ownership(null, userTenant);
+            }
+            if (id2.equals(typeRelativeIdentifierString)) {
+                return new Ownership(null, adminTenant);
+            }
+            return null;
+        };
+        
+        BooleanSupplier permissionCheck = () -> PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck, allHasPermissions,
+                user, null, ownershipResolver);
+        
+        assertFalse(permissionCheck.getAsBoolean());
+        user.addRole(new Role(rd, userTenant, null));
+        assertFalse(permissionCheck.getAsBoolean());
+        user.addRole(new Role(rd, adminTenant, null));
+        assertTrue(permissionCheck.getAsBoolean());
     }
 
     @Test
