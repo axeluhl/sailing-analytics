@@ -136,7 +136,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 SecuredDomainType.TRACKED_RACE);
         tableAndConfigurationPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshTracTracConnectionList());
-        buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
+        Button addCreateAction = buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
                 () -> new EditTracTracConnectionDialog(new TracTracConfigurationWithSecurityDTO(),
                         new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
                             @Override
@@ -164,6 +164,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                             public void cancel() {
                             }
                         }, userService, errorReporter).show());
+        addCreateAction.ensureDebugId("AddConnectionButton");
         final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
             sailingService.deleteTracTracConfiguration(connectionsTable.getSelectionModel().getSelectedObject(),
                     new AsyncCallback<Void>() {
@@ -185,6 +186,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             loadingMessageLabel.setText(stringMessages.loading());
             fillRaces(sailingService, showHiddenRacesCheckbox.getValue());
         });
+        listRacesButton.ensureDebugId("ListRacesButton");
         listRacesButton.setEnabled(false);
         removeButton.setEnabled(false);
 

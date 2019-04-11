@@ -140,7 +140,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
      */
     private void startTrackingRaceAndStopWhenFinished(AdminConsolePage adminConsole) {
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(KIELER_WOCHE_2013_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(KIELER_WOCHE_2013_JSON_URL);
         tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);

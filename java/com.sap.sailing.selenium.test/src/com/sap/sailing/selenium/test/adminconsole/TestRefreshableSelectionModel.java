@@ -259,7 +259,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         
         // Start the tracking for the races and wait until they are ready to use
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(IDM_5O5_2013_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(IDM_5O5_2013_JSON_URL);
         tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRaces(this.trackableRaces);
