@@ -1,27 +1,27 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.io.Serializable;
-import java.net.URI;
-
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 
+import java.io.Serializable;
+import java.net.URI;
+
 public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCompetitorWithBoat {
     private static final long serialVersionUID = 22679449208503264L;
     private DynamicBoat boat;
-    
+
     public CompetitorWithBoatImpl(Serializable id, String name, String shortName, Color color, String email,
-            URI flagImage, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile,
-            String searchTag, DynamicBoat boat) {
+                                  URI flagImage, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile,
+                                  String searchTag, DynamicBoat boat) {
         super(id, name, shortName, color, email, flagImage, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile,
                 searchTag);
         this.boat = boat;
     }
 
     public CompetitorWithBoatImpl(Competitor competitor, DynamicBoat boat) {
-        this(competitor.getId(), competitor.getName(), competitor.getShortName(), competitor.getColor(), competitor.getEmail(), 
+        this(competitor.getId(), competitor.getName(), competitor.getShortName(), competitor.getColor(), competitor.getEmail(),
                 competitor.getFlagImage(), (DynamicTeam) competitor.getTeam(), competitor.getTimeOnTimeFactor(),
                 competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(), boat);
     }
@@ -51,28 +51,38 @@ public class CompetitorWithBoatImpl extends CompetitorImpl implements DynamicCom
     public void clearBoat() {
         this.boat = null;
     }
-    
+
     @Override
     public boolean hasBoat() {
         return boat != null;
     }
 
-    @Override
-    public String getShortInfo() {
-        final String superResult = super.getShortInfo();
-        final String result;
-        if (superResult != null) {
-            result = superResult; 
-        } else if (getBoat() != null) {
-            result = getBoat().getSailID() != null ? getBoat().getSailID() : getBoat().getName();
-        } else {
-            result = null;
+    private String getShortInfo() {
+        String shortName = getShortName();
+        if (!hasBoat()) {
+            return shortName;
         }
-        return result;
+        String boatInfo = getBoat().getSailID() != null ? getBoat().getSailID() : getBoat().getName();
+        if (shortName == null || shortName.length() == 0) {
+            return boatInfo;
+        }
+        if (boatInfo == null || boatInfo.length() == 0) {
+            return shortName;
+        }
+        return shortName + Competitor.DELIMITER_SHORT_NAME + boatInfo;
+    }
+
+    @Override
+    public String getDisplayName() {
+        String shortInfo = getShortInfo();
+        if (shortInfo == null || shortInfo.length() == 0) {
+            return getName();
+        }
+        return getShortInfo() + Competitor.DELIMITER_SAIL_ID + getName();
     }
 
     @Override
     public String toString() {
-        return super.toString()+" with boat "+getBoat();
+        return super.toString() + " with boat " + getBoat();
     }
 }
