@@ -13,6 +13,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public MongoObjectFactoryImpl(MongoDatabase db) {
         this.db = db;
     }
+    
+    @Override
+    public void clear() {
+        db.getCollection(CollectionNames.IGTIMI_ACCESS_TOKENS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED)
+                .drop();
+    }
 
     @Override
     public void storeAccessToken(String creatorName, String accessToken) {

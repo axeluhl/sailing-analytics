@@ -6,4 +6,6 @@ public interface MongoObjectFactory {
 
     void removeAccessToken(String creatorName, String accessToken);
 
+    void clear();
+
 }

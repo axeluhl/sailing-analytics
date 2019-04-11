@@ -16,6 +16,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         super();
         this.database = database;
     }
+    
+    @Override
+    public void clear() {
+        database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name())
+                .withWriteConcern(WriteConcern.ACKNOWLEDGED).drop();
+    }
 
     @Override
     public void createTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {

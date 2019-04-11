@@ -26,5 +26,7 @@ public interface MongoObjectFactory {
     void updateTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
 
     void deleteTracTracConfiguration(String creatorName, String jsonurl);
+
+    void clear();
     
 }
