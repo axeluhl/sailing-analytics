@@ -57,6 +57,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
@@ -122,39 +123,34 @@ public class IgtimiAccountsPanel extends FlowPanel {
         final RefreshableMultiSelectionModel<AccountWithSecurityDTO> refreshableAccountsSelectionModel = (RefreshableMultiSelectionModel<AccountWithSecurityDTO>) cellTable
                 .getSelectionModel();
 
-        // setup controls
         final Panel controlsPanel = new HorizontalPanel();
-        final Button removeAccountButton = new Button(stringMessages.remove());
-        removeAccountButton.setEnabled(false);
-        removeAccountButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (refreshableAccountsSelectionModel.getSelectedSet().size() > 0) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiAccounts())) {
-                        for (AccountWithSecurityDTO account : refreshableAccountsSelectionModel.getSelectedSet()) {
-                            removeAccount(account, filteredAccounts);
-                        }
+        controlsPanel.add(filterAccountsPanel);
+
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
+                SecuredDomainType.IGTIMI_ACCOUNT);
+        controlsPanel.add(buttonPanel);
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refresh());
+
+        // setup controls
+        final Button removeAccountButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+            if (refreshableAccountsSelectionModel.getSelectedSet().size() > 0) {
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiAccounts())) {
+                    for (AccountWithSecurityDTO account : refreshableAccountsSelectionModel.getSelectedSet()) {
+                        removeAccount(account, filteredAccounts);
                     }
                 }
             }
         });
+        removeAccountButton.setEnabled(false);
         refreshableAccountsSelectionModel.addSelectionChangeHandler(
                 e -> removeAccountButton.setEnabled(refreshableAccountsSelectionModel.getSelectedSet().size() > 0));
-        controlsPanel.add(filterAccountsPanel);
-        controlsPanel.add(removeAccountButton);
         add(controlsPanel);
         add(cellTable);
 
         // add button
-        final Button addAccountButton = new Button(stringMessages.addIgtimiAccount());
+        final Button addAccountButton = buttonPanel.addCreateAction(stringMessages.addIgtimiAccount(),
+                () -> addAccount());
         addAccountButton.ensureDebugId("addIgtimiAccount");
-        addAccountButton.addClickHandler(e -> addAccount());
-        add(addAccountButton);
-
-        // refresh button
-        final Button refreshButton = new Button(stringMessages.refresh());
-        refreshButton.addClickHandler(e -> refresh());
-        add(refreshButton);
 
         final String protocol = Window.Location.getProtocol().endsWith(":")
                 ? Window.Location.getProtocol().substring(0, Window.Location.getProtocol().length() - 1)
@@ -171,8 +167,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
 
             @Override
             public void onSuccess(String result) {
-                final Button addIgtimiUserButton = new Button(stringMessages.addIgtimiUser() + " (OAuth)");
-                addIgtimiUserButton.addClickHandler(clickEvent -> {
+                buttonPanel.addCreateAction(stringMessages.addIgtimiUser() + " (OAuth)", () -> {
                     Frame frame = new Frame(UriUtils.fromString(result).asString());
                     frame.addLoadHandler(loadEvent -> refresh());
                     frame.setPixelSize(520, 770);
@@ -195,8 +190,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                         refresh();
                     });
                     dialogBox.center();
-                });
-                controlsPanel.add(addIgtimiUserButton);
+                        });
             }
         });
     }
