@@ -24,16 +24,20 @@ public interface Account extends WithQualifiedObjectIdentifier {
         return getUser().getFirstName() + " " + getUser().getSurname();
     }
 
+
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
         return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
 
+
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(getUser().getEmail());
+        return getCreatorName() == null ? new TypeRelativeObjectIdentifier(getUser().getEmail())
+                : new TypeRelativeObjectIdentifier(getUser().getEmail(), getCreatorName());
     }
 
-    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String email) {
-        return new TypeRelativeObjectIdentifier(email);
+    static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String email, String creatorName) {
+        return new TypeRelativeObjectIdentifier(email, creatorName);
     }
+
 }
