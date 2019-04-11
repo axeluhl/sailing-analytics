@@ -56,6 +56,7 @@ public class Activator implements BundleActivator {
     private final Future<IgtimiWindTrackerFactory> windTrackerFactory;
     private ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+    private SecurityService securityServiceTest;
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         logger.info(getClass().getName()+" constructor");
@@ -81,6 +82,11 @@ public class Activator implements BundleActivator {
                 return new IgtimiWindTrackerFactory(connectionFactory.get());
             }
         });
+    }
+
+    /** Only used by tests. */
+    public void setSecurityService(SecurityService securityService) {
+        securityServiceTest = securityService;
     }
 
     @Override
@@ -133,7 +139,7 @@ public class Activator implements BundleActivator {
     }
     
     public SecurityService getSecurityService() {
-        return securityServiceServiceTracker.getService();
+        return securityServiceTest == null ? securityServiceServiceTracker.getService() : securityServiceTest;
     }
 
     public IgtimiWindTrackerFactory getWindTrackerFactory() {
