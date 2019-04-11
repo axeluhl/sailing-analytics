@@ -490,7 +490,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void migrateUser(User user);
 
     void migratePermission(User user, WildcardPermission permissionToMigrate,
-            com.sap.sse.common.Util.Function<WildcardPermission, WildcardPermission> permissionReplacement);
+            Function<WildcardPermission, WildcardPermission> permissionReplacement);
 
     void checkMigration(Iterable<HasPermissions> allInstances);
 
