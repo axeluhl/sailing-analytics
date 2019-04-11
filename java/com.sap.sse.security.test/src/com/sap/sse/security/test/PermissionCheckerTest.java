@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -292,6 +293,29 @@ public class PermissionCheckerTest {
             user.removePermission(p);
         }
         return result;
+    }
+
+    @Test
+    public void testMetaPermissionWithOwnership() {
+        RoleDefinition rd = new RoleDefinitionImpl(UUID.randomUUID(), "some_role",
+                Collections.singleton(type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
+        user.addRole(new Role(rd, userTenant, null));
+        WildcardPermission permissionToCheck = type1.getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
+                new TypeRelativeObjectIdentifier("someid"));
+        // The assigned role is qualified by the tenant. This makes a check without ownership fail
+        assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null));
+        // In addition a check with ownership without tentant will also fail
+        assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
+                new Ownership(user, null)));
+        // A check with the wrong tentant owner will also fail
+        assertFalse(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
+                new Ownership(user, adminTenant)));
+        
+        // Only an ownership with a tenant owner matching the roles qualification makes the check succeed
+        assertTrue(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
+                new Ownership(null, userTenant)));
+        assertTrue(PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null,
+                new Ownership(user, userTenant)));
     }
 
     @Test
