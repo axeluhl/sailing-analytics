@@ -547,7 +547,6 @@
 
     <string name="competitor_list">Results</string>
     <string name="sort_by_boat">by Sail Number</string>
-    <string name="sort_by_short_name">by Short Name</string>
     <string name="sort_by_name">by Competitor Name</string>
     <string name="sort_by_start">by Position to Start Line</string>
     <string name="sort_by_goal">by Tracked Position</string>

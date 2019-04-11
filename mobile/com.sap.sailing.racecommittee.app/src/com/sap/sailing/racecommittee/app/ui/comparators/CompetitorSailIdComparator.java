@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.comparators;
 
+import java.util.Comparator;
+import java.util.Map;
+
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
-
-import java.util.Comparator;
-import java.util.Map;
 
 public class CompetitorSailIdComparator implements Comparator<Map.Entry<Competitor, Boat>> {
 
@@ -22,31 +22,22 @@ public class CompetitorSailIdComparator implements Comparator<Map.Entry<Competit
                 && rightCompetitor.getValue() != null) {
             Boat left = leftCompetitor.getValue();
             Boat right = rightCompetitor.getValue();
-            String leftSailId = left == null ? null : left.getSailID();
-            String rightSailId = right == null ? null : right.getSailID();
-            return compare(leftSailId, rightSailId, comparator);
+
+            // if right is null, left will be greater
+            if (right == null || right.getSailID() == null) {
+                return 1;
+            }
+
+            String leftBoat = "";
+            for (String lh : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(left.getSailID())) {
+                leftBoat = lh;
+            }
+            String rightBoat = "";
+            for (String rh : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(right.getSailID())) {
+                rightBoat = rh;
+            }
+            return comparator.compare(leftBoat, rightBoat);
         }
         return 0;
-    }
-
-    public static int compare(String leftSailId, String rightSailId, Comparator<String> comparator) {
-        if (leftSailId == null && rightSailId == null) {
-            return 0;
-        }
-        if (leftSailId == null) {
-            return -1;
-        }
-        if (rightSailId == null) {
-            return 1;
-        }
-        String leftBoat = "";
-        for (String lh : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(leftSailId)) {
-            leftBoat = lh;
-        }
-        String rightBoat = "";
-        for (String rh : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(rightSailId)) {
-            rightBoat = rh;
-        }
-        return comparator.compare(leftBoat, rightBoat);
     }
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import java.net.URI;
+
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
@@ -8,13 +10,7 @@ import com.sap.sse.common.NamedWithID;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 
-import java.net.URI;
-
 public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
-
-    String DELIMITER_SHORT_NAME = " / ";
-    String DELIMITER_SAIL_ID = " - ";
-
     Team getTeam();
     
     /**
@@ -31,7 +27,13 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
 
     String getShortName();
 
-    String getDisplayName();
+    /**
+     * Returns a derived short information about a competitor depending on the information available
+     * If we have a short name set on the competitor this name will be returned.
+     * If no short name exist but a boat the either the sailId or the boat name will returned.
+     * If all these attributes have no value null is returned.   
+     */
+    String getShortInfo();
 
     /**
      * A helper to know if the competitor has a boat attached.

@@ -1,5 +1,12 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.Nationality;
@@ -7,13 +14,6 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.net.URI;
-import java.util.HashSet;
-import java.util.Set;
 
 public class CompetitorImpl implements DynamicCompetitor {
     private static final long serialVersionUID = 294603681016643157L;
@@ -28,7 +28,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     private URI flagImage;
     private Double timeOnTimeFactor;
     private Duration timeOnDistanceAllowancePerNauticalMile;
-
+    
     public CompetitorImpl(Serializable id, String name, String shortName, Color color, String email, URI flagImage, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         this.id = id;
         this.name = name;
@@ -42,7 +42,7 @@ public class CompetitorImpl implements DynamicCompetitor {
         this.searchTag = searchTag;
         this.listeners = new HashSet<CompetitorChangeListener>();
     }
-
+    
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
         listeners = new HashSet<CompetitorChangeListener>();
@@ -59,6 +59,17 @@ public class CompetitorImpl implements DynamicCompetitor {
     }
 
     @Override
+    public String getShortInfo() {
+        final String result;
+        if (getShortName() != null) {
+            result = getShortName(); 
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
     public boolean hasBoat() {
         return false;
     }
@@ -67,7 +78,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     public String toString() {
         return getName();
     }
-
+    
     @Override
     public void setName(String newName) {
         final String oldName = this.name;
@@ -89,20 +100,13 @@ public class CompetitorImpl implements DynamicCompetitor {
             }
         }
     }
-
-    @Override
-    public String getDisplayName() {
-        if (shortName == null || shortName.length() == 0) {
-            return name;
-        }
-        return shortName + Competitor.DELIMITER_SAIL_ID;
-    }
+    
 
     @Override
     public Serializable getId() {
         return id;
     }
-
+    
     @Override
     public DynamicTeam getTeam() {
         return team;
@@ -149,7 +153,7 @@ public class CompetitorImpl implements DynamicCompetitor {
         }
         getTeam().removeNationalityChangeListener(listener);
     }
-
+    
     private Iterable<CompetitorChangeListener> getListeners() {
         synchronized (listeners) {
             return new HashSet<CompetitorChangeListener>(listeners);
@@ -185,9 +189,9 @@ public class CompetitorImpl implements DynamicCompetitor {
             }
         }
     }
-
+    
     @Override
-    public boolean hasEmail() {
+    public boolean hasEmail(){
         return email != null && !email.isEmpty();
     }
 

@@ -61,7 +61,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.ItemTouchH
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorGoalPassingComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorNameComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
-import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorShortNameComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
@@ -92,10 +91,9 @@ public class TrackingListFragment extends BaseFragment
     private static final int LEADERBOARD_ORDER_LOADER = 2;
 
     private static final int SORT_SAIL_NUMBER = 0;
-    private static final int SORT_SHORT_NAME = 1;
-    private static final int SORT_NAME = 2;
-    private static final int SORT_GOAL = 3;
-    private static final int SORT_START = 4;
+    private static final int SORT_NAME = 1;
+    private static final int SORT_GOAL = 2;
+    private static final int SORT_START = 3;
 
     private RecyclerView mFinishView;
     private FinishListAdapter mFinishedAdapter;
@@ -227,7 +225,6 @@ public class TrackingListFragment extends BaseFragment
         super.onActivityCreated(savedInstanceState);
         mComparators = new ArrayList<>();
         mComparators.add(SORT_SAIL_NUMBER, new CompetitorSailIdComparator());
-        mComparators.add(SORT_SHORT_NAME, new CompetitorShortNameComparator());
         mComparators.add(SORT_NAME, new CompetitorNameComparator());
         mComparators.add(SORT_GOAL, new CompetitorGoalPassingComparator());
         mComparator = mComparators.get(SORT_SAIL_NUMBER);
@@ -380,9 +377,6 @@ public class TrackingListFragment extends BaseFragment
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.by_short_name:
-            mComparator = mComparators.get(SORT_SHORT_NAME);
-            break;
         case R.id.by_name:
             mComparator = mComparators.get(SORT_NAME);
             break;
@@ -649,7 +643,11 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private void moveCompetitorToFinishList(Competitor competitor) {
-        String name = competitor.getDisplayName();
+        String name = "";
+        if (competitor.getShortInfo() != null) {
+            name += competitor.getShortInfo() + " - ";
+        }
+        name += competitor.getName();
         int pos = mFinishedAdapter.getFirstRankZeroPosition();
         // FIXME mFinishedData.size()+1 also counts penalized competitors before which the competitor is to be inserted!
         // I just wonder how the position shown in the app seems correct...
@@ -962,7 +960,11 @@ public class TrackingListFragment extends BaseFragment
                 mFilteredCompetitorData.addAll(mCompetitorData);
             } else {
                 for (Map.Entry<Competitor, Boat> entry : mCompetitorData) {
-                    String name = entry.getKey().getDisplayName();
+                    String name = "";
+                    if (entry.getKey().getShortInfo() != null) {
+                        name += entry.getKey().getShortInfo() + " - ";
+                    }
+                    name += entry.getKey().getName();
                     if (StringHelper.on(getActivity()).containsIgnoreCase(name, mFilter)) {
                         mFilteredCompetitorData.add(entry);
                     }

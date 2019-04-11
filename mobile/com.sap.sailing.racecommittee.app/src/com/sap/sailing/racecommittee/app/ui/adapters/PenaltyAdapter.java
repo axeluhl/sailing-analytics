@@ -21,9 +21,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultEditableImpl;
-import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 
 import java.io.Serializable;
@@ -36,9 +36,8 @@ import java.util.Map;
 
 public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHolder> {
 
-    private static final int COMPETITOR_SHORT_NAME_POSITION = 0;
-    private static final int SAILING_NUMBER_POSITION = 1;
-    private static final int COMPETITOR_NAME_POSITION = 2;
+    private static final int SAILING_NUMBER_POSITION = 0;
+    private static final int COMPETITOR_NAME_POSITION = 1;
 
     private final Context mContext;
     private final ItemListener mListener;
@@ -106,17 +105,17 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
         }
         Drawable mergeIcon;
         switch (item.getMergeState()) {
-            case WARNING:
-                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
-                break;
+        case WARNING:
+            mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
+            break;
 
-            case ERROR:
-                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
-                break;
+        case ERROR:
+            mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
+            break;
 
-            default:
-                mergeIcon = null;
-                break;
+        default:
+            mergeIcon = null;
+            break;
         }
         holder.mItemMergeState.setImageDrawable(mergeIcon);
     }
@@ -170,17 +169,16 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     private void sortData() {
         Comparator<CompetitorResultEditableImpl> comparator = null;
         switch (mOrderBy) {
-            case COMPETITOR_SHORT_NAME:
-                comparator = new DisplayNameComparator(COMPETITOR_SHORT_NAME_POSITION);
-                break;
-            case SAILING_NUMBER:
-                comparator = new DisplayNameComparator(SAILING_NUMBER_POSITION);
-                break;
-            case COMPETITOR_NAME:
-                comparator = new DisplayNameComparator(COMPETITOR_NAME_POSITION);
-                break;
-            default:
-                break;
+        case SAILING_NUMBER:
+            comparator = new DisplayNameComparator(SAILING_NUMBER_POSITION);
+            break;
+
+        case COMPETITOR_NAME:
+            comparator = new DisplayNameComparator(COMPETITOR_NAME_POSITION);
+            break;
+
+        default:
+            break;
         }
 
         if (mFiltered != null && comparator != null) {
@@ -190,7 +188,7 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     }
 
     public enum OrderBy {
-        COMPETITOR_SHORT_NAME, SAILING_NUMBER, COMPETITOR_NAME, START_LINE, FINISH_LINE
+        SAILING_NUMBER, COMPETITOR_NAME, START_LINE, FINISH_LINE
     }
 
     public interface ItemListener {
@@ -214,34 +212,32 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
 
         @Override
         public int compare(CompetitorResultEditableImpl lhs, CompetitorResultEditableImpl rhs) {
-            String[] left = splitShortName(lhs.getCompetitorDisplayName());
-            String[] right = splitShortName(rhs.getCompetitorDisplayName());
-            String leftShortName = left.length == 1 ? null : left[0];
-            String rightShortName = right.length == 1 ? null : right[0];
-            left = splitSailId(leftShortName == null ? lhs.getCompetitorDisplayName() : left[1]);
-            right = splitSailId(rightShortName == null ? rhs.getCompetitorDisplayName() : right[1]);
-            String leftSailId = left.length == 1 ? null : left[0];
-            String rightSailId = right.length == 1 ? null : right[0];
-            String leftName = left.length == 1 ? left[0] : left[1];
-            String rightName = right.length == 1 ? right[0] : right[1];
-            switch (mPos) {
-                case COMPETITOR_SHORT_NAME_POSITION:
-                    return CompetitorSailIdComparator
-                            .compare(leftShortName, rightShortName, mNaturalComparator);
-                case SAILING_NUMBER_POSITION:
-                    return CompetitorSailIdComparator
-                            .compare(leftSailId, rightSailId, mNaturalComparator);
-                default:
-                    return mNaturalComparator.compare(leftName, rightName);
+            String[] left = splitDisplayName(lhs.getCompetitorDisplayName());
+            String[] right = splitDisplayName(rhs.getCompetitorDisplayName());
+
+            int leftPos = mPos;
+            int rightPos = mPos;
+            if (left.length == 1) {
+                leftPos = 0;
             }
+            if (right.length == 1) {
+                rightPos = 0;
+            }
+            String leftItem = left[leftPos];
+            String rightItem = right[rightPos];
+            if (mPos == SAILING_NUMBER_POSITION) {
+                for (String leftData : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(leftItem)) {
+                    leftItem = leftData;
+                }
+                for (String rightData : Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(rightItem)) {
+                    rightItem = rightData;
+                }
+            }
+            return mNaturalComparator.compare(leftItem, rightItem);
         }
 
-        private String[] splitShortName(String displayName) {
-            return displayName.split(Competitor.DELIMITER_SHORT_NAME);
-        }
-
-        private String[] splitSailId(String displayName) {
-            return displayName.split(Competitor.DELIMITER_SAIL_ID);
+        private String[] splitDisplayName(String displayName) {
+            return displayName.split(" - ");
         }
     }
 

@@ -130,11 +130,11 @@ public class PenaltyFragment extends BaseFragment
                     RaceFragment fragment = TrackingListFragment.newInstance(new Bundle(), 1);
                     int viewId = R.id.race_content;
                     switch (getRaceState().getStatus()) {
-                        case FINISHED:
-                            viewId = getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true);
-                            break;
-                        default:
-                            break;
+                    case FINISHED:
+                        viewId = getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true);
+                        break;
+                    default:
+                        break;
                     }
                     replaceFragment(fragment, viewId);
                 }
@@ -238,17 +238,17 @@ public class PenaltyFragment extends BaseFragment
             if (procedure instanceof ConfigurableStartModeFlagRacingProcedure) {
                 ConfigurableStartModeFlagRacingProcedure racingProcedure = getRaceState().getTypedRacingProcedure();
                 switch (racingProcedure.getStartModeFlag()) {
-                    case BLACK:
-                        selection = mPenaltyAdapter.getPosition(MaxPointsReason.BFD.name());
-                        break;
+                case BLACK:
+                    selection = mPenaltyAdapter.getPosition(MaxPointsReason.BFD.name());
+                    break;
 
-                    case UNIFORM:
-                        selection = mPenaltyAdapter.getPosition(MaxPointsReason.UFD.name());
-                        break;
+                case UNIFORM:
+                    selection = mPenaltyAdapter.getPosition(MaxPointsReason.UFD.name());
+                    break;
 
-                    default:
-                        // nothing
-                        break;
+                default:
+                    // nothing
+                    break;
                 }
             }
             if (getRaceState().getStatus() == RaceLogRaceStatus.FINISHED) {
@@ -257,34 +257,34 @@ public class PenaltyFragment extends BaseFragment
             mPenaltyDropDown.setSelection(selection);
         }
         switch (getRaceState().getStatus()) {
-            case FINISHED:
-                if (mHeader != null) {
-                    if (AppUtils.with(getActivity()).isPhone()) {
-                        mHeader.setVisibility(View.VISIBLE);
-                        mHeader.setHeaderOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                                sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                            }
-                        });
-                    } else {
-                        mHeader.setVisibility(View.GONE);
-                    }
+        case FINISHED:
+            if (mHeader != null) {
+                if (AppUtils.with(getActivity()).isPhone()) {
+                    mHeader.setVisibility(View.VISIBLE);
+                    mHeader.setHeaderOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+                            sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                        }
+                    });
+                } else {
+                    mHeader.setVisibility(View.GONE);
                 }
-            case FINISHING:
-                if (mListButton != null) {
-                    mListButton.setImageDrawable(BitmapHelper.getAttrDrawable(getActivity(), R.attr.list_both_24dp));
-                }
-                if (mListButtonLayout != null) {
-                    mListButtonLayout.setVisibility(View.VISIBLE);
-                }
-                break;
+            }
+        case FINISHING:
+            if (mListButton != null) {
+                mListButton.setImageDrawable(BitmapHelper.getAttrDrawable(getActivity(), R.attr.list_both_24dp));
+            }
+            if (mListButtonLayout != null) {
+                mListButtonLayout.setVisibility(View.VISIBLE);
+            }
+            break;
 
-            default:
-                if (mListButtonLayout != null) {
-                    mListButtonLayout.setVisibility(View.GONE);
-                }
+        default:
+            if (mListButtonLayout != null) {
+                mListButtonLayout.setVisibility(View.GONE);
+            }
         }
         if (mListButtonLayout != null) {
             mSearchView.isEditSmall(mListButtonLayout.getVisibility() == View.VISIBLE);
@@ -425,13 +425,17 @@ public class PenaltyFragment extends BaseFragment
     private void onLoadCompetitorsSucceeded(Map<Competitor, Boat> data) {
         mCompetitorResults.clear();
         for (Competitor item : data.keySet()) { // add loaded competitors
-            CompetitorResult result = new CompetitorResultImpl(item.getId(), item.getDisplayName(),
-                    0, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null,
-                    /* comment */ null, MergeState.OK);
+            String name = "";
+            if (item.getShortInfo() != null) {
+                name += item.getShortInfo() + " - ";
+            }
+            name += item.getName();
+            CompetitorResult result = new CompetitorResultImpl(item.getId(), name, 0, MaxPointsReason.NONE,
+                    /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK);
             mCompetitorResults.add(new CompetitorResultEditableImpl(result));
         }
         if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) { // mix with finish position
-            // list
+                                                                                           // list
             for (CompetitorResult result : getRaceState().getFinishPositioningList()) {
                 int pos = 0;
                 for (int i = 0; i < mCompetitorResults.size(); i++) {
@@ -471,21 +475,21 @@ public class PenaltyFragment extends BaseFragment
     public boolean onMenuItemClick(MenuItem item) {
         OrderBy orderBy = OrderBy.SAILING_NUMBER;
         switch (item.getItemId()) {
-            case R.id.by_short_name:
-                orderBy = OrderBy.COMPETITOR_SHORT_NAME;
-                break;
-            case R.id.by_name:
-                orderBy = OrderBy.COMPETITOR_NAME;
-                break;
-            case R.id.by_start:
-                orderBy = OrderBy.START_LINE;
-                break;
-            case R.id.by_goal:
-                orderBy = OrderBy.FINISH_LINE;
-                loadLeaderboardResult();
-                break;
-            default:
-                break;
+        case R.id.by_name:
+            orderBy = OrderBy.COMPETITOR_NAME;
+            break;
+
+        case R.id.by_start:
+            orderBy = OrderBy.START_LINE;
+            break;
+
+        case R.id.by_goal:
+            orderBy = OrderBy.FINISH_LINE;
+            loadLeaderboardResult();
+            break;
+
+        default:
+            break;
 
         }
         mAdapter.setOrderedBy(orderBy);
@@ -603,26 +607,26 @@ public class PenaltyFragment extends BaseFragment
 
     private void setMergeState(CompetitorResultEditableImpl item, MergeState newState) {
         switch (item.getMergeState()) {
-            case ERROR:
-                if (newState != MergeState.ERROR) {
-                    break;
-                }
-                item.setDirty(true);
-                item.setMergeState(newState);
+        case ERROR:
+            if (newState != MergeState.ERROR) {
                 break;
+            }
+            item.setDirty(true);
+            item.setMergeState(newState);
+            break;
 
-            case WARNING:
-                if (newState != MergeState.WARNING && newState != MergeState.ERROR) {
-                    break;
-                }
-                item.setDirty(true);
-                item.setMergeState(newState);
+        case WARNING:
+            if (newState != MergeState.WARNING && newState != MergeState.ERROR) {
                 break;
+            }
+            item.setDirty(true);
+            item.setMergeState(newState);
+            break;
 
-            case OK:
-                item.setDirty(true);
-                item.setMergeState(newState);
-                break;
+        case OK:
+            item.setDirty(true);
+            item.setMergeState(newState);
+            break;
         }
     }
 
@@ -681,9 +685,9 @@ public class PenaltyFragment extends BaseFragment
         builder.setTitle(item.getCompetitorDisplayName());
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item,
                 mCompetitorResults.getFirstRankZeroPosition() +
-                        /*
-                         * allow for setting rank as the new last in the list in case the competitor did not have a rank so far
-                         */
+                /*
+                 * allow for setting rank as the new last in the list in case the competitor did not have a rank so far
+                 */
                         (item.getOneBasedRank() == 0 ? 1 : 0),
                 competitor.getMergeState() == MergeState.ERROR);
         builder.setView(layout);
