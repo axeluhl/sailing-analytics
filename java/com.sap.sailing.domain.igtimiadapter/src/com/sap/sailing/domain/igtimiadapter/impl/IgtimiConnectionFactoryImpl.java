@@ -72,12 +72,15 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         connectionsByAccount = new HashMap<>();
         this.client = client;
         this.mongoObjectFactory = mongoObjectFactory;
-        for (TokenAndCreator accessToken : domainObjectFactory.getAccessTokens()) {
+        for (TokenAndCreator accessTokenWithCreator : domainObjectFactory.getAccessTokens()) {
             try {
-                registerAccountForWhichClientIsAuthorized(accessToken.getCreatorName(), accessToken.getAccessToken());
+                storeIgtimiAccount(accessTokenWithCreator.getCreatorName(), accessTokenWithCreator.getAccessToken(),
+                        getAccount(accessTokenWithCreator.getCreatorName(), accessTokenWithCreator.getAccessToken()));
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error registering Igtimi access token "+accessToken+"; probably the access token was revoked or expired.", e);
-                mongoObjectFactory.removeAccessToken(accessToken.getCreatorName(), accessToken.getAccessToken());
+                logger.log(Level.SEVERE, "Error registering Igtimi access token " + accessTokenWithCreator
+                        + "; probably the access token was revoked or expired.", e);
+                mongoObjectFactory.removeAccessToken(accessTokenWithCreator.getCreatorName(),
+                        accessTokenWithCreator.getAccessToken());
             }
         }
     }
@@ -89,11 +92,15 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.IGTIMI_ACCOUNT, account.getIdentifier().getTypeRelativeObjectIdentifier(),
                 account.getUser().getEmail(), () -> {
-                    accountsByEmail.put(account.getUser().getEmail(), account);
-                    accessTokensByAccount.put(account, accessToken);
-                    mongoObjectFactory.storeAccessToken(creatorName, accessToken);
-                    return account;
+                    return storeIgtimiAccount(creatorName, accessToken, account);
                 });
+    }
+
+    private Account storeIgtimiAccount(String creatorName, String accessToken, Account account) {
+        accountsByEmail.put(account.getUser().getEmail(), account);
+        accessTokensByAccount.put(account, accessToken);
+        mongoObjectFactory.storeAccessToken(creatorName, accessToken);
+        return account;
     }
 
     protected SecurityService getSecurityService() throws ClientProtocolException, IOException, ParseException {
