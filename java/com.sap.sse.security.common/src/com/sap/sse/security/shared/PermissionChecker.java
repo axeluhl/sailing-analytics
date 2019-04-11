@@ -229,7 +229,7 @@ public class PermissionChecker {
             Iterable<HasPermissions> allPermissionTypes, U user, U allUser, Function<WildcardPermission, O> ownershipResolver) {
         assert permission != null;
         assert allPermissionTypes != null;
-        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
+        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes, true);
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             final O ownership = ownershipResolver.apply(effectiveWildcardPermissionToCheck);
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
@@ -243,7 +243,7 @@ public class PermissionChecker {
     }
 
     private static Set<WildcardPermission> expandSingleToPermissions(WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes) {
+            Iterable<HasPermissions> allPermissionTypes, boolean expandToSingleIds) {
         List<Set<String>> parts = permission.getParts();
         final Set<String> typeParts;
         final boolean isTypePartWildcard;
@@ -280,10 +280,15 @@ public class PermissionChecker {
             allPermissionTypesByName.put(hasPermissions.getName(), hasPermissions);
         }
 
-        final Set<WildcardPermission> effectivePermissionsToCheck = new HashSet<>();
-        final String effectiveIdPartToCheck = isIdPartWildcard ? ""
-                : (WildcardPermission.PART_DIVIDER_TOKEN
-                        + Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
+        final Set<String> effectiveIdPartsToCheck;
+        if (isIdPartWildcard) {
+            effectiveIdPartsToCheck = Collections.singleton("");
+        } else if(expandToSingleIds) {
+            effectiveIdPartsToCheck = idParts;
+        } else {
+            effectiveIdPartsToCheck = Collections.singleton(Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
+        }
+        
         final Set<String> effectiveTypePartsToCheck;
         if (isTypePartWildcard) {
             effectiveTypePartsToCheck = allPermissionTypesByName.keySet();
@@ -291,6 +296,7 @@ public class PermissionChecker {
             effectiveTypePartsToCheck = typeParts;
         }
 
+        final Set<WildcardPermission> effectivePermissionsToCheck = new HashSet<>();
         for (String typePart : effectiveTypePartsToCheck) {
             HasPermissions hasPermissions = allPermissionTypesByName.get(typePart);
             final Set<String> effectiveActionPartsToCheck;
@@ -306,8 +312,11 @@ public class PermissionChecker {
             }
 
             for (String actionPart : effectiveActionPartsToCheck) {
-                effectivePermissionsToCheck.add(new WildcardPermission(
-                        typePart + WildcardPermission.PART_DIVIDER_TOKEN + actionPart + effectiveIdPartToCheck));
+                for (String idPart : effectiveIdPartsToCheck) {
+                    String idSuffix = idPart.isEmpty() ? "" : WildcardPermission.PART_DIVIDER_TOKEN + idPart;
+                    effectivePermissionsToCheck.add(new WildcardPermission(
+                            typePart + WildcardPermission.PART_DIVIDER_TOKEN + actionPart + idSuffix));
+                }
             }
         }
         return effectivePermissionsToCheck;
@@ -325,7 +334,7 @@ public class PermissionChecker {
             O ownership) {
         assert permission != null;
         assert allPermissionTypes != null;
-        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
+        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes, false);
         
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker,
