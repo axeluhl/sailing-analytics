@@ -24,6 +24,7 @@ import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
@@ -120,6 +121,12 @@ public class Activator implements BundleActivator {
             }
         }, getClass().getName() + " registering connectivity handler").start();
         
+        context.registerService(ClearStateTestSupport.class.getName(), new ClearStateTestSupport() {
+            @Override
+            public void clearState() throws Exception {
+                connectionFactory.get().clear();
+            }
+        }, null);
     }
     
     public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {

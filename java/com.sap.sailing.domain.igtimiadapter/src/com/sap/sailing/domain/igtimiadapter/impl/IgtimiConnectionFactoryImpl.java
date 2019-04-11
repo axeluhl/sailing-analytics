@@ -84,6 +84,13 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             }
         }
     }
+
+    public void clear() {
+        accessTokensByAccount.clear();
+        accountsByEmail.clear();
+        connectionsByAccount.clear();
+        mongoObjectFactory.clear();
+    }
     
     @Override
     public Account registerAccountForWhichClientIsAuthorized(String creatorName, String accessToken)
