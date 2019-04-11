@@ -228,6 +228,8 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 account -> account.getName(), columnSortHandler);
         final TextColumn<AccountWithSecurityDTO> accountEmailColumn = new AbstractSortableTextColumn<AccountWithSecurityDTO>(
                 account -> account.getEmail(), columnSortHandler);
+        final TextColumn<AccountWithSecurityDTO> creatorNameColumn = new AbstractSortableTextColumn<AccountWithSecurityDTO>(
+                account -> account.getCreatorName(), columnSortHandler);
 
         final HasPermissions type = SecuredDomainType.IGTIMI_ACCOUNT;
         final AccessControlledActionsColumn<AccountWithSecurityDTO, DefaultActionsImagesBarCell> roleActionColumn = create(
@@ -248,6 +250,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         table.addColumn(accountSelectionCheckboxColumn, accountSelectionCheckboxColumn.getHeader());
         table.addColumn(accountNameColumn, stringMessages.name());
         table.addColumn(accountEmailColumn, stringMessages.email());
+        table.addColumn(creatorNameColumn, stringMessages.creatorName());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(roleActionColumn, stringMessages.actions());
         table.setSelectionModel(accountSelectionCheckboxColumn.getSelectionModel(),
