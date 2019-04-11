@@ -3,9 +3,11 @@ package com.sap.sse.security.shared;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions.Action;
@@ -190,11 +192,46 @@ public class PermissionChecker {
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermission(
             WildcardPermission permission,
             Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
+        return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> ownership);
+    }
+    
+    /**
+     * This is not the fully featured permission check!<br>
+     * See {@link #checkMetaPermission(WildcardPermission, Iterable, SecurityUser, SecurityUser, AbstractOwnership)} for
+     * more information about the check.<br>
+     * This version of the meta permission check relies on dynamic resolution of ownerships via the given
+     * ownershipResolver. Due to the absence of ownership information this check is not possible in the UI.
+     */
+    public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermissionWithOwnershipResolution(
+            WildcardPermission permission, Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
+            Function<QualifiedObjectIdentifier, O> ownershipResolver) {
+        return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> {
+            final Iterable<QualifiedObjectIdentifier> qualifiedObjectIdentifiers = wp.getQualifiedObjectIdentifiers();
+            final O ownership;
+            Iterator<QualifiedObjectIdentifier> iterator = qualifiedObjectIdentifiers.iterator();
+            if (!iterator.hasNext()) {
+                ownership = null;
+            } else {
+                QualifiedObjectIdentifier firstIdentifier = iterator.next();
+                if (iterator.hasNext() || firstIdentifier == null) {
+                    // No single distinct identifier
+                    ownership = null;
+                } else {
+                    ownership = ownershipResolver.apply(firstIdentifier);
+                }
+            }
+            return ownership;
+        });
+    }
+    
+    private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermissionInternal(
+            WildcardPermission permission,
+            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, Function<WildcardPermission, O> ownershipResolver) {
         assert permission != null;
         assert allPermissionTypes != null;
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
-
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
+            final O ownership = ownershipResolver.apply(effectiveWildcardPermissionToCheck);
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
                     impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED
                     && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser),
