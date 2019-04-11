@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.sap.sse.common.util.MappingIterable;
 import com.sap.sse.common.util.MappingIterator;
@@ -146,20 +148,6 @@ public class Util {
         public String toString() {
             return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
-    }
-    
-    /**
-     * To be replaced with java.util.function.Supplier when we can consistently use Java 8.
-     */
-    public interface Provider<T> {
-        T get();
-    }
-    
-    /**
-     * To be replaced with java.util.function.Function when we can consistently use Java 8.
-     */
-    public interface Function<I, O> {
-        O get(I in);
     }
 
     /**
@@ -783,10 +771,10 @@ public class Util {
      * @return a map containing all given values in inner collections grouped by a specific criteria
      */
     public static <K, V> Map<K, Iterable<V>> group(Iterable<V> values, Function<V, K> mappingFunction,
-            Provider<? extends Collection<V>> newCollectionProvider) {
+            Supplier<? extends Collection<V>> newCollectionProvider) {
         final Map<K, Iterable<V>> result = new HashMap<>();
         for (V value : values) {
-            final K key = mappingFunction.get(value);
+            final K key = mappingFunction.apply(value);
             Collection<V> groupValues = (Collection<V>) result.get(key);
             if (groupValues == null) {
                 groupValues = newCollectionProvider.get();

@@ -5,6 +5,7 @@ import java.io.ObjectOutputStream;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.FixAcceptancePredicate;
@@ -13,7 +14,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Function;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 import com.sap.sse.concurrent.LockUtil;
@@ -318,15 +318,15 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
             if (fixPair.getB() == null) {
                 result = null;
             } else {
-                result = converter.get(fixPair.getB()).divide(1);
+                result = converter.apply(fixPair.getB()).divide(1);
             }
         } else {
             if (fixPair.getB() == null || fixPair.getA() == fixPair.getB()) {
-                result = converter.get(fixPair.getA()).divide(1);
+                result = converter.apply(fixPair.getA()).divide(1);
             } else {
                 result = timeBasedAverage(timePoint,
-                        converter.get(fixPair.getA()), fixPair.getA().getTimePoint(),
-                        converter.get(fixPair.getB()), fixPair.getB().getTimePoint());
+                        converter.apply(fixPair.getA()), fixPair.getA().getTimePoint(),
+                        converter.apply(fixPair.getB()), fixPair.getB().getTimePoint());
             }
         }
         return result;
