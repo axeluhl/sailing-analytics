@@ -15,10 +15,12 @@ public class AccountWithSecurityDTO implements SecuredDTO {
 
     private String email;
     private String name;
+    private String creatorName;
 
-    public AccountWithSecurityDTO(String email, String name) {
+    public AccountWithSecurityDTO(String email, String name, String creatorName) {
         this.email = email;
         this.name = name;
+        this.creatorName = creatorName;
     }
 
     public AccountWithSecurityDTO() {
@@ -34,6 +36,10 @@ public class AccountWithSecurityDTO implements SecuredDTO {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
     }
 
     @Override
@@ -66,13 +72,14 @@ public class AccountWithSecurityDTO implements SecuredDTO {
         return name;
     }
 
+    private TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return creatorName == null ? new TypeRelativeObjectIdentifier(email)
+                : new TypeRelativeObjectIdentifier(email, creatorName);
+    }
+
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
         return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
-    }
-
-    private TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return new TypeRelativeObjectIdentifier(email);
     }
 
 }

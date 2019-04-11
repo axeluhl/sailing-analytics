@@ -6500,7 +6500,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final com.sap.sailing.domain.igtimiadapter.User user = igtimiAccount.getUser();
         final String email = user.getEmail();
         final String name = user.getFirstName() + " " + user.getSurname();
-        final AccountWithSecurityDTO securedAccount = new AccountWithSecurityDTO(email, name);
+        final AccountWithSecurityDTO securedAccount = new AccountWithSecurityDTO(email, name,
+                igtimiAccount.getCreatorName());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedAccount, igtimiAccount.getIdentifier());
         return securedAccount;
     }
@@ -6529,7 +6530,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (existingAccount == null) {
             final String creatorName = getSecurityService().getCurrentUser().getName();
             account = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.IGTIMI_ACCOUNT, Account.getTypeRelativeObjectIdentifier(eMailAddress),
+                    SecuredDomainType.IGTIMI_ACCOUNT,
+                    Account.getTypeRelativeObjectIdentifier(eMailAddress, creatorName),
                     eMailAddress,
                     () -> getIgtimiConnectionFactory().createAccountToAccessUserData(creatorName, eMailAddress, password));
         } else {
