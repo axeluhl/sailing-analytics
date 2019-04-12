@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -57,6 +58,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         configureLeaderboard();
     }
     
+    @Ignore
     @Test
     public void testCorrectDisplayOfAllColumns() {
         LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, true);
@@ -106,7 +108,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
             assertFalse(races.iterator().next().isLinked()); // removing the race must make the race column unlinked.
         }
         // now back to the TracTrac management panel, load the race again and make sure it is auto-linked to the column
-        startTrackingRaceAndStopWhenFinished(adminConsole);
+        startTrackingRaceAndStopWhenFinished(adminConsole, false);
         {
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
             LeaderboardDetailsPanelPO details = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
@@ -128,7 +130,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         seriesDialog.pressOk();
         regattaDetails.deleteSeries("Default");
         // Start the tracking for the races and wait until they are ready to use
-        startTrackingRaceAndStopWhenFinished(adminConsole);
+        startTrackingRaceAndStopWhenFinished(adminConsole, true);
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
@@ -138,9 +140,13 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
     /**
      * @param adminConsole
      */
-    private void startTrackingRaceAndStopWhenFinished(AdminConsolePage adminConsole) {
+    private void startTrackingRaceAndStopWhenFinished(AdminConsolePage adminConsole, boolean addConnection) {
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.addConnectionAndListTrackableRaces(KIELER_WOCHE_2013_JSON_URL);
+        if (addConnection) {
+            tracTracEvents.addConnectionAndListTrackableRaces(KIELER_WOCHE_2013_JSON_URL);
+        } else {
+            tracTracEvents.listRacesForExistingConnection(KIELER_WOCHE_2013_JSON_URL);
+        }
         tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);

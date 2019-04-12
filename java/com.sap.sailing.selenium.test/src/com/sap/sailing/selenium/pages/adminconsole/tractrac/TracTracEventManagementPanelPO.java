@@ -123,6 +123,10 @@ public class TracTracEventManagementPanelPO extends PageArea {
         AddTracTracConnectionDialogPO dialog = addConnection();
         dialog.setJsonUrl(url);
         dialog.pressOk();
+        listRacesForExistingConnection(url);
+    }
+
+    public void listRacesForExistingConnection(String url) {
         CellTablePO<DataEntryPO> tablePO = getConfigurationTable();
         tablePO.waitForTableToShowData();
         tablePO.selectEntries(entry -> {
