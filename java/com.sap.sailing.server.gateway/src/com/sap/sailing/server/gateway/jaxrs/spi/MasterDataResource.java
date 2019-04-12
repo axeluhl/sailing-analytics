@@ -48,15 +48,13 @@ public class MasterDataResource extends AbstractSailingServerResource {
     public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> requestedLeaderboardGroups,
             @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind, @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs)
             throws UnsupportedEncodingException {
-
         final SecurityService securityService = getSecurityService();
         User user = securityService.getCurrentUser();
         if (user == null) {
             return Response.status(Status.FORBIDDEN).build();
         }
-
         final long startTime = System.currentTimeMillis();
-        logger.info("Masterdataexport has started");
+        logger.info("Masterdataexport has started; requesting user: "+user);
         if (compress == null) {
             compress = false;
         }
@@ -89,9 +87,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
                 }
             }
         }
-
         final List<Serializable> competitorIds = new ArrayList<Serializable>();
-
         for (LeaderboardGroup lg : groupsToExport) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
                 if (securityService.hasCurrentUserReadPermission(leaderboard)) {
@@ -108,7 +104,6 @@ public class MasterDataResource extends AbstractSailingServerResource {
                 raceManagerDeviceConfigurations.add(deviceConfig);
             }
         }
-
         ArrayList<Event> events = new ArrayList<>();
         for (Event event : getService().getAllEvents()) {
             if (securityService.hasCurrentUserReadPermission(event)) {
@@ -122,7 +117,6 @@ public class MasterDataResource extends AbstractSailingServerResource {
                 mediaTracks.add(mediaTrack);
             }
         }
-
         Map<String, Regatta> regattaRaceIds = new HashMap<>();
         for (Entry<String, Regatta> regattaRaceMap : getService().getPersistentRegattasForRaceIDs().entrySet()) {
             if (securityService.hasCurrentUserReadPermission(regattaRaceMap.getValue())) {
