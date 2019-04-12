@@ -191,7 +191,7 @@ Due to the new security model, there are semantic changes regarding several part
 
 Wind tracking via Igtimi changed its semantic the respect account visibility for a user who tracks a race. When a user tracks a new race or starts tracking wind for existing races, only Igtimi accounts are included that the user has READ permissions for.
 
-When races are automatically tracked during server restarting, the accounts are filtered by the user owner of the TrackedRace to simulate the tracking of the race as it would be done by the initial creator. If there is no user owner, the accounts are filtered by the readability of the race's group owner.
+When races are automatically tracked during server restarting, the accounts are filtered by the user owner of the TrackedRace to simulate the tracking of the race as it were triggered by the initial creator. If there is no user owner, the accounts are filtered by the readability of the race's group owner.
 
 ### DeviceConfiguration UUID
 
