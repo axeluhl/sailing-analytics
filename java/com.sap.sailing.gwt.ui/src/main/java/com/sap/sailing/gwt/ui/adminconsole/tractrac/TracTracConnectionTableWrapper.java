@@ -78,8 +78,6 @@ public class TracTracConnectionTableWrapper extends
                 dto -> dto.getCourseDesignUpdateURI(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountUsernameColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getTracTracUsername(), tracTracAccountColumnListHandler);
-        final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountPasswordColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
-                dto -> dto.getTracTracPassword(), tracTracAccountColumnListHandler);
         final TextColumn<TracTracConfigurationWithSecurityDTO> tracTracAccountCreatorNameColumn = new AbstractSortableTextColumn<TracTracConfigurationWithSecurityDTO>(
                 dto -> dto.getCreatorName(), tracTracAccountColumnListHandler);
 
@@ -162,7 +160,6 @@ public class TracTracConnectionTableWrapper extends
         table.addColumn(tracTracAccountJsonUrlColumn, stringMessagesClient.jsonUrl());
         table.addColumn(tracTracAccountTracTracServerUpdateUriColumn, stringMessagesClient.tracTracUpdateUrl());
         table.addColumn(tracTracAccountUsernameColumn, stringMessagesClient.tractracUsername());
-        table.addColumn(tracTracAccountPasswordColumn, stringMessagesClient.tractracPassword());
         table.addColumn(tracTracAccountCreatorNameColumn, stringMessagesClient.creatorName());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, tracTracAccountColumnListHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());

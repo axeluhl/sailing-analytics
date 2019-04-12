@@ -81,8 +81,6 @@ public class SwissTimingConnectionTableWrapper extends
                 dto -> dto.getUpdateURL(), swissTimingConectionColumnListHandler);
         final TextColumn<SwissTimingConfigurationWithSecurityDTO> swissTimingConnectionUpdateUsernameColumn = new AbstractSortableTextColumn<SwissTimingConfigurationWithSecurityDTO>(
                 dto -> dto.getUpdateUsername(), swissTimingConectionColumnListHandler);
-        final TextColumn<SwissTimingConfigurationWithSecurityDTO> swissTimingConnectionUpdatePasswordColumn = new AbstractSortableTextColumn<SwissTimingConfigurationWithSecurityDTO>(
-                dto -> dto.getUpdatePassword(), swissTimingConectionColumnListHandler);
         final TextColumn<SwissTimingConfigurationWithSecurityDTO> swissTimingConnectionCreatorNameColumn = new AbstractSortableTextColumn<SwissTimingConfigurationWithSecurityDTO>(
                 dto -> dto.getCreatorName(), swissTimingConectionColumnListHandler);
 
@@ -166,7 +164,6 @@ public class SwissTimingConnectionTableWrapper extends
         table.addColumn(swissTimingConnectionPortColumn, stringMessagesClient.manage2SailPort());
         table.addColumn(swissTimingConnectionUpdateUrlColumn, stringMessagesClient.updateURL());
         table.addColumn(swissTimingConnectionUpdateUsernameColumn, stringMessagesClient.username());
-        table.addColumn(swissTimingConnectionUpdatePasswordColumn, stringMessagesClient.password());
         table.addColumn(swissTimingConnectionCreatorNameColumn, stringMessagesClient.creatorName());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, swissTimingConectionColumnListHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());
