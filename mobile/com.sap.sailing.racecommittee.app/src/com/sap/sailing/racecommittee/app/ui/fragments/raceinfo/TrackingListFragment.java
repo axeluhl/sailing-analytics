@@ -840,7 +840,7 @@ public class TrackingListFragment extends BaseFragment
                 }
             }
             if (!found) {
-                result.add(new CompetitorResultImpl(oldItem));
+                result.add(new CompetitorResultImpl(oldItem, 0));
             }
         }
 

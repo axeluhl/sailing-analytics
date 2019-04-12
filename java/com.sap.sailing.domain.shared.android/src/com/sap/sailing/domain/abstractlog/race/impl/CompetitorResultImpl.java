@@ -37,6 +37,12 @@ public class CompetitorResultImpl implements CompetitorResult {
                 item.getComment(), item.getMergeState());
     }
 
+    public CompetitorResultImpl(CompetitorResult item,  int oneBasedRank) {
+        this(item.getCompetitorId(), item.getName(), item.getShortName(), item.getBoatName(), item.getBoatSailId(),
+                oneBasedRank, item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
+                item.getComment(), item.getMergeState());
+    }
+
     public CompetitorResultImpl(Serializable competitorId, String competitorName, String competitorShortName,
             String boatName, String boatSailId, int oneBasedRank, MaxPointsReason maxPointsReason, Double score,
             TimePoint finishingTime, String comment, MergeState mergeState) {
