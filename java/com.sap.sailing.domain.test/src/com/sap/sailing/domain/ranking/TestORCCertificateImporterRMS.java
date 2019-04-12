@@ -7,19 +7,19 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.ranking.ORCCertificateFile.ORCCertificateValues;
+import com.sap.sailing.domain.ranking.ORCCertificateImporterRMS.ORCCertificateValues;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
-public class TestORCCertificateParser {
+public class TestORCCertificateImporterRMS {
     private static final String RESOURCES = "resources/orc/";
 
     @Test
     public void testSimpleRMSFileRead() throws FileNotFoundException, IOException {
         final File gerRms = new File(RESOURCES + "GER2016.rms");
-        ORCCertificateFile gerRmsFile = new ORCCertificateFile(new FileReader(gerRms));
+        ORCCertificateImporterRMS gerRmsFile = new ORCCertificateImporterRMS(new FileReader(gerRms));
         assertNotNull(gerRmsFile);
         assertTrue(gerRmsFile.getFileIds().contains("GER152487GER884"));
         final ORCCertificateValues ger884 = gerRmsFile.getValuesForFileId("GER152487GER884");

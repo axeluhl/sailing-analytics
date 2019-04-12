@@ -22,4 +22,24 @@ public class ORCCertificate {
         this.twaCourses = twaCourses;
         this.predefinedCourses = predefinedCourses;
     }
+    
+    public String getValue(String key) {
+        String result = null;
+        
+        if (general.containsKey(key)) {
+            result = general.get(key);
+        } else if (hull.containsKey(key)) {
+            result = hull.get(key).toString();
+        } else if (sails.containsKey(key)) {
+            result = sails.get(key).toString();
+        } else if (scoring.containsKey(key)) {
+            result = scoring.get(key).toString();
+        } else if (twaCourses.containsKey(key)) {
+            result = twaCourses.get(key).toString();
+        } else if (predefinedCourses.containsKey(key)) {
+            result = predefinedCourses.get(key).toString();
+        };
+        
+        return result;
+    } 
 }
