@@ -73,6 +73,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         getUserService().executeWithServerInfo(this::createUI);
+        getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
     }
      
     private void createUI(final ServerInfoDTO serverInfo) {
@@ -83,7 +84,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             @Override
             public Widget get() {
-                checkPublicServerNonPublicUserWarning();
                 return createAdminConsolePanel(serverInfo);
             }
         });
