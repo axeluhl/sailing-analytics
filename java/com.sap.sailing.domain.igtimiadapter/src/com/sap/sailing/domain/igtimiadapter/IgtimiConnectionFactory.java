@@ -43,7 +43,7 @@ public interface IgtimiConnectionFactory {
      * which this factory belongs.
      * @return 
      */
-    Account registerAccountForWhichClientIsAuthorized(String accessToken) throws ClientProtocolException,
+    Account registerAccountForWhichClientIsAuthorized(String creatorName, String accessToken) throws ClientProtocolException,
             IllegalStateException, IOException, ParseException;
 
     /**
@@ -59,7 +59,7 @@ public interface IgtimiConnectionFactory {
      * @return the account with which a caller can then {@link #connect obtain a connection} for the data that the user
      *         identified by <code>userEmail</code> and <code>userPassword</code> shares with our client.
      */
-    Account createAccountToAccessUserData(String userEmail, String userPassword) throws ClientProtocolException,
+    Account createAccountToAccessUserData(String creatorName, String userEmail, String userPassword) throws ClientProtocolException,
             IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
             InstantiationException, IllegalAccessException, ClassCastException, ParseException;
 

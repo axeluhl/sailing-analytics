@@ -24,6 +24,7 @@ import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
@@ -54,7 +55,9 @@ public class Activator implements BundleActivator {
     private static final String CLIENT_REDIRECT_PORT_PROPERTY_NAME = "igtimi.client.redirect.port";
     private final Future<IgtimiConnectionFactoryImpl> connectionFactory;
     private final Future<IgtimiWindTrackerFactory> windTrackerFactory;
+    private ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+    private SecurityService securityServiceTest;
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         logger.info(getClass().getName()+" constructor");
@@ -82,6 +85,11 @@ public class Activator implements BundleActivator {
         });
     }
 
+    /** Only used by tests. */
+    public void setSecurityService(SecurityService securityService) {
+        securityServiceTest = securityService;
+    }
+
     @Override
     public void start(final BundleContext context) throws Exception {
         INSTANCE = this;
@@ -99,9 +107,8 @@ public class Activator implements BundleActivator {
             }
         });
         
+        securityServiceServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
         new Thread(() -> {
-            final ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker = ServiceTrackerFactory
-                    .createAndOpen(context, SecurityService.class);
             try {
                 final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
                 IgtimiConnectionFactoryImpl igtimiConnectionFactory = connectionFactory.get();
@@ -114,6 +121,12 @@ public class Activator implements BundleActivator {
             }
         }, getClass().getName() + " registering connectivity handler").start();
         
+        context.registerService(ClearStateTestSupport.class.getName(), new ClearStateTestSupport() {
+            @Override
+            public void clearState() throws Exception {
+                connectionFactory.get().clear();
+            }
+        }, null);
     }
     
     public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
@@ -132,6 +145,10 @@ public class Activator implements BundleActivator {
         }
     }
     
+    public SecurityService getSecurityService() {
+        return securityServiceTest == null ? securityServiceServiceTracker.getService() : securityServiceTest;
+    }
+
     public IgtimiWindTrackerFactory getWindTrackerFactory() {
         try {
             return windTrackerFactory.get();
@@ -143,5 +160,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        securityServiceServiceTracker.close();
+        securityServiceServiceTracker = null;
     }
 }

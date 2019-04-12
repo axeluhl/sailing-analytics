@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParam
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
@@ -61,6 +62,8 @@ public class Activator implements BundleActivator {
 
                 com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
                         .createDomainObjectFactory(mongoObjectFactory.getDatabase(), domainFactory);
+                com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
+                        .createMongoObjectFactory(mongoObjectFactory.getDatabase());
                 for (TracTracConfiguration trackTrackConfig : tractracDomainObjectFactory.getTracTracConfigurations()) {
                     securityService.migrateOwnership(trackTrackConfig);
                 }
@@ -69,6 +72,12 @@ public class Activator implements BundleActivator {
 
                 properties.put(TypeBasedServiceFinder.TYPE, RaceTrackingConnectivityParametersImpl.TYPE);
                 context.registerService(RaceTrackingConnectivityParametersHandler.class, paramsHandler, properties);
+                context.registerService(ClearStateTestSupport.class.getName(), new ClearStateTestSupport() {
+                    @Override
+                    public void clearState() throws Exception {
+                        tractracMongoObjectFactory.clear();
+                    }
+                }, null);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception trying to register TracTrac RaceTrackingConnectivityParametersHandler implementation", e);
             }

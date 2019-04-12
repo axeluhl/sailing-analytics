@@ -13,6 +13,8 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  *
  */
 public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier {
+
+    String getCreatorName();
     String getName();
     
     String getJsonURL();
@@ -38,10 +40,11 @@ public interface SwissTimingConfiguration extends WithQualifiedObjectIdentifier 
     }
 
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(getJsonURL());
+        return getTypeRelativeObjectIdentifier(getJsonURL(), getCreatorName());
     }
 
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl) {
-        return new TypeRelativeObjectIdentifier(jsonUrl);
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl, String username) {
+        return username == null ? new TypeRelativeObjectIdentifier(jsonUrl)
+                : new TypeRelativeObjectIdentifier(jsonUrl, username);
     }
 }

@@ -454,12 +454,12 @@ import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
-import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
@@ -1411,25 +1411,58 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception {
+    public List<TracTracConfigurationWithSecurityDTO> getPreviousTracTracConfigurations() throws Exception {
         final Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT,
                 configs,
-                ttConfig -> new TracTracConfigurationDTO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
+                ttConfig -> {
+                    TracTracConfigurationWithSecurityDTO config = new TracTracConfigurationWithSecurityDTO(
+                            ttConfig.getName(),
+                        ttConfig.getJSONURL().toString(),
                         ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(),
                         ttConfig.getCourseDesignUpdateURI().toString(), ttConfig.getTracTracUsername().toString(),
-                        ttConfig.getTracTracPassword().toString()));
+                            ttConfig.getTracTracPassword().toString(), ttConfig.getCreatorName());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
+                    return config;
+                });
+    }
+    
+    @Override
+    public void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
+            String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
+        if (existsTracTracConfigurationForCurrentUser(jsonURL)) {
+            throw new RuntimeException("A configuration for the current user with this json URL already exists.");
+        }
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
+        final TypeRelativeObjectIdentifier identifier = TracTracConfiguration.getTypeRelativeObjectIdentifier(jsonURL, currentUserName);
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.TRACTRAC_ACCOUNT,
+                identifier, name,
+                () -> tractracMongoObjectFactory.createTracTracConfiguration(
+                        getTracTracAdapter().createTracTracConfiguration(currentUserName, name, jsonURL, liveDataURI,
+                                storedDataURI,
+                                courseDesignUpdateURI, tracTracUsername, tracTracPassword)));
     }
 
     @Override
-    public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
-            String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
+    public void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration) {
+        getSecurityService().checkCurrentUserDeletePermission(tracTracConfiguration);
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(tracTracConfiguration,
+                () ->
+        tractracMongoObjectFactory.deleteTracTracConfiguration(tracTracConfiguration.getCreatorName(),
+                tracTracConfiguration.getJsonUrl()));
+    }
 
-        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.TRACTRAC_ACCOUNT, TracTracConfiguration.getTypeRelativeObjectIdentifier(jsonURL), name,
-                () -> tractracMongoObjectFactory.storeTracTracConfiguration(
-                        getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI,
-                                courseDesignUpdateURI, tracTracUsername, tracTracPassword)));
+    @Override
+    public void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
+            throws Exception {
+        getSecurityService().checkCurrentUserUpdatePermission(tracTracConfiguration);
+        tractracMongoObjectFactory.updateTracTracConfiguration(
+                getTracTracAdapter().createTracTracConfiguration(tracTracConfiguration.getCreatorName(),
+                tracTracConfiguration.getName(), tracTracConfiguration.getJsonUrl(),
+                tracTracConfiguration.getLiveDataURI(), tracTracConfiguration.getStoredDataURI(),
+                tracTracConfiguration.getCourseDesignUpdateURI(), tracTracConfiguration.getTracTracUsername(),
+                        tracTracConfiguration.getTracTracPassword()));
     }
 
     private RaceDefinition getRaceByName(Regatta regatta, String raceName) {
@@ -3144,12 +3177,96 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations() {
+    public boolean existsSwissTimingConfigurationForCurrentUser(String jsonUrl)
+            throws Exception, UnauthorizedException {
+        boolean found = false;
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
+        for (final SwissTimingConfigurationWithSecurityDTO dto : getPreviousSwissTimingConfigurations()) {
+            if (dto.getJsonUrl().equals(jsonUrl) && currentUserName.equals(dto.getCreatorName())) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+    @Override
+    public boolean existsSwissTimingArchiveConfigurationForCurrentUser(String jsonUrl)
+            throws Exception, UnauthorizedException {
+        boolean found = false;
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
+        for (final SwissTimingArchiveConfigurationWithSecurityDTO dto : getPreviousSwissTimingArchiveConfigurations()) {
+            if (dto.getJsonUrl().equals(jsonUrl) && currentUserName.equals(dto.getCreatorName())) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+    @Override
+    public boolean existsTracTracConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException {
+        boolean found = false;
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
+        for (final TracTracConfigurationWithSecurityDTO dto : getPreviousTracTracConfigurations()) {
+            if (dto.getJsonUrl().equals(jsonUrl) && currentUserName.equals(dto.getCreatorName())) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+    @Override
+    public List<SwissTimingConfigurationWithSecurityDTO> getPreviousSwissTimingConfigurations() {
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, configs,
-                stConfig -> new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(),
+                stConfig -> {
+                    final SwissTimingConfigurationWithSecurityDTO config = new SwissTimingConfigurationWithSecurityDTO(
+                            stConfig.getName(), stConfig.getJsonURL(),
                         stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(),
-                        stConfig.getUpdateUsername(), stConfig.getUpdatePassword()));
+                            stConfig.getUpdateUsername(), stConfig.getUpdatePassword(), stConfig.getCreatorName());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
+                    return config;
+                });
+    }
+
+    @Override
+    public void createSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
+            String updateURL, String updateUsername, String updatePassword) throws Exception {
+        if (!jsonURL.equalsIgnoreCase("test")) {
+            if (existsSwissTimingConfigurationForCurrentUser(jsonURL)) {
+                throw new RuntimeException("A Configuration for the current user with this json URL already exists.");
+            }
+            final String currentUserName = getSecurityService().getCurrentUser().getName();
+            final TypeRelativeObjectIdentifier identifier = SwissTimingConfiguration.getTypeRelativeObjectIdentifier(jsonURL, currentUserName);
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.SWISS_TIMING_ACCOUNT,
+                    identifier, configName,
+                    () -> swissTimingAdapterPersistence
+                            .createSwissTimingConfiguration(
+                                    swissTimingFactory.createSwissTimingConfiguration(configName,
+                                            jsonURL, hostname, port, updateURL, updateUsername, updatePassword,
+                                            currentUserName)));
+        }
+    }
+
+    @Override
+    public void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration) {
+        getSecurityService().checkCurrentUserDeletePermission(configuration);
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(configuration,
+                () -> swissTimingAdapterPersistence.deleteSwissTimingConfiguration(configuration.getCreatorName(),
+                        configuration.getJsonUrl()));
+    }
+
+    @Override
+    public void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration)
+            throws Exception {
+        getSecurityService().checkCurrentUserUpdatePermission(configuration);
+        swissTimingAdapterPersistence.updateSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(
+                configuration.getName(), configuration.getJsonUrl(), configuration.getHostname(),
+                configuration.getPort(), configuration.getUpdateURL(), configuration.getUpdateUsername(),
+                configuration.getUpdatePassword(), configuration.getCreatorName()));
     }
 
     @Override
@@ -3182,19 +3299,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     eventResult.getTrackingDataPort(), swissTimingRaces);
         }
         return result;
-    }
-
-    @Override
-    public void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
-            String updateURL, String updateUsername, String updatePassword) throws Exception {
-        if (!jsonURL.equalsIgnoreCase("test")) {
-            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.SWISS_TIMING_ACCOUNT, SwissTimingConfiguration.getTypeRelativeObjectIdentifier(jsonURL),
-                    configName,
-                    () -> swissTimingAdapterPersistence
-                            .storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName,
-                                    jsonURL, hostname, port, updateURL, updateUsername, updatePassword)));
-        }
     }
     
     private RaceLogStore getRaceLogStore() {
@@ -5183,20 +5287,50 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations() {
+    public List<SwissTimingArchiveConfigurationWithSecurityDTO> getPreviousSwissTimingArchiveConfigurations() {
         Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence
                 .getSwissTimingArchiveConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, configs,
-                stArchiveConfig -> new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonURL()));
+                stArchiveConfig -> {
+                    SwissTimingArchiveConfigurationWithSecurityDTO config = new SwissTimingArchiveConfigurationWithSecurityDTO(
+                            stArchiveConfig.getJsonURL(), stArchiveConfig.getCreatorName());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
+                    return config;
+                });
     }
 
     @Override
-    public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) throws Exception {
+    public void createSwissTimingArchiveConfiguration(final String jsonURL)
+            throws Exception {
+        if (existsSwissTimingArchiveConfigurationForCurrentUser(jsonURL)) {
+            throw new RuntimeException("A configuration for the current user with this json URL already exists.");
+        }
+        final String currentUserName = getSecurityService().getCurrentUser().getName();
+        final TypeRelativeObjectIdentifier identifier = SwissTimingArchiveConfiguration
+                .getTypeRelativeObjectIdentifier(jsonURL, currentUserName);
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.SWISS_TIMING_ACCOUNT, SwissTimingArchiveConfiguration.getTypeRelativeObjectIdentifier(swissTimingJsonUrl),
-                swissTimingJsonUrl, () -> swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(
-                        swissTimingFactory.createSwissTimingArchiveConfiguration(swissTimingJsonUrl)));
+                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT,
+                identifier, identifier.toString(),
+                () -> swissTimingAdapterPersistence.createSwissTimingArchiveConfiguration(
+                        swissTimingFactory.createSwissTimingArchiveConfiguration(jsonURL,
+                                currentUserName)));
+    }
+
+    @Override
+    public void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+            throws Exception {
+        getSecurityService().checkCurrentUserUpdatePermission(dto);
+        swissTimingAdapterPersistence.updateSwissTimingArchiveConfiguration(
+                swissTimingFactory.createSwissTimingArchiveConfiguration(dto.getJsonUrl(), dto.getCreatorName()));
+    }
+
+    @Override
+    public void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+            throws Exception {
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(dto.getIdentifier(),
+                () -> swissTimingAdapterPersistence.deleteSwissTimingArchiveConfiguration(swissTimingFactory
+                        .createSwissTimingArchiveConfiguration(dto.getJsonUrl(), dto.getCreatorName())));
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
@@ -6366,7 +6500,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final com.sap.sailing.domain.igtimiadapter.User user = igtimiAccount.getUser();
         final String email = user.getEmail();
         final String name = user.getFirstName() + " " + user.getSurname();
-        final AccountWithSecurityDTO securedAccount = new AccountWithSecurityDTO(email, name);
+        final AccountWithSecurityDTO securedAccount = new AccountWithSecurityDTO(email, name,
+                igtimiAccount.getCreatorName());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedAccount, igtimiAccount.getIdentifier());
         return securedAccount;
     }
@@ -6393,10 +6528,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailAddress);
         final Account account;
         if (existingAccount == null) {
+            final String creatorName = getSecurityService().getCurrentUser().getName();
             account = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.IGTIMI_ACCOUNT, Account.getTypeRelativeObjectIdentifier(eMailAddress),
+                    SecuredDomainType.IGTIMI_ACCOUNT,
+                    Account.getTypeRelativeObjectIdentifier(eMailAddress, creatorName),
                     eMailAddress,
-                    () -> getIgtimiConnectionFactory().createAccountToAccessUserData(eMailAddress, password));
+                    () -> getIgtimiConnectionFactory().createAccountToAccessUserData(creatorName, eMailAddress, password));
         } else {
             logger.warning("Igtimi account "+eMailAddress+" already exists.");
             account = null; // account with that e-mail already exists

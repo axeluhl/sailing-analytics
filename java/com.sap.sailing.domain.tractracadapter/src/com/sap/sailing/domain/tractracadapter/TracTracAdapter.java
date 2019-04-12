@@ -103,7 +103,8 @@ public interface TracTracAdapter {
 
     RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws Exception;
 
-    TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI,
+    TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
+            String liveDataURI,
             String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
 
 }

@@ -39,6 +39,8 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
      */
     String getTracTracPassword();
 
+    String getCreatorName();
+
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
         return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
@@ -50,10 +52,12 @@ public interface TracTracConfiguration extends WithQualifiedObjectIdentifier {
     }
 
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(getJSONURL());
+        return getTypeRelativeObjectIdentifier(getJSONURL(), getCreatorName());
     }
 
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl) {
-        return new TypeRelativeObjectIdentifier(jsonUrl);
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl, String username) {
+
+        return username == null ? new TypeRelativeObjectIdentifier(jsonUrl)
+                : new TypeRelativeObjectIdentifier(jsonUrl, username);
     }
 }

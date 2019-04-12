@@ -43,6 +43,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -51,7 +52,9 @@ import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.persistence.TokenAndCreator;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
@@ -69,32 +72,55 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         connectionsByAccount = new HashMap<>();
         this.client = client;
         this.mongoObjectFactory = mongoObjectFactory;
-        for (String accessToken : domainObjectFactory.getAccessTokens()) {
+        for (TokenAndCreator accessTokenWithCreator : domainObjectFactory.getAccessTokens()) {
             try {
-                registerAccountForWhichClientIsAuthorized(accessToken);
+                storeIgtimiAccount(accessTokenWithCreator.getCreatorName(), accessTokenWithCreator.getAccessToken(),
+                        getAccount(accessTokenWithCreator.getCreatorName(), accessTokenWithCreator.getAccessToken()));
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error registering Igtimi access token "+accessToken+"; probably the access token was revoked or expired.", e);
-                mongoObjectFactory.removeAccessToken(accessToken);
+                logger.log(Level.SEVERE, "Error registering Igtimi access token " + accessTokenWithCreator
+                        + "; probably the access token was revoked or expired.", e);
+                mongoObjectFactory.removeAccessToken(accessTokenWithCreator.getCreatorName(),
+                        accessTokenWithCreator.getAccessToken());
             }
         }
     }
+
+    public void clear() {
+        accessTokensByAccount.clear();
+        accountsByEmail.clear();
+        connectionsByAccount.clear();
+        mongoObjectFactory.clear();
+    }
     
     @Override
-    public Account registerAccountForWhichClientIsAuthorized(String accessToken) throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        Account account = getAccount(accessToken);
+    public Account registerAccountForWhichClientIsAuthorized(String creatorName, String accessToken)
+            throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+        Account account = getAccount(creatorName, accessToken);
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.IGTIMI_ACCOUNT, account.getIdentifier().getTypeRelativeObjectIdentifier(),
+                account.getUser().getEmail(), () -> {
+                    return storeIgtimiAccount(creatorName, accessToken, account);
+                });
+    }
+
+    private Account storeIgtimiAccount(String creatorName, String accessToken, Account account) {
         accountsByEmail.put(account.getUser().getEmail(), account);
         accessTokensByAccount.put(account, accessToken);
-        mongoObjectFactory.storeAccessToken(accessToken);
+        mongoObjectFactory.storeAccessToken(creatorName, accessToken);
         return account;
     }
 
-    private Account getAccount(String accessToken) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
+    protected SecurityService getSecurityService() throws ClientProtocolException, IOException, ParseException {
+        return Activator.getInstance().getSecurityService();
+    }
+
+    private Account getAccount(String creatorName, String accessToken) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
         HttpClient client = new SystemDefaultHttpClient();
         HttpGet getAccount = new HttpGet(getApiV1BaseUrl()+"account?access_token="+accessToken);
         HttpResponse accountResponse = client.execute(getAccount);
         JSONObject accountJson = ConnectivityUtils.getJsonFromResponse(accountResponse);
         JSONObject userJson = (JSONObject) accountJson.get("user");
-        Account account = new AccountImpl(new UserDeserializer().createUserFromJson(userJson));
+        Account account = new AccountImpl(creatorName, new UserDeserializer().createUserFromJson(userJson));
         return account;
     }
 
@@ -348,7 +374,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * @return the account encoding the application that is authorized for a user's account
      * @throws RuntimeException in case there was an error while retrieving the token
      */
-    public Account obtainAccessTokenFromAuthorizationCode(String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
+    public Account obtainAccessTokenFromAuthorizationCode(String creatorName, String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
         HttpClient client = new SystemDefaultHttpClient();
         HttpPost post = new HttpPost(getOauthTokenUrl());
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
@@ -365,7 +391,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             throw new RuntimeException(accessTokenJson.toString());
         } else {
             String accessToken = (String) accessTokenJson.get("access_token");
-            result = registerAccountForWhichClientIsAuthorized(accessToken);
+            result = registerAccountForWhichClientIsAuthorized(creatorName, accessToken);
         }
         return result;
     }
@@ -390,13 +416,13 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     @Override
-    public Account createAccountToAccessUserData(String userEmail, String userPassword) throws ClientProtocolException,
+    public Account createAccountToAccessUserData(String creatorName, String userEmail, String userPassword) throws ClientProtocolException,
             IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
             InstantiationException, IllegalAccessException, ClassCastException, ParseException {
         final Account result;
         String code = authorizeAndReturnAuthorizedCode(userEmail, userPassword);
         if (code != null) {
-            result = obtainAccessTokenFromAuthorizationCode(code);
+            result = obtainAccessTokenFromAuthorizationCode(creatorName, code);
         } else {
             result = null;
         }
@@ -526,7 +552,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         if (account != null) {
             String accessToken = accessTokensByAccount.remove(account);
             accountsByEmail.remove(account.getUser().getEmail());
-            mongoObjectFactory.removeAccessToken(accessToken);
+            mongoObjectFactory.removeAccessToken(account.getCreatorName(), accessToken);
         }
     }
 

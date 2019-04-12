@@ -11,9 +11,12 @@ public class TracTracConfigurationImpl implements TracTracConfiguration {
     private final String courseDesignUpdateURI;
     private final String tracTracUsername;
     private final String tracTracPassword;
+    private final String creatorName;
 
-    public TracTracConfigurationImpl(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, 
+    public TracTracConfigurationImpl(String creatorName, String name, String jsonURL, String liveDataURI,
+            String storedDataURI, String courseDesignUpdateURI,
             String tracTracUsername, String tracTracPassword) {
+        this.creatorName = creatorName;
         this.name = name;
         this.jsonURL = jsonURL;
         this.liveDataURI = liveDataURI;
@@ -65,6 +68,10 @@ public class TracTracConfigurationImpl implements TracTracConfiguration {
     @Override
     public String getTracTracPassword() {
         return tracTracPassword;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
     }
 
 }

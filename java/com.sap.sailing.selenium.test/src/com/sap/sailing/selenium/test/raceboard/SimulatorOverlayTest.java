@@ -124,7 +124,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
     }
 
     private void trackRacesFor49er(final RegattaDescriptor regattaDescriptor, final TracTracEventManagementPanelPO tracTracEvents) {
-        tracTracEvents.listTrackableRaces(JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(JSON_URL);
         tracTracEvents.setReggataForTracking(regattaDescriptor);
         tracTracEvents.setTrackSettings(true, false, false);
         tracTracEvents.setFilterForTrackableRaces("(49er)");
