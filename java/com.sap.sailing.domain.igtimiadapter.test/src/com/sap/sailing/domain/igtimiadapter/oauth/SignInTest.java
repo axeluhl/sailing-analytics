@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -25,11 +26,17 @@ import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
 public class SignInTest {
     private static final Logger logger = Logger.getLogger(SignInTest.class.getName());
     
     @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
+    
+    @Before
+    public void setUp() throws ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+        Activator.getInstance().setSecurityService(SecurityServiceMockFactory.mockSecurityService());
+    }
 
     @Test
     public void testSimpleSignIn() throws ClientProtocolException, IOException, IllegalStateException,
