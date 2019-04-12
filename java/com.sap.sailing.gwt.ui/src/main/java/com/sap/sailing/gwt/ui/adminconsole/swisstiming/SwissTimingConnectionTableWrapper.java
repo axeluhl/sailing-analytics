@@ -143,9 +143,19 @@ public class SwissTimingConnectionTableWrapper extends
                 new ArrayList<SwissTimingConfigurationWithSecurityDTO>(), dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingConfigurationWithSecurityDTO t) {
-                List<String> string = new ArrayList<String>();
-                string.add(t.getName());
-                return string;
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.getName());
+                if (t.getUpdateUsername() != null) {
+                    strings.add(t.getUpdateUsername());
+                }
+                strings.add(t.getCreatorName());
+                if (t.getHostname() != null) {
+                    strings.add(t.getHostname());
+                }
+                if (t.getPort() != null) {
+                    strings.add(t.getPort().toString());
+                }
+                return strings;
             }
 
             @Override
@@ -154,7 +164,6 @@ public class SwissTimingConnectionTableWrapper extends
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(swissTimingConectionColumnListHandler);
         table.addColumn(swissTimingConnectionNameColumn, getStringMessages().name());

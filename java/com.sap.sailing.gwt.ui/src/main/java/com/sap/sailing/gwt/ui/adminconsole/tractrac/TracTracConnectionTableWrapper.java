@@ -122,27 +122,24 @@ public class TracTracConnectionTableWrapper extends
                 }
             });
         });
-
         final EditOwnershipDialog.DialogConfig<TracTracConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, dto -> refreshTracTracConnectionList(),
                         stringMessages);
-
         final EditACLDialog.DialogConfig<TracTracConfigurationWithSecurityDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, dto -> dto.getAccessControlList(), stringMessages);
-
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
-
         filterField = new LabeledAbstractFilterablePanel<TracTracConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterTracTracConnections()),
                 new ArrayList<TracTracConfigurationWithSecurityDTO>(), dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(TracTracConfigurationWithSecurityDTO t) {
-                List<String> string = new ArrayList<String>();
-                string.add(t.getName());
-                return string;
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.getName());
+                strings.add(t.getCreatorName());
+                return strings;
             }
 
             @Override
@@ -151,7 +148,6 @@ public class TracTracConnectionTableWrapper extends
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(tracTracAccountColumnListHandler);
         table.addColumn(tracTracAccountNameColumn, getStringMessages().name());

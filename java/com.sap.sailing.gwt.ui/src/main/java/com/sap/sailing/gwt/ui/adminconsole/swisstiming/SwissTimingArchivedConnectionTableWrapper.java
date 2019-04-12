@@ -97,7 +97,6 @@ public class SwissTimingArchivedConnectionTableWrapper extends
                 }
             }, userService, errorReporter).show();
         });
-
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
             sailingServiceAsync.deleteSwissTimingArchiveConfiguration(dto, new AsyncCallback<Void>() {
                 @Override
@@ -111,28 +110,25 @@ public class SwissTimingArchivedConnectionTableWrapper extends
                 }
             });
         });
-
         final EditOwnershipDialog.DialogConfig<SwissTimingArchiveConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
                 .create(userService.getUserManagementService(), type, dto -> refreshConnectionList(),
                         stringMessages);
-
         final EditACLDialog.DialogConfig<SwissTimingArchiveConfigurationWithSecurityDTO> configACL = EditACLDialog
                 .create(
                 userService.getUserManagementService(), type, dto -> dto.getAccessControlList(), stringMessages);
-
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
-
         filterField = new LabeledAbstractFilterablePanel<SwissTimingArchiveConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterSwissTimingAchivedConnections()),
                 new ArrayList<SwissTimingArchiveConfigurationWithSecurityDTO>(), dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingArchiveConfigurationWithSecurityDTO t) {
-                List<String> string = new ArrayList<String>();
-                string.add(t.getName());
-                return string;
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.getName());
+                strings.add(t.getCreatorName());
+                return strings;
             }
 
             @Override
