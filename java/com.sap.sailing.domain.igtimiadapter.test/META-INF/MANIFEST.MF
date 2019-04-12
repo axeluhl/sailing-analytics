@@ -11,6 +11,4 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sailing.domain.common,
  com.sap.sse.mongodb,
  com.sap.sse.common,
- org.mockito.mockito-core,
- org.objenesis,
  com.sap.sse.security.testsupport
