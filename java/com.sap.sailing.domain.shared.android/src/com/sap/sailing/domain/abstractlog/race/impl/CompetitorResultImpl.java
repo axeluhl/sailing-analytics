@@ -115,13 +115,6 @@ public class CompetitorResultImpl implements CompetitorResult {
         return mergeState == null ? MergeState.OK : mergeState; // default in case of having de-serialized an old version
     }
 
-    public String getCompetitorDisplayName() {
-        if (competitorShortName != null) {
-            return competitorShortName + " - " + competitorName;
-        }
-        return competitorName;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;

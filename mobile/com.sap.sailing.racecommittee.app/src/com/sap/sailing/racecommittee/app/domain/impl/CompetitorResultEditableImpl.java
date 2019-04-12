@@ -166,13 +166,6 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
         this.mMergeState = mergeState;
     }
 
-    public String getCompetitorDisplayName() {
-        if (mCompetitorShortName != null) {
-            return mCompetitorShortName + " - " + mCompetitorName;
-        }
-        return mCompetitorName;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o)

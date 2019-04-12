@@ -61,9 +61,11 @@ import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.ItemTouchH
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorGoalPassingComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorNameComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorShortNameComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
+import com.sap.sailing.racecommittee.app.ui.utils.CompetitorUtils;
 import com.sap.sailing.racecommittee.app.ui.views.SearchView;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -90,10 +92,11 @@ public class TrackingListFragment extends BaseFragment
     private static final int COMPETITOR_LOADER = 0;
     private static final int LEADERBOARD_ORDER_LOADER = 2;
 
-    private static final int SORT_SAIL_NUMBER = 0;
-    private static final int SORT_NAME = 1;
-    private static final int SORT_GOAL = 2;
-    private static final int SORT_START = 3;
+    private static final int SORT_SHORT_NAME = 0;
+    private static final int SORT_SAIL_NUMBER = 1;
+    private static final int SORT_NAME = 2;
+    private static final int SORT_GOAL = 3;
+    private static final int SORT_START = 4;
 
     private RecyclerView mFinishView;
     private FinishListAdapter mFinishedAdapter;
@@ -224,6 +227,7 @@ public class TrackingListFragment extends BaseFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mComparators = new ArrayList<>();
+        mComparators.add(SORT_SHORT_NAME, new CompetitorShortNameComparator());
         mComparators.add(SORT_SAIL_NUMBER, new CompetitorSailIdComparator());
         mComparators.add(SORT_NAME, new CompetitorNameComparator());
         mComparators.add(SORT_GOAL, new CompetitorGoalPassingComparator());
@@ -375,6 +379,9 @@ public class TrackingListFragment extends BaseFragment
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
+        case R.id.by_short_name:
+            mComparator = mComparators.get(SORT_SHORT_NAME);
+            break;
         case R.id.by_name:
             mComparator = mComparators.get(SORT_NAME);
             break;
@@ -597,7 +604,7 @@ public class TrackingListFragment extends BaseFragment
             }
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
-        builder.setTitle(item.getCompetitorDisplayName());
+        builder.setTitle(CompetitorUtils.getDisplayName(item));
         final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState().getFinishingTime(), item,
                 mFinishedAdapter.getFirstRankZeroPosition() +
                         /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
@@ -654,7 +661,7 @@ public class TrackingListFragment extends BaseFragment
         setPublishButton();
         mFinishedAdapter.notifyItemInserted(pos);
         if (mDots.size() > 0) {
-            Toast.makeText(getActivity(), getString(R.string.added_to_result_list, theCompetitor.getCompetitorDisplayName(), pos + 1), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), getString(R.string.added_to_result_list, CompetitorUtils.getDisplayName(theCompetitor), pos + 1), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1120,7 +1127,7 @@ public class TrackingListFragment extends BaseFragment
     private CompetitorResultWithIdImpl updateChangedItem(Map<Serializable, String> changedCompetitor,
             CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
         updateItem(item, newItem);
-        changedCompetitor.put(newItem.getCompetitorId(), newItem.getCompetitorDisplayName());
+        changedCompetitor.put(newItem.getCompetitorId(), CompetitorUtils.getDisplayName(newItem));
         return newItem;
     }
 
