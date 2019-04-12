@@ -3,9 +3,12 @@ package com.sap.sse.security.shared;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions.Action;
@@ -30,26 +33,9 @@ public class PermissionChecker {
         NONE
     }
     
-    // TODO use BiFunction and Method reference when we can use Java 8
-    private interface WildcardPermissionChecker {
-        boolean check(WildcardPermission grantedPermission, WildcardPermission permissionToCheck);
-    }
+    private static final BiFunction<WildcardPermission, WildcardPermission, Boolean> impliesChecker = WildcardPermission::implies;
     
-    private static final WildcardPermissionChecker impliesChecker = new WildcardPermissionChecker() {
-        
-        @Override
-        public boolean check(WildcardPermission grantedPermission, WildcardPermission permissionToCheck) {
-            return grantedPermission.implies(permissionToCheck);
-        }
-    };
-    
-    private static final WildcardPermissionChecker impliesAnyChecker = new WildcardPermissionChecker() {
-        
-        @Override
-        public boolean check(WildcardPermission grantedPermission, WildcardPermission permissionToCheck) {
-            return grantedPermission.impliesAny(permissionToCheck);
-        }
-    };
+    private static final BiFunction<WildcardPermission, WildcardPermission, Boolean> impliesAnyChecker = WildcardPermission::impliesAny;
     
     private static <U extends SecurityUser<?, ?, G>, G extends SecurityUserGroup<?>> Iterable<G> getGroupsOfUser(U user) {
         return (Iterable<G>) (user == null ? Collections.<G>emptySet() : user.getUserGroups());
@@ -190,11 +176,56 @@ public class PermissionChecker {
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermission(
             WildcardPermission permission,
             Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
+        return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> ownership);
+    }
+    
+    /**
+     * This is not the fully featured permission check!<br>
+     * See {@link #checkMetaPermission(WildcardPermission, Iterable, SecurityUser, SecurityUser, AbstractOwnership)} for
+     * more information about the check.<br>
+     * This version of the meta permission check relies on dynamic resolution of ownerships via the given
+     * ownershipResolver. Due to the absence of ownership information this check is not possible in the UI.
+     * 
+     * @param ownershipResolver
+     *            due to the fact that complex {@link WildcardPermission WildcardPermissions} are expanded using
+     *            {@link #expandSingleWildcardPermissionToDistinctPermissions(WildcardPermission, Iterable, boolean)},
+     *            for permissions containing a single id or a list of distinct ids (no wildcard in the id part) this
+     *            results in expanded permissions that can be used to resolve to a single
+     *            {@link QualifiedObjectIdentifier} which in fact allows the surrounding system to resolve an
+     *            {@link Ownership} for those permissions. Using this, it is possible to restrict the permission check
+     *            to the effectively existing owning qualification. If no {@link Ownership} can be resolved, the check
+     *            can not be restricted to an owning qualification and must pass unrestricted in this consequence.
+     */
+    public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermissionWithOwnershipResolution(
+            WildcardPermission permission, Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
+            Function<QualifiedObjectIdentifier, O> ownershipResolver) {
+        return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> {
+            final Iterable<QualifiedObjectIdentifier> qualifiedObjectIdentifiers = wp.getQualifiedObjectIdentifiers();
+            final O ownership;
+            Iterator<QualifiedObjectIdentifier> iterator = qualifiedObjectIdentifiers.iterator();
+            if (!iterator.hasNext()) {
+                ownership = null;
+            } else {
+                QualifiedObjectIdentifier firstIdentifier = iterator.next();
+                if (iterator.hasNext() || firstIdentifier == null) {
+                    // No single distinct identifier
+                    ownership = null;
+                } else {
+                    ownership = ownershipResolver.apply(firstIdentifier);
+                }
+            }
+            return ownership;
+        });
+    }
+    
+    private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean checkMetaPermissionInternal(
+            WildcardPermission permission,
+            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, Function<WildcardPermission, O> ownershipResolver) {
         assert permission != null;
         assert allPermissionTypes != null;
-        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
-
+        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, true);
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
+            final O ownership = ownershipResolver.apply(effectiveWildcardPermissionToCheck);
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership,
                     impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED
                     && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser),
@@ -205,8 +236,38 @@ public class PermissionChecker {
         return true;
     }
 
-    private static Set<WildcardPermission> expandSingleToPermissions(WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes) {
+    /**
+     * WildcardPermissions can be pretty complex and allow wildcards for all parts. With the knowledge of all specific
+     * permissions that are implied by a WildcardPermission, we can do more distinct checks that do not require a user
+     * to have permission with an equivalent wildcard.
+     * 
+     * With the specific knowledge of all existing secured types and their associated actions, we can:
+     * <ul>
+     * <li>Resolve * for the type to a set of existing types</li>
+     * <li>Filter a list of action per declared type (pruning of impossible permissions)</li>
+     * </ul>
+     * 
+     * A user having distinct permissions for all existing types, will in fact be able to succeed a permission check for
+     * *, although, he does not explicitly have * as a permission.
+     * 
+     * The following rules apply for the expansion of permissions:
+     * <ul>
+     * <li>A list of types is expanded to single type permissions. Explicitly declared but unknown types are not
+     * pruned.</li>
+     * <li>A type wildcard is expanded to single permissions for all known types</li>
+     * <li>A list of actions is expanded to single action permissions. For known types, the set of actions is pruned to
+     * the effectively existing actions. For unknown types, the action list is preserved.</li>
+     * <li>A action wildcard is expanded to single action permissions per known type or a wildcard for unknown
+     * types.</li>
+     * </ul>
+     * 
+     * @param expandToSingleIds
+     *            if true, a list of ids is also expanded to distinct permissions instead of a permission having a list
+     *            of ids. This is useful when it is necessary to resolve e.g. type identifiers from a
+     *            {@link WildcardPermission}.
+     */
+    private static Set<WildcardPermission> expandSingleWildcardPermissionToDistinctPermissions(WildcardPermission permission,
+            Iterable<HasPermissions> allPermissionTypes, boolean expandToSingleIds) {
         List<Set<String>> parts = permission.getParts();
         final Set<String> typeParts;
         final boolean isTypePartWildcard;
@@ -243,10 +304,15 @@ public class PermissionChecker {
             allPermissionTypesByName.put(hasPermissions.getName(), hasPermissions);
         }
 
-        final Set<WildcardPermission> effectivePermissionsToCheck = new HashSet<>();
-        final String effectiveIdPartToCheck = isIdPartWildcard ? ""
-                : (WildcardPermission.PART_DIVIDER_TOKEN
-                        + Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
+        final Set<String> effectiveIdPartsToCheck;
+        if (isIdPartWildcard) {
+            effectiveIdPartsToCheck = Collections.singleton("");
+        } else if(expandToSingleIds) {
+            effectiveIdPartsToCheck = idParts;
+        } else {
+            effectiveIdPartsToCheck = Collections.singleton(Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
+        }
+        
         final Set<String> effectiveTypePartsToCheck;
         if (isTypePartWildcard) {
             effectiveTypePartsToCheck = allPermissionTypesByName.keySet();
@@ -254,6 +320,7 @@ public class PermissionChecker {
             effectiveTypePartsToCheck = typeParts;
         }
 
+        final Set<WildcardPermission> effectivePermissionsToCheck = new HashSet<>();
         for (String typePart : effectiveTypePartsToCheck) {
             HasPermissions hasPermissions = allPermissionTypesByName.get(typePart);
             final Set<String> effectiveActionPartsToCheck;
@@ -269,8 +336,11 @@ public class PermissionChecker {
             }
 
             for (String actionPart : effectiveActionPartsToCheck) {
-                effectivePermissionsToCheck.add(new WildcardPermission(
-                        typePart + WildcardPermission.PART_DIVIDER_TOKEN + actionPart + effectiveIdPartToCheck));
+                for (String idPart : effectiveIdPartsToCheck) {
+                    String idSuffix = idPart.isEmpty() ? "" : WildcardPermission.PART_DIVIDER_TOKEN + idPart;
+                    effectivePermissionsToCheck.add(new WildcardPermission(
+                            typePart + WildcardPermission.PART_DIVIDER_TOKEN + actionPart + idSuffix));
+                }
             }
         }
         return effectivePermissionsToCheck;
@@ -288,7 +358,7 @@ public class PermissionChecker {
             O ownership) {
         assert permission != null;
         assert allPermissionTypes != null;
-        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
+        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, false);
         
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker,
@@ -315,12 +385,12 @@ public class PermissionChecker {
      */
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> PermissionState checkUserPermissions(
             WildcardPermission permission, U user, Iterable<G> groupsOfWhichUserIsMember, O ownership,
-            WildcardPermissionChecker permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
+            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
         PermissionState result = PermissionState.NONE;
         // 2. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
             for (WildcardPermission directPermission : user.getPermissions()) {
-                if (permissionChecker.check(directPermission, permission)) {
+                if (permissionChecker.apply(directPermission, permission)) {
                     result = PermissionState.GRANTED;
                     break;
                 }
@@ -362,12 +432,12 @@ public class PermissionChecker {
     
     private static <RD extends RoleDefinition, U extends SecurityUser<RD, ?, G>, G extends SecurityUserGroup<RD>> boolean isPermissionGrantedByGroup(
             WildcardPermission permission, G groupToCheck, boolean userIsMemberOfGroup,
-            WildcardPermissionChecker permissionChecker) {
+            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker) {
         for (Map.Entry<RD, Boolean> entry : groupToCheck.getRoleDefinitionMap().entrySet()) {
             if (Boolean.TRUE.equals(entry.getValue()) || userIsMemberOfGroup) {
                 final RD roleDefinition = entry.getKey();
                 for (WildcardPermission grantedPermission : roleDefinition.getPermissions()) {
-                    if (permissionChecker.check(grantedPermission, permission)) {
+                    if (permissionChecker.apply(grantedPermission, permission)) {
                         return true;
                     }
                 }
@@ -404,7 +474,7 @@ public class PermissionChecker {
      */
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>> boolean implies(
             R role, WildcardPermission permission, O ownership,
-            WildcardPermissionChecker permissionChecker,
+            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker,
            boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
        final boolean roleIsTenantQualified = role.getQualifiedForTenant() != null;
        final boolean roleIsUserQualified = role.getQualifiedForUser() != null;
@@ -425,7 +495,7 @@ public class PermissionChecker {
        if (permissionsApply) {
            result = false; // if the role grants no permissions at all or no permission implies the one requested for, access is not granted
             for (WildcardPermission rolePermission : role.getPermissions()) {
-                if (permissionChecker.check(rolePermission, permission)) {
+                if (permissionChecker.apply(rolePermission, permission)) {
                     result = true;
                     break;
                 }

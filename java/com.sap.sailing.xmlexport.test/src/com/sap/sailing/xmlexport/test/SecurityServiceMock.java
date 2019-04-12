@@ -770,7 +770,7 @@ public class SecurityServiceMock implements SecurityService {
 
     @Override
     public void migratePermission(User user, WildcardPermission permissionToMigrate,
-            com.sap.sse.common.Util.Function<WildcardPermission, WildcardPermission> permissionReplacement) {
+            Function<WildcardPermission, WildcardPermission> permissionReplacement) {
 
     }
 
@@ -788,7 +788,11 @@ public class SecurityServiceMock implements SecurityService {
 
     @Override
     public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
-
+        return false;
+    }
+    
+    @Override
+    public boolean hasCurrentUserMetaPermissionWithOwnershipLookup(WildcardPermission permissionToCheck) {
         return false;
     }
 
@@ -893,6 +897,10 @@ public class SecurityServiceMock implements SecurityService {
             Action actionToCreateObject) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier) {
     }
 
 }

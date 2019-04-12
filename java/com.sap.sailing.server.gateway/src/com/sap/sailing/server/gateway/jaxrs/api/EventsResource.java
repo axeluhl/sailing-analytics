@@ -525,8 +525,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 UUID newTenantId = UUID.randomUUID();
                 String escapedName = WildcardPermissionEncoder.encode(eventName) + "-owner";
                 UserGroup ownerGroup = getSecurityService().createUserGroup(newTenantId, escapedName);
-                getSecurityService().setOwnershipIfNotSet(ownerGroup.getIdentifier(), getCurrentUser(),
-                        getSecurityService().getDefaultTenantForCurrentUser());
+                getSecurityService().setDefaultOwnershipIfNotSet(ownerGroup.getIdentifier());
                 RoleDefinition roleDef = getSecurityService()
                         .getRoleDefinition(SailingViewerRole.getInstance().getId());
                 getSecurityService().putRoleDefinitionToUserGroup(ownerGroup, roleDef, true);

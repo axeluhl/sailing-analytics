@@ -32,10 +32,11 @@ public class EditUserRolesAndPermissionsDialog extends DataEntryDialog<Void> {
     public EditUserRolesAndPermissionsDialog(final String selectedUsername, final UserService userService,
             final ErrorReporter errorReporter, final CellTableWithCheckboxResources tableResources,
             final DialogCallback<Void> callback) {
-        super(stringMessages.editRolesAndPermissionsForUser(selectedUsername), null, stringMessages.ok(),
-                stringMessages.cancel(), /* validator */ null,
+        super(stringMessages.editRolesAndPermissionsForUser(selectedUsername), null, stringMessages.close(),
+                null, /* validator */ null,
                 /* animationEnabled */true, callback);
         final MultiSelectionModel<UserDTO> selectionAdapter = new MultiSelectionModel<>();
+        super.getCancelButton().removeFromParent();
 
         final Runnable updater = new Runnable() {
             @Override

@@ -590,18 +590,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userOwner == null && tenantOwner == null) {
             throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
         }
-        final UUID tenantId;
-        if (userOwner == null) {
-            tenantId = tenantOwner.getId();
-        } else {
-            // check if a default owner is existing
-            if (tenantOwner == null) {
-                tenantOwner = getDefaultTenantForUser(userOwner);
-            }
-            tenantId = tenantOwner==null?null:tenantOwner.getId();
-        }
-
+        UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
+
         return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
     }
@@ -1705,6 +1696,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier) {
+        final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
+        if (preexistingOwnership == null) {
+            setDefaultOwnership(identifier, identifier.toString());
+        }
+    }
+
+    @Override
     public void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
             Action actionToCreateObject) {
@@ -1915,6 +1914,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
+    public boolean hasCurrentUserMetaPermissionWithOwnershipLookup(WildcardPermission permissionToCheck) {
+        if (hasPermissionsProvider == null) {
+            logger.warning(
+                    "Missing HasPermissionsProvider for meta permission check. Using basic permission check that will produce false negatives in some cases.");
+            // In case we can not resolve all available HasPermissions instances, a meta permission check will not be
+            // able to produce the expected results.
+            // A basic permission check is done instead. This will potentially produce false negatives but never false
+            // positives.
+            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), null, null);
+        } else {
+            return PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck,
+                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(),
+                    qualifiedObjectId -> {
+                        OwnershipAnnotation ownershipAnnotation = accessControlStore.getOwnership(qualifiedObjectId);
+                        return ownershipAnnotation == null ? null : ownershipAnnotation.getAnnotation();
+                    });
+        }
+    }
+    
+    @Override
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck) {
         if (hasPermissionsProvider == null) {
             logger.warning(
@@ -2055,13 +2074,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
-        this.migrateOwnership(identifier, null, displayName);
+        this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
     }
     
     @Override
     public void migrateUser(final User user) {
         // If no ownership migration was necessary, this is not a migration
-        if (migrateOwnership(user.getIdentifier(), user, user.getName())) {
+        if (migrateOwnership(user.getIdentifier(), user, /* setServerGroupAsOwner */ false, user.getName())) {
             final String tenantNameForUsername = getDefaultTenantNameForUsername(user.getName());
             // if there is already a default creation tenant set for the user, this is not a migration
             // If the user's tenant already exists, this is no migration
@@ -2099,8 +2118,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void migratePermission(final User user, final WildcardPermission permissionToMigrate, final com.sap.sse.common.Util.Function<WildcardPermission, WildcardPermission> permissionReplacement) {
-        final WildcardPermission replacementPermissionOrNull = permissionReplacement.get(permissionToMigrate);
+    public void migratePermission(final User user, final WildcardPermission permissionToMigrate, final Function<WildcardPermission, WildcardPermission> permissionReplacement) {
+        final WildcardPermission replacementPermissionOrNull = permissionReplacement.apply(permissionToMigrate);
         final WildcardPermission effectivePermission;
         if (replacementPermissionOrNull != null) {
             // replacing legacy permission with a replacement
@@ -2117,18 +2136,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         migrateOwnership(associationQualifiedIdentifier, associationQualifiedIdentifier.toString());
     }
     
-    private boolean migrateOwnership(final QualifiedObjectIdentifier identifier, User userOwnerToSet, final String displayName) {
+    private boolean migrateOwnership(final QualifiedObjectIdentifier identifier, User userOwnerToSet,
+            boolean setServerGroupAsOwner, final String displayName) {
         boolean wasNecessaryToMigrate = false;
         final OwnershipAnnotation owner = this.getOwnership(identifier);
-        final UserGroup defaultTenant = this.getDefaultTenant();
-        // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
-        // users correctly
+        // initialize ownerships on migration and fix objects that were orphaned by e.g. deleting the owning user/group
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
+            final UserGroup tenantOwnerToSet = setServerGroupAsOwner ? this.getDefaultTenant() : null;
             logger.info("missing Ownership fixed: Setting ownership for: " + identifier
-                    + " to default tenant: "
-                    + defaultTenant + "; user: " + userOwnerToSet);
-            this.setOwnership(identifier, userOwnerToSet, defaultTenant, displayName);
+                    + " to tenant: "
+                    + tenantOwnerToSet + "; user: " + userOwnerToSet);
+            this.setOwnership(identifier, userOwnerToSet, tenantOwnerToSet, displayName);
             wasNecessaryToMigrate = true;
         }
         migratedHasPermissionTypes.add(identifier.getTypeIdentifier());

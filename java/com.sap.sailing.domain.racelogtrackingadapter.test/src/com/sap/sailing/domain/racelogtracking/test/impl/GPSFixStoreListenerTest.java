@@ -33,9 +33,9 @@ public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
         CyclicBarrier barrier = new CyclicBarrier(2);
         // We need 3 listener instances to guarantee that the iterator isn't finished
         // when adding another listener in the thread below.
-        store.addListener(new ListenerAwaitingBarier(barrier), device);
-        store.addListener(new ListenerAwaitingBarier(barrier), device);
-        store.addListener(new ListenerAwaitingBarier(barrier), device);
+        store.addListener(new ListenerAwaitingBarrier(barrier), device);
+        store.addListener(new ListenerAwaitingBarrier(barrier), device);
+        store.addListener(new ListenerAwaitingBarrier(barrier), device);
 
         Thread thread = new Thread() {
             public void run() {
@@ -63,11 +63,11 @@ public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
         }
     }
 
-    private static class ListenerAwaitingBarier implements FixReceivedListener<GPSFixMoving> {
+    private static class ListenerAwaitingBarrier implements FixReceivedListener<GPSFixMoving> {
 
         private final CyclicBarrier barrier;
 
-        public ListenerAwaitingBarier(CyclicBarrier barrier) {
+        public ListenerAwaitingBarrier(CyclicBarrier barrier) {
             this.barrier = barrier;
         }
 

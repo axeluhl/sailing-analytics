@@ -77,8 +77,12 @@ INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
 REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
 REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
+# Provide authentication credentials for a user on the master permitted to replicate, either by username/password...
 REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SERVER:REPLICATE:<server-name> permission)
 REPLICATE_MASTER_PASSWORD=(password of the user for replication login on master)
+# Or by bearer token, obtained, e.g., through
+#   curl -d "username=myuser&password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
+# REPLICATE_MASTER_BEARER_TOKEN=
 SERVER_NAME=MYSPECIFICEVENT
 MONGODB_NAME=myspecificevent-replica
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
@@ -488,7 +492,7 @@ Click on "Create Record Set" and fill in the subdomain name (`myspecificevent` i
 
 <img src="/wiki/images/amazon/Route53_5.png" />
 
-Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of its internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
+Amazon ELB is designed to handle unlimited concurrent requests per second with â€œgradually increasingâ€� load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of its internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
 
 With this set-up, please keep in mind that administration of the sailing server instance always needs to happen through the master instance. A fat, red warning is displayed in the administration console of the replica instances that shall keep you from making administrative changes there. Change them on the master, and the changes will be replicated to the replicas.
 

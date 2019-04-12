@@ -490,7 +490,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void migrateUser(User user);
 
     void migratePermission(User user, WildcardPermission permissionToMigrate,
-            com.sap.sse.common.Util.Function<WildcardPermission, WildcardPermission> permissionReplacement);
+            Function<WildcardPermission, WildcardPermission> permissionReplacement);
 
     void checkMigration(Iterable<HasPermissions> allInstances);
 
@@ -498,6 +498,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             RoleDefinition roleToCheck);
 
     boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);
+    
+    boolean hasCurrentUserMetaPermissionWithOwnershipLookup(WildcardPermission permissionToCheck);
 
     void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User userOwner, UserGroup defaultTenant);
 
@@ -556,6 +558,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /** Sets the default ownership based on the current user. */
     void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description);
 
+    void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier);
+
     /**
      * Checks if a user has at least one permission implied by the given {@link WildcardPermission}.
      * 
@@ -571,4 +575,5 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
             Action actionToCreateObject);
+
 }

@@ -115,7 +115,8 @@ public class ReplicationServlet extends AbstractHttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             String action = req.getParameter(ACTION);
-            logger.fine("Received replication request, action is "+action);
+            logger.fine("Received replication request, action is "+action+", subject is "+
+                    (SecurityUtils.getSubject()==null?null:SecurityUtils.getSubject().getPrincipal()));
             String[] replicableIdsAsStrings;
             switch (Action.valueOf(action)) {
             case REGISTER:
