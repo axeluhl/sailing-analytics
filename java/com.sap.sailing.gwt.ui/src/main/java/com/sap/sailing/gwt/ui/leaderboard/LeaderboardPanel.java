@@ -875,17 +875,28 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             // an overflow to the next column (see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3537)
             setCellStyleNames(style.getTableresources().cellTableStyle().cellTableSailIdColumn());
         }
+        
+        /**
+         * Depending on the {@link LeaderboardDTO LeaderboardDTO's}
+         * {@link AbstractLeaderboardDTO#canBoatsOfCompetitorsChangePerRace canBoatsOfCompetitorsChangePerRace} flag
+         * there is a different precedence of showing either the sail ID (no changing boats) or the competitor short
+         * name (changing boats). This method handles the resolution of the text to show for a competitor in this column.
+         */
+        private String getRealTextToShow(CompetitorDTO competitor) {
+            boolean preferSailId = !getLeaderboard().canBoatsOfCompetitorsChangePerRace;
+            return competitor.getShortInfo(preferSailId);
+        }
 
         @Override
         public InvertibleComparator<T> getComparator() {
             return new InvertibleComparatorAdapter<T>() {
                 @Override
                 public int compare(T o1, T o2) {
-                    return competitorFetcher.getCompetitor(o1).getShortInfo() == null
-                            ? competitorFetcher.getCompetitor(o2).getShortInfo() == null ? 0 : -1
-                            : competitorFetcher.getCompetitor(o2).getShortInfo() == null ? 1
-                                    : Collator.getInstance().compare(competitorFetcher.getCompetitor(o1).getShortInfo(),
-                                            competitorFetcher.getCompetitor(o2).getShortInfo());
+                    final String competitor1ShortInfo = getRealTextToShow(competitorFetcher.getCompetitor(o1));
+                    final String competitor2ShortInfo = getRealTextToShow(competitorFetcher.getCompetitor(o2));
+                    return competitor1ShortInfo == null ? competitor2ShortInfo == null ? 0 : -1
+                            : competitor2ShortInfo == null ? 1
+                                    : Collator.getInstance().compare(competitor1ShortInfo, competitor2ShortInfo);
                 }
             };
         }
@@ -900,12 +911,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         public void render(Context context, T object, SafeHtmlBuilder sb) {
             final CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             LeaderboardPanel.this.renderCompetitorText(competitor, isShowCompetitorShortName(),
-                    !isShowCompetitorFullName(), sb, builder -> builder.appendEscaped(competitor.getShortInfo()));
+                    !isShowCompetitorFullName(), sb, builder -> builder.appendEscaped(getRealTextToShow(competitor)));
         }
 
         @Override
         public String getValue(T object) {
-            return competitorFetcher.getCompetitor(object).getShortInfo();
+            return getRealTextToShow(competitorFetcher.getCompetitor(object));
         }
     }
 
