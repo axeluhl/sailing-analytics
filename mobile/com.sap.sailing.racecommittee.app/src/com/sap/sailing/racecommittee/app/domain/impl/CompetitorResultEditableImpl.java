@@ -8,7 +8,7 @@ import com.sap.sse.common.TimePoint;
 
 public class CompetitorResultEditableImpl implements CompetitorResult {
     private static final long serialVersionUID = 3928498127285186791L;
-    
+
     private Serializable mCompetitorId;
     private int mOneBasedRank;
     private MaxPointsReason mMaxPointsReason;
@@ -157,7 +157,7 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
     public void setChecked(boolean checked) {
         mChecked = checked;
     }
-    
+
     public MergeState getMergeState() {
         return mMergeState == null ? MergeState.OK : mMergeState; // default for having de-serialized an old version
     }

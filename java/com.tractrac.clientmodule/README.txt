@@ -17,6 +17,56 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.12.0 ***************
+********************************************
+This is a final version. It changes the enumerate RaceStatusType,
+breaking the backward compatibility:
+
+ - The new RaceStatusTypes requested by Swiss Timing are:
+    - NONE (NONE)
+    - START (STR_SEQ)
+    - RACING (RAC)
+    - FINISHED (FSHD)
+    - ABANDONED (ABDN)
+    - FINAL (FINAL)
+    - GENERAL_RECALL (GNR_REC)
+    - POSTPONED (PSP)
+ - TracAPI establishes equivalences with the old and the new statuses:
+    - PENDING -> NONE
+    - START_PHASE -> START
+    - RUNNING -> RACING
+    - CANCELLED -> ABANDONED
+    - UNSCHEDULED -> NONE
+    - PRESCHEDULED -> NONE
+    - SCHEDULED -> NONE
+    - FINISHING -> RACING
+
+Release date: 27/03/2019
+Build number: f52717c06bb047a747030e3ea450e15b609edf73
+
+ 1) Features
+
+ - Updating the list of race statuses (Requested by Radek Masnika, 01/03/2019)
+
+
+********************************************
+************* TracAPI 3.11.1 ***************
+********************************************
+This is a final version.It fixes bugs in the implementation.
+It keeps the backward compatibility:
+
+Release date: 19/10/2018
+Build number: 6c0010208212c2aad1016bd69708bc6859e371e9
+
+ 1) Bugs
+
+ - Validating null values for the methods of the IRaceSubscriber that accept an array of
+ Classes (Reported by Andre Borud, 05/09/2018)
+ - The IEventSubscriber is not able to connect to the server if the IEvent has been created
+  using the IEventFactory.createEvent(URL) method and the URL uses HTTPs. It only works using HTTP
+  (Reported by Thomas Scott, 19/10/2018)
+
+********************************************
 ************* TracAPI 3.11.0 ***************
 ********************************************
 This is a final version. It changes the implementation of the IRaceSubscriber interface,

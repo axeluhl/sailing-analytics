@@ -1,5 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.adapters.PanelsAdapter;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+
 import android.annotation.TargetApi;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -10,18 +21,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.adapters.PanelsAdapter;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-
-public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
+public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure>
+        extends BaseRaceInfoRaceFragment<ProcedureType> {
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override

@@ -12,7 +12,7 @@ import java.text.ParseException;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
-import org.hamcrest.number.IsGreaterThan;
+import static org.hamcrest.number.OrderingComparison.greaterThan;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,6 +56,6 @@ public class ManeuverLossOnPenaltyCircleTest extends OnlineTracTracBasedTest {
         Competitor canottieri = getCompetitorByName("Club Canottieri Roggero di Lauria");
         final Iterable<Maneuver> maneuversCanottieri = getTrackedRace().getManeuvers(canottieri, getTrackedRace().getStartOfRace(), getTrackedRace().getEndOfRace(), /* waitForLatest */ true);
         final Optional<Maneuver> penaltyCircleCanottieri = StreamSupport.stream(maneuversCanottieri.spliterator(), /* parallel */ false).filter(m->m.getType()==ManeuverType.PENALTY_CIRCLE).findAny();
-        assertThat(penaltyCircleCanottieri.get().getManeuverLoss().getProjectedDistanceLost(), new IsGreaterThan<>(new MeterDistance(30)));
+        assertThat(penaltyCircleCanottieri.get().getManeuverLoss().getProjectedDistanceLost(), greaterThan(new MeterDistance(30)));
     }
 }

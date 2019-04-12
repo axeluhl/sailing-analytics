@@ -13,10 +13,11 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.DateParser;
 import com.sun.jersey.api.core.ResourceContext;
 
@@ -46,6 +47,12 @@ public abstract class AbstractSailingServerResource {
     public RacingEventService getService() {
         @SuppressWarnings("unchecked")
         ServiceTracker<RacingEventService, RacingEventService> tracker = (ServiceTracker<RacingEventService, RacingEventService>) servletContext.getAttribute(RestServletContainer.RACING_EVENT_SERVICE_TRACKER_NAME);
+        return tracker.getService(); 
+    }
+    
+    public ReplicationService getReplicationService() {
+        @SuppressWarnings("unchecked")
+        ServiceTracker<ReplicationService, ReplicationService> tracker = (ServiceTracker<ReplicationService, ReplicationService>) servletContext.getAttribute(RestServletContainer.REPLICATION_SERVICE_TRACKER_NAME);
         return tracker.getService(); 
     }
     

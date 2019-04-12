@@ -12,9 +12,9 @@ Require-Bundle: com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.common,
  com.sap.sse.common,
  com.sap.sse.mongodb,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sailing.expeditionconnector.common,
  com.sap.sailing.server.gateway.serialization.shared.android,
- com.sap.sse
+ com.sap.sse,
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Export-Package: com.sap.sailing.expeditionconnector.persistence
 Automatic-Module-Name: com.sap.sailing.expeditionconnector.persistence

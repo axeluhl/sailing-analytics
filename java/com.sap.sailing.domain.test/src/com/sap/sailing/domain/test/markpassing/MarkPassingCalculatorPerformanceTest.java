@@ -14,7 +14,6 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
@@ -30,7 +29,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMarkPassingTest {
 
@@ -56,7 +55,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
     @Test
     public void testFinder() {
         CandidateFinder f = new CandidateFinderImpl(race);
-        List<GPSFix> fixesAdded = new ArrayList<>();
+        List<GPSFixMoving> fixesAdded = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             GPSFixMoving fix = rndFix();
             race.recordFix(ron, fix);

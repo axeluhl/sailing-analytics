@@ -5,13 +5,12 @@ import static org.junit.Assert.assertNotNull;
 
 import java.net.UnknownHostException;
 
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoCollection;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
@@ -40,29 +39,29 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
 
     @Test
     public void testDBConnection() throws UnknownHostException, MongoException {
-        DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
+        MongoCollection<Document> coll = db.getCollection(RACELOG_TEST_COLLECTION);
         assertNotNull(coll);
-        BasicDBObject doc = new BasicDBObject();
+        Document doc = new Document();
         doc.put("upperflag", "AP");
         doc.put("lowerflag", "ALPHA");
-        coll.insert(doc);
+        coll.insertOne(doc);
     }
 
     @Test
     public void testDBRead() throws UnknownHostException, MongoException, InterruptedException {
         {
-            DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
+            MongoCollection<Document> coll = db.getCollection(RACELOG_TEST_COLLECTION);
             assertNotNull(coll);
-            BasicDBObject doc = new BasicDBObject();
+            Document doc = new Document();
             doc.put("upperflag", "AP");
             doc.put("lowerflag", "ALPHA");
-            coll.insert(doc);
+            coll.insertOne(doc);
         }
 
         {
-            DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
+            MongoCollection<Document> coll = db.getCollection(RACELOG_TEST_COLLECTION);
             assertNotNull(coll);
-            DBObject object = coll.findOne();
+            Document object = coll.find().first();
             assertEquals("AP", object.get("upperflag"));
             assertEquals("ALPHA", object.get("lowerflag"));
         }
@@ -73,16 +72,16 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
         TimePoint now = MillisecondsTimePoint.now();
         RaceLogFlagEvent rcEvent = new RaceLogFlagEventImpl(now, author, 0, Flags.AP, Flags.ALPHA, true);
         {
-            DBObject rcEventForMongo = ((MongoObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory())
+            Document rcEventForMongo = ((MongoObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory())
                     .storeRaceLogFlagEvent(rcEvent);
-            DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
-            coll.insert(rcEventForMongo);
+            MongoCollection<Document> coll = db.getCollection(RACELOG_TEST_COLLECTION);
+            coll.insertOne(rcEventForMongo);
         }
 
         {
-            DBCollection coll = db.getCollection(RACELOG_TEST_COLLECTION);
+            MongoCollection<Document> coll = db.getCollection(RACELOG_TEST_COLLECTION);
             assertNotNull(coll);
-            DBObject object = coll.findOne();
+            Document object = coll.find().first();
             RaceLogFlagEvent readRcEvent = (RaceLogFlagEvent) ((DomainObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()).loadRaceLogEvent(object).getA();
             assertEquals(rcEvent.getLogicalTimePoint(), readRcEvent.getLogicalTimePoint());
             assertEquals(rcEvent.getId(), readRcEvent.getId());

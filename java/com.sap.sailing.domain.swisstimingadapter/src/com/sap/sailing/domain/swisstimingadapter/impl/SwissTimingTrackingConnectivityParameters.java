@@ -131,4 +131,9 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
     public boolean isUseInternalMarkPassingAlgorithm() {
         return useInternalMarkPassingAlgorithm;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+" for "+hostname+":"+port+", raceName: "+raceName+", raceID: "+raceID+", boatClass: "+boatClass;
+    }
 }

@@ -8,14 +8,14 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.sap.sailing.domain.persistence.impl.Activator
 Require-Bundle: com.sap.sse.mongodb,
  com.sap.sailing.domain,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sailing.domain.common,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.server.gateway.serialization,
  com.sap.sse.common,
  com.sap.sse,
  com.sap.sailing.server.gateway.serialization.shared.android,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Export-Package: com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.persistence.impl;
   x-friends:="com.sap.sailing.domain.persistence.test,

@@ -56,6 +56,10 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                 fileExtension = ".jpg";
             } else if (fileType.equals("image/png")) {
                 fileExtension = ".png";
+            } else if (fileType.equals("image/gif")) {
+                fileExtension = ".gif";
+            } else if (fileType.startsWith("video/")) {
+                fileExtension = fileType.substring(fileType.indexOf('/')+1);
             } else {
                 int lastDot = fileName.lastIndexOf(".");
                 if (lastDot > 0) {

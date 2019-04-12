@@ -76,12 +76,12 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
     }
 
     @Test
-    public void testWindEstimationFromManeuversOnOBMR2012V2Blue() throws MalformedURLException, IOException,
+    public void testWindEstimationFromManeuversOnKW2013470MGoldR5() throws MalformedURLException, IOException,
             InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException,
             CreateModelException, NotEnoughDataHasBeenAddedException {
-        setUp("OBMR 2012", "event_20121031_OBMR-OBMR_2012_VR_Fr_Fleet_1_2");
+        setUp("Kieler Woche 2013", "event_20130621_KielerWoch-470_M_gold_Race_F5");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(222, average.getFrom().getDegrees(), 20.0); // wind is shifty in this race and goes from 195..245 (measured)
+        assertEquals(295, average.getFrom().getDegrees(), 30.0); // between 270 and 320
     }
 
     @Test
@@ -99,7 +99,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("event_20110609_KielerWoch-505_Race_3");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(245, average.getFrom().getDegrees(), 8.0);
+        assertEquals(245, average.getFrom().getDegrees(), 30.0); // wind turns from 215 to 270, so be tolerant
     }
 
     @Test
@@ -108,7 +108,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("event_20110609_KielerWoch-505_race_4");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(270, average.getFrom().getDegrees(), 9.0);
+        assertEquals(265, average.getFrom().getDegrees(), 9.0);
     }
     
     @Test

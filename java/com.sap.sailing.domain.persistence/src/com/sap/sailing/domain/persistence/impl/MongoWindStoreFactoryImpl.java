@@ -2,17 +2,17 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.net.UnknownHostException;
 
-import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 
 public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory {
-    private final DB db;
+    private final MongoDatabase db;
     
-    public MongoWindStoreFactoryImpl(DB db) {
+    public MongoWindStoreFactoryImpl(MongoDatabase db) {
         this.db = db;
     }
     
@@ -21,7 +21,7 @@ public class MongoWindStoreFactoryImpl implements MongoWindStoreFactory {
         return new MongoWindStoreImpl(db, mongoObjectFactory, domainObjectFactory);
     }
 
-    public static MongoWindStoreFactory getInstance(DB db) {
+    public static MongoWindStoreFactory getInstance(MongoDatabase db) {
         return new MongoWindStoreFactoryImpl(db);
     }
 

@@ -122,10 +122,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
 
     @Override
     public String getName() {
-        if (this.getOperator() != null) {
-            return FILTER_NAME + " " + this.getOperator().getName() + " " + this.getValue();
-        }
-        return FILTER_NAME + " " + this.getValue();
+        return FILTER_NAME;
     }
 
     @Override

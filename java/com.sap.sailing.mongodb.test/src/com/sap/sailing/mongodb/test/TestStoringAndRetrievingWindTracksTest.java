@@ -14,10 +14,9 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -55,8 +54,8 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 
 public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLiveTest {
 
-    private Mongo mongo;
-    private DB db;
+    private MongoClient mongo;
+    private MongoDatabase db;
     
     private final MongoDBConfiguration dbConfiguration;
 
@@ -65,17 +64,16 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
     }
     
-    private Mongo newMongo() throws UnknownHostException, MongoException {
-        return new MongoClient(dbConfiguration.getHostName(),
-                dbConfiguration.getPort());
+    private MongoClient newMongo() throws UnknownHostException, MongoException {
+        return new MongoClient(dbConfiguration.getMongoClientURI());
     }
     
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException {
         mongo = newMongo();
         assertNotNull(mongo);
-        mongo.dropDatabase(dbConfiguration.getDatabaseName());
-        db = mongo.getDB(dbConfiguration.getDatabaseName());
+        mongo.dropDatabase(dbConfiguration.getMongoClientURI().getDatabase());
+        db = mongo.getDatabase(dbConfiguration.getMongoClientURI().getDatabase());
         assertNotNull(db);
     }
     
@@ -108,8 +106,8 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                 }, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class),
                 Optional.empty());
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
-        Mongo myFirstMongo = newMongo();
-        DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());
+        MongoClient myFirstMongo = newMongo();
+        MongoDatabase firstDatabase = myFirstMongo.getDatabase(dbConfiguration.getDatabaseName());
         new MongoObjectFactoryImpl(firstDatabase).addWindTrackDumper(trackedRegatta, trackedRace, windSource);
         WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
         Position pos = new DegreePosition(54, 9);
@@ -120,8 +118,8 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         }
         Thread.sleep(2000); // give MongoDB some time to make written data available to other connections
         
-        Mongo mySecondMongo = newMongo();
-        DB secondDatabase = mySecondMongo.getDB(dbConfiguration.getDatabaseName());
+        MongoClient mySecondMongo = newMongo();
+        MongoDatabase secondDatabase = mySecondMongo.getDatabase(dbConfiguration.getDatabaseName());
         WindTrack result = new DomainObjectFactoryImpl(secondDatabase, com.sap.sailing.domain.base.DomainFactory.INSTANCE).loadWindTrack(domainEvent.getName(), race, windSource, /* millisecondsOverWhichToAverage */
                 30000);
         double myBearingDeg = 123.4;

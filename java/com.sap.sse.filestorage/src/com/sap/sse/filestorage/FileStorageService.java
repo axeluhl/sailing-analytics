@@ -15,11 +15,6 @@ import com.sap.sse.common.TypeBasedServiceFinder;
  * servers. Implementations of this service are announced via the OSGi service registry. They should provide their name
  * as the OSGi property {@link TypeBasedServiceFinder#TYPE type};
  * 
- * TODO The storage service to use should be configured via the AdminConsole. Upon auto-discovering the available
- * services, the AdminConsole should allow to edit properties for each service (e.g. access credentials for AWS S3). We
- * probably need a generic property discovery mechanism (key-value based?), and to survive server restarts these
- * properties should be saved to the MongoDB.
- * 
  * @author Fredrik Teschke
  *
  */

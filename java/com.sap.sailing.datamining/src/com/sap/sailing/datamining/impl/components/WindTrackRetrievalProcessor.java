@@ -22,8 +22,11 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
  */
 public class WindTrackRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedRaceContext, HasWindTrackContext> {
 
-    public WindTrackRetrievalProcessor(ExecutorService executor, Collection<Processor<HasWindTrackContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasTrackedRaceContext.class, HasWindTrackContext.class, executor, resultReceivers, retrievalLevel);
+    public WindTrackRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<HasWindTrackContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasTrackedRaceContext.class, HasWindTrackContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
     }
 
     @Override

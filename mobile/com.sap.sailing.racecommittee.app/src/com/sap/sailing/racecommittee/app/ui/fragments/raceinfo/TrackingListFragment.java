@@ -1,22 +1,34 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.io.Serializable;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
-import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
-import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -44,6 +56,8 @@ import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAndBoatAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorResultsList;
 import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.HolderAwareOnDragListener;
+import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.ItemTouchHelperCallback;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorGoalPassingComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorNameComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
@@ -57,39 +71,21 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.Loader;
-import android.graphics.drawable.NinePatchDrawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.TextView;
-import android.widget.Toast;
+import java.io.Serializable;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class TrackingListFragment extends BaseFragment
-    implements CompetitorAndBoatAdapter.CompetitorClick, FinishListAdapter.FinishEvents, View.OnClickListener, AdapterView.OnItemSelectedListener,
-    PopupMenu.OnMenuItemClickListener, SearchView.SearchTextWatcher {
+        implements CompetitorAndBoatAdapter.CompetitorClick, View.OnClickListener, AdapterView.OnItemSelectedListener,
+        PopupMenu.OnMenuItemClickListener, SearchView.SearchTextWatcher, HolderAwareOnDragListener {
 
     private static final int COMPETITOR_LOADER = 0;
     private static final int LEADERBOARD_ORDER_LOADER = 2;
@@ -99,17 +95,15 @@ public class TrackingListFragment extends BaseFragment
     private static final int SORT_GOAL = 2;
     private static final int SORT_START = 3;
 
-    private RecyclerViewDragDropManager mDragDropManager;
-    private RecyclerViewSwipeManager mSwipeManager;
-    private RecyclerViewTouchActionGuardManager mGuardManager;
     private RecyclerView mFinishView;
+    private FinishListAdapter mFinishedAdapter;
+    private CompetitorResultsList<CompetitorResultWithIdImpl> mFinishedData;
+    private ItemTouchHelper mItemTouchHelper;
+
     private Button mConfirm;
     private TextView mEntryCount;
 
-    private FinishListAdapter mAdapter;
-    private RecyclerView.Adapter<FinishListAdapter.ViewHolder> mFinishedAdapter;
     private CompetitorAndBoatAdapter mCompetitorAdapter;
-    private CompetitorResultsList<CompetitorResultWithIdImpl> mFinishedData;
     private CompetitorResults mDraftData;
     private CompetitorResults mConfirmedData;
     private List<Map.Entry<Competitor, Boat>> mCompetitorData;
@@ -165,12 +159,12 @@ public class TrackingListFragment extends BaseFragment
                     RaceFragment fragment = PenaltyFragment.newInstance();
                     int viewId = R.id.race_content;
                     switch (getRaceState().getStatus()) {
-                        case FINISHED:
-                            viewId = getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true);
-                            break;
+                    case FINISHED:
+                        viewId = getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true);
+                        break;
 
-                        default:
-                            break;
+                    default:
+                        break;
                     }
                     replaceFragment(fragment, viewId);
                 }
@@ -239,58 +233,9 @@ public class TrackingListFragment extends BaseFragment
         mDraftData = new CompetitorResultsImpl();
         loadCompetitors();
         if (getView() != null) {
-            RecyclerView competitorView = (RecyclerView) getView().findViewById(R.id.list_positioning_all);
-            if (competitorView != null) {
-                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                mCompetitorAdapter = new CompetitorAndBoatAdapter(getActivity(), mFilteredCompetitorData, getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
-                mCompetitorAdapter.setListener(this);
-                competitorView.setLayoutManager(layoutManager);
-                competitorView.setAdapter(mCompetitorAdapter);
-                mPanels.add(competitorView);
-            }
-            mFinishView = (RecyclerView) getView().findViewById(R.id.list_positioning_chosen);
-            if (mFinishView != null) {
-                mGuardManager = new RecyclerViewTouchActionGuardManager();
-                mGuardManager.setInterceptVerticalScrollingWhileAnimationRunning(true);
-                mGuardManager.setEnabled(true);
-                mDragDropManager = new RecyclerViewDragDropManager();
-                NinePatchDrawable drawable = (NinePatchDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.material_shadow_z3);
-                mDragDropManager.setDraggingItemShadowDrawable(drawable);
-                mSwipeManager = new RecyclerViewSwipeManager();
-                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                mAdapter = new FinishListAdapter(getActivity(), mFinishedData, getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
-                mAdapter.setListener(this);
-                @SuppressWarnings("unchecked") RecyclerView.Adapter<FinishListAdapter.ViewHolder> dragManager = mDragDropManager
-                    .createWrappedAdapter(mAdapter);
-                mFinishedAdapter = dragManager;
-                @SuppressWarnings("unchecked") RecyclerView.Adapter<FinishListAdapter.ViewHolder> swipeManager = mSwipeManager
-                    .createWrappedAdapter(mFinishedAdapter);
-                mFinishedAdapter = swipeManager;
-                mFinishView.setLayoutManager(layoutManager);
-                mFinishView.setAdapter(mFinishedAdapter);
-                mFinishView.setItemAnimator(new SwipeDismissItemAnimator());
-                mGuardManager.attachRecyclerView(mFinishView);
-                mDragDropManager.attachRecyclerView(mFinishView);
-                mSwipeManager.attachRecyclerView(mFinishView);
-                mPanels.add(mFinishView);
-            }
-            mConfirm = (Button) getView().findViewById(R.id.confirm);
-            if (mConfirm != null) {
-                mConfirm.setEnabled(true);
-                mConfirm.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        TimePoint now = MillisecondsTimePoint.now();
-                        CompetitorResults result = getCompetitorResultsDiff(mConfirmedData);
-                        getRaceState().setFinishPositioningListChanged(now, result);
-                        getRaceState().setFinishPositioningConfirmed(now, result);
-                        initLocalData();
-                        Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
-                        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                    }
-                });
-            }
+            initCompetitorsView();
+            initFinishersView();
+            initConfirmationButton();
             if (getArguments().getInt(START_MODE, 0) == 0) {
                 onClick(ViewHelper.get(getView(), R.id.nav_next));
             } else {
@@ -302,6 +247,57 @@ public class TrackingListFragment extends BaseFragment
         mFilteredCompetitorData.addAll(mCompetitorData);
         loadLeaderboardResult();
         initLocalData();
+    }
+
+    private void initCompetitorsView() {
+        RecyclerView competitorView = (RecyclerView) getView().findViewById(R.id.list_positioning_all);
+        if (competitorView != null) {
+            mCompetitorAdapter = new CompetitorAndBoatAdapter(getActivity(), mFilteredCompetitorData,
+                    getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
+            mCompetitorAdapter.setListener(this);
+            competitorView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            competitorView.setAdapter(mCompetitorAdapter);
+            mPanels.add(competitorView);
+        }
+    }
+
+    private void initFinishersView() {
+        mFinishView = (RecyclerView) getView().findViewById(R.id.list_positioning_chosen);
+        if (mFinishView != null) {
+
+            mFinishedAdapter = new FinishListAdapter(getActivity(), mFinishedData,
+                    getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace(), this);
+            mFinishedAdapter.setDragListener(this);
+
+            mFinishView.setAdapter(mFinishedAdapter);
+            mFinishView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+            ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(mFinishedAdapter);
+            mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.attachToRecyclerView(mFinishView);
+
+            mPanels.add(mFinishView);
+        }
+    }
+
+    private void initConfirmationButton() {
+        mConfirm = (Button) getView().findViewById(R.id.confirm);
+        if (mConfirm != null) {
+            mConfirm.setEnabled(true);
+            mConfirm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    TimePoint now = MillisecondsTimePoint.now();
+                    CompetitorResults result = getCompetitorResultsDiff(mConfirmedData);
+                    getRaceState().setFinishPositioningListChanged(now, result);
+                    getRaceState().setFinishPositioningConfirmed(now, result);
+                    initLocalData();
+                    Toast.makeText(getActivity(), R.string.publish_clicked, Toast.LENGTH_SHORT).show();
+                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                }
+            });
+        }
     }
 
     private void initLocalData() {
@@ -321,13 +317,11 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private int getFirstRankZeroPosition() {
-        return mAdapter.getFirstRankZeroPosition();
+        return mFinishedAdapter.getFirstRankZeroPosition();
     }
 
     @Override
     public void onPause() {
-        mDragDropManager.cancelDrag();
-
         super.onPause();
     }
 
@@ -365,21 +359,6 @@ public class TrackingListFragment extends BaseFragment
 
     @Override
     public void onDestroy() {
-        if (mDragDropManager != null) {
-            mDragDropManager.release();
-            mDragDropManager = null;
-        }
-
-        if (mSwipeManager != null) {
-            mSwipeManager.release();
-            mSwipeManager = null;
-        }
-
-        if (mGuardManager != null) {
-            mGuardManager.release();
-            mGuardManager = null;
-        }
-
         if (mFinishView != null) {
             mFinishView.setItemAnimator(null);
             mFinishView.setAdapter(null);
@@ -387,7 +366,6 @@ public class TrackingListFragment extends BaseFragment
         }
 
         if (mFinishedAdapter != null) {
-            WrapperAdapterUtils.releaseAll(mFinishedAdapter);
             mFinishedAdapter = null;
         }
 
@@ -397,25 +375,30 @@ public class TrackingListFragment extends BaseFragment
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.by_name:
-                mComparator = mComparators.get(SORT_NAME);
-                break;
-            case R.id.by_start:
-                mComparator = mComparators.get(SORT_START);
-                break;
-            case R.id.by_goal:
-                mComparator = mComparators.get(SORT_GOAL);
-                break;
-            case R.id.by_boat:
-                mComparator = mComparators.get(SORT_SAIL_NUMBER);
-                break;
-            default:
-                mComparator = mComparators.get(SORT_SAIL_NUMBER);
+        case R.id.by_name:
+            mComparator = mComparators.get(SORT_NAME);
+            break;
+        case R.id.by_start:
+            mComparator = mComparators.get(SORT_START);
+            break;
+        case R.id.by_goal:
+            mComparator = mComparators.get(SORT_GOAL);
+            break;
+        case R.id.by_boat:
+            mComparator = mComparators.get(SORT_SAIL_NUMBER);
+            break;
+        default:
+            mComparator = mComparators.get(SORT_SAIL_NUMBER);
 
         }
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
         return true;
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewholder) {
+        mItemTouchHelper.startDrag(viewholder);
     }
 
     private boolean isDirty() {
@@ -462,7 +445,8 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private void sendUnconfirmed() {
-        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResultsDiff(mConfirmedData));
+        getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(),
+                getCompetitorResultsDiff(mConfirmedData));
     }
 
     private void loadCompetitors() {
@@ -473,21 +457,22 @@ public class TrackingListFragment extends BaseFragment
             domainFactory.getCompetitorAndBoatStore().allowCompetitorResetToDefaults(competitor);
         }
 
-        final Loader<?> competitorLoader = getLoaderManager()
-            .initLoader(COMPETITOR_LOADER, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Map<Competitor, Boat>>() {
+        final Loader<?> competitorLoader = getLoaderManager().initLoader(COMPETITOR_LOADER, null,
+                dataManager.createCompetitorsLoader(getRace(), new LoadClient<Map<Competitor, Boat>>() {
 
-                @Override
-                public void onLoadFailed(Exception reason) {
-                    Toast.makeText(getActivity(), getString(R.string.competitor_load_error, reason.toString()), Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onLoadSucceeded(Map<Competitor, Boat> data, boolean isCached) {
-                    if (isAdded() && !isCached) {
-                        onLoadCompetitorsSucceeded(data);
+                    @Override
+                    public void onLoadFailed(Exception reason) {
+                        Toast.makeText(getActivity(), getString(R.string.competitor_load_error, reason.toString()),
+                                Toast.LENGTH_LONG).show();
                     }
-                }
-            }));
+
+                    @Override
+                    public void onLoadSucceeded(Map<Competitor, Boat> data, boolean isCached) {
+                        if (isAdded() && !isCached) {
+                            onLoadCompetitorsSucceeded(data);
+                        }
+                    }
+                }));
 
         // Force load to get non-cached remote competitors...
         competitorLoader.forceLoad();
@@ -496,24 +481,25 @@ public class TrackingListFragment extends BaseFragment
     private void loadLeaderboardResult() {
         ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
 
-        final Loader<?> leaderboardResultLoader = getLoaderManager()
-            .initLoader(LEADERBOARD_ORDER_LOADER, null, dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
-                @Override
-                public void onLoadFailed(Exception reason) {
+        final Loader<?> leaderboardResultLoader = getLoaderManager().initLoader(LEADERBOARD_ORDER_LOADER, null,
+                dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
+                    @Override
+                    public void onLoadFailed(Exception reason) {
 
-                }
-
-                @Override
-                public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
-                    List<Util.Pair<Long, String>> sortByRank = data.getResult(getRace().getName());
-                    if (isAdded() && sortByRank != null) {
-                        CompetitorGoalPassingComparator comparator = (CompetitorGoalPassingComparator)mComparators.get(SORT_GOAL);
-                        comparator.updateWith(sortByRank);
-                        sortCompetitors();
-                        mCompetitorAdapter.notifyDataSetChanged();
                     }
-                }
-            }));
+
+                    @Override
+                    public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
+                        List<Util.Pair<Long, String>> sortByRank = data.getResult(getRace().getName());
+                        if (isAdded() && sortByRank != null) {
+                            CompetitorGoalPassingComparator comparator = (CompetitorGoalPassingComparator) mComparators
+                                    .get(SORT_GOAL);
+                            comparator.updateWith(sortByRank);
+                            sortCompetitors();
+                            mCompetitorAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }));
 
         leaderboardResultLoader.forceLoad();
     }
@@ -565,8 +551,8 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private CompetitorResultsList<CompetitorResultWithIdImpl> initializeFinishList() {
-        CompetitorResultsList<CompetitorResultWithIdImpl> positioning = new CompetitorResultsList<>(Collections
-            .synchronizedList(new ArrayList<CompetitorResultWithIdImpl>()));
+        CompetitorResultsList<CompetitorResultWithIdImpl> positioning = new CompetitorResultsList<>(
+                Collections.synchronizedList(new ArrayList<CompetitorResultWithIdImpl>()));
         if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) {
             for (CompetitorResult result : getRaceState().getFinishPositioningList()) {
                 Boat boat = getBoat(result.getCompetitorId());
@@ -574,12 +560,13 @@ public class TrackingListFragment extends BaseFragment
                 mId++;
             }
         }
-        Collections.sort(positioning, new DefaultCompetitorResultComparator(/* lowPoint TODO where to get this from? */ true));
+        Collections.sort(positioning,
+                new DefaultCompetitorResultComparator(/* lowPoint TODO where to get this from? */ true));
         return positioning;
     }
 
     @Nullable
-    private Boat getBoat(Serializable competitorId) {
+    public Boat getBoat(Serializable competitorId) {
         Boat boat = null;
         for (Map.Entry<Competitor, Boat> entry : getRace().getCompetitorsAndBoats().entrySet()) {
             if (entry.getKey().getId().equals(competitorId)) {
@@ -601,9 +588,57 @@ public class TrackingListFragment extends BaseFragment
         }
     }
 
-    private void moveCompetitorToFinishList(Competitor competitor) {
+    public void onItemEdit(final CompetitorResultWithIdImpl item) {
+        Context context = getContext();
+        if (context instanceof AppCompatActivity) {
+            ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
+            if (actionBar != null) {
+                context = actionBar.getThemedContext();
+            }
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+        builder.setTitle(item.getCompetitorDisplayName());
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState().getFinishingTime(), item,
+                mFinishedAdapter.getFirstRankZeroPosition() +
+                        /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
+                        (item.getOneBasedRank() == 0 ? 1 : 0), false, item.getMergeState() == MergeState.ERROR);
+        builder.setView(layout);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                CompetitorResultWithIdImpl newItem = layout.getValue();
+                updateItem(item, newItem);
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(),
+                        getBoat(item.getCompetitorId()), item.getCompetitorId(), item.getName(), item.getShortName(),
+                        item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
+                        item.getComment(), MergeState.OK);
+                updateItem(item, newItem);
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        if (AppUtils.with(getContext()).isTablet()) {
+            Window window = dialog.getWindow();
+            if (window != null) {
+                window.setLayout(getContext().getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width),
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
+        }
+    }
 
-        int pos = mAdapter.getFirstRankZeroPosition();
+    private void moveCompetitorToFinishList(Competitor competitor) {
+        int pos = mFinishedAdapter.getFirstRankZeroPosition();
         // FIXME mFinishedData.size()+1 also counts penalized competitors before which the competitor is to be inserted! I just wonder how the position shown in the app seems correct...
         int greatestOneBasedRankSoFar = 0;
         for (final CompetitorResultWithIdImpl result : mFinishedData) {
@@ -613,7 +648,7 @@ public class TrackingListFragment extends BaseFragment
         }
         CompetitorResultWithIdImpl theCompetitor = new CompetitorResultWithIdImpl(mId, getBoat(competitor.getId()), competitor.getId(),
                 competitor.getName(), competitor.getShortName(), greatestOneBasedRankSoFar + 1, MaxPointsReason.NONE,
-                /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK); 
+                /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK);
         mFinishedData.add(pos, theCompetitor);
         mId++;
         setPublishButton();
@@ -652,30 +687,28 @@ public class TrackingListFragment extends BaseFragment
      * position</li>
      * </ol>
      *
-     * @param fromPosition the position (zero-based index) where the item currently is in {@link #mFinishedData}
-     * @param toPosition   the position (zero-based index <em>after</em> removal of the item from its {@code fromPosition}) where
-     *                     to {@link List#add(int, Object)} the item again in {@link #mFinishedData}
+     * @param fromPosition
+     *            the position (zero-based index) where the item currently is in {@link #mFinishedData}
+     * @param toPosition
+     *            the position (zero-based index <em>after</em> removal of the item from its {@code fromPosition}) where
+     *            to {@link List#add(int, Object)} the item again in {@link #mFinishedData}
      */
-    @Override
-    public void onItemMove(int fromPosition, int toPosition) {
-        CompetitorResultWithIdImpl item = mFinishedData.remove(fromPosition);
-        mFinishedData.add(toPosition, item);
+    public boolean onItemMove(int fromPosition, int toPosition) {
         final int firstPositionChanged = Math.min(getFirstRankZeroPosition(), Math.min(fromPosition, toPosition));
         final int lastPositionChanged = Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition) + 1);
         adjustRanks(firstPositionChanged, lastPositionChanged);
+        mFinishedAdapter.notifyItemChanged(fromPosition);
+        mFinishedAdapter.notifyItemChanged(toPosition);
         setPublishButton();
-        mFinishedAdapter.notifyItemRangeChanged(firstPositionChanged, lastPositionChanged - firstPositionChanged);
+        return true;
     }
 
-    @Override
-    public void onItemRemove(int position) {
-        CompetitorResultWithIdImpl item = mFinishedData.get(position);
-        if (position >= 0) { // found
-            mFinishedData.remove(position);
-            adjustRanks(position, getFirstRankZeroPosition());
-            setPublishButton();
-            mFinishedAdapter.notifyItemRemoved(position);
+    public void onItemRemove(int position, CompetitorResultWithIdImpl item) {
+        if (position < 0) { // not found
+            return;
         }
+        adjustRanks(position, getFirstRankZeroPosition());
+        setPublishButton();
         for (Map.Entry<Competitor, Boat> entry : getRace().getCompetitorsAndBoats().entrySet()) {
             if (entry.getKey().getId().equals(item.getCompetitorId())) {
                 addNewCompetitorToCompetitorList(entry);
@@ -685,19 +718,22 @@ public class TrackingListFragment extends BaseFragment
     }
 
     /**
-     * In {@link #mFinishedData}, starting at index {@code fromPosition}, updates all ranks so they equal the
-     * position in the list plus one; stop before reaching the entry at list index {@code toPosition} or the
+     * In {@link #mFinishedData}, starting at index {@code fromPosition}, updates all ranks so they equal the position
+     * in the list plus one; stop before reaching the entry at list index {@code toPosition} or the
      * {@link #getFirstRankZeroPosition() first penalty position}.
      *
-     * @param fromPosition inclusive start index into {@link #mFinishedData} where to start updating the ranks
-     * @param toPosition   exclusive end index into {@link #mFinishedData} where to stop updating the ranks; must not be -1
+     * @param fromPosition
+     *            inclusive start index into {@link #mFinishedData} where to start updating the ranks
+     * @param toPosition
+     *            exclusive end index into {@link #mFinishedData} where to stop updating the ranks; must not be -1
      */
     private void adjustRanks(int fromPosition, int toPosition) {
         final int end = Math.min(toPosition, getFirstRankZeroPosition());
         for (int i = fromPosition; i < end; i++) {
             CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition = mFinishedData.get(i);
             final int newOneBasedRank = i + 1;
-            mFinishedData.set(i, cloneCompetitorResultAndAdjustRank(competitorToReplaceWithAdjustedPosition, newOneBasedRank));
+            mFinishedData.set(i,
+                    cloneCompetitorResultAndAdjustRank(competitorToReplaceWithAdjustedPosition, newOneBasedRank));
         }
     }
 
@@ -710,10 +746,9 @@ public class TrackingListFragment extends BaseFragment
             .getFinishingTime(), competitorToReplaceWithAdjustedPosition.getComment(), MergeState.OK);
     }
 
-    @Override
     public void onLongClick(final CompetitorResultWithIdImpl item) {
         final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(R.string.select_penalty_reason);
         builder.setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int position) {
@@ -723,55 +758,6 @@ public class TrackingListFragment extends BaseFragment
             }
         });
         builder.show();
-    }
-
-    @Override
-    public void onItemEdit(final CompetitorResultWithIdImpl item) {
-        Context context = getActivity();
-        if (context instanceof AppCompatActivity) {
-            ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
-            if (actionBar != null) {
-                context = actionBar.getThemedContext();
-            }
-        }
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
-        builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState().getFinishingTime(), item,
-            mAdapter.getFirstRankZeroPosition() +
-            /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
-                (item.getOneBasedRank() == 0 ? 1 : 0), false, item.getMergeState() == MergeState.ERROR);
-        builder.setView(layout);
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                CompetitorResultWithIdImpl newItem = layout.getValue();
-                updateItem(item, newItem);
-            }
-        });
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(),
-                        getBoat(item.getCompetitorId()), item.getCompetitorId(), item.getName(), item.getShortName(),
-                        item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
-                        item.getComment(), MergeState.OK);
-                updateItem(item, newItem);
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        if (AppUtils.with(getActivity()).isTablet()) {
-            Window window = dialog.getWindow();
-            if (window != null) {
-                window.setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
-            }
-        }
     }
 
     /**
@@ -786,7 +772,7 @@ public class TrackingListFragment extends BaseFragment
      * position</li>
      * </ol>
      */
-    private void updateItem(final CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
+    public void updateItem(final CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
         int index = -1;
         for (int i = 0; i < mFinishedData.size(); i++) {
             if (mFinishedData.get(i).getCompetitorId().equals(item.getCompetitorId())) {
@@ -794,16 +780,20 @@ public class TrackingListFragment extends BaseFragment
             }
         }
         if (index >= 0) {
-            mFinishedData.set(index, newItem); // update the item in the list already; then check where to move it and adjust other elements
+            mFinishedData.set(index, newItem); // update the item in the list already; then check where to move it and
+                                               // adjust other elements
         }
-        if (item.getOneBasedRank() != 0 && newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() != MaxPointsReason.NONE) {
+        if (item.getOneBasedRank() != 0 && newItem.getOneBasedRank() == 0
+                && newItem.getMaxPointsReason() != MaxPointsReason.NONE) {
             // move to the end of the area of "penalized" competitors; may also be an unpenalized competitor that hasn't
             // been removed yet (e.g., in order to force a score correction reset on the server)
-            onItemMove(index, mFinishedData.size() - 1); // -1 because first the element is removed, so when inserting the list is one element shorter
+            onItemMove(index, mFinishedData.size() - 1); // -1 because first the element is removed, so when inserting
+                                                         // the list is one element shorter
         } else if (item.getOneBasedRank() != newItem.getOneBasedRank() && newItem.getOneBasedRank() != 0) {
             onItemMove(index, newItem.getOneBasedRank() - 1);
+            mFinishedAdapter.notifyItemChanged(index);
         } else if (newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() == MaxPointsReason.NONE) {
-            onItemRemove(index);
+            onItemRemove(index, item);
         } else {
             mFinishedAdapter.notifyItemChanged(index);
         }
@@ -875,23 +865,23 @@ public class TrackingListFragment extends BaseFragment
     public void onClick(View v) {
         if (v != null) {
             switch (v.getId()) {
-                case R.id.nav_prev:
-                    viewPanel(MOVE_DOWN);
-                    break;
+            case R.id.nav_prev:
+                viewPanel(MOVE_DOWN);
+                break;
 
-                case R.id.nav_next:
-                    viewPanel(MOVE_UP);
-                    break;
+            case R.id.nav_next:
+                viewPanel(MOVE_UP);
+                break;
             }
         }
         if (mHeader != null) {
             switch (mActivePage) {
-                case 0:
-                    mHeader.setHeaderText(R.string.tracking_list_01);
-                    break;
+            case 0:
+                mHeader.setHeaderText(R.string.tracking_list_01);
+                break;
 
-                default:
-                    mHeader.setHeaderText(R.string.tracking_list_02);
+            default:
+                mHeader.setHeaderText(R.string.tracking_list_02);
             }
         }
         if (mTools != null) {
@@ -1101,15 +1091,17 @@ public class TrackingListFragment extends BaseFragment
                             break;
                         }
                     }
-                    mFinishedData.add(new CompetitorResultWithIdImpl(mFinishedData.size(), getBoat(result.getCompetitorId()), result));
-                    Collections.sort(mFinishedData, new DefaultCompetitorResultComparator(/* lowPoint TODO where to get this from? */ true));
+                    mFinishedData.add(new CompetitorResultWithIdImpl(mFinishedData.size(),
+                            getBoat(result.getCompetitorId()), result));
+                    Collections.sort(mFinishedData,
+                            new DefaultCompetitorResultComparator(/* lowPoint TODO where to get this from? */ true));
                 }
             }
         }
         setPublishButton();
-        mAdapter.notifyDataSetChanged();
+        mFinishedAdapter.notifyDataSetChanged();
         if (changedCompetitor.size() > 0) { // show message to user
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(R.string.refresh_title);
             StringBuilder string = new StringBuilder(1024);
             for (String competitor : changedCompetitor.values()) {
@@ -1125,8 +1117,8 @@ public class TrackingListFragment extends BaseFragment
     }
 
     @NonNull
-    private CompetitorResultWithIdImpl updateChangedItem(Map<Serializable, String> changedCompetitor, CompetitorResultWithIdImpl item,
-        CompetitorResultWithIdImpl newItem) {
+    private CompetitorResultWithIdImpl updateChangedItem(Map<Serializable, String> changedCompetitor,
+            CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
         updateItem(item, newItem);
         changedCompetitor.put(newItem.getCompetitorId(), newItem.getCompetitorDisplayName());
         return newItem;
@@ -1135,23 +1127,23 @@ public class TrackingListFragment extends BaseFragment
     private MergeState getMergeState(CompetitorResultWithIdImpl item, MergeState newState) {
         MergeState state = item.getMergeState();
         switch (item.getMergeState()) {
-            case ERROR:
-                if (newState != MergeState.ERROR) {
-                    break;
-                }
-                state = newState;
+        case ERROR:
+            if (newState != MergeState.ERROR) {
                 break;
+            }
+            state = newState;
+            break;
 
-            case WARNING:
-                if (newState != MergeState.WARNING && newState != MergeState.ERROR) {
-                    break;
-                }
-                state = newState;
+        case WARNING:
+            if (newState != MergeState.WARNING && newState != MergeState.ERROR) {
                 break;
+            }
+            state = newState;
+            break;
 
-            case OK:
-                state = newState;
-                break;
+        case OK:
+            state = newState;
+            break;
         }
         return state;
     }

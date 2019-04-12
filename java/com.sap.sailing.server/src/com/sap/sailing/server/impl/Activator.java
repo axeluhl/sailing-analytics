@@ -35,10 +35,12 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMong
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
+import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
@@ -63,6 +65,8 @@ public class Activator implements BundleActivator {
     private static final String RESTORE_TRACKED_RACES_PROPERTY_NAME = "restore.tracked.races";
 
     private static ExtenderBundleTracker extenderBundleTracker;
+
+    private static BundleContext context;
 
     private CachedOsgiTypeBasedServiceFinderFactory serviceFinderFactory;
 
@@ -99,6 +103,8 @@ public class Activator implements BundleActivator {
     }
 
     public void start(BundleContext context) throws Exception {
+        Activator.context = context;
+
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
 
@@ -184,6 +190,18 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(() -> new BoatClassNotificationPreferences(racingEventService)),
                 properties));
+        properties.put(PreferenceConverter.KEY_PARAMETER_NAME, StoredDataMiningQueryPreferences.PREF_NAME);
+        registrations.add(context.registerService(PreferenceConverter.class,
+                new GenericJSONPreferenceConverter<>(() -> new StoredDataMiningQueryPreferences()), properties));
+        properties.put(PreferenceConverter.KEY_PARAMETER_NAME, SailorProfilePreferences.PREF_NAME);
+        registrations.add(context.registerService(PreferenceConverter.class,
+                new GenericJSONPreferenceConverter<>(
+                        () -> new SailorProfilePreferences(racingEventService.getCompetitorAndBoatStore())),
+                properties));
+    }
+
+    public static BundleContext getContext() {
+        return context;
     }
 
     public void stop(BundleContext context) throws Exception {
@@ -274,5 +292,4 @@ public class Activator implements BundleActivator {
         }
 
     }
-
 }

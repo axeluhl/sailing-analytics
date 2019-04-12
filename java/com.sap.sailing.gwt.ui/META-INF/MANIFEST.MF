@@ -8,9 +8,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.server,
+ com.sap.sailing.server.interface,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sse.mongodb,
- org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence,
@@ -18,8 +18,9 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sailing.resultimport,
  org.moxieapps.gwt.highcharts;bundle-version="1.5.0";resolution:=optional,
+ com.github.branflake2267.gwt-maps-api;bundle-version="3.10";resolution:=optional,
  com.sap.sailing.geocoding,
- com.sap.sse.replication,
+ com.sap.sse.replication.interfaces,
  com.googlecode.java-diff-utils;bundle-version="1.3.0",
  com.sap.sailing.freg.resultimport,
  com.sap.sailing.domain.swisstimingreplayadapter,
@@ -56,22 +57,23 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.competitorimport,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.expeditionconnector.common,
- org.mp4parser.isoparser;bundle-version="1.9.31",
- com.sap.sse.datamining.ui
+ org.mp4parser.isoparser;bundle-version="1.9.37",
+ com.sap.sse.datamining.ui,
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0",
+ javax.ws.rs;version="1.1.1",
+ javax.ws.rs.core;version="1.1.1",
  org.apache.http.client;version="[4.2.5,4.3.0)",
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework,
  org.osgi.util.tracker
 Web-ContextPath: /gwt
-Bundle-ClassPath: WEB-INF/classes/,
- WEB-INF/lib/gwt-maps-api-3.9.0-build-17.jar,
- WEB-INF/lib/gwt-ajaxloader.jar
+Bundle-ClassPath: WEB-INF/classes/
 TrackLifecycle: true
 Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.confidence.impl,
  com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.impl,

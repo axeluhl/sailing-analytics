@@ -66,6 +66,7 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
                 new WindImpl(/* position */null, new MillisecondsTimePoint(dateFormat.parse("06/23/2011-15:53:30")),
                         new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(55))),
                 new WindSourceImpl(WindSourceType.WEB));
+        getTrackedRace().waitForManeuverDetectionToFinish();
     }
 
     // TODO Think about how to implement an incremental douglas peucker which matches exactly the non-incremental
@@ -130,7 +131,8 @@ public class IncrementalManeuverComputationTest extends AbstractManeuverDetectio
         performanceMeasurementStartedAt = System.currentTimeMillis();
         List<Maneuver> normallyDetectedManeuvers = normalManeuverDetector.detectManeuvers();
         long millisForNormalManeuverDetection = System.currentTimeMillis() - performanceMeasurementStartedAt;
-        int performanceBenefitOfIncrementalManeuverDetectionInPercent = (int) ((1.0 * (millisForNormalManeuverDetection - millisForIncrementalManeuverDetection)
+        int performanceBenefitOfIncrementalManeuverDetectionInPercent = (int) ((1.0
+                * (millisForNormalManeuverDetection - millisForIncrementalManeuverDetection)
                 / millisForNormalManeuverDetection) * 100);
         assertEquals("Incrementally calculated maneuvers differ from normally calculated maneuvers",
                 normallyDetectedManeuvers, incrementallyDetectedManeuvers);

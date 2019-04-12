@@ -16,6 +16,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
@@ -196,13 +197,18 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         leaderboardsTable = new FlushableCellTable<StrippedLeaderboardDTO>(10000, tableRes);
         leaderboardsTable.ensureDebugId("LeaderboardsCellTable");
         leaderboardsFilterablePanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(
-                filterLeaderboardsLabel, availableLeaderboards, leaderboardsTable, leaderboardsProvider) {
+                filterLeaderboardsLabel, availableLeaderboards, leaderboardsProvider) {
             @Override
             public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.name);
                 strings.add(t.displayName);
                 return strings;
+            }
+
+            @Override
+            public AbstractCellTable<StrippedLeaderboardDTO> getCellTable() {
+                return leaderboardsTable;
             }
         };
         SelectionCheckboxColumn<StrippedLeaderboardDTO> leaderboardTableSelectionColumn =
@@ -457,12 +463,18 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         ListHandler<LeaderboardGroupDTO> leaderboardGroupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsProvider.getList());
         groupsTable = new FlushableCellTable<LeaderboardGroupDTO>(10000, tableRes);
         groupsTable.ensureDebugId("LeaderboardGroupsCellTable");
-        groupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(filterLeaderboardGroupsLbl, availableLeaderboardGroups, groupsTable, groupsProvider) {
+        groupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(filterLeaderboardGroupsLbl,
+                availableLeaderboardGroups, groupsProvider) {
             @Override
             public Iterable<String> getSearchableStrings(LeaderboardGroupDTO t) {
                 List<String> string = new ArrayList<String>();
                 string.add(t.getName());
                 return string;
+            }
+
+            @Override
+            public AbstractCellTable<LeaderboardGroupDTO> getCellTable() {
+                return groupsTable;
             }
         };
         groupsFilterablePanel.getTextBox().ensureDebugId("LeaderboardGroupsFilterTextBox");

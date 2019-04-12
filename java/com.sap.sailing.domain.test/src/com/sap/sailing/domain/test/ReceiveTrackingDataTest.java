@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -56,7 +57,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             private boolean first = true;
             
             @Override
-            public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+            public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, AddResult addedOrReplaced) {
                 synchronized (semaphor) {
                     if (first) {
                         firstTracked[0] = competitor;

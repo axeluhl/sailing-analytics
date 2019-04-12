@@ -8,22 +8,22 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.8.0 ["Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr)), [http://www.eclipse.org](http://www.eclipse.org)
+1. Eclipse (Eclipse IDE for Eclipse Committers, version 4.11.0 ["2019-03"]https://www.eclipse.org/downloads/packages/release/2019-03/r/eclipse-ide-eclipse-committers)), [http://www.eclipse.org](http://www.eclipse.org)
 2. Install the eclipse plugins (see Automatic Eclipse plugin installation below)
 3. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
 4. MongoDB (e.g. Production Release 2.6.7), download: [https://www.mongodb.com/](https://www.mongodb.com/)
 5. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8) is the link.
-6. JDK 1.7 (Java SE 7), [http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html](http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html)
-7. JDK 1.8 (Java SE 8), [http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+6. JDK 1.7 (Java SE 7), [http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html](http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html) --- Alternatively you can use the SAPJVM 1.7: Go to [http://sapjvm.wdf.sap.corp:1080/downloads](http://sapjvm.wdf.sap.corp:1080/downloads), select JVM 1.7, extract the downloaded .zip into desired location (e.g. C:\Program Files\Java), then Go to Window -> Preferences -> Java -> Installed JREs and add the VM.
+7. JDK 1.8 (Java SE 8), [http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) --- Alternatively you can use the SAPJVM 1.8: Go to [http://sapjvm.wdf.sap.corp:1080/downloads](http://sapjvm.wdf.sap.corp:1080/downloads), select JVM 1.8, extract the downloaded .zip into desired location (e.g. C:\Program Files\Java), then Go to Window -> Preferences -> Java -> Installed JREs and add the VM.
 8. Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
 9. GWT SDK 2.8.2 ([http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html))
 10. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.8.0 "Photon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr) by using the script "configuration/installPluginsForEclipsePhoton.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.11.0 "2019-03"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/photonr) by using the script "configuration/installPluginsForEclipse2019-03.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipsePhoton.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipse2019-03.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
@@ -76,6 +76,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Ensure that your git username and email is set properly: In case you are unsure, use the commands `git config user.name "My Name"` and `git config user.email my.email@sap.com` in the git repository.
 3. Setup and configure Eclipse
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Formatter)
+  * It is also strongly recommended to import CodeFormatter\_JavaScript.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->JavaScript->Code Style->Formatter) to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
   * Install the required plugins using the script provided above. Further configuration steps depend on the plugins being installed successfully.
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> GWT -> GWT Settings -> Add...)
@@ -89,7 +90,6 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Check that the both JDKs are available (Windows->Preferences->Java->Installed JREs)
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
-  * Go to Windows->Preferences->GWT->Errors/Warnings and set "Missing SDK" to "Ignore"
   * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import via the wizard <del>"Git->Projects from Git"</del> "Import->General->Projects from Folder or Archive" in Eclipse, and additionally make sure to scan for nested projects!)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
@@ -119,6 +119,7 @@ Copy the settings.xml **and** the toolchains.xml from the top-level git folder t
 #### Further hints
 - Configure Eclipse to use Chrome or Firefox as the default browser
 - Install the GWT Browser Plugin for the GWT Development mode <del>(Chrome or Firefox; as of this writing (2013-11-05), Firefox is the only platform where the plug-in runs stably)</del> (As of 2016-08-31 Firefox is the only browser supporting the GWT plugin, you have to download Firefox version 24 for it to work)
+- Use SAP JVM Profiler. If you used the script above and installed the SAPJVM instead of the jdk, you can now open the profiling perspective by clicking on Window -> Perspective -> Open Perspective -> Profiling)
 
 #### Git usage troubleshooting
 

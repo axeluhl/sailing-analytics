@@ -8,6 +8,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
@@ -41,6 +43,18 @@ public interface HasTrackedRaceContext {
     @Dimension(messageKey="AdvantageousEndOfLine", ordinal=7)
     public NauticalSide getAdvantageousEndOfLine();
     
+    @Statistic(messageKey="AdvantageOfStarboardSideOfStartLine")
+    public Distance getAdvantageOfStarboardSideOfStartline();
+    
+    @Statistic(messageKey="TrueWindAngleOfStartLineSeenFromStarboardSide")
+    public Bearing getTrueWindAngleOfStartLineFromStarboardSide();
+    
+    @Statistic(messageKey="StartLineLength")
+    public Distance getStartLineLength();
+    
+    @Statistic(messageKey="FinishLineLength")
+    public Distance getFinishLineLength();
+    
     @Dimension(messageKey="MedalRace", ordinal=8)
     public Boolean isMedalRace();
     
@@ -56,9 +70,12 @@ public interface HasTrackedRaceContext {
     @Statistic(messageKey="NumberOfMarkFixes", resultDecimals=0, ordinal=2)
     public int getNumberOfMarkFixes();
     
+    @Statistic(messageKey="NumberOfWindFixes", resultDecimals=0, ordinal=1)
+    public int getNumberOfWindFixes();
+    
     // Convenience methods for race dependent calculation to avoid code duplication
     public Double getRelativeScoreForCompetitor(Competitor competitor);
     
-    public Double getRankAtFinishForCompetitor(Competitor competitor);
+    public Integer getRankAtFinishForCompetitor(Competitor competitor);
     
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -43,9 +44,9 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public SailMasterConnector getOrCreateSailMasterConnector(String host, int port, String raceId, String raceName,
-            String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
+            String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         if (Boolean.valueOf(System.getProperty("simulateLiveMode", "false"))) {
-            return getOrCreateSailMasterLiveSimulatorConnector(host, port, raceId, raceName, raceDescription, boatClass);
+            return getOrCreateSailMasterLiveSimulatorConnector(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
         } else {
             Util.Triple<String, Integer, String> key = new Util.Triple<String, Integer, String>(host, port, raceId);
             SailMasterConnector result = connectors.get(key);
@@ -55,7 +56,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
                 } else {
                     logger.info("Creating a new connector for "+key+" because the old one was stopped");
                 }
-                result = new SailMasterConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass);
+                result = new SailMasterConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
                 connectors.put(key, result);
                 // TODO how do connectors get stopped, terminated and removed from the connectors map again?
             } else {
@@ -67,15 +68,15 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, String raceId, String raceName,
-            String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
+            String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         Util.Triple<String, Integer, String> key = new Util.Triple<>(host, port, raceId);
         SailMasterConnector result = connectors.get(key);
         if (result == null) {
-            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass);
+            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
             connectors.put(key, result);
             // TODO how do connectors get stopped, terminated and removed from the connectors map again?
         } else if (result.isStopped()) {
-            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass);
+            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
             connectors.put(key, result);
         }
         return result;
@@ -91,7 +92,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     public SwissTimingRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws InterruptedException, UnknownHostException, IOException, ParseException {
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         return new SwissTimingRaceTrackerImpl(raceLogStore, regattaLogStore, windStore, domainFactory, this,
                 trackedRegattaRegistry, raceLogResolver, connectivityParams);
     }
@@ -100,7 +101,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     public RaceTracker createRaceTracker(Regatta regatta, WindStore windStore, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws UnknownHostException, InterruptedException, IOException, ParseException {
+            throws UnknownHostException, InterruptedException, IOException, ParseException, URISyntaxException {
         return new SwissTimingRaceTrackerImpl(regatta, windStore, domainFactory, this, trackedRegattaRegistry,
                 raceLogStore, regattaLogStore, raceLogResolver, connectivityParams);
     }

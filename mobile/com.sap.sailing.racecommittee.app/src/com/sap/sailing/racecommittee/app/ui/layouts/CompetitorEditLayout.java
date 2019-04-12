@@ -34,7 +34,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 @SuppressLint("ViewConstructor")
-public class CompetitorEditLayout extends ScrollView implements DatePickerDialog.OnDateSetListener, FullTimePickerDialog.OnTimeSetListener {
+public class CompetitorEditLayout extends ScrollView
+        implements DatePickerDialog.OnDateSetListener, FullTimePickerDialog.OnTimeSetListener {
 
     private CompetitorResultWithIdImpl mCompetitor;
     private GregorianCalendar mCalendar;
@@ -49,12 +50,13 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
 
     private boolean mRestricted;
 
-    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int maxPos, boolean hasWarning) {
+    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int maxPos,
+            boolean hasWarning) {
         this(context, null, competitor, maxPos, true, hasWarning);
     }
 
-    public CompetitorEditLayout(final Context context, final TimePoint startTime, CompetitorResultWithIdImpl competitor, int maxPos,
-        boolean restrictedView, boolean hasWarning) {
+    public CompetitorEditLayout(final Context context, final TimePoint startTime, CompetitorResultWithIdImpl competitor,
+            int maxPos, boolean restrictedView, boolean hasWarning) {
         super(context);
 
         mRestricted = restrictedView;
@@ -107,7 +109,8 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
                         month = mCalendar.get(Calendar.MONTH);
                         day = mCalendar.get(Calendar.DAY_OF_MONTH);
                     }
-                    DatePickerDialog dialog = new DatePickerDialog(context, R.style.AppTheme_PickerDialog, CompetitorEditLayout.this, year, month, day);
+                    DatePickerDialog dialog = new DatePickerDialog(context, R.style.AppTheme_PickerDialog,
+                            CompetitorEditLayout.this, year, month, day);
                     dialog.getDatePicker().setMinDate(startTime.asMillis());
                     dialog.show();
                 }
@@ -126,7 +129,8 @@ public class CompetitorEditLayout extends ScrollView implements DatePickerDialog
                         minutes = mCalendar.get(Calendar.MINUTE);
                         second = mCalendar.get(Calendar.SECOND);
                     }
-                    FullTimePickerDialog dialog = new FullTimePickerDialog(context, R.style.AppTheme_PickerDialog, CompetitorEditLayout.this, hour, minutes, second, true);
+                    FullTimePickerDialog dialog = new FullTimePickerDialog(context, R.style.AppTheme_PickerDialog,
+                            CompetitorEditLayout.this, hour, minutes, second, true);
                     dialog.show();
                 }
             });

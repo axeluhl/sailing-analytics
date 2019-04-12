@@ -10,7 +10,7 @@ import com.sap.sse.common.TimePoint;
 
 public class CompetitorResultWithIdImpl extends CompetitorResultImpl {
     private static final long serialVersionUID = 4373611281142932067L;
-    
+
     private long mId;
     private Boat mBoat;
 

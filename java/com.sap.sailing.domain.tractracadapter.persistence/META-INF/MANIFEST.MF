@@ -6,14 +6,14 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.mongodb.mongo-java-driver;bundle-version="2.13.0",
- com.sap.sse.mongodb,
+Require-Bundle: com.sap.sse.mongodb,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sse.common,
  com.sap.sailing.domain.persistence,
- com.sap.sse
+ com.sap.sse,
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Export-Package: com.sap.sailing.domain.tractracadapter.persistence,
  com.sap.sailing.domain.tractracadapter.persistence.impl;x-friends:="com.sap.sailing.mongodb.test"
 Import-Package: org.osgi.framework,

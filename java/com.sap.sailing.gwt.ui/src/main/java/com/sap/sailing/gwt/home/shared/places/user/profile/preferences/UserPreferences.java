@@ -1,22 +1,17 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.preferences;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.NotificationCallback;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -56,67 +51,56 @@ public class UserPreferences extends Composite implements UserPreferencesView {
         favoriteCompetitorsSelctionUi.getElement().getParentElement().removeClassName(res.mediaCss().column());
     }
     
-    private class CompetitorDisplayImpl implements SuggestedMultiSelectionCompetitorDataProvider.Display {
+    private class CompetitorDisplayImpl implements CompetitorSelectionPresenter.Display {
         private final SuggestedMultiSelection<SimpleCompetitorWithIdDTO> selectionUi;
-        private final HasEnabled notifyAboutResultsUi;
+        private final HasValue<Boolean> notifyAboutResultsUi;
         
-        private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider, FlagImageResolver flagImageResolver) {
+        private CompetitorDisplayImpl(final CompetitorSelectionPresenter dataProvider,
+                FlagImageResolver flagImageResolver) {
             selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.favoriteCompetitors(), flagImageResolver);
-            notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
-                @Override
-                public void onNotificationToggled(boolean enabled) {
-                    dataProvider.setNotifyAboutResults(enabled);
-                }
-            }, StringMessages.INSTANCE.notificationAboutNewResults());
+            notifyAboutResultsUi = selectionUi.addNotificationToggle(dataProvider::setNotifyAboutResults,
+                    StringMessages.INSTANCE.notificationAboutNewResults());
             dataProvider.addDisplay(this);
         }
         
         @Override
-        public void setSelectedItems(Collection<SimpleCompetitorWithIdDTO> selectedItems) {
+        public void setSelectedItems(Iterable<SimpleCompetitorWithIdDTO> selectedItems) {
             selectionUi.setSelectedItems(selectedItems);
         }
 
         @Override
         public void setNotifyAboutResults(boolean notifyAboutResults) {
-            notifyAboutResultsUi.setEnabled(notifyAboutResults);
+            notifyAboutResultsUi.setValue(notifyAboutResults);
         }
     }
     
-    private class BoatClassDisplayImpl implements SuggestedMultiSelectionBoatClassDataProvider.Display {
+    private class BoatClassDisplayImpl implements BoatClassSelectionPresenter.Display {
         private final SuggestedMultiSelection<BoatClassDTO> selectionUi;
-        private final HasEnabled notifyAboutUpcomingRacesUi;
-        private final HasEnabled notifyAboutResultsUi;
+        private final HasValue<Boolean> notifyAboutUpcomingRacesUi;
+        private final HasValue<Boolean> notifyAboutResultsUi;
         
-        private BoatClassDisplayImpl(final SuggestedMultiSelectionBoatClassDataProvider dataProvider) {
+        private BoatClassDisplayImpl(final BoatClassSelectionPresenter dataProvider) {
             selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, StringMessages.INSTANCE.favoriteBoatClasses());
-            notifyAboutUpcomingRacesUi = selectionUi.addNotificationToggle(new NotificationCallback() {
-                @Override
-                public void onNotificationToggled(boolean enabled) {
-                    dataProvider.setNotifyAboutUpcomingRaces(enabled);
-                }
-            }, StringMessages.INSTANCE.notificationAboutUpcomingRaces());
-            notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
-                @Override
-                public void onNotificationToggled(boolean enabled) {
-                    dataProvider.setNotifyAboutResults(enabled);
-                }
-            }, StringMessages.INSTANCE.notificationAboutNewResults());
+            notifyAboutUpcomingRacesUi = selectionUi.addNotificationToggle(dataProvider::setNotifyAboutUpcomingRaces,
+                    StringMessages.INSTANCE.notificationAboutUpcomingRaces());
+            notifyAboutResultsUi = selectionUi.addNotificationToggle(dataProvider::setNotifyAboutResults,
+                    StringMessages.INSTANCE.notificationAboutNewResults());
             dataProvider.addDisplay(this);
         }
         
         @Override
-        public void setSelectedItems(Collection<BoatClassDTO> selectedItems) {
+        public void setSelectedItems(Iterable<BoatClassDTO> selectedItems) {
             selectionUi.setSelectedItems(selectedItems);
         }
         
         @Override
         public void setNotifyAboutUpcomingRaces(boolean notifyAboutUpcomingRaces) {
-            notifyAboutUpcomingRacesUi.setEnabled(notifyAboutUpcomingRaces);
+            notifyAboutUpcomingRacesUi.setValue(notifyAboutUpcomingRaces);
         }
         
         @Override
         public void setNotifyAboutResults(boolean notifyAboutResults) {
-            notifyAboutResultsUi.setEnabled(notifyAboutResults);
+            notifyAboutResultsUi.setValue(notifyAboutResults);
         }
     }
 

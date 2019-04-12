@@ -26,7 +26,7 @@ import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityParameters {
     /**
@@ -134,5 +134,10 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
             result.add(((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog());
         }
         return result;
+    }
+    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+" for "+leaderboard.getName()+"/"+raceColumn.getName()+"/"+fleet.getName();
     }
 }

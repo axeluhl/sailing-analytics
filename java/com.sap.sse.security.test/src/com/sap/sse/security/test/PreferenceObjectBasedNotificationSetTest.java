@@ -10,8 +10,8 @@ import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
@@ -22,7 +22,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class PreferenceObjectBasedNotificationSetTest {
     
@@ -47,7 +47,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     public void setUp() throws UnknownHostException, MongoException {
         final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService service = dbConfiguration.getService();
-        DB db = service.getDB();
+        MongoDatabase db = service.getDB();
         db.getCollection(CollectionNames.USERS.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();

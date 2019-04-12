@@ -13,6 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishPositioningListFinder;
@@ -27,6 +28,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TagFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
@@ -167,6 +169,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     private final LastPublishedCourseDesignFinder courseDesignerAnalyzer;
     private final LastWindFixFinder lastWindFixAnalyzer;
+    
+    private final TagFinder tagAnalyzer;
 
     /**
      * The cached racing procedure type. If no racing procedure type specification is found in the underlying race log,
@@ -196,6 +200,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      * whenever {@link #cachedRaceStatus} is set.
      */
     private Iterable<TimePoint> timePointsWhenRaceStatusMayChange;
+    
+    private Iterable<RaceLogTagEvent> cachedTagEvents;
     
     private int cachedPassId;
     private StartTimeFinderResult cachedStartTimeFinderResult;
@@ -246,6 +252,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ false);
         this.lastWindFixAnalyzer = new LastWindFixFinder(raceLog);
+        this.tagAnalyzer = new TagFinder(raceLog);
 
         this.raceStateToObserveListener = new BaseRaceStateChangedListener() {
             @Override
@@ -421,6 +428,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
 
     @Override
+    public Iterable<RaceLogTagEvent> getTagEvents() {
+        return cachedTagEvents;
+    }
+
+    @Override
     public RegattaConfiguration getConfiguration() {
         return procedureFactory.getConfiguration();
     }
@@ -561,6 +573,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         if (!Util.equalsWithNull(cachedWindFix, windFix)) {
             cachedWindFix = windFix;
             changedListeners.onWindFixChanged(this);
+        }
+        Iterable<RaceLogTagEvent> tagEvents = tagAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedTagEvents, tagEvents)) {
+            cachedTagEvents = tagEvents;
+            changedListeners.onTagEventsChanged(this);
         }
     }
 

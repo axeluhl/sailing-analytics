@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
+import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
@@ -42,6 +43,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
@@ -108,10 +110,12 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -237,8 +241,14 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<RaceTimesInfoDTO> callback);
 
+    void getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince,
+            AsyncCallback<RaceTimesInfoDTO> callback);
+
     void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
             AsyncCallback<List<RaceTimesInfoDTO>> callback);
+
+    void getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
+            Map<RegattaAndRaceIdentifier, TimePoint> searchSinceMap, AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
     void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date,
             AsyncCallback<CoursePositionsDTO> asyncCallback);
@@ -363,11 +373,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     /**
      * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty
      * list of leaderboards.<br/>
-     * 
-     * @param displayName
-     *            TODO
-     * @param displayGroupsInReverseOrder
-     *            TODO
      */
     void createLeaderboardGroup(String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
@@ -723,7 +728,26 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName, AsyncCallback<Collection<CompetitorAndBoatDTO>> callback);
 
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            List<Util.Pair<ControlPointDTO, PassingInstruction>> course, AsyncCallback<Void> callback);
+            List<Util.Pair<ControlPointDTO, PassingInstruction>> course, int priority, AsyncCallback<Void> callback);
+
+    void addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
+            String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint,
+            AsyncCallback<SuccessInfo> asyncCallback);
+
+    void updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate, String tag,
+            String comment, String imageURL, String resizedImageURL, boolean visibleForPublic, AsyncCallback<SuccessInfo> asyncCallback);
+
+    void removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag,
+            AsyncCallback<SuccessInfo> asyncCallback);
+
+    void getAllTags(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<TagDTO>> asyncCallback);
+
+    void getPublicTags(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<TagDTO>> asyncCallback);
+
+    void getPrivateTags(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<TagDTO>> asyncCallback);
 
     void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<RaceCourseDTO> callback);
@@ -829,7 +853,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
 
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
-            Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
+            Set<Triple<String, String, String>> toTriples, int priority, AsyncCallback<Void> callback);
 
     void addMarkToRegattaLog(String leaderboardName, MarkDTO mark, AsyncCallback<Void> asyncCallback);
 
@@ -923,11 +947,15 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            the count of competitors
      * @param flightMultiplier
      *            specifies how often the flights will be cloned
+     * @param boatChangeFactor
+     *            specifies the priority of well distributed assignment of competitors to boats (smallest factor) or
+     *            minimization of boat changes within a {@link PairingList} (highest factor); valid factors are
+     *            {@code 0..numberOfFlights}
      * @param callback
      *            returns a {@link PairingListTemplateDTO}
      */
     void calculatePairingListTemplate(final int flightCount, final int groupCount, final int competitorCount,
-            final int flightMultiplier, AsyncCallback<PairingListTemplateDTO> callback);
+            final int flightMultiplier, final int boatChangeFactor, AsyncCallback<PairingListTemplateDTO> callback);
 
     /**
      * Creates a {@link PairingListDTO} in which the competitors will be matched to a {@link PairingList} based on the
@@ -939,7 +967,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param callback
      */
     void getPairingListFromTemplate(final String leaderboardName, final int flightMultiplier,
-            final Iterable<String> selectedFlightNames,PairingListTemplateDTO templateDTO, AsyncCallback<PairingListDTO> callback);
+            final Iterable<String> selectedFlightNames, PairingListTemplateDTO templateDTO, AsyncCallback<PairingListDTO> callback);
 
     /**
      * Creates a {@link PairingListDTO} that is based on the competitors in the race logs of a leaderboard.
@@ -989,4 +1017,25 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @see SailingService#checkIfRaceIsTracking(RegattaAndRaceIdentifier)
      */
     void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
+
+    /**
+     * @see SailingService#resizeImage(ImageResizingTaskDTO)
+     * @param imageResizingTask the information on how the contained ImageDTO should be resized
+     * @param asyncCallback The callback called after finishing resizing, storing the returned ImageDTOs somewhere is proposed
+     */
+    void resizeImage(ImageResizingTaskDTO imageResizingTask, AsyncCallback<Set<ImageDTO>> asyncCallback);
+
+    void getMailType(AsyncCallback<MailInvitationType> callback);
+
+    /**
+     * Allows reading public Boats, or Boats that are registered in races belonging to the given regatta
+     */
+    void getBoat(UUID boatId, String regattaName, String regattaRegistrationLinkSecret,
+            AsyncCallback<BoatDTO> asyncCallback);
+
+    /**
+     * Allows reading public Marks, or Marks that are registered in races belonging to the given regatta
+     */
+    void getMark(UUID markId, String regattaName, String regattaRegistrationLinkSecret,
+            AsyncCallback<MarkDTO> asyncCallback);
 }

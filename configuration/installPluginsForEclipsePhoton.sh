@@ -53,6 +53,6 @@ updatePlugins http://download.eclipse.org/egit/updates org.eclipse.jgit.feature.
 # updatePlugins http://download.eclipse.org/mylyn/releases/latest org.eclipse.mylyn_feature.feature.group,org.eclipse.mylyn.bugzilla_feature.feature.group,org.eclipse.mylyn.builds.feature.group,org.eclipse.mylyn.commons.feature.group,org.eclipse.mylyn.commons.identity.feature.group,org.eclipse.mylyn.commons.notifications.feature.group,org.eclipse.mylyn.commons.repositories.feature.group,org.eclipse.mylyn.commons.repositories.http.feature.group,org.eclipse.mylyn.context_feature.feature.group,org.eclipse.mylyn.discovery.feature.group,org.eclipse.mylyn.gerrit.feature.feature.group,org.eclipse.mylyn.git.feature.group,org.eclipse.mylyn.hudson.feature.group,org.eclipse.mylyn.java_feature.feature.group,org.eclipse.mylyn.monitor.feature.group,org.eclipse.mylyn.reviews.feature.feature.group,org.eclipse.mylyn.team_feature.feature.group,org.eclipse.mylyn.versions.feature.group,org.eclipse.mylyn.wikitext_feature.feature.group
 
 echo "Installing SAP JVM Tools (profiler) ..."
-installPlugins https://tools.hana.ondemand.com/oxygen com.sap.jvm.profiling.feature.group
+installPlugins https://tools.hana.ondemand.com/photon com.sap.jvm.profiling.feature.group
 
 echo "Installation completed!"

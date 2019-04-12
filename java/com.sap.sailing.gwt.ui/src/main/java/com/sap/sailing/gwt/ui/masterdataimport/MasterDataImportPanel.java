@@ -34,6 +34,8 @@ import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.impl.KeywordMatcher;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.progressbar.CustomProgressBar;
@@ -396,16 +398,15 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void filterLeaderboardGroupList() {
         clearListBox();
         int visibleNameCount = 0;
-        List<String> filterTexts = Arrays.asList(filterBox.getText().split(" "));
+        Iterable<String> filterTexts = Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(filterBox.getText());
+        final KeywordMatcher<String> matcher = new KeywordMatcher<String>() {
+            @Override
+            public Iterable<String> getStrings(String t) {
+                return Collections.singleton(t);
+            } 
+        };
         for (String name : allLeaderboardGroupNames) {
-            boolean containsAllFilterTexts = true;
-            for (String filterText : filterTexts) {
-                if (!name.toUpperCase().contains(filterText.toUpperCase())) {
-                    containsAllFilterTexts = false;
-                    break;
-                }
-            }
-            if (containsAllFilterTexts) {
+            if (matcher.matches(filterTexts, name)) {
                 leaderboardgroupListBox.addItem(name);
                 visibleNameCount++;
             }

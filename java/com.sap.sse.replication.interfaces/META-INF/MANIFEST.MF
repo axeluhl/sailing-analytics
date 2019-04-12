@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Interfaces
+Bundle-SymbolicName: com.sap.sse.replication.interfaces
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Automatic-Module-Name: com.sap.sse.replication.interfaces
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.sap.sse.replication
+Import-Package: com.rabbitmq.client;version="2.8.4",
+ org.json.simple
+Require-Bundle: com.sap.sse.operationaltransformation;bundle-version="1.0.0",
+ com.sap.sse.common;bundle-version="1.0.0",
+ com.sap.sse;bundle-version="1.0.0"

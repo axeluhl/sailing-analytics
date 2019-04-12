@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
@@ -114,7 +115,7 @@ public class WaypointPositionAndDistanceCache {
             Util.addAll(course.getWaypoints(), this.waypoints);
             this.trackedRace.addListener(new AbstractRaceChangeListener() {
                 @Override
-                public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+                public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
                     invalidate(mark, fix);
                 }
 

@@ -177,7 +177,7 @@
     <string name="set_course_layout">Set the course layout</string>
     <string name="loading_failure">Load failure</string>
     <string name="wind_unknown">(click to set wind)</string>
-    <string name="wind_info">%2$s / %1$s kts</string>
+    <string name="wind_info">%2$s / %1$f kts</string>
     <string name="login">Login</string>
     <string name="please_select_a_login_type">Please select a login type.</string>
     <string name="race_list_filter_show_all">Show all</string>
@@ -224,7 +224,6 @@
     <string name="preference_wakelock_summary">Force the screen to stay awake. Caution: Uses more battery.</string>
     <string name="preference_offline_header">Offline Mode</string>
     <string name="preference_offline_summary">Disables the connection to a server and uses static data</string>
-    <string name="preference_theme_header">Theme</string>
     <string name="preference_allow_demo_header">Allow login as Viewer</string>
     <string name="preference_allow_demo_summary">If set, you are allowed to log in as Viewer. No race changes will be send back to the server.</string>
     <string name="options_menu_info">Expert Information</string>
@@ -386,7 +385,7 @@
     <string name="race_summary_individual_recalls">Individual Recalls</string>
     <string name="race_summary_time" translatable="false">%s min</string>
     <string name="record_voice">Record Voice</string>
-    <string name="finishing_started">First vessel in finish at %s</string>
+    <string name="finishing_started">First in finish at %1$s</string>
     <string name="finishing_started_since">(%s)</string>
     <string name="finishing_done">Down now</string>
 

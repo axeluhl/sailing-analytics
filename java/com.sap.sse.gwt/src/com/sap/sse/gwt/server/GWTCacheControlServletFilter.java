@@ -25,11 +25,9 @@ public class GWTCacheControlServletFilter implements Filter {
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
-
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String requestURI = httpRequest.getRequestURI();
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-
         if (requestURI.contains(".nocache.")) {
             Date now = new Date();
             httpResponse.setDateHeader("Date", now.getTime());
@@ -40,7 +38,6 @@ public class GWTCacheControlServletFilter implements Filter {
         } else if (requestURI.contains(".cache.")) {
             httpResponse.setHeader("Cache-Control", "max-age=2592000");
         }
-
         filterChain.doFilter(request, response);
     }
 }

@@ -21,7 +21,7 @@ import com.sap.sailing.datamining.test.util.NullProcessor;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.datamining.components.Processor;
 
 public class TestLeaderboardGroupRetrievalProcessor {
@@ -46,7 +46,7 @@ public class TestLeaderboardGroupRetrievalProcessor {
         
         Collection<Processor<HasLeaderboardGroupContext, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(receiver);
-        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), resultReceivers, 0);
+        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), resultReceivers, 0, "");
     }
 
     private Map<String, LeaderboardGroup> getGroupsInService() {

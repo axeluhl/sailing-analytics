@@ -49,7 +49,7 @@ import com.sap.sse.mongodb.MongoDBService;
 public class WebSocketTest {
     private static final Logger logger = Logger.getLogger(WebSocketTest.class.getName());
 
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(1 * 60 * 1000);
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(1 * 60 * 1000);
 
     @WebSocket
     public class SimpleEchoTestSocket {

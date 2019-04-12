@@ -45,7 +45,9 @@ public class KeywordQuery implements Query, Serializable {
             } else {
                 sb.append(' ');
             }
+            sb.append('"');
             sb.append(keyword);
+            sb.append('"');
         }
         return sb.toString();
     }

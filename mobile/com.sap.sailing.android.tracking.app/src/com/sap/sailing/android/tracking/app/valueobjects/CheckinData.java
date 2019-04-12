@@ -1,16 +1,17 @@
 package com.sap.sailing.android.tracking.app.valueobjects;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import android.net.Uri;
 
 import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 
-import android.net.Uri;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public abstract class CheckinData extends BaseCheckinData {
+    public String secret;
     private String leaderboardName;
     private String leaderboardDisplayName;
     private String eventId;
@@ -26,6 +27,7 @@ public abstract class CheckinData extends BaseCheckinData {
     private boolean update;
 
     public CheckinData(UrlData data, String leaderboardDisplayName) {
+        secret = data.secret;
         leaderboardName = Uri.decode(data.leaderboardName);
         this.leaderboardDisplayName = leaderboardDisplayName;
         deviceUid = data.deviceUuid.getStringRepresentation();
@@ -39,12 +41,12 @@ public abstract class CheckinData extends BaseCheckinData {
         uriString = data.uriStr;
     }
 
-    public void setCheckinDigestFromString(String checkinString) throws UnsupportedEncodingException,
-            NoSuchAlgorithmException {
+    public void setCheckinDigestFromString(String checkinString)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         md.update(checkinString.getBytes("UTF-8"));
         byte[] digest = md.digest();
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (byte byt : digest) {
             buf.append(Integer.toString((byt & 0xff) + 0x100, 16).substring(1));
         }

@@ -1,9 +1,9 @@
 package com.sap.sse.datamining.ui.client.developer;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -17,11 +17,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
-import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
-import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
-import com.sap.sse.datamining.ui.client.ResultsPresenter;
+import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -32,11 +32,11 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class PredefinedQueryRunner extends ComponentWithoutSettings {
 
-    private final DataMiningSession session;
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
-    private final ResultsPresenter<?> resultsPresenter;
+    private final QueryDefinitionProvider<?> queryDefinitionProvider;
+    private final Consumer<StatisticQueryDefinitionDTO> queryRunner;
 
     private final Button showDialogButton;
     private final DialogBox dialogBox;
@@ -44,15 +44,15 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
     private final ValueListBox<PredefinedQueryIdentifier> selectionListBox;
     private final Button runButton;
 
-    public PredefinedQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
-            StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-            ResultsPresenter<?> resultsPresenter) {
+    public PredefinedQueryRunner(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+            QueryDefinitionProvider<?> queryDefinitionProvider, Consumer<StatisticQueryDefinitionDTO> queryRunner) {
         super(parent, context);
-        this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
-        this.resultsPresenter = resultsPresenter;
+        this.queryDefinitionProvider = queryDefinitionProvider;
+        this.queryRunner = queryRunner;
 
         showDialogButton = new Button(stringMessages.runPredefinedQuery(), new ClickHandler() {
             @Override
@@ -62,7 +62,7 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
         });
 
         dialogBox = new DialogBox(false, true);
-        dialogBox.setText(stringMessages.viewQueryDefinition());
+        dialogBox.setText(stringMessages.runPredefinedQuery());
         dialogBox.setAnimationEnabled(true);
 
         Button closeButton = new Button(stringMessages.close(), new ClickHandler() {
@@ -140,18 +140,17 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
 
     protected void runSelectedPredefinedQuery() {
         PredefinedQueryIdentifier predefinedQueryIdentifier = selectionListBox.getValue();
-        resultsPresenter.showBusyIndicator();
-        dataMiningService.runPredefinedQuery(session, predefinedQueryIdentifier,
-                LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResultDTO<Serializable>>() {
+        dataMiningService.getPredefinedQueryDefinition(predefinedQueryIdentifier,
+                LocaleInfo.getCurrentLocale().getLocaleName(),
+                new AsyncCallback<ModifiableStatisticQueryDefinitionDTO>() {
                     @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error running the query: " + caught.getMessage());
-                        resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
+                    public void onSuccess(ModifiableStatisticQueryDefinitionDTO queryDefinition) {
+                        queryDefinitionProvider.applyQueryDefinition(queryDefinition);
+                        queryRunner.accept(queryDefinition);
                     }
-
                     @Override
-            public void onSuccess(QueryResultDTO<Serializable> result) {
-                        resultsPresenter.showResult(result);
+                    public void onFailure(Throwable error) {
+                        errorReporter.reportError("Error running the query: " + error.getMessage());
                     }
                 });
         dialogBox.hide();

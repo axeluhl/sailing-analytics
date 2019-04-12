@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**

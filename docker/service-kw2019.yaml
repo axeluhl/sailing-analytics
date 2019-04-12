@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sailing-kw2019-app
+  name: sailing-kw2019-master-svc
+  namespace: default
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: http-port
+  selector:
+    app: sailing-kw2019-master
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sailing-kw2019-app
+  name: sailing-kw2019-svc
+  namespace: default
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: http-port
+  selector:
+    app: sailing-kw2019-master

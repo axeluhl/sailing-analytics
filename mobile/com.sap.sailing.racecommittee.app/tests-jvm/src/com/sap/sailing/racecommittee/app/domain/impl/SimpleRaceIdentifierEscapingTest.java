@@ -32,7 +32,7 @@ public class SimpleRaceIdentifierEscapingTest {
         test("\\\\.Leaderboard with leading double backslash and dot", "series", "fleet", "raceColumn");
         test("\\\\.Leaderboard with leading double backslash and two dots", "series", "fleet", "raceColumn");
     }
-    
+
     private void test(String leaderboardName, String seriesName, String fleetName, String raceColumnName) {
         final String marshalled = build(leaderboardName, seriesName, fleetName, raceColumnName);
         final Triple<String, String, String> parsed = FleetIdentifierImpl.unescape(marshalled);
@@ -40,8 +40,9 @@ public class SimpleRaceIdentifierEscapingTest {
         assertEquals(raceColumnName, parsed.getB());
         assertEquals(fleetName, parsed.getC());
     }
-    
-    private String build(final String leaderboardName, final String seriesName, final String fleetName, final String raceColumnName) {
+
+    private String build(final String leaderboardName, final String seriesName, final String fleetName,
+            final String raceColumnName) {
         Fleet fleet = mock(Fleet.class);
         SeriesWithRows series = mock(SeriesWithRows.class);
         RaceGroup raceGroup = mock(RaceGroupImpl.class);

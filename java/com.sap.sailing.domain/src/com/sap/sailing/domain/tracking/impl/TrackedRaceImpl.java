@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
@@ -67,7 +68,6 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -121,6 +121,7 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -144,6 +145,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindSummary;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Bearing;
@@ -296,6 +298,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * them.
      */
     private transient SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> maneuverCache;
+    
+    /**
+     * The values of this map are used by the {@link #approximate(Competitor, Distance, TimePoint, TimePoint)} method and
+     * maintain state to accelerate the {@link #approximate(Competitor, Distance, TimePoint, TimePoint)} method, also in
+     * live scenarios when the contents of the competitors' {@link #tracks} changes dynamically.
+     */
+    private final Map<Competitor, CourseChangeBasedTrackApproximation> maneuverApproximators;
     
     private transient ConcurrentMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
@@ -482,13 +491,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } finally {
             race.getCourse().unlockAfterRead();
         }
-        markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
-        tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
+        markPassingsForCompetitor = new HashMap<>();
+        tracks = new HashMap<>();
+        maneuverApproximators = new HashMap<>();
         for (Competitor competitor : race.getCompetitors()) {
-            markPassingsForCompetitor.put(competitor, new ConcurrentSkipListSet<MarkPassing>(
-                    MarkPassingByTimeComparator.INSTANCE));
-            tracks.put(competitor, new DynamicGPSFixMovingTrackImpl<Competitor>(competitor,
-                    millisecondsOverWhichToAverageSpeed));
+            markPassingsForCompetitor.put(competitor, new ConcurrentSkipListSet<MarkPassing>(MarkPassingByTimeComparator.INSTANCE));
+            final DynamicGPSFixMovingTrackImpl<Competitor> track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, millisecondsOverWhichToAverageSpeed);
+            tracks.put(competitor, track);
+            maneuverApproximators.put(competitor, new CourseChangeBasedTrackApproximation(track, race.getBoatOfCompetitor(competitor).getBoatClass()));
         }
         markPassingsForWaypoint = new ConcurrentHashMap<Waypoint, NavigableSet<MarkPassing>>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
@@ -690,6 +700,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public synchronized void waitForLoadingToFinish() throws InterruptedException {
+    }
+    
+    public void waitForManeuverDetectionToFinish() {
+        for (Competitor competitor : getRace().getCompetitors()) {
+            getManeuvers(competitor, true);
+        }
     }
 
     private SmartFutureCache<Competitor, List<Maneuver>, EmptyUpdateInterval> createManeuverCache() {
@@ -2654,9 +2670,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Iterable<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to) {
-        DouglasPeucker<Competitor, GPSFixMoving> douglasPeucker = new DouglasPeucker<Competitor, GPSFixMoving>(
-                getTrack(competitor));
-        return douglasPeucker.approximate(maxDistance, from, to);
+        return maneuverApproximators.get(competitor).approximate(from, to);
     }
 
     protected void triggerManeuverCacheRecalculationForAllCompetitors() {
@@ -2798,7 +2812,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
 
         @Override
-        public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack) {
+        public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack, AddResult addedOrReplaced) {
             clearDirectionFromStartToNextMarkCache();
         }
 
@@ -3794,5 +3808,61 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                                     .getEstimatedPosition(at, false), at, windPositionMode), at);
         }
         return wind;
+    }
+
+    @Override
+    public WindSummary getWindSummary() {
+        Speed minTrueWindSpeed = null;
+        Speed maxTrueWindSpeed = null;
+        final TimePoint finishedTime = getFinishedTime();
+        final TimePoint endOfRace = getEndOfRace();
+        final TimePoint finishTime = finishedTime == null ?
+                endOfRace == null ? MillisecondsTimePoint.now().minus(getDelayToLiveInMillis()) : endOfRace : finishedTime;
+        final TimePoint newestEvent = getTimePointOfNewestEvent();
+        final TimePoint toTimePoint;
+        if (newestEvent != null && newestEvent.before(finishTime)) {
+            toTimePoint = newestEvent;
+        } else {
+            toTimePoint = finishTime;
+        }
+        final BearingWithConfidenceCluster<TimePoint> bwcc = new BearingWithConfidenceCluster<TimePoint>(
+                new Weigher<TimePoint>() {
+                    private static final long serialVersionUID = -5779398785058438328L;
+                    @Override
+                    public double getConfidence(TimePoint fix, TimePoint request) {
+                        return 1;
+                    }
+                });
+        final TimePoint middleOfRace = getStartOfRace().plus(getStartOfRace().until(toTimePoint).divide(2));
+        List<TimePoint> pointsToGetWind = Arrays.asList(getStartOfRace(), middleOfRace, toTimePoint);
+        for (TimePoint timePoint : pointsToGetWind) {
+            WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = 
+                    getWindWithConfidence(getCenterOfCourse(timePoint), timePoint);
+            final WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> windFixToUse;
+            if (averagedWindWithConfidence != null && averagedWindWithConfidence.getObject().getKnots() >= 0.05d) {
+                windFixToUse = averagedWindWithConfidence;
+            } else {
+                windFixToUse = null;
+            }
+            if (windFixToUse != null) {
+                final Wind wind = windFixToUse.getObject();
+                bwcc.add(new BearingWithConfidenceImpl<TimePoint>(wind.getBearing(), windFixToUse.getConfidence(), timePoint));
+                if (minTrueWindSpeed == null || minTrueWindSpeed.compareTo(wind) > 0) {
+                    minTrueWindSpeed = wind;
+                }
+                if (maxTrueWindSpeed == null || maxTrueWindSpeed.compareTo(wind) < 0) {
+                    maxTrueWindSpeed = wind;
+                }
+            }
+        }
+        final WindSummary result;
+        if (minTrueWindSpeed != null && maxTrueWindSpeed != null) {
+            BearingWithConfidence<TimePoint> average = bwcc.getAverage(middleOfRace);
+            result = new WindSummaryImpl(average.getObject().reverse(), minTrueWindSpeed,
+                    maxTrueWindSpeed);
+        } else {
+            result = null;
+        }
+        return result;
     }
 }
