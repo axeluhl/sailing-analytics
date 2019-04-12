@@ -711,11 +711,12 @@ public class TrackingListFragment extends BaseFragment
     }
 
     public void onItemRemove(int position, CompetitorResultWithIdImpl item) {
-        if (position < 0) { // not found
-            return;
+        if (position >= 0) { // found
+            mFinishedData.remove(position);
+            adjustRanks(position, getFirstRankZeroPosition());
+            setPublishButton();
+            mFinishedAdapter.notifyItemRemoved(position);
         }
-        adjustRanks(position, getFirstRankZeroPosition());
-        setPublishButton();
         for (Map.Entry<Competitor, Boat> entry : getRace().getCompetitorsAndBoats().entrySet()) {
             if (entry.getKey().getId().equals(item.getCompetitorId())) {
                 addNewCompetitorToCompetitorList(entry);
