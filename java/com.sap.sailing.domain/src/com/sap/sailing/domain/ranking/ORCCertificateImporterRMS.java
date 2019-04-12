@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * @author Axel Uhl (d043530)
  *
  */
-public class ORCCertificateFile {
+public class ORCCertificateImporterRMS {
     private static final String NAME_OF_LAST_LEFT_ALIGNED_COLUMN_HEADER = "HH:MM:SS";
     
     private final LinkedHashMap<String, Integer> columnNamesAndWidths;
@@ -50,7 +50,7 @@ public class ORCCertificateFile {
         }
     }
     
-    public ORCCertificateFile(Reader reader) throws IOException {
+    public ORCCertificateImporterRMS(Reader reader) throws IOException {
         final BufferedReader br = new BufferedReader(reader);
         columnNamesAndWidths = readColumnWidthsFromFirstLine(br.readLine());
         final String fileIdColumnName = columnNamesAndWidths.keySet().iterator().next();

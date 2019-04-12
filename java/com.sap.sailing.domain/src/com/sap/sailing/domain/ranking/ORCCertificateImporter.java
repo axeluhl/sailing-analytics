@@ -10,11 +10,6 @@ import java.util.Map;
  * 
  **/
 public interface ORCCertificateImporter {
-
-    /**
-     * Imports and processes the given Data for accessing and creating ORCCertificates by identification. 
-     * **/
-    public void importData();
     
     /**
      * Returns an ORCCertificate object to a given sailnumber.

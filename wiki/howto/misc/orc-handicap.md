@@ -25,6 +25,7 @@ GER140772GER5549 GER 5549    MOANA                   MARTEN 49 Mod     MARTEN MA
 
 | Code | Explanation |
 | ----------------- | --------------------------------------- |
+| **General** ||
 | NATCERTN.FILE_ID  | National Certificate Number |
 | SAILNUMB          | Sailnumber                  |
 | TYPE              | Class                       |
@@ -35,20 +36,32 @@ GER140772GER5549 GER 5549    MOANA                   MARTEN 49 Mod     MARTEN MA
 | OWNER             | |
 | ADRS1             | |
 | ADRS2             | |
-|||
 | C_Type            | Certificate Type (Club or International) |
-| D                 | IMS Regulation Division (R = Performance, S, U, C = Racer, Sailboat, ? Cruiser) |
-| CREW              | Minimum Declared Crew Weight (in kg) |
 | DD_MM_yyYY        | Date of Issue |
 | HH:MM:SS          | Time of Issue |
-| LOA               | Length Overall
+| ReferenceNo       | ORC Reference Number  | 
+|||
+| **Hull** ||
+| D                 | IMS Regulation Division (R = Performance, S, U, C = Racer, Sailboat, ? Cruiser) |
+| LOA               | Length Overall (in m)
 | IMSL              | Freeboard
-| DRAFT             | Draft
-| BMAX              | Maximum Beam
-| DSPL              | Displacement
+| CDL               | Class Division Length
+| DRAFT             | Draft (in m)
+| BMAX              | Maximum Beam (in m)
+| DSPL              | Displacement (in kg)
+| DSPS              | Displacement in sailing trim (in kg)
+| CREW              | Minimum Declared Crew Weight (in kg) |
+| WSS               | Wetted surface (in m^2)
 | INDEX             | Stability Index
 | DA                | Dynamic Allowance (in %)
 |||
+| **Sails** ||
+| MAIN   | Maximum main sail area (in m^2)
+| GENOA  | Maximum fore sail area (in m^2)
+| SYM    | Area of symmetrical Spinnaker (in m^2)
+| ASYM   | Area of asymmetrical Spinnaker (in m^2)
+|||
+| **Scoring** ||
 | GPH               | General Purpose Handicap (in s/nm Allowance)
 | TMF-OF            | Offshore Time-On-Time Value (in s/s)
 | OSN               | Offshore Time-On-Distance Value (in s/nm)
@@ -58,6 +71,12 @@ GER140772GER5549 GER 5549    MOANA                   MARTEN 49 Mod     MARTEN MA
 | PLD-O             | Offshore Performance Line (PLD)
 | PLT-I             | Inshore Performance Line (PLT)
 | PLD-I             | Inshore Performance Line (PLD)
+| OTNLOW/OTNMED/OTNHIG  | Triple Number Offshore Low/Medium/High
+| ITNLOW/ITNMED/ITNHIG  | Triple Number Inshore Low/Medium/High
+| DH_TOD    | Double-Hand Time-On-Distance
+| DH_TOT    | Double-Hand Time-On-Time
+| PLT2H | Performance Line, Time-On-Time, Double Handed
+| PLD2H | Performance Line, Time-On-Distance, Double Handed
 |||
 | WL[6,8,10,12,14,16,20] | *Selected Courses:* **Windward/Leeward** Time Allowances for 6..20kt of Wind (in s/nm)
 | OL[6,8,10,12,14,16,20] | *Selected Courses:* ??? Time Allowances for 6..20kt of Wind (in s/nm)
@@ -72,20 +91,6 @@ GER140772GER5549 GER 5549    MOANA                   MARTEN 49 Mod     MARTEN MA
 | R[52,60,75,90,110,120,135][6,8,10,12,14,16,20] | Time Allowances for 52..135° TWA with 6..20kt of Wind(in s/nm)  
 | D[6,8,10,12,14,16,20] | **Downwind** Time Allowances for 6..20kt of Wind (in s/nm)
 ||| 
-| OTNLOW/OTNMED/OTNHIG  | Triple Number Offshore Low/Medium/High
-| ITNLOW/ITNMED/ITNHIG  | Triple Number Inshore Low/Medium/High
-| DH_TOD    | Double-Hand Time-On-Distance
-| DH_TOT    | Double-Hand Time-On-Time
-| PLT2H | *???*
-| PLD2H | *???*   
-|||
-| ReferenceNo | ORC Reference Number   
-| CDL    | Class Division Length
-| DSPS   |  *???*
-| WSS    | Area of smallest jib (in m^2)
-| MAIN   | Area of Mainsail (in m^2)
-| GENOA  | Area of Genoa (in m^2)
-| SYM    | Area of symmetrical Spinnaker (in m^2)
-| ASYM   | Area of asymmetrical Spinnaker (in m^2)
+   
 
 ---
