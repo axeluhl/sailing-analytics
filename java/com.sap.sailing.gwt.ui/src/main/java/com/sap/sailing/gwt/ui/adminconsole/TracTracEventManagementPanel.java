@@ -113,27 +113,20 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         CaptionPanel connectionsPanel = new CaptionPanel("TracTrac " + stringMessages.connections());
         connectionsPanel.ensureDebugId("ConnectionsSection");
         connectionsPanel.setStyleName("bold");
-
         VerticalPanel tableAndConfigurationPanel = new VerticalPanel();
         connectionsTable = new TracTracConnectionTableWrapper(userService, sailingService, stringMessages,
-                errorReporter, true, tableResources, () -> {
-                });
+                errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshTracTracConnectionList();
-
         connectionsPanel.setContentWidget(tableAndConfigurationPanel);
-
         final Grid grid = new Grid(1, 2);
         grid.setWidget(0, 0, new Label(stringMessages.racesWithHiddenState() + ":"));
         final CheckBox showHiddenRacesCheckbox = new CheckBox(stringMessages.show());
         showHiddenRacesCheckbox.ensureDebugId("ShowHiddenRacesCheckBox");
         grid.setWidget(0, 1, showHiddenRacesCheckbox);
-
         tableAndConfigurationPanel.add(connectionsTable);
         tableAndConfigurationPanel.add(grid);
-
         // Add TracTrac Connection
-        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
-                SecuredDomainType.TRACKED_RACE);
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredDomainType.TRACKED_RACE);
         tableAndConfigurationPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshTracTracConnectionList());
         Button addCreateAction = buttonPanel.addCreateAction(stringMessages.addTracTracConnection(),
@@ -180,7 +173,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         }
                     });
         });
-
         loadingMessageLabel = new Label();
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
             loadingMessageLabel.setText(stringMessages.loading());
@@ -189,9 +181,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         listRacesButton.ensureDebugId("ListRacesButton");
         listRacesButton.setEnabled(false);
         removeButton.setEnabled(false);
-
         buttonPanel.addUnsecuredWidget(loadingMessageLabel);
-
         connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
             final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedObject() != null;
             listRacesButton.setEnabled(objectSelected);
