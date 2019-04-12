@@ -698,7 +698,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("fromtimeasmillis") Long fromtimeasmillis, @QueryParam("totime") String totime,
             @QueryParam("totimeasmillis") Long totimeasmillis, @QueryParam("withtack") Boolean withTack,
             @QueryParam("competitorId") Set<String> competitorIds,
-            @DefaultValue("false") @QueryParam("lastknown") boolean addLastKnown) {
+            @DefaultValue("false") @QueryParam("lastknown") boolean addLastKnown,
+            @DefaultValue("false") @QueryParam("raw") boolean raw) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -752,9 +753,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                             try {
                                 Iterator<GPSFixMoving> fixIter;
                                 if (from == null) {
-                                    fixIter = track.getFixes().iterator();
+                                    fixIter = raw?track.getRawFixes().iterator():track.getFixes().iterator();
                                 } else {
-                                    fixIter = track.getFixesIterator(from, /* inclusive */true);
+                                    fixIter = raw?track.getRawFixesIterator(from, /* inclusive */true):track.getFixesIterator(from, /* inclusive */true);
                                 }
                                 GPSFixMoving fix = null;
                                 boolean lastAdded = false;
@@ -779,8 +780,9 @@ public class RegattasResource extends AbstractSailingServerResource {
 
                                 if (addLastKnown && !lastAdded) {
                                     // find a fix earlier than the interval requested:
-                                    Iterator<GPSFixMoving> earlierFixIter = track.getFixesDescendingIterator(from,
-                                            /* inclusive */false);
+                                    Iterator<GPSFixMoving> earlierFixIter = raw ?
+                                        track.getRawFixesDescendingIterator(from, /* inclusive */false) :
+                                            track.getFixesDescendingIterator(from, /* inclusive */false);
                                     final GPSFixMoving earlierFix;
                                     if (earlierFixIter.hasNext()) {
                                         earlierFix = earlierFixIter.next();

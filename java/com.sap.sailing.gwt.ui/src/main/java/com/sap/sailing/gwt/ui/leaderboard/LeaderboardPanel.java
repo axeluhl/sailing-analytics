@@ -917,10 +917,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         
         private String getShortInfo(BoatDTO boat) {
             final String result;
-            if (boat.getSailId() != null) {
-                result = boat.getSailId();
-            } else if (boat.getName() != null) {
+            if (boat.getName() != null) {
                 result = boat.getName();
+            } else if (boat.getSailId() != null) {
+                result = boat.getSailId();
             } else {
                 result = null;
             }
