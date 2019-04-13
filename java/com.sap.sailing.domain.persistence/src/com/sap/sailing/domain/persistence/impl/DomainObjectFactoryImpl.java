@@ -1895,11 +1895,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Document dbObject = (Document) object;
             final Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
             String competitorDisplayName = (String) dbObject.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
-            // The Competitor name is a new field in the list. Therefore the name might be null for existing events. In
-            // this case a standard name is set.
-            if (competitorDisplayName == null) {
-                competitorDisplayName = "loaded competitor";
-            }
+            String competitorShortName = (String) dbObject.get(FieldNames.COMPETITOR_SHORT_NAME.name());
+            String competitorBoatName = (String) dbObject.get(FieldNames.COMPETITOR_BOAT_NAME.name());
+            String competitorBoatSailId = (String) dbObject.get(FieldNames.COMPETITOR_BOAT_SAIL_ID.name());
             // At this point we do not retrieve the competitor object since at any point in time, especially after a
             // server restart, the DomainFactory and its competitor
             // cache might be empty. But at this time the race log is loaded from database, so the competitor would be
@@ -1925,8 +1923,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             } else {
                 mergeState = MergeState.valueOf(mergeStateAsString);
             }
-            CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(
-                    competitorId, competitorDisplayName, rank == null ? rankCounter : rank, maxPointsReason, score, finishingTime, comment, mergeState);
+            CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(competitorId, competitorDisplayName,
+                    competitorShortName, competitorBoatName, competitorBoatSailId, rank == null ? rankCounter : rank,
+                            maxPointsReason, score, finishingTime, comment, mergeState);
             positionedCompetitors.add(positionedCompetitor);
             rankCounter++;
         }
