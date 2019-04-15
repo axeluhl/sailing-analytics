@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/events/{event-id}/</h2>
+
+<b>Description:</b>
+<p>Deletes and Event, optionally also allows to delete the LeaderboardGroup this event is part of and the linked OverallLeaderboard</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>PUT</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>empty</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>none; when no parameters are provided the call is a no-op</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>
+			<div>withLeaderboardGroupsAndOverallLeaderboard If true, the LeaderBoardGroup and the OverallLeaderboard will be deleted as well</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>DELETE</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl -X DELETE -H "Authorization: Bearer w9YSIfr/Zf6a127SZDddkhdAtQuuv0Jm1PSXlo1Yvd0=" "http://127.0.0.1:8888/sailingserver/api/v1/events/0065b870-9ddb-42be-a7d4-6be2081cb63e?withLeaderboardGroupsAndOverallLeaderboard=true"<br>
+		</pre></td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -80,11 +81,15 @@ import com.sap.sailing.server.gateway.serialization.impl.EventRaceStatesSerializ
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
+import com.sap.sailing.server.operationaltransformation.RemoveEvent;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.security.SailingViewerRole;
@@ -96,6 +101,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.impl.User;
@@ -113,6 +119,34 @@ public class EventsResource extends AbstractSailingServerResource {
     public EventsResource() {
     }
     
+    @DELETE
+    @Path("/{eventId}/")
+    public Response delete(@PathParam("eventId") UUID eventId,
+            @QueryParam("withLeaderboardGroupsAndOverallLeaderboard") Boolean withLeaderboardGroupsAndOverallLeaderboard)
+            throws ParseException, JsonDeserializationException {
+        Event event = getService().getEvent(eventId);
+        RacingEventService racingEventService = getService();
+        SecurityService securityService = racingEventService.getSecurityService();
+        securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(event, () -> {
+            getService().apply(new RemoveEvent(event.getId()));
+            if (withLeaderboardGroupsAndOverallLeaderboard == Boolean.TRUE) {
+                for (LeaderboardGroup group : event.getLeaderboardGroups()) {
+                    securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(group, () -> {
+                        Leaderboard overallLeaderboard = group.getOverallLeaderboard();
+                        if (overallLeaderboard != null) {
+                            securityService.checkPermissionAndDeleteOwnershipForObjectRemoval(overallLeaderboard,
+                                    () -> {
+                                        racingEventService.apply(new RemoveLeaderboard(overallLeaderboard.getName()));
+                                    });
+                        }
+                        racingEventService.apply(new RemoveLeaderboardGroup(group.getName()));
+                    });
+                }
+            }
+        });
+        return Response.ok().build();
+    }
+
     @POST
     @Path("/{eventId}/migrate")
     public Response migrateOwnershipForEvent(@PathParam("eventId") UUID eventId,
