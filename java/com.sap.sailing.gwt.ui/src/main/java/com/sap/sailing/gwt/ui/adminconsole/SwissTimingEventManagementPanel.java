@@ -142,34 +142,26 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         });
         listRacesButton.setEnabled(false);
         removeButton.setEnabled(false);
-
         connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
             final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedObject() != null;
             listRacesButton.setEnabled(objectSelected);
             removeButton.setEnabled(objectSelected);
         });
-        
-        
         HorizontalPanel racesSplitPanel = new HorizontalPanel();
         mainPanel.add(racesSplitPanel);
-        
         CaptionPanel trackableRacesCaptionPanel = new CaptionPanel(stringConstants.trackableRaces());
         racesSplitPanel.add(trackableRacesCaptionPanel);
         trackableRacesCaptionPanel.setWidth("50%");
-
         CaptionPanel trackedRacesCaptionPanel = new CaptionPanel(stringConstants.trackedRaces());
         racesSplitPanel.add(trackedRacesCaptionPanel);
         trackedRacesCaptionPanel.setWidth("50%");
-
         VerticalPanel trackableRacesPanel = new VerticalPanel();
         trackableRacesCaptionPanel.setContentWidget(trackableRacesPanel);
         trackableRacesCaptionPanel.setStyleName("bold");
-
         VerticalPanel trackedRacesPanel = new VerticalPanel();
         trackedRacesPanel.setWidth("100%");
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
-
         // Regatta selection
         HorizontalPanel regattaPanel = new HorizontalPanel();
         regattaPanel.setSpacing(5);
@@ -178,39 +170,31 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         regattaPanel.add(regattaForTrackingLabel);
         regattaPanel.add(getAvailableRegattasListBox());
         trackableRacesPanel.add(regattaPanel);
-
         Label lblTrackSettings = new Label(stringConstants.trackSettings());
         trackableRacesPanel.add(lblTrackSettings);
-
         final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
         trackWindCheckbox.setWordWrap(false);
         trackWindCheckbox.setValue(true);
         trackableRacesPanel.add(trackWindCheckbox);
-
         final CheckBox declinationCheckbox = new CheckBox(stringConstants.declinationCheckbox());
         declinationCheckbox.setWordWrap(false);
         declinationCheckbox.setValue(true);
         trackableRacesPanel.add(declinationCheckbox);
-        
         final CheckBox simulateWithStartTimeNow = new CheckBox(stringMessages.simulateAsLiveRace());
         simulateWithStartTimeNow.setWordWrap(false);
         simulateWithStartTimeNow.setValue(false);
         trackableRacesPanel.add(simulateWithStartTimeNow);
-        
         final CheckBox useInternalMarkPassingAlgorithmCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
         useInternalMarkPassingAlgorithmCheckbox.setWordWrap(false);
         useInternalMarkPassingAlgorithmCheckbox.setValue(Boolean.FALSE);
         trackableRacesPanel.add(useInternalMarkPassingAlgorithmCheckbox);
-        
         // text box for filtering the cell table
         HorizontalPanel filterPanel = new HorizontalPanel();
         filterPanel.setSpacing(5);
         trackableRacesPanel.add(filterPanel);
-
         Label lblFilterEvents = new Label(stringConstants.filterRaces() + ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
-        
         raceTable = new FlushableCellTable<SwissTimingRaceRecordDTO>(/* pageSize */10000, tableRes);
         raceTable.setWidth("300px");
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
@@ -236,7 +220,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 return raceTable;
             }
         };
-        
         final EntityIdentityComparator<SwissTimingRaceRecordDTO> entityIdentityComparator = new EntityIdentityComparator<SwissTimingRaceRecordDTO>() {
             @Override
             public boolean representSameEntity(SwissTimingRaceRecordDTO dto1, SwissTimingRaceRecordDTO dto2) {
@@ -247,21 +230,18 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 return t.raceId.hashCode();
             }
         };
-
         TextColumn<SwissTimingRaceRecordDTO> raceNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.getName();
             }
         };
-
         TextColumn<SwissTimingRaceRecordDTO> regattaNameColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.regattaName;
             }
         };
-
         SelectionCheckboxColumn<SwissTimingRaceRecordDTO> selectionColumn = new SelectionCheckboxColumn<SwissTimingRaceRecordDTO>(
                 tableRes.cellTableStyle().cellTableCheckboxSelected(),
                 tableRes.cellTableStyle().cellTableCheckboxDeselected(),
@@ -273,42 +253,36 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 return object.seriesName;
             }
         };
-
         TextColumn<SwissTimingRaceRecordDTO> raceIdColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.raceId;
             }
         };
-        
         TextColumn<SwissTimingRaceRecordDTO> boatClassColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.boatClass != null ? object.boatClass : "";
             }
         };
-
         TextColumn<SwissTimingRaceRecordDTO> genderColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.gender != null ? object.gender : "";
             }
         };
-
         TextColumn<SwissTimingRaceRecordDTO> raceStatusColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.raceStatus != null ? object.raceStatus : "";
             }
         };
-
         TextColumn<SwissTimingRaceRecordDTO> raceStartTimeColumn = new TextColumn<SwissTimingRaceRecordDTO>() {
             @Override
             public String getValue(SwissTimingRaceRecordDTO object) {
                 return object.raceStartTime==null?"":dateFormatter.render(object.raceStartTime) + " " + timeFormatter.render(object.raceStartTime);
             }
         };
-
         raceNameColumn.setSortable(true);
         raceStartTimeColumn.setSortable(true);
         boatClassColumn.setSortable(true);
@@ -317,8 +291,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceStatusColumn.setSortable(true);
         regattaNameColumn.setSortable(true);
         seriesNameColumn.setSortable(true);
-        
-
         raceTable.addColumn(selectionColumn, selectionColumn.getHeader());
         raceTable.addColumn(regattaNameColumn, stringConstants.regatta());
         raceTable.addColumn(seriesNameColumn, stringConstants.series());
@@ -328,20 +300,16 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceTable.addColumn(boatClassColumn, stringConstants.boatClass());
         raceTable.addColumn(genderColumn, stringConstants.gender());
         raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
-
         raceTable.setSelectionModel(selectionColumn.getSelectionModel(), selectionColumn.getSelectionManager());
-        
         trackableRacesPanel.add(raceTable);
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), regattaNameColumn, seriesNameColumn,
         		raceNameColumn, raceStartTimeColumn, raceIdColumn, boatClassColumn, genderColumn, raceStatusColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
-        
         trackedRacesPanel.add(trackedRacesListComposite);
         filterPanel.add(filterablePanelEvents);
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
         trackableRacesPanel.add(racesButtonPanel);
-
         Button btnTrack = new Button(stringConstants.startTracking());
         racesButtonPanel.add(btnTrack);
         racesButtonPanel.setSpacing(10);
