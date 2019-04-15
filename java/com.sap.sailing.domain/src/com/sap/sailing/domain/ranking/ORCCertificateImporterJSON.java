@@ -11,6 +11,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
+
 public class ORCCertificateImporterJSON implements ORCCertificateImporter {
 
     private Map<String, Object> data;
@@ -39,20 +43,18 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
     @Override
     public ORCCertificate getCertificate(String sailnumber) {
         String searchString = sailnumber.replaceAll(" ", "").toUpperCase();
-        System.out.println(searchString);
 
         JSONObject object = (JSONObject) data.get(searchString);
-        System.out.println(object);
 
-        Map<String, String> general = new HashMap<String, String>();
-        Map<String, Number> hull    = new HashMap<String, Number>();
-        Map<String, Number> sails   = new HashMap<String, Number>();
-        Map<String, Number> scoring = new HashMap<String, Number>();
-        Map<String, Map<Integer, Number>> twaCourses  = new HashMap<String, Map<Integer, Number>>();
-        Map<String, Map<Integer, Number>> predefinedCourses  = new HashMap<String, Map<Integer, Number>>();
+        Map<String, String> general = new HashMap<>();
+        Map<String, Number> hull    = new HashMap<>();
+        Map<String, Number> sails   = new HashMap<>();
+        Map<String, Number> scoring = new HashMap<>();
+        Map<String, Map<Speed, Duration>> twaCourses  = new HashMap<>();
+        Map<String, Map<Speed, Duration>> predefinedCourses  = new HashMap<>();
 
         for (Object key : object.keySet()) {
-            switch ((String )key) {
+            switch ((String) key) {
                 // TODO: nicer! Instead of switch cases, if else condition with ((String) key).matches(<regex>) expressions
                 case "NatAuth": case "BIN": case "RefNo": case "SailNo": case "YachtName": case "Class": case "Builder":
                 case "Designer": case "Division": case "IssueDate": {
@@ -75,23 +77,23 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                 case "Allowances": {
                     JSONObject allowances = (JSONObject) object.get("Allowances");
                     for (Object aKey : allowances.keySet()) {
-                        System.out.println((String) aKey + allowances.get(aKey) + allowances.get(aKey).getClass());
-
-                        Map<Integer, Number> twsMap = new HashMap<Integer, Number>();
+                        Map<Speed, Duration> twsMap = new HashMap<>();
                         JSONArray oneTwaArray = (JSONArray) allowances.get(aKey);
                         for (int i = 0; i < oneTwaArray.size(); i++) {
-                            twsMap.put(twsDistances[i], (Number) oneTwaArray.get(i));
+                            twsMap.put(new KnotSpeedImpl(twsDistances[i]), Duration.ONE_SECOND.times((Double) oneTwaArray.get(i)));
                         }
 
                         switch ((String) aKey) {
                             case "R52": case "R60": case "R75": case "R90": case "R110": case "R120": case "R135": case "R150": {
                                 twaCourses.put((String) aKey, twsMap);
+                                break;
                             }
                             default: {
                                 predefinedCourses.put((String) aKey, twsMap);
                             }
                         }
-                    };
+                    }
+                    break;
                 }
                 default: {}
             }

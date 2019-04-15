@@ -63,15 +63,13 @@ public class ORCCertificatePerformanceCurve implements Serializable {
      * column is a map from the true wind angle (here expressed as an object of type {@link Bearing}) and
      * the {@link Duration} the boat is assumed to need at that true wind speed/angle for one nautical mile.
      */
-    public ORCCertificatePerformanceCurve(Map<Bearing, Duration> durationsForOneNauticalMileForBeatAngle,
-                                          Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt6kts,
+    public ORCCertificatePerformanceCurve(Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt6kts,
                                           Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt8kts,
                                           Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt10kts,
                                           Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt12kts,
                                           Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt14kts,
                                           Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt16kts,
-                                          Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt20kts,
-                                          Map<Bearing, Duration> durationsForOneNauticalMileForGybeAngle) {
+                                          Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt20kts) {
         Map<Speed, Map<Bearing, Duration>> map = new HashMap<>();
         map.put(new KnotSpeedImpl( 6), durationsForOneNauticalMileForTrueWindAngleAt6kts);
         map.put(new KnotSpeedImpl( 8), durationsForOneNauticalMileForTrueWindAngleAt8kts);
