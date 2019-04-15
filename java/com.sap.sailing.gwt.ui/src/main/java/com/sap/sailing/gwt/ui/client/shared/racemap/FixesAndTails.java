@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
@@ -800,8 +801,10 @@ public class FixesAndTails {
      * in the search.
      */
     protected void updateDetailValueBoundaries(Iterable<CompetitorDTO> competitors) {
-        Double min = null;
-        Double max = null;
+        double min = 0;
+        boolean minSet = false;
+        double max = 0;
+        boolean maxSet = false;
         for (CompetitorDTO competitor : competitors) {
             searchMinMaxDetailValue(competitor);
             // Find minimum value across all boats
@@ -809,8 +812,9 @@ public class FixesAndTails {
                 int index = minDetailValueFix.get(competitor);
                 if (!fixes.containsKey(competitor) || fixes.get(competitor) == null || index >= fixes.get(competitor).size()) {
                     minDetailValueFix.put(competitor, -1);
-                } else if (min == null || fixes.get(competitor).get(index).detailValue < min) {
+                } else if (!minSet || fixes.get(competitor).get(index).detailValue < min) {
                     min = fixes.get(competitor).get(index).detailValue;
+                    minSet = true;
                 }
             }
             // Find maximum value across all boats
@@ -818,14 +822,15 @@ public class FixesAndTails {
                 int index = maxDetailValueFix.get(competitor);
                 if (!fixes.containsKey(competitor) || fixes.get(competitor) == null || index >= fixes.get(competitor).size()) {
                     maxDetailValueFix.put(competitor, -1);
-                } else if (max == null || fixes.get(competitor).get(index).detailValue > max) {
+                } else if (!maxSet || fixes.get(competitor).get(index).detailValue > max) {
                     max = fixes.get(competitor).get(index).detailValue;
+                    maxSet = true;
                 }
             }
         }
 
         // If possible update detailValueBoundaries
-        if (min != null && max != null) {
+        if (minSet && maxSet) {
             detailValueBoundaries.setMinMax(min, max);
         }
     }
