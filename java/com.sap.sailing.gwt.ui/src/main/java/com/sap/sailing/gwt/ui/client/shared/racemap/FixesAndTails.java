@@ -835,10 +835,21 @@ public class FixesAndTails {
         }
     }
 
+    /**
+     * Sets the {@link ValueRangeFlexibleBoundaries} to use for tracking the minimum and maximum detail values.
+     * @param boundaries {@link ValueRangeFlexibleBoundaries} to set {@link #detailValueBoundaries} to.
+     */
     protected void setDetailValueBoundaries(ValueRangeFlexibleBoundaries boundaries) {
         detailValueBoundaries = boundaries;
     }
 
+    /**
+     * Gets the detail value at a specific index in a competitors tail.
+     * @param competitorDTO {@link CompetitorDTO} specifying the competitor.
+     * @param index {@code int} specifying the index.
+     * @return {@code null} if {@code index} is out of bounds or if a detail value cannot be found. Otherwise returns
+     * a {@link Double} of the respective value.
+     */
     protected Double getDetailValueAt(CompetitorDTO competitorDTO, int index) {
         final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
         int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1 : firstShownFixForCompetitor.get();
