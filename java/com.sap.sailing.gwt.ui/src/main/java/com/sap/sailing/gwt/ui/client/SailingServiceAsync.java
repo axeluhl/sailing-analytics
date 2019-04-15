@@ -1089,13 +1089,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void openRegattaRegistrationQrCode(String url, AsyncCallback<String> asyncCallback);
 
     /**
-     * Sets the tenant that is used for CREATE operations done on this server
-     * 
-     * @param tennant
-     */
-    void setDefaultTenantForCurrentServer(String tennant, AsyncCallback<Void> asyncCallback);
-
-    /**
      * gets a (possibly imcomplete) list of available tennants to choose from.
      */
     void getPossibleTennants(AsyncCallback<List<String>> asyncCallback);

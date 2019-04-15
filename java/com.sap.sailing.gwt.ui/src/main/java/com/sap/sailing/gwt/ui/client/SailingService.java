@@ -1145,8 +1145,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     String openRegattaRegistrationQrCode(String url) throws UnauthorizedException;
 
-    void setDefaultTenantForCurrentServer(String tennant) throws UnauthorizedException;
-
     List<String> getPossibleTennants() throws UnauthorizedException;
 
     void updateGroupOwnerForEventHierarchy(UUID eventId,

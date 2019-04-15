@@ -9153,22 +9153,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public void setDefaultTenantForCurrentServer(String tennant) {
-        User user = getSecurityService().getCurrentUser();
-        if (user != null) {
-            if (tennant == null) {
-                user.getDefaultTenantMap().remove(ServerInfo.getName());
-            } else {
-                UserGroup userGroupCandidate = getSecurityService().getUserGroupByName(tennant);
-                // FIXME allow admins to pose as any tenant?
-                if (Util.contains(user.getUserGroups(), userGroupCandidate)) {
-                    user.getDefaultTenantMap().put(ServerInfo.getName(), userGroupCandidate);
-                }
-            }
-        }
-    }
-
-    @Override
     public List<String> getPossibleTennants() {
         // FIXME this is most likely greatly oversimplified and needs to be improved
         ArrayList<String> tenants = new ArrayList<>();
