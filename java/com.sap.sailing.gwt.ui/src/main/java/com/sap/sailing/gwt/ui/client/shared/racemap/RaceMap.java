@@ -758,6 +758,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             }
                         });
                         sortedAvailableDetailTypes.remove(DetailType.CHART_COURSE_OVER_GROUND_TRUE_DEGREES);
+                        sortedAvailableDetailTypes.remove(DetailType.CHART_BEAT_ANGLE);
+                        sortedAvailableDetailTypes.remove(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
                     }
                 });
     }
