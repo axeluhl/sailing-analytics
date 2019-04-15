@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -43,6 +44,22 @@ public class UserGroupsResource extends AbstractSailingServerResource {
                 groups.add(groupJson);
             }
             response = Response.ok(root.toJSONString()).build();
+        } else {
+            response = Response.status(401).build();
+        }
+        return response;
+    }
+
+    @POST
+    @Produces("application/json;charset=UTF-8")
+    @Path("setDefaultTenantForCurrentServerAndUser")
+    public Response setDefaultTenantForCurrentServerAndUser(@QueryParam("tenantGroup") UUID tennant)
+            throws ParseException, JsonDeserializationException {
+        Response response = null;
+        User user = getSecurityService().getCurrentUser();
+        if (user != null) {
+            getSecurityService().setDefaultTenantForCurrentServerForUser(user.getName(), tennant);
+            response = Response.ok().build();
         } else {
             response = Response.status(401).build();
         }
