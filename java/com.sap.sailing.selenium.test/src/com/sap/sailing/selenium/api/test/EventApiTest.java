@@ -8,8 +8,10 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
+import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class EventApiTest extends AbstractSeleniumTest {
@@ -26,23 +28,25 @@ public class EventApiTest extends AbstractSeleniumTest {
         String eventName = "<ppp> loggingsession";
         EventApi eventApi = new EventApi();
 
-        JSONObject createdEvent = eventApi.createEvent(ctx, eventName, "75QMNATIONALEKREUZER", "CLOSED", "default");
-        assertNotNull("create: event.eventid is missing", createdEvent.get("eventid"));
-        assertNotNull("create: event.eventstartdate is missing", createdEvent.get("eventstartdate"));
-        assertNotNull("create: event.eventenddate is missing", createdEvent.get("eventenddate"));
-        assertEquals("create: event.eventname is different", eventName, createdEvent.get("eventname"));
+        Event createdEvent = eventApi.createEvent(ctx, eventName, "75QMNATIONALEKREUZER",
+                CompetitorRegistrationType.CLOSED, "default");
+        assertNotNull("create: event.eventid is missing", createdEvent.getId());
+        assertNotNull("create: event.eventstartdate is missing", createdEvent.getStartDate());
+        assertNotNull("create: event.eventenddate is missing", createdEvent.getEndDate());
+        assertEquals("create: event.eventname is different", eventName, createdEvent.getName());
         assertEquals("create: event.reagattaname is different", eventName, createdEvent.get("regatta"));
         assertEquals("create: event.leaderboard is different", eventName, createdEvent.get("leaderboard"));
 
-        JSONObject foundEvent = eventApi.getEvent(ctx, (String) createdEvent.get("eventid"));
-        assertNotNull("read: event.id is missing", foundEvent.get("id"));
-        assertEquals("read: event.name is different", eventName, foundEvent.get("name"));
+        Event foundEvent = eventApi.getEvent(ctx, (String) createdEvent.getId());
+        assertNotNull("read: event.id is missing", foundEvent.getId());
+        assertEquals("read: event.name is different", eventName, foundEvent.getName());
         assertEquals("read: event.description is different", eventName, foundEvent.get("description"));
-        assertEquals("read: event.officialWebsiteURL is different", null, foundEvent.get("officialWebsiteURL"));
+        assertEquals("read: event.officialWebsiteURL is different", null,
+                (String) foundEvent.get("officialWebsiteURL"));
         assertEquals("read: event.baseUrl is different", getContextRoot() + ApiContext.SERVER_CONTEXT + "/api/",
                 foundEvent.get("baseURL"));
-        assertNotNull("read: event.startDate is missing", foundEvent.get("startDate"));
-        assertNotNull("read: event.endDate is missing", foundEvent.get("endDate"));
+        assertNotNull("read: event.startDate is missing", foundEvent.getStartDate());
+        assertNotNull("read: event.endDate is missing", foundEvent.getEndDate());
         assertEquals("read: event.images should be empty", 0, ((JSONArray) foundEvent.get("images")).size());
         assertEquals("read: event.videos should be empty", 0, ((JSONArray) foundEvent.get("videos")).size());
         assertEquals("read: event.sailorsInfoWebsiteURLs", 0,

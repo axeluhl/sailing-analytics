@@ -11,6 +11,7 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
@@ -33,7 +34,8 @@ public class LeaderBoardApiTest extends AbstractSeleniumTest {
         EventApi eventApi = new EventApi();
         LeaderboardApi leaderboardApi = new LeaderboardApi();
 
-        eventApi.createEvent(ctx, leaderboardName, "75QMNATIONALEKREUZER", "CLOSED", "default");
+        eventApi.createEvent(ctx, leaderboardName, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
+                "default");
 
         JSONObject leaderBoard = leaderboardApi.getLeaderboard(ctx, leaderboardName);
         assertEquals("read: leaderboard.name is different", leaderboardName, leaderBoard.get("name"));
@@ -62,20 +64,21 @@ public class LeaderBoardApiTest extends AbstractSeleniumTest {
         RegattaApi regattaApi = new RegattaApi();
         LeaderboardApi leaderboardApi = new LeaderboardApi();
 
-        eventApi.createEvent(ctx, leaderboardName, "75QMNATIONALEKREUZER", "CLOSED", "default");
+        eventApi.createEvent(ctx, leaderboardName, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
+                "default");
         JSONObject competitor = regattaApi.createAndAddCompetitor(ctx, leaderboardName, "75QMNATIONALEKREUZER",
                 "test@de", "Max Mustermann", "USA");
         String competitorId = competitor.get("id").toString();
-        
+
         String boatId = "sdjkfhsdkjfh!";
         String markId = "kjashfkfhskh";
         String deviceUuid = UUID.randomUUID().toString();
         String secret = "dskjshfkdjhfksh";
         Long fromMillis = System.currentTimeMillis();
-        @SuppressWarnings("unused")//TODO: check result
+        @SuppressWarnings("unused") // TODO: check result
         JSONObject dmStart = leaderboardApi.deviceMappingsStart(ctx, leaderboardName, competitorId, boatId, markId,
                 deviceUuid, secret, fromMillis);
-        @SuppressWarnings("unused") //TODO: check result
+        @SuppressWarnings("unused") // TODO: check result
         JSONObject dmEnd = leaderboardApi.deviceMappingsEnd(ctx, leaderboardName, competitorId, boatId, markId,
                 deviceUuid, secret, fromMillis);
     }

@@ -1,11 +1,12 @@
 package com.sap.sailing.selenium.api.test;
 
-import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
+import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.RegattaApi;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -36,18 +37,11 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         adminConsole.goToLcalServerPanel().setSelfServiceServer(true);
     }
 
-    // Event erzeugen
-    // Competitor anlegen owner
-    // Competitor anlegen
-    // Start Race
-    // GPS (n*)
-    // End Race
-
     @Test
     public void simpleTest() {
-        JSONObject event = eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, "OPEN_UNMODERATED",
-                "Duckburg Harbour");
-        String registrationLinkSecret = (String) event.get("registrationSecret");
+        Event event = eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS,
+                CompetitorRegistrationType.OPEN_UNMODERATED, "Duckburg Harbour");
+        String registrationLinkSecret = event.getSecret();
         regattaApi.createAndAddCompetitor(ownerCtx, EVENT_NAME, BOAT_CLASS, "", "Donald Duck", "USA");
         regattaApi.createAndAddCompetitorWithSecret(sailorCtx, EVENT_NAME, BOAT_CLASS, "", "Mickey Mouse", "USA",
                 registrationLinkSecret, "00000000-0000-0000-0000-000000000001");

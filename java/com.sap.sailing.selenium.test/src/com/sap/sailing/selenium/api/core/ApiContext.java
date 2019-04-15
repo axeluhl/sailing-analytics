@@ -25,7 +25,7 @@ public class ApiContext {
 
     public static final String SERVER_CONTEXT = "sailingserver"; //$NON-NLS-1$
     public static final String SECURITY_CONTEXT = "security"; //$NON-NLS-1$
-    
+
     private static final Logger logger = Logger.getLogger(ApiContext.class.getName());
 
     /** Jax-RS client. */
