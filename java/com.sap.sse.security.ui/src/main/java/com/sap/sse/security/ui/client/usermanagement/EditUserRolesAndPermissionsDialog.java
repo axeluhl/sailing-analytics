@@ -1,8 +1,9 @@
 package com.sap.sse.security.ui.client.usermanagement;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -26,15 +27,13 @@ public class EditUserRolesAndPermissionsDialog extends DataEntryDialog<Void> {
     private static final StringMessages stringMessages = StringMessages.INSTANCE;
 
     private WildcardPermissionPanel wildcardPermissionPanel;
-
     private UserRoleDefinitionPanel userRoleDefinitionPanel;
 
     public EditUserRolesAndPermissionsDialog(final String selectedUsername, final UserService userService,
             final ErrorReporter errorReporter, final CellTableWithCheckboxResources tableResources,
             final DialogCallback<Void> callback) {
-        super(stringMessages.editRolesAndPermissionsForUser(selectedUsername), null, stringMessages.close(),
-                null, /* validator */ null,
-                /* animationEnabled */true, callback);
+        super(stringMessages.editRolesAndPermissionsForUser(selectedUsername), null, stringMessages.close(), null,
+                /* validator */ null, /* animationEnabled */true, callback);
         final MultiSelectionModel<UserDTO> selectionAdapter = new MultiSelectionModel<>();
         super.getCancelButton().removeFromParent();
 
@@ -51,6 +50,7 @@ public class EditUserRolesAndPermissionsDialog extends DataEntryDialog<Void> {
                                 selectionAdapter.setSelected(createUserAdapter(selectedUsername, result), true);
                                 wildcardPermissionPanel.updatePermissionList();
                                 userRoleDefinitionPanel.updateRoles();
+                                Scheduler.get().scheduleDeferred(() -> EditUserRolesAndPermissionsDialog.this.center());
                             }
 
                             @Override
@@ -86,10 +86,10 @@ public class EditUserRolesAndPermissionsDialog extends DataEntryDialog<Void> {
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(5, 2);
-        result.setWidget(0, 0, userRoleDefinitionPanel);
-        result.setWidget(1, 0, wildcardPermissionPanel);
-        return result;
+        final VerticalPanel panel = new VerticalPanel();
+        panel.add(userRoleDefinitionPanel);
+        panel.add(wildcardPermissionPanel);
+        return panel;
     }
 
 }
