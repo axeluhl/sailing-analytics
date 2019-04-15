@@ -3,9 +3,11 @@ package com.sap.sailing.domain.ranking;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class ORCCertificate {
 
@@ -35,11 +37,31 @@ public class ORCCertificate {
     private void initializePerformanceCurve() {
         Map<Speed, Map<Bearing, Duration>> PCAllowancesTws = new HashMap<>();
         
-        for (String key : twaCourses.keySet()) {
+        PCAllowancesTws.put(new KnotSpeedImpl( 6), new HashMap<Bearing, Duration>());
+        PCAllowancesTws.put(new KnotSpeedImpl( 8), new HashMap<Bearing, Duration>());
+        PCAllowancesTws.put(new KnotSpeedImpl(10), new HashMap<Bearing, Duration>());
+        PCAllowancesTws.put(new KnotSpeedImpl(12), new HashMap<Bearing, Duration>());
+        PCAllowancesTws.put(new KnotSpeedImpl(14), new HashMap<Bearing, Duration>());
+        PCAllowancesTws.put(new KnotSpeedImpl(16), new HashMap<Bearing, Duration>());
+        PCAllowancesTws.put(new KnotSpeedImpl(20), new HashMap<Bearing, Duration>());
+        
+        for (String keyTWA : twaCourses.keySet()) {
+            int twa = Integer.parseInt(keyTWA.substring(1));
             
+            for (Speed keyTWS : twaCourses.get(keyTWA).keySet()) {
+                PCAllowancesTws.get(keyTWS).put(new DegreeBearingImpl(twa), twaCourses.get(keyTWA).get(keyTWS));
+            }
         };
         
-        performanceCurve = new ORCCertificatePerformanceCurve(null, null, null, null, null, null, null);
+        performanceCurve = new ORCCertificatePerformanceCurve(  PCAllowancesTws.get(new KnotSpeedImpl( 6)),
+                                                                PCAllowancesTws.get(new KnotSpeedImpl( 8)),
+                                                                PCAllowancesTws.get(new KnotSpeedImpl(10)),
+                                                                PCAllowancesTws.get(new KnotSpeedImpl(12)),
+                                                                PCAllowancesTws.get(new KnotSpeedImpl(14)),
+                                                                PCAllowancesTws.get(new KnotSpeedImpl(16)),
+                                                                PCAllowancesTws.get(new KnotSpeedImpl(20)));
+        
+        if (performanceCurve != null) {System.out.println("Everything fine!");} //TODO Bookmark for the next day.
     } 
     
     public String getValue(String key) {
