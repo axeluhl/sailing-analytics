@@ -250,10 +250,8 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             UserService userService, ErrorReporter errorReporter, StringMessages stringMessages) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT);
-
         // Refresh action
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshConnectionList());
-
         // Create action
         buttonPanel.addCreateAction(stringMessages.addSwissTimingAchivedConnection(),
                 () -> new EditSwissTimingArchivedConnectionDialog(new SwissTimingArchiveConfigurationWithSecurityDTO(),
@@ -280,7 +278,6 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                             public void cancel() {
                             }
                         }, userService, errorReporter).show());
-
         // Remove action
         final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
             sailingService.deleteSwissTimingArchiveConfiguration(
@@ -297,14 +294,12 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                         }
                     });
         });
-
         // List Race action
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
             fillRaces(sailingService);
         });
         listRacesButton.setEnabled(false);
         removeButton.setEnabled(false);
-
         // add change handlers to enable and disable List Races and Remove
         connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
             final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedObject() != null;

@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.shiro.authz.AuthorizationException;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -1041,6 +1043,13 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getAvailableDetailTypesForLeaderboard(String leaderboardName, RegattaAndRaceIdentifier raceOrNull,
             AsyncCallback<Iterable<DetailType>> asyncCallback);
 
+    /**
+     * Checks whether the user may cut the race identified by {@code radeIdentifier} into multiple races. For this, it
+     * has to be found and it has to be a "smartphone-tracked" race with a valid start-of-tracking time. If not,
+     * {@code false} will be returned. If the user it not <em>permitted</em> to slice the race, e.g., because no
+     * permission has been granted to modify the leaderboard or regatta, an {@link AuthorizationException} will be
+     * thrown.
+     */
     void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
 
     void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo,
@@ -1078,13 +1087,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
      * @param asyncCallback
      */
     void openRegattaRegistrationQrCode(String url, AsyncCallback<String> asyncCallback);
-
-    /**
-     * Sets the tenant that is used for CREATE operations done on this server
-     * 
-     * @param tennant
-     */
-    void setDefaultTenantForCurrentServer(String tennant, AsyncCallback<Void> asyncCallback);
 
     /**
      * gets a (possibly imcomplete) list of available tennants to choose from.
