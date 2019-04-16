@@ -19,6 +19,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.client.ClientProtocolException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -28,6 +29,8 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -39,12 +42,14 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
+import com.sap.sailing.domain.igtimiadapter.impl.Activator;
 import com.sap.sailing.domain.igtimiadapter.impl.ClientImpl;
 import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
 public class WebSocketTest {
     private static final Logger logger = Logger.getLogger(WebSocketTest.class.getName());
@@ -116,6 +121,16 @@ public class WebSocketTest {
         }
     }
     
+    @Before
+    public void setUp() throws ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+        Activator.getInstance().setSecurityService(SecurityServiceMockFactory.mockSecurityService());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        Activator.getInstance().setSecurityService(null);
+    }
+
     @Test
     public void simpleWebSocketEchoTest() throws Exception {
         String destUri = "ws://echo.websocket.org"; // wss currently doesn't seem to work with Jetty 9.0.4 WebSocket implementation
