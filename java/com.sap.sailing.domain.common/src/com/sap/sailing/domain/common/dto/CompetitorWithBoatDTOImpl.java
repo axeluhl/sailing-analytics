@@ -59,11 +59,13 @@ public class CompetitorWithBoatDTOImpl extends CompetitorDTOImpl implements Comp
     public CompetitorWithBoatDTO getCompetitorFromPrevious(LeaderboardDTO previousVersion) {
         return this;
     }
-
+    
     @Override
-    public String getShortInfo() {
+    public String getShortInfo(boolean preferSailId) {
         final String result;
-        if (getShortName() != null && !getShortName().trim().isEmpty()) {
+        if (preferSailId && getBoat() != null && getBoat().getSailId() != null) {
+            result = getBoat().getSailId();
+        } else if (getShortName() != null && !getShortName().trim().isEmpty()) {
             result = getShortName(); 
         } else if (getBoat() != null) {
             result = getBoat().getSailId() != null ? getBoat().getSailId() : getBoat().getName();

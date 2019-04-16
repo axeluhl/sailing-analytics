@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.qrcode;
 
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.http.client.UrlBuilder;
@@ -18,6 +19,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 
 public class QRCodePresenter {
+    private static final Logger logger = Logger.getLogger(QRCodePresenter.class.getName());
+    
     private final QRCodeClientFactory clientFactory;
     private DataCollector dataCollector;
     private QRCodePlace place;
@@ -25,18 +28,23 @@ public class QRCodePresenter {
     public QRCodePresenter(QRCodeClientFactory clientFactory, QRCodePlace place) {
         this.clientFactory = clientFactory;
         this.place = place;
+        logger.info("Creating QRCodePresenter with place: " + place);
     }
 
     public void setView(QRCodeView view) {
         String rawTargetServer = place.getTargetServer();
+        logger.info("Target server for QR Code: " + rawTargetServer);
         Triple<String, String, Integer> correctServerHost = getServerAndPort(rawTargetServer);
         if (isCorrectServer(correctServerHost)) {
+            logger.info("Already the right server for QR Code");
             showQrCode(view);
         } else {
+            logger.info("Not the right server for QR Code");
             if (isSecureServer(correctServerHost)) {
                 String url = getCorrectUrl(correctServerHost);
                 Window.Location.assign(url);
             } else {
+                logger.info("Unsafe target server for QR Code -> ask the user");
                 view.showRedirectionDialog(correctServerHost, new Runnable() {
                     @Override
                     public void run() {
@@ -87,15 +95,26 @@ public class QRCodePresenter {
     }
 
     private boolean isCorrectServer(Triple<String, String, Integer> correctServerHost) {
-        boolean protocolSame = Util.equalsWithNull(correctServerHost.getA(), Window.Location.getProtocol());
-        boolean hostSame = Util.equalsWithNull(correctServerHost.getB(), Window.Location.getHostName());
-        boolean portSame = Util.equalsWithNull("" + correctServerHost.getC(), Window.Location.getPort());
+        final String targetProtocol = correctServerHost.getA();
+        final String currentProtocol = Window.Location.getProtocol();
+        boolean protocolSame = Util.equalsWithNull(targetProtocol, currentProtocol);
+        logger.info("Checking Protocol: current=" + currentProtocol + "; target=" + targetProtocol + "; same=" + protocolSame);
+        String targetHost = correctServerHost.getB();
+        String currentHost = Window.Location.getHostName();
+        boolean hostSame = Util.equalsWithNull(targetHost, currentHost);
+        logger.info("Checking Host: current=" + currentHost + "; target=" + targetHost + "; same=" + hostSame);
+        final Integer targetPort = correctServerHost.getC();
+        final String targetPortAsString = correctServerHost.getC() == null ? "" : Integer.toString(targetPort);
+        final String currentPort = Window.Location.getPort();
+        boolean portSame = Util.equalsWithNull(targetPortAsString, currentPort);
+        logger.info("Checking Port: current=" + currentPort + "; target=" + targetPortAsString + "; same=" + portSame);
         return protocolSame && hostSame && portSame;
     }
 
     private void showQrCode(QRCodeView view) {
         switch (place.getMode()) {
         case BOUY_TENDER:
+            logger.info("QR Code for buoy tender to be shown");
             if (place.getEncodedCheckInUrl() == null || place.getEncodedCheckInUrl().isEmpty()) {
                 view.setError();
             } else {
@@ -105,6 +124,7 @@ public class QRCodePresenter {
             break;
         case COMPETITOR:
         case COMPETITOR_2:
+            logger.info("QR Code for competitor/boat/buoy tracking to be shown");
             if (place.getEncodedCheckInUrl() == null || place.getEncodedCheckInUrl().isEmpty()) {
                 view.setError();
             } else {
@@ -123,6 +143,7 @@ public class QRCodePresenter {
             }
             break;
         case PUBLIC_INVITE:
+            logger.info("QR Code for public regatta invite to be shown");
             // as the event is most likely displayed on a different server anyway, do not load additional data
             dataCollector = new DataCollector(view);
             dataCollector.proceedIfFinished();
@@ -131,48 +152,56 @@ public class QRCodePresenter {
     }
 
     private void retrieveMark(UUID markId) {
+        logger.info("retrieving mark: " + markId);
         clientFactory.getSailingService().getMark(markId, place.getLeaderboardName(),
                 place.getRegattaRegistrationLinkSecret(), new AsyncCallback<MarkDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
+                        logger.info("Could not load mark for QR Code");
                         dataCollector.setMark(null);
                     }
 
                     @Override
                     public void onSuccess(MarkDTO result) {
+                        logger.info("Received mark for QR Code");
                         dataCollector.setMark(result);
                     }
                 });
     }
 
     private void retrieveBoat(UUID boatId) {
+        logger.info("retrieving boat: " + boatId);
         clientFactory.getSailingService().getBoat(boatId, place.getLeaderboardName(),
                 place.getRegattaRegistrationLinkSecret(), new AsyncCallback<BoatDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
+                        logger.info("Could not load boat for QR Code");
                         dataCollector.setBoat(null);
                     }
 
                     @Override
                     public void onSuccess(BoatDTO result) {
+                        logger.info("Received boat for QR Code");
                         dataCollector.setBoat(result);
                     }
                 });
     }
 
     private void retrieveEvent(UUID eventId) {
-        GWT.log("retrieving event: " + eventId);
+        logger.info("retrieving event: " + eventId);
         clientFactory.getDispatch().execute(new GetEventViewAction(eventId), new AsyncCallback<EventViewDTO>() {
 
             @Override
             public void onFailure(Throwable caught) {
+                logger.info("Could not load event for QR Code");
                 dataCollector.setEvent(null);
             }
 
             @Override
             public void onSuccess(EventViewDTO result) {
+                logger.info("Received event for QR Code");
                 dataCollector.setEvent(result);
             }
         });
@@ -185,11 +214,13 @@ public class QRCodePresenter {
 
                     @Override
                     public void onFailure(Throwable caught) {
+                        logger.info("Could not load competitor for QR Code");
                         dataCollector.setCompetitor(null);
                     }
 
                     @Override
                     public void onSuccess(SimpleCompetitorWithIdDTO result) {
+                        logger.info("Received competitor for QR Code");
                         dataCollector.setCompetitor(result);
                     }
                 });
@@ -235,17 +266,22 @@ public class QRCodePresenter {
         }
 
         private void proceedIfFinished() {
+            logger.info("Checking if data for QR Code is loaded");
             switch (place.getMode()) {
             case BOUY_TENDER:
                 if (eventIsSet) {
+                    logger.info("About to show QR Code for buoy tender");
                     String branchIoUrl = BranchIOConstants.BUOYPINGER_APP_BRANCHIO + "?"
                             + BranchIOConstants.BUOYPINGER_APP_BRANCHIO_PATH + "=" + place.getEncodedCheckInUrl();
                     view.showBouyTender(event, place.getLeaderboardName(), branchIoUrl);
+                } else {
+                    logger.info("Event is missing for buoy tender QR Code");
                 }
                 break;
             case COMPETITOR:
             case COMPETITOR_2:
                 if (participantIsSet && eventIsSet) {
+                    logger.info("About to show QR Code for competitor/boat/mark tracking");
                     String sailInsightBranch = place.getMode() == InvitationMode.COMPETITOR
                             ? BranchIOConstants.SAILINSIGHT_APP_BRANCHIO
                             : BranchIOConstants.SAILINSIGHT_2_APP_BRANCHIO;
@@ -255,9 +291,9 @@ public class QRCodePresenter {
                 }
                 break;
             case PUBLIC_INVITE:
+                logger.info("About to show QR Code for public regatta invite");
                 view.showPublic(place.getPublicRegattaName(), place.getPublicInviteBranchIOUrl());
                 break;
-
             }
         }
     }

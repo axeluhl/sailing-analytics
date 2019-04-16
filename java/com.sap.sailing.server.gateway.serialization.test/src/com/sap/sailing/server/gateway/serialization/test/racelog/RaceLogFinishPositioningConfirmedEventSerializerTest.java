@@ -21,8 +21,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmed
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
@@ -34,6 +36,7 @@ import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializ
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -68,8 +71,11 @@ public class RaceLogFinishPositioningConfirmedEventSerializerTest {
 
     @Test
     public void testSerializeAndDeserializeRaceLogFinishPositioningConfirmedEvent() throws JsonDeserializationException {
-        positioningList.add(new CompetitorResultImpl(UUID.randomUUID(), "SAP Extreme", /* rank */ 1,
-                MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
+        Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
+                new BoatClassImpl("X40", false), "123", Color.RED);
+        positioningList.add(new CompetitorResultImpl(UUID.randomUUID(), "SAP Extreme", "SAP Ext", storedBoat.getName(),
+                storedBoat.getSailID(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null,
+                /* comment */ null, MergeState.OK));
         event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, positioningList);
         JSONObject jsonConfirmationEvent = serializer.serialize(event);
         RaceLogFinishPositioningConfirmedEvent deserializedEvent = (RaceLogFinishPositioningConfirmedEvent) deserializer.deserialize(jsonConfirmationEvent);
