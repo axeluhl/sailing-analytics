@@ -16,6 +16,7 @@ import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.RegattaApi;
+import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class LeaderBoardApiTest extends AbstractSeleniumTest {
@@ -66,7 +67,7 @@ public class LeaderBoardApiTest extends AbstractSeleniumTest {
 
         eventApi.createEvent(ctx, leaderboardName, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
                 "default");
-        JSONObject competitor = regattaApi.createAndAddCompetitor(ctx, leaderboardName, "75QMNATIONALEKREUZER",
+        Competitor competitor = regattaApi.createAndAddCompetitor(ctx, leaderboardName, "75QMNATIONALEKREUZER",
                 "test@de", "Max Mustermann", "USA");
         String competitorId = competitor.get("id").toString();
 
