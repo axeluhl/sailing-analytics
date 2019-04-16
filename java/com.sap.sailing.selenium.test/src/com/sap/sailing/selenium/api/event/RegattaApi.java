@@ -68,13 +68,17 @@ public class RegattaApi {
         return new Competitor(competitorJson);
     }
 
-    public JSONArray addRaceColumn(ApiContext ctx, String regattaName, String prefix, Integer numberOfRaces) {
+    public RaceColumn[] addRaceColumn(ApiContext ctx, String regattaName, String prefix, Integer numberOfRaces) {
         String url = REGATTAS + "/" + regattaName + ADD_RACE_COLUMN_URL;
         Map<String, String> queryParams = new TreeMap<>();
         queryParams.put("prefix", prefix);
         queryParams.put("numberOfRaces", numberOfRaces != null ? numberOfRaces.toString() : null);
-        return ctx.post(url, queryParams);
-
+        JSONArray json = ctx.post(url, queryParams);
+        RaceColumn[] result = new RaceColumn[json.size()];
+        for (int i = 0; i < json.size(); i++) {
+            result[i] = new RaceColumn((JSONObject)(json.get(i)));
+        }
+        return result;
     }
 
     public class Regatta extends JsonWrapper {
@@ -222,6 +226,21 @@ public class RegattaApi {
 
         public Double getHullBeamInMeters() {
             return get("hullBeamInMeters");
+        }
+    }
+
+    public class RaceColumn extends JsonWrapper {
+
+        public RaceColumn(JSONObject json) {
+            super(json);
+        }
+
+        public String getSeriesName() {
+            return get("seriesname");
+        }
+
+        public String getRaceName() {
+            return get("racename");
         }
     }
 }

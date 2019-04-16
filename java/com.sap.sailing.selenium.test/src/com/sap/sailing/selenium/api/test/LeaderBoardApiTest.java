@@ -69,11 +69,11 @@ public class LeaderBoardApiTest extends AbstractSeleniumTest {
                 "default");
         Competitor competitor = regattaApi.createAndAddCompetitor(ctx, leaderboardName, "75QMNATIONALEKREUZER",
                 "test@de", "Max Mustermann", "USA");
-        String competitorId = competitor.get("id").toString();
+        UUID competitorId = competitor.getId();
 
-        String boatId = "sdjkfhsdkjfh!";
-        String markId = "kjashfkfhskh";
-        String deviceUuid = UUID.randomUUID().toString();
+        UUID boatId = UUID.randomUUID();
+        UUID markId = UUID.randomUUID();
+        UUID deviceUuid = UUID.randomUUID();
         String secret = "dskjshfkdjhfksh";
         Long fromMillis = System.currentTimeMillis();
         @SuppressWarnings("unused") // TODO: check result

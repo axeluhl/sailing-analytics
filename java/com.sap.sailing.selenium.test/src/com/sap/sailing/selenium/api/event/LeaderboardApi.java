@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.api.event;
 
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
@@ -28,13 +29,13 @@ public class LeaderboardApi {
         return ctx.get(LEADERBOARD_URL.replace("{leaderboardname}", leaderboardName));
     }
 
-    public JSONObject deviceMappingsStart(ApiContext ctx, String leaderboardName, String competitorId, String boatId,
-            String markId, String deviceUuid, String secret, Long fromMillis) {
+    public JSONObject deviceMappingsStart(ApiContext ctx, String leaderboardName, UUID competitorId, UUID boatId,
+            UUID markId, UUID deviceUuid, String secret, Long fromMillis) {
         JSONObject json = new JSONObject();
-        json.put("competitorId", competitorId);
-        json.put("boatId", boatId);
-        json.put("markId", markId);
-        json.put("deviceUuid", deviceUuid);
+        json.put("competitorId", competitorId != null ? competitorId.toString() : null);
+        json.put("boatId", boatId != null ? boatId.toString() : null);
+        json.put("markId", markId != null ? markId.toString() : null);
+        json.put("deviceUuid", deviceUuid != null ? deviceUuid.toString() : null);
         json.put("secret", secret);
         json.put("fromMillis", fromMillis);
 
@@ -44,13 +45,13 @@ public class LeaderboardApi {
         return result;
     }
 
-    public JSONObject deviceMappingsEnd(ApiContext ctx, String leaderboardName, String competitorId, String boatId,
-            String markId, String deviceUuid, String secret, Long fromMillis) {
+    public JSONObject deviceMappingsEnd(ApiContext ctx, String leaderboardName, UUID competitorId, UUID boatId,
+            UUID markId, UUID deviceUuid, String secret, Long fromMillis) {
         JSONObject json = new JSONObject();
-        json.put("competitorId", competitorId);
-        json.put("boatId", boatId);
-        json.put("markId", markId);
-        json.put("deviceUuid", deviceUuid);
+        json.put("competitorId", competitorId != null ? competitorId.toString() : null);
+        json.put("boatId", boatId != null ? boatId.toString() : null);
+        json.put("markId", markId != null ? markId.toString() : null);
+        json.put("deviceUuid", deviceUuid != null ? deviceUuid.toString() : null);
         json.put("secret", secret);
         json.put("toMillis", fromMillis);
 

@@ -14,6 +14,7 @@ import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.RegattaApi;
 import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
+import com.sap.sailing.selenium.api.event.RegattaApi.RaceColumn;
 import com.sap.sailing.selenium.api.event.RegattaApi.Regatta;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
@@ -101,7 +102,10 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         RegattaApi regattaApi = new RegattaApi();
 
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
-        @SuppressWarnings("unused") // TODO: check result
-        JSONArray result = regattaApi.addRaceColumn(ctx, EVENT_NAME, "T", 5);
+        RaceColumn[] result = regattaApi.addRaceColumn(ctx, EVENT_NAME, "T", 5);
+        assertEquals("read: racecolumn.seriesname is different", "Default", result[0].getSeriesName());
+        assertEquals("read: racecolumn.racename is different", "T1", result[0].getRaceName());
+        //assertEquals("read: racecolumn.seriesname is different", "Default", result[4].getSeriesName());
+        //assertEquals("read: racecolumn.racename is different", "T5", result[4].getRaceName());
     }
 }
