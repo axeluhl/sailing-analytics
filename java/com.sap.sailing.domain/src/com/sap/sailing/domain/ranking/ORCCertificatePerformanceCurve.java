@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,7 +14,6 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeFo
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -63,30 +61,11 @@ public class ORCCertificatePerformanceCurve implements Serializable {
      * column is a map from the true wind angle (here expressed as an object of type {@link Bearing}) and
      * the {@link Duration} the boat is assumed to need at that true wind speed/angle for one nautical mile.
      */
-    public ORCCertificatePerformanceCurve(Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt6kts,
-                                          Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt8kts,
-                                          Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt10kts,
-                                          Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt12kts,
-                                          Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt14kts,
-                                          Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt16kts,
-                                          Map<Bearing, Duration> durationsForOneNauticalMileForTrueWindAngleAt20kts) {
-        Map<Speed, Map<Bearing, Duration>> map = new HashMap<>();
-        map.put(new KnotSpeedImpl( 6), durationsForOneNauticalMileForTrueWindAngleAt6kts);
-        map.put(new KnotSpeedImpl( 8), durationsForOneNauticalMileForTrueWindAngleAt8kts);
-        map.put(new KnotSpeedImpl(10), durationsForOneNauticalMileForTrueWindAngleAt10kts);
-        map.put(new KnotSpeedImpl(12), durationsForOneNauticalMileForTrueWindAngleAt12kts);
-        map.put(new KnotSpeedImpl(14), durationsForOneNauticalMileForTrueWindAngleAt14kts);
-        map.put(new KnotSpeedImpl(16), durationsForOneNauticalMileForTrueWindAngleAt16kts);
-        map.put(new KnotSpeedImpl(20), durationsForOneNauticalMileForTrueWindAngleAt20kts);
+    public ORCCertificatePerformanceCurve(Map<Speed, Map<Bearing, Duration>> twaAllowances, Map<Speed, Bearing> beatAngles, Map<Speed, Bearing> gybeAngles) {
+        Map<Speed, Map<Bearing, Duration>> map = twaAllowances;
         durationPerNauticalMileAtTrueWindAngleAndSpeed = Collections.unmodifiableMap(map);
-        Map<Speed, Bearing> writeableBeatAngles = new HashMap<>();
-        Map<Speed, Bearing> writeableGybeAngles = new HashMap<>();
-        for (Entry<Speed, Map<Bearing, Duration>> e : durationPerNauticalMileAtTrueWindAngleAndSpeed.entrySet()) {
-            writeableBeatAngles.put(e.getKey(), e.getValue().keySet().stream().min(Comparator.comparingDouble((Bearing b) -> b.getDegrees())).get());
-            writeableGybeAngles.put(e.getKey(), e.getValue().keySet().stream().max(Comparator.comparingDouble((Bearing b) -> b.getDegrees())).get());
-        }
-        beatAngles = Collections.unmodifiableMap(writeableBeatAngles);
-        gybeAngles = Collections.unmodifiableMap(writeableGybeAngles);
+        this.beatAngles = Collections.unmodifiableMap(beatAngles);
+        this.gybeAngles = Collections.unmodifiableMap(gybeAngles);
         lagrangePolynomialsPerTrueWindSpeed = createLagrangePolynomials();
     }
     
@@ -96,7 +75,6 @@ public class ORCCertificatePerformanceCurve implements Serializable {
     }
 
     private Map<Speed, PolynomialFunctionLagrangeForm> createLagrangePolynomials() {
-        // TODO Interpolation should start with the Beat Angle, go over the fixed Values and end with the Downwind Angle
         Map<Speed, PolynomialFunctionLagrangeForm> writeableLagrange = new HashMap<>();
         for (Entry<Speed, Map<Bearing, Duration>> twsAndTwaToDuration : durationPerNauticalMileAtTrueWindAngleAndSpeed.entrySet()) {
             final int numberOfTrueWindAngles = twsAndTwaToDuration.getValue().size();

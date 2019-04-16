@@ -5,10 +5,9 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
@@ -35,5 +34,8 @@ public class TestORCCertificateImporterJSON {
         ORCCertificate swan = importer.getCertificate(" GER 5335");
         assertNotNull(swan);
         assertEquals("NAUTOR", swan.getValue("Builder"));
+        
+        ORCCertificate empty = importer.getCertificate("GBR 007");
+        //assertEquals(new HashMap<>());
     }
 }

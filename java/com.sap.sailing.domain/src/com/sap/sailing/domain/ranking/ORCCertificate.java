@@ -17,53 +17,57 @@ public class ORCCertificate {
     private Map<String, Number> scoring;
     private Map<String, Map<Speed, Duration>> twaCourses;
     private Map<String, Map<Speed, Duration>> predefinedCourses;
+    private Map<Speed, Bearing> beatAngles;
+    private Map<Speed, Bearing> gybeAngles;
     private ORCCertificatePerformanceCurve performanceCurve;
 
     public ORCCertificate(Map<String, String> general, Map<String, Number> hull, Map<String, Number> sails,
-        Map<String, Number> scoring, Map<String, Map<Speed, Duration>> twaCourses,
-        Map<String, Map<Speed, Duration>> predefinedCourses) {
+            Map<String, Number> scoring, Map<String, Map<Speed, Duration>> twaCourses,
+            Map<String, Map<Speed, Duration>> predefinedCourses, Map<Speed, Bearing> beatAngles,
+            Map<Speed, Bearing> gybeAngles) {
         this.general = general;
         this.hull = hull;
         this.sails = sails;
         this.scoring = scoring;
         this.twaCourses = twaCourses;
         this.predefinedCourses = predefinedCourses;
-        
+        this.beatAngles = beatAngles;
+        this.gybeAngles = gybeAngles;
+
         if ((String) getValue("C_Type") == "INTL") {
             initializePerformanceCurve();
         }
     }
 
     private void initializePerformanceCurve() {
-        Map<Speed, Map<Bearing, Duration>> PCAllowancesTws = new HashMap<>();
-        
-        PCAllowancesTws.put(new KnotSpeedImpl( 6), new HashMap<Bearing, Duration>());
-        PCAllowancesTws.put(new KnotSpeedImpl( 8), new HashMap<Bearing, Duration>());
-        PCAllowancesTws.put(new KnotSpeedImpl(10), new HashMap<Bearing, Duration>());
-        PCAllowancesTws.put(new KnotSpeedImpl(12), new HashMap<Bearing, Duration>());
-        PCAllowancesTws.put(new KnotSpeedImpl(14), new HashMap<Bearing, Duration>());
-        PCAllowancesTws.put(new KnotSpeedImpl(16), new HashMap<Bearing, Duration>());
-        PCAllowancesTws.put(new KnotSpeedImpl(20), new HashMap<Bearing, Duration>());
-        
+        Map<Speed, Map<Bearing, Duration>> map = new HashMap<>();
+
+        map.put(new KnotSpeedImpl( 6), new HashMap<Bearing, Duration>());
+        map.put(new KnotSpeedImpl( 8), new HashMap<Bearing, Duration>());
+        map.put(new KnotSpeedImpl(10), new HashMap<Bearing, Duration>());
+        map.put(new KnotSpeedImpl(12), new HashMap<Bearing, Duration>());
+        map.put(new KnotSpeedImpl(14), new HashMap<Bearing, Duration>());
+        map.put(new KnotSpeedImpl(16), new HashMap<Bearing, Duration>());
+        map.put(new KnotSpeedImpl(20), new HashMap<Bearing, Duration>());
+
         for (String keyTWA : twaCourses.keySet()) {
             int twa = Integer.parseInt(keyTWA.substring(1));
-            
+
             for (Speed keyTWS : twaCourses.get(keyTWA).keySet()) {
-                PCAllowancesTws.get(keyTWS).put(new DegreeBearingImpl(twa), twaCourses.get(keyTWA).get(keyTWS));
+                map.get(keyTWS).put(new DegreeBearingImpl(twa), twaCourses.get(keyTWA).get(keyTWS));
             }
-        };
-        
-        performanceCurve = new ORCCertificatePerformanceCurve(  PCAllowancesTws.get(new KnotSpeedImpl( 6)),
-                                                                PCAllowancesTws.get(new KnotSpeedImpl( 8)),
-                                                                PCAllowancesTws.get(new KnotSpeedImpl(10)),
-                                                                PCAllowancesTws.get(new KnotSpeedImpl(12)),
-                                                                PCAllowancesTws.get(new KnotSpeedImpl(14)),
-                                                                PCAllowancesTws.get(new KnotSpeedImpl(16)),
-                                                                PCAllowancesTws.get(new KnotSpeedImpl(20)));
-        
-        if (performanceCurve != null) {System.out.println("Everything fine!");} //TODO Bookmark for the next day.
-    } 
-    
+        }
+        ;
+
+        for (Speed tws : map.keySet()) {
+            map.get(tws).put(beatAngles.get(tws), predefinedCourses.get("Beat").get(tws));
+            map.get(tws).put(gybeAngles.get(tws), predefinedCourses.get("Gybe").get(tws));
+        }
+
+        performanceCurve = new ORCCertificatePerformanceCurve(map, beatAngles, gybeAngles);
+        performanceCurve.hashCode(); // Only to resolve "Warning"
+    }
+
     public String getValue(String key) {
         String result = null;
 
@@ -80,7 +84,6 @@ public class ORCCertificate {
         } else if (predefinedCourses.containsKey(key)) {
             result = predefinedCourses.get(key).toString();
         }
-        ;
 
         return result;
     }
