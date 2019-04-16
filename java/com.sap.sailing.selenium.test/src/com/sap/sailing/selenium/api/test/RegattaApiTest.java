@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.RegattaApi;
+import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
 import com.sap.sailing.selenium.api.event.RegattaApi.Regatta;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
@@ -72,14 +73,25 @@ public class RegattaApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testCreateAndAddCompetitor() {
+        String competitorName = "Max Mustermann";
+        String competitorNationality = "USA";
         ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
         EventApi eventApi = new EventApi();
         RegattaApi regattaApi = new RegattaApi();
 
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
-        JSONObject competitor = regattaApi.createAndAddCompetitor(ctx, EVENT_NAME, BOAT_CLASS, "test@de",
-                "Max Mustermann", "USA");
-        assertNotNull("competitor.id is missing", competitor.get("id"));
+        Competitor competitor = regattaApi.createAndAddCompetitor(ctx, EVENT_NAME, BOAT_CLASS, "test@de",
+                competitorName, competitorNationality);
+        System.out.println(competitor.getJson().toString());
+        assertNotNull("read: competitor.id is missing", competitor.getId());
+        assertEquals("read: competitor.name is different", competitorName, competitor.getName());
+        assertEquals("read: competitor.shortName is different", competitorName, competitor.getShortName());
+        assertEquals("read: competitor.nationality is different", competitorNationality, competitor.getNationality());
+        assertNotNull("read: competitor.team should not be emtpy", competitor.getTeam());
+        assertNotNull("read: competitor.boat should not be empty", competitor.getBoat());
+        assertNotNull("read: competitor.boat.boatClass should not be empty", competitor.getBoat().getBoatClass());
+        assertEquals("read: competitor.boat.boatClass.name is differnet", BOAT_CLASS,
+                competitor.getBoat().getBoatClass().getName());
     }
 
     @Test
