@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.ranking;
+package com.sap.sailing.domain.orc;
 
 import java.io.BufferedReader;
 import java.io.IOException;

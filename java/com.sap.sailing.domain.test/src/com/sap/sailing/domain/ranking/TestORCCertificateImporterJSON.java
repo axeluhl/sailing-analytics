@@ -12,6 +12,9 @@ import java.util.HashMap;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
+import com.sap.sailing.domain.orc.ORCCertificate;
+import com.sap.sailing.domain.orc.ORCCertificateImporterJSON;
+
 
 public class TestORCCertificateImporterJSON {
 

@@ -7,7 +7,8 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.ranking.ORCCertificateImporterRMS.ORCCertificateValues;
+import com.sap.sailing.domain.orc.ORCCertificateImporterRMS;
+import com.sap.sailing.domain.orc.ORCCertificateImporterRMS.ORCCertificateValues;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
