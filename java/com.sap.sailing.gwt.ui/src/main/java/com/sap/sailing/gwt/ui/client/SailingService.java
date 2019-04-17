@@ -163,7 +163,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     RegattaDTO getRegattaByName(String regattaName) throws UnauthorizedException;
 
-    List<EventDTO> getEvents() throws UnauthorizedException, Exception;
+    List<EventDTO> getEvents() throws Exception;
 
     List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws UnauthorizedException, Exception;
 
