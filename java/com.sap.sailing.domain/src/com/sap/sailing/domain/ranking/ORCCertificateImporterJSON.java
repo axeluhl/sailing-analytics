@@ -17,11 +17,31 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
+
+/**
+ * Represents a file in format {@code .json} which is a simple ASCII file format. The {@code .json} file contains an array of maps,
+ * each map representing one measurement certificate. The maps have the specific measurement values accessible with a 
+ * {@link String} for each boat.
+ * <p>
+ * 
+ * The result of successfully parsing a {@code .json} file is a map keyed by the sailing number,
+ * with values being equal-sized maps from the key names to the {@link String} values.
+ * 
+ * @author Daniel Lisunkin (i505543)
+ *
+ */
 public class ORCCertificateImporterJSON implements ORCCertificateImporter {
 
     private Map<String, Object> data;
     private final int[] twsDistances = new int[] { 6, 8, 10, 12, 14, 16, 20 };
 
+    /**
+     * Receives an InputStream from different possible sources (web, local file, ...) and does parse the {@code .json} file.
+     * 
+     * @param in
+     * @throws IOException
+     * @throws ParseException
+     */
     public ORCCertificateImporterJSON(InputStream in) throws IOException, ParseException {
         Map<String, Object> result = new HashMap<>();
 
@@ -42,6 +62,9 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         data = result;
     }
 
+    /**
+     * Returns an ORCCertificate object for a given {@link String} key. If there is no map value for the given key, the method returns {@link null}.
+     */
     @Override
     public ORCCertificate getCertificate(String sailnumber) {
 
