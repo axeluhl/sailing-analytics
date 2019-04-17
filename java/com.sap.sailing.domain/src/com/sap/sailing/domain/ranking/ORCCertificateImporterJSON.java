@@ -154,13 +154,13 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                     if (((String) aKey).equals("BeatAngle")) {
                         for (int i = 0; i < array.size(); i++) {
                             beatAngles.put(new KnotSpeedImpl(twsDistances[i]),
-                                    new DegreeBearingImpl((Double) array.get(i)));
+                                    new DegreeBearingImpl((double) array.get(i)));
                         }
                         break;
                     } else if (((String) aKey).equals("GybeAngle")) {
                         for (int i = 0; i < array.size(); i++) {
                             gybeAngles.put(new KnotSpeedImpl(twsDistances[i]),
-                                    new DegreeBearingImpl((Double) array.get(i)));
+                                    new DegreeBearingImpl((double) array.get(i)));
                         }
                         break;
                     }
@@ -168,7 +168,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                     Map<Speed, Duration> twsMap = new HashMap<>();
                     for (int i = 0; i < array.size(); i++) {
                         twsMap.put(new KnotSpeedImpl(twsDistances[i]),
-                                Duration.ONE_SECOND.times((Double) array.get(i)));
+                                Duration.ONE_SECOND.times((double) array.get(i)));
                     }
 
                     switch ((String) aKey) {
