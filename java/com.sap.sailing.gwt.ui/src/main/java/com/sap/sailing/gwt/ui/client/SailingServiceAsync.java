@@ -68,7 +68,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
@@ -449,8 +448,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             AsyncCallback<CompactBoatPositionsDTO> callback);
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
-
-    void getPublicEventsOfAllSailingServers(AsyncCallback<List<EventBaseDTO>> callback);
 
     /**
      * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />

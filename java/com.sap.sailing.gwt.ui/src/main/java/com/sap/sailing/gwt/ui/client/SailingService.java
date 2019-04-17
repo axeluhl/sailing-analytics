@@ -82,7 +82,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
@@ -164,8 +163,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     RegattaDTO getRegattaByName(String regattaName) throws UnauthorizedException;
 
     List<EventDTO> getEvents() throws Exception;
-
-    List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws UnauthorizedException, Exception;
 
     Util.Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL,
             boolean listHiddenRaces) throws UnauthorizedException, Exception;
