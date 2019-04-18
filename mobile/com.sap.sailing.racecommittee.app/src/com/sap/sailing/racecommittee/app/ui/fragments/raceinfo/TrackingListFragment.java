@@ -61,9 +61,11 @@ import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.ItemTouchH
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorGoalPassingComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorNameComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
+import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorShortNameComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
+import com.sap.sailing.racecommittee.app.ui.utils.CompetitorUtils;
 import com.sap.sailing.racecommittee.app.ui.views.SearchView;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -90,10 +92,11 @@ public class TrackingListFragment extends BaseFragment
     private static final int COMPETITOR_LOADER = 0;
     private static final int LEADERBOARD_ORDER_LOADER = 2;
 
-    private static final int SORT_SAIL_NUMBER = 0;
-    private static final int SORT_NAME = 1;
-    private static final int SORT_GOAL = 2;
-    private static final int SORT_START = 3;
+    private static final int SORT_SHORT_NAME = 0;
+    private static final int SORT_SAIL_NUMBER = 1;
+    private static final int SORT_NAME = 2;
+    private static final int SORT_GOAL = 3;
+    private static final int SORT_START = 4;
 
     private RecyclerView mFinishView;
     private FinishListAdapter mFinishedAdapter;
@@ -224,6 +227,7 @@ public class TrackingListFragment extends BaseFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mComparators = new ArrayList<>();
+        mComparators.add(SORT_SHORT_NAME, new CompetitorShortNameComparator());
         mComparators.add(SORT_SAIL_NUMBER, new CompetitorSailIdComparator());
         mComparators.add(SORT_NAME, new CompetitorNameComparator());
         mComparators.add(SORT_GOAL, new CompetitorGoalPassingComparator());
@@ -311,9 +315,7 @@ public class TrackingListFragment extends BaseFragment
         mConfirmedData.clear();
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
-                mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(),
-                        item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
-                        item.getComment(), item.getMergeState()));
+                mConfirmedData.add(new CompetitorResultImpl(item));
             }
         }
     }
@@ -377,6 +379,9 @@ public class TrackingListFragment extends BaseFragment
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
+        case R.id.by_short_name:
+            mComparator = mComparators.get(SORT_SHORT_NAME);
+            break;
         case R.id.by_name:
             mComparator = mComparators.get(SORT_NAME);
             break;
@@ -598,15 +603,12 @@ public class TrackingListFragment extends BaseFragment
                 context = actionBar.getThemedContext();
             }
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getContext(),
-                getRace().getState().getFinishingTime(), item, getFirstRankZeroPosition() +
-                /*
-                 * allow for setting rank as the new last in the list in case the competitor did not have a rank so far
-                 */
-                        (item.getOneBasedRank() == 0 ? 1 : 0),
-                false, item.getMergeState() == MergeState.ERROR);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+        builder.setTitle(CompetitorUtils.getDisplayName(item));
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState().getFinishingTime(), item,
+                mFinishedAdapter.getFirstRankZeroPosition() +
+                        /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
+                        (item.getOneBasedRank() == 0 ? 1 : 0), false, item.getMergeState() == MergeState.ERROR);
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -625,7 +627,7 @@ public class TrackingListFragment extends BaseFragment
             @Override
             public void onCancel(DialogInterface dialog) {
                 CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(),
-                        getBoat(item.getCompetitorId()), item.getCompetitorId(), item.getCompetitorDisplayName(),
+                        getBoat(item.getCompetitorId()), item.getCompetitorId(), item.getName(), item.getShortName(),
                         item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
                         item.getComment(), MergeState.OK);
                 updateItem(item, newItem);
@@ -643,30 +645,23 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private void moveCompetitorToFinishList(Competitor competitor) {
-        String name = "";
-        if (competitor.getShortInfo() != null) {
-            name += competitor.getShortInfo() + " - ";
-        }
-        name += competitor.getName();
         int pos = mFinishedAdapter.getFirstRankZeroPosition();
-        // FIXME mFinishedData.size()+1 also counts penalized competitors before which the competitor is to be inserted!
-        // I just wonder how the position shown in the app seems correct...
+        // FIXME mFinishedData.size()+1 also counts penalized competitors before which the competitor is to be inserted! I just wonder how the position shown in the app seems correct...
         int greatestOneBasedRankSoFar = 0;
         for (final CompetitorResultWithIdImpl result : mFinishedData) {
             if (result.getOneBasedRank() > greatestOneBasedRankSoFar) {
                 greatestOneBasedRankSoFar = result.getOneBasedRank();
             }
         }
-        mFinishedData.add(pos,
-                new CompetitorResultWithIdImpl(mId, getBoat(competitor.getId()), competitor.getId(), name,
-                        greatestOneBasedRankSoFar + 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null,
-                        /* comment */ null, MergeState.OK));
+        CompetitorResultWithIdImpl theCompetitor = new CompetitorResultWithIdImpl(mId, getBoat(competitor.getId()), competitor.getId(),
+                competitor.getName(), competitor.getShortName(), greatestOneBasedRankSoFar + 1, MaxPointsReason.NONE,
+                /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK);
+        mFinishedData.add(pos, theCompetitor);
         mId++;
         setPublishButton();
         mFinishedAdapter.notifyItemInserted(pos);
         if (mDots.size() > 0) {
-            Toast.makeText(getActivity(), getString(R.string.added_to_result_list, name, pos + 1), Toast.LENGTH_SHORT)
-                    .show();
+            Toast.makeText(getActivity(), getString(R.string.added_to_result_list, CompetitorUtils.getDisplayName(theCompetitor), pos + 1), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -707,19 +702,16 @@ public class TrackingListFragment extends BaseFragment
      */
     public boolean onItemMove(int fromPosition, int toPosition) {
         final int firstPositionChanged = Math.min(getFirstRankZeroPosition(), Math.min(fromPosition, toPosition));
-        final int lastPositionChanged = Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition) + 1);
+        final int lastPositionChanged = Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition));
         adjustRanks(firstPositionChanged, lastPositionChanged);
-        mFinishedAdapter.notifyItemChanged(fromPosition);
-        mFinishedAdapter.notifyItemChanged(toPosition);
+        mFinishedAdapter.notifyItemRangeChanged(firstPositionChanged, lastPositionChanged - firstPositionChanged + 1);
         setPublishButton();
         return true;
     }
 
     public void onItemRemove(int position, CompetitorResultWithIdImpl item) {
-        if (position < 0) { // not found
-            return;
-        }
-        adjustRanks(position, getFirstRankZeroPosition());
+        adjustRanks(position, getFirstRankZeroPosition() - 1);
+        mFinishedAdapter.notifyItemRangeChanged(position, getFirstRankZeroPosition() - position);
         setPublishButton();
         for (Map.Entry<Competitor, Boat> entry : getRace().getCompetitorsAndBoats().entrySet()) {
             if (entry.getKey().getId().equals(item.getCompetitorId())) {
@@ -737,11 +729,11 @@ public class TrackingListFragment extends BaseFragment
      * @param fromPosition
      *            inclusive start index into {@link #mFinishedData} where to start updating the ranks
      * @param toPosition
-     *            exclusive end index into {@link #mFinishedData} where to stop updating the ranks; must not be -1
+     *            inclusive end index into {@link #mFinishedData} where to stop updating the ranks; must not be -1
      */
     private void adjustRanks(int fromPosition, int toPosition) {
         final int end = Math.min(toPosition, getFirstRankZeroPosition());
-        for (int i = fromPosition; i < end; i++) {
+        for (int i = fromPosition; i <= end; i++) {
             CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition = mFinishedData.get(i);
             final int newOneBasedRank = i + 1;
             mFinishedData.set(i,
@@ -749,16 +741,13 @@ public class TrackingListFragment extends BaseFragment
         }
     }
 
-    private CompetitorResultWithIdImpl cloneCompetitorResultAndAdjustRank(
-            CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition, final int newOneBasedRank) {
-        return new CompetitorResultWithIdImpl(competitorToReplaceWithAdjustedPosition.getId(),
-                getBoat(competitorToReplaceWithAdjustedPosition.getCompetitorId()),
-                competitorToReplaceWithAdjustedPosition.getCompetitorId(),
-                competitorToReplaceWithAdjustedPosition.getCompetitorDisplayName(), newOneBasedRank,
-                competitorToReplaceWithAdjustedPosition.getMaxPointsReason(),
-                competitorToReplaceWithAdjustedPosition.getScore(),
-                competitorToReplaceWithAdjustedPosition.getFinishingTime(),
-                competitorToReplaceWithAdjustedPosition.getComment(), MergeState.OK);
+    private CompetitorResultWithIdImpl cloneCompetitorResultAndAdjustRank(CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition,
+        final int newOneBasedRank) {
+        return new CompetitorResultWithIdImpl(competitorToReplaceWithAdjustedPosition.getId(), getBoat(competitorToReplaceWithAdjustedPosition
+            .getCompetitorId()), competitorToReplaceWithAdjustedPosition.getCompetitorId(), competitorToReplaceWithAdjustedPosition
+            .getName(), competitorToReplaceWithAdjustedPosition.getShortName(), newOneBasedRank, competitorToReplaceWithAdjustedPosition
+            .getMaxPointsReason(), competitorToReplaceWithAdjustedPosition.getScore(), competitorToReplaceWithAdjustedPosition
+            .getFinishingTime(), competitorToReplaceWithAdjustedPosition.getComment(), MergeState.OK);
     }
 
     public void onLongClick(final CompetitorResultWithIdImpl item) {
@@ -802,13 +791,12 @@ public class TrackingListFragment extends BaseFragment
                 && newItem.getMaxPointsReason() != MaxPointsReason.NONE) {
             // move to the end of the area of "penalized" competitors; may also be an unpenalized competitor that hasn't
             // been removed yet (e.g., in order to force a score correction reset on the server)
-            onItemMove(index, mFinishedData.size() - 1); // -1 because first the element is removed, so when inserting
-                                                         // the list is one element shorter
+            mFinishedAdapter.onItemMove(index, mFinishedData.size() - 1); // -1 because first the element is removed, so when inserting
+                                                                          // the list is one element shorter
         } else if (item.getOneBasedRank() != newItem.getOneBasedRank() && newItem.getOneBasedRank() != 0) {
-            onItemMove(index, newItem.getOneBasedRank() - 1);
-            mFinishedAdapter.notifyItemChanged(index);
+            mFinishedAdapter.onItemMove(index, newItem.getOneBasedRank() - 1);
         } else if (newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() == MaxPointsReason.NONE) {
-            onItemRemove(index, item);
+            mFinishedAdapter.onItemRemove(index);
         } else {
             mFinishedAdapter.notifyItemChanged(index);
         }
@@ -825,10 +813,7 @@ public class TrackingListFragment extends BaseFragment
 
     protected void setMaxPointsReasonForItem(CompetitorResultWithIdImpl item, CharSequence maxPointsReasonName) {
         MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName.toString());
-        CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(),
-                getBoat(item.getCompetitorId()), item.getCompetitorId(), item.getCompetitorDisplayName(),
-                item.getOneBasedRank(), maxPointsReason, item.getScore(), item.getFinishingTime(), item.getComment(),
-                item.getMergeState());
+        CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(), getBoat(item.getCompetitorId()), item);
         updateItem(item, newItem);
         getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
     }
@@ -836,9 +821,7 @@ public class TrackingListFragment extends BaseFragment
     private CompetitorResults getCompetitorResults() {
         CompetitorResults result = new CompetitorResultsImpl();
         for (CompetitorResultWithIdImpl item : mFinishedData) {
-            result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(),
-                    item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(), item.getFinishingTime(),
-                    item.getComment(), item.getMergeState()));
+            result.add(new CompetitorResultImpl(item));
         }
         return result;
     }
@@ -851,10 +834,7 @@ public class TrackingListFragment extends BaseFragment
             boolean found = false;
             for (CompetitorResult newItem : mFinishedData) {
                 if (oldItem.getCompetitorId().equals(newItem.getCompetitorId())) {
-                    CompetitorResult temp = new CompetitorResultImpl(newItem.getCompetitorId(),
-                            newItem.getCompetitorDisplayName(), newItem.getOneBasedRank(), newItem.getMaxPointsReason(),
-                            newItem.getScore(), newItem.getFinishingTime(), newItem.getComment(),
-                            newItem.getMergeState());
+                    CompetitorResult temp = new CompetitorResultImpl(newItem);
                     if (!oldItem.equals(temp)) {
                         result.add(temp);
                     }
@@ -863,9 +843,7 @@ public class TrackingListFragment extends BaseFragment
                 }
             }
             if (!found) {
-                result.add(new CompetitorResultImpl(oldItem.getCompetitorId(), oldItem.getCompetitorDisplayName(), 0,
-                        oldItem.getMaxPointsReason(), oldItem.getScore(), oldItem.getFinishingTime(),
-                        oldItem.getComment(), oldItem.getMergeState()));
+                result.add(new CompetitorResultImpl(oldItem, 0));
             }
         }
 
@@ -879,9 +857,7 @@ public class TrackingListFragment extends BaseFragment
                 }
             }
             if (!found) {
-                result.add(new CompetitorResultImpl(newItem.getCompetitorId(), newItem.getCompetitorDisplayName(),
-                        newItem.getOneBasedRank(), newItem.getMaxPointsReason(), newItem.getScore(),
-                        newItem.getFinishingTime(), newItem.getComment(), newItem.getMergeState()));
+                result.add(new CompetitorResultImpl(newItem));
             }
         }
 
@@ -1005,9 +981,9 @@ public class TrackingListFragment extends BaseFragment
                     } else {
                         state = MergeState.ERROR;
                     }
-                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(),
-                            item.getCompetitorDisplayName(), result.getOneBasedRank(), item.getMaxPointsReason(),
-                            item.getScore(), item.getFinishingTime(), item.getComment(), getMergeState(item, state));
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(), item.getName(),
+                            item.getShortName(), result.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(),
+                            item.getFinishingTime(), item.getComment(), getMergeState(item, state));
                     item = updateChangedItem(changedCompetitor, item, newItem);
                 }
 
@@ -1022,9 +998,9 @@ public class TrackingListFragment extends BaseFragment
                     } else {
                         state = MergeState.ERROR;
                     }
-                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(),
-                            item.getCompetitorDisplayName(), item.getOneBasedRank(), result.getMaxPointsReason(),
-                            item.getScore(), item.getFinishingTime(), item.getComment(), getMergeState(item, state));
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(), item.getName(),
+                            item.getShortName(), item.getOneBasedRank(), result.getMaxPointsReason(), item.getScore(),
+                            item.getFinishingTime(), item.getComment(), getMergeState(item, state));
                     item = updateChangedItem(changedCompetitor, item, newItem);
                 }
 
@@ -1041,16 +1017,15 @@ public class TrackingListFragment extends BaseFragment
                             state = MergeState.ERROR;
                         }
                         newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(),
-                                item.getCompetitorDisplayName(), item.getOneBasedRank(), item.getMaxPointsReason(),
+                                item.getName(), item.getShortName(), item.getOneBasedRank(), item.getMaxPointsReason(),
                                 result.getScore(), item.getFinishingTime(), item.getComment(),
                                 getMergeState(item, state));
                         item = updateChangedItem(changedCompetitor, item, newItem);
                     }
                 } else if (result.getScore() != null) {
-                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(),
-                            item.getCompetitorDisplayName(), item.getOneBasedRank(), item.getMaxPointsReason(),
-                            result.getScore(), item.getFinishingTime(), item.getComment(),
-                            getMergeState(item, MergeState.ERROR));
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(), item.getName(),
+                            item.getShortName(), item.getOneBasedRank(), item.getMaxPointsReason(), result.getScore(),
+                            item.getFinishingTime(), item.getComment(), getMergeState(item, MergeState.ERROR));
                     item = updateChangedItem(changedCompetitor, item, newItem);
                 }
 
@@ -1067,16 +1042,15 @@ public class TrackingListFragment extends BaseFragment
                             state = MergeState.ERROR;
                         }
                         newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(),
-                                item.getCompetitorDisplayName(), item.getOneBasedRank(), item.getMaxPointsReason(),
+                                item.getName(), item.getShortName(), item.getOneBasedRank(), item.getMaxPointsReason(),
                                 item.getScore(), result.getFinishingTime(), item.getComment(),
                                 getMergeState(item, state));
                         item = updateChangedItem(changedCompetitor, item, newItem);
                     }
                 } else if (result.getFinishingTime() != null) {
-                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(),
-                            item.getCompetitorDisplayName(), item.getOneBasedRank(), item.getMaxPointsReason(),
-                            item.getScore(), result.getFinishingTime(), item.getComment(),
-                            getMergeState(item, MergeState.ERROR));
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(), item.getName(),
+                            item.getShortName(), item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(),
+                            result.getFinishingTime(), item.getComment(), getMergeState(item, MergeState.ERROR));
                     item = updateChangedItem(changedCompetitor, item, newItem);
                 }
 
@@ -1093,25 +1067,23 @@ public class TrackingListFragment extends BaseFragment
                             state = MergeState.ERROR;
                         }
                         newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(),
-                                item.getCompetitorDisplayName(), item.getOneBasedRank(), item.getMaxPointsReason(),
+                                item.getName(), item.getShortName(), item.getOneBasedRank(), item.getMaxPointsReason(),
                                 item.getScore(), item.getFinishingTime(),
                                 item.getComment() + " ## " + result.getComment(), getMergeState(item, state));
                         item = updateChangedItem(changedCompetitor, item, newItem);
                     }
                 } else if (result.getComment() != null) {
-                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(),
-                            item.getCompetitorDisplayName(), item.getOneBasedRank(), item.getMaxPointsReason(),
-                            item.getScore(), item.getFinishingTime(), result.getComment(),
-                            getMergeState(item, MergeState.ERROR));
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(), item.getName(),
+                            item.getShortName(), item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(),
+                            item.getFinishingTime(), result.getComment(), getMergeState(item, MergeState.ERROR));
                     item = updateChangedItem(changedCompetitor, item, newItem);
                 }
 
                 // check merge state
                 if (!item.getMergeState().equals(result.getMergeState())) {
-                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(),
-                            item.getCompetitorDisplayName(), item.getOneBasedRank(), item.getMaxPointsReason(),
-                            item.getScore(), item.getFinishingTime(), item.getComment(),
-                            getMergeState(item, result.getMergeState()));
+                    newItem = new CompetitorResultWithIdImpl(item.getId(), boat, item.getCompetitorId(), item.getName(),
+                            item.getShortName(), item.getOneBasedRank(), item.getMaxPointsReason(), item.getScore(),
+                            item.getFinishingTime(), item.getComment(), getMergeState(item, result.getMergeState()));
                     item = updateChangedItem(changedCompetitor, item, newItem);
                 }
             } else { // unknown result, so it will be added
@@ -1151,7 +1123,7 @@ public class TrackingListFragment extends BaseFragment
     private CompetitorResultWithIdImpl updateChangedItem(Map<Serializable, String> changedCompetitor,
             CompetitorResultWithIdImpl item, CompetitorResultWithIdImpl newItem) {
         updateItem(item, newItem);
-        changedCompetitor.put(newItem.getCompetitorId(), newItem.getCompetitorDisplayName());
+        changedCompetitor.put(newItem.getCompetitorId(), CompetitorUtils.getDisplayName(newItem));
         return newItem;
     }
 
