@@ -523,7 +523,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             if (result.canBoatsOfCompetitorsChangePerRace == false && !row.fieldsByRaceColumnName.isEmpty()) {
                 // find a raceColumn where a boat is available
                 for (LeaderboardEntryDTO leaderboardEntry : row.fieldsByRaceColumnName.values()) {
-                    if (leaderboardEntry.boat != null) {
+                    if (leaderboardEntry != null && leaderboardEntry.boat != null) {
                         row.boat = leaderboardEntry.boat;
                         break;
                     }
@@ -541,7 +541,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         for (RaceColumn raceColumn : getRaceColumns()) {
             // reuse calculations already done earlier
             LeaderboardEntryDTO entry = row.fieldsByRaceColumnName.get(raceColumn.getName());
-            if (entry.netPoints != null) {
+            if (entry != null && entry.netPoints != null) {
                 if (entry.reasonForMaxPoints.equals(MaxPointsReason.NONE)
                         || !Util.contains(Arrays.asList(MAX_POINTS_REASONS_THAT_IDENTIFY_NON_FINISHED_RACES),
                                 entry.reasonForMaxPoints)) {
