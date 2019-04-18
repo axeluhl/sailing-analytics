@@ -9,6 +9,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.BaseDraggableSwipeAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.dragandswipelist.BaseDraggableSwipeViewHolder;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
+import com.sap.sailing.racecommittee.app.ui.utils.CompetitorUtils;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import android.content.Context;
@@ -90,7 +91,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
                 ViewHelper.setColors(holder.vesselId, item.getBoat().getColor().getAsHtml());
             }
         }
-        holder.competitor.setText(item.getCompetitorDisplayName());
+        holder.competitor.setText(CompetitorUtils.getDisplayName(item));
         Drawable warning;
         switch (item.getMergeState()) {
         case ERROR:

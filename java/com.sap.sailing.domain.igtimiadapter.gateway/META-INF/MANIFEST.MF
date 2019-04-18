@@ -20,7 +20,12 @@ Require-Bundle: org.json.simple;bundle-version="1.1.0",
  com.sap.sse.security,
  com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0",
  com.sap.sse.security.common,
- com.sap.sailing.domain.igtimiadapter
+ com.sap.sailing.domain.igtimiadapter,
+ com.sap.sse.security,
+ com.sap.sse.security.common,
+ com.sap.sse.security.interface,
+ org.apache.shiro.core,
+ org.apache.shiro.web
 Import-Package: com.sap.sse.security.shared,
  javax.ws.rs;version="1.1.1",
  javax.ws.rs.core;version="1.1.1",

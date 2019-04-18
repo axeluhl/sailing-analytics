@@ -74,8 +74,6 @@ public interface TracTracAdapter {
      *            described above will be created and used.
      * @param offsetToStartTimeOfSimulatedRace
      *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
-     * @param trackWind TODO
-     * @param correctWindDirectionByMagneticDeclination TODO
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
@@ -103,7 +101,8 @@ public interface TracTracAdapter {
 
     RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws Exception;
 
-    TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI,
+    TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
+            String liveDataURI,
             String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
 
 }

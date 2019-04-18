@@ -518,6 +518,7 @@
     <string name="non_public_changed_title">Nicht öffentliche Events</string>
     <string name="competitor_list">Teilnehmerliste</string>
     <string name="sort_by_boat">nach Segelnummer</string>
+    <string name="sort_by_short_name">nach Kurzname</string>
     <string name="sort_by_name">nach Namen</string>
     <string name="sort_by_start">nach Abstand zur Startlinie</string>
     <string name="sort_by_goal">nach getracktem Zieldurchgang</string>

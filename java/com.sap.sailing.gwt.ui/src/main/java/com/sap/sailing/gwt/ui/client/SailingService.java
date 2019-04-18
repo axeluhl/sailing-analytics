@@ -82,7 +82,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
@@ -110,12 +109,12 @@ import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
-import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
@@ -148,7 +147,14 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  * service methods, an empty (non-<code>null</code>) result is returned.
  */
 public interface SailingService extends RemoteService, FileStorageManagementGwtService, RemoteReplicationService {
-    List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws UnauthorizedException, Exception;
+    List<TracTracConfigurationWithSecurityDTO> getPreviousTracTracConfigurations()
+            throws UnauthorizedException, Exception;
+
+    void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
+            throws UnauthorizedException, Exception;
+
+    void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration)
+            throws UnauthorizedException, Exception;
 
     List<RegattaDTO> getRegattas() throws UnauthorizedException;
 
@@ -156,9 +162,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     RegattaDTO getRegattaByName(String regattaName) throws UnauthorizedException;
 
-    List<EventDTO> getEvents() throws UnauthorizedException, Exception;
-
-    List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws UnauthorizedException, Exception;
+    List<EventDTO> getEvents() throws Exception;
 
     Util.Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL,
             boolean listHiddenRaces) throws UnauthorizedException, Exception;
@@ -176,7 +180,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm)
             throws UnauthorizedException;
 
-    void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
+    void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword)
             throws UnauthorizedException, Exception;
 
@@ -364,12 +368,18 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace) throws UnauthorizedException;
 
-    List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations() throws UnauthorizedException;
+    List<SwissTimingConfigurationWithSecurityDTO> getPreviousSwissTimingConfigurations() throws UnauthorizedException;
 
     SwissTimingEventRecordDTO getRacesOfSwissTimingEvent(String eventJsonURL) throws UnauthorizedException, Exception;
 
-    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
+    void createSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             String updateURL, String updateUsername, String updatePassword) throws UnauthorizedException, Exception;
+
+    void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration)
+            throws UnauthorizedException, Exception;
+
+    void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration)
+            throws UnauthorizedException, Exception;
 
     String[] getCountryCodes() throws UnauthorizedException;
 
@@ -505,9 +515,16 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<String> getOverallLeaderboardNamesContaining(String leaderboardName) throws UnauthorizedException;
 
-    List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations() throws UnauthorizedException;
+    List<SwissTimingArchiveConfigurationWithSecurityDTO> getPreviousSwissTimingArchiveConfigurations() throws UnauthorizedException;
 
-    void storeSwissTimingArchiveConfiguration(String swissTimingUrl) throws UnauthorizedException, Exception;
+    void createSwissTimingArchiveConfiguration(String jsonUrl)
+            throws UnauthorizedException, Exception;
+
+    void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+            throws UnauthorizedException, Exception;
+
+    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto)
+            throws UnauthorizedException, Exception;
 
     void createCourseAreas(UUID eventId, String[] courseAreaNames) throws UnauthorizedException;
 
@@ -1125,8 +1142,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     String openRegattaRegistrationQrCode(String url) throws UnauthorizedException;
 
-    void setDefaultTenantForCurrentServer(String tennant) throws UnauthorizedException;
-
     List<String> getPossibleTennants() throws UnauthorizedException;
 
     void updateGroupOwnerForEventHierarchy(UUID eventId,
@@ -1159,4 +1174,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     CompetitorDTO getCompetitor(UUID competitorId, String leaderboardName,
             String regattaRegistrationLinkSecret);
+
+    boolean existsSwissTimingConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException;
+
+    boolean existsSwissTimingArchiveConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException;
+
+    boolean existsTracTracConfigurationForCurrentUser(String jsonUrl) throws Exception, UnauthorizedException;
 }

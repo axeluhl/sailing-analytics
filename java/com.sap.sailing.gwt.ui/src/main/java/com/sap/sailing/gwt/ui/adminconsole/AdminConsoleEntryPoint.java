@@ -291,22 +291,28 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
         /* CONNECTORS */
         final HorizontalTabLayoutPanel connectorsTabPanel = panel.addVerticalTab(getStringMessages().connectors(), "TrackingProviderPanel");
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
-                getSailingService(), getUserService(), this, this, getStringMessages());
+                getSailingService(), getUserService(), this, this, getStringMessages(), tableResources);
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
-        panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tractracEventManagementPanel),
+        panel.addToTabPanel(connectorsTabPanel,
+                new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tractracEventManagementPanel) {
+                    @Override
+                    public void refreshAfterBecomingVisible() {
+                        tractracEventManagementPanel.refreshTracTracConnectors();
+                    }
+                },
                 getStringMessages().tracTracEvents(),
                 SecuredDomainType.TRACTRAC_ACCOUNT.getPermission(DefaultActions.values()));
         regattasDisplayers.add(tractracEventManagementPanel);
         
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(
-                getSailingService(), getUserService(), this, this, getStringMessages());
+                getSailingService(), getUserService(), this, this, getStringMessages(), tableResources);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingReplayConnectorPanel>(swissTimingReplayConnectorPanel),
                 getStringMessages().swissTimingArchiveConnector(),
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getPermission(DefaultActions.values()));
         regattasDisplayers.add(swissTimingReplayConnectorPanel);
 
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(
-                getSailingService(), getUserService(), this, this, getStringMessages());
+                getSailingService(), getUserService(), this, this, getStringMessages(), tableResources);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingEventManagementPanel>(swisstimingEventManagementPanel),
                 getStringMessages().swissTimingEvents(),
                 SecuredDomainType.SWISS_TIMING_ACCOUNT.getPermission(DefaultActions.values()));

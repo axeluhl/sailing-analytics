@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.shiro.authz.AuthorizationException;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -66,7 +68,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
@@ -95,12 +96,12 @@ import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
-import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
-import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
@@ -181,10 +182,16 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
             AsyncCallback<Void> asyncCallback);
 
-    void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDTO>> callback);
+    void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationWithSecurityDTO>> callback);
 
-    void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
+    void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
+
+    void deleteTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
+            AsyncCallback<Void> callback);
+
+    void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
+            AsyncCallback<Void> callback);
 
     void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking, AsyncCallback<Void> asyncCallback);
 
@@ -357,12 +364,18 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs,
             AsyncCallback<Void> callback);
 
-    void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationDTO>> asyncCallback);
+    void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationWithSecurityDTO>> asyncCallback);
 
     void getRacesOfSwissTimingEvent(String eventJsonUrl, AsyncCallback<SwissTimingEventRecordDTO> asyncCallback);
 
-    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
+    void createSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             String updateURL, String updateUsername, String updatePassword, AsyncCallback<Void> asyncCallback);
+
+    void updateSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
+            AsyncCallback<Void> asyncCallback);
+
+    void deleteSwissTimingConfiguration(SwissTimingConfigurationWithSecurityDTO configuration,
+            AsyncCallback<Void> asyncCallback);
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
@@ -435,8 +448,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
             AsyncCallback<CompactBoatPositionsDTO> callback);
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
-
-    void getPublicEventsOfAllSailingServers(AsyncCallback<List<EventBaseDTO>> callback);
 
     /**
      * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
@@ -572,9 +583,16 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getOverallLeaderboardNamesContaining(String leaderboardName, AsyncCallback<List<String>> asyncCallback);
 
     void getPreviousSwissTimingArchiveConfigurations(
-            AsyncCallback<List<SwissTimingArchiveConfigurationDTO>> asyncCallback);
+            AsyncCallback<List<SwissTimingArchiveConfigurationWithSecurityDTO>> asyncCallback);
 
-    void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
+    void createSwissTimingArchiveConfiguration(String jsonUrl,
+            AsyncCallback<Void> asyncCallback);
+
+    void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
+            AsyncCallback<Void> asyncCallback);
+
+    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfigurationWithSecurityDTO dto,
+            AsyncCallback<Void> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths,
@@ -1022,6 +1040,13 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getAvailableDetailTypesForLeaderboard(String leaderboardName, RegattaAndRaceIdentifier raceOrNull,
             AsyncCallback<Iterable<DetailType>> asyncCallback);
 
+    /**
+     * Checks whether the user may cut the race identified by {@code radeIdentifier} into multiple races. For this, it
+     * has to be found and it has to be a "smartphone-tracked" race with a valid start-of-tracking time. If not,
+     * {@code false} will be returned. If the user it not <em>permitted</em> to slice the race, e.g., because no
+     * permission has been granted to modify the leaderboard or regatta, an {@link AuthorizationException} will be
+     * thrown.
+     */
     void canSliceRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> callback);
 
     void sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName, TimePoint sliceFrom, TimePoint sliceTo,
@@ -1061,13 +1086,6 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void openRegattaRegistrationQrCode(String url, AsyncCallback<String> asyncCallback);
 
     /**
-     * Sets the tenant that is used for CREATE operations done on this server
-     * 
-     * @param tennant
-     */
-    void setDefaultTenantForCurrentServer(String tennant, AsyncCallback<Void> asyncCallback);
-
-    /**
      * gets a (possibly imcomplete) list of available tennants to choose from.
      */
     void getPossibleTennants(AsyncCallback<List<String>> asyncCallback);
@@ -1105,4 +1123,10 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
      */
     void getCompetitor(UUID competitorId, String leaderboardName, String regattaRegistrationLinkSecret,
             AsyncCallback<CompetitorDTO> asyncCallback);
+
+    void existsSwissTimingConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
+
+    void existsSwissTimingArchiveConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
+
+    void existsTracTracConfigurationForCurrentUser(String jsonUrl, AsyncCallback<Boolean> callback);
 }

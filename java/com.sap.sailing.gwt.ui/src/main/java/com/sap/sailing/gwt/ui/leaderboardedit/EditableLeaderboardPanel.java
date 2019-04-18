@@ -43,6 +43,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -133,12 +134,23 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
             super(new TextCell(), SortingOrder.ASCENDING, EditableLeaderboardPanel.this);
         }
 
+        /**
+         * Depending on the {@link LeaderboardDTO LeaderboardDTO's}
+         * {@link AbstractLeaderboardDTO#canBoatsOfCompetitorsChangePerRace canBoatsOfCompetitorsChangePerRace} flag
+         * there is a different precedence of showing either the sail ID (no changing boats) or the competitor short
+         * name (changing boats). This method handles the resolution of the text to show for a competitor in this column.
+         */
+        private String getRealTextToShow(CompetitorDTO competitor) {
+            boolean preferSailId = !getLeaderboard().canBoatsOfCompetitorsChangePerRace;
+            return competitor.getShortInfo(preferSailId);
+        }
+
         @Override
         public InvertibleComparator<CompetitorDTO> getComparator() {
             return new InvertibleComparatorAdapter<CompetitorDTO>() {
                 @Override
                 public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                    return Collator.getInstance().compare(o1.getShortInfo(), o2.getShortInfo());
+                    return Collator.getInstance().compare(getRealTextToShow(o1), getRealTextToShow(o2));
                 }
             };
         }
@@ -161,7 +173,7 @@ public class EditableLeaderboardPanel extends MultiRaceLeaderboardPanel {
                 sb.append(FlagImageRenderer.image(flagImageResource.getSafeUri().asString()));
                 sb.appendHtmlConstant("&nbsp;");
             }
-            sb.appendEscaped(object.getShortInfo());
+            sb.appendEscaped(getRealTextToShow(object));
         }
 
         @Override

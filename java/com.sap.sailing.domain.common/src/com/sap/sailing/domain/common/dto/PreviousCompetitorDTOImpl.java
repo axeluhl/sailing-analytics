@@ -59,6 +59,12 @@ public class PreviousCompetitorDTOImpl extends NamedSecuredObjectDTO implements 
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
     }
+    
+    @Override
+    public String getShortInfo(boolean preferSailId) {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
+    }
 
     @Override
     public String getTwoLetterIsoCountryCode() {

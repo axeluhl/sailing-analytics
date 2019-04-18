@@ -160,6 +160,11 @@ public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements Competit
 
     @Override
     public String getShortInfo() {
+        return getShortInfo(false);
+    }
+    
+    @Override
+    public String getShortInfo(boolean preferSailId) {
         final String result;
         if (getShortName() != null && !getShortName().trim().isEmpty()) {
             result = getShortName(); 
@@ -169,9 +174,9 @@ public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements Competit
                 result = null;
             } else {
                 result = (trimmedName.length()>0?""+trimmedName.charAt(0):"")
-                    + (trimmedName.length()>1?trimmedName.charAt(1):"")
-                    + (trimmedName.length()>0?trimmedName.charAt(trimmedName.length()-1):"");
-                        
+                        + (trimmedName.length()>1?trimmedName.charAt(1):"")
+                        + (trimmedName.length()>0?trimmedName.charAt(trimmedName.length()-1):"");
+                
             }
         }
         return result;

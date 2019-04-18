@@ -10,6 +10,8 @@ public interface SwissTimingArchiveConfiguration extends WithQualifiedObjectIden
 
     String getJsonURL();
 
+    String getCreatorName();
+
     @Override
     default String getName() {
         return getJsonURL();
@@ -26,10 +28,11 @@ public interface SwissTimingArchiveConfiguration extends WithQualifiedObjectIden
     }
 
     default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return getTypeRelativeObjectIdentifier(getJsonURL());
+        return getTypeRelativeObjectIdentifier(getJsonURL(), getCreatorName());
     }
 
-    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl) {
-        return new TypeRelativeObjectIdentifier(jsonUrl);
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(String jsonUrl, String username) {
+        return username == null ? new TypeRelativeObjectIdentifier(jsonUrl)
+                : new TypeRelativeObjectIdentifier(jsonUrl, username);
     }
 }

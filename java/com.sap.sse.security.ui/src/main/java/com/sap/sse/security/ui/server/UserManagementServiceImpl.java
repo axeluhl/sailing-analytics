@@ -194,9 +194,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public OwnershipDTO setOwnership(String username, UUID userGroupId,
-            QualifiedObjectIdentifier idOfOwnedObject,
-            String displayNameOfOwnedObject) {
+    public OwnershipDTO setOwnership(final String username, final UUID userGroupId,
+            final QualifiedObjectIdentifier idOfOwnedObject, final String displayNameOfOwnedObject) {
 
         SecurityUtils.getSubject()
                 .checkPermission(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
@@ -205,7 +204,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         // no security check if current user can see the user associated with the given username
 
         final Ownership result = getSecurityService().setOwnership(idOfOwnedObject, user,
-                getSecurityService().getUserGroup(userGroupId));
+                getSecurityService().getUserGroup(userGroupId), displayNameOfOwnedObject);
         return securityDTOFactory.createOwnershipDTO(result, new HashMap<>(), new HashMap<>());
     }
 
