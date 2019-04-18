@@ -14,6 +14,7 @@ import com.sap.sailing.selenium.api.event.GPSFixApi.GpsFixResponse;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.RegattaApi;
 import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
+import com.sap.sailing.selenium.api.event.RegattaApi.RaceColumn;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -52,8 +53,8 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         Event event = eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS,
                 CompetitorRegistrationType.OPEN_UNMODERATED, "Duckburg Harbour");
         String registrationLinkSecret = event.getSecret();
-        regattaApi.addRaceColumn(ownerCtx, EVENT_NAME, null, 1);
-        
+        RaceColumn race = regattaApi.addRaceColumn(ownerCtx, EVENT_NAME, null, 1)[0];
+
         Competitor competitor1 = regattaApi.createAndAddCompetitorWithSecret(ownerCtx, EVENT_NAME, BOAT_CLASS,
                 /* email */ null, "Donald Duck", "USA", registrationLinkSecret, deviceUuidCompetitor1);
         Competitor competitor2 = regattaApi.createAndAddCompetitorWithSecret(sailorCtx, EVENT_NAME, BOAT_CLASS,
@@ -65,16 +66,25 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         leaderboardApi.deviceMappingsStart(sailorCtx, EVENT_NAME, competitor2.getId(), competitor2.getBoat().getId(),
                 /* markId */ null, deviceUuidCompetitor2, registrationLinkSecret, System.currentTimeMillis());
 
+        leaderboardApi.setTrackingTimes(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", System.currentTimeMillis(),
+                null);
+        leaderboardApi.startRaceLogTracking(ownerCtx, EVENT_NAME, race.getRaceName(), "Default");
+
         for (double i = 0.0; i < 100.0; i++) {
             GpsFixResponse fix;
-            fix = gpsFixApi.postGpsFix(ownerCtx, deviceUuidCompetitor1,
-                    gpsFixApi.new GpsFix(49.12 + i/1000.0, 8.599 + i/1000.0, System.currentTimeMillis(), 10.0, 180.0));
+            fix = gpsFixApi.postGpsFix(ownerCtx, deviceUuidCompetitor1, gpsFixApi.new GpsFix(49.12 + i / 1000.0,
+                    8.599 + i / 1000.0, System.currentTimeMillis(), 10.0, 180.0));
             System.out.println(fix.getJson().toJSONString());
-            fix = gpsFixApi.postGpsFix(sailorCtx, deviceUuidCompetitor2,
-                    gpsFixApi.new GpsFix(49.12 + i/1000.0, 8.599 + i/1000.0, System.currentTimeMillis(), 10.0, 180.0));
+            fix = gpsFixApi.postGpsFix(sailorCtx, deviceUuidCompetitor2, gpsFixApi.new GpsFix(49.12 + i / 1000.0,
+                    8.599 + i / 1000.0, System.currentTimeMillis(), 10.0, 180.0));
             System.out.println(fix.getJson().toJSONString());
         }
 
+        leaderboardApi.deviceMappingsEnd(ownerCtx, EVENT_NAME, competitor1.getId(), competitor1.getBoat().getId(),
+                /* markId */ null, deviceUuidCompetitor1, registrationLinkSecret, System.currentTimeMillis());
+
+        leaderboardApi.deviceMappingsEnd(sailorCtx, EVENT_NAME, competitor2.getId(), competitor2.getBoat().getId(),
+                /* markId */ null, deviceUuidCompetitor2, registrationLinkSecret, System.currentTimeMillis());
     }
 
 }
