@@ -110,21 +110,37 @@ public class SecurityResource extends AbstractSecurityResource {
     @POST
     @Path("/create_user")
     @Produces("text/plain;charset=UTF-8")
-    public Response createUser(@Context UriInfo uriInfo, @QueryParam("username") String username,
-            @QueryParam("email") String email, @QueryParam("password") String password,
-            @QueryParam("fullName") String fullName, @QueryParam("company") String company) {
-
+    public Response createUser(@Context UriInfo uriInfo,
+            @QueryParam("username") String queryUsername, @FormParam("username") String formUsername,
+            @QueryParam("email") String queryEmail, @FormParam("email") String formEmail,
+            @QueryParam("password") String queryPassword, @FormParam("password") String formPassword,
+            @QueryParam("fullName") String queryFullName, @FormParam("fullName") String formFullName,
+            @QueryParam("company") String queryCompany, @FormParam("company") String formCompany) {
         try {
-            User user = getService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(username,
+            User user = getService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(queryUsername,
                     new Callable<User>() {
-
                         @Override
                         public User call() throws Exception {
                             final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
-                            User newUser = getService().createSimpleUser(username, email, password, fullName, company,
+                            final String usernameToUse = preferFirstIfNotNullOrElseSecond(formUsername, queryUsername);
+                            final String passwordToUse = preferFirstIfNotNullOrElseSecond(formPassword, queryPassword);
+                            final String emailToUse = preferFirstIfNotNullOrElseSecond(formEmail, queryEmail);
+                            final String fullNameToUse = preferFirstIfNotNullOrElseSecond(formFullName, queryFullName);
+                            final String companyToUse = preferFirstIfNotNullOrElseSecond(formCompany, queryCompany);
+                            User newUser = getService().createSimpleUser(usernameToUse, emailToUse, passwordToUse, fullNameToUse, companyToUse,
                                     Locale.ENGLISH, validationBaseURL, getService().getDefaultTenantForCurrentUser());
-                            SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
+                            SecurityUtils.getSubject().login(new UsernamePasswordToken(usernameToUse, passwordToUse));
                             return newUser;
+                        }
+
+                        private String preferFirstIfNotNullOrElseSecond(String first, String second) {
+                            final String result;
+                            if (first != null) {
+                                result = first;
+                            } else {
+                                result = second;
+                            }
+                            return result;
                         }
                     });
             return respondWithAccessTokenForUser(user.getName());

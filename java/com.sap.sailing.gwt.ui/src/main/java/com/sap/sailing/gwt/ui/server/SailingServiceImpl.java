@@ -4341,32 +4341,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 });
     }
 
-    @Override
-    public List<EventBaseDTO> getPublicEventsOfAllSailingServers() throws MalformedURLException {
-        List<EventBaseDTO> result = new ArrayList<>();
-        for (EventDTO localEvent : getEvents()) {
-            if (localEvent.isPublic) {
-                result.add(localEvent);
-            }
-        }
-        for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
-                        getService().getPublicEventsOfAllSailingServers().entrySet()) {
-            final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
-            final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
-            final Iterable<EventBase> remoteEvents = eventsOrException.getA();
-            String baseURLFromServerReference = getBaseURL(serverRef.getURL()).toString();
-            if (remoteEvents != null) {
-                for (EventBase remoteEvent : remoteEvents) {
-                    EventBaseDTO remoteEventDTO = convertToEventDTO(remoteEvent);
-                    remoteEventDTO.setBaseURL(remoteEvent.getBaseURL() == null ? baseURLFromServerReference : remoteEvent.getBaseURL().toString());
-                    remoteEventDTO.setIsOnRemoteServer(true);
-                    result.add(remoteEventDTO);
-                }
-            }
-        }
-        return result;
-    }
-
     /**
      * Determines the base URL (protocol, host and port parts) used for the currently executing servlet request. Defaults
      * to <code>http://sapsailing.com</code>.
