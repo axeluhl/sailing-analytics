@@ -256,7 +256,7 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource Nacra15Icon();
     
-    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/NACRA_17_FOIL.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/N_17.png")
     @ImageOptions(preventInlining = true)
     ImageResource Nacra17Icon();
     
