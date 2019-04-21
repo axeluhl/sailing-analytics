@@ -8,12 +8,18 @@ import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 /**
  * Compares two competitors by their ranking in the overall race for a given time point. Competitors who haven't started
@@ -38,25 +44,57 @@ import com.sap.sse.common.TimePoint;
  * 
  */
 public class RaceRankComparator extends AbstractRaceRankComparator<Distance> {
-    private final Map<Competitor, Distance> windwardDistanceToGoInLegCache;
+    private final Map<Competitor, Distance> negatedWindwardDistanceFromStartOfLeg;
     private final WindLegTypeAndLegBearingCache cache;
+    
+    /**
+     * The position of the leg's {@link Leg#getFrom() start} at the time the first competitor
+     * passed it. This way we can cope with the waypoint's mark(s) being moved after all
+     * competitors rounded it the last time, and we get a constant reference point regardless
+     * of which competitor we're computing the distance from this point for.<p>
+     * 
+     * Starts out as {@code null} and will be calculated until not {@code null} anymore.
+     */
+    private Position startOfLeg;
     
     public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         super(trackedRace, timePoint, /* lessIsBetter */ true);
         this.cache = cache;
-        this.windwardDistanceToGoInLegCache = new HashMap<Competitor, Distance>();
+        this.negatedWindwardDistanceFromStartOfLeg = new HashMap<Competitor, Distance>();
     }
 
     @Override
     protected Distance getComparisonValueForSameLeg(Competitor competitor) {
-        Distance result = windwardDistanceToGoInLegCache.get(competitor);
+        Distance result = negatedWindwardDistanceFromStartOfLeg.get(competitor);
         if (result == null) {
             final TrackedLegOfCompetitor trackedLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, getTimePoint());
             if (trackedLegOfCompetitor != null) {
-                result = trackedLegOfCompetitor.getWindwardDistanceToGo(getTimePoint(), WindPositionMode.LEG_MIDDLE, cache);
-                windwardDistanceToGoInLegCache.put(competitor, result);
+                final Position startOfLegPosition = getStartOfLeg(trackedLegOfCompetitor.getTrackedLeg());
+                if (startOfLegPosition != null) {
+                    Position estimatedCompetitorPosition = getTrackedRace().getTrack(competitor).getEstimatedPosition(getTimePoint(), false);
+                    if (estimatedCompetitorPosition != null) {
+                        // use the negative windward distance from the leg start
+                        result = trackedLegOfCompetitor.getTrackedLeg().getAbsoluteWindwardDistance(
+                                startOfLegPosition, estimatedCompetitorPosition,
+                                getTimePoint(), WindPositionMode.LEG_MIDDLE, cache).scale(-1);
+                        negatedWindwardDistanceFromStartOfLeg.put(competitor, result);
+                    }
+                }
             }
         }
         return result;
+    }
+    
+    private Position getStartOfLeg(TrackedLeg trackedLeg) {
+        if (startOfLeg == null) {
+            final Waypoint legStartWaypoint = trackedLeg.getLeg().getFrom();
+            final Iterable<MarkPassing> markPassingsForLegStart = getTrackedRace().getMarkPassingsInOrder(legStartWaypoint);
+            if (!Util.isEmpty(markPassingsForLegStart)) {
+                final MarkPassing firstMarkPassingForLegStart = markPassingsForLegStart.iterator().next();
+                final TimePoint timePointOfFirstMarkPassingForLegStart = firstMarkPassingForLegStart.getTimePoint();
+                startOfLeg = getTrackedRace().getApproximatePosition(legStartWaypoint, timePointOfFirstMarkPassingForLegStart);
+            }
+        }
+        return startOfLeg;
     }
 }
