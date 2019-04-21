@@ -244,8 +244,13 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
     protected void setUpWithoutLaunchingController(String regattaName, String raceId, final URI liveUri,
             final URI storedUri) throws MalformedURLException, FileNotFoundException, URISyntaxException,
             SubscriberInitializationException, CreateModelException {
-        final URL paramUrl = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/"+raceId+".txt");
+        final URL paramUrl = getParamUrl(regattaName, raceId);
         setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
+    }
+
+
+    protected URL getParamUrl(String regattaName, String raceId) throws MalformedURLException {
+        return new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/"+raceId+".txt");
     }
 
 
