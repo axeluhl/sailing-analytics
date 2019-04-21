@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
@@ -44,7 +43,7 @@ public class SteadyRankingForBiasedFinishLineTest extends OnlineTracTracBasedTes
 
     @Override
     protected URL getParamUrl(String regattaName, String raceId) throws MalformedURLException {
-        // TODO adjust once TracTrac has migrated this to the regular back-end
+        // TODO adjust once TracTrac has migrated this to the regular back-end; download .mtb file to local resource
         return new URL("http://aws.tractrac.com/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId);
     }
 
