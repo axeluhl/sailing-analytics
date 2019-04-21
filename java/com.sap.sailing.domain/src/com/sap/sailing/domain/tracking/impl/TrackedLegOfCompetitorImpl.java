@@ -9,7 +9,6 @@ import java.util.function.BiFunction;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -221,18 +220,13 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     
     @Override
     public Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+        final Distance result;
         if (hasFinishedLeg(timePoint)) {
-            return Distance.NULL;
+            result = Distance.NULL;
         } else {
-            Distance result = null;
-            for (Mark mark : getLeg().getTo().getMarks()) {
-                Distance d = getWindwardDistanceTo(mark, timePoint, windPositionMode, cache);
-                if (result == null || d != null && d.compareTo(result) < 0) {
-                    result = d;
-                }
-            }
-            return result;
+            result = getWindwardDistanceTo(getLeg().getTo(), timePoint, windPositionMode, cache);
         }
+        return result;
     }
 
     @Override
@@ -242,21 +236,24 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     /**
      * If the current {@link #getLeg() leg} is +/- {@link LegType#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear
-     * with the wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the
-     * wind's bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is
-     * assumed that the leg is neither an upwind nor a downwind leg, and hence the along-track distance to
-     * <code>mark</code> is returned. A cache for wind and leg type / bearing can be passed to avoid their redundant
-     * calculation during a single round-trip.
+     * with the wind's bearing, the competitor's position is projected onto the line crossing <code>waypoint</code> (its
+     * approximate position) in the wind's bearing, and the distance from the projection to the <code>waypoint</code> is
+     * returned. Otherwise, it is assumed that the leg is neither an upwind nor a downwind leg, and hence the
+     * along-track distance to <code>waypoint</code> is returned. A cache for wind and leg type / bearing can be passed to
+     * avoid their redundant calculation during a single round-trip.
      * <p>
      * 
-     * If no wind information is available, again the true geometrical distance to <code>mark</code> is returned.
+     * If no wind information is available, again the along-track distance to <code>waypoint</code> is returned.
      * <p>
      * 
-     * If the competitor's position or the mark's position cannot be determined, <code>null</code> is returned.
+     * If the competitor's position or the waypoint's position cannot be determined, <code>null</code> is returned.
      * <code>null</code> is also returned if the leg's bearing cannot be determined because for at least one of its two
-     * waypoints no mark has a known position.
+     * waypoints no mark has a known position.<p>
+     * 
+     * The distance returned may turn negative if the competitor sailed past the approximate windward position of the
+     * leg's {@link Leg#getTo() end waypoint} but hasn't finished the leg yet.
      */
-    private Distance getWindwardDistanceTo(Mark mark, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
+    private Distance getWindwardDistanceTo(Waypoint waypoint, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
         if (!hasStartedLeg(at) || estimatedPosition == null) {
             // covers the case with no fixes for this leg yet, also if the mark passing has already been received
@@ -266,11 +263,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (estimatedPosition == null) { // may happen if mark positions haven't been received yet
             return null;
         }
-        final Position estimatedMarkPosition = getTrackedRace().getOrCreateTrack(mark).getEstimatedPosition(at, false);
-        if (estimatedMarkPosition == null) {
+        final Position approximateWaypointPosition = getTrackedRace().getApproximatePosition(waypoint, at);
+        if (approximateWaypointPosition == null) {
             return null;
         }
-        return getTrackedLeg().getAbsoluteWindwardDistance(estimatedPosition, estimatedMarkPosition, at, windPositionMode, cache);
+        return getTrackedLeg().getWindwardDistance(estimatedPosition, approximateWaypointPosition, at, windPositionMode, cache);
     }
 
     /**
