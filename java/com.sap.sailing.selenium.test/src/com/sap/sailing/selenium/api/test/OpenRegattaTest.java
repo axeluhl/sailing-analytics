@@ -29,7 +29,6 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class OpenRegattaTest extends AbstractSeleniumTest {
 
-    private ApiContext adminSecurityCtx;
     private ApiContext ownerCtx;
     private ApiContext sailorCtx;
 
@@ -46,12 +45,12 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
-        adminSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
+        final ApiContext adminSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
         ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
         sailorCtx = createAnonymousApiContext(getContextRoot(), SERVER_CONTEXT);
-        AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
-        adminConsole.goToLcalServerPanel().setSelfServiceServer(true);
+        final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
+        adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
     }
 
     @Test

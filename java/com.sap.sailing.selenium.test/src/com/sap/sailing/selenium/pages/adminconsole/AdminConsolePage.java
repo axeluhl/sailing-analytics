@@ -190,7 +190,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
                 SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER, false));
     }
 
-    public LocalServerPO goToLcalServerPanel() {
+    public LocalServerPO goToLocalServerPanel() {
         goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
         return new LocalServerPO(this.driver,
                 goToTab(ADVANCED_LOCAL_SERVER_LABEL, ADVANCED_LOCAL_SERVER_IDENTIFIER, false));

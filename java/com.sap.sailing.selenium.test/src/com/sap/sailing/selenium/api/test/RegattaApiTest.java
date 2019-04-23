@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.api.test;
 
+import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static org.junit.Assert.assertEquals;
@@ -11,7 +12,6 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.RegattaApi;
@@ -37,7 +37,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     public void testGetRegattaForCreatedEvent() {
         final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
 
-        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
+        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
         JSONArray series = (JSONArray) regatta.get("series");
         JSONObject serie = (JSONObject) series.get(0);
@@ -52,7 +52,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertNotNull("read: regatta.courseAreaId is missing", regatta.getCourseAreaId());
         assertEquals("read: regatta.canBoatsOfCompetitorsChangePerRace should be false", false,
                 regatta.canBoatsOfCompetitorsChangePerRace());
-        assertEquals("read: regatta.competitorRegistrationType is different", CompetitorRegistrationType.CLOSED,
+        assertEquals("read: regatta.competitorRegistrationType is different", CLOSED,
                 regatta.getCompetitorRegistrationType());
 
         assertEquals("read: reagtta.series should have 1 entry", 1, series.size());
@@ -64,7 +64,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     public void testGetRacesForRegattaForCreateEvent() {
         final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
 
-        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
+        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         JSONObject regattaRaces = regattaApi.getRegattaRaces(ctx, EVENT_NAME);
         JSONArray races = (JSONArray) regattaRaces.get("races");
 
@@ -78,7 +78,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         final String competitorNationality = "USA";
         final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
 
-        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
+        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Competitor competitor = regattaApi.createAndAddCompetitor(ctx, EVENT_NAME, BOAT_CLASS, "test@de",
                 competitorName, competitorNationality);
         assertNotNull("read: competitor.id is missing", competitor.getId());
@@ -96,7 +96,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     public void testAddRaceColumns() {
         final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
 
-        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
+        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         RaceColumn[] result = regattaApi.addRaceColumn(ctx, EVENT_NAME, "T", 5);
         assertEquals("read: racecolumn.seriesname is different", "Default", result[0].getSeriesName());
         assertEquals("read: racecolumn.racename is different", "T1", result[0].getRaceName());

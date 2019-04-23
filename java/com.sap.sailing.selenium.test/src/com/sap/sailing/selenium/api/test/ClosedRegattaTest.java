@@ -26,13 +26,12 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class ClosedRegattaTest extends AbstractSeleniumTest {
 
-    private ApiContext adminSecurityCtx;
     private ApiContext ownerCtx;
     private ApiContext unregisteredCtx;
 
-    private SecurityApi securityApi = new SecurityApi();
-    private EventApi eventApi = new EventApi();
-    private RegattaApi regattaApi = new RegattaApi();
+    private final SecurityApi securityApi = new SecurityApi();
+    private final EventApi eventApi = new EventApi();
+    private final RegattaApi regattaApi = new RegattaApi();
 
     private static final String EVENT_NAME = "Super exclusive regatta - invited competitors only";
     private static final String BOAT_CLASS = "GC 32";
@@ -41,12 +40,12 @@ public class ClosedRegattaTest extends AbstractSeleniumTest {
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
-        adminSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
+        final ApiContext adminSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
         ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
         unregisteredCtx = createAnonymousApiContext(getContextRoot(), SERVER_CONTEXT);
-        AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
-        adminConsole.goToLcalServerPanel().setSelfServiceServer(true);
+        final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
+        adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
     }
 
     @Test
