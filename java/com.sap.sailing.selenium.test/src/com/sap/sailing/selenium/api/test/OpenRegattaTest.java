@@ -20,6 +20,7 @@ import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.GpsFixApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
+import com.sap.sailing.selenium.api.event.LeaderboardApi.DeviceMappingRequest;
 import com.sap.sailing.selenium.api.event.RegattaApi;
 import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
 import com.sap.sailing.selenium.api.event.RegattaApi.RaceColumn;
@@ -67,14 +68,17 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         final Competitor competitor2 = regattaApi.createAndAddCompetitorWithSecret(sailorCtx, EVENT_NAME, BOAT_CLASS,
                 /* email */ null, "Mickey Mouse", "USA", registrationLinkSecret, deviceUuidCompetitor2);
 
-        leaderboardApi.deviceMappingsStart(ownerCtx, EVENT_NAME, competitor1.getId(), competitor1.getBoat().getId(),
-                /* markId */ null, deviceUuidCompetitor1, registrationLinkSecret, currentTimeMillis());
+        final DeviceMappingRequest devideMappingRequestOwner = leaderboardApi
+                .createDeviceMappingRequest(ownerCtx, EVENT_NAME).forCompetitor(competitor1.getId())
+                .withDeviceUuid(deviceUuidCompetitor1);
+        final DeviceMappingRequest deviceMappingRequestSailor = leaderboardApi
+                .createDeviceMappingRequest(sailorCtx, EVENT_NAME).forCompetitor(competitor2.getId())
+                .withDeviceUuid(deviceUuidCompetitor2).withSecret(registrationLinkSecret);
 
-        leaderboardApi.deviceMappingsStart(sailorCtx, EVENT_NAME, competitor2.getId(), competitor2.getBoat().getId(),
-                /* markId */ null, deviceUuidCompetitor2, registrationLinkSecret, currentTimeMillis());
+        devideMappingRequestOwner.startDeviceMapping(currentTimeMillis());
+        deviceMappingRequestSailor.startDeviceMapping(currentTimeMillis());
 
-        leaderboardApi.setTrackingTimes(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", currentTimeMillis(),
-                null);
+        leaderboardApi.setTrackingTimes(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", currentTimeMillis(), null);
         leaderboardApi.startRaceLogTracking(ownerCtx, EVENT_NAME, race.getRaceName(), "Default");
 
         for (double i = 0.0; i < 100.0; i++) {
@@ -85,11 +89,8 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
                     createFix(longitude, latitude, currentTimeMillis(), speed, course));
         }
 
-        leaderboardApi.deviceMappingsEnd(ownerCtx, EVENT_NAME, competitor1.getId(), competitor1.getBoat().getId(),
-                /* markId */ null, deviceUuidCompetitor1, registrationLinkSecret, currentTimeMillis());
-
-        leaderboardApi.deviceMappingsEnd(sailorCtx, EVENT_NAME, competitor2.getId(), competitor2.getBoat().getId(),
-                /* markId */ null, deviceUuidCompetitor2, registrationLinkSecret, currentTimeMillis());
+        devideMappingRequestOwner.startDeviceMapping(currentTimeMillis());
+        deviceMappingRequestSailor.startDeviceMapping(currentTimeMillis());
     }
 
 }

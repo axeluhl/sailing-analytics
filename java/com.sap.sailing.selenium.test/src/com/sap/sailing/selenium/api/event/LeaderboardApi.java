@@ -31,27 +31,11 @@ public class LeaderboardApi {
     }
 
     public JSONObject getLeaderboard(ApiContext ctx, String leaderboardName) {
-        return ctx.get(LEADERBOARD_URL.replace("{leaderboardname}", leaderboardName));
+        return ctx.get(toUrl(LEADERBOARD_URL, leaderboardName));
     }
 
-    public JSONObject deviceMappingsStart(ApiContext ctx, String leaderboardName, UUID competitorId, UUID boatId,
-            UUID markId, UUID deviceUuid, String secret, Long fromMillis) {
-        final JSONObject json = initDeviceMappingRequestBody(competitorId, boatId, markId, deviceUuid, secret);
-        json.put("fromMillis", fromMillis);
-
-        final JSONObject result = ctx.post(toUrl(START_DEVICE_MAPPING_URL, leaderboardName), null, json);
-        logger.info("devicemapping started for : " + json.toJSONString());
-        return result;
-    }
-
-    public JSONObject deviceMappingsEnd(ApiContext ctx, String leaderboardName, UUID competitorId, UUID boatId,
-            UUID markId, UUID deviceUuid, String secret, Long fromMillis) {
-        final JSONObject json = initDeviceMappingRequestBody(competitorId, boatId, markId, deviceUuid, secret);
-        json.put("toMillis", fromMillis);
-
-        final JSONObject result = ctx.post(toUrl(END_DEVICE_MAPPING_URL, leaderboardName), null, json);
-        logger.info("devicemapping ended for : " + json.toJSONString());
-        return result;
+    public DeviceMappingRequest createDeviceMappingRequest(final ApiContext ctx, final String leaderboardName) {
+        return new DeviceMappingRequest(ctx, leaderboardName);
     }
 
     public JSONObject setTrackingTimes(ApiContext ctx, String leaderboardName, String raceColumnName, String fleetName,
@@ -74,18 +58,62 @@ public class LeaderboardApi {
         return ctx.post(toUrl(START_TRACKING_URL, leaderboardName), queryParams);
     }
 
-    private JSONObject initDeviceMappingRequestBody(final UUID competitorId, final UUID boatId, final UUID markId,
-            final UUID deviceUuid, final String secret) {
-        final JSONObject json = new JSONObject();
-        json.put("competitorId", competitorId != null ? competitorId.toString() : null);
-        json.put("boatId", boatId != null ? boatId.toString() : null);
-        json.put("markId", markId != null ? markId.toString() : null);
-        json.put("deviceUuid", deviceUuid != null ? deviceUuid.toString() : null);
-        json.put("secret", secret);
-        return json;
-    }
-
     private String toUrl(final String urlTemplate, final String leaderboardName) {
         return urlTemplate.replace("{leaderboardname}", leaderboardName);
     }
+
+    public class DeviceMappingRequest {
+
+        private final JSONObject requestBody = new JSONObject();
+        private final ApiContext context;
+        private final String leaderboardName;
+
+        private DeviceMappingRequest(final ApiContext context, final String leaderboardName) {
+            this.context = context;
+            this.leaderboardName = leaderboardName;
+        }
+
+        public DeviceMappingRequest forCompetitor(final UUID competitorId) {
+            requestBody.put("competitorId", competitorId != null ? competitorId.toString() : null);
+            return this;
+        }
+
+        public DeviceMappingRequest forBoat(final UUID boatId) {
+            requestBody.put("boatId", boatId != null ? boatId.toString() : null);
+            return this;
+        }
+
+        public DeviceMappingRequest forMark(final UUID markId) {
+            requestBody.put("markId", markId != null ? markId.toString() : null);
+            return this;
+        }
+
+        public DeviceMappingRequest withDeviceUuid(final UUID deviceId) {
+            requestBody.put("deviceUuid", deviceId != null ? deviceId.toString() : null);
+            return this;
+        }
+
+        public DeviceMappingRequest withSecret(final String secret) {
+            requestBody.put("secret", secret);
+            return this;
+        }
+
+        public JSONObject startDeviceMapping(final Long fromMillis) {
+            requestBody.put("fromMillis", fromMillis);
+            return post(START_DEVICE_MAPPING_URL, "devicemapping started for : ");
+        }
+
+        public JSONObject endDeviceMapping(final Long toMillis) {
+            requestBody.put("toMillis", toMillis);
+            return post(END_DEVICE_MAPPING_URL, "devicemapping ended for : ");
+        }
+
+        private JSONObject post(final String urlTemplate, final String logMessage) {
+            final JSONObject result = context.post(toUrl(urlTemplate, leaderboardName), null, requestBody);
+            logger.info(logMessage + requestBody.toJSONString());
+            return result;
+        }
+
+    }
+
 }

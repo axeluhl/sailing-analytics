@@ -1,28 +1,30 @@
 package com.sap.sailing.selenium.api.test;
 
+import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static java.lang.System.currentTimeMillis;
+import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
-import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
+import com.sap.sailing.selenium.api.event.LeaderboardApi.DeviceMappingRequest;
 import com.sap.sailing.selenium.api.event.RegattaApi;
 import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class LeaderboardApiTest extends AbstractSeleniumTest {
 
+    private static final String BOATCLASSNAME = "75QMNATIONALEKREUZER";
     private static final String LEADERBOARD_NAME = "loggingsession";
 
     private final EventApi eventApi = new EventApi();
@@ -38,8 +40,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
     public void testGetLeaderboardForCreatedEvent() {
         final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
 
-        eventApi.createEvent(ctx, LEADERBOARD_NAME, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
-                "default");
+        eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
 
         JSONObject leaderBoard = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
         assertEquals("read: leaderboard.name is different", LEADERBOARD_NAME, leaderBoard.get("name"));
@@ -65,23 +66,16 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
     public void testDeviceMappingStartAndEnd() throws Exception {
         final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
 
-        eventApi.createEvent(ctx, LEADERBOARD_NAME, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
-                "default");
-        final Competitor competitor = regattaApi.createAndAddCompetitor(ctx, LEADERBOARD_NAME, "75QMNATIONALEKREUZER",
+        eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
+        final Competitor competitor = regattaApi.createAndAddCompetitor(ctx, LEADERBOARD_NAME, BOATCLASSNAME,
                 "test@de", "Max Mustermann", "USA");
 
-        final UUID competitorId = competitor.getId();
-        final UUID boatId = UUID.randomUUID();
-        final UUID markId = UUID.randomUUID();
-        final UUID deviceUuid = UUID.randomUUID();
-        final String secret = "dskjshfkdjhfksh";
-        final Long fromMillis = System.currentTimeMillis();
+        final DeviceMappingRequest request = leaderboardApi.createDeviceMappingRequest(ctx, LEADERBOARD_NAME)
+                .forCompetitor(competitor.getId()).withDeviceUuid(randomUUID());
 
         @SuppressWarnings("unused") // TODO: check result
-        JSONObject dmStart = leaderboardApi.deviceMappingsStart(ctx, LEADERBOARD_NAME, competitorId, boatId, markId,
-                deviceUuid, secret, fromMillis);
+        JSONObject mappingStart = request.startDeviceMapping(currentTimeMillis());
         @SuppressWarnings("unused") // TODO: check result
-        JSONObject dmEnd = leaderboardApi.deviceMappingsEnd(ctx, LEADERBOARD_NAME, competitorId, boatId, markId,
-                deviceUuid, secret, fromMillis);
+        JSONObject mappingEnd = request.endDeviceMapping(currentTimeMillis());
     }
 }
