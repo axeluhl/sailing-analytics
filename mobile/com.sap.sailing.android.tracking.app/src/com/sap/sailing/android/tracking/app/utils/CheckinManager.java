@@ -112,7 +112,7 @@ public class CheckinManager {
                         .encodedPath(prefs.getServerCompetitorPath(competitorUrlData.competitorId));
                 if (secretFromQR != null) {
                     builder.appendQueryParameter(DeviceMappingConstants.URL_SECRET, secretFromQR);
-                    builder.appendQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME, URLDecoder.decode(urlEncodedLeaderboardNameFromQR, "UTF-8"));
+                    builder.appendQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME_FOR_SECRET, URLDecoder.decode(urlEncodedLeaderboardNameFromQR, "UTF-8"));
                 }
                 competitorUrlData.competitorUrl = builder.build().toString();
                 urlData = competitorUrlData;
@@ -135,7 +135,7 @@ public class CheckinManager {
                         .encodedPath(prefs.getServerBoatPath(boatUrlData.getBoatId()));
                 if (secretFromQR != null) {
                     builder.appendQueryParameter(DeviceMappingConstants.URL_SECRET, secretFromQR);
-                    builder.appendQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME, URLDecoder.decode(urlEncodedLeaderboardNameFromQR, "UTF-8"));
+                    builder.appendQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME_FOR_SECRET, URLDecoder.decode(urlEncodedLeaderboardNameFromQR, "UTF-8"));
                 }
                 boatUrlData.setBoatUrl(builder.build().toString());
                 urlData = boatUrlData;
