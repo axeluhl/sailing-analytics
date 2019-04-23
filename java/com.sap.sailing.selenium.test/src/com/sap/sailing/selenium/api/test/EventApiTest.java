@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.api.test;
 
+import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
+import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -8,13 +10,14 @@ import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class EventApiTest extends AbstractSeleniumTest {
+
+    private final EventApi eventApi = new EventApi();
 
     @Before
     public void setUp() {
@@ -23,13 +26,11 @@ public class EventApiTest extends AbstractSeleniumTest {
 
     @Test
     public void createAndGetEventTest() {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
 
-        String eventName = "<ppp> loggingsession";
-        EventApi eventApi = new EventApi();
+        final String eventName = "<ppp> loggingsession";
 
-        Event createdEvent = eventApi.createEvent(ctx, eventName, "75QMNATIONALEKREUZER",
-                CompetitorRegistrationType.CLOSED, "default");
+        final Event createdEvent = eventApi.createEvent(ctx, eventName, "75QMNATIONALEKREUZER", CLOSED, "default");
         assertNotNull("create: event.eventid is missing", createdEvent.getId());
         assertNotNull("create: event.eventstartdate is missing", createdEvent.getStartDate());
         assertNotNull("create: event.eventenddate is missing", createdEvent.getEndDate());
@@ -37,7 +38,7 @@ public class EventApiTest extends AbstractSeleniumTest {
         assertEquals("create: event.reagattaname is different", eventName, createdEvent.get("regatta"));
         assertEquals("create: event.leaderboard is different", eventName, createdEvent.get("leaderboard"));
 
-        Event foundEvent = eventApi.getEvent(ctx, (String) createdEvent.getId());
+        final Event foundEvent = eventApi.getEvent(ctx, (String) createdEvent.getId());
         assertNotNull("read: event.id is missing", foundEvent.getId());
         assertEquals("read: event.name is different", eventName, foundEvent.getName());
         assertEquals("read: event.description is different", eventName, foundEvent.get("description"));

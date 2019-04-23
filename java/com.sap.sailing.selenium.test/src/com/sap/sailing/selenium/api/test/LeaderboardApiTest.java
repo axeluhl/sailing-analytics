@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.api.test;
 
+import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
+import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -19,9 +21,13 @@ import com.sap.sailing.selenium.api.event.RegattaApi;
 import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-public class LeaderBoardApiTest extends AbstractSeleniumTest {
+public class LeaderboardApiTest extends AbstractSeleniumTest {
 
-    private static final String leaderboardName = "loggingsession";
+    private static final String LEADERBOARD_NAME = "loggingsession";
+
+    private final EventApi eventApi = new EventApi();
+    private final RegattaApi regattaApi = new RegattaApi();
+    private final LeaderboardApi leaderboardApi = new LeaderboardApi();
 
     @Before
     public void setUp() {
@@ -30,17 +36,14 @@ public class LeaderBoardApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testGetLeaderboardForCreatedEvent() {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
 
-        EventApi eventApi = new EventApi();
-        LeaderboardApi leaderboardApi = new LeaderboardApi();
-
-        eventApi.createEvent(ctx, leaderboardName, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
+        eventApi.createEvent(ctx, LEADERBOARD_NAME, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
                 "default");
 
-        JSONObject leaderBoard = leaderboardApi.getLeaderboard(ctx, leaderboardName);
-        assertEquals("read: leaderboard.name is different", leaderboardName, leaderBoard.get("name"));
-        assertEquals("read: leaderboard.displayName is different", leaderboardName, leaderBoard.get("displayName"));
+        JSONObject leaderBoard = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
+        assertEquals("read: leaderboard.name is different", LEADERBOARD_NAME, leaderBoard.get("name"));
+        assertEquals("read: leaderboard.displayName is different", LEADERBOARD_NAME, leaderBoard.get("displayName"));
         assertNotNull("read: leaderboard.resultTimepoint is missing", leaderBoard.get("resultTimepoint"));
         assertEquals("read: leaderboard.resultState is different", "Live", leaderBoard.get("resultState"));
         assertEquals("read: leaderboard.type is different", "RegattaLeaderboard", leaderBoard.get("type"));
@@ -54,33 +57,31 @@ public class LeaderBoardApiTest extends AbstractSeleniumTest {
         assertEquals("read: leaderboard.competitors should be empty", 0,
                 ((JSONArray) leaderBoard.get("competitors")).size());
         assertEquals("read: leaderboard.ShardingLeaderboardName is different",
-                "/leaderboard/" + leaderboardName.replaceAll(" ", "_").replaceAll("<", "_").replaceAll(">", "_"),
+                "/leaderboard/" + LEADERBOARD_NAME.replaceAll(" ", "_").replaceAll("<", "_").replaceAll(">", "_"),
                 leaderBoard.get("ShardingLeaderboardName"));
     }
 
     @Test
     public void testDeviceMappingStartAndEnd() throws Exception {
-        ApiContext ctx = ApiContext.createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
-        EventApi eventApi = new EventApi();
-        RegattaApi regattaApi = new RegattaApi();
-        LeaderboardApi leaderboardApi = new LeaderboardApi();
+        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
 
-        eventApi.createEvent(ctx, leaderboardName, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
+        eventApi.createEvent(ctx, LEADERBOARD_NAME, "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED,
                 "default");
-        Competitor competitor = regattaApi.createAndAddCompetitor(ctx, leaderboardName, "75QMNATIONALEKREUZER",
+        final Competitor competitor = regattaApi.createAndAddCompetitor(ctx, LEADERBOARD_NAME, "75QMNATIONALEKREUZER",
                 "test@de", "Max Mustermann", "USA");
-        UUID competitorId = competitor.getId();
 
-        UUID boatId = UUID.randomUUID();
-        UUID markId = UUID.randomUUID();
-        UUID deviceUuid = UUID.randomUUID();
-        String secret = "dskjshfkdjhfksh";
-        Long fromMillis = System.currentTimeMillis();
+        final UUID competitorId = competitor.getId();
+        final UUID boatId = UUID.randomUUID();
+        final UUID markId = UUID.randomUUID();
+        final UUID deviceUuid = UUID.randomUUID();
+        final String secret = "dskjshfkdjhfksh";
+        final Long fromMillis = System.currentTimeMillis();
+
         @SuppressWarnings("unused") // TODO: check result
-        JSONObject dmStart = leaderboardApi.deviceMappingsStart(ctx, leaderboardName, competitorId, boatId, markId,
+        JSONObject dmStart = leaderboardApi.deviceMappingsStart(ctx, LEADERBOARD_NAME, competitorId, boatId, markId,
                 deviceUuid, secret, fromMillis);
         @SuppressWarnings("unused") // TODO: check result
-        JSONObject dmEnd = leaderboardApi.deviceMappingsEnd(ctx, leaderboardName, competitorId, boatId, markId,
+        JSONObject dmEnd = leaderboardApi.deviceMappingsEnd(ctx, LEADERBOARD_NAME, competitorId, boatId, markId,
                 deviceUuid, secret, fromMillis);
     }
 }

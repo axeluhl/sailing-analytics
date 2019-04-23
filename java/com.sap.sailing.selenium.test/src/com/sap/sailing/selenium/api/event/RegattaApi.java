@@ -21,8 +21,7 @@ public class RegattaApi {
     private static final String ADD_RACE_COLUMN_URL = "/addracecolumns";
 
     public Regatta getRegatta(ApiContext ctx, String regattaName) {
-        Regatta regatta = new Regatta(ctx.get(REGATTAS + "/" + regattaName));
-        return regatta;
+        return new Regatta(ctx.get(REGATTAS + "/" + regattaName));
     }
 
     public JSONObject getRegattaRaces(ApiContext ctx, String regattaName) {
@@ -56,25 +55,25 @@ public class RegattaApi {
     private Competitor createAndAddCompetitor(ApiContext ctx, String regattaName, String boatclass,
             String competitorEmail, String competitorName, String nationalityIOC, Optional<String> secret,
             Optional<UUID> deviceUuid) {
-        String url = REGATTAS + "/" + regattaName + COMPETITOR_CREATE_AND_ADD_WITH_BOAT;
-        Map<String, String> queryParams = new TreeMap<>();
+        final String url = REGATTAS + "/" + regattaName + COMPETITOR_CREATE_AND_ADD_WITH_BOAT;
+        final Map<String, String> queryParams = new TreeMap<>();
         queryParams.put("boatclass", boatclass);
         queryParams.put("competitorEmail", competitorEmail);
         queryParams.put("competitorName", competitorName);
         queryParams.put("nationalityIOC", nationalityIOC);
         queryParams.put("secret", secret.orElse(null));
         deviceUuid.ifPresent(c -> queryParams.put("deviceUuid", c.toString()));
-        JSONObject competitorJson = ctx.post(url, queryParams);
+        final JSONObject competitorJson = ctx.post(url, queryParams);
         return new Competitor(competitorJson);
     }
 
     public RaceColumn[] addRaceColumn(ApiContext ctx, String regattaName, String prefix, Integer numberOfRaces) {
-        String url = REGATTAS + "/" + regattaName + ADD_RACE_COLUMN_URL;
-        Map<String, String> queryParams = new TreeMap<>();
+        final String url = REGATTAS + "/" + regattaName + ADD_RACE_COLUMN_URL;
+        final Map<String, String> queryParams = new TreeMap<>();
         queryParams.put("prefix", prefix);
         queryParams.put("numberOfRaces", numberOfRaces != null ? numberOfRaces.toString() : null);
-        JSONArray json = ctx.post(url, queryParams);
-        RaceColumn[] result = new RaceColumn[json.size()];
+        final JSONArray json = ctx.post(url, queryParams);
+        final RaceColumn[] result = new RaceColumn[json.size()];
         for (int i = 0; i < json.size(); i++) {
             result[i] = new RaceColumn((JSONObject)(json.get(i)));
         }

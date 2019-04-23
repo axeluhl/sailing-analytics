@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 public class JsonWrapper {
 
-    private JSONObject json;
+    private final JSONObject json;
 
     public JsonWrapper(JSONObject json) {
         this.json = json;
@@ -14,8 +14,18 @@ public class JsonWrapper {
         return json;
     }
 
+    public boolean isEmpty() {
+        return json.isEmpty();
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T get(String key) {
         return (T) json.get(key);
     }
+
+    @Override
+    public String toString() {
+        return json.toJSONString();
+    }
+
 }

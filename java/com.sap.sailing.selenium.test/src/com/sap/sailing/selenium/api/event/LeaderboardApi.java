@@ -36,52 +36,56 @@ public class LeaderboardApi {
 
     public JSONObject deviceMappingsStart(ApiContext ctx, String leaderboardName, UUID competitorId, UUID boatId,
             UUID markId, UUID deviceUuid, String secret, Long fromMillis) {
-        JSONObject json = new JSONObject();
-        json.put("competitorId", competitorId != null ? competitorId.toString() : null);
-        json.put("boatId", boatId != null ? boatId.toString() : null);
-        json.put("markId", markId != null ? markId.toString() : null);
-        json.put("deviceUuid", deviceUuid != null ? deviceUuid.toString() : null);
-        json.put("secret", secret);
+        final JSONObject json = initDeviceMappingRequestBody(competitorId, boatId, markId, deviceUuid, secret);
         json.put("fromMillis", fromMillis);
 
-        JSONObject result = ctx.post(START_DEVICE_MAPPING_URL.replace("{leaderboardname}", leaderboardName), null,
-                json);
+        final JSONObject result = ctx.post(toUrl(START_DEVICE_MAPPING_URL, leaderboardName), null, json);
         logger.info("devicemapping started for : " + json.toJSONString());
         return result;
     }
 
     public JSONObject deviceMappingsEnd(ApiContext ctx, String leaderboardName, UUID competitorId, UUID boatId,
             UUID markId, UUID deviceUuid, String secret, Long fromMillis) {
-        JSONObject json = new JSONObject();
-        json.put("competitorId", competitorId != null ? competitorId.toString() : null);
-        json.put("boatId", boatId != null ? boatId.toString() : null);
-        json.put("markId", markId != null ? markId.toString() : null);
-        json.put("deviceUuid", deviceUuid != null ? deviceUuid.toString() : null);
-        json.put("secret", secret);
+        final JSONObject json = initDeviceMappingRequestBody(competitorId, boatId, markId, deviceUuid, secret);
         json.put("toMillis", fromMillis);
 
-        JSONObject result = ctx.post(END_DEVICE_MAPPING_URL.replace("{leaderboardname}", leaderboardName), null, json);
+        final JSONObject result = ctx.post(toUrl(END_DEVICE_MAPPING_URL, leaderboardName), null, json);
         logger.info("devicemapping ended for : " + json.toJSONString());
         return result;
     }
 
     public JSONObject setTrackingTimes(ApiContext ctx, String leaderboardName, String raceColumnName, String fleetName,
             Long startTime, Long endTime) {
-        Map<String, String> queryParams = new TreeMap<>();
+        final Map<String, String> queryParams = new TreeMap<>();
         queryParams.put("race_column", raceColumnName);
         queryParams.put("fleet", fleetName);
         queryParams.put("startoftrackingasmillis", startTime != null ? startTime.toString() : null);
         queryParams.put("endoftrackingasmillis", endTime != null ? endTime.toString() : null);
-        return ctx.post(SET_TRACKING_TIMES_URL.replace("{leaderboardname}", leaderboardName), queryParams);
+        return ctx.post(toUrl(SET_TRACKING_TIMES_URL, leaderboardName), queryParams);
     }
 
     public JSONObject startRaceLogTracking(ApiContext ctx, String leaderboardName, String raceColumnName,
             String fleetName) {
-        Map<String, String> queryParams = new TreeMap<>();
+        final Map<String, String> queryParams = new TreeMap<>();
         queryParams.put("race_column", raceColumnName);
         queryParams.put("fleet", fleetName);
         queryParams.put("trackWind", Boolean.FALSE.toString());
         queryParams.put("correctWindDirectionByMagneticDeclination", Boolean.FALSE.toString());
-        return ctx.post(START_TRACKING_URL.replace("{leaderboardname}", leaderboardName), queryParams);
+        return ctx.post(toUrl(START_TRACKING_URL, leaderboardName), queryParams);
+    }
+
+    private JSONObject initDeviceMappingRequestBody(final UUID competitorId, final UUID boatId, final UUID markId,
+            final UUID deviceUuid, final String secret) {
+        final JSONObject json = new JSONObject();
+        json.put("competitorId", competitorId != null ? competitorId.toString() : null);
+        json.put("boatId", boatId != null ? boatId.toString() : null);
+        json.put("markId", markId != null ? markId.toString() : null);
+        json.put("deviceUuid", deviceUuid != null ? deviceUuid.toString() : null);
+        json.put("secret", secret);
+        return json;
+    }
+
+    private String toUrl(final String urlTemplate, final String leaderboardName) {
+        return urlTemplate.replace("{leaderboardname}", leaderboardName);
     }
 }

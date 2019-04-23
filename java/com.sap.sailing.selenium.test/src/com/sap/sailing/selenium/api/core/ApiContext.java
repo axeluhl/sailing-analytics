@@ -31,18 +31,11 @@ public class ApiContext {
     /** Jax-RS client. */
     private final Client client;
     /** Token to be sent as authorization header. */
-    protected final String token;
+    private final String token;
     /** Server instance. */
     private final String contextRoot;
     /** Web application context. */
     private final String context;
-
-    private ApiContext(String contextRoot, String context, String token) {
-        this.contextRoot = contextRoot;
-        this.token = token;
-        this.context = context;
-        client = new Client();
-    }
 
     /**
      * Create ApiContext by providing user name and password.
@@ -74,6 +67,13 @@ public class ApiContext {
      */
     public static ApiContext createAnonymousApiContext(String contextRoot, String context) {
         return new ApiContext(contextRoot, context, null);
+    }
+
+    private ApiContext(String contextRoot, String context, String token) {
+        this.contextRoot = contextRoot;
+        this.token = token;
+        this.context = context;
+        this.client = new Client();
     }
 
     /**

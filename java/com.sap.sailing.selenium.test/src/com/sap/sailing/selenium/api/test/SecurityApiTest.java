@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.api.test;
 
+import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
+import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -18,6 +20,8 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     private static final String USERNAME = "max";
     private static final String USERNAME_FULL = "Max Mustermann";
 
+    private final SecurityApi securityApi = new SecurityApi();
+
     @Before
     public void setUp() {
         clearState(getContextRoot());
@@ -25,11 +29,9 @@ public class SecurityApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testCreateAndGetUser() {
-        ApiContext adminCtx = ApiContext.createApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT, "admin",
-                "admin");
+        final ApiContext adminCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
 
-        SecurityApi securityApi = new SecurityApi();
-        AccessToken createUserResponse = securityApi.createUser(adminCtx, "max", USERNAME_FULL, null, "start123");
+        final AccessToken createUserResponse = securityApi.createUser(adminCtx, "max", USERNAME_FULL, null, "start123");
 
         assertEquals("Responded username of createUser is different!", USERNAME, createUserResponse.getUsername());
         assertNotNull("Token is missing in reponse!", createUserResponse.getAccessToken());
@@ -40,11 +42,9 @@ public class SecurityApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testSayHello() {
-        ApiContext adminCtx = ApiContext.createApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT, "admin",
-                "admin");
-        SecurityApi securityApi = new SecurityApi();
+        final ApiContext adminCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
 
-        Hello hello = securityApi.sayHello(adminCtx);
+        final Hello hello = securityApi.sayHello(adminCtx);
         assertEquals("Responded principal of hello is different!", "admin", hello.getPrincipal());
         assertEquals("Responded authenticated of hello is different!", true, hello.isAuthenticated());
     }

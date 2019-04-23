@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
 
-public class GPSFixApi {
+public class GpsFixApi {
 
     private static final String POST_FIX_URL = "/api/v1/gps_fixes";
 
@@ -34,7 +34,7 @@ public class GPSFixApi {
 
     public static JSONObject createGpsFixJson(Double longitude, Double latitude, Long timestamp, Double speed,
             Double course) {
-        JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject();
         json.put("longitude", longitude);
         json.put("latitude", latitude);
         json.put("timestamp", timestamp);

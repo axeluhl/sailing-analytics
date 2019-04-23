@@ -16,26 +16,23 @@ public class SecurityApi {
 
     public AccessToken createUser(ApiContext ctx, String username, String fullName, String company,
             /* String email, */ String password) {
-        Map<String, String> queryParams = new HashMap<>();
+        final Map<String, String> queryParams = new HashMap<>();
         queryParams.put("username", username);
         queryParams.put("fullName", fullName);
         queryParams.put("company", company);
         // queryParams.put("email", email); //if email is provided a validation mail would be sent
         queryParams.put("password", password);
-        AccessToken accessToken = new AccessToken(ctx.post(CREATE_USER_URL, queryParams));
-        return accessToken;
+        return new AccessToken(ctx.post(CREATE_USER_URL, queryParams));
     }
 
     public User getUser(ApiContext ctx, String username) {
-        Map<String, String> queryParams = new HashMap<>();
+        final Map<String, String> queryParams = new HashMap<>();
         queryParams.put("username", username);
-        User user = new User(ctx.get(GET_USER_URL, queryParams));
-        return user;
+        return new User(ctx.get(GET_USER_URL, queryParams));
     }
 
     public Hello sayHello(ApiContext ctx) {
-        Hello hello = new Hello(ctx.get(SAY_HELLO_URL));
-        return hello;
+        return new Hello(ctx.get(SAY_HELLO_URL));
     }
 
     public class AccessToken extends JsonWrapper {
