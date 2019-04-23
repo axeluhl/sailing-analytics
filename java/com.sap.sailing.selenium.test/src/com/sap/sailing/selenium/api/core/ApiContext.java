@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.api.core;
 
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
@@ -231,13 +233,12 @@ public class ApiContext {
         try {
             result = auth(wres.getRequestBuilder()).get(String.class);
         } catch (UniformInterfaceException e) {
-            int rc = e.getResponse().getStatus();
-            if (rc == 204) {
-                logger.info("API GET request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
-                        + "<no content>");
+            final int rc = e.getResponse().getStatus();
+            if (rc == NO_CONTENT.getStatusCode()) {
+                logger.info("API GET request " + url + " failed (rc=" + rc + "): " + "<no content>");
                 return null;
             } else {
-                String error = "API GET request " + url + " failed (rc=" + e.getResponse().getStatus() + "): "
+                String error = "API GET request " + url + " failed (rc=" + rc + "): "
                         + e.getResponse().getEntity(String.class);
                 logger.severe(error);
                 throw new RuntimeException(error);
