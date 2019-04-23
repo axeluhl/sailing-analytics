@@ -40,9 +40,9 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.ALBIN_EXPRESS.getDisplayName(), imageResources.AlbinExpressIcon());
         boatClassIconsMap.put(BoatClassMasterdata.ALBIN_BALLAD.getDisplayName(), imageResources.AlbinBalladIcon());
         boatClassIconsMap.put(BoatClassMasterdata.B_ONE.getDisplayName(), imageResources.BOne());
-        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_41S.getDisplayName(), imageResources.BOne()); // TODO
-        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_45.getDisplayName(), imageResources.BOne()); // TODO
-        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_46.getDisplayName(), imageResources.BOne()); // TODO
+        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_41S.getDisplayName(), imageResources.BavariaCruiser41S());
+        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_45.getDisplayName(), imageResources.BavariaCruiser45());
+        boatClassIconsMap.put(BoatClassMasterdata.BAVARIA_CRUISER_46.getDisplayName(), imageResources.BavariaCruiser46());
         boatClassIconsMap.put(BoatClassMasterdata.CADET.getDisplayName(), imageResources.CadetIcon());
         boatClassIconsMap.put(BoatClassMasterdata.CANOE_IC.getDisplayName(), imageResources.CanoeICIcon());
         boatClassIconsMap.put(BoatClassMasterdata.CANOE_TAIFUN.getDisplayName(), imageResources.CanoeTaifunIcon());
