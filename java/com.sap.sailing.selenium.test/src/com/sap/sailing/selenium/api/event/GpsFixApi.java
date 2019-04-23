@@ -6,19 +6,19 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.GpsFix;
 import com.sap.sailing.selenium.api.core.JsonWrapper;
 
 public class GpsFixApi {
 
     private static final String POST_FIX_URL = "/api/v1/gps_fixes";
 
-    public GpsFixResponse postGpsFix(ApiContext ctx, UUID deviceUuid, GpsFix... fixes) {
-        JSONObject gpsFix = new JSONObject();
+    public GpsFixResponse postGpsFix(final ApiContext ctx, final UUID deviceUuid, final GpsFix... fixes) {
+        final JSONObject gpsFix = new JSONObject();
         gpsFix.put("deviceUuid", deviceUuid != null ? deviceUuid.toString(): null);
-        JSONArray fixesArray = new JSONArray();
+        final JSONArray fixesArray = new JSONArray();
         gpsFix.put("fixes", fixesArray);
-        GpsFixResponse gpsFixResponse = new GpsFixResponse(ctx.post(POST_FIX_URL, null, gpsFix));
-        return gpsFixResponse;
+        return new GpsFixResponse(ctx.post(POST_FIX_URL, null, gpsFix));
     }
 
     public class GpsFixResponse extends JsonWrapper {
@@ -29,48 +29,6 @@ public class GpsFixApi {
 
         public ManeuverChanged[] getManeuverChanged() {
             return get("maneuverchanged");
-        }
-    }
-
-    public static JSONObject createGpsFixJson(Double longitude, Double latitude, Long timestamp, Double speed,
-            Double course) {
-        final JSONObject json = new JSONObject();
-        json.put("longitude", longitude);
-        json.put("latitude", latitude);
-        json.put("timestamp", timestamp);
-        json.put("speed", speed);
-        json.put("course", course);
-        return json;
-    }
-
-    public class GpsFix extends JsonWrapper {
-
-        public GpsFix(JSONObject json) {
-            super(json);
-        }
-
-        public GpsFix(Double longitude, Double latitude, Long timeMillis, Double speed, Double course) {
-            super(createGpsFixJson(longitude, latitude, timeMillis, speed, course));
-        }
-
-        public Double getLongitude() {
-            return get("longitude");
-        }
-
-        public Double getLatitude() {
-            return get("latitude");
-        }
-
-        public Long getTimestamp() {
-            return get("timestamp");
-        }
-
-        public Double getSpeed() {
-            return get("speed");
-        }
-
-        public Double getCourse() {
-            return get("course");
         }
     }
 

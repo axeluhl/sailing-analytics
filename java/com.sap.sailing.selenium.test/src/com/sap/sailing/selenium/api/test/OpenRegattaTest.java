@@ -5,6 +5,7 @@ import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAnonymousApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.api.core.GpsFixMoving.createFix;
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static java.lang.System.currentTimeMillis;
 import static java.util.UUID.randomUUID;
@@ -80,9 +81,9 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         for (double i = 0.0; i < 100.0; i++) {
             final Double longitude = 9.12 + i / 1000.0, latitude = .599 + i / 1000.0, speed = 10.0, course = 180.0;
             gpsFixApi.postGpsFix(ownerCtx, deviceUuidCompetitor1,
-                    gpsFixApi.new GpsFix(longitude, latitude, currentTimeMillis(), speed, course));
+                    createFix(longitude, latitude, currentTimeMillis(), speed, course));
             gpsFixApi.postGpsFix(sailorCtx, deviceUuidCompetitor2,
-                    gpsFixApi.new GpsFix(longitude, latitude, currentTimeMillis(), speed, course));
+                    createFix(longitude, latitude, currentTimeMillis(), speed, course));
         }
 
         leaderboardApi.deviceMappingsEnd(ownerCtx, EVENT_NAME, competitor1.getId(), competitor1.getBoat().getId(),

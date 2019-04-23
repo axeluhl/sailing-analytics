@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.api.core.GpsFixMoving.createFix;
 import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
@@ -10,8 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.GpsFixMoving;
 import com.sap.sailing.selenium.api.event.GpsFixApi;
-import com.sap.sailing.selenium.api.event.GpsFixApi.GpsFix;
 import com.sap.sailing.selenium.api.event.GpsFixApi.GpsFixResponse;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
@@ -34,7 +35,7 @@ public class GpsFixApiTest extends AbstractSeleniumTest {
     @Test
     public void testGpsFix() {
         final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
-        final GpsFix gpsFix = gpsFixApi.new GpsFix(49.12, 8.599, System.currentTimeMillis(), 10.0, 180.0);
+        final GpsFixMoving gpsFix = createFix(49.12, 8.599, System.currentTimeMillis(), 10.0, 180.0);
         final GpsFixResponse gpsFixResponse = gpsFixApi.postGpsFix(ctx, UUID.randomUUID(), gpsFix);
         assertTrue("Result should be empty.", gpsFixResponse.isEmpty());
     }
