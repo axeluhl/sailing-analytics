@@ -21,6 +21,8 @@ import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.GpsFixApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi.DeviceMappingRequest;
+import com.sap.sailing.selenium.api.event.MarkApi;
+import com.sap.sailing.selenium.api.event.MarkApi.Mark;
 import com.sap.sailing.selenium.api.event.RegattaApi;
 import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
 import com.sap.sailing.selenium.api.event.RegattaApi.RaceColumn;
@@ -38,6 +40,7 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
     private final RegattaApi regattaApi = new RegattaApi();
     private final LeaderboardApi leaderboardApi = new LeaderboardApi();
     private final GpsFixApi gpsFixApi = new GpsFixApi();
+    private final MarkApi markApi = new MarkApi();
 
     private static final String EVENT_NAME = "Duckburg 2019 Everybody's Regatta";
     private static final String BOAT_CLASS = "49er";
@@ -91,6 +94,17 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
 
         devideMappingRequestOwner.startDeviceMapping(currentTimeMillis());
         deviceMappingRequestSailor.startDeviceMapping(currentTimeMillis());
+
+
+        final Mark mark1 = markApi.addMarkToRegatta(ownerCtx, EVENT_NAME, "FirstMark");
+        final UUID deviceUuidMark1 = randomUUID();
+        final DeviceMappingRequest deviceMappingRequestFirstMark = leaderboardApi
+                .createDeviceMappingRequest(ownerCtx, EVENT_NAME).forMark(mark1.getMarkId())
+                .withDeviceUuid(deviceUuidMark1);
+        deviceMappingRequestFirstMark.startDeviceMapping(currentTimeMillis());
+        // TODO: Add mark fix(es)
+        deviceMappingRequestFirstMark.endDeviceMapping(currentTimeMillis());
+        
     }
 
 }
