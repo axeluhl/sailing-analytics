@@ -224,7 +224,7 @@ Team2Name:Pavlos Kontides
 Team2Comp1UUID:74360b33-5df4-46ab-a50d-e632966b4b17
 
 Team3UUID:9577beb0-41e3-0137-290a-021d89ada30e
-Team3Name:JoaquÃ­n Blanco
+Team3Name:Joaquín Blanco
 Team3Comp1UUID:481d9bb3-6c30-4abc-8b18-87168acf9bba
 
 Team4UUID:95840dc0-41e3-0137-2914-021d89ada30e
