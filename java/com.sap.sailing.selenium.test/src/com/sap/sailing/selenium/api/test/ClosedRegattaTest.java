@@ -5,6 +5,9 @@ import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAnonymousApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.UUID;
 
@@ -16,6 +19,7 @@ import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.RegattaApi;
+import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -24,8 +28,7 @@ public class ClosedRegattaTest extends AbstractSeleniumTest {
 
     private ApiContext adminSecurityCtx;
     private ApiContext ownerCtx;
-    // private ApiContext registeredCompetitor;
-    private ApiContext unregisteredCompetitor;
+    private ApiContext unregisteredCtx;
 
     private SecurityApi securityApi = new SecurityApi();
     private EventApi eventApi = new EventApi();
@@ -41,18 +44,25 @@ public class ClosedRegattaTest extends AbstractSeleniumTest {
         adminSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
         ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
-        unregisteredCompetitor = createAnonymousApiContext(getContextRoot(), SERVER_CONTEXT);
+        unregisteredCtx = createAnonymousApiContext(getContextRoot(), SERVER_CONTEXT);
         AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLcalServerPanel().setSelfServiceServer(true);
     }
 
     @Test
-    public void simpleTest() {
+    public void testRegisterOwnerSucceededSelfRegistrationFailed() {
         final Event event = eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED,
                 "Some special place");
         final String registrationLinkSecret = event.getSecret();
-        regattaApi.createAndAddCompetitor(ownerCtx, EVENT_NAME, BOAT_CLASS, "", "Donald Duck", "USA");
-        regattaApi.createAndAddCompetitorWithSecret(unregisteredCompetitor, EVENT_NAME, BOAT_CLASS, "", "Mickey Mouse",
-                "USA", registrationLinkSecret, UUID.randomUUID());
+        final Competitor owner = regattaApi.createAndAddCompetitor(ownerCtx, EVENT_NAME, BOAT_CLASS, "", "Donald Duck",
+                "USA");
+        assertNotNull("Owner should be able to register for a closed regatta!", owner);
+        try {
+            regattaApi.createAndAddCompetitorWithSecret(unregisteredCtx, EVENT_NAME, BOAT_CLASS, "", "Mickey Mouse",
+                    "USA", registrationLinkSecret, UUID.randomUUID());
+            fail("Self-registration should not be possible for a closed regatta!");
+        } catch (RuntimeException exc) {
+            assertTrue("Response status \"Forbidden\" expected!", exc.getMessage().contains("rc=403"));
+        }
     }
 }
