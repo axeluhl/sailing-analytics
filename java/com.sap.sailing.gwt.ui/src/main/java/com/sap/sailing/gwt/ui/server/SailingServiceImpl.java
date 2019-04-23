@@ -7590,7 +7590,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             competitors.add(getCompetitor(c));
         }
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.SailInsight1.name()));
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         Regatta regatta = getService().getRegattaByName(leaderboardName);
@@ -7611,7 +7611,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         Regatta regatta = getService().getRegattaByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(regatta);
         MailInvitationType type = MailInvitationType
-                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.LEGACY.name()));
+                .valueOf(System.getProperty(MAILTYPE_PROPERTY, MailInvitationType.SailInsight1.name()));
         getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, regatta, serverUrlWithoutTrailingSlash,
                 emails, iOSAppUrl, androidAppUrl, getLocale(localeInfoName), type);
     }
