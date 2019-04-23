@@ -2,8 +2,10 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
@@ -41,18 +43,12 @@ public class SteadyRankingForBiasedFinishLineTest extends OnlineTracTracBasedTes
         return "Sailing World Cup Genoa 2019";
     }
 
-    @Override
-    protected URL getParamUrl(String regattaName, String raceId) throws MalformedURLException {
-        // TODO adjust once TracTrac has migrated this to the regular back-end; download .mtb file to local resource
-        return new URL("http://aws.tractrac.com/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId);
-    }
-
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
-        super.setUp("event_20190412_SailingWor",
-                /* raceId */ "0fb18f50-45d7-0137-24dd-021d89ada30e",
-                /* liveUri */ null, /* storedUri */ null,
+        URI storedUri = new URI("file:///"+new File("resources/0fb18f50-45d7-0137-24dd-021d89ada30e.mtb").getCanonicalPath().replace('\\', '/'));
+        super.setUp(new URL("file:///"+new File("resources/0fb18f50-45d7-0137-24dd-021d89ada30e.txt").getCanonicalPath()),
+                /* liveUri */ null, /* storedUri */ storedUri,
                 new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS, ReceiverType.MARKPOSITIONS, ReceiverType.RACECOURSE,
                         ReceiverType.RACESTARTFINISH });
         getTrackedRace().recordWind(new WindImpl(/* position */ new DegreePosition(44.37670797575265, 8.925960855558515), TIME_14_30_00,
