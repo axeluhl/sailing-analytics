@@ -302,7 +302,7 @@ For the tests of this scenario, we need a fully featured setup consisting of the
 * A regatta having dynamic competitor/boat assignments
 * Pinged marks as well as tracked marks
 
-The a smartphone tracking setup needs to get repeated using the following invitation and app combinations (some cases can be tested in parallel):
+Then a smartphone tracking setup needs to get repeated using the following invitation and app combinations (some cases can be tested in parallel):
 
 * Legacy invitations/QR codes with the old apps
 * Legacy invitations/QR codes with Sail Insight 2.0
