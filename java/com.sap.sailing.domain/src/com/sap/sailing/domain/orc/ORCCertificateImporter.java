@@ -4,7 +4,7 @@ import java.util.Map;
 
 /**
  * Extracts ORC-Certificates from different sources and different formats. Returns ORC-Certificate objects for given
- * identification (sailnumber).
+ * identification (sail number).
  * 
  * @author Daniel Lisunkin (i505543)
  * 
@@ -12,13 +12,13 @@ import java.util.Map;
 public interface ORCCertificateImporter {
     
     /**
-     * Returns an ORCCertificate object to a given sailnumber.
+     * Returns an ORCCertificate object to a given sail number. If there is no certificate for the given id, the method returns {@link null}.
      * **/
     ORCCertificate getCertificate(String sailnumber);
     
     
     /**
-     * Returns a map of ORCCertificate objects to a given array of sailnumbers.
+     * Returns a map of ORCCertificate objects to a given array of sail numbers.
      * **/
     Map<String, ORCCertificate> getCertificates(String[] sailnumbers);
 

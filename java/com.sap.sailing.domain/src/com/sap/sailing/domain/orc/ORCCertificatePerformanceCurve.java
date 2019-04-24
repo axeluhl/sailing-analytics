@@ -32,7 +32,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  * for details. The true wind angles are symmetrical, assuming that the boat performs equally well on both tacks.
  * 
  * @author Axel Uhl (D043530)
- *
+ * 
  */
 public class ORCCertificatePerformanceCurve implements Serializable {
     private static final long serialVersionUID = 4113356173492168453L;
