@@ -1,55 +1,43 @@
 [[_TOC_]]
 
-## Introduction
+# Introduction
 
-This document describes the permission concept developed for the SAP Sailing Analytics (in the following just Sailing Analytics). Currently a very rough permission system based on role based access control (RBAC) is used to e.g. restrict access to the administration console. The system is built on the Apache Shiro (in the following just Shiro) framework. This system currently does not support unified user management (in the sense of a central user management system that manages the users for all deployments of the Sailing Analytics) or dynamic access control for all aspects of the Sailing Analytics.
-
-However, as one medium term goal is to develop the Sailing Analytics to be usable by sailing clubs and eventually individuals as a cloud application, the user management and access control should be unified and expanded to be dynamic and provide the appropriate (the Sailing Analytics manages very personal data) security aspects. 
-The concept developed in this document should focus on fine grained access control with a strong focus on being able to unify and strengthen the user management and access control. Resulting in a system where multiple organizations and individuals can work on one system without unwantedly interfering in their actions and data. 
-A secure access control concept for the existing data model is not easily developed, because the data objects in the Sailing Analytics do not merely form static trees. Data objects can form graphs where there is no clear root for a given node. Furthermore the associations of data objects can change. These challenges have to be addressed by possible concepts by adapting them to this very specific domain.
-
-The following requirements result from the above described (the access control system has to…):
+This document describes the permission concept developed for the SAP Sailing Analytics (in the following just Sailing Analytics). The following requirements were considered during its conception:
 
 * Be expressive enough to support the complex associations of the Sailing Analytics
 * Support multiple organizations (clubs, events and individuals) working in one system
 * Communicate the permissions to the frontend (so only UI elements that support permitted actions are active)
-* Be reasonably complex and implementation intensive
+* Be not overly complex and implementation intensive
 
-## Access Control Concepts
+## Users and User Groups
 
-The two big concepts that play together in this permission concept are access control lists (ACLs) (also used e.g. in the Linux or Windows file system) and RBAC. Furthermore, there is the concept of attribute based access control (ABAC) that is not explored in this concept document.
+A client can try to access the solution anonymously, without authentication, or can sign up for a user account and authenticate accordingly before making requests. A user has to provide a nickname that is unique and can optionally provide and validate an e-mail address as well as further attributes such as the full name, a company affiliation and various other settings.
 
-The concept of ACLs is based on the idea of assigning each data object that is access controlled an ACL. The ACL is a list of entries that assign a user or group of users to permissions. If e.g. read access is requested for a data object, its ACL is checked if the user or a group, the user belongs to, has an entry granting the read permission.
-
-RBAC is based on the idea of having roles that imply certain permissions and assigning roles to users. The roles of RBAC are on a simple level equivalent to groups for ACLs. (Barkley, 1997) However, in general roles combine a set of users with a set of permissions, whereas groups represent only a set of users. According to (Sandhu, Coyne, Feinstein, & Youman, 1996) there are multiple models for RBAC. The model described above is called RBAC_0. Furthermore, there are RBAC_1, RBAC_2 and RBAC_3 which all include RBAC_0, but add additional features. 
-
-RBAC_1 adds the concept of role hierarchies, where roles inherit the permissions granted by their parent roles. However, they do not inherit the set of users. RBAC_2 adds constraints which restrict how and when roles and permissions can be combined with other roles or permissions. Besides mutual exclusion of roles or permissions, constraints could also require a user to have role s when assigned role r (or the same with permissions, which could be used e.g. to require to be able to view an event when a view permission for a race in the event is granted). Furthermore, the concept of constraints could also restrict the roles and permissions that a user can simultaneously have in a session (e.g. only one tenant role at a time). RBAC_3 combines RBAC_1 and RBAC_2.
-
-In the context of RBAC (Ferraiolo, Cugini, & Kuhn) mentions the concept of subjects. A user may in one session only have a certain set of roles and permissions. This may be due to choice to reduce accidental actions with a wrong role or a constraint enforced by the system (See RBAC_2). This set of roles and permissions is called a subject. A user may have any number of active subjects. However, a subject is only associated with one user.
-
-It is to note that simple RBAC models show no difference in their ability to express access control policies than ACLs. (Barkley, 1997) More complex RBAC models are more expressive than ACLs.
-
-In the course of this concept document there will be no difference in meaning between roles and groups. In the existing system they are named roles, thus the term roles will be used for both roles and groups.
-
-## Initial Idea
-
-The inital idea for this document is based on the existing Shiro RBAC system that handles roles that can imply permissions and that also supports directly granting permissions to a user. Furthermore, ACLs should be introduced. Those should solve the problem of “losing” implied permissions, e.g., upon ownership changes, because the access control lists are directly associated with the data object and do not depend on ownerships, whereas role-implied permissions may well be implied only if ownerships support this. Furthermore, an ACL can be used to explicitly revoke a permission that may otherwise have been implied for a user based on ownerships or the roles the user has assigned.
-
-The existing Shiro authorizing realm that checks for the roles and permissions directly assigned to a user would have to be extended by the ACL concept. This will form what we call a "compound realm" that if a permission is checked looks for the permission in the roles and permissions of the user *and* in the ACL of the data object. If either the roles and permissions or the ACL grants the permission and the ACL does not revoke the permission then the user is allowed access.
+User groups can be created that users can be assigned to as members. A user can be member of any number of user groups. By default, when a new user account is created, a new user group is created, too, named after the user with the suffix ``-tenant`` appended. For example, for the user with nickname ``john`` a user group named ``john-tenant`` will be created. The user is made a member of that default user group automatically.
 
 ## Ownership
 
-The approach chosen here mimics that of a Unix/Linux file system where each file system object has a "group owner" and a "user owner." Certain permissions may then implicitly be granted if the requesting user belongs to the group owning the object or is identical to the user owning the object. Groups in this context are called "tenants."
+Objects can have a user as an owner, and a user group as an owning group. The approach mimics that of a Unix/Linux file system where each file system object has a "group owner" and a "user owner." As will be explained later, certain permissions may then implicitly be granted if the requesting user belongs to the group owning the object or is identical to the user owning the object.
 
-The tenants represent the organizations and---if a hierarchy is allowed---the sub-organizations working in the system. In the Sailing Analytics the organizations could be SAP in general (e.g. archive server), sailing clubs, events like the Travemünder Woche or in the future private users.
+The user groups may, e.g., represent the organizations working in the system. For example, in the Sailing Analytics the organizations could be SAP in general (e.g., owning all content in the "archive server"), sailing clubs, or events like the Travemünder Woche. The group ownership can then be used to define access rules based on this group ownership, either generally for all users, or specifically for users that are members of that group. An example of the latter would be a training group that wants to track their training sessions and make the tracks accessible only to members of that group. An example of the former would be an event with a dedicated event user group, making all event data public by providing permission to all users to read all content owned by the event group.
 
-One idea behind tenants is to encapsulate organizations' data so users of one organization cannot work with data objects from another organization if they are not granted the permissions explicitly. Furthermore, tenants are used to group data objects so users can have access to all data objects of a tenant and do not have to be granted every permission explicitly. Additional to data objects, tenants are also associated with roles. Thus, assigning to a user a role associated with a tenant is equivalent to granting the permissions implied by that role for each data object which is associated with (owned by) the tenant.
+Ownerships are usually assigned to an object upon its creation. For this, the session user will be taken as the default owning user. The owning group is determined based on the user's preferences. Logged-in users can select the user group to use as the group owner for new objects the user created. The user must be a member of that group at the time the selection is made. This assignment is stored on a per-server basis. When a dedicated server is set up for an event it is good practice to create the objects with a specific event group as group owner on that server. Still, on other servers the user may want to create objects with other groups as owners which is why this setting is remembered per server.
 
-As will be described later in more detail, ownership information can be used to constrain the granting of roles' permissions. For example, a user may be assigned the "admin" role qualified with a specific tenant so that the permissions implied by the admin role will be granted to that user only for those objects owned by that tenant. The same concept of role qualification can be applied to user ownerships.
+It is generally possible to change the group and user ownership of an object. This constitutes an action for which the user needs to have the corresponding permission.
 
-Ownerships should usually be assigned to an object upon its creation. For this, the session user may be taken as the default owning user. The owning tenant, however, may not be unique in case the user belongs to more than one tenant. In this case, a disambiguation is required which may happen upon user log-on where the user would have to select one of its several tenants that shall be used as the tenant owner for new objects created during this session.
+## Access Control Concepts
 
-In some cases, it might be necessary to transfer the ownership to another tenant/user. Thus, ownership should not be final but changeable.
+The two big concepts that play together in this permission concept are access control lists (ACLs) (also used e.g. in the Linux or Windows file system) and role-based access control (RBAC).
+
+The concept of ACLs is based on the idea of assigning each data object that is access controlled an ACL. The ACL used here is a list of entries that grant or revoke permissions to a user group. If e.g. read access is requested for a data object, its ACL is checked if any of the groups the user is a member of has an entry granting the read permission and no entry denying that read permission.
+
+RBAC is based on the idea of having roles that imply certain permissions and assigning roles to users. When an action is to be executed, such as reading an object, the read permission is checked, and if it is not granted or revoked by an ACL entry, the requesting user's roles are checked regarding implying this read permission. If so, the permission is granted. It is important to note that always single permissions are checked and not whether or not the user has a certain role assigned.
+
+## Initial Idea
+
+The inital idea for this document is based on the existing Shiro RBAC system that handles roles that can imply permissions and that also supports directly granting permissions to a user. Furthermore, ACLs should be introduced. Those should solve the problem of â€œlosingâ€� implied permissions, e.g., upon ownership changes, because the access control lists are directly associated with the data object and do not depend on ownerships, whereas role-implied permissions may well be implied only if ownerships support this. Furthermore, an ACL can be used to explicitly revoke a permission that may otherwise have been implied for a user based on ownerships or the roles the user has assigned.
+
+The existing Shiro authorizing realm that checks for the roles and permissions directly assigned to a user would have to be extended by the ACL concept. This will form what we call a "compound realm" that if a permission is checked looks for the permission in the roles and permissions of the user *and* in the ACL of the data object. If either the roles and permissions or the ACL grants the permission and the ACL does not revoke the permission then the user is allowed access.
 
 ## Roles
 
@@ -87,7 +75,19 @@ This role implies the "*" permission. It should ideally be used with a tenant qu
 
 ### Role "user"
 
+This role is intended to be used to describe the permissions that object owners shall be granted. In particular, when qualified
+for objects owned by the user being assigned the role, that user obtains the permission to execute actions
+``CHANGE_ACL,CHANGE_OWNERSHIP,CREATE,DELETE,READ,READ_PUBLIC,UPDATE`` for objects of any type. By default, users are also assigned
+this role constrained for objects whose group owner is the user's dedicated group (``{username}-tenant``).
 
+### Role "sailing_viewer"
+
+This role can be used to publish the data of a sailing event. When assigning this to a user, the user obtains all
+permissions required to ``READ`` the content of the sailing event, including leaderboards, regatta details, tracking, etc.
+In order to constrain access to, say, a dedicated event, that event including its object hierarchy with leaderboards,
+leaderboard groups, regattas, tracked races and so on can be transferred to a dedicated group owner. The ``sailing_viewer``
+role can then be assigned, qualified for that group, to one or more users, or it can be assigned to the group owning
+the event hierarchy now and can then be restricted to the members of that group or can be opened up to all users.
 
 ### User "admin"
 
@@ -108,7 +108,7 @@ This section will discuss how it is determined if a user can grant or revoke a p
 
 With these two facts in mind, data objects must have a single user as the owner. User ownership can changed over time. Additionally, as discussed earlier, tenants are a second tier of ownership. Not every user that can create data objects in a tenant should automatically be the owner of every data object of the tenant, but in return should also not lose rights e.g. for removing an accidentally created data object on creation, because the tenant is the owner. Thus, in our approach the creator of a data object will be the owner and the tenant he is currently logged in to will be the owning tenant.
 
-Another challenge after having a concept for ownership is the delegation of power. Not every user should be allowed to delegate his permissions to other users, thus there has to be a “grantPermission” permission that allows a user to delegate all his permissions to other users.
+Another challenge after having a concept for ownership is the delegation of power. Not every user should be allowed to delegate his permissions to other users, thus there has to be a â€œgrantPermissionâ€� permission that allows a user to delegate all his permissions to other users.
 
 ### Implementation of Ownership
 
@@ -174,40 +174,40 @@ There are even more expressive access control systems than RBAC. They are called
 
 In the following example use cases are listed that describe how user actions will impact the ACLs of the data objects the user interacts with. It is to note that this list of use cases is no complete list of all use cases for the permission handling system. Listing all of them is outside the scope of this document.
 
-It is always assumed that the ID of the user is “user” and the ID of its tenant is “tenant”.
+It is always assumed that the ID of the user is â€œuserâ€� and the ID of its tenant is â€œtenantâ€�.
 
 1. Create Event (or any other data object)
   * User creates event
   * Event is owned by tenant that user is associated with in this session
   * Access control list is created for the event
-  * Permissions as e.g. “view” are implicitly granted by the roles of the owning tenant
-2. Transfer ownership of event (or any other ownership transfer) (Already described in section “Ownership”)
+  * Permissions as e.g. â€œviewâ€� are implicitly granted by the roles of the owning tenant
+2. Transfer ownership of event (or any other ownership transfer) (Already described in section â€œOwnershipâ€�)
 3. Link RegattaLeaderboard into LeaderboardGroup
-  * If either the user, a role or a tenant the user is part of, has the permission to edit the LeaderboardGroup (LBG) and view the RegattaLeaderboard (RL), the user can link them. LBG ACL = {“user”:[“edit”]} | RL ACL = {“user”:[“view”]}
-  * If the user has the “grantPermissions” permission, the “view” permission will automatically granted to all that can view the LeaderboardGroup.
+  * If either the user, a role or a tenant the user is part of, has the permission to edit the LeaderboardGroup (LBG) and view the RegattaLeaderboard (RL), the user can link them. LBG ACL = {â€œuserâ€�:[â€œeditâ€�]} | RL ACL = {â€œuserâ€�:[â€œviewâ€�]}
+  * If the user has the â€œgrantPermissionsâ€� permission, the â€œviewâ€� permission will automatically granted to all that can view the LeaderboardGroup.
 4. Unlink TrackedRace
   * If either the user, a role or a tenant, the user is part of, has the permission to edit the Leaderboard, the user can unlink them.
 5. Share TrackedRace
-  * If either the user, a role or a tenant, the user is part of, has the permission to view the TrackedRace and the “grantPermissions” permission, the user can grant view permissions to anybody. ACL = {“user”:[“view, grantPermissions”]}
-  * The user shares the TrackedRace with “user2”. ACL = {“user”:[“view, grantPermission”], “user2”:[“view”]}
+  * If either the user, a role or a tenant, the user is part of, has the permission to view the TrackedRace and the â€œgrantPermissionsâ€� permission, the user can grant view permissions to anybody. ACL = {â€œuserâ€�:[â€œview, grantPermissionsâ€�]}
+  * The user shares the TrackedRace with â€œuser2â€�. ACL = {â€œuserâ€�:[â€œview, grantPermissionâ€�], â€œuser2â€�:[â€œviewâ€�]}
 6. Create GPSFix
   * It would only be consistent to attach a ACL to each GPSFix, however it probably never happens that a GPSFix has other permissions than a whole track, thus I propose to leave GPSFixes without ACLs and only introduce access windows on the tracks that can have their own ACL.
 7. Masterdata import
-  * This should import all permissions as they are. A masterdata import itself is no reason to change permissions, however only data objects that the user that is importing has a “view” permission for should be importable. If the importing user is the owner or a tenant owner of the imported data, he can also change the ownership.
+  * This should import all permissions as they are. A masterdata import itself is no reason to change permissions, however only data objects that the user that is importing has a â€œviewâ€� permission for should be importable. If the importing user is the owner or a tenant owner of the imported data, he can also change the ownership.
 8. Share event with public
-  * If either the user, a role or a tenant, the user is part of, has the permission to view the data object and the “grantPermissions” permission, the user can share the event with the public. ACL = {“user”:[“view, grantPermissions”]}
-  * The user shares the data object. ACL = {“user”:[“view”], “*”:[“view”]}
+  * If either the user, a role or a tenant, the user is part of, has the permission to view the data object and the â€œgrantPermissionsâ€� permission, the user can share the event with the public. ACL = {â€œuserâ€�:[â€œview, grantPermissionsâ€�]}
+  * The user shares the data object. ACL = {â€œuserâ€�:[â€œviewâ€�], â€œ*â€�:[â€œviewâ€�]}
 9. Revoke permissions
   * Simply revoke: If either the user is the owner of or the user is a tenant owner/admin of the data object, the user can revoke every permission to the data object from anybody. 
-  * Overwrite with negative: the same rules apply as for revoking, however a permissions in the following form is inserted into the ACL. {“user”:[“!view”]}
+  * Overwrite with negative: the same rules apply as for revoking, however a permissions in the following form is inserted into the ACL. {â€œuserâ€�:[â€œ!viewâ€�]}
 10. First boot of server
   * On first boot of the server, an admin user is created. The creator of the server will log in as that admin user and in most cases create a new tenant. Thereafter, the creator will create at least one new users, assign the admin role to that user and delete the default admin user.
 
 ## Algorithm `boolean isPermitted(PrincipalCollection principals, WildcardPermission permission)` for Composite Realm
 
-The above describes the data model that is relevant to the composite realm that implements the `isPermitted` function. The “permission” parameter should be of the pattern “type:action:instance”. It is assumed that the user (with associated permissions and roles), tenant, ownership associations and ACL entries are available. The following describes in which order the different sources for permissions are checked and how they depend on each other.
+The above describes the data model that is relevant to the composite realm that implements the `isPermitted` function. The â€œpermissionâ€� parameter should be of the pattern â€œtype:action:instanceâ€�. It is assumed that the user (with associated permissions and roles), tenant, ownership associations and ACL entries are available. The following describes in which order the different sources for permissions are checked and how they depend on each other.
 
-1. Check if the ACL entries grant or explicitly revoke the permission to the user under consideration of the user’s roles
+1. Check if the ACL entries grant or explicitly revoke the permission to the user under consideration of the userâ€™s roles
   * If there is an entry, return true if granted and false if revoked, but take the most explicit entry and in doubt return false
 2. Check if the permission is directly assigned to the user
   * If this is true return true
@@ -286,11 +286,11 @@ As the tenant is a data object itself, it also has an owner. The owning tenant o
 
 #### Subtenants
 
-Subtenants could be a convenient way to restrict the permissions of certain users to only a part of a tenant’s domain. However, this introduces a hierarchy of tenants that brings with it its own challenges. Imagine there is a tenant “tw2017” and the 49er boat class races should not be manageable by the same race managers that can manage races of the other regattas. So “tw2017” would require a subtenant “other” and “49er” that encapsulate the 49er boat class and everything else from each other. Now if a permission is checked on an ACL, the ACL has to traverse the tenant hierarchy to find out if the user is part of a role for a parent tenant that grants the permission. However, the convenience of tenant hierarchies might be stronger than the traversal problem, because the hierarchy will probably never be deeper than one or two levels.
+Subtenants could be a convenient way to restrict the permissions of certain users to only a part of a tenantâ€™s domain. However, this introduces a hierarchy of tenants that brings with it its own challenges. Imagine there is a tenant â€œtw2017â€� and the 49er boat class races should not be manageable by the same race managers that can manage races of the other regattas. So â€œtw2017â€� would require a subtenant â€œotherâ€� and â€œ49erâ€� that encapsulate the 49er boat class and everything else from each other. Now if a permission is checked on an ACL, the ACL has to traverse the tenant hierarchy to find out if the user is part of a role for a parent tenant that grants the permission. However, the convenience of tenant hierarchies might be stronger than the traversal problem, because the hierarchy will probably never be deeper than one or two levels.
 
 Another challenge with subtenants is how to communicate the concept to users. Which also makes it harder to imply with which tenant or subtenant a user is currently working.
 
-An alternative strategy is just creating a completely new top level tenant for the 49er boat class races of “tw2017”. This would not introduce a hierarchy, but would require users that have roles for all boat classes to have their roles for both tenants instead of only the role for the parent tenant.
+An alternative strategy is just creating a completely new top level tenant for the 49er boat class races of â€œtw2017â€�. This would not introduce a hierarchy, but would require users that have roles for all boat classes to have their roles for both tenants instead of only the role for the parent tenant.
 
 For now, we will not consider the concept of subtenants further.
 
