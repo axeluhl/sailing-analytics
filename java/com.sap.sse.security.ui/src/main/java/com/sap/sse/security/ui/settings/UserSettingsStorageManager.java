@@ -14,9 +14,9 @@ import com.sap.sse.gwt.client.shared.settings.OnSettingsStoredCallback;
 import com.sap.sse.gwt.client.shared.settings.SettingsStorageManager;
 import com.sap.sse.gwt.client.shared.settings.StorableRepresentationOfDocumentAndUserSettings;
 import com.sap.sse.gwt.client.shared.settings.StorableSettingsRepresentation;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * The settings are stored in HTML5 LocalStorage, as well as on server in the user's account, in case the user is

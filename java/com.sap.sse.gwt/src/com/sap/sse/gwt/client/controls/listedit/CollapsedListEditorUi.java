@@ -125,5 +125,9 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
     @Override
     public void onRowRemoved(int rowIndex) {
     }
+
+    public void setEnabled(final boolean enabled) {
+        collapsedEditButton.setEnabled(enabled);
+    }
 }
 

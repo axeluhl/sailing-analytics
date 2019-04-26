@@ -73,4 +73,5 @@ public interface ReplicationMasterDescriptor {
 
     Iterable<Replicable<?, ?>> getReplicables();
 
+    String getBearerToken();
 }

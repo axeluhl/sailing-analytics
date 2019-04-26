@@ -340,7 +340,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
                 String.format(BMW_RACE, 1));
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
         tracTracEvents.setReggataForTracking(bmwCupDescriptor);
         tracTracEvents.setTrackSettings(true, false, false);

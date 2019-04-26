@@ -25,8 +25,6 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -42,6 +40,7 @@ import com.sap.sailing.racecommittee.app.ui.views.decoration.PreferenceMarginIte
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class MainPreferenceFragment extends LoggableFragment {
 
@@ -74,11 +73,10 @@ public class MainPreferenceFragment extends LoggableFragment {
                     new Runnable() {
                         @Override
                         public void run() {
-                            DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
-                                    AppPreferences.on(getActivity()).getDeviceIdentifier());
-
+                            String deviceConfigurationName = AppPreferences.on(getActivity()).getDeviceConfigurationName();
+                            UUID deviceConfigurationUuid = AppPreferences.on(getActivity()).getDeviceConfigurationUuid();
                             LoaderManager.LoaderCallbacks<?> configurationLoader = DataManager.create(getActivity())
-                                    .createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
+                                    .createConfigurationLoader(deviceConfigurationName, deviceConfigurationUuid, new LoadClient<DeviceConfiguration>() {
 
                                         @Override
                                         public void onLoadFailed(Exception reason) {

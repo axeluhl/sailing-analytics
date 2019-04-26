@@ -45,6 +45,7 @@ import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -96,7 +97,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 },
                 /* delayToLiveInMillis */0l, /* millisecondsOverWhichToAverageWind */30000, /* simulator */null, /* courseDesignUpdateURI */
                 null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(),
-                /*ignoreTracTracMarkPassings*/false, mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS) {
+                /*ignoreTracTracMarkPassings*/false, mock(RaceLogResolver.class), mock(LeaderboardGroupResolver.class), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                new DefaultRaceTrackingHandler()) {
             @Override
             protected void handleEvent(Triple<IControlRoute, Long, Void> event) {
                 super.handleEvent(event);

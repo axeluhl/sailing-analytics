@@ -5,6 +5,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -28,6 +29,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         mediaService = GWT.create(MediaService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
+        getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }
     
     @Override

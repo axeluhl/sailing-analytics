@@ -22,10 +22,8 @@ public class WindJsonDeserializer implements JsonDeserializer<Wind> {
     }
 
     public Wind deserialize(JSONObject object) throws JsonDeserializationException {
-        
         JSONObject positionJsonObject = Helpers.getNestedObjectSafe(object, WindJsonSerializer.FIELD_POSITION);
         Position position = positionDeserializer.deserialize(positionJsonObject);
-        
         Number timeStamp = (Number) object.get(WindJsonSerializer.FIELD_TIMEPOINT);
         Number direction = (Number) object.get(WindJsonSerializer.FIELD_DIRECTION);
         if (direction == null) {

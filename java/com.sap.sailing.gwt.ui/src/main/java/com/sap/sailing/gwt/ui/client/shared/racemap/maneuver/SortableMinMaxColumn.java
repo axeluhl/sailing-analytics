@@ -11,13 +11,13 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.domain.common.InvertibleComparator;
-import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.HasStringAndDoubleValue;
 import com.sap.sailing.gwt.ui.leaderboard.MinMaxRenderer;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 
 public class SortableMinMaxColumn extends AbstractSortableColumnWithMinMax<ManeuverTableData, String> {
     private final static NumberFormat TWO_DIGIT_ACCURACY = NumberFormatterFactory.getDecimalFormat(2);

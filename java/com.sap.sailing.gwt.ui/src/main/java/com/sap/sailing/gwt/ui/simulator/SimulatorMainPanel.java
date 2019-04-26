@@ -317,8 +317,10 @@ public class SimulatorMainPanel extends SimplePanel {
         int secondsTimeStep = (int) windParams.getTimeStep().asSeconds();
         timer.setPlaySpeedFactor(secondsTimeStep);
         timePanel = new TimePanel<TimePanelSettings>(null, null, timer, timeRangeProvider, stringMessages, false,
-                /* isScreenLargeEnoughToOfferChartSupport: no wind or competitor chart is shown; use full horizontal
-                 * extension of time panel */ false, userService);
+                /*
+                 * isScreenLargeEnoughToOfferChartSupport: no wind or competitor chart is shown; use full horizontal
+                 * extension of time panel
+                 */ false, userService, /*TODO: raceDTO is needed for permission check */null);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, streamletPars,
                 timer, timePanel, windParams, busyIndicator, mode, this, showMapControls,
@@ -362,20 +364,20 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     public native void setMapInstance(Object mapInstance) /*-{
-		$wnd.swarmMap = mapInstance;
+        $wnd.swarmMap = mapInstance;
     }-*/;
     
     public native void setCanvasProjectionInstance(Object instance) /*-{
-		$wnd.swarmCanvasProjection = instance;
+        $wnd.swarmCanvasProjection = instance;
     }-*/;
 
     public native void startStreamlets() /*-{
-		if ($wnd.swarmAnimator) {
-			$wnd.swarmUpdData = true;
-			$wnd.updateStreamlets($wnd.swarmUpdData);
-		} else {
-			$wnd.initStreamlets($wnd.swarmMap);
-		}
+        if ($wnd.swarmAnimator) {
+            $wnd.swarmUpdData = true;
+            $wnd.updateStreamlets($wnd.swarmUpdData);
+        } else {
+            $wnd.initStreamlets($wnd.swarmMap);
+        }
     }-*/;
 
     public void setDefaultTimeSettings() {

@@ -1,16 +1,19 @@
 package com.sap.sse.security.ui.client.component;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Produces username, e-mail and password as the dialog's result. This class's default implementation of
@@ -29,6 +32,8 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
     private final PasswordTextBox pwBox;
     private final PasswordTextBox pwRepeat;
     private final UserManagementServiceAsync userManagementService;
+    private boolean resolvingUsername = false;
+    private boolean usernameUnavailable = true;
     
     public static class UserData {
         private final String username;
@@ -63,39 +68,53 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
 
     /**
      * Uses a default validator that validates the username and the two new passwords.
+     * 
+     * @param checkUsernameForExistance
      */
     public AbstractUserDialog(final StringMessages stringMessages, final String title,
             final UserManagementServiceAsync userManagementService,
             final UserDTO user,
-            final DialogCallback<UserData> callback) {
-        this(stringMessages, title, title, userManagementService, user, callback);
+            final DialogCallback<UserData> callback, final boolean checkUsernameForExistance) {
+        this(stringMessages, title, title, userManagementService, user, callback, checkUsernameForExistance);
     }
     
     /**
-     * Uses a default validator that validates the username and the two new passwords and allows
-     * callers to specify distinct title and message strings.
+     * Uses a default validator that validates the username and the two new passwords and allows callers to specify
+     * distinct title and message strings.
+     * 
+     * @param checkUsernameForExistance
      */
     public AbstractUserDialog(final StringMessages stringMessages, final String title, final String message,
-            final UserManagementServiceAsync userManagementService,
-            final UserDTO user,
-            final DialogCallback<UserData> callback) {
-        this(stringMessages, title, message, userManagementService, user, new DataEntryDialog.Validator<UserData>() {
+            final UserManagementServiceAsync userManagementService, final UserDTO user,
+            final DialogCallback<UserData> callback, boolean checkUsernameForExistance) {
+        this(stringMessages, title, message, userManagementService, user, null, callback, checkUsernameForExistance);
+        super.setValidator(new DataEntryDialog.Validator<UserData>() {
             private final NewAccountValidator validator = new NewAccountValidator(stringMessages);
+
             @Override
             public String getErrorMessage(UserData valueToValidate) {
-                return validator.validateUsernameAndPassword(valueToValidate.getUsername(), valueToValidate.getPassword(),
-                        valueToValidate.getPasswordRepeat());
+                return resolvingUsername ? stringMessages.pleaseWaitUntilUsernameIsResolved()
+                        : (usernameUnavailable ? stringMessages.userAlreadyExists(nameBox.getText())
+                                : validator.validateUsernameAndPassword(valueToValidate.getUsername(),
+                                        valueToValidate.getPassword(), valueToValidate.getPasswordRepeat()));
             }
-        }, callback);
+        });
     }
-    
+
+    public AbstractUserDialog(final StringMessages stringMessages, final String title, final String message,
+            final UserManagementServiceAsync userManagementService, final UserDTO user,
+            DataEntryDialog.Validator<UserData> validator, final DialogCallback<UserData> callback) {
+        this(stringMessages, title, message, userManagementService, user, validator, callback, /* checkUsernameForExistence */ true);
+    }
+
     /**
      * Allows the caller to provide their own validator, e.g., in order to skip password or username validation or to
      * add validation for the current password
      */
     public AbstractUserDialog(final StringMessages stringMessages, final String title, final String message,
                 final UserManagementServiceAsync userManagementService, final UserDTO user,
-                DataEntryDialog.Validator<UserData> validator, final DialogCallback<UserData> callback) {
+            DataEntryDialog.Validator<UserData> validator, final DialogCallback<UserData> callback,
+            final boolean checkUsernameForExistance) {
         super(title, message, stringMessages.ok(), stringMessages.cancel(),
                 validator, callback);
         nameBox = createTextBox("", 30);
@@ -103,14 +122,46 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
         emailBox = createTextBox("", 30);
         oldPwBox = createPasswordTextBox("", 30);
         pwBox = createPasswordTextBox("", 30);
+        pwBox.ensureDebugId("pw");
         nameBox.setName("password");
         pwRepeat = createPasswordTextBox("", 30);
+        pwRepeat.ensureDebugId("pwrepeat");
         if (user != null) {
             nameBox.setText(user.getName());
             emailBox.setText(user.getEmail());
         }
         this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
+        if (checkUsernameForExistance) {
+            nameBox.addKeyUpHandler(e -> checkIfUsernameExists());
+        } else {
+            usernameUnavailable = false;
+        }
+    }
+
+    public AbstractUserDialog(StringMessages stringMessages, String title,
+            UserManagementServiceAsync userManagementService, UserDTO user,
+            DialogCallback<UserData> callback) {
+        this(stringMessages, title, userManagementService, user, callback, /* checkUsernameForExistence */ true);
+    }
+
+    private void checkIfUsernameExists() {
+        resolvingUsername = true;
+        validateAndUpdate();
+        final String username = nameBox.getText();
+        userManagementService.userExists(username, new AsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                usernameUnavailable = result != null ? result : false;
+                resolvingUsername = false;
+                validateAndUpdate();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
+            }
+        });
     }
     
     protected UserManagementServiceAsync getUserManagementService() {

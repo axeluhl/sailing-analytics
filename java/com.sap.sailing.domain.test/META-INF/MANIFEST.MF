@@ -26,7 +26,11 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.interface,
  com.sap.sailing.server.testsupport,
  com.sap.sailing.domain.persistence,
- com.sap.sse.filestorage
+ com.sap.sse.filestorage,
+ com.sap.sse.security,
+ com.sap.sse.security.userstore.mongodb,
+ com.sap.sse.security.common,
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Export-Package: com.sap.sailing.domain.test,
  com.sap.sailing.domain.test.mock
 Import-Package: org.osgi.util.tracker

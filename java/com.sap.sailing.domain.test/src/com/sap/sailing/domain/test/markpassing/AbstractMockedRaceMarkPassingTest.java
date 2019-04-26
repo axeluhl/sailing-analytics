@@ -31,6 +31,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -72,9 +73,12 @@ public class AbstractMockedRaceMarkPassingTest {
         Waypoint w4 = new WaypointImpl(m, PassingInstruction.Starboard);
         Waypoint w5 = new WaypointImpl(cp, PassingInstruction.Line);
         waypoints = Arrays.asList(w1, w2, w3, w4, w5);
-        Regatta r = new RegattaImpl(RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* canBoatsOfCompetitorsChangePerRace */ true, 
+        Regatta r = new RegattaImpl(RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, Arrays.asList(new SeriesImpl("Series", true, /* isFleetsCanRunInParallel */ true, Arrays.asList(new FleetImpl("fleet")),
-                new ArrayList<String>(), null)), true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)), OneDesignRankingMetric::new);
+                        new ArrayList<String>(), null)),
+                true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)), OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         Course course = new CourseImpl("course", waypoints);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(ron, boatRon);

@@ -459,4 +459,11 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="com.sap.sailing.domain.igtimiadapter.gateway"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

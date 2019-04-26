@@ -8,16 +8,25 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +41,7 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.cache.CacheManager;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
 import org.apache.shiro.crypto.RandomNumberGenerator;
@@ -66,39 +75,73 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.OperationsToMasterSender;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.OperationsToMasterSendingQueue;
+import com.sap.sse.security.Action;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
-import com.sap.sse.security.Credential;
 import com.sap.sse.security.GithubApi;
 import com.sap.sse.security.InstagramApi;
 import com.sap.sse.security.OAuthRealm;
-import com.sap.sse.security.OAuthToken;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionCacheManager;
 import com.sap.sse.security.SessionUtils;
-import com.sap.sse.security.Social;
-import com.sap.sse.security.SocialSettingsKeys;
-import com.sap.sse.security.User;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.interfaces.Credential;
+import com.sap.sse.security.interfaces.OAuthToken;
+import com.sap.sse.security.interfaces.Social;
+import com.sap.sse.security.interfaces.SocialSettingsKeys;
+import com.sap.sse.security.interfaces.UserImpl;
+import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.persistence.PersistenceFactory;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.HasPermissionsProvider;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PredefinedRoles;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserRole;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
+
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
+
+    private static final String ADMIN_DEFAULT_PASSWORD = "admin";
+
+    private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();;
 
     private CachingSecurityManager securityManager;
     
@@ -110,6 +153,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private final ReplicatingCacheManager cacheManager;
     
     private UserStore store;
+    private AccessControlStore accessControlStore;
+    
+    private boolean isInitialOrMigration;
+    
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
     private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
@@ -124,6 +171,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
     
     private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
+
+    private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
     
     /**
      * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
@@ -134,20 +183,23 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
 
     private static Ini shiroConfiguration;
+
+    private final HasPermissionsProvider hasPermissionsProvider;
     static {
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
     }
     
-    public SecurityServiceImpl(UserStore store) {
-        this(null, store);
+    public SecurityServiceImpl(UserStore userStore, AccessControlStore accessControlStore) {
+        this(null, userStore, accessControlStore);
     }
 
     /**
-     * @param mailProperties must not be <code>null</code>
+     * @param mailProperties
+     *            must not be <code>null</code>
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore store) {
-        this(mailServiceTracker, store, /* setAsActivatorTestSecurityService */ false);
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore) {
+        this(mailServiceTracker, userStore, accessControlStore, null);
     }
     
     /**
@@ -159,19 +211,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      *            replication.
      * 
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore store, boolean setAsActivatorSecurityService) {
-        logger.info("Initializing Security Service with user store " + store);
-        if (setAsActivatorSecurityService) {
-            Activator.setSecurityService(this);
-        }
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
+            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider) {
+        logger.info("Initializing Security Service with user store " + userStore);
         operationsSentToMasterForReplication = new HashSet<>();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
-        this.store = store;
+        this.store = userStore;
+        this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
-        // Create default users if no users exist yet.
-        initEmptyStore();
-        Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
+        this.hasPermissionsProvider = hasPermissionsProvider;
         cacheManager = loadReplicationCacheManagerContents();
+        Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
         final Section urlsSection = shiroConfiguration.getSection("urls");
@@ -197,7 +247,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final ReplicatingCacheManager result = new ReplicatingCacheManager();
         for (Entry<String, Set<Session>> cacheNameAndSessions : PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadSessionsByCacheName().entrySet()) {
             final String cacheName = cacheNameAndSessions.getKey();
-            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName);
+            final ReplicatingCache<Object, Object> cache = (ReplicatingCache<Object, Object>) result.getCache(cacheName,
+                    this);
             for (final Session session : cacheNameAndSessions.getValue()) {
                 cache.put(session.getId(), session, /* store */ false);
                 count++;
@@ -227,23 +278,86 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
     }
 
+    @Override
+    public void initialize() {
+        initEmptyStore();
+        initEmptyAccessControlStore();
+    }
+
     /**
      * Creates a default "admin" user with initial password "admin" and initial role "admin" if the user <code>store</code>
      * is empty.
      */
     private void initEmptyStore() {
-        if (!store.hasUsers()) {
-            try {
-                logger.info("No users found, creating default user \"admin\" with password \"admin\"");
-                createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
-                        /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null);
-                addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
-            } catch (UserManagementException | MailException e) {
-                logger.log(Level.SEVERE, "Exception while creating default admin user", e);
+        final AdminRole adminRolePrototype = AdminRole.getInstance();
+        RoleDefinition adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
+        adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
+        assert adminRoleDefinition != null;
+        try {
+            isInitialOrMigration = false;
+            if (!store.hasUsers()) {
+                isInitialOrMigration = true;
+                logger.info("No users found, creating default user \""+UserStore.ADMIN_USERNAME+"\" with password \""+ADMIN_DEFAULT_PASSWORD+"\"");
+                final User adminUser = createSimpleUser(UserStore.ADMIN_USERNAME, "nobody@sapsailing.com",
+                        ADMIN_DEFAULT_PASSWORD,
+                        /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
+                        null);
+
+                setOwnership(adminUser.getIdentifier(), adminUser, null);
+                Role adminRole = new Role(adminRoleDefinition);
+                addRoleForUserAndSetUserAsOwner(adminUser, adminRole);
+                final UserGroup defaultTenant = getDefaultTenant();
+                addUserToUserGroup(defaultTenant, adminUser);
+                setDefaultTenantForCurrentServerForUser(adminUser.getName(), defaultTenant.getId());
             }
+            
+            if (store.getUserByName(SecurityService.ALL_USERNAME) == null) {
+                isInitialOrMigration = true;
+                logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
+                User allUser = apply(s->s.internalCreateUser(SecurityService.ALL_USERNAME, null));
+
+                // <all> user is explicitly not owned by itself because this would enable anybody to modify this user
+                setOwnership(allUser.getIdentifier(), null, getDefaultTenant());
+
+                // The permission to create new users is initially added but not recreated on server start if the admin removed it in the meanwhile.
+                // This allows servers to be configured to not permit self-registration of new users but only users being managed by an admin user.
+                WildcardPermission createUserPermission = SecuredSecurityTypes.USER.getPermission(DefaultActions.CREATE);
+                addPermissionForUser(ALL_USERNAME, createUserPermission);
+                QualifiedObjectIdentifier qualifiedTypeIdentifierForPermission = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                        .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(createUserPermission, allUser));
+                // Permission association is owned by the server tenant.
+                // This typically ensures that the server admin is able to remove the association.
+                setOwnership(qualifiedTypeIdentifierForPermission, null, getDefaultTenant());
+            }
+            
+            if (isInitialOrMigration) {
+                // predefined roles are meant to be publicly readable
+                for (UUID predefinedRoleId : getPredefinedRoleIds()) {
+                    final RoleDefinition predefinedRole = getRoleDefinition(predefinedRoleId);
+                    if (predefinedRole != null) {
+                        addToAccessControlList(predefinedRole.getIdentifier(), null, DefaultActions.READ.name());
+                    }
+                }
+            }
+        } catch (UserManagementException | MailException | UserGroupManagementException e) {
+            logger.log(Level.SEVERE,
+                    "Exception while creating default " + UserStore.ADMIN_USERNAME + " and " + SecurityService.ALL_USERNAME + " user", e);
         }
     }
     
+    private Iterable<UUID> getPredefinedRoleIds() {
+        final Set<UUID> predefinedRoleIds = new HashSet<>();
+        predefinedRoleIds.add(AdminRole.getInstance().getId());
+        predefinedRoleIds.add(UserRole.getInstance().getId());
+        for (final PredefinedRoles otherPredefinedRole : PredefinedRoles.values()) {
+            predefinedRoleIds.add(otherPredefinedRole.getId());
+        }
+        return predefinedRoleIds;
+    }
+    
+    private void initEmptyAccessControlStore() {
+    }
+
     private MailService getMailService() {
         return mailServiceTracker == null ? null : mailServiceTracker.getService();
     }
@@ -273,8 +387,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (!user.isEmailValidated()) {
             throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
         }
-        final String passwordResetSecret = user.startPasswordReset();
-        apply(s->s.internalStoreUser(user)); // durably storing the password reset secret
+        final String passwordResetSecret = user.createRandomSecret();
+        apply(s->s.internalResetPassword(username, passwordResetSecret));
         Map<String, String> urlParameters = new HashMap<>();
         try {
             urlParameters.put("u", URLEncoder.encode(user.getName(), "UTF-8"));
@@ -302,8 +416,332 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public Void internalResetPassword(String username, String passwordResetSecret) {
+        getUserByName(username).startPasswordReset(passwordResetSecret);
+        return null;
+    }
+
+    @Override
     public CachingSecurityManager getSecurityManager() {
         return this.securityManager;
+    }
+
+    @Override
+    public OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
+        return accessControlStore.getOwnership(idOfOwnedObjectAsString);
+    }
+
+    @Override
+    public OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject) {
+        return new OwnershipAnnotation(new Ownership(getCurrentUser(), getDefaultTenantForCurrentUser()),
+                idOfNewObject, /* display name */ idOfNewObject.toString());
+    }
+    
+    public UserGroup getDefaultTenantForUser(User user) {
+        UserGroup specificTenant = temporaryDefaultTenant.get();
+        if (specificTenant == null) {
+            specificTenant = user.getDefaultTenant(ServerInfo.getName());
+            if (specificTenant == null) {
+                String defaultTenantName = getDefaultTenantNameForUsername(user.getName());
+                specificTenant = getUserGroupByName(defaultTenantName);
+            }
+        }
+        return specificTenant;
+    }
+
+    @Override
+    public UserGroup getDefaultTenantForCurrentUser() {
+        if (SecurityUtils.getSecurityManager() != null && getCurrentUser() == null) {
+            return null;
+        }
+        return getDefaultTenantForUser(getCurrentUser());
+    }
+
+    @Override
+    public RoleDefinition getRoleDefinition(UUID idOfRoleDefinition) {
+        return store.getRoleDefinition(idOfRoleDefinition);
+    }
+
+    /**
+     * Returns a list of all existing access control lists. This is possibly not complete in the sense
+     * that there is a access control list for every access controlled data object.
+     */
+    @Override
+    public Iterable<AccessControlListAnnotation> getAccessControlLists() {
+        return accessControlStore.getAccessControlLists();
+    }
+
+    @Override
+    public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+        return accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString);
+    }
+
+    @Override
+    public SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+        return setEmptyAccessControlList(idOfAccessControlledObjectAsString, /* display name of access-controlled object */ null);
+    }
+
+    @Override
+    public SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
+        apply(s->s.internalSetEmptyAccessControlList(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
+        return this;
+    }
+
+    @Override
+    public Void internalSetEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject) {
+        accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
+        return null;
+    }
+
+    @Override
+    public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<UserGroup, Set<String>> permissionMap) {
+        accessControlStore.removeAccessControlList(idOfAccessControlledObject);
+        return updateAccessControlList(idOfAccessControlledObject, permissionMap);
+    }
+
+    @Override
+    public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<UserGroup, Set<String>> permissionMap) {
+        if (getAccessControlList(idOfAccessControlledObject) == null) {
+            setEmptyAccessControlList(idOfAccessControlledObject);
+        }
+        for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
+            final UserGroup userGroup = entry.getKey();
+            final UUID userGroupId = userGroup == null ? null : userGroup.getId();
+            final Set<String> actions = entry.getValue();
+            // avoid the UserGroup object having to be serialized with the operation by using the ID
+            apply(s -> s.internalAclPutPermissions(idOfAccessControlledObject, userGroupId, actions));
+        }
+        return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
+    }
+
+    @Override
+    public Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions) {
+        accessControlStore.setAclPermissions(idOfAccessControlledObject, getUserGroup(groupId), actions);
+        return null;
+    }
+
+    /*
+     * @param name The name of the user group to add
+     */
+    @Override
+    public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            UserGroup group, String action) {
+        if (getAccessControlList(idOfAccessControlledObject) == null) {
+            setEmptyAccessControlList(idOfAccessControlledObject);
+        }
+        final UUID groupId = group == null ? null : group.getId();
+        apply(s->s.internalAclAddPermission(idOfAccessControlledObject, groupId, action));
+        return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
+    }
+
+    @Override
+    public Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UUID groupId, String permission) {
+        accessControlStore.addAclPermission(idOfAccessControlledObjectAsString, getUserGroup(groupId), permission);
+        return null;
+    }
+
+    /*
+     * @param name The name of the user group to remove
+     */
+    @Override
+    public AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString,
+            UserGroup group, String permission) {
+        final AccessControlList result;
+        if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
+            final UUID groupId = group == null ? null : group.getId();
+            apply(s->s.internalAclRemovePermission(idOfAccessControlledObjectAsString, groupId, permission));
+            result = accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString).getAnnotation();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Void internalAclRemovePermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UUID groupId, String permission) {
+        accessControlStore.removeAclPermission(idOfAccessControlledObjectAsString, getUserGroup(groupId), permission);
+        return null;
+    }
+
+    @Override
+    public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+        if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
+            apply(s->s.internalDeleteAcl(idOfAccessControlledObjectAsString));
+        }
+    }
+
+    @Override
+    public Void internalDeleteAcl(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+        accessControlStore.removeAccessControlList(idOfAccessControlledObjectAsString);
+        return null;
+    }
+
+    @Override
+    public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, User userOwner,
+            UserGroup tenantOwner) {
+        return setOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
+    }
+
+    @Override
+    public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, User userOwner,
+            UserGroup tenantOwner, String displayNameOfOwnedObject) {
+        if (userOwner == null && tenantOwner == null) {
+            throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
+        }
+        final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
+        final String userOwnerName = userOwner == null ? null : userOwner.getName();
+
+        return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
+                displayNameOfOwnedObject));
+    }
+    
+    @Override
+    public Ownership internalSetOwnership(QualifiedObjectIdentifier idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
+        return accessControlStore.setOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
+    }
+
+    @Override
+    public void deleteOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
+        if (getOwnership(idOfOwnedObjectAsString) != null) {
+            apply(s->s.internalDeleteOwnership(idOfOwnedObjectAsString));
+        }
+    }
+
+    @Override
+    public Void internalDeleteOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
+        accessControlStore.removeOwnership(idOfOwnedObjectAsString);
+        return null;
+    }
+
+    @Override
+    public Iterable<UserGroup> getUserGroupList() {
+        return store.getUserGroups();
+    }
+
+    @Override
+    public UserGroup getUserGroup(UUID id) {
+        return store.getUserGroup(id);
+    }
+
+    @Override
+    public UserGroup getUserGroupByName(String name) {
+        return store.getUserGroupByName(name);
+    }
+
+    @Override
+    public Iterable<UserGroup> getUserGroupsOfUser(User user) {
+        return store.getUserGroupsOfUser(user);
+    }
+
+    @Override
+    public UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException {
+        return createUserGroupWithInitialUser(id, name, getCurrentUser());
+    }
+    
+    private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser)
+            throws UserGroupManagementException {
+        logger.info("Creating user group " + name + " with ID " + id);
+        apply(s -> s.internalCreateUserGroup(id, name));
+        final UserGroup userGroup = store.getUserGroup(id);
+        if (initialUser != null) {
+            logger.info("Adding initial user " + initialUser + " to group " + userGroup);
+            addUserToUserGroup(userGroup, initialUser);
+            addUserRoleForGroupToUser(userGroup, initialUser);
+        }
+        return userGroup;
+    }
+
+    @Override
+    public Void internalCreateUserGroup(UUID id, String name) throws UserGroupManagementException {
+        store.createUserGroup(id, name);
+        return null;
+    }
+
+    @Override
+    public void addUserToUserGroup(UserGroup userGroup, User user) {
+        logger.info("Adding user "+user.getName()+" to group "+userGroup.getName());
+        userGroup.add(user);
+        final UUID groupId = userGroup.getId();
+        final String username = user.getName();
+        apply(s->s.internalAddUserToUserGroup(groupId, username));
+    }
+
+    @Override
+    public Void internalAddUserToUserGroup(UUID groupId, String username) {
+        final UserGroup userGroup = getUserGroup(groupId);
+        userGroup.add(getUserByName(username));
+        store.updateUserGroup(userGroup);
+        return null;
+    }
+    
+    @Override
+    public Void internalRemoveUserFromUserGroup(UUID groupId, String username) {
+        final UserGroup userGroup = getUserGroup(groupId);
+        userGroup.remove(getUserByName(username));
+        store.updateUserGroup(userGroup);
+        return null;
+    }
+    
+    @Override
+    public void removeUserFromUserGroup(UserGroup userGroup, User user) {
+        logger.info("Removing user "+user.getName()+" from group "+userGroup.getName());
+        userGroup.remove(user);
+        final UUID userGroupId = userGroup.getId();
+        final String username = user.getName();
+        apply(s->s.internalRemoveUserFromUserGroup(userGroupId, username));
+    }
+
+    @Override
+    public void putRoleDefinitionToUserGroup(UserGroup userGroup, RoleDefinition roleDefinition, boolean forAll) {
+        logger.info("Removing role definition " + roleDefinition.getName() + "(forAll = " + forAll + ") to group "
+                + userGroup.getName());
+        apply(s -> s.internalPutRoleDefinitionToUserGroup(userGroup.getId(), roleDefinition.getId(), forAll));
+    }
+
+    @Override
+    public Void internalPutRoleDefinitionToUserGroup(UUID groupId, UUID roleDefinitionId, boolean forAll)
+            throws UserGroupManagementException {
+        final UserGroup userGroup = getUserGroup(groupId);
+        userGroup.put(getRoleDefinition(roleDefinitionId), forAll);
+        store.updateUserGroup(userGroup);
+        return null;
+    }
+
+    @Override
+    public void removeRoleDefintionFromUserGroup(UserGroup userGroup, RoleDefinition roleDefinition) {
+        logger.info("Removing role definition " + roleDefinition.getName() + " from group " + userGroup.getName());
+        apply(s -> s.internalRemoveRoleDefinitionFromUserGroup(userGroup.getId(), roleDefinition.getId()));
+    }
+
+    @Override
+    public Void internalRemoveRoleDefinitionFromUserGroup(UUID groupId, UUID roleDefinitionId)
+            throws UserGroupManagementException {
+        final UserGroup userGroup = getUserGroup(groupId);
+        userGroup.remove(getRoleDefinition(roleDefinitionId));
+        store.updateUserGroup(userGroup);
+        return null;
+    }
+
+    @Override
+    public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+        logger.info("Removing user group "+userGroup.getName());
+        final UUID groupId = userGroup.getId();
+        apply(s->s.internalDeleteUserGroup(groupId));
+    }
+    
+    @Override
+    public Void internalDeleteUserGroup(UUID groupId) throws UserGroupManagementException {
+        final UserGroup userGroup = getUserGroup(groupId);
+        if (userGroup == null) {
+            logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
+        } else {
+            accessControlStore.removeAllOwnershipsFor(userGroup);
+            store.removeAllQualifiedRolesForUserGroup(userGroup);
+            store.deleteUserGroup(userGroup);
+        }
+        return null;
     }
 
     @Override
@@ -365,17 +803,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public User getUserByEmail(String email) {
         return store.getUserByEmail(email);
     }
-    
-    @Override
-    public User createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, final String validationBaseURL) throws UserManagementException, MailException {
-        return createSimpleUser(username, email, password, fullName, company, /* locale */ null, validationBaseURL);
-    }
 
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, Locale locale, final String validationBaseURL) throws UserManagementException, MailException {
+            String company, Locale locale, final String validationBaseURL, UserGroup groupOwningUser)
+            throws UserManagementException, MailException, UserGroupManagementException {
+        logger.info("Creating user "+username);
         if (store.getUserByName(username) != null) {
+            logger.warning("User "+username+" already exists");
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         if (username == null || username.length() < 3) {
@@ -387,33 +822,55 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-        final User result = store.createUser(username, email, upa);
-        result.setFullName(fullName);
-        result.setCompany(company);
-        result.setLocale(locale);
-        final String emailValidationSecret = result.startEmailValidation();
-        // don't replicate exception handling; replicate only the effect on the user store
-        apply(s->s.internalStoreUser(result));
-        if (validationBaseURL != null) {
-            new Thread("e-mail validation for user " + username + " with e-mail address " + email) {
-                @Override
-                public void run() {
-                    try {
-                        startEmailValidation(result, emailValidationSecret, validationBaseURL);
-                    } catch (MailException e) {
-                        logger.log(Level.SEVERE, "Error sending mail for new account validation of user " + username
-                                + " to address " + email, e);
-                    }
-                }
-            }.start();
-        }
+        final User result = apply(s->s.internalCreateUser(username, email, upa)); // This also replicated the user creation
+        addUserRoleToUser(result);
+        final UserGroup tenant = getOrCreateTenantForUser(result);
+        setDefaultTenantForCurrentServerForUser(username, tenant.getId());
+        // the new user becomes its owner to ensure the user role is working correctly
+        // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
+        apply(s->s.internalSetOwnership(result.getIdentifier(), username, groupOwningUser==null?null:groupOwningUser.getId(), username));
+        updateUserProperties(username, fullName, company, locale);
+        // email has been set during creation already; the following call will trigger the e-mail validation process
+        updateSimpleUserEmail(username, email, validationBaseURL);
         return result;
     }
 
+    private void addUserRoleToUser(final User user) {
+        addRoleForUserAndSetUserAsOwner(user,
+                new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ user));
+    }
+    
+    private void addUserRoleForGroupToUser(final UserGroup group, final User user) {
+        addRoleForUserAndSetUserAsOwner(user, new Role(UserRole.getInstance(), /* tenant qualifier */ group, /* user qualifier */ null));
+    }
+    
+    private UserGroup getOrCreateTenantForUser(User user) throws UserGroupManagementException {
+        final String username = user.getName();
+        final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
+        UserGroup tenant = store.getUserGroupByName(defaultTenantNameForUsername);
+        if (tenant != null) {
+            logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
+        } else {
+            logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
+            tenant = createTenantForUser(defaultTenantNameForUsername, user);
+        }
+        return tenant;
+    }
+    
+    private UserGroup createTenantForUser(String defaultTenantNameForUsername, User user) throws UserGroupManagementException {
+        final UserGroup tenant = createUserGroupWithInitialUser(UUID.randomUUID(), defaultTenantNameForUsername, user);
+        setOwnership(tenant.getIdentifier(), user, tenant);
+        return tenant;
+    }
+
     @Override
-    public Void internalStoreUser(User user) {
-        store.updateUser(user);
-        return null;
+    public User internalCreateUser(String username, String email, Account... accounts) throws UserManagementException {
+        final User result = store.createUser(username, email, accounts); // TODO: get the principal as owner
+        return result;
+    }
+
+    private String getDefaultTenantNameForUsername(final String username) {
+        return username + "-tenant";
     }
 
     @Override
@@ -430,14 +887,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         // for non-admins, check that the old password is correct
-        final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(newPassword, salt);
+        apply(s->s.internalUpdateSimpleUserPassword(user.getName(), salt, hashedPasswordBase64));
+    }
+    
+    @Override
+    public Void internalUpdateSimpleUserPassword(String username, byte[] salt, String hashedPasswordBase64) {
+        final User user = getUserByName(username);
+        final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
         user.passwordWasReset();
-        apply(s->s.internalStoreUser(user));
+        return null;
     }
 
     @Override
@@ -446,14 +909,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        updateUserProperties(user, fullName, company, locale);
+        apply(s->s.internalUpdateUserProperties(username, fullName, company, locale));
     }
 
-    private void updateUserProperties(User user, String fullName, String company, Locale locale) {
+    @Override
+    public Void internalUpdateUserProperties(String username, String fullName, String company, Locale locale) {
+        final User user = store.getUserByName(username);
         user.setFullName(fullName);
         user.setCompany(company);
         user.setLocale(locale);
-        apply(s->s.internalStoreUser(user));
+        store.updateUser(user);
+        return null;
     }
 
     @Override
@@ -483,19 +949,29 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         logger.info("Changing e-mail address of user "+username+" to "+newEmail);
-        final String validationSecret = user.setEmail(newEmail);
-        new Thread("e-mail validation after changing e-mail of user " + username + " to " + newEmail) {
-            @Override
-            public void run() {
-                try {
-                    startEmailValidation(user, validationSecret, validationBaseURL);
-                } catch (MailException e) {
-                    logger.log(Level.SEVERE, "Error sending mail to validate e-mail address change for user "
-                            + username + " to address " + newEmail, e);
+        final String validationSecret = user.createRandomSecret();
+        apply(s->s.internalUpdateSimpleUserEmail(username, newEmail, validationSecret));
+        if (validationBaseURL != null && newEmail != null && !newEmail.trim().isEmpty()) {
+            new Thread("e-mail validation after changing e-mail of user " + username + " to " + newEmail) {
+                @Override
+                public void run() {
+                    try {
+                        startEmailValidation(user, validationSecret, validationBaseURL);
+                    } catch (MailException e) {
+                        logger.log(Level.SEVERE, "Error sending mail to validate e-mail address change for user "
+                                + username + " to address " + newEmail, e);
+                    }
                 }
-            }
-        }.start();
-        apply(s->s.internalStoreUser(user));
+            }.start();
+        }
+    }
+
+    @Override
+    public Void internalUpdateSimpleUserEmail(final String username, final String newEmail, final String validationSecret) {
+        final User user = getUserByName(username);
+        user.setEmail(newEmail);
+        user.startEmailValidation(validationSecret);
+        return null;
     }
 
     @Override
@@ -504,17 +980,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
+        return apply(s->s.internalValidateEmail(username, validationSecret));
+    }
+    
+    @Override
+    public Boolean internalValidateEmail(String username, String validationSecret) {
+        final User user = store.getUserByName(username);
         final boolean result = user.validate(validationSecret);
-        apply(s->s.internalStoreUser(user));
+        if (result) {
+            store.updateUser(user);
+        }
         return result;
     }
 
     /**
-     * {@link User#startEmailValidation() Triggers} e-mail validation for the <code>user</code> object and sends out a
+     * {@link UserImpl#startEmailValidation(String) Triggers} e-mail validation for the <code>user</code> object and sends out a
      * URL to the user's e-mail that has the validation secret ready for validation by clicking.
      * 
      * @param validationSecret
-     *            the result of either {@link User#startEmailValidation()} or {@link User#setEmail(String)}.
+     *            the result of either {@link UserImpl#startEmailValidation(String)} or {@link UserImpl#setEmail(String)}.
      * @param baseURL
      *            the URL under which the user can reach the e-mail validation service; this URL is required to assemble
      *            a validation URL that is sent by e-mail to the user, to make the user return the validation secret to
@@ -536,9 +1020,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     public StringBuilder buildURL(String baseURL, Map<String, String> urlParameters) {
-        StringBuilder url = new StringBuilder(baseURL);
+        StringBuilder url = new StringBuilder(baseURL==null?"":baseURL);
         // Potentially contained hash is checked to support place-based mail verification
-        boolean first = !baseURL.contains("?") || baseURL.contains("#");
+        boolean first = baseURL == null || !baseURL.contains("?") || baseURL.contains("#");
         for (Map.Entry<String, String> e : urlParameters.entrySet()) {
             if (first) {
                 url.append('?');
@@ -558,67 +1042,164 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Iterable<String> getRolesFromUser(String name) throws UserManagementException {
-        return store.getRolesFromUser(name);
+    public RoleDefinition createRoleDefinition(UUID roleId, String name) {
+        return apply(s->s.internalCreateRoleDefinition(roleId, name));
     }
 
     @Override
-    public void addRoleForUser(String username, String role) {
-        apply(s->s.internalAddRoleForUser(username, role));
+    public RoleDefinition internalCreateRoleDefinition(UUID roleId, String name) {
+        return store.createRoleDefinition(roleId, name, Collections.emptySet());
+    }
+    
+    @Override
+    public void deleteRoleDefinition(RoleDefinition roleDefinition) {
+        final UUID roleId = roleDefinition.getId();
+        apply(s->s.internalDeleteRoleDefinition(roleId));
     }
 
     @Override
-    public Void internalAddRoleForUser(String username, String role) throws UserManagementException {
-        store.addRoleForUser(username, role);
+    public Void internalDeleteRoleDefinition(UUID roleId) {
+        final RoleDefinition role = store.getRoleDefinition(roleId);
+        store.removeRoleDefinition(role);
         return null;
     }
 
     @Override
-    public void removeRoleFromUser(String username, String role) {
-        apply(s->s.internalRemoveRoleFromUser(username, role));
+    public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
+        apply(s->s.internalUpdateRoleDefinition(roleDefinitionWithNewProperties));
     }
 
     @Override
-    public Void internalRemoveRoleFromUser(String username, String role) throws UserManagementException {
-        store.removeRoleFromUser(username, role);
+    public Void internalUpdateRoleDefinition(RoleDefinition roleWithNewProperties) {
+        final RoleDefinition role = store.getRoleDefinition(roleWithNewProperties.getId());
+        role.setName(roleWithNewProperties.getName());
+        store.setRoleDefinitionDisplayName(roleWithNewProperties.getId(), role.getName());
+        role.setPermissions(roleWithNewProperties.getPermissions());
+        store.setRoleDefinitionPermissions(role.getId(), role.getPermissions());
         return null;
     }
 
     @Override
-    public Iterable<String> getPermissionsFromUser(String username) throws UserManagementException {
+    public Iterable<RoleDefinition> getRoleDefinitions() {
+        Collection<RoleDefinition> result = new ArrayList<>();
+        filterObjectsWithPermissionForCurrentUser(SecuredSecurityTypes.ROLE_DEFINITION, DefaultActions.READ,
+                store.getRoleDefinitions(), t -> result.add(t));
+        return result;
+    }
+    
+    private void addRoleForUserAndSetUserAsOwner(User user, Role role) {
+        addRoleForUser(user.getName(), role);
+        TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
+        QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                .getQualifiedObjectIdentifier(associationTypeIdentifier);
+        setOwnership(qualifiedTypeIdentifier, user, null);
+    }
+
+    @Override
+    public void addRoleForUser(User user, Role role) {
+        addRoleForUser(user.getName(), role);
+    }
+
+    @Override
+    public void addRoleForUser(String username, Role role) {
+        final UUID roleDefinitionId = role.getRoleDefinition().getId();
+        final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
+        final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
+        apply(s->s.internalAddRoleForUser(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
+    }
+
+    @Override
+    public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
+            String nameOfUserQualifyingRole) throws UserManagementException {
+        store.addRoleForUser(username, new Role(getRoleDefinition(roleDefinitionId),
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
+        return null;
+    }
+
+    @Override
+    public void removeRoleFromUser(User user, Role role) {
+        removeRoleFromUser(user.getName(), role);
+    }
+    
+    @Override
+    public void removeRoleFromUser(String username, Role role) {
+        final UUID roleDefinitionId = role.getRoleDefinition().getId();
+        final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
+        final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
+        apply(s->s.internalRemoveRoleFromUser(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
+    }
+
+    @Override
+    public Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
+            String nameOfUserQualifyingRole) throws UserManagementException {
+        store.removeRoleFromUser(username, new Role(getRoleDefinition(roleDefinitionId),
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
+        return null;
+    }
+
+    @Override
+    public Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException {
         return store.getPermissionsFromUser(username);
     }
 
     @Override
-    public void removePermissionFromUser(String username, String permissionToRemove) {
+    public void removePermissionFromUser(String username, WildcardPermission permissionToRemove) {
         apply(s->s.internalRemovePermissionForUser(username, permissionToRemove));
     }
 
     @Override
-    public Void internalRemovePermissionForUser(String username, String permissionToRemove) throws UserManagementException {
+    public Void internalRemovePermissionForUser(String username, WildcardPermission permissionToRemove) throws UserManagementException {
         store.removePermissionFromUser(username, permissionToRemove);
         return null;
     }
 
     @Override
-    public void addPermissionForUser(String username, String permissionToAdd) {
+    public void addPermissionForUser(String username, WildcardPermission permissionToAdd) {
         apply(s->s.internalAddPermissionForUser(username, permissionToAdd));
     }
 
     @Override
-    public Void internalAddPermissionForUser(String username, String permissionToAdd) throws UserManagementException {
+    public Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException {
         store.addPermissionForUser(username, permissionToAdd);
         return null;
     }
 
     @Override
     public void deleteUser(String username) throws UserManagementException {
-        apply(s->s.internalDeleteUser(username));
+        final User userToDelete = store.getUserByName(username);
+        if (userToDelete == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        apply(s -> s.internalDeleteUser(username));
     }
 
     @Override
     public Void internalDeleteUser(String username) throws UserManagementException {
-        store.deleteUser(username);
+        User userToDelete = store.getUserByName(username);
+        if (userToDelete != null) {
+            // remove all permissions the user has
+            accessControlStore.removeAllOwnershipsFor(userToDelete);
+            store.removeAllQualifiedRolesForUser(userToDelete);
+
+            final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
+            UserGroup defaultTenantUserGroup = getUserGroupByName(defaultTenantNameForUsername);
+            if (defaultTenantUserGroup != null) {
+                List<User> usersInGroupList = Util.asList(defaultTenantUserGroup.getUsers());
+                if (usersInGroupList.size() == 1 && usersInGroupList.contains(userToDelete)) {
+                    // no other user is in group, delete it as well
+                    try {
+                        internalDeleteUserGroup(defaultTenantUserGroup.getId());
+                    } catch (UserGroupManagementException e) {
+                        logger.log(Level.SEVERE, "Could not delete default tenant for user", e);
+                    }
+                }
+            }
+            // also remove from all usergroups
+            for (UserGroup userGroup : userToDelete.getUserGroups()) {
+                internalRemoveUserFromUserGroup(userGroup.getId(), userToDelete.getName());
+            }
+            store.deleteUser(username);
+        }
         return null;
     }
 
@@ -648,11 +1229,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public User createSocialUser(String name, SocialUserAccount socialUserAccount) throws UserManagementException {
+    public User createSocialUser(String name, SocialUserAccount socialUserAccount)
+            throws UserManagementException, UserGroupManagementException {
         if (store.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        return store.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), socialUserAccount);
+        User result = store.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()),
+                socialUserAccount);
+        UserGroup tenant = getOrCreateTenantForUser(result);
+        accessControlStore.setOwnership(tenant.getIdentifier(), result, tenant, tenant.getName());
+        addUserToUserGroup(tenant, result);
+        return result;
     }
 
     @Override
@@ -699,11 +1286,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (subject == null || !subject.isAuthenticated()) {
             result = null;
         } else {
-            String username = subject.getPrincipal().toString();
-            if (username == null || username.length() <= 0) {
+            Object principal = subject.getPrincipal();
+            if (principal == null) {
                 result = null;
             } else {
-                result = store.getUserByName(username);
+                String username = principal.toString();
+                if (username == null || username.length() <= 0) {
+                    result = null;
+                } else {
+                    result = store.getUserByName(username);
+                }
             }
         }
         return result;
@@ -934,27 +1526,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public ReplicatingCacheManager getCacheManager() {
         return cacheManager;
     }
-    
-    private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) {
-        final Subject subject = SecurityUtils.getSubject();
-        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
-                || !username.equals(subject.getPrincipal().toString()))) {
-            final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
-                    : subject.getPrincipal().toString();
-            throw new AuthorizationException(
-                    "User " + currentUserName + " does not have the permission required to access data of user " + username);
-        }
-    }
 
     @Override
     public void setPreference(final String username, final String key, final String value) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         apply(s->s.internalSetPreference(username, key, value));
     }
 
     @Override
     public void setPreferenceObject(final String username, final String key, final Object value) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
         apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
     }
@@ -972,7 +1551,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void unsetPreference(String username, String key) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         apply(s->s.internalUnsetPreference(username, key));
     }
 
@@ -1010,13 +1588,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public String getPreference(String username, String key) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         return store.getPreference(username, key);
     }
-    
+
     @Override
     public Map<String, String> getAllPreferences(String username) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         return store.getAllPreferences(username);
     }
     
@@ -1038,7 +1614,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void removeAccessToken(String username) {
         Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
+        if (hasCurrentUserUpdatePermission(getUserByName(username))) {
             apply(s -> s.internalRemoveAccessToken(username));
         } else {
             throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
@@ -1046,10 +1622,363 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
     }
 
+    @Override
+    public UserGroup getDefaultTenant() {
+        return store.getDefaultTenant();
+    }
+
+    @Override
+    public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+            HasPermissions type, TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName,
+            Callable<T> actionWithResult) {
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeIdentifier,
+                securityDisplayName, actionWithResult, true);
+    }
+
+    private <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult,
+            boolean doServerCreateObjectCheck) {
+        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
+        T result = null;
+        boolean didSetOwnership = false;
+        try {
+            final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
+            if (preexistingOwnership == null) {
+                didSetOwnership = true;
+                setDefaultOwnership(identifier, securityDisplayName);
+            } else {
+                logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
+            }
+
+            if (doServerCreateObjectCheck) {
+                SecurityUtils.getSubject()
+                        .checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                                ServerActions.CREATE_OBJECT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+            }
+            try {
+                SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
+            } catch (AuthorizationException e) {
+                if (didSetOwnership) {
+                    throw e;
+                } else {
+                    // An ownership for this ID already exists and the user is not permitted
+                    // -> a nicer error is produced to explain the user that a name clash is most probably the cause
+                    throw new UnauthorizedException(MessageFormat.format(
+                            "You are not permitted to create a \"{0}\" with name or identifier \"{1}\". "
+                                    + "This is most probably caused by an already existing entry with the same name/identifier. "
+                                    + "Please try to use a different name.",
+                            identifier.getTypeIdentifier(), identifier.getTypeRelativeObjectIdentifier().toString()),
+                            e);
+                }
+            }
+            result = actionWithResult.call();
+        } catch (AuthorizationException e) {
+            if (didSetOwnership) {
+                deleteOwnership(identifier);
+            }
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    @Override
+    public <T> T setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult) {
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeIdentifier, securityDisplayName,
+                actionWithResult, false);
+    }
+
+    @Override
+    public void setDefaultOwnership(QualifiedObjectIdentifier identifier, String description) {
+        setOwnership(identifier, getCurrentUser(), getDefaultTenantForCurrentUser(), description);
+    }
+
+    @Override
+    public void setDefaultOwnershipIfNotSet(QualifiedObjectIdentifier identifier) {
+        final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
+        if (preexistingOwnership == null) {
+            setDefaultOwnership(identifier, identifier.toString());
+        }
+    }
+
+    @Override
+    public void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
+            Action actionToCreateObject) {
+        setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeRelativeObjectIdentifier,
+                securityDisplayName, () -> {
+                    actionToCreateObject.run();
+                    return null;
+                });
+    }
+
+    @Override
+    public void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
+            TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
+            Action actionToCreateObject) {
+        setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(type, typeRelativeObjectIdentifier,
+                securityDisplayName, () -> {
+                    actionToCreateObject.run();
+                    return null;
+                });
+    }
+
+    @Override
+    public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User user, UserGroup tenantOwner) {
+        final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
+        if (preexistingOwnership == null) {
+            setOwnership(identifier, user, tenantOwner, identifier.toString());
+        }
+    }
+
+    /**
+     * Special case for user creation, as no currentUser might exist when registering anonymous, and since a user always
+     * should own itself as userOwner
+     * 
+     * @return
+     */
+    @Override
+    public User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
+            Callable<User> createActionReturningCreatedObject) {
+        QualifiedObjectIdentifier identifier = SecuredSecurityTypes.USER
+                .getQualifiedObjectIdentifier(UserImpl.getTypeRelativeObjectIdentifier(username));
+        User result = null;
+        try {
+            SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
+            result = createActionReturningCreatedObject.call();
+        } catch (AuthorizationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    @Override
+    public void checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
+            Action actionToDeleteObject) {
+        checkPermissionAndDeleteOwnershipForObjectRemoval(object, () -> {
+            actionToDeleteObject.run();
+            return null;
+        });
+    }
+
+    @Override
+    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
+            Callable<T> actionToDeleteObject) {
+        QualifiedObjectIdentifier identifier = object.getIdentifier();
+        return checkPermissionAndDeleteOwnershipForObjectRemoval(identifier, actionToDeleteObject);
+    }
+
+    @Override
+    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
+            Callable<T> actionToDeleteObject) {
+        try {
+            SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
+            final T result = actionToDeleteObject.call();
+            deleteAllDataForRemovedObject(identifier);
+            return result;
+        } catch (UnauthorizedException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    @Override
+    public void checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
+            Action actionToDeleteObject) {
+        checkPermissionAndDeleteOwnershipForObjectRemoval(identifier, () -> {
+            actionToDeleteObject.run();
+            return null;
+        });
+    }
+
+    @Override
+    public void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier) {
+        logger.info("Deleting ownerships for " + identifier);
+        deleteOwnership(identifier);
+        logger.info("Deleting acls for " + identifier);
+        deleteAccessControlList(identifier);
+    }
+
+    @Override
+    public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+            HasPermissions.Action action, Iterable<T> objectsToFilter,
+            Consumer<T> filteredObjectsConsumer) {
+        objectsToFilter.forEach(objectToCheck -> {
+            if (SecurityUtils.getSubject().isPermitted(
+                    permittedObject.getStringPermissionForObject(action, objectToCheck))) {
+                filteredObjectsConsumer.accept(objectToCheck);
+            }
+        });
+    }
+
+    @Override
+    public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
+            Consumer<T> filteredObjectsConsumer) {
+        objectsToFilter.forEach(objectToCheck -> {
+            boolean isPermitted = actions.length > 0;
+            for (int i = 0; i < actions.length; i++) {
+                isPermitted &= SecurityUtils.getSubject().isPermitted(
+                        permittedObject.getStringPermissionForObject(actions[i], objectToCheck));
+            }
+            if (isPermitted) {
+                filteredObjectsConsumer.accept(objectToCheck);
+            }
+        });
+    }
+
+    /** Filters the objects with any of the given permissions for the current user */
+    @Override
+    public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithAnyPermissionForCurrentUser(
+            HasPermissions permittedObject, HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
+            Consumer<T> filteredObjectsConsumer) {
+        objectsToFilter.forEach(objectToCheck -> {
+            boolean isPermitted = false;
+            for (int i = 0; i < actions.length; i++) {
+                if (SecurityUtils.getSubject()
+                        .isPermitted(permittedObject.getStringPermissionForObject(actions[i], objectToCheck))) {
+                    isPermitted = true;
+                    break;
+                }
+            }
+            if (isPermitted) {
+                filteredObjectsConsumer.accept(objectToCheck);
+            }
+        });
+    }
+
+    @Override
+    public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
+            Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper) {
+        final List<R> result = new ArrayList<>();
+        filterObjectsWithPermissionForCurrentUser(permittedObject, DefaultActions.READ, objectsToFilter,
+                filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
+        return result;
+    }
+    
+    @Override
+    public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
+            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
+            Function<T, R> filteredObjectsMapper) {
+        final List<R> result = new ArrayList<>();
+        filterObjectsWithPermissionForCurrentUser(permittedObject, actions, objectsToFilter,
+                filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
+        return result;
+    }
+
+    @Override
+    public <T extends WithQualifiedObjectIdentifier, R> List<R> mapAndFilterByAnyExplicitPermissionForCurrentUser(
+            HasPermissions permittedObject, HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
+            Function<T, R> filteredObjectsMapper) {
+        final List<R> result = new ArrayList<>();
+        filterObjectsWithAnyPermissionForCurrentUser(permittedObject, actions, objectsToFilter,
+                filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
+        return result;
+    }
+
+    @Override
+    public User getAllUser() {
+        return store.getUserByName(SecurityService.ALL_USERNAME);
+    }
+    
+    @Override
+    public <T extends WithQualifiedObjectIdentifier> boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, T object,
+            RoleDefinition roleToCheck) {
+        assert type != null;
+        assert object != null;
+        assert roleToCheck != null;
+        OwnershipAnnotation ownershipToCheck = getOwnership(object.getIdentifier());
+        return PermissionChecker.ownsUserASpecificRole(getCurrentUser(), getAllUser(),
+                ownershipToCheck == null ? null : ownershipToCheck.getAnnotation(), roleToCheck.getName());
+    }
+    
+    @Override
+    public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
+        if (hasPermissionsProvider == null) {
+            logger.warning(
+                    "Missing HasPermissionsProvider for meta permission check. Using basic permission check that will produce false negatives in some cases.");
+            // In case we can not resolve all available HasPermissions instances, a meta permission check will not be
+            // able to produce the expected results.
+            // A basic permission check is done instead. This will potentially produce false negatives but never false
+            // positives.
+            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), ownership, null);
+        } else {
+            return PermissionChecker.checkMetaPermission(permissionToCheck,
+                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership);
+        }
+    }
+    
+    @Override
+    public boolean hasCurrentUserMetaPermissionWithOwnershipLookup(WildcardPermission permissionToCheck) {
+        if (hasPermissionsProvider == null) {
+            logger.warning(
+                    "Missing HasPermissionsProvider for meta permission check. Using basic permission check that will produce false negatives in some cases.");
+            // In case we can not resolve all available HasPermissions instances, a meta permission check will not be
+            // able to produce the expected results.
+            // A basic permission check is done instead. This will potentially produce false negatives but never false
+            // positives.
+            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), null, null);
+        } else {
+            return PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck,
+                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(),
+                    qualifiedObjectId -> {
+                        OwnershipAnnotation ownershipAnnotation = accessControlStore.getOwnership(qualifiedObjectId);
+                        return ownershipAnnotation == null ? null : ownershipAnnotation.getAnnotation();
+                    });
+        }
+    }
+    
+    @Override
+    public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck) {
+        if (hasPermissionsProvider == null) {
+            logger.warning(
+                    "Missing HasPermissionsProvider for any permission check. Using basic permission check that will produce false negatives in some cases.");
+            // In case we can not resolve all available HasPermissions instances, an any permission check will not be
+            // able to produce the expected results.
+            // A basic permission check is done instead. This will potentially produce false negatives but never false
+            // positives.
+            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), null, null);
+        } else {
+            return PermissionChecker.hasUserAnyPermission(permissionToCheck, hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), null);
+        }
+    }
+    
+    @Override
+    public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(final RoleDefinition roleDefinition, final Ownership qualificationForGrantedPermissions) {
+        boolean result = true;
+        for (WildcardPermission permissionToCheck : roleDefinition.getPermissions()) {
+            if (!hasCurrentUserMetaPermission(permissionToCheck, qualificationForGrantedPermissions)) {
+                result = false;
+                break;
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public RoleDefinition getOrCreateRoleDefinitionFromPrototype(final RolePrototype rolePrototype) {
+        final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
+        final RoleDefinition result;
+        if (potentiallyExistingRoleDefinition == null) {
+            result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
+                    rolePrototype.getPermissions());
+            setOwnership(result.getIdentifier(), null, getDefaultTenant());
+        } else {
+            result = potentiallyExistingRoleDefinition;
+        }
+        return result;
+    }
+
     // ----------------- Replication -------------
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
         store.clear();
+        accessControlStore.clear();
     }
 
     @Override
@@ -1059,7 +1988,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store);
+        return new ObjectInputStreamResolvingAgainstSecurityCache(is, store, null);
     }
 
     @Override
@@ -1079,12 +2008,22 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } finally {
             Thread.currentThread().setContextClassLoader(oldCCL);
         }
+        if (accessControlStore != null) {
+            Thread.currentThread().setContextClassLoader(accessControlStore.getClass().getClassLoader());
+        }
+        try {
+            AccessControlStore newAccessControlStore = (AccessControlStore) is.readObject();
+            accessControlStore.replaceContentsFrom(newAccessControlStore);
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldCCL);
+        }
     }
 
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(cacheManager);
         objectOutputStream.writeObject(store);
+        objectOutputStream.writeObject(accessControlStore);
     }
 
     @Override
@@ -1129,24 +2068,304 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void clearState() throws Exception {
-        store.clear();
-        initEmptyStore();
-        CacheManager cm = getSecurityManager().getCacheManager();
-        if (cm instanceof ReplicatingCacheManager) {
-            ((ReplicatingCacheManager) cm).clear();
+    public void migrateOwnership(WithQualifiedObjectIdentifier identifier) {
+        migrateOwnership(identifier.getIdentifier(), identifier.getName());
+    }
+
+    @Override
+    public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
+        this.migrateOwnership(identifier, null, /* setServerGroupAsOwner */ true, displayName);
+    }
+    
+    @Override
+    public void migrateUser(final User user) {
+        // If no ownership migration was necessary, this is not a migration
+        if (migrateOwnership(user.getIdentifier(), user, /* setServerGroupAsOwner */ false, user.getName())) {
+            final String tenantNameForUsername = getDefaultTenantNameForUsername(user.getName());
+            // if there is already a default creation tenant set for the user, this is not a migration
+            // If the user's tenant already exists, this is no migration
+            if (user.getDefaultTenant(ServerInfo.getName()) == null
+                    && getUserGroupByName(tenantNameForUsername) == null) {
+                try {
+                    final UserGroup tenantForUser = createTenantForUser(tenantNameForUsername, user);
+                    setDefaultTenantForCurrentServerForUser(user.getName(), tenantForUser.getId());
+                } catch (UserGroupManagementException e) {
+                    logger.log(Level.SEVERE, "Error during migration while creating tenant for user: " + user, e);
+                }
+                // Only adding user role if it is most probably a migration case
+                // In case an admin removes/changes the user role, it should not be recreated automatically
+                addUserRoleToUser(user);
+                final RoleDefinition adminRoleDefinition = getRoleDefinition(AdminRole.getInstance().getId());
+                for (Role roleOfUser : user.getRoles()) {
+                    if (roleOfUser.getRoleDefinition().equals(adminRoleDefinition)) {
+                        final UserGroup defaultTenant = getDefaultTenant();
+                        if (roleOfUser.getQualifiedForTenant() == null
+                                || roleOfUser.getQualifiedForTenant().equals(defaultTenant)) {
+                            // The user is a server admin -> Add it to the server group to allow setting the server
+                            // group as default creation group
+                            addUserToUserGroup(defaultTenant, user);
+                            if (UserStore.ADMIN_USERNAME.equals(user.getName())) {
+                                // For the "admin" user the server group is initially set as
+                                // default creation group. This is consistent to a newly created server
+                                // and in most cases this is the group, the admin is meant to work with.
+                                setDefaultTenantForCurrentServerForUser(user.getName(), getDefaultTenant().getId());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    @Override
+    public void migratePermission(final User user, final WildcardPermission permissionToMigrate, final Function<WildcardPermission, WildcardPermission> permissionReplacement) {
+        final WildcardPermission replacementPermissionOrNull = permissionReplacement.apply(permissionToMigrate);
+        final WildcardPermission effectivePermission;
+        if (replacementPermissionOrNull != null) {
+            // replacing legacy permission with a replacement
+            String username = user.getName();
+            removePermissionFromUser(username, permissionToMigrate);
+            addPermissionForUser(username, replacementPermissionOrNull);
+            effectivePermission = replacementPermissionOrNull;
+        } else {
+            effectivePermission = permissionToMigrate;
+        }
+        final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(effectivePermission, user);
+        final QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
+                .getQualifiedObjectIdentifier(associationTypeIdentifier);
+        migrateOwnership(associationQualifiedIdentifier, associationQualifiedIdentifier.toString());
+    }
+    
+    private boolean migrateOwnership(final QualifiedObjectIdentifier identifier, User userOwnerToSet,
+            boolean setServerGroupAsOwner, final String displayName) {
+        boolean wasNecessaryToMigrate = false;
+        final OwnershipAnnotation owner = this.getOwnership(identifier);
+        // initialize ownerships on migration and fix objects that were orphaned by e.g. deleting the owning user/group
+        if (owner == null
+                || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
+            final UserGroup tenantOwnerToSet = setServerGroupAsOwner ? this.getDefaultTenant() : null;
+            logger.info("missing Ownership fixed: Setting ownership for: " + identifier
+                    + " to tenant: "
+                    + tenantOwnerToSet + "; user: " + userOwnerToSet);
+            this.setOwnership(identifier, userOwnerToSet, tenantOwnerToSet, displayName);
+            wasNecessaryToMigrate = true;
+        }
+        migratedHasPermissionTypes.add(identifier.getTypeIdentifier());
+        return wasNecessaryToMigrate;
+    }
+
+    @Override
+    public void checkMigration(Iterable<HasPermissions> allInstances) {
+        Class<? extends HasPermissions> clazz = Util.first(allInstances).getClass();
+        boolean allChecksSucessful = true;
+        for (HasPermissions shouldBeMigrated : allInstances) {
+            if (!migratedHasPermissionTypes.contains(shouldBeMigrated.getName())) {
+                logger.severe("ensure Ownership failed: Did not check Ownerships for " + clazz.getName()
+                        + " missing: " + shouldBeMigrated);
+                allChecksSucessful = false;
+            }
+        }
+        if (allChecksSucessful) {
+            logger.info("Ownership checks finished: Sucessfully checked all types in " + clazz.getName());
         }
     }
 
     @Override
+    public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
+        return object == null ? true :
+            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
+    }
+
+    @Override
+    public boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
+        return object == null ? true :
+            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
+    }
+
+    @Override
+    public boolean hasCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
+        return object == null ? true :
+            SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
+    }
+
+    public boolean hasCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+        boolean isPermitted = true;
+        if (object != null) {
+            for (int i = 0; i < actions.length; i++) {
+                isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObject(actions[i], object));
+            }
+        }
+        return isPermitted;
+    }
+
+    public boolean hasCurrentUserOneOfExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+        boolean result = object == null;
+        if (object != null) {
+            for (com.sap.sse.security.shared.HasPermissions.Action action : actions) {
+                if (hasCurrentUserExplicitPermissions(object, action)) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
+        if (object != null) {
+            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.READ, object));
+        }
+    }
+
+    @Override
+    public void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
+        if (object != null) {
+            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.UPDATE, object));
+        }
+    }
+
+    @Override
+    public void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
+        if (object != null) {
+            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(DefaultActions.DELETE, object));
+        }
+    }
+
+    @Override
+    public void checkCurrentUserDeletePermission(QualifiedObjectIdentifier identifier) {
+        if (identifier != null) {
+            SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
+        }
+    }
+
+    @Override
+    public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+        if (object != null) {
+            for (int i = 0; i < actions.length; i++) {
+                SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObject(actions[i], object));
+            }
+        }
+    }
+
+    @Override
+    public void checkCurrentUserHasOneOfExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+        if (object != null) {
+            boolean isPermitted = false;
+            for (int i = 0; i < actions.length; i++) {
+                if (SecurityUtils.getSubject()
+                        .isPermitted(object.getType().getStringPermissionForObject(actions[i], object))) {
+                    isPermitted = true;
+                    break;
+                }
+            }
+            if (!isPermitted) {
+                throw new AuthorizationException();
+            }
+        }
+    }
+
+    @Override
+    public void assumeOwnershipMigrated(String typeName) {
+        migratedHasPermissionTypes.add(typeName);
+    }
+    
+    @Override
+    public boolean hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(RoleDefinition role,
+            Iterable<WildcardPermission> permissionsToCheck) {
+        Pair<Boolean, Set<Ownership>> qualificationsToCheck = store.getExistingQualificationsForRoleDefinition(role);
+        final Iterable<Ownership> effectiveQualificationsToCheck = Boolean.TRUE.equals(qualificationsToCheck.getA())
+                ? Collections.singletonList(null)
+                : qualificationsToCheck.getB();
+        for (WildcardPermission permission : permissionsToCheck) {
+            for (Ownership ownership : effectiveQualificationsToCheck) {
+                if (!hasCurrentUserMetaPermission(permission, ownership)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
     public <T> T getPreferenceObject(String username, String key) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         return store.getPreferenceObject(username, key);
     }
 
     @Override
+    public void setDefaultTenantForCurrentServerForUser(String username, UUID defaultTenantId) {
+        final String serverName = ServerInfo.getName();
+        apply(s->s.internalSetDefaultTenantForServerForUser(username, defaultTenantId, serverName));
+    }
+    
+    @Override
+    public Void internalSetDefaultTenantForServerForUser(String username, UUID defaultTenantId, String serverName) {
+        User user = getUserByName(username);
+        UserGroup newDefaultTenant = getUserGroup(defaultTenantId);
+        user.setDefaultTenant(newDefaultTenant, serverName);
+        store.updateUser(user);
+        return null;
+    }
+    
+    @Override
+    /**
+     * This method does not handle RoleAssociationOwnerships! this must be done via the callback
+     */
+    public void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback) {
+        for (User user : source.getUsers()) {
+            addUserToUserGroup(destination, user);
+        }
+
+        for (Map.Entry<RoleDefinition, Boolean> entr : source.getRoleDefinitionMap().entrySet()) {
+            putRoleDefinitionToUserGroup(destination, entr.getKey(), entr.getValue());
+        }
+
+        for (Pair<User, Role> userAndRole : store.getRolesQualifiedByUserGroup(source)) {
+            final Role existingRole = userAndRole.getB();
+            final Role copyRole = new Role(existingRole.getRoleDefinition(), destination,
+                    existingRole.getQualifiedForUser());
+            addRoleForUser(userAndRole.getA(),
+                    copyRole);
+            callback.onRoleCopy(userAndRole.getA(), existingRole, copyRole);
+        }
+    }
+    
+    @Override
+    public <T> T doWithTemporaryDefaultTenant(UserGroup tenant, Callable<T> action) {
+        final UserGroup previousValue = temporaryDefaultTenant.get();
+        temporaryDefaultTenant.set(tenant);
+        try {
+            return action.call();
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            temporaryDefaultTenant.set(previousValue);
+        }
+    }
+
+    @Override
+    // See com.sap.sse.security.impl.Activator.clearState(), moved due to required reinitialisation sequence for
+    // permission-vertical
+    public void clearState() throws Exception {
+    }
+
+    @Override
+    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
+        this.unsentOperationsToMasterSender = service;
+    }
+    @Override
     public void storeSession(String cacheName, Session session) {
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSession(cacheName, session);
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationsToMasterSender != null) {
+            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
+        }
     }
 
     @Override
@@ -1160,15 +2379,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
-        this.unsentOperationsToMasterSender = service;
-    }
-
-    @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
-        if (unsentOperationsToMasterSender != null) {
-            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
-        }
+    public boolean isInitialOrMigration() {
+        return isInitialOrMigration;
     }
 }

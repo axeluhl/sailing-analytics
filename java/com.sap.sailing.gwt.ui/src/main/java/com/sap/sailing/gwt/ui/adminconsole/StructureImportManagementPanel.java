@@ -52,6 +52,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.ui.client.UserService;
 
 public class StructureImportManagementPanel extends SimplePanel implements RegattaStructureProvider {
     private final SailingServiceAsync sailingService;
@@ -96,8 +97,9 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      */
     private final Map<RegattaDTO, RegattaStructure> regattaStructures;
     
-    public StructureImportManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            StringMessages stringMessages, RegattaRefresher regattaRefresher, EventManagementPanel eventManagementPanel) {
+    public StructureImportManagementPanel(SailingServiceAsync sailingService, UserService userService,
+            ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
+            EventManagementPanel eventManagementPanel) {
         this.regattaDefaultsPerStructure = new HashMap<>();
         this.regattaStructures = new HashMap<>();
         this.eventManagementPanel = eventManagementPanel;
@@ -106,8 +108,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
-        this.regattaListComposite = new StructureImportListComposite(this.sailingService, this.regattaRefresher, this,
-                this.errorReporter, this.stringMessages);
+        this.regattaListComposite = new StructureImportListComposite(this.sailingService, userService,
+                this.regattaRefresher, this, this.errorReporter, this.stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
 
         VerticalPanel mainPanel = new VerticalPanel();
@@ -450,7 +452,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         return result;
     }
 
-    private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR, EventDTO newEvent) {
+    private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR,
+            EventDTO newEvent) {
         eventManagementPanel.fillEvents();
         final Set<RegattaDTO> regattaConfigurationsToCreate = new HashSet<>();
         for (RegattaDTO originalRegattaFromXRR : selectedOriginalRegattasFromXRR) {
@@ -467,7 +470,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             }
             regattaConfigurationsToCreate.add(cloneFromDefaults);
         }
-        sailingService.createRegattaStructure(regattaConfigurationsToCreate, newEvent, new AsyncCallback<Void>() {
+        sailingService.createRegattaStructure(regattaConfigurationsToCreate, newEvent,
+                new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught.getMessage()));

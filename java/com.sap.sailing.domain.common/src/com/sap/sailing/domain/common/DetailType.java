@@ -1,13 +1,15 @@
 package com.sap.sailing.domain.common;
 
-import static com.sap.sailing.domain.common.SortingOrder.ASCENDING;
-import static com.sap.sailing.domain.common.SortingOrder.DESCENDING;
-import static com.sap.sailing.domain.common.SortingOrder.NONE;
+import static com.sap.sse.common.SortingOrder.ASCENDING;
+import static com.sap.sse.common.SortingOrder.DESCENDING;
+import static com.sap.sse.common.SortingOrder.NONE;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+
+import com.sap.sse.common.SortingOrder;
 
 /**
  * Identifies details that can be requested from the racing service. Optionally, the details can specify a precision as

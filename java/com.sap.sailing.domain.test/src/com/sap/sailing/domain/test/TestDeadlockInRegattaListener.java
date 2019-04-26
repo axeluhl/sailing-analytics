@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -50,10 +51,11 @@ public class TestDeadlockInRegattaListener {
         final String regattaName = "Test Regatta";
         final RegattaImpl regatta = new RegattaImpl(
                 /* raceLogStore */ null, EmptyRegattaLogStore.INSTANCE, regattaName,
-                new BoatClassImpl("49er", true), /* can boats change */ false, /* startDate */ null, /* endDate */ null,
+                new BoatClassImpl("49er", true), /* can boats change */ false, CompetitorRegistrationType.CLOSED,
+                /* startDate */ null, /* endDate */ null,
                 /* trackedRegattaRegistry */ null, new LowPoint(), UUID.randomUUID(),
                 /* courseArea */ null, /* controlTrackingFromStartAndFinishTimes */ true,
-                OneDesignRankingMetric::new);
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta) {
             private static final long serialVersionUID = -3599667964201700780L;
 
