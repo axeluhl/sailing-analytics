@@ -3,6 +3,7 @@ package com.sap.sailing.selenium.api.test;
 import static com.sap.sailing.domain.common.CompetitorRegistrationType.OPEN_UNMODERATED;
 import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
+import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAnonymousApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static com.sap.sailing.selenium.api.core.GpsFixMoving.createFix;
@@ -49,7 +50,7 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
-        final ApiContext adminSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
         ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
         sailorCtx = createAnonymousApiContext(getContextRoot(), SERVER_CONTEXT);
@@ -95,7 +96,6 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         devideMappingRequestOwner.startDeviceMapping(currentTimeMillis());
         deviceMappingRequestSailor.startDeviceMapping(currentTimeMillis());
 
-
         final Mark mark1 = markApi.addMarkToRegatta(ownerCtx, EVENT_NAME, "FirstMark");
         final UUID deviceUuidMark1 = randomUUID();
         final DeviceMappingRequest deviceMappingRequestFirstMark = leaderboardApi
@@ -104,7 +104,7 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         deviceMappingRequestFirstMark.startDeviceMapping(currentTimeMillis());
         // TODO: Add mark fix(es)
         deviceMappingRequestFirstMark.endDeviceMapping(currentTimeMillis());
-        
+
     }
 
 }

@@ -1,7 +1,7 @@
 package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
-import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -26,7 +26,7 @@ public class EventApiTest extends AbstractSeleniumTest {
 
     @Test
     public void createAndGetEventTest() {
-        final ApiContext ctx = createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT);
 
         final String eventName = "<ppp> loggingsession";
 

@@ -1,7 +1,7 @@
 package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
-import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -29,7 +29,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testCreateAndGetUser() {
-        final ApiContext adminCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
         final AccessToken createUserResponse = securityApi.createUser(adminCtx, "max", USERNAME_FULL, null, "start123");
 
@@ -42,7 +42,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testSayHello() {
-        final ApiContext adminCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
         final Hello hello = securityApi.sayHello(adminCtx);
         assertEquals("Responded principal of hello is different!", "admin", hello.getPrincipal());

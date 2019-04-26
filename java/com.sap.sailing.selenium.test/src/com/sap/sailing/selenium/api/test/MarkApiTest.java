@@ -1,7 +1,7 @@
 package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
-import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
@@ -32,7 +32,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testAddMarkToRegatta() {
-        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
         final Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);

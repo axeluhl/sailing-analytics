@@ -2,7 +2,7 @@ package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
-import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -35,7 +35,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testGetRegattaForCreatedEvent() {
-        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
@@ -62,7 +62,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testGetRacesForRegattaForCreateEvent() {
-        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         JSONObject regattaRaces = regattaApi.getRegattaRaces(ctx, EVENT_NAME);
@@ -76,7 +76,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
     public void testCreateAndAddCompetitor() {
         final String competitorName = "Max Mustermann";
         final String competitorNationality = "USA";
-        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Competitor competitor = regattaApi.createAndAddCompetitor(ctx, EVENT_NAME, BOAT_CLASS, "test@de",
@@ -94,13 +94,13 @@ public class RegattaApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testAddRaceColumns() {
-        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         RaceColumn[] result = regattaApi.addRaceColumn(ctx, EVENT_NAME, "T", 5);
         assertEquals("read: racecolumn.seriesname is different", "Default", result[0].getSeriesName());
         assertEquals("read: racecolumn.racename is different", "T1", result[0].getRaceName());
-        //assertEquals("read: racecolumn.seriesname is different", "Default", result[4].getSeriesName());
-        //assertEquals("read: racecolumn.racename is different", "T5", result[4].getRaceName());
+        // assertEquals("read: racecolumn.seriesname is different", "Default", result[4].getSeriesName());
+        // assertEquals("read: racecolumn.racename is different", "T5", result[4].getRaceName());
     }
 }

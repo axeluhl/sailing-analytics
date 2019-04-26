@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
+import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAnonymousApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
@@ -40,7 +41,7 @@ public class ClosedRegattaTest extends AbstractSeleniumTest {
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
-        final ApiContext adminSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "admin", "admin");
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
         ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
         unregisteredCtx = createAnonymousApiContext(getContextRoot(), SERVER_CONTEXT);

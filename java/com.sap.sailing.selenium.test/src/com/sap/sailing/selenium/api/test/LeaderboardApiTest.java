@@ -2,7 +2,7 @@ package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.domain.common.CompetitorRegistrationType.CLOSED;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
-import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static java.lang.System.currentTimeMillis;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
@@ -38,7 +38,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testGetLeaderboardForCreatedEvent() {
-        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
 
@@ -64,11 +64,11 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
 
     @Test
     public void testDeviceMappingStartAndEnd() throws Exception {
-        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
-        final Competitor competitor = regattaApi.createAndAddCompetitor(ctx, LEADERBOARD_NAME, BOATCLASSNAME,
-                "test@de", "Max Mustermann", "USA");
+        final Competitor competitor = regattaApi.createAndAddCompetitor(ctx, LEADERBOARD_NAME, BOATCLASSNAME, "test@de",
+                "Max Mustermann", "USA");
 
         final DeviceMappingRequest request = leaderboardApi.createDeviceMappingRequest(ctx, LEADERBOARD_NAME)
                 .forCompetitor(competitor.getId()).withDeviceUuid(randomUUID());

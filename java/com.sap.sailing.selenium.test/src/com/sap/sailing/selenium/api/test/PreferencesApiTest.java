@@ -1,6 +1,6 @@
 package com.sap.sailing.selenium.api.test;
 
-import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -24,7 +24,7 @@ public class PreferencesApiTest extends AbstractSeleniumTest {
 
     @Test
     public void createAndGetPreferencesTest() {
-        final ApiContext ctx = createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT);
 
         Map<String, String> prefObjectAttr = new HashMap<String, String>();
         prefObjectAttr.put("key1", "value1");
@@ -40,7 +40,7 @@ public class PreferencesApiTest extends AbstractSeleniumTest {
 
     @Test
     public void createAndDeletePreferencesTest() {
-        final ApiContext ctx = createApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT, "admin", "admin");
+        final ApiContext ctx = createAdminApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT);
 
         Map<String, String> prefObjectAttr = new HashMap<String, String>();
         prefObjectAttr.put("key1", "value1");
