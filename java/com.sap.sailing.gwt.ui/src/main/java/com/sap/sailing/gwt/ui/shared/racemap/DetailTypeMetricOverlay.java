@@ -39,7 +39,7 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
         metricLegend = Canvas.createIfSupported();
         metricLegend.setStyleName("MapMetricLegend");
         metricLegend.setTitle("Metric Legend");
-        map.setControls(ControlPosition.LEFT_TOP, metricLegend);
+        map.setControls(ControlPosition.TOP_CENTER, metricLegend);
         metricLegend.getParent().setStyleName("MapMetricLegendParentDiv");
     }
 

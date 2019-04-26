@@ -2513,7 +2513,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
         }
 
-        vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), createDetailTypeDropwdown(competitorDTO)));
+        vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), createDetailTypeDropdown(competitorDTO)));
 
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
@@ -2549,7 +2549,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return vPanel;
     }
 
-    private ListBox createDetailTypeDropwdown(CompetitorDTO competitor) {
+    private ListBox createDetailTypeDropdown(CompetitorDTO competitor) {
         ListBox lb = new ListBox();
         lb.addItem(stringMessages.none(), "none");
         if (sortedAvailableDetailTypes != null) {
