@@ -6,10 +6,11 @@ import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.controls.ControlPosition;
+import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
-import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sse.common.ColorMapper;
 import com.sap.sse.common.ValueRangeFlexibleBoundaries;
@@ -18,14 +19,16 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
     
     private final String textColor = "Black";
     private final String textFont = "10pt 'Open Sans'";
-    private double lineWidth = 300;
-    private double lineHeight = 10;
-    private double lineMargin = 10;
+    private double lineWidth = 250;
+    private double lineHeight = 13;
+    private double lineMargin = 5;
     private final StringMessages stringMessages;
     private Canvas metricLegend;
     
     private ValueRangeFlexibleBoundaries valueRange;
     private ColorMapper colorMapper;
+    
+    private String detailTypeAndUnit = "";
 
     public DetailTypeMetricOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem, StringMessages stringMessages) {
         super(map, zIndex, coordinateSystem);
@@ -71,9 +74,10 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
         }
     }
     
-    public void updateLegend(ValueRangeFlexibleBoundaries valueRange, ColorMapper colorMapper) {
+    public void updateLegend(ValueRangeFlexibleBoundaries valueRange, ColorMapper colorMapper, DetailType detailType) {
         this.valueRange = valueRange;
         this.colorMapper = colorMapper;
+        this.detailTypeAndUnit = DetailTypeFormatter.format(detailType) + " - " + DetailTypeFormatter.getUnit(detailType);
         draw();
     }
 
@@ -91,8 +95,9 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
             drawRectangle(context2d, 0, 0, canvasWidth, canvasHeight, "white");
             context2d.setGlobalAlpha(1.0);
             drawTextCentered(context2d, lineMargin, lineToYOffset(0), canvasWidth - 2 * lineMargin, "Tail Color", textColor);
+            drawText(context2d, lineMargin * 2, lineToYOffset(1), canvasWidth - 4 * lineMargin, detailTypeAndUnit, textColor);
             
-            drawSpectrum(context2d, lineMargin, lineToYOffset(1), canvasWidth - 2 * lineMargin);
+            drawSpectrum(context2d, lineMargin * 2, lineToYOffset(2) - 6, canvasWidth - 4 * lineMargin);
         }
     }
     
@@ -135,15 +140,15 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
         } else if (spread < 1) {
             scale_spread = 100;
         } else {
-            scale_spread = 50;
+            scale_spread = 30;
         }
-        final int maxIdx = 300;
-        final double h = 20;
+        //final int maxIdx = 300;
+        final double h = 15;
         String label;
         TextMetrics txtmet;
         final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
-        for (int idx = 0; idx <= maxIdx; idx++) {
-            final double speedSteps = min + idx * (spread) / maxIdx;
+        for (int idx = 0; idx <= width; idx++) {
+            final double speedSteps = min + idx * (spread) / width;
             context2d.setFillStyle(colorMapper.getColor(speedSteps));
             context2d.beginPath();
             context2d.fillRect(x + idx, y, 1, h);

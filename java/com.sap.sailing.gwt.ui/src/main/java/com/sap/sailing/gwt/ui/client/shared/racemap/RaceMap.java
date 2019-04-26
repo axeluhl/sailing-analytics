@@ -3082,7 +3082,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     @Override
     public void onColorMappingChanged() {
-        metricOverlay.updateLegend(fixesAndTails.getDetailValueBoundaries(), tailColorMapper);
+        metricOverlay.updateLegend(fixesAndTails.getDetailValueBoundaries(), tailColorMapper, selectedDetailType);
         for (CompetitorDTO competitor : competitorSelection.getSelectedCompetitors()) {
             ColorlineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
             fixesAndTails.getTail(competitor).setOptions(options);
