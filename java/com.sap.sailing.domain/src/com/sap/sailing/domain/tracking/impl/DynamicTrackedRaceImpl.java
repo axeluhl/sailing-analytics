@@ -217,16 +217,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimesInterval) {
+    public boolean recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimesInterval) {
+        final boolean result;
         if (!onlyWhenInTrackingTimesInterval || isWithinStartAndEndOfTracking(fix.getTimePoint())) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             if (track != null) {
                 if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
                     logger.finest(""+competitor.getName() + ": " + fix);
                 }
-                track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
+                result = track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
+            } else {
+                result = false;
             }
+        } else {
+            result = false;
         }
+        return result;
     }
 
     @Override

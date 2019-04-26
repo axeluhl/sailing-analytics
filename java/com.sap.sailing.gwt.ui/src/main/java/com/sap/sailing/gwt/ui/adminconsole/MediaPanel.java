@@ -2,6 +2,11 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYUP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,28 +25,29 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.domain.common.media.MediaUtil;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiURLChangeDialog;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -52,13 +58,13 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
-import com.sap.sailing.gwt.ui.client.shared.controls.BetterCheckboxCell;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -66,8 +72,18 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
+import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
  * Table inspired by http://gwt.google.com/samples/Showcase/Showcase.html#!CwCellTable
@@ -79,53 +95,51 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     
     private final SailingServiceAsync sailingService;
-    private final LabeledAbstractFilterablePanel<MediaTrack> filterableMediaTracks;
-    private List<MediaTrack> allMediaTracks;
+    private final LabeledAbstractFilterablePanel<MediaTrackWithSecurityDTO> filterableMediaTracks;
+    private List<MediaTrackWithSecurityDTO> allMediaTracks;
     private final RegattaRefresher regattaRefresher;
     private final MediaServiceAsync mediaService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
+    private final UserService userService;
     private Set<RegattasDisplayer> regattasDisplayers;
-    private CellTable<MediaTrack> mediaTracksTable;
-    private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
+    private CellTable<MediaTrackWithSecurityDTO> mediaTracksTable;
+    private ListDataProvider<MediaTrackWithSecurityDTO> mediaTrackListDataProvider = new ListDataProvider<>();
     private Date latestDate;
-    private RefreshableMultiSelectionModel<MediaTrack> refreshableSelectionModel;
+    private RefreshableMultiSelectionModel<MediaTrackWithSecurityDTO> refreshableSelectionModel;
 
     public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, MediaServiceAsync mediaService, ErrorReporter errorReporter,
-            StringMessages stringMessages) {
+            StringMessages stringMessages, final UserService userService) {
         this.regattasDisplayers = regattasDisplayers;
         this.sailingService = sailingService;
+        this.userService = userService;
         this.regattaRefresher = regattaRefresher;
         this.mediaService = mediaService;  
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        HorizontalPanel buttonAndFilterPanel = new HorizontalPanel();
-        allMediaTracks = new ArrayList<MediaTrack>();  
-        Button refreshButton = new Button(stringMessages.refresh());
-        refreshButton.addClickHandler(new ClickHandler() {
+        AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
+                SecuredDomainType.MEDIA_TRACK);
+        add(buttonAndFilterPanel);
+        allMediaTracks = new ArrayList<>();
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
+
             @Override
-            public void onClick(ClickEvent event) {
+            public void execute() {
                 loadMediaTracks();
             }
-
         });
-        buttonAndFilterPanel.add(refreshButton);
-        Button addUrlButton = new Button(stringMessages.addMediaTrack());
-        addUrlButton.addClickHandler(new ClickHandler() {
+        buttonAndFilterPanel.addCreateAction(stringMessages.addMediaTrack(), new Command() {
             @Override
-            public void onClick(ClickEvent event) {
+            public void execute() {
                 addUrlMediaTrack();
             }
         });
-        buttonAndFilterPanel.add(addUrlButton);
-        
-        Button multiVideo = new Button(stringMessages.multiVideoLinking());
-        multiVideo.addClickHandler(new ClickHandler() {
+        buttonAndFilterPanel.addCreateAction(stringMessages.multiVideoLinking(), new Command() {
             @Override
-            public void onClick(ClickEvent event) {
+            public void execute() {
                 new MultiVideoDialog(sailingService, mediaService, stringMessages, errorReporter, new Runnable() {
-                    
+
                     @Override
                     public void run() {
                         loadMediaTracks();
@@ -133,40 +147,35 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                 }).center();
             }
         });
-        buttonAndFilterPanel.add(multiVideo);
-        
-        
-        Button multiVideoRename = new Button(this.stringMessages.multiUrlChangeMediaTrack());
-        multiVideoRename.addClickHandler(new ClickHandler() {
+
+        Button multiURLChange = buttonAndFilterPanel.addUnsecuredAction(stringMessages.multiUrlChangeMediaTrack(),
+                new Command() {
             @Override
-            public void onClick(ClickEvent event) {
-                Set<MediaTrack> selected = refreshableSelectionModel.getSelectedSet();
+            public void execute() {
+                Set<MediaTrackWithSecurityDTO> selected = refreshableSelectionModel.getSelectedSet();
                 if (selected.isEmpty()) {
                     Notification.notify(stringMessages.noSelection(), NotificationType.ERROR);
                 } else {
-                    new MultiURLChangeDialog(mediaService, stringMessages, selected, errorReporter,
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    loadMediaTracks();
-                                }
-                            }).center();
+                    new MultiURLChangeDialog(mediaService, stringMessages, selected, errorReporter, new Runnable() {
+                        @Override
+                        public void run() {
+                            loadMediaTracks();
+                        }
+                    }).center();
                 }
             }
         });
-        buttonAndFilterPanel.add(multiVideoRename);
-        
-        add(buttonAndFilterPanel);
-        
+        multiURLChange.setEnabled(false);
+
         Label lblFilterRaces = new Label(stringMessages.filterMediaByName() + ":");
         lblFilterRaces.setWordWrap(false);
-        buttonAndFilterPanel.setSpacing(5);
-        buttonAndFilterPanel.add(lblFilterRaces);
-        buttonAndFilterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
-        this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrack>(lblFilterRaces, allMediaTracks,
+        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
+
+        this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrackWithSecurityDTO>(lblFilterRaces,
+                allMediaTracks,
                 mediaTrackListDataProvider) {
             @Override
-            public List<String> getSearchableStrings(MediaTrack t) {
+            public List<String> getSearchableStrings(MediaTrackWithSecurityDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.title);
                 strings.add(t.url);
@@ -179,26 +188,40 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             }
 
             @Override
-            public AbstractCellTable<MediaTrack> getCellTable() {
+            public AbstractCellTable<MediaTrackWithSecurityDTO> getCellTable() {
                 return mediaTracksTable;
             }
         };
-        createMediaTracksTable();
+        createMediaTracksTable(userService);
         filterableMediaTracks.getTextBox().ensureDebugId("MediaTracksFilterTextBox");
-        buttonAndFilterPanel.add(filterableMediaTracks);
+        buttonAndFilterPanel.addUnsecuredWidget(filterableMediaTracks);
+
+        refreshableSelectionModel.addSelectionChangeHandler(new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                boolean canUpdateAll = true;
+                for (MediaTrackWithSecurityDTO track : refreshableSelectionModel.getSelectedSet()) {
+                    if (!userService.hasPermission(track, DefaultActions.UPDATE)) {
+                        canUpdateAll = false;
+                    }
+                }
+                multiURLChange.setEnabled(!refreshableSelectionModel.getSelectedSet().isEmpty() && canUpdateAll);
+            }
+        });
+
     }
 
     @Override
     public void loadMediaTracks() {
         mediaTrackListDataProvider.getList().clear();
-        mediaService.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrack>>() {
+        mediaService.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError(t.toString());
             }
 
             @Override
-            public void onSuccess(Iterable<MediaTrack> allMediaTracks) {
+            public void onSuccess(Iterable<MediaTrackWithSecurityDTO> allMediaTracks) {
                 mediaTrackListDataProvider.getList().clear();
                 Util.addAll(allMediaTracks, mediaTrackListDataProvider.getList());
                 filterableMediaTracks.updateAll(mediaTrackListDataProvider.getList());
@@ -207,43 +230,46 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         });
     }
 
-    private void createMediaTracksTable() {
+    private void createMediaTracksTable(final UserService userService) {
         // Create a CellTable.
 
         // Set a key provider that provides a unique key for each contact. If key is
         // used to identify contacts when fields (such as the name and address)
         // change.
-        mediaTracksTable = new BaseCelltable<MediaTrack>(1000, tableResources);
+        mediaTracksTable = new BaseCelltable<>(1000, tableResources);
         mediaTracksTable.setWidth("100%");
 
         // Attach a column sort handler to the ListDataProvider to sort the list.
-        ListHandler<MediaTrack> sortHandler = new ListHandler<MediaTrack>(mediaTrackListDataProvider.getList());
+        ListHandler<MediaTrackWithSecurityDTO> sortHandler = new ListHandler<>(mediaTrackListDataProvider.getList());
         mediaTracksTable.addColumnSortHandler(sortHandler);
 
         // Add a selection model so we can select cells.
-        refreshableSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<MediaTrack>() {
+        refreshableSelectionModel = new RefreshableMultiSelectionModel<>(
+                new EntityIdentityComparator<MediaTrackWithSecurityDTO>() {
             @Override
-            public boolean representSameEntity(MediaTrack dto1, MediaTrack dto2) {
+                    public boolean representSameEntity(MediaTrackWithSecurityDTO dto1, MediaTrackWithSecurityDTO dto2) {
                 return dto1.dbId.equals(dto2.dbId);
             }
             @Override
-            public int hashCode(MediaTrack t) {
+                    public int hashCode(MediaTrackWithSecurityDTO t) {
                 return t.dbId.hashCode();
             }
         }, filterableMediaTracks.getAllListDataProvider());
         mediaTracksTable.setSelectionModel(refreshableSelectionModel,
-                DefaultSelectionEventManager.createCustomManager(new DefaultSelectionEventManager.CheckboxEventTranslator<MediaTrack>() {
+                DefaultSelectionEventManager.createCustomManager(
+                        new DefaultSelectionEventManager.CheckboxEventTranslator<MediaTrackWithSecurityDTO>() {
                     @Override
-                    public boolean clearCurrentSelection(CellPreviewEvent<MediaTrack> event) {
+                            public boolean clearCurrentSelection(CellPreviewEvent<MediaTrackWithSecurityDTO> event) {
                         return !isCheckboxColumn(event.getColumn());
                     }
 
                     @Override
-                    public SelectAction translateSelectionEvent(CellPreviewEvent<MediaTrack> event) {
+                            public SelectAction translateSelectionEvent(
+                                    CellPreviewEvent<MediaTrackWithSecurityDTO> event) {
                         NativeEvent nativeEvent = event.getNativeEvent();
                         if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
                             if (nativeEvent.getCtrlKey()) {
-                                MediaTrack value = event.getValue();
+                                        MediaTrackWithSecurityDTO value = event.getValue();
                                 refreshableSelectionModel.setSelected(value, !refreshableSelectionModel.isSelected(value));
                                 return SelectAction.IGNORE;
                             }
@@ -260,7 +286,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                 }));
 
         // Initialize the columns.
-        initTableColumns(sortHandler);
+        initTableColumns(sortHandler, userService);
 
         mediaTrackListDataProvider.addDataDisplay(mediaTracksTable);
         add(mediaTracksTable);
@@ -271,10 +297,13 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     /**
      * Add the columns to the table.
      */
-    private void initTableColumns(ListHandler<MediaTrack> sortHandler) {
-        Column<MediaTrack, Boolean> checkColumn = new Column<MediaTrack, Boolean>(new BetterCheckboxCell(tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected())) {
+    private void initTableColumns(final ListHandler<MediaTrackWithSecurityDTO> sortHandler,
+            final UserService userService) {
+        Column<MediaTrackWithSecurityDTO, Boolean> checkColumn = new Column<MediaTrackWithSecurityDTO, Boolean>(
+                new BetterCheckboxCell(tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                        tableResources.cellTableStyle().cellTableCheckboxDeselected())) {
             @Override
-            public Boolean getValue(MediaTrack object) {
+            public Boolean getValue(MediaTrackWithSecurityDTO object) {
                 // Get the value from the selection model.
                 return refreshableSelectionModel.isSelected(object);
             }
@@ -283,15 +312,16 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         mediaTracksTable.setColumnWidth(checkColumn, 40, Unit.PX);
 
         // db id
-        Column<MediaTrack, String> dbIdColumn = new Column<MediaTrack, String>(new TextCell()) {
+        Column<MediaTrackWithSecurityDTO, String> dbIdColumn = new Column<MediaTrackWithSecurityDTO, String>(
+                new TextCell()) {
             @Override
-            public String getValue(MediaTrack mediaTrack) {
+            public String getValue(MediaTrackWithSecurityDTO mediaTrack) {
                 return mediaTrack.dbId;
             }
         };
         dbIdColumn.setSortable(true);
-        sortHandler.setComparator(dbIdColumn, new Comparator<MediaTrack>() {
-            public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
+        sortHandler.setComparator(dbIdColumn, new Comparator<MediaTrackWithSecurityDTO>() {
+            public int compare(MediaTrackWithSecurityDTO mediaTrack1, MediaTrackWithSecurityDTO mediaTrack2) {
                 return mediaTrack1.dbId.compareTo(mediaTrack2.dbId);
             }
         });
@@ -299,21 +329,26 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         mediaTracksTable.setColumnWidth(dbIdColumn, 10, Unit.PCT);
 
         // media title
-        Column<MediaTrack, String> titleColumn = new Column<MediaTrack, String>(new EditTextCell()) {
+        Column<MediaTrackWithSecurityDTO, String> titleColumn = new Column<MediaTrackWithSecurityDTO, String>(
+                new EditTextCell()) {
             @Override
-            public String getValue(MediaTrack mediaTrack) {
+            public String getValue(MediaTrackWithSecurityDTO mediaTrack) {
                 return mediaTrack.title;
             }
         };
         titleColumn.setSortable(true);
-        sortHandler.setComparator(titleColumn, new Comparator<MediaTrack>() {
-            public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
+        sortHandler.setComparator(titleColumn, new Comparator<MediaTrackWithSecurityDTO>() {
+            public int compare(MediaTrackWithSecurityDTO mediaTrack1, MediaTrackWithSecurityDTO mediaTrack2) {
                 return mediaTrack1.title.compareTo(mediaTrack2.title);
             }
         });
         mediaTracksTable.addColumn(titleColumn, stringMessages.title());
-        titleColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
-            public void update(int index, MediaTrack mediaTrack, String newTitle) {
+        titleColumn.setFieldUpdater(new FieldUpdater<MediaTrackWithSecurityDTO, String>() {
+            public void update(int index, MediaTrackWithSecurityDTO mediaTrack, String newTitle) {
+                if (Util.equalStringsWithEmptyIsNull(newTitle, mediaTrack.title)) {
+                    return;
+                }
+                String oldtitle = mediaTrack.title;
                 // Called when the user changes the value.
                 mediaTrack.title = newTitle;
                 mediaService.updateTitle(mediaTrack, new AsyncCallback<Void>() {
@@ -321,6 +356,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError(t.toString());
+                        mediaTrack.title = oldtitle;
                     }
 
                     @Override
@@ -333,22 +369,26 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         mediaTracksTable.setColumnWidth(titleColumn, 20, Unit.PCT);
 
         // url
-        Column<MediaTrack, String> urlColumn = new Column<MediaTrack, String>(new EditTextCell()) {
+        Column<MediaTrackWithSecurityDTO, String> urlColumn = new Column<MediaTrackWithSecurityDTO, String>(
+                new EditTextCell()) {
             @Override
-            public String getValue(MediaTrack mediaTrack) {
+            public String getValue(MediaTrackWithSecurityDTO mediaTrack) {
                 return mediaTrack.url;
             }
         };
         urlColumn.setSortable(true);
-        sortHandler.setComparator(urlColumn, new Comparator<MediaTrack>() {
-            public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
+        sortHandler.setComparator(urlColumn, new Comparator<MediaTrackWithSecurityDTO>() {
+            public int compare(MediaTrackWithSecurityDTO mediaTrack1, MediaTrackWithSecurityDTO mediaTrack2) {
                 return mediaTrack1.url.compareTo(mediaTrack2.url);
             }
         });
         mediaTracksTable.addColumn(urlColumn, stringMessages.url());
-        urlColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
-            public void update(int index, MediaTrack mediaTrack, String newUrl) {
+        urlColumn.setFieldUpdater(new FieldUpdater<MediaTrackWithSecurityDTO, String>() {
+            public void update(int index, MediaTrackWithSecurityDTO mediaTrack, String newUrl) {
                 // Called when the user changes the value.
+                if (Util.equalStringsWithEmptyIsNull(newUrl, mediaTrack.url = newUrl)) {
+                    return;
+                }
                 mediaTrack.url = newUrl;
                 mediaService.updateUrl(mediaTrack, new AsyncCallback<Void>() {
 
@@ -368,7 +408,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
         // assingedRaces
 
-        Column<MediaTrack, String> assignedRacesColumn = new Column<MediaTrack, String>(new ClickableTextCell() {
+        Column<MediaTrackWithSecurityDTO, String> assignedRacesColumn = new Column<MediaTrackWithSecurityDTO, String>(
+                new ClickableTextCell() {
             public void onEnterKeyDown(Context context, Element parent, String value, NativeEvent event,
                     ValueUpdater<String> valueUpdater) {
                 String type = event.getType();
@@ -380,7 +421,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             }
         }) {
             @Override
-            public String getValue(MediaTrack mediaTrack) {
+            public String getValue(MediaTrackWithSecurityDTO mediaTrack) {
                 if (mediaTrack.assignedRaces != null) {
                     return listAssignedRaces(mediaTrack);
                 } else
@@ -389,14 +430,14 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
         };
         assignedRacesColumn.setSortable(true);
-        sortHandler.setComparator(assignedRacesColumn, new Comparator<MediaTrack>() {
-            public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
+        sortHandler.setComparator(assignedRacesColumn, new Comparator<MediaTrackWithSecurityDTO>() {
+            public int compare(MediaTrackWithSecurityDTO mediaTrack1, MediaTrackWithSecurityDTO mediaTrack2) {
                 return (listAssignedRaces(mediaTrack1)).compareTo(listAssignedRaces(mediaTrack2));
             }
         });
         mediaTracksTable.addColumn(assignedRacesColumn, stringMessages.linkedRaces());
-        assignedRacesColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
-            public void update(int index, MediaTrack mediaTrack, String newAssignedRace) {
+        assignedRacesColumn.setFieldUpdater(new FieldUpdater<MediaTrackWithSecurityDTO, String>() {
+            public void update(int index, MediaTrackWithSecurityDTO mediaTrack, String newAssignedRace) {
                 // Called when the user changes the value.
                 if (newAssignedRace.trim().isEmpty()) {
                     mediaTrack.assignedRaces.clear();
@@ -420,21 +461,22 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         mediaTracksTable.setColumnWidth(assignedRacesColumn, 100, Unit.PCT);
 
         // start time
-        Column<MediaTrack, String> startTimeColumn = new Column<MediaTrack, String>(new EditTextCell()) {
+        Column<MediaTrackWithSecurityDTO, String> startTimeColumn = new Column<MediaTrackWithSecurityDTO, String>(
+                new EditTextCell()) {
             @Override
-            public String getValue(MediaTrack mediaTrack) {
+            public String getValue(MediaTrackWithSecurityDTO mediaTrack) {
                 return mediaTrack.startTime == null ? "" : TimeFormatUtil.DATETIME_FORMAT.format(mediaTrack.startTime
                         .asDate());
             }
         };
         startTimeColumn.setSortable(true);
-        sortHandler.setComparator(startTimeColumn, new Comparator<MediaTrack>() {
-            public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
+        sortHandler.setComparator(startTimeColumn, new Comparator<MediaTrackWithSecurityDTO>() {
+            public int compare(MediaTrackWithSecurityDTO mediaTrack1, MediaTrackWithSecurityDTO mediaTrack2) {
                 return MediaUtil.compareDatesAllowingNull(mediaTrack1.startTime, mediaTrack2.startTime);
             }
         });
-        startTimeColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
-            public void update(int index, MediaTrack mediaTrack, String newStartTime) {
+        startTimeColumn.setFieldUpdater(new FieldUpdater<MediaTrackWithSecurityDTO, String>() {
+            public void update(int index, MediaTrackWithSecurityDTO mediaTrack, String newStartTime) {
                 // Called when the user changes the value.
                 if (newStartTime == null || newStartTime.trim().isEmpty()) {
                     mediaTrack.startTime = null;
@@ -465,21 +507,23 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         mediaTracksTable.setColumnWidth(startTimeColumn, 100, Unit.PCT);
 
         // duration
-        Column<MediaTrack, String> durationColumn = new Column<MediaTrack, String>(new EditTextCell()) {
+        Column<MediaTrackWithSecurityDTO, String> durationColumn = new Column<MediaTrackWithSecurityDTO, String>(
+                new EditTextCell()) {
             @Override
-            public String getValue(MediaTrack mediaTrack) {
+            public String getValue(MediaTrackWithSecurityDTO mediaTrack) {
                 return TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration);
             }
         };
         durationColumn.setSortable(true);
-        sortHandler.setComparator(durationColumn, new Comparator<MediaTrack>() {
+        sortHandler.setComparator(durationColumn, new Comparator<MediaTrackWithSecurityDTO>() {
             final Comparator<Duration> durationComparator = new NullSafeComparableComparator<>(true);
-            public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
+
+            public int compare(MediaTrackWithSecurityDTO mediaTrack1, MediaTrackWithSecurityDTO mediaTrack2) {
                 return durationComparator.compare(mediaTrack1.duration, mediaTrack2.duration);
             }
         });
-        durationColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
-            public void update(int index, MediaTrack mediaTrack, String newDuration) {
+        durationColumn.setFieldUpdater(new FieldUpdater<MediaTrackWithSecurityDTO, String>() {
+            public void update(int index, MediaTrackWithSecurityDTO mediaTrack, String newDuration) {
                 // Called when the user changes the value.
                 if (newDuration == null || newDuration.trim().isEmpty()) {
                     mediaTrack.duration = null;
@@ -507,9 +551,10 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         mediaTracksTable.addColumn(durationColumn, stringMessages.duration());
         mediaTracksTable.setColumnWidth(durationColumn, 100, Unit.PCT);
         // media type
-        Column<MediaTrack, String> mimeTypeColumn = new Column<MediaTrack, String>(new TextCell()) {
+        Column<MediaTrackWithSecurityDTO, String> mimeTypeColumn = new Column<MediaTrackWithSecurityDTO, String>(
+                new TextCell()) {
             @Override
-            public String getValue(MediaTrack mediaTrack) {
+            public String getValue(MediaTrackWithSecurityDTO mediaTrack) {
                 return mediaTrack.mimeType == null ? "" : mediaTrack.mimeType.toString();
             }
         };
@@ -520,21 +565,29 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
             (mt1.mimeType == null ? "" : mt1.mimeType.toString()).compareTo(
                     mt2.mimeType == null ? "" : mt2.mimeType.toString()));
 
-        // delete action
-        ImagesBarColumn<MediaTrack, MediaActionBarCell> mediaActionColumn = new ImagesBarColumn<MediaTrack, MediaActionBarCell>(
-                new MediaActionBarCell(stringMessages));
-        mediaActionColumn.setFieldUpdater(new FieldUpdater<MediaTrack, String>() {
-            @Override
-            public void update(int index, MediaTrack mediaTrack, String value) {
-                if (MediaActionBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm(stringMessages.reallyRemoveMediaTrack(mediaTrack.title))) {
-                        removeMediaTrack(mediaTrack);
-                    }
-                }
+        SecuredDTOOwnerColumn.configureOwnerColumns(mediaTracksTable, sortHandler, stringMessages);
+
+        final HasPermissions type = SecuredDomainType.MEDIA_TRACK;
+
+        final AccessControlledActionsColumn<MediaTrackWithSecurityDTO, DefaultActionsImagesBarCell> actionsColumn = create(
+                new DefaultActionsImagesBarCell(stringMessages), userService);
+        actionsColumn.addAction(ACTION_DELETE, DELETE, mediaTrack -> {
+            if (Window.confirm(stringMessages.reallyRemoveMediaTrack(mediaTrack.title))) {
+                removeMediaTrack(mediaTrack);
             }
         });
-        mediaTracksTable.addColumn(mediaActionColumn, stringMessages.delete());
-        mediaTracksTable.setColumnWidth(mediaActionColumn, 5, Unit.PCT);
+        final EditOwnershipDialog.DialogConfig<MediaTrackWithSecurityDTO> configOwnership = EditOwnershipDialog.create(
+                userService.getUserManagementService(), type,
+                mediaTrack -> {
+                    /* no refresh action */},
+                stringMessages);
+
+        final EditACLDialog.DialogConfig<MediaTrackWithSecurityDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, mediaTrack -> mediaTrack.getAccessControlList(), stringMessages);
+        actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                mediaTrack -> configACL.openDialog(mediaTrack));
+        mediaTracksTable.addColumn(actionsColumn, stringMessages.actions());
 
     }
 
@@ -555,7 +608,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
     private void addUrlMediaTrack() {
         NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaService,
-                getDefaultStartTime(), stringMessages, sailingService, errorReporter, regattaRefresher,
+                getDefaultStartTime(), stringMessages, sailingService, userService, errorReporter, regattaRefresher,
                 regattasDisplayers, new DialogCallback<MediaTrack>() {
 
                     @Override
@@ -623,7 +676,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         return latestDate;
     }
 
-    private String listAssignedRaces(MediaTrack mediaTrack) {
+    private String listAssignedRaces(MediaTrackWithSecurityDTO mediaTrack) {
         final String result;
         if (mediaTrack.assignedRaces.size() > 1) {
             result = String.valueOf(mediaTrack.assignedRaces.size());
@@ -647,8 +700,9 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
 
     public void openAssignedRacesDialog(final Context context, final Element parent,
             final ValueUpdater<String> valueUpdater) {
-        final MediaTrack mediaTrack = (MediaTrack) context.getKey();
-        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingService, mediaTrack, errorReporter,
+        final MediaTrackWithSecurityDTO mediaTrack = (MediaTrackWithSecurityDTO) context.getKey();
+        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingService, userService, mediaTrack,
+                errorReporter,
                 regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
 
                     @Override

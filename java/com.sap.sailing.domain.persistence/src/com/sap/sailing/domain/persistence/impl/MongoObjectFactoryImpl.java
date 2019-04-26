@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -87,9 +88,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -718,6 +717,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
         dbRegatta.put(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name(), regatta.isControlTrackingFromStartAndFinishTimes());
         dbRegatta.put(FieldNames.REGATTA_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE.name(), regatta.canBoatsOfCompetitorsChangePerRace());
+        dbRegatta.put(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name(), regatta.getCompetitorRegistrationType().name());
+        dbRegatta.put(FieldNames.REGATTA_REGISTRATION_LINK_SECRET.name(), regatta.getRegistrationLinkSecret());
         dbRegatta.put(FieldNames.REGATTA_RANKING_METRIC.name(), storeRankingMetric(regatta));
         boolean success = false;
         final int MAX_TRIES = 3;
@@ -1254,7 +1255,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private Document storePositionedCompetitor(CompetitorResult competitorResult) {
         Document result = new Document();
         result.put(FieldNames.COMPETITOR_ID.name(), competitorResult.getCompetitorId());
-        result.put(FieldNames.COMPETITOR_DISPLAY_NAME.name(), competitorResult.getCompetitorDisplayName());
+        result.put(FieldNames.COMPETITOR_DISPLAY_NAME.name(), competitorResult.getName());
+        result.put(FieldNames.COMPETITOR_SHORT_NAME.name(), competitorResult.getShortName());
+        result.put(FieldNames.COMPETITOR_BOAT_NAME.name(), competitorResult.getBoatName());
+        result.put(FieldNames.COMPETITOR_BOAT_SAIL_ID.name(), competitorResult.getBoatSailId());
         result.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(), competitorResult.getMaxPointsReason() == null ? null : competitorResult.getMaxPointsReason().name());
         result.put(FieldNames.LEADERBOARD_CORRECTED_SCORE.name(), competitorResult.getScore());
         result.put(FieldNames.RACE_LOG_FINISHING_TIME_AS_MILLIS.name(), competitorResult.getFinishingTime() == null ? null : competitorResult.getFinishingTime().asMillis());
@@ -1444,29 +1448,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         collection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(query);
     }
 
+    /**
+     * Lets the {@link DeviceConfigurationJsonSerializer} create a JSON-serialized copy of the {@code configuration} and
+     * adds as a key field the stringified configuration's UUID as a field named
+     * {@link FieldNames#CONFIGURATION_ID_AS_STRING}. This field will be redundant to the serializer's copy of the ID field.
+     */
     @Override
-    public void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
+    public void storeDeviceConfiguration(DeviceConfiguration configuration) {
         MongoCollection<Document> configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
-        
+        final Document configDocument = createDeviceConfigurationObject(configuration);
+        configDocument.put(FieldNames.CONFIGURATION_ID_AS_STRING.name(), configuration.getId().toString());
         Document query = new Document();
-        query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
-        
-        Document entryObject = new Document();
-        entryObject.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
-        entryObject.put(FieldNames.CONFIGURATION_MATCHER.name(), createDeviceConfigurationMatcherObject(matcher));
-        entryObject.put(FieldNames.CONFIGURATION_CONFIG.name(), createDeviceConfigurationObject(configuration));
-        
-        configurationsCollections.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, entryObject, new UpdateOptions().upsert(true));
-    }
-
-    private Document createDeviceConfigurationMatcherObject(DeviceConfigurationMatcher matcher) {
-        Document matcherObject = new Document();
-        if (matcher instanceof DeviceConfigurationMatcherSingle) {
-            BasicDBList client = new BasicDBList();
-            client.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
-            matcherObject.put(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name(), client);
-        }
-        return matcherObject;
+        query.put(FieldNames.CONFIGURATION_ID_AS_STRING.name(), configuration.getId().toString());
+        configurationsCollections.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, configDocument, new UpdateOptions().upsert(true));
     }
 
     private Document createDeviceConfigurationObject(DeviceConfiguration configuration) {
@@ -1477,10 +1471,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void removeDeviceConfiguration(DeviceConfigurationMatcher matcher) {
+    public void removeDeviceConfiguration(UUID id) {
         MongoCollection<Document> configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());
-        Document query = new Document();
-        query.put(FieldNames.CONFIGURATION_MATCHER_ID.name(), matcher.getMatcherIdentifier());
+        Document query = new Document(FieldNames.CONFIGURATION_ID_AS_STRING.name(), id.toString());
         configurationsCollections.deleteOne(query);
     }
 

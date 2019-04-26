@@ -33,6 +33,7 @@ import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache.ResolveListener;
 
 public interface DomainFactory extends SharedDomainFactory {
     /**
@@ -61,7 +62,8 @@ public interface DomainFactory extends SharedDomainFactory {
      *          Thread.currentThread().setContextClassLoader(oldContextClassLoader);
      * </pre>
      */
-    ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException;
+    ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(
+            InputStream inputStream, ResolveListener resolver) throws IOException;
     
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 

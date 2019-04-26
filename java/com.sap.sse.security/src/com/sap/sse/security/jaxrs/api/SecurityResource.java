@@ -1,5 +1,8 @@
 package com.sap.sse.security.jaxrs.api;
 
+import java.util.Locale;
+import java.util.concurrent.Callable;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -15,15 +18,16 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONObject;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.security.User;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
-import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.User;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/restsecurity")
@@ -67,9 +71,7 @@ public class SecurityResource extends AbstractSecurityResource {
     @Path("/change_password")
     @Produces("text/plain;charset=UTF-8")
     public Response changePassword(@FormParam("username") String username, @FormParam("password") String password) {
-        final Subject subject = SecurityUtils.getSubject();
-        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
-                || !username.equals(subject.getPrincipal().toString()))) {
+        if (!getService().hasCurrentUserUpdatePermission(getService().getUserByName(username))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
             try {
@@ -108,15 +110,41 @@ public class SecurityResource extends AbstractSecurityResource {
     @POST
     @Path("/create_user")
     @Produces("text/plain;charset=UTF-8")
-    public Response createUser(@Context UriInfo uriInfo, @QueryParam("username") String username, @QueryParam("email") String email,
-            @QueryParam("password") String password, @QueryParam("fullName") String fullName,
-            @QueryParam("company") String company) {
+    public Response createUser(@Context UriInfo uriInfo,
+            @QueryParam("username") String queryUsername, @FormParam("username") String formUsername,
+            @QueryParam("email") String queryEmail, @FormParam("email") String formEmail,
+            @QueryParam("password") String queryPassword, @FormParam("password") String formPassword,
+            @QueryParam("fullName") String queryFullName, @FormParam("fullName") String formFullName,
+            @QueryParam("company") String queryCompany, @FormParam("company") String formCompany) {
         try {
-            final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
-            getService().createSimpleUser(username, email, password, fullName, company, validationBaseURL);
-            SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
-            return respondWithAccessTokenForUser(username);
-        } catch (UserManagementException | MailException e) {
+            User user = getService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(queryUsername,
+                    new Callable<User>() {
+                        @Override
+                        public User call() throws Exception {
+                            final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
+                            final String usernameToUse = preferFirstIfNotNullOrElseSecond(formUsername, queryUsername);
+                            final String passwordToUse = preferFirstIfNotNullOrElseSecond(formPassword, queryPassword);
+                            final String emailToUse = preferFirstIfNotNullOrElseSecond(formEmail, queryEmail);
+                            final String fullNameToUse = preferFirstIfNotNullOrElseSecond(formFullName, queryFullName);
+                            final String companyToUse = preferFirstIfNotNullOrElseSecond(formCompany, queryCompany);
+                            User newUser = getService().createSimpleUser(usernameToUse, emailToUse, passwordToUse, fullNameToUse, companyToUse,
+                                    Locale.ENGLISH, validationBaseURL, getService().getDefaultTenantForCurrentUser());
+                            SecurityUtils.getSubject().login(new UsernamePasswordToken(usernameToUse, passwordToUse));
+                            return newUser;
+                        }
+
+                        private String preferFirstIfNotNullOrElseSecond(String first, String second) {
+                            final String result;
+                            if (first != null) {
+                                result = first;
+                            } else {
+                                result = second;
+                            }
+                            return result;
+                        }
+                    });
+            return respondWithAccessTokenForUser(user.getName());
+        } catch (Exception e) {
             return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
         }
     }
@@ -142,22 +170,20 @@ public class SecurityResource extends AbstractSecurityResource {
     @Produces("application/json;charset=UTF-8")
     public Response getUser(@QueryParam("username") String username) {
         final Subject subject = SecurityUtils.getSubject();
-        // ADMIN can query all; otherwise, only the owning user can query
-        // TODO: ideally, we would introduce a USER:READ:<username> permission which later can be granted to tenant admins for all users of that tenant
-        if (subject.getPrincipal() == null || (username != null && !subject.hasRole(DefaultRoles.ADMIN.getRolename()))) {
-            return Response.status(Status.UNAUTHORIZED).build();
+        final User user = getService().getUserByName(username == null ? subject.getPrincipal().toString() : username);
+        if (user == null) {
+            return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
+        } else if (getService().hasCurrentUserReadPermission(user) || getService()
+                .hasCurrentUserOneOfExplicitPermissions(user, SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC)) {
+            // TODO: pruning when current user only has READ_PUBLIC
+            JSONObject result = new JSONObject();
+            result.put("username", user.getName());
+            result.put("fullName", user.getFullName());
+            result.put("email", user.getEmail());
+            result.put("company", user.getCompany());
+            return Response.ok(result.toJSONString()).build();
         } else {
-            final User user = getService().getUserByName(username == null ? subject.getPrincipal().toString() : username);
-            if (user == null) {
-                return Response.status(Status.PRECONDITION_FAILED).entity("User "+username+" not known").build();
-            } else {
-                JSONObject result = new JSONObject();
-                result.put("username", user.getName());
-                result.put("fullName", user.getFullName());
-                result.put("email", user.getEmail());
-                result.put("company", user.getCompany());
-                return Response.ok(result.toJSONString()).build();
-            }
+            return Response.status(Status.UNAUTHORIZED).build();
         }
     }
     
@@ -165,18 +191,18 @@ public class SecurityResource extends AbstractSecurityResource {
     @Path("/user")
     @Produces("text/plain;charset=UTF-8")
     public Response deleteUser(@QueryParam("username") String username) {
-        final Subject subject = SecurityUtils.getSubject();
-        // the signed-in subject has role ADMIN
-        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
-                || !username.equals(subject.getPrincipal().toString()))) {
-            return Response.status(Status.UNAUTHORIZED).build();
+        User user = getService().getUserByName(username);
+        if (user != null) {
+            return getService().checkPermissionAndDeleteOwnershipForObjectRemoval(user, () -> {
+                try {
+                    getService().deleteUser(username);
+                    return Response.ok().build();
+                } catch (UserManagementException e) {
+                    return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
+                }
+            });
         } else {
-            try {
-                getService().deleteUser(username);
-                return Response.ok().build();
-            } catch (UserManagementException e) {
-                return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
-            }
+            return Response.status(Status.PRECONDITION_FAILED).entity("unknown id").build();
         }
     }
     
@@ -186,10 +212,7 @@ public class SecurityResource extends AbstractSecurityResource {
     public Response updateUser(@Context UriInfo uriInfo, @QueryParam("username") String username,
             @QueryParam("email") String email, @QueryParam("fullName") String fullName,
             @QueryParam("company") String company) {
-        final Subject subject = SecurityUtils.getSubject();
-        // the signed-in subject has role ADMIN
-        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
-                || !username.equals(subject.getPrincipal().toString()))) {
+        if (!getService().hasCurrentUserUpdatePermission(getService().getUserByName(username))) {
             return Response.status(Status.UNAUTHORIZED).build();
         } else {
             try {
@@ -282,9 +305,16 @@ public class SecurityResource extends AbstractSecurityResource {
     Response respondWithAccessTokenForUser(final String username) {
         JSONObject response = new JSONObject();
         response.put("username", username);
-        String accessToken = getService().getOrCreateAccessToken(username);
-        if (accessToken == null) {
-            accessToken = getService().createAccessToken(username);
+        getService().checkCurrentUserReadPermission(getService().getUserByName(username));
+        String accessToken;
+        if (getService().hasCurrentUserUpdatePermission(getService().getUserByName(username))) {
+            accessToken = getService().getOrCreateAccessToken(username);
+        } else {
+            accessToken = getService().getAccessToken(username);
+            if (accessToken == null) {
+                throw new AuthorizationException(
+                        "No access token was found and the permission to create one is lacking.");
+            }
         }
         response.put("access_token", accessToken);
         return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();

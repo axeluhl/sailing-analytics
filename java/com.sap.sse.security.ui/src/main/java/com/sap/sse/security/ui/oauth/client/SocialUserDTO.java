@@ -3,8 +3,7 @@ package com.sap.sse.security.ui.oauth.client;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.security.ui.shared.AccountDTO;
+import com.sap.sse.security.shared.dto.AccountDTO;
 
 /**
  * The object we send back and forth between client and server.
@@ -12,9 +11,10 @@ import com.sap.sse.security.ui.shared.AccountDTO;
  * object.
  * @author muquit@muquit.com
  */
-public class SocialUserDTO extends AccountDTO implements IsSerializable
-{
-private String sessionId;
+public class SocialUserDTO extends AccountDTO {
+    private static final long serialVersionUID = 1L;
+
+    private String sessionId;
     
     private Map<String, String> properties = new HashMap<String, String>();
     

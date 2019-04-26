@@ -4,7 +4,7 @@ Bundle-Name: Schema
 Bundle-SymbolicName: com.sap.sailing.xrr.schema
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sailing.xrr.schema
 Import-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl,

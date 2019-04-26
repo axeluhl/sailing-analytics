@@ -17,8 +17,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -41,9 +39,11 @@ import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithCon
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
@@ -65,18 +65,17 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         session = new UUIDDataMiningSession(UUID.randomUUID());
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService,
                 RemoteServiceMappingConstants.dataMiningServiceRemotePath);
-        createDataminingPanel(Window.Location.getParameter("q"));
+        getUserService().executeWithServerInfo(s -> createDataminingPanel(s, Window.Location.getParameter("q")));
     }
 
-    private void createDataminingPanel(final String queryIdentifier) {
+    private void createDataminingPanel(ServerInfoDTO serverInfo, final String queryIdentifier) {
         removeUrlParameter();
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
                 header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                 genericSailingAuthentication);
-        authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING,
-                SailingPermissionsForRoleProvider.INSTANCE);
+        authorizedContentDecorator.setPermissionToCheck(serverInfo, ServerActions.DATA_MINING);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
 
             private QueryDefinitionProviderWithControls queryDefinitionProvider;
@@ -107,9 +106,11 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
                         queryDefinitionProvider, resultsPresenter);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
-                StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
-                        queryDefinitionProvider, dataMiningService, queryRunner);
-                queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
+                if (getUserService().hasServerPermission(ServerActions.DATA_MINING)) {
+                    StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
+                            queryDefinitionProvider, dataMiningService, queryRunner);
+                    queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
+                }
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even
                  * counterproductive. This removes the query runner settings to prevent that the user can enable the
@@ -160,6 +161,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         DockLayoutPanel panel = new DockLayoutPanel(Unit.PX);
         panel.addNorth(header, 75);
         panel.add(authorizedContentDecorator);
+        panel.ensureDebugId("DataMiningPanel");
         rootPanel.add(panel);
     }
 

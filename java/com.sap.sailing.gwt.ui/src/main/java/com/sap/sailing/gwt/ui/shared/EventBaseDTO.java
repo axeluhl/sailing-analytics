@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,13 +9,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
-public class EventBaseDTO extends NamedDTO implements IsSerializable {
+public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
 
     public VenueDTO venue;
@@ -181,4 +183,10 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     public ImageSize getImageSize(String imageURL) {
         return imageSizes.get(imageURL);
     }
+
+    @Override
+    public Serializable getId() {
+        return id;
+    }
+
 }

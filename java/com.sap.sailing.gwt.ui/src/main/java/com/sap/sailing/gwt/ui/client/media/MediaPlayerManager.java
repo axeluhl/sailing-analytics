@@ -54,7 +54,9 @@ public interface MediaPlayerManager {
     
     boolean deleteMediaTrack(MediaTrack mediaTrack);
     
-    boolean allowsEditing();
+    boolean allowsEditing(String mediaTrackDbId);
+
+    boolean allowsCreating();
 
     void playDefault();
 

@@ -55,6 +55,7 @@ import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -194,16 +195,22 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             JSONObject requestObject = null;
             if (checkinData instanceof CompetitorCheckinData) {
                 CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) checkinData;
-                requestObject = CheckinHelper.getCompetitorCheckinJson(competitorCheckinData.competitorId,
-                        competitorCheckinData.deviceUid, "TODO push device ID!!", date.getTime());
+                requestObject = CheckinHelper.getCompetitorCheckinJson(
+                        competitorCheckinData.secret, competitorCheckinData.competitorId,
+                        competitorCheckinData.deviceUid, "TODO push device ID!!",
+                        date.getTime());
             } else if (checkinData instanceof MarkCheckinData) {
                 MarkCheckinData markCheckinData = (MarkCheckinData) checkinData;
-                requestObject = CheckinHelper.getMarkCheckinJson(markCheckinData.getMark().getId().toString(),
-                        markCheckinData.deviceUid, "TODO push device ID!!", date.getTime());
+                requestObject = CheckinHelper.getMarkCheckinJson(
+                        markCheckinData.secret, markCheckinData.getMark().getId().toString(),
+                        markCheckinData.deviceUid, "TODO push device ID!!",
+                        date.getTime());
             } else if (checkinData instanceof BoatCheckinData) {
                 BoatCheckinData boatCheckinData = (BoatCheckinData) checkinData;
-                requestObject = CheckinHelper.getBoatCheckinJson(boatCheckinData.getBoat().getId().toString(),
-                        boatCheckinData.deviceUid, "TODO push device ID!!", date.getTime());
+                requestObject = CheckinHelper.getBoatCheckinJson(
+                        boatCheckinData.secret, boatCheckinData.getBoat().getId().toString(),
+                        boatCheckinData.deviceUid, "TODO push device ID!!",
+                        date.getTime());
             }
             HttpJsonPostRequest request = new HttpJsonPostRequest(getActivity(), new URL(checkinData.checkinURL),
                     requestObject.toString());
@@ -377,19 +384,21 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             }
         };
         CheckoutHelper checkoutHelper = new CheckoutHelper();
+        CheckinUrlInfo checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(getActivity(), checkinDigest);
+        String secret = Uri.parse(checkinUrl.urlString).getQueryParameter(DeviceMappingConstants.URL_SECRET);
         LeaderboardInfo leaderboardInfo = DatabaseHelper.getInstance().getLeaderboard(getActivity(), checkinDigest);
         EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
         if (type == CheckinUrlInfo.TYPE_COMPETITOR) {
             CompetitorInfo competitorInfo = DatabaseHelper.getInstance().getCompetitor(getActivity(), checkinDigest);
-            checkoutHelper.checkoutCompetitor((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server,
+            checkoutHelper.checkoutCompetitor((StartActivity) getActivity(), secret, leaderboardInfo.name, eventInfo.server,
                     competitorInfo.id, successListener, failureListener);
         } else if (type == CheckinUrlInfo.TYPE_MARK) {
             MarkInfo markInfo = DatabaseHelper.getInstance().getMarkInfo(getActivity(), checkinDigest);
-            checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server,
+            checkoutHelper.checkoutMark((StartActivity) getActivity(), secret, leaderboardInfo.name, eventInfo.server,
                     markInfo.markId, type, successListener, failureListener);
         } else if (type == CheckinUrlInfo.TYPE_BOAT) {
             BoatInfo boatInfo = DatabaseHelper.getInstance().getBoatInfo(getActivity(), checkinDigest);
-            checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server,
+            checkoutHelper.checkoutMark((StartActivity) getActivity(), secret, leaderboardInfo.name, eventInfo.server,
                     boatInfo.boatId, type, successListener, failureListener);
         }
     }

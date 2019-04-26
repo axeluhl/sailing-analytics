@@ -17,8 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.subject.support.SubjectThreadState;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -36,6 +37,7 @@ import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -73,12 +75,17 @@ import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
+import com.sap.sailing.server.tagging.TaggingServiceImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -103,15 +110,33 @@ public class SearchServiceTest {
     private DynamicTrackedRace pfingstbusch470TrackedR2;
     private DynamicTrackedRace aalOrcTrackedR1;
     private DynamicTrackedRace aalOrcTrackedR2;
+    private SecurityService securityService;
 
     @Before
     public void setUp() {
-        // setup the Shiro SubjectThreadState to ensure that the tagging service can check whether a subject is logged in
-        final Subject subject = Mockito.mock(Subject.class);
-        final SubjectThreadState threadState = new SubjectThreadState(subject);
-        threadState.bind();
+        UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
+        User currentUser = Mockito.mock(User.class);
 
-        server = new RacingEventServiceImpl();
+        securityService = Mockito.mock(SecurityService.class);
+        SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
+        Subject fakeSubject = Mockito.mock(Subject.class);
+
+
+        SecurityUtils.setSecurityManager(securityManager);
+        Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
+        Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();
+        Mockito.doReturn(currentUser).when(securityService).getCurrentUser();
+        Mockito.doReturn(true).when(securityService).hasCurrentUserReadPermission(Mockito.any());
+        Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());
+
+        Mockito.doReturn(true).when(securityService)
+                .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
+        Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
+
+        server = Mockito.spy(new RacingEventServiceImpl());
+        Mockito.doReturn(securityService).when(server).getSecurityService();
+        TaggingServiceImpl taggingServer = Mockito.spy(new TaggingServiceImpl(server));
+        Mockito.doReturn(taggingServer).when(server).getTaggingService();
         List<Event> allEvents = new ArrayList<>();
         Util.addAll(server.getAllEvents(), allEvents);
         for (final Event e : allEvents) {
@@ -146,25 +171,35 @@ public class SearchServiceTest {
                 new SeriesCreationParametersDTO(Collections.singletonList(new FleetDTO("Default", /* order */-1, Color.RED)),
                 /* medal */false, /* fleetsCanRunInParallel */ true, /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
                 /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false, /* maximumNumberOfDiscards */ null));
-        pfingstbusch29er = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "29er"), "29er", 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(),
+        pfingstbusch29er = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "29er"),
+                "29er", /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
+                UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielAlpha.getId(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
+                true, new LowPoint(), kielAlpha.getId(), /* buoyZoneRadiusInHullLengths */2.0,
+                /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
+                RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R3"));
         RegattaLeaderboard pfingstbusch29erLeaderboard = server.apply(new CreateRegattaLeaderboard(pfingstbusch29er.getRegattaIdentifier(),
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
-        pfingstbusch470 = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "470"), "470", 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
-                UUID.randomUUID(), new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielBravo.getId(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
+        pfingstbusch470 = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "470"), "470",
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
+                UUID.randomUUID(),
+                new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
+                true, new LowPoint(), kielBravo.getId(), /* buoyZoneRadiusInHullLengths */2.0,
+                /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
+                RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R3"));
         RegattaLeaderboard pfingstbusch470Leaderboard = server.apply(new CreateRegattaLeaderboard(pfingstbusch470.getRegattaIdentifier(),
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
-        final LeaderboardGroup pfingstbuschLeaderboardGroup = server.apply(new CreateLeaderboardGroup("Pfingstbusch", "Pfingstbusch", /* displayName */ null,
+        UUID newGroupid = UUID.randomUUID();
+        final LeaderboardGroup pfingstbuschLeaderboardGroup = server.apply(new CreateLeaderboardGroup(newGroupid,
+                "Pfingstbusch", "Pfingstbusch", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false, Arrays.asList(new String[] { RegattaImpl.getDefaultName("Pfingstbusch", "29er"), RegattaImpl.getDefaultName("Pfingstbusch", "470") }),
                 new int[0], /* overallLeaderboardScoringSchemeType */ null));
         server.apply(new AddLeaderboardGroupToEvent(pfingstbusch.getId(), pfingstbuschLeaderboardGroup.getId()));
@@ -178,15 +213,21 @@ public class SearchServiceTest {
         flensburg = aalEvent.getVenue();
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
         flensburg.addCourseArea(flensburgStandard);
-        aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC", 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(),
+        aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC",
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
+                UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), flensburgStandard.getId(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
+                true, new LowPoint(), flensburgStandard.getId(), /* buoyZoneRadiusInHullLengths */2.0,
+                /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
+                RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R2"));
         RegattaLeaderboard aalRegattaLeaderboard = server.apply(new CreateRegattaLeaderboard(aalRegatta.getRegattaIdentifier(),
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
-        final LeaderboardGroup aalLeaderboardGroup = server.apply(new CreateLeaderboardGroup("Aal Regatta", "Aal Regatta", /* displayName */ null,
+        UUID newGroupid2 = UUID.randomUUID();
+        final LeaderboardGroup aalLeaderboardGroup = server.apply(new CreateLeaderboardGroup(newGroupid2, "Aal Regatta",
+                "Aal Regatta", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false, Collections.singletonList(RegattaImpl.getDefaultName("Aalregatta", "ORC")),
                 new int[0], /* overallLeaderboardScoringSchemeType */ null));
         server.apply(new AddLeaderboardGroupToEvent(aalEvent.getId(), aalLeaderboardGroup.getId()));

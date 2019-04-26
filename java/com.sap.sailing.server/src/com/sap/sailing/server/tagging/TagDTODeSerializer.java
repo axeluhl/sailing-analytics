@@ -206,7 +206,7 @@ public class TagDTODeSerializer {
 
     /**
      * Combines <code>leaderboardName</code>, <code>raceColumnName</code> and <code>fleetName</code> to a unique key.
-     * Used to store private tags in {@link com.sap.sse.security.UserStore UserStore}.
+     * Used to store private tags in {@link com.sap.sse.security.interfaces.UserStore UserStore}.
      * 
      * @param leaderboardName
      *            leaderboard name

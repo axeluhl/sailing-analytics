@@ -15,4 +15,5 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.mongodb,
  com.sap.sse.common,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4"
-Export-Package: com.sap.sse.security.persistence
+Export-Package: com.sap.sse.security.persistence,
+ com.sap.sse.security.persistence.impl

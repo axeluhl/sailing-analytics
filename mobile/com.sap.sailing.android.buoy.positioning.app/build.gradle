@@ -88,8 +88,7 @@ android {
 
 dependencies {
     /* local dependencies */
-    implementation project(":mobile:com.sap.sailing.android.shared")
-
+    implementation project(':mobile:com.sap.sailing.android.shared')
     /* JVM tests */
     testImplementation "junit:junit:${rootProject.ext.junit}"
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"

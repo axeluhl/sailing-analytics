@@ -3,58 +3,48 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
+import com.sap.sse.common.Util;
 
 public class DeviceConfigurationReplicationTest extends AbstractServerReplicationTest {
 
     @Test
     public void testCreateConfiguration() throws InterruptedException {
-        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("a");
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
-        master.createOrUpdateDeviceConfiguration(matcher, configuration);
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl(), UUID.randomUUID(), "The Config");
+        master.createOrUpdateDeviceConfiguration(configuration);
         Thread.sleep(1000);
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> configurationMap = replica.getAllDeviceConfigurations();
-        assertEquals(1, configurationMap.size());
+        Iterable<DeviceConfiguration> configurations = replica.getAllDeviceConfigurations();
+        assertEquals(1, Util.size(configurations));
     }
     
     @Test
     public void testUpdateConfiguration() throws InterruptedException {
-        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("23");
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
-        
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl(), UUID.randomUUID(), "23");
         configuration.setAllowedCourseAreaNames(Arrays.asList("hallo"));
-        master.createOrUpdateDeviceConfiguration(matcher, configuration);
+        master.createOrUpdateDeviceConfiguration(configuration);
         configuration.setAllowedCourseAreaNames(Arrays.asList("hallo", "welt"));
-        master.createOrUpdateDeviceConfiguration(matcher, configuration);
+        master.createOrUpdateDeviceConfiguration(configuration);
         Thread.sleep(1000);
-        
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> configurationMap = replica.getAllDeviceConfigurations();
-        assertEquals(1, configurationMap.size());
-        
-        DeviceConfiguration replicatedConfiguration = configurationMap.values().iterator().next();
-        assertEquals(configuration.getByNameCourseDesignerCourseNames(), 
-                replicatedConfiguration.getByNameCourseDesignerCourseNames());
+        Iterable<DeviceConfiguration> configurations = replica.getAllDeviceConfigurations();
+        assertEquals(1, Util.size(configurations));
+        DeviceConfiguration replicatedConfiguration = configurations.iterator().next();
+        assertEquals(configuration.getByNameCourseDesignerCourseNames(), replicatedConfiguration.getByNameCourseDesignerCourseNames());
     }
     
     @Test
     public void testRemoveConfiguration() throws InterruptedException {
-        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("24");
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
-        
-        master.createOrUpdateDeviceConfiguration(matcher, configuration);
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl(), UUID.randomUUID(), "24");
+        master.createOrUpdateDeviceConfiguration(configuration);
         Thread.sleep(1000);
-        master.removeDeviceConfiguration(matcher);
+        master.removeDeviceConfiguration(configuration.getId());
         Thread.sleep(1000);
-        
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> configurationMap = replica.getAllDeviceConfigurations();
-        assertEquals(0, configurationMap.size());
+        Iterable<DeviceConfiguration> configurationMap = replica.getAllDeviceConfigurations();
+        assertEquals(0, Util.size(configurationMap));
     }
 }

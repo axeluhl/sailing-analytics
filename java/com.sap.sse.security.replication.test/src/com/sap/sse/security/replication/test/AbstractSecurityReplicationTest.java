@@ -9,7 +9,10 @@ import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp;
 import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public abstract class AbstractSecurityReplicationTest extends AbstractServerWithSingleServiceReplicationTest<SecurityService, SecurityServiceImpl> {
@@ -30,15 +33,22 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
 
         @Override
         protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException,
-                UserManagementException, MailException {
-            SecurityServiceImpl result = new SecurityServiceImpl(new UserStoreImpl());
-            result.clearReplicaState();
+                UserManagementException, MailException, UserGroupManagementException {
+            final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
+            userStore.ensureDefaultRolesExist();
+            userStore.loadAndMigrateUsers();
+            final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
+            SecurityServiceImpl result = new SecurityServiceImpl(userStore, accessControlStore);
             return result;
         }
 
         @Override
-        protected SecurityServiceImpl createNewReplica() {
-            return new SecurityServiceImpl(new UserStoreImpl());
+        protected SecurityServiceImpl createNewReplica() throws UserGroupManagementException, UserManagementException, MalformedURLException, IOException, InterruptedException {
+            final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
+            userStore.ensureDefaultRolesExist();
+            userStore.loadAndMigrateUsers();
+            final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
+            return new SecurityServiceImpl(userStore, accessControlStore);
         }
     }
 }

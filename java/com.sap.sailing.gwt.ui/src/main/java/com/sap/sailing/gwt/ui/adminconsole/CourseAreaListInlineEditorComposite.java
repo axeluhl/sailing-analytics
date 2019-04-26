@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-
 import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sse.common.Util;
@@ -20,7 +18,7 @@ public class CourseAreaListInlineEditorComposite extends GenericStringListInline
     }
 
     public CourseAreaListInlineEditorComposite(Iterable<CourseAreaDTO> initialValues, StringMessages stringMessages,
-            ImageResource removeImage, List<String> suggestValues, int textBoxSize) {
+            ImageResource removeImage, Iterable<String> suggestValues, int textBoxSize) {
         super(initialValues, stringMessages, removeImage, suggestValues, textBoxSize);
     }
 

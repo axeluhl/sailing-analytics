@@ -267,7 +267,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                         url.setText(pref.getServerBaseURL());
                     }
                     final EditText device_id = (EditText) view.findViewById(R.id.device_id);
-                    device_id.setText(pref.getDeviceIdentifier(null));
+                    device_id.setText(pref.getDeviceConfigurationName(null));
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                     builder.setView(view);

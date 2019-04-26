@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
-public interface LeaderboardsRefresher {
+public interface LeaderboardsRefresher<T extends StrippedLeaderboardDTO> {
     /**
      * Fetch all leaderboards from the server as {@link StrippedLeaderboardDTO} objects and distribute to all
      * {@link LeaderboardsDisplayer}s registered.
@@ -20,5 +20,5 @@ public interface LeaderboardsRefresher {
      * @param origin will not receive a call to its {@link LeaderboardsDisplayer#fillLeaderboards(Iterable)}, assuming
      * that the update originated in <code>origin</code> and hence no notification is required.
      */
-    void updateLeaderboards(Iterable<StrippedLeaderboardDTO> updatedLeaderboards, LeaderboardsDisplayer origin);
+    void updateLeaderboards(Iterable<T> updatedLeaderboards, LeaderboardsDisplayer<T> origin);
 }

@@ -35,7 +35,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.queue.MailQueue;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.UserStore;
 
 public class SailingNotificationServiceImpl implements SailingNotificationService {
     public static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
