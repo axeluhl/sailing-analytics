@@ -702,21 +702,17 @@ public class TrackingListFragment extends BaseFragment
      */
     public boolean onItemMove(int fromPosition, int toPosition) {
         final int firstPositionChanged = Math.min(getFirstRankZeroPosition(), Math.min(fromPosition, toPosition));
-        final int lastPositionChanged = Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition) + 1);
+        final int lastPositionChanged = Math.min(getFirstRankZeroPosition(), Math.max(fromPosition, toPosition));
         adjustRanks(firstPositionChanged, lastPositionChanged);
-        mFinishedAdapter.notifyItemChanged(fromPosition);
-        mFinishedAdapter.notifyItemChanged(toPosition);
+        mFinishedAdapter.notifyItemRangeChanged(firstPositionChanged, lastPositionChanged - firstPositionChanged + 1);
         setPublishButton();
         return true;
     }
 
     public void onItemRemove(int position, CompetitorResultWithIdImpl item) {
-        if (position >= 0) { // found
-            mFinishedData.remove(position);
-            adjustRanks(position, getFirstRankZeroPosition());
-            setPublishButton();
-            mFinishedAdapter.notifyItemRemoved(position);
-        }
+        adjustRanks(position, getFirstRankZeroPosition() - 1);
+        mFinishedAdapter.notifyItemRangeChanged(position, getFirstRankZeroPosition() - position);
+        setPublishButton();
         for (Map.Entry<Competitor, Boat> entry : getRace().getCompetitorsAndBoats().entrySet()) {
             if (entry.getKey().getId().equals(item.getCompetitorId())) {
                 addNewCompetitorToCompetitorList(entry);
@@ -733,11 +729,11 @@ public class TrackingListFragment extends BaseFragment
      * @param fromPosition
      *            inclusive start index into {@link #mFinishedData} where to start updating the ranks
      * @param toPosition
-     *            exclusive end index into {@link #mFinishedData} where to stop updating the ranks; must not be -1
+     *            inclusive end index into {@link #mFinishedData} where to stop updating the ranks; must not be -1
      */
     private void adjustRanks(int fromPosition, int toPosition) {
         final int end = Math.min(toPosition, getFirstRankZeroPosition());
-        for (int i = fromPosition; i < end; i++) {
+        for (int i = fromPosition; i <= end; i++) {
             CompetitorResultWithIdImpl competitorToReplaceWithAdjustedPosition = mFinishedData.get(i);
             final int newOneBasedRank = i + 1;
             mFinishedData.set(i,
@@ -795,13 +791,12 @@ public class TrackingListFragment extends BaseFragment
                 && newItem.getMaxPointsReason() != MaxPointsReason.NONE) {
             // move to the end of the area of "penalized" competitors; may also be an unpenalized competitor that hasn't
             // been removed yet (e.g., in order to force a score correction reset on the server)
-            onItemMove(index, mFinishedData.size() - 1); // -1 because first the element is removed, so when inserting
-                                                         // the list is one element shorter
+            mFinishedAdapter.onItemMove(index, mFinishedData.size() - 1); // -1 because first the element is removed, so when inserting
+                                                                          // the list is one element shorter
         } else if (item.getOneBasedRank() != newItem.getOneBasedRank() && newItem.getOneBasedRank() != 0) {
-            onItemMove(index, newItem.getOneBasedRank() - 1);
-            mFinishedAdapter.notifyItemChanged(index);
+            mFinishedAdapter.onItemMove(index, newItem.getOneBasedRank() - 1);
         } else if (newItem.getOneBasedRank() == 0 && newItem.getMaxPointsReason() == MaxPointsReason.NONE) {
-            onItemRemove(index, item);
+            mFinishedAdapter.onItemRemove(index);
         } else {
             mFinishedAdapter.notifyItemChanged(index);
         }
