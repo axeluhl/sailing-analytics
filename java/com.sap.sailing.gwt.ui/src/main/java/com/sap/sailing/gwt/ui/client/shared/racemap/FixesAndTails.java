@@ -834,6 +834,10 @@ public class FixesAndTails {
             detailValueBoundaries.setMinMax(min, max);
         }
     }
+    
+    protected ValueRangeFlexibleBoundaries getDetailValueBoundaries() {
+        return detailValueBoundaries;
+    }
 
     /**
      * Sets the {@link ValueRangeFlexibleBoundaries} to use for tracking the minimum and maximum detail values.

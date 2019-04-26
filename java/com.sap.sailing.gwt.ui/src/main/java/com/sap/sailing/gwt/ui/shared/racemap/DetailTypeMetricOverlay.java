@@ -3,68 +3,101 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.controls.ControlPosition;
+import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sse.common.ColorMapper;
+import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 
 public class DetailTypeMetricOverlay extends FullCanvasOverlay {
     
     private final String textColor = "Black";
     private final String textFont = "10pt 'Open Sans'";
-    private int xOffset = 0;
-    private int yOffset = 0; //150;
-    private double rectWidth = 20;
-    private double rectHeight = 20;
+    private double lineWidth = 300;
+    private double lineHeight = 10;
+    private double lineMargin = 10;
     private final StringMessages stringMessages;
-    private Canvas detailLegend;
+    private Canvas metricLegend;
+    
+    private ValueRangeFlexibleBoundaries valueRange;
+    private ColorMapper colorMapper;
 
     public DetailTypeMetricOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem, StringMessages stringMessages) {
         super(map, zIndex, coordinateSystem);
         this.stringMessages = stringMessages;
     }
     
-    protected void createDetailLegend(MapWidget map) {
-        detailLegend = Canvas.createIfSupported();
-        detailLegend.setStyleName("MapSimulationLegend");
-        detailLegend.setTitle("Metric Legend");
-        map.setControls(ControlPosition.TOP_LEFT, detailLegend);
-        detailLegend.getParent().setStyleName("MapSimulationLegendParentDiv");
+    protected void createMetricLegend(MapWidget map) {
+        metricLegend = Canvas.createIfSupported();
+        metricLegend.setStyleName("MapMetricLegend");
+        metricLegend.setTitle("Metric Legend");
+        map.setControls(ControlPosition.LEFT_TOP, metricLegend);
+        metricLegend.getParent().setStyleName("MapMetricLegendParentDiv");
     }
-    
+
+    @Override
+    public void setVisible(boolean isVisible) {
+        super.setVisible(isVisible);
+        if (metricLegend != null) {
+            metricLegend.setVisible(isVisible);
+        }
+    }
+
+    @Override
+    protected void draw() {
+        if (mapProjection != null) {
+            super.setCanvasSettings();
+            drawLegend();
+        }
+    }
+
+    @Override
+    protected void drawCenterChanged() {
+        draw();
+    }
+
     public void clearCanvas() {
-        if (detailLegend != null) {
+        if (metricLegend != null) {
             Context2d g = this.getCanvas().getContext2d();
-            double w = detailLegend.getOffsetWidth();
-            double h = detailLegend.getOffsetHeight();
-            g = detailLegend.getContext2d();
+            double w = metricLegend.getOffsetWidth();
+            double h = metricLegend.getOffsetHeight();
+            g = metricLegend.getContext2d();
             g.clearRect(0, 0, w, h);            
         }
     }
     
-    public void drawLegend(Canvas canvas) {
-        int index = 0;
-        Context2d context2d = canvas.getContext2d();
-        context2d.setFont(textFont);
-        TextMetrics txtmet;
-        txtmet = context2d.measureText("00:00:00");
-        double timewidth = txtmet.getWidth();
-        double txtmaxwidth = 0.0;
-        boolean containsTimeOut = false;
-        boolean containsMixedLeg = false;
-        double newwidth = 0;
-        double deltaTime = 0;
-        double deltaMixedLeg = 0;
-        double deltaTimeOut = 0;
-        double mixedLegWidth = 0;
-        //canvas.setSize(xOffset + rectWidth + txtmaxwidth + timewidth + 10.0+"px", rectHeight*(paths.length+1)+"px");
-        int canvasWidth = (int)Math.ceil(xOffset + rectWidth + txtmaxwidth + timewidth + 20.0);
-        int canvasHeight = (int)Math.ceil(yOffset + rectHeight + 20.0);
-        setCanvasSize(canvas, canvasWidth, canvasHeight);
-        /*drawRectangleWithText(context2d, xOffset, yOffset, null, stringMessages.raceLeader(),
-            getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth, deltaTime, true);*/
+    public void updateLegend(ValueRangeFlexibleBoundaries valueRange, ColorMapper colorMapper) {
+        this.valueRange = valueRange;
+        this.colorMapper = colorMapper;
+        draw();
+    }
+
+    public void drawLegend() {
+        if (isVisible()) {
+            if (metricLegend == null) {
+                createMetricLegend(map);
+            }
+            Context2d context2d = metricLegend.getContext2d();
+            
+            int canvasWidth = (int) Math.ceil(lineWidth + lineMargin * 2);
+            int canvasHeight = (int) Math.ceil(lineHeight * 5 + lineMargin * 2);
+            setCanvasSize(metricLegend, canvasWidth, canvasHeight);
+            context2d.setGlobalAlpha(0.75); //TODO Check color
+            drawRectangle(context2d, 0, 0, canvasWidth, canvasHeight, "white");
+            context2d.setGlobalAlpha(1.0);
+            drawTextCentered(context2d, lineMargin, lineToYOffset(0), canvasWidth - 2 * lineMargin, "Tail Color", textColor);
+            
+            drawSpectrum(context2d, lineMargin, lineToYOffset(1), canvasWidth - 2 * lineMargin);
+        }
+    }
+    
+    private double lineToYOffset(int line) {
+        return lineMargin + (lineHeight * ++line);
     }
     
     protected void setCanvasSize(Canvas canvas, int canvasWidth, int canvasHeight) {
@@ -74,39 +107,61 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
         canvas.setCoordinateSpaceHeight(canvasHeight);
     }
     
-    protected void drawRectangle(Context2d context2d, double x, double y, String color) {
+    protected void drawRectangle(Context2d context2d, double fromX, double fromY, double toX, double toY, String color) {
         context2d.setFillStyle(color);
         context2d.setLineWidth(3);
-        context2d.fillRect(x, y, rectWidth, rectHeight);
+        context2d.fillRect(fromX, fromY, toX, toY);
     }
-
-    protected void drawRectangleWithText(Context2d context2d, double x, double y, String color, String text, String time, double textmaxwidth, double timewidth, double xdelta, boolean visible) {
-        double offset = 3.0;
-        double crossOffset = 5.0;
+    
+    protected void drawText(Context2d context2d, double x, double y, double maxWidth, String text, String color) {
+        context2d.setFillStyle(color);
         context2d.setFont(textFont);
-        if (color != null) {
-            drawRectangle(context2d, x, y, color);
+        context2d.fillText(text, x, y, maxWidth);
+    }
+    
+    protected void drawTextCentered(Context2d context2d, double x, double y, double width, String text, String color) {
+        TextMetrics metrics = context2d.measureText(text);
+        double offset = Math.max((width - metrics.getWidth()) / 2.0, 0.0);
+        drawText(context2d, x + offset, y, width - 2 * offset, text, color);
+    }
+    
+    protected void drawSpectrum(Context2d context2d, double x, double y, double width) {
+        if (valueRange == null || colorMapper == null) return;
+        final double min = valueRange.getMinLeft();
+        final double spread = valueRange.getMaxRight() - min;
+        final int scale_spread;
+        if (spread < 0.5) {
+            scale_spread = 300;
+        } else if (spread < 1) {
+            scale_spread = 100;
+        } else {
+            scale_spread = 50;
         }
-        if ((visible) && (color != null)) {
-            context2d.setGlobalAlpha(1.0);
-            context2d.setLineWidth(3.0);
-            context2d.setStrokeStyle("white");
+        final int maxIdx = 300;
+        final double h = 20;
+        String label;
+        TextMetrics txtmet;
+        final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
+        for (int idx = 0; idx <= maxIdx; idx++) {
+            final double speedSteps = min + idx * (spread) / maxIdx;
+            context2d.setFillStyle(colorMapper.getColor(speedSteps));
             context2d.beginPath();
-            context2d.moveTo(x + crossOffset,y + crossOffset);
-            context2d.lineTo(x + rectWidth - crossOffset, y + rectHeight - crossOffset);
+            context2d.fillRect(x + idx, y, 1, h);
+            context2d.closePath();
             context2d.stroke();
-            context2d.beginPath();
-            context2d.moveTo(x + crossOffset, y + rectHeight - crossOffset);
-            context2d.lineTo(x + rectWidth - crossOffset,y + crossOffset);
-            context2d.stroke();
-            context2d.setStrokeStyle("black");            
+            if (idx % scale_spread == 0) {
+                context2d.setStrokeStyle(textColor);
+                context2d.setLineWidth(1.0);
+                context2d.beginPath();
+                context2d.moveTo(x + idx, y + h);
+                context2d.lineTo(x + idx, y + h + 7.0);
+                context2d.closePath();
+                context2d.stroke();
+                context2d.setFillStyle(textColor);
+                label = numberFormatOneDecimal.format(speedSteps);
+                txtmet = context2d.measureText(label);
+                context2d.fillText(label, x + idx - txtmet.getWidth() / 2.0, y + h + 8.0 + 8.0);
+            }
         }
-        context2d.setGlobalAlpha(0.80);
-        context2d.setFillStyle("white");
-        context2d.fillRect(x + (color==null?0:rectWidth), y, 20.0 + textmaxwidth + timewidth + (color==null?rectWidth:0), rectHeight);
-        context2d.setGlobalAlpha(1.0);
-        context2d.setFillStyle(textColor);
-        context2d.fillText(text, x + rectWidth + 5.0, y + 12.0 + offset);
-        context2d.fillText(time, x + rectWidth + textmaxwidth + xdelta + 15.0, y + 12.0 + offset);
     }
 }

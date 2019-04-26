@@ -129,6 +129,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
+import com.sap.sailing.gwt.ui.shared.racemap.DetailTypeMetricOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
@@ -394,6 +395,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
+    private DetailTypeMetricOverlay metricOverlay;
     
     private final boolean isSimulationEnabled;
     
@@ -924,6 +926,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     simulationOverlay.addToMap();
                     showSimulationOverlay(settings.isShowSimulationOverlay());
                 }
+                metricOverlay = new DetailTypeMetricOverlay(getMap(), 0, coordinateSystem, stringMessages);
+                metricOverlay.setVisible(false);
+                metricOverlay.addToMap();
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
                 }
@@ -2564,8 +2569,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 DetailType previous = selectedDetailType;
                 if (value == null || value.equals("none")) {
                     selectedDetailType = null;
+                    metricOverlay.setVisible(false);
                 } else {
                     selectedDetailType = DetailType.valueOfString(value);
+                    metricOverlay.setVisible(true);
                     if (!competitorSelection.isSelected(competitor)) {
                         competitorSelection.setSelected(competitor, true);
                     }
@@ -3075,6 +3082,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     @Override
     public void onColorMappingChanged() {
+        metricOverlay.updateLegend(fixesAndTails.getDetailValueBoundaries(), tailColorMapper);
         for (CompetitorDTO competitor : competitorSelection.getSelectedCompetitors()) {
             ColorlineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
             fixesAndTails.getTail(competitor).setOptions(options);
