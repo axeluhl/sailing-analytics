@@ -3,7 +3,6 @@ package com.sap.sailing.server.tagging;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -207,8 +206,9 @@ public class TaggingServiceImpl implements TaggingService {
     public List<TagDTO> getTags(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, TimePoint searchSince,
             boolean returnRevokedTags) throws RaceLogNotFoundException, ServiceNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
-        getSecurityService().checkCurrentUserReadPermission(leaderboard);
-        extractPublicTagsFromLogInternal(raceColumn.getRaceLog(fleet), searchSince, returnRevokedTags, result);
+        if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+            extractPublicTagsFromLogInternal(raceColumn.getRaceLog(fleet), searchSince, returnRevokedTags, result);
+        }
         Util.addAll(getPrivateTags(leaderboard.getName(), raceColumn.getName(), fleet.getName()), result);
         return result;
     }
@@ -216,10 +216,11 @@ public class TaggingServiceImpl implements TaggingService {
     @Override
     public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName,
             TimePoint searchSince, boolean returnRevokedTags) throws RaceLogNotFoundException {
-        getSecurityService().checkCurrentUserReadPermission(racingService.getLeaderboardByName(leaderboardName));
-        RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         final List<TagDTO> result = new ArrayList<TagDTO>();
-        extractPublicTagsFromLogInternal(raceLog, searchSince, returnRevokedTags, result);
+        if (getSecurityService().hasCurrentUserReadPermission(racingService.getLeaderboardByName(leaderboardName))) {
+            RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
+            extractPublicTagsFromLogInternal(raceLog, searchSince, returnRevokedTags, result);
+        }
         return result;
     }
 
@@ -263,7 +264,7 @@ public class TaggingServiceImpl implements TaggingService {
     public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName)
             throws AuthorizationException, ServiceNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
-        if (SecurityUtils.getSubject().getPrincipal() != null) {
+        if (getSecurityService().getCurrentUser() != null) {
             String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
             String privateTagsJson = getSecurityService().getPreference(getCurrentUsername(), key);
             List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
