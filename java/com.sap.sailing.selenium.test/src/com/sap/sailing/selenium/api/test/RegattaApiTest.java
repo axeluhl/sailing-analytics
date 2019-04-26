@@ -14,10 +14,12 @@ import org.junit.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
+import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.RegattaApi;
 import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
 import com.sap.sailing.selenium.api.event.RegattaApi.RaceColumn;
 import com.sap.sailing.selenium.api.event.RegattaApi.Regatta;
+import com.sap.sailing.selenium.api.event.RegattaApi.RegattaRaces;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class RegattaApiTest extends AbstractSeleniumTest {
@@ -27,6 +29,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
 
     private final EventApi eventApi = new EventApi();
     private final RegattaApi regattaApi = new RegattaApi();
+    private final LeaderboardApi leaderboardApi = new LeaderboardApi();
 
     @Before
     public void setUp() {
@@ -65,11 +68,15 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
-        JSONObject regattaRaces = regattaApi.getRegattaRaces(ctx, EVENT_NAME);
-        JSONArray races = (JSONArray) regattaRaces.get("races");
+        RegattaRaces regattaRaces = regattaApi.getRegattaRaces(ctx, EVENT_NAME);
 
-        assertEquals("read: regatta is different", EVENT_NAME, regattaRaces.get("regatta"));
-        assertEquals("read: reagtta.series should have 0 entries", 0, races.size());
+        assertEquals("read: regatta is different", EVENT_NAME, regattaRaces.getRegattaName());
+        //assertEquals("read: reagtta.series should have 0 entries", 0, regattaRaces.getRaces().length);
+        
+        RaceColumn[] raceColumns = regattaApi.addRaceColumn(ctx, EVENT_NAME, "R", 1);
+        leaderboardApi.startRaceLogTracking(ctx, EVENT_NAME, raceColumns[0].getRaceName(), "Default");
+        regattaRaces = regattaApi.getRegattaRaces(ctx, EVENT_NAME);
+        assertEquals("read: reagtta.series should have 0 entries", 1, regattaRaces.getRaces().length);
     }
 
     @Test

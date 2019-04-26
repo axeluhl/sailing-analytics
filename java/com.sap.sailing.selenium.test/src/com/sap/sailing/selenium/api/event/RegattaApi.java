@@ -24,8 +24,8 @@ public class RegattaApi {
         return new Regatta(ctx.get(REGATTAS + "/" + regattaName));
     }
 
-    public JSONObject getRegattaRaces(ApiContext ctx, String regattaName) {
-        return ctx.get(REGATTAS + "/" + regattaName + LIST_REGATTA_RACES);
+    public RegattaRaces getRegattaRaces(ApiContext ctx, String regattaName) {
+        return new RegattaRaces(ctx.get(REGATTAS + "/" + regattaName + LIST_REGATTA_RACES));
     }
 
     public Competitor createAndAddCompetitor(ApiContext ctx, String regattaName, String boatclass,
@@ -75,7 +75,7 @@ public class RegattaApi {
         final JSONArray json = ctx.post(url, queryParams);
         final RaceColumn[] result = new RaceColumn[json.size()];
         for (int i = 0; i < json.size(); i++) {
-            result[i] = new RaceColumn((JSONObject)(json.get(i)));
+            result[i] = new RaceColumn((JSONObject) (json.get(i)));
         }
         return result;
     }
@@ -240,6 +240,37 @@ public class RegattaApi {
 
         public String getRaceName() {
             return get("racename");
+        }
+    }
+
+    public class RaceNameWithId extends JsonWrapper {
+
+        public RaceNameWithId(JSONObject json) {
+            super(json);
+        }
+
+        public String getName() {
+            return get("name");
+        }
+
+        public String getId() {
+            return get("id");
+        }
+    }
+
+    public class RegattaRaces extends JsonWrapper {
+
+        public RegattaRaces(JSONObject json) {
+            super(json);
+        }
+
+        public String getRegattaName() {
+            return get("regatta");
+        }
+
+        public RaceNameWithId[] getRaces() {
+            RaceNameWithId[] array = getArray("races", RaceNameWithId.class);
+            return array;
         }
     }
 }
