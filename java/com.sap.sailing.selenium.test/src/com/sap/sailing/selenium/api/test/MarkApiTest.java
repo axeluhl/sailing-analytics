@@ -12,8 +12,8 @@ import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.MarkApi;
 import com.sap.sailing.selenium.api.event.MarkApi.Mark;
-import com.sap.sailing.selenium.api.event.RegattaApi;
-import com.sap.sailing.selenium.api.event.RegattaApi.Regatta;
+import com.sap.sailing.selenium.api.regatta.RegattaApi;
+import com.sap.sailing.selenium.api.regatta.RegattaApi.Regatta;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class MarkApiTest extends AbstractSeleniumTest {

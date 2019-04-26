@@ -24,9 +24,9 @@ import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi.DeviceMappingRequest;
 import com.sap.sailing.selenium.api.event.MarkApi;
 import com.sap.sailing.selenium.api.event.MarkApi.Mark;
-import com.sap.sailing.selenium.api.event.RegattaApi;
-import com.sap.sailing.selenium.api.event.RegattaApi.Competitor;
-import com.sap.sailing.selenium.api.event.RegattaApi.RaceColumn;
+import com.sap.sailing.selenium.api.regatta.RegattaApi;
+import com.sap.sailing.selenium.api.regatta.RegattaApi.Competitor;
+import com.sap.sailing.selenium.api.regatta.RegattaApi.RaceColumn;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -84,6 +84,8 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
 
         leaderboardApi.setTrackingTimes(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", currentTimeMillis(), null);
         leaderboardApi.startRaceLogTracking(ownerCtx, EVENT_NAME, race.getRaceName(), "Default");
+        
+        System.out.println(regattaApi.getRegattaRaces(ownerCtx, EVENT_NAME));
 
         for (double i = 0.0; i < 100.0; i++) {
             final Double longitude = 9.12 + i / 1000.0, latitude = .599 + i / 1000.0, speed = 10.0, course = 180.0;

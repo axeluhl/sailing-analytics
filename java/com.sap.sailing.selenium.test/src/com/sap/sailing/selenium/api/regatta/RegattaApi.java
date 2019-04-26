@@ -1,4 +1,4 @@
-package com.sap.sailing.selenium.api.event;
+package com.sap.sailing.selenium.api.regatta;
 
 import java.util.Date;
 import java.util.Map;
