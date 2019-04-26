@@ -922,7 +922,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     setHasPolar();
                     // initialize simulation canvas
                     simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier,
-                            sailingService, stringMessages, asyncActionsExecutor, coordinateSystem);
+                            sailingService, stringMessages, asyncActionsExecutor, coordinateSystem,
+                            () -> updateSettings(new RaceMapSettings(settings, false)));
                     simulationOverlay.addToMap();
                     showSimulationOverlay(settings.isShowSimulationOverlay());
                 }

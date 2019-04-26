@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
@@ -32,9 +33,9 @@ public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
         CyclicBarrier barrier = new CyclicBarrier(2);
         // We need 3 listener instances to guarantee that the iterator isn't finished
         // when adding another listener in the thread below.
-        store.addListener(new ListenerAwaitingBarier(barrier), device);
-        store.addListener(new ListenerAwaitingBarier(barrier), device);
-        store.addListener(new ListenerAwaitingBarier(barrier), device);
+        store.addListener(new ListenerAwaitingBarrier(barrier), device);
+        store.addListener(new ListenerAwaitingBarrier(barrier), device);
+        store.addListener(new ListenerAwaitingBarrier(barrier), device);
 
         Thread thread = new Thread() {
             public void run() {
@@ -42,7 +43,9 @@ public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
                     barrier.await(100, TimeUnit.MILLISECONDS);
                     // During iteration in the main thread this causes a modification that makes the iterator throw a
                     // ConcurrentModificationException on next()
-                    store.addListener((DeviceIdentifier device, GPSFixMoving fix) -> {}, device);
+                    store.addListener((DeviceIdentifier device, GPSFixMoving fix) -> {
+                        return null;
+                    }, device);
                     barrier.await(100, TimeUnit.MILLISECONDS);
                     barrier.await(100, TimeUnit.MILLISECONDS);
                 } catch (Exception e) {
@@ -60,16 +63,16 @@ public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
         }
     }
 
-    private static class ListenerAwaitingBarier implements FixReceivedListener<GPSFixMoving> {
+    private static class ListenerAwaitingBarrier implements FixReceivedListener<GPSFixMoving> {
 
         private final CyclicBarrier barrier;
 
-        public ListenerAwaitingBarier(CyclicBarrier barrier) {
+        public ListenerAwaitingBarrier(CyclicBarrier barrier) {
             this.barrier = barrier;
         }
 
         @Override
-        public void fixReceived(DeviceIdentifier device, GPSFixMoving fix) {
+        public Iterable<RegattaAndRaceIdentifier> fixReceived(DeviceIdentifier device, GPSFixMoving fix) {
             try {
                 barrier.await(100, TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
@@ -77,6 +80,7 @@ public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            return null;
         }
     }
     

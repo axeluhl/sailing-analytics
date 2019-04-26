@@ -15,5 +15,7 @@ Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.domain.racelogtrackingadapter.testsupport;bundle-version="1.0.0",
  com.sap.sse.common,
  com.sap.sse,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sse.security,
+ com.sap.sse.security.common
 Automatic-Module-Name: com.sap.sailing.domain.shared.android.test

@@ -39,6 +39,7 @@ public interface TabView<PLACE extends Place, PRESENTER> {
 
     PLACE placeToFire();
     
-    // TODO implement as defender method when Java 8 is ready as this is "VISIBLE" in most cases
-    State getState();
+    default State getState() {
+        return State.VISIBLE;
+    };
 }

@@ -18,6 +18,7 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.DateParser;
 import com.sun.jersey.api.core.ResourceContext;
 
@@ -34,7 +35,7 @@ public abstract class AbstractSailingServerResource {
         return resourceContext;
     }
     
-    protected <T> T getService(Class<T> clazz) {
+    public <T> T getService(Class<T> clazz) {
         BundleContext context = (BundleContext) servletContext
                 .getAttribute(RestServletContainer.OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);
         ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, clazz, null);
@@ -47,6 +48,12 @@ public abstract class AbstractSailingServerResource {
     public RacingEventService getService() {
         @SuppressWarnings("unchecked")
         ServiceTracker<RacingEventService, RacingEventService> tracker = (ServiceTracker<RacingEventService, RacingEventService>) servletContext.getAttribute(RestServletContainer.RACING_EVENT_SERVICE_TRACKER_NAME);
+        return tracker.getService(); 
+    }
+    
+    protected SecurityService getSecurityService() {
+        @SuppressWarnings("unchecked")
+        ServiceTracker<SecurityService, SecurityService> tracker = (ServiceTracker<SecurityService, SecurityService>) servletContext.getAttribute(RestServletContainer.SECURITY_SERVICE_TRACKER_NAME);
         return tracker.getService(); 
     }
     

@@ -13,7 +13,7 @@ public class SystemInformationActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        helper = new SystemInformationActivityHelper(this, preferences.getDeviceIdentifier());
+        helper = new SystemInformationActivityHelper(this, preferences.getDeviceConfigurationName());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {

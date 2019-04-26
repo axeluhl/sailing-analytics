@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -35,7 +36,6 @@ import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.component.EditEmailDialogWithDefaultCallback;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class EditProfileEntryPoint implements EntryPoint {
     private final UserManagementServiceAsync userManagementService = GWT.create(UserManagementService.class);

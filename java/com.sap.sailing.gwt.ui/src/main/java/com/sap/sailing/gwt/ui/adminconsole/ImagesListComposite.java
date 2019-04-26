@@ -35,9 +35,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
@@ -327,7 +329,7 @@ public class ImagesListComposite extends Composite {
         sailingService.resizeImage(resizingTask, new AsyncCallback<Set<ImageDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.resizeUnsuccessfull(), NotificationType.ERROR);
+                Notification.notify(stringMessages.resizeUnsuccessful(caught.getMessage()), NotificationType.ERROR);
             }
 
             @Override

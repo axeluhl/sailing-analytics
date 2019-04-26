@@ -6,16 +6,14 @@ import static org.junit.Assert.assertNull;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
@@ -35,54 +33,41 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
 
     @Test
     public void testStoreEmptyConfiguration() {
-        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("");
-        DeviceConfiguration configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
-        mongoFactory.storeDeviceConfiguration(matcher, configuration);
-
-        Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> configurations = domainFactory
-                .loadAllDeviceConfigurations();
-
+        DeviceConfiguration configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl(), UUID.randomUUID(), "");
+        mongoFactory.storeDeviceConfiguration(configuration);
+        Iterable<DeviceConfiguration> configurations = domainFactory.loadAllDeviceConfigurations();
         assertEquals(1, Util.size(configurations));
-        Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry = configurations.iterator().next();
-        assertNull(entry.getValue().getAllowedCourseAreaNames());
-        assertNull(entry.getValue().getByNameCourseDesignerCourseNames());
-        assertNull(entry.getValue().getResultsMailRecipient());
+        DeviceConfiguration entry = configurations.iterator().next();
+        assertNull(entry.getAllowedCourseAreaNames());
+        assertNull(entry.getByNameCourseDesignerCourseNames());
+        assertNull(entry.getResultsMailRecipient());
     }
     
     @Test
     public void testStoreConfiguration() {
-        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("");
-        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
+        DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl(), UUID.randomUUID(), "");
         configuration.setAllowedCourseAreaNames(Arrays.asList("a","b"));
         configuration.setByNameDesignerCourseNames(Arrays.asList("a", "c"));
         configuration.setResultsMailRecipient("abc");
-        mongoFactory.storeDeviceConfiguration(matcher, configuration);
-
-        Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> configurations = domainFactory
-                .loadAllDeviceConfigurations();
-
+        mongoFactory.storeDeviceConfiguration(configuration);
+        Iterable<DeviceConfiguration> configurations = domainFactory.loadAllDeviceConfigurations();
         assertEquals(1, Util.size(configurations));
-        Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry = configurations.iterator().next();
-        assertNotNull(entry.getValue().getAllowedCourseAreaNames());
-        assertEquals(2, entry.getValue().getAllowedCourseAreaNames().size());
-        assertEquals(2, entry.getValue().getByNameCourseDesignerCourseNames().size());
-        assertEquals(configuration.getByNameCourseDesignerCourseNames(), 
-                entry.getValue().getByNameCourseDesignerCourseNames());
-        assertEquals("abc", entry.getValue().getResultsMailRecipient());
+        DeviceConfiguration entry = configurations.iterator().next();
+        assertNotNull(entry.getAllowedCourseAreaNames());
+        assertEquals(2, entry.getAllowedCourseAreaNames().size());
+        assertEquals(2, entry.getByNameCourseDesignerCourseNames().size());
+        assertEquals(configuration.getByNameCourseDesignerCourseNames(), entry.getByNameCourseDesignerCourseNames());
+        assertEquals("abc", entry.getResultsMailRecipient());
     }
     
     @Test
     public void testRemoveConfiguration() {
-        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("");
-        DeviceConfiguration configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
-        mongoFactory.storeDeviceConfiguration(matcher, configuration);
-
-        Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> configurations = domainFactory
-                .loadAllDeviceConfigurations();
+        DeviceConfiguration configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl(), UUID.randomUUID(), "");
+        mongoFactory.storeDeviceConfiguration(configuration);
+        Iterable<DeviceConfiguration> configurations = domainFactory.loadAllDeviceConfigurations();
         assertEquals(1, Util.size(configurations));
-        mongoFactory.removeDeviceConfiguration(matcher);
+        mongoFactory.removeDeviceConfiguration(configuration.getId());
         configurations = domainFactory.loadAllDeviceConfigurations();
-        
         assertEquals(0, Util.size(configurations));
     }
 }

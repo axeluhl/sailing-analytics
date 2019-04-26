@@ -21,6 +21,7 @@ import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatsPan
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.wind.WindPanelPO;
 
 /**
@@ -76,6 +77,9 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL = "Smartphone Tracking"; //$NON-NLS-1$
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER = "SmartphoneTrackingPanel"; //$NON-NLS-1$
 
+    private static final String USER_MANAGEMENT_PANEL_TAB_LABEL = "User Management"; //$NON-NLS-1$
+    private static final String USER_MANAGEMENT_PANEL_TAB_IDENTIFIER = "UserManagementPanel"; //$NON-NLS-1$
+
     private static final String ADVANCED_PARENT_LABEL = "Advanced";
     private static final String ADVANCED_TAB_PARENT_IDENTIFIER = "AdvancedTab";
     private static final String ADVANCED_MASTERDATA_LABEL = "Master Data Import";
@@ -105,6 +109,12 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         return new EventConfigurationPanelPO(this.driver, goToTab(EVENTS_TAB_LABEL, EVENTS_TAB_IDENTIFIER, true));
     }
     
+    public UserManagementPanelPO goToUserManagement() {
+        goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
+        return new UserManagementPanelPO(this.driver,
+                goToTab(USER_MANAGEMENT_PANEL_TAB_LABEL, USER_MANAGEMENT_PANEL_TAB_IDENTIFIER, false));
+    }
+
     public RegattaStructureManagementPanelPO goToRegattaStructure() {
         return new RegattaStructureManagementPanelPO(this.driver, goToTab(REGATTA_STRUCTURE_TAB_LABEL,
                 REGATTA_STRUCTURE_TAB_IDENTIFIER, true));

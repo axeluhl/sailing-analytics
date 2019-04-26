@@ -83,6 +83,16 @@ fi
 #
 # REPLICATE_MASTER_EXCHANGE_NAME=
 
+# Credentials for replication access to the master server
+# Make sure, the user is granted the permission SERVER:REPLICATE:<server-name>
+# Credentials can be provided either as a combination of username and password,
+# or alternatively as a single bearer token that was obtained, e.g., through
+#   curl -d "username=myuser&password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
+# 
+# REPLICATE_MASTER_USERNAME=
+# REPLICATE_MASTER_PASSWORD=
+# REPLICATE_MASTER_BEARER_TOKEN=
+
 # Automatic build and test configuration
 DEPLOY_TO=server
 BUILD_BEFORE_START=False

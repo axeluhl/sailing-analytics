@@ -15,6 +15,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -28,6 +29,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
@@ -36,8 +38,10 @@ import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializ
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.common.Util;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/v1/competitors")
 public class CompetitorsResource extends AbstractSailingServerResource {
@@ -73,17 +77,30 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{competitorId}")
-    public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString) {
+    public Response getCompetitor(@PathParam("competitorId") String competitorIdAsString,
+            @QueryParam("secret") String secret, @QueryParam("leaderboardName") String leaderboardName) {
         Response response;
-        Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
-                competitorIdAsString);
+        Competitor competitor = getService().getCompetitorAndBoatStore()
+                .getExistingCompetitorByIdAsString(competitorIdAsString);
         if (competitor == null) {
-            response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
+            response = Response
+                    .status(Status.NOT_FOUND).entity("Could not find a competitor with id '"
+                            + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
+            boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
+            boolean competitorInRegatta = false;
+            if (skip) {
+                Regatta regatta = getService().getRegattaByName(leaderboardName);
+                competitorInRegatta = Util.contains(regatta.getAllCompetitors(), competitor);
+            }
+            if (!(skip && competitorInRegatta)) {
+                getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
+                        SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
+            }
             String jsonString = getCompetitorJSON(competitor).toJSONString();
-            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
+                    .build();
         }
         return response;
     }
@@ -124,7 +141,8 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     @Path("{competitor-id}/team/image")
     @Produces("application/json;charset=UTF-8")
     public String setTeamImage(@PathParam("competitor-id") String competitorId, InputStream uploadedInputStream,
-            @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes) throws IOException {
+            @HeaderParam("Content-Type") String fileType, @HeaderParam("Content-Length") long sizeInBytes,
+            @QueryParam("secret") String secret, @QueryParam("leaderboardName") String leaderboardName) throws IOException {
         RacingEventService service = getService();
         CompetitorAndBoatStore store = service.getCompetitorAndBoatStore();
         Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
@@ -133,6 +151,15 @@ public class CompetitorsResource extends AbstractSailingServerResource {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                     .entity("Could not find competitor with id " +
                             StringEscapeUtils.escapeHtml(competitorId)).type(MediaType.TEXT_PLAIN).build());
+        }
+        boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
+        boolean competitorInRegatta = false;
+        if (skip) {
+            Regatta regatta = getService().getRegattaByName(leaderboardName);
+            competitorInRegatta = Util.contains(regatta.getAllCompetitors(), competitor);
+        }
+        if (!(skip && competitorInRegatta)) {
+            getSecurityService().checkCurrentUserUpdatePermission(competitor);
         }
         String fileExtension = "";
         if (fileType.equals("image/jpeg")) {

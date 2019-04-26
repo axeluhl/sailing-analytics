@@ -60,7 +60,7 @@ public class XMLExportTest extends OnlineTracTracBasedTest {
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("ESS 2014 Nice", new ThresholdBasedResultDiscardingRuleImpl(new int[] {0}), new HighPointFirstGets10LastBreaksTie(), 
                 null);
         leaderboard.addRace(getTrackedRace(), "R1", false);
-        LeaderboardData leaderboardData = new LeaderboardData(leaderboard);
+        LeaderboardData leaderboardData = new LeaderboardData(leaderboard, new SecurityServiceMock());
         try {
             leaderboardData.perform();
         } catch (Exception e) {

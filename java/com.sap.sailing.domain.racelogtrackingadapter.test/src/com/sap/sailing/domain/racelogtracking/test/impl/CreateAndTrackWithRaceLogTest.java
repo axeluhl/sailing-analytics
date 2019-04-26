@@ -44,6 +44,7 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -64,6 +65,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -97,9 +99,11 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         Series series = new SeriesImpl("series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet), Collections.emptySet(),
                 service);
         regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser",
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */null, /* endDate */null,
-                UUID.randomUUID(), Collections.<Series> singletonList(series), /* persistent */ true,
-                new HighPoint(), UUID.randomUUID(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */null, /* endDate */null, UUID.randomUUID(),
+                Collections.<Series> singletonList(series), /* persistent */ true, new HighPoint(), UUID.randomUUID(),
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */true,
+                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         series.addRaceColumn(columnName, /* trackedRegattaRegistry */null);
         leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         adapter = RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(DomainFactory.INSTANCE);
@@ -225,7 +229,8 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     }
 
     private TrackedRace trackAndGetRace(RaceColumn column) throws NotDenotedForRaceLogTrackingException, Exception {
-        final RaceHandle raceHandle = adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
+        final RaceHandle raceHandle = adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
+                new DefaultRaceTrackingHandler());
         raceHandle.getRace();
         return WaitForTrackedRaceUtil.waitForTrackedRace(column, fleet, 10);
     }

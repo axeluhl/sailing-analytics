@@ -32,6 +32,7 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -89,9 +90,10 @@ public class RemoveLeaderboardTest {
         
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
         regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, /* canBoatsOfCompetitorsChangePerRace*/ true,
+                RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, /* canBoatsOfCompetitorsChangePerRace*/ true,  CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */
-                null, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null);
+                null, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         TrackedRegatta trackedRegatta1 = server.getOrCreateTrackedRegatta(regatta);
         defaultFleet = new FleetImpl("Default");
         regatta.addSeries(new SeriesImpl(SERIES_NAME, /* is medal */ false, /* can fleets run in parallel */ true,

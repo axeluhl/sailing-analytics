@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TrackedRaces;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -229,8 +230,9 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         raceColumnInSeries = series.addRaceColumn(RACECOLUMN_SERIES, null);
         ScoringScheme scoringScheme = new LowPoint();
         regatta = new RegattaImpl(RegattaImpl.getDefaultName(REGATTA, boatClass.getName()), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */null, /* endDate */null, 
-                seriesSet, false, scoringScheme, UUID.randomUUID(), null, OneDesignRankingMetric::new);
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, /* startDate */null, /* endDate */null, 
+                seriesSet, false, scoringScheme, UUID.randomUUID(), null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
     }
     
     /**

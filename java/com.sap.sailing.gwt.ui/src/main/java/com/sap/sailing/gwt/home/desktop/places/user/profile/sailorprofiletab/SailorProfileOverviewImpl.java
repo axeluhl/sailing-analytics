@@ -30,7 +30,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedS
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileOverview;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
+import com.sap.sse.gwt.client.celltable.SortedCellTable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 

@@ -52,6 +52,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -208,15 +209,6 @@ public final class HomeServiceUtil {
     
     public static boolean hasVideos(Event event) {
         return !Util.isEmpty(event.getVideos());
-    }
-
-    public static boolean isPartOfEvent(EventBase event, Leaderboard regattaEntity) {
-        for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-            if(courseArea.equals(regattaEntity.getDefaultCourseArea())) {
-                return true;
-            }
-        }
-        return false;
     }
     
     public static VideoDescriptor getRandomVideo(Iterable<VideoDescriptor> urls) {
@@ -393,7 +385,7 @@ public final class HomeServiceUtil {
         final Event event = (Event) eventBase;
         String displayNameOfSingleAssociatedRegatta = null;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
-            if (HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+            if (leaderboard.isPartOfEvent(event)) {
                 if (displayNameOfSingleAssociatedRegatta != null) {
                     // more than one Regatta is associated to the specific event
                     return null;
@@ -454,11 +446,12 @@ public final class HomeServiceUtil {
         return courseArea == null ? null : courseArea.getId().toString();
     }
     
-    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request,
+    public static void forAllPublicEventsWithReadPermission(RacingEventService service, HttpServletRequest request,
+            SecurityService securityService,
             EventVisitor... visitors) throws DispatchException {
         URL requestedBaseURL = getRequestBaseURL(request);
         for (Event event : service.getAllEvents()) {
-            if(event.isPublic()) {
+            if (event.isPublic() && securityService.hasCurrentUserReadPermission(event)) {
                 for(EventVisitor visitor : visitors) {
                     visitor.visit(event, false, requestedBaseURL);
                 }
@@ -472,10 +465,12 @@ public final class HomeServiceUtil {
             URL baseURL = getBaseURL(serverRef.getURL());
             if (remoteEvents != null) {
                 for (EventBase remoteEvent : remoteEvents) {
-                    if(remoteEvent.isPublic()) {
-                        for(EventVisitor visitor : visitors) {
-                            visitor.visit(remoteEvent, true, baseURL);
-                        }
+                    // Those events have been publicly advertised and have been received by an unauthenticated
+                    // anonymous call to the /events end point to the remote server. No security checks or filtering
+                    // seems necessary here because we should be seeing only the public remote events anyway.
+                    // See also bug 5000.
+                    for (EventVisitor visitor : visitors) {
+                        visitor.visit(remoteEvent, true, baseURL);
                     }
                 }
             }
@@ -515,7 +510,7 @@ public final class HomeServiceUtil {
                 // for events that are locally available, we can see if there are any leaderboards
                 LeaderboardGroup leaderboardGroup = (LeaderboardGroup) leaderboardGroupBase;
                 for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                    if(!fakeSeries || isPartOfEvent(event, leaderboard)) {
+                    if(!fakeSeries || leaderboard.isPartOfEvent(event)) {
                         return true;
                     }
                 }
@@ -570,7 +565,8 @@ public final class HomeServiceUtil {
     public static List<Pair<Event, Leaderboard>> getEventsAndLeaderboardsForSeriesOrdered(LeaderboardGroup overallLeaderboardGroup,
             RacingEventService service) {
         final Iterable<Event> eventsInSeries = getEventsInSeries(overallLeaderboardGroup, service);
-        final Iterable<Leaderboard> orderedLeaderboards = getLeaderboardsForSeriesInOrder(overallLeaderboardGroup);
+        final Iterable<Leaderboard> orderedLeaderboards = getLeaderboardsForSeriesInOrderWithReadPermissions(overallLeaderboardGroup,
+                service);
         final List<Pair<Event, Leaderboard>> orderedEventsInSeries = new ArrayList<>();
         for (Leaderboard leaderboard : orderedLeaderboards) {
             final Event associatedEvent = getAssociatedEventForLeaderboardInSeries(leaderboard, eventsInSeries);
@@ -585,11 +581,23 @@ public final class HomeServiceUtil {
      * The {@link Leaderboard Leaderboards} referenced in the given {@link LeaderboardGroup} have a defined order. If
      * the displayGroupsInReverseOrder flag is set for the {@link LeaderboardGroup}, the order needs to change in the
      * UI. This methods sorts the {@link Leaderboard Leaderboards} using this flag.
+     * @param service 
      */
-    public static Iterable<Leaderboard> getLeaderboardsForSeriesInOrder(LeaderboardGroup overallLeaderboardGroup) {
+    public static Iterable<Leaderboard> getLeaderboardsForSeriesInOrderWithReadPermissions(LeaderboardGroup overallLeaderboardGroup, RacingEventService service) {
         if (overallLeaderboardGroup.isDisplayGroupsInReverseOrder()) {
             List<Leaderboard> leaderboardsInSeries = new ArrayList<>();
-            Util.addAll(overallLeaderboardGroup.getLeaderboards(), leaderboardsInSeries);
+            for(Leaderboard leaderboard: overallLeaderboardGroup.getLeaderboards()) {
+                if (service.getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                    if (leaderboard instanceof RegattaLeaderboard) {
+                        if (service.getSecurityService()
+                                .hasCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta())) {
+                            leaderboardsInSeries.add(leaderboard);
+                        }
+                    } else {
+                        leaderboardsInSeries.add(leaderboard);
+                    }
+                }
+            }
             Collections.reverse(leaderboardsInSeries);
             return leaderboardsInSeries;
         }
@@ -636,9 +644,13 @@ public final class HomeServiceUtil {
             RacingEventService service) {
         Set<Event> eventsInSeries = new HashSet<>();
         for (Event event : service.getAllEvents()) {
-            for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-                if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                    eventsInSeries.add(event);
+            if (service.getSecurityService().hasCurrentUserReadPermission(event)) {
+                for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                    if (service.getSecurityService().hasCurrentUserReadPermission(leaderboardGroup)) {
+                        if (overallLeaderboardGroup.equals(leaderboardGroup)) {
+                            eventsInSeries.add(event);
+                        }
+                    }
                 }
             }
         }

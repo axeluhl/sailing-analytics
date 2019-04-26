@@ -1,7 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class CreateOrUpdateDeviceConfiguration extends AbstractDeviceConfigurationOperation {
@@ -10,14 +9,14 @@ public class CreateOrUpdateDeviceConfiguration extends AbstractDeviceConfigurati
     
     private DeviceConfiguration configuration;
     
-    public CreateOrUpdateDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
-        super(matcher);
+    public CreateOrUpdateDeviceConfiguration(DeviceConfiguration configuration) {
+        super(configuration.getId());
         this.configuration = configuration;
     }
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        toState.createOrUpdateDeviceConfiguration(matcher, configuration);
+        toState.createOrUpdateDeviceConfiguration(configuration);
         return null;
     }
 
