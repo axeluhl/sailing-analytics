@@ -1,8 +1,9 @@
 package com.sap.sailing.selenium.api.core;
 
-import java.util.Arrays;
+import java.lang.reflect.InvocationTargetException;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 /**
@@ -54,17 +55,32 @@ public class JsonWrapper {
     }
 
     /**
-     * Get a typed array of the JSON Value for the corresponding key.
-     * Returns null if JSON value is not an array.
-     * @param key JSON attribute name
-     * @param type array type to produce
+     * Get a typed array of the JSON Value for the corresponding key. Returns null if JSON value is not an array.
+     * 
+     * @param key
+     *            JSON attribute name
+     * @param type
+     *            array type to produce
      * @return typed array containg the elements of the {@link JSONArray}
      */
-    public <T> T[] getArray(String key, Class<T[]> type) {
+    public <T extends JsonWrapper> T[] getArray(String key, Class<T> type) {
         Object object = json.get(key);
         if (object instanceof JSONArray) {
             JSONArray jsonArray = ((JSONArray) object);
-            return (T[]) Arrays.copyOf(jsonArray.toArray(), jsonArray.size(), type);
+            JSONAware[] objectArray = (JSONAware[]) jsonArray.toArray();
+            @SuppressWarnings("unchecked")
+            T[] result = (T[]) new Object[objectArray.length];
+            for (int i = 0; i < objectArray.length; i++) {
+                if (objectArray[i] instanceof JSONObject) {
+                    try {
+                        result[i] = type.getDeclaredConstructor(JSONObject.class).newInstance(objectArray[i]);
+                    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                            | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            return result;
         }
         return null;
     }
