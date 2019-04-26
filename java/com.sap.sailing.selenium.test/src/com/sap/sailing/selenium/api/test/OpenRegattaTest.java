@@ -24,10 +24,10 @@ import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi.DeviceMappingRequest;
 import com.sap.sailing.selenium.api.event.MarkApi;
 import com.sap.sailing.selenium.api.event.MarkApi.Mark;
-import com.sap.sailing.selenium.api.regatta.RegattaApi;
-import com.sap.sailing.selenium.api.regatta.RegattaApi.Competitor;
-import com.sap.sailing.selenium.api.regatta.RegattaApi.RaceColumn;
 import com.sap.sailing.selenium.api.event.SecurityApi;
+import com.sap.sailing.selenium.api.regatta.Competitor;
+import com.sap.sailing.selenium.api.regatta.RaceColumn;
+import com.sap.sailing.selenium.api.regatta.RegattaApi;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 

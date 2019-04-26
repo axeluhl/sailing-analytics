@@ -15,11 +15,11 @@ import org.junit.Test;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
+import com.sap.sailing.selenium.api.regatta.Competitor;
+import com.sap.sailing.selenium.api.regatta.RaceColumn;
+import com.sap.sailing.selenium.api.regatta.Regatta;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
-import com.sap.sailing.selenium.api.regatta.RegattaApi.Competitor;
-import com.sap.sailing.selenium.api.regatta.RegattaApi.RaceColumn;
-import com.sap.sailing.selenium.api.regatta.RegattaApi.Regatta;
-import com.sap.sailing.selenium.api.regatta.RegattaApi.RegattaRaces;
+import com.sap.sailing.selenium.api.regatta.RegattaRaces;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class RegattaApiTest extends AbstractSeleniumTest {

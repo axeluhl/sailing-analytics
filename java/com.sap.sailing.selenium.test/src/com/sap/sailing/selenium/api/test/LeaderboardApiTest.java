@@ -18,8 +18,8 @@ import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi;
 import com.sap.sailing.selenium.api.event.LeaderboardApi.DeviceMappingRequest;
+import com.sap.sailing.selenium.api.regatta.Competitor;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
-import com.sap.sailing.selenium.api.regatta.RegattaApi.Competitor;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class LeaderboardApiTest extends AbstractSeleniumTest {
