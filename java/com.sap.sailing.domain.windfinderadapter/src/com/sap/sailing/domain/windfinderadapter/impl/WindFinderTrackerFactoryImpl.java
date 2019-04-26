@@ -26,6 +26,7 @@ import com.sap.sailing.domain.windfinder.ReviewedSpotsCollection;
 import com.sap.sailing.domain.windfinder.Spot;
 import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -79,7 +80,7 @@ public class WindFinderTrackerFactoryImpl implements WindFinderTrackerFactory {
 
     @Override
     public WindTracker createWindTracker(DynamicTrackedRegatta trackedRegatta, RaceDefinition race,
-            boolean correctByDeclination) throws Exception {
+            boolean correctByDeclination, SecurityService optionalSecurityService) throws Exception {
         final WindTracker result;
         synchronized (windTrackerPerRace) {
             final WindTracker existingWindTrackerForRace = getExistingWindTracker(race);

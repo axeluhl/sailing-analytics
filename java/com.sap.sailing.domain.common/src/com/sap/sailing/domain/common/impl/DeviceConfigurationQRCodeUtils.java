@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.impl;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
@@ -11,23 +12,25 @@ import java.util.Map;
 public class DeviceConfigurationQRCodeUtils {
     public static final String deviceIdentifierKey = "identifier";
     public static final String accessTokenKey = "token";
+    public static final String deviceUuidKey = "uuid";
     
     public static class DeviceConfigurationDetails {
         private final String apkUrl;
         private final String deviceIdentifier;
+        private final UUID uuid;
         private final String accessToken;
-        public DeviceConfigurationDetails(String apkUrl, String deviceIdentifier, String accessToken) {
+        public DeviceConfigurationDetails(String apkUrl, UUID uuid, String deviceConfigurationName, String accessToken) {
             super();
             this.apkUrl = apkUrl;
-            this.deviceIdentifier = deviceIdentifier;
+            this.uuid = uuid;
+            this.deviceIdentifier = deviceConfigurationName;
             this.accessToken = accessToken;
         }
         public String getApkUrl() {
             return apkUrl;
         }
-        public String getDeviceIdentifier() {
-            return deviceIdentifier;
-        }
+        public UUID getUuid() { return uuid; }
+        public String getDeviceIdentifier() { return deviceIdentifier; }
         public String getAccessToken() {
             return accessToken;
         }
@@ -37,8 +40,9 @@ public class DeviceConfigurationQRCodeUtils {
         String decode(String encodedURL);
     }
 
-    public static String composeQRContent(String urlEncodedDeviceIdentifier, String apkUrl, String accessToken) {
-        return apkUrl + "#" + deviceIdentifierKey + "=" + urlEncodedDeviceIdentifier + "&"+accessTokenKey + "=" + accessToken;
+    public static String composeQRContent(String urlEncodedDeviceConfigName, String apkUrl, String accessToken, String urlEncodedDeviceIdAsString) {
+        return apkUrl + "#" + deviceIdentifierKey + "=" + urlEncodedDeviceConfigName + "&" + deviceUuidKey + "="
+                + urlEncodedDeviceIdAsString + "&" + accessTokenKey + "=" + accessToken;
     }
 
     public static DeviceConfigurationDetails splitQRContent(String qrCodeContent, URLDecoder urlDecoder) {
@@ -55,11 +59,15 @@ public class DeviceConfigurationQRCodeUtils {
                 paramMap.put(keyValue[0], urlDecoder.decode(keyValue[1]));
             }
         }
-        if (!paramMap.containsKey(deviceIdentifierKey)) {
-            throw new IllegalArgumentException("Device identifier missing from QR code contents");
+        if (!paramMap.containsKey(deviceIdentifierKey) && !paramMap.containsKey(deviceUuidKey)) {
+            throw new IllegalArgumentException("Device identifier parameter " + deviceIdentifierKey
+                    + " and device UUID parameter " + deviceUuidKey + " are both missing from QR code contents");
         }
         String apkUrl = qrCodeContent.substring(0, fragmentIndex);
-        return new DeviceConfigurationDetails(apkUrl, paramMap.get(deviceIdentifierKey), paramMap.get(accessTokenKey));
+        return new DeviceConfigurationDetails(apkUrl,
+                paramMap.get(deviceUuidKey) == null ? null : UUID.fromString(paramMap.get(deviceUuidKey)),
+                paramMap.get(deviceIdentifierKey) == null ? null : paramMap.get(deviceIdentifierKey),
+                paramMap.get(accessTokenKey));
     }
 
 }

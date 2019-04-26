@@ -8,6 +8,7 @@ public class UserManagementException extends Exception implements Serializable {
     
     public static final String USER_DOES_NOT_EXIST = "User does not exist";
     public static final String USER_ALREADY_EXISTS = "User already exists";
+    public static final String TENANT_ALREADY_EXISTS = "Tenant already exists";
     public static final String INVALID_CREDENTIALS = "Invalid Credentials";
     public static final String PASSWORD_DOES_NOT_MEET_REQUIREMENTS = "Password does not meet requirements";
     public static final String USERNAME_DOES_NOT_MEET_REQUIREMENTS = "Username does not meet requirements";

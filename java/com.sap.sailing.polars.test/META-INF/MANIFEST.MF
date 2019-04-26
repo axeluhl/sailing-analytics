@@ -15,5 +15,6 @@ Require-Bundle: org.hamcrest;bundle-version="1.1.0",
  com.sap.sailing.domain.tractracadapter,
  com.tractrac.clientmodule;bundle-version="3.0.7",
  com.sap.sailing.domain,
- com.sap.sailing.polars.datamining
+ com.sap.sailing.polars.datamining,
+ com.sap.sse.security.common
 Automatic-Module-Name: com.sap.sailing.polars.test

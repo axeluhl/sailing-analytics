@@ -59,29 +59,24 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
-import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -92,9 +87,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
-import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
-import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -103,14 +95,21 @@ import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
-import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.FlushableSortedCellTableWithStylableHeaders;
+import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
+import com.sap.sse.gwt.client.celltable.SortedCellTable;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyStateProvider;
@@ -788,28 +787,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     /**
      * @param callWhenExpansionDataIsLoaded
      */
-    private void updateLeaderboardAndRun(final Runnable callWhenExpansionDataIsLoaded) {
-        final LeaderboardDTO previousLeaderboard = getLeaderboard();
-        getSailingService().getLeaderboardByName(getLeaderboardName(),
-                timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
-                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(), shallAddOverallDetails(),
-                previousLeaderboard.getId(), /* fillTotalPointsUncorrected */ false,
-                new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
-                        new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
-                            @Override
-                            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
-                                updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
-                                callWhenExpansionDataIsLoaded.run();
-                            }
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                getErrorReporter().reportError(
-                                        stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
-                                        true /* silentMode */);
-                            }
-                        }));
-    }
+    protected abstract void updateLeaderboardAndRun(final Runnable callWhenExpansionDataIsLoaded);
 
     public void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
         raceColumnSelection = new LastNRacesColumnSelection(numberOfLastRacesToShow, getRaceTimesInfoProvider());
@@ -2078,7 +2057,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     }
 
     private class LeaderboardSelectionCheckboxColumn
-            extends com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn<LeaderboardRowDTO>
+            extends com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn<LeaderboardRowDTO>
             implements CompetitorSelectionChangeListener {
         protected LeaderboardSelectionCheckboxColumn(final CompetitorSelectionProvider competitorSelectionProvider) {
             super(style.getTableresources().cellTableStyle().cellTableCheckboxSelected(),
@@ -2468,17 +2447,15 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
+    abstract protected AsyncAction<LeaderboardDTO> getRetrieverAction();
+
     public void loadCompleteLeaderboard(final boolean showProgress) {
-        final Date date = getLeaderboardDisplayDate();
         if (needsDataLoading()) {
             if (showProgress) {
                 addBusyTask();
             }
-            GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
-                    getLeaderboardName(), useNullAsTimePoint() ? null : date,
-                    /* namesOfRaceColumnsForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(),
-                    shallAddOverallDetails(), /* previousLeaderboard */
-                    getLeaderboard(), isFillTotalPointsUncorrected(), timer, errorReporter, stringMessages);
+
+            AsyncAction<LeaderboardDTO> getLeaderboardByNameAction = getRetrieverAction();
             this.asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
@@ -2533,7 +2510,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * additional call to {@link #loadCompleteLeaderboard(boolean)} would be required as <code>null</code> will be
      * passed in any case, not being affected by local time offsets.
      */
-    private boolean useNullAsTimePoint() {
+    protected boolean useNullAsTimePoint() {
         return timer.getPlayMode() == PlayModes.Live;
     }
 
@@ -2544,7 +2521,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     /**
      * Determine from column expansion state which races need their leg details
      */
-    private Collection<String> getNamesOfExpandedRaceColumns() {
+    protected Collection<String> getNamesOfExpandedRaceColumns() {
         Collection<String> namesOfExpandedRaceColumns = new ArrayList<String>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
@@ -2558,7 +2535,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return namesOfExpandedRaceColumns;
     }
 
-    private boolean shallAddOverallDetails() {
+    protected boolean shallAddOverallDetails() {
         return !selectedOverallDetailColumns.isEmpty();
     }
 

@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
@@ -20,6 +21,8 @@ public class RegattaListCompositePO extends PageArea {
     public static class RegattaDescriptor {
         private final String name;
         private final String boatClass;
+        private final CompetitorRegistrationType competitorRegistrationType;
+        private final String registrationLinkSecret;
         
         // TODO [D049941]: Mark as a bug and remove this method as soon as possible
         public static RegattaDescriptor fromString(String name) {
@@ -32,24 +35,39 @@ public class RegattaListCompositePO extends PageArea {
             return new RegattaDescriptor(name.substring(0, openingBrace - 1),
                     name.substring(openingBrace + 1, closingBrace));
         }
-        
+
         public RegattaDescriptor(String name, String boatClass) {
+            this(name, boatClass, CompetitorRegistrationType.CLOSED, null);
+        }
+
+        public RegattaDescriptor(String name, String boatClass, CompetitorRegistrationType competitorRegistrationType,
+                String registrationLinkSecret) {
             this.name = name;
             this.boatClass = boatClass;
+            this.competitorRegistrationType = competitorRegistrationType;
+            this.registrationLinkSecret = registrationLinkSecret;
         }
-        
+
         public String getName() {
             return this.name;
         }
-        
+
         public String getBoatClass() {
             return this.boatClass;
         }
-        
+
+        public CompetitorRegistrationType getCompetitorRegistrationType() {
+            return competitorRegistrationType;
+        }
+
+        public String getRegistrationLinkSecret() {
+            return registrationLinkSecret;
+        }
+
         public String toString() {
             return this.name + " (" + this.boatClass + ")";
         }
-        
+
         @Override
         public int hashCode() {
             return Objects.hash(this.name, this.boatClass);
@@ -128,7 +146,7 @@ public class RegattaListCompositePO extends PageArea {
     public void removeRegatta(RegattaDescriptor regatta) {
         DataEntryPO entry = findRegatta(regatta);
         if (entry != null) {
-            WebElement action = ActionsHelper.findRemoveAction(entry.getWebElement());
+            WebElement action = ActionsHelper.findDeleteAction(entry.getWebElement());
             action.click();
             waitForAjaxRequests();
             ActionsHelper.acceptAlert(this.driver);
@@ -138,7 +156,7 @@ public class RegattaListCompositePO extends PageArea {
     public RegattaEditDialogPO editRegatta(RegattaDescriptor regatta) {
         DataEntryPO entry = findRegatta(regatta);
         if (entry != null) {
-            WebElement action = ActionsHelper.findEditAction(entry.getWebElement());
+            WebElement action = ActionsHelper.findUpdateAction(entry.getWebElement());
             action.click();
             WebElement dialog = findElementBySeleniumId(this.driver, "RegattaWithSeriesAndFleetsEditDialog");
             return new RegattaEditDialogPO(this.driver, dialog);

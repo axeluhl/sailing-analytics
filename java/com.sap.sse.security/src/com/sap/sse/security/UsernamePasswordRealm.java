@@ -7,9 +7,11 @@ import org.apache.shiro.authc.SaltedAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.interfaces.SimpleSaltedAuthenticationInfo;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 
-public class UsernamePasswordRealm extends AbstractUserStoreBasedRealm {
+public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
     
     public UsernamePasswordRealm() {
         super();

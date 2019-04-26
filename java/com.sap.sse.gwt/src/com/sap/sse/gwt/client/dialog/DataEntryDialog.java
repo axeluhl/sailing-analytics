@@ -172,7 +172,7 @@ public abstract class DataEntryDialog<T> {
             errorMessage = validator.getErrorMessage(result);
         }
         boolean invalidState = errorMessage != null && !errorMessage.isEmpty();
-        if(invalidState != dialogInInvalidState) {
+        if (invalidState != dialogInInvalidState) {
             dialogInInvalidState = invalidState;
             onInvalidStateChanged(invalidState);
         }
@@ -183,7 +183,6 @@ public abstract class DataEntryDialog<T> {
             getStatusLabel().setText(errorMessage);
             getStatusLabel().setStyleName("errorLabel");
         }
-        
         return !invalidState;
     }
 

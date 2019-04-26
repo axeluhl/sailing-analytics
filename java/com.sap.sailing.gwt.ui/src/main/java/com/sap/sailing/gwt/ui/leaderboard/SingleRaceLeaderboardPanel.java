@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,34 +8,40 @@ import java.util.Map;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettingsDialogComponent;
+import com.sap.sailing.gwt.ui.actions.GetLeaderboardForRaceAction;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.SortingOrder;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -321,6 +328,40 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     public void updateSettings(SingleRaceLeaderboardSettings newSettings) {
         super.updateSettings(newSettings);
         showRaceRankColumn = newSettings.isShowRaceRankColumn();
+    }
+
+    @Override
+    protected void updateLeaderboardAndRun(Runnable callWhenExpansionDataIsLoaded) {
+        final LeaderboardDTO previousLeaderboard = getLeaderboard();
+        getSailingService().getLeaderboardForRace(preSelectedRace, getLeaderboardName(),
+                timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
+                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(), shallAddOverallDetails(),
+                previousLeaderboard.getId(), /* fillTotalPointsUncorrected */ false,
+                new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
+                        new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+                            @Override
+                            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
+                                updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
+                                callWhenExpansionDataIsLoaded.run();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                getErrorReporter().reportError(
+                                        stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
+                                        true /* silentMode */);
+                            }
+                        }));
+    }
+
+    @Override
+    protected AsyncAction<LeaderboardDTO> getRetrieverAction() {
+        final Date date = getLeaderboardDisplayDate();
+        return new GetLeaderboardForRaceAction(getSailingService(), getLeaderboardName(), preSelectedRace,
+                useNullAsTimePoint() ? null : date,
+                /* namesOfRaceColumnsForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(),
+                shallAddOverallDetails(), /* previousLeaderboard */
+                getLeaderboard(), isFillTotalPointsUncorrected(), timer, getErrorReporter(), stringMessages);
     }
 
 }

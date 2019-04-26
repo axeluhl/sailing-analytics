@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 
 public class RaceLogTrackingDeviceMappingsImagesBarCell extends ImagesBarCell {
     public static final String ACTION_CLOSE = "CLOSE";

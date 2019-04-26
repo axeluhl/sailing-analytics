@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -33,14 +34,18 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final boolean useStartTimeInference;
     private final boolean controlTrackingFromStartAndFinishTimes;
     private final boolean canBoatsOfCompetitorsChangePerRace;
+    private final CompetitorRegistrationType competitorRegistrationType;
     private final RankingMetrics rankingMetricType;
+    private final String registrationLinkSecret;
     
-    public AddSpecificRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id,
+    public AddSpecificRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
+            CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
         super(regattaName, boatClassName, startDate, endDate, id);
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
+        this.competitorRegistrationType = competitorRegistrationType;
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
@@ -49,11 +54,13 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
         this.rankingMetricType = rankingMetricType;
         this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
+        this.registrationLinkSecret = registrationLinkSecret;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), canBoatsOfCompetitorsChangePerRace, getStartDate(), getEndDate(), getId(), createSeries(toState),
+        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), canBoatsOfCompetitorsChangePerRace, 
+                competitorRegistrationType, registrationLinkSecret, getStartDate(), getEndDate(), getId(), createSeries(toState),
                 persistent, scoringScheme, defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
         return regatta;
     }

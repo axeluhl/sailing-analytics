@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDialog<Set<CompetitorDTO>> {
     protected final ErrorReporter errorReporter;
@@ -20,7 +21,7 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
     protected final boolean canBoatsOfCompetitorsChangePerRace;
     protected final CompetitorRegistrationsPanel competitorRegistrationsPanel;
 
-    public AbstractCompetitorRegistrationDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
+    public AbstractCompetitorRegistrationDialog(SailingServiceAsync sailingService, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, String okButtonMessage,
@@ -32,7 +33,7 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
         this.sailingService = sailingService;
         this.leaderboardName = leaderboardName;
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
-        this.competitorRegistrationsPanel = new CompetitorRegistrationsPanel(sailingService, stringMessages, errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
+        this.competitorRegistrationsPanel = new CompetitorRegistrationsPanel(sailingService, userService, stringMessages, errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
                 ()->validateAndUpdate(), getRegisteredCompetitorsRetriever(), /* restrictPoolToLeaderboard */ false, getAdditionalWidgetsToInsertAboveCompetitorTables(stringMessages));
     }
     

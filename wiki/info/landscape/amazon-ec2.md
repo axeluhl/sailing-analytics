@@ -28,7 +28,14 @@ You may need to select "All generations" instead of "Current generation" to see 
   SERVER_NAME=MYSPECIFICEVENT
   BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
   SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+  ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
   </pre>
+
+The *MailInvitationType* property controls which version of the SAP Sail Insight app will be targeted by tracking invitations sent out by e-mail.
+Two different Branch.io URL schemes exist for the Sail Insight app: sailinsight-app.sapsailing.com and sailinsight20-app.sapsailing.com.
+They can be selected by providing *SailInsight1* or *SailInsight2*, respectively, as the values for the property. If the property is
+set to *LEGACY*, no Branch.io link is used in the invitation at all. This mode should no longer be used as soon as the Branch.io-enabled
+iOS app has hit the store. If not provided, it will default to *SailInsight1*.
 
 Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_NAME` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
 
@@ -68,6 +75,7 @@ SERVER_NAME=MYSPECIFICEVENT
 REPLICATION_CHANNEL=myspecificevent
 MONGODB_NAME=myspecificevent
 SERVER_STARTUP_NOTIFY=you@email.com
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
 </pre>
 
 - After your master server is ready, note the internal IP and configure your replica instances. Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data and adjust the `myspecificevent` master exchange name to the `REPLICATION_CHANNEL` setting you used for the master configuration. 
@@ -77,18 +85,21 @@ INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
 REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
 REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
+# Provide authentication credentials for a user on the master permitted to replicate, either by username/password...
+REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SERVER:REPLICATE:<server-name> permission)
+REPLICATE_MASTER_PASSWORD=(password of the user for replication login on master)
+# Or by bearer token, obtained, e.g., through
+#   curl -d "username=myuser&password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
+# REPLICATE_MASTER_BEARER_TOKEN=
 SERVER_NAME=MYSPECIFICEVENT
 MONGODB_NAME=myspecificevent-replica
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
 SERVER_STARTUP_NOTIFY=you@email.com
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
 </pre>
-
-
 
 #### Setting up a Multi Instance
 To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsailing.com" and description "Schwartauer Segler-Verein, [www.ssv-net.de](http://www.ssv-net.de), Alexander Probst, [webmaster@alexprobst.de](mailto:webmaster@alexprobst.de)" perform the following steps:
-
-
 
 ##### Instance configuration
 
@@ -486,7 +497,7 @@ Click on "Create Record Set" and fill in the subdomain name (`myspecificevent` i
 
 <img src="/wiki/images/amazon/Route53_5.png" />
 
-Amazon ELB is designed to handle unlimited concurrent requests per second with “gradually increasing” load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of its internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
+Amazon ELB is designed to handle unlimited concurrent requests per second with â€œgradually increasingâ€� load pattern (although it's initial capacity is described to reach 20k requests/secs). It is not designed to handle heavy sudden spike of load or flash traffic because of its internal structure where it needs to fire up more instances when load increases. ELB's can be pre-warmed though by writing to the AWS Support Team.
 
 With this set-up, please keep in mind that administration of the sailing server instance always needs to happen through the master instance. A fat, red warning is displayed in the administration console of the replica instances that shall keep you from making administrative changes there. Change them on the master, and the changes will be replicated to the replicas.
 

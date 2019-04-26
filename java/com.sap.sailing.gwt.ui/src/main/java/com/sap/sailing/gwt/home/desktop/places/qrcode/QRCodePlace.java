@@ -197,6 +197,14 @@ public class QRCodePlace extends AbstractBasePlace {
         return targetServer;
     }
 
+    @Override
+    public String toString() {
+        return "QRCodePlace [eventId=" + eventId + ", competitorId=" + competitorId + ", boatId=" + boatId + ", markId="
+                + markId + ", leaderboardName=" + leaderboardName + ", publicRegattaName=" + publicRegattaName
+                + ", regattaRegistrationLinkSecret=" + regattaRegistrationLinkSecret + ", mode=" + mode
+                + ", rawCheckInUrl=" + rawCheckInUrl + ", targetServer=" + targetServer + "]";
+    }
+
     public static class Tokenizer implements PlaceTokenizer<QRCodePlace> {
         @Override
         public String getToken(QRCodePlace place) {

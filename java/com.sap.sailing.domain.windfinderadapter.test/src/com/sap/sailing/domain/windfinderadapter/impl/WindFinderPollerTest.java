@@ -57,7 +57,8 @@ public class WindFinderPollerTest {
         });
         final WindTracker tracker;
         synchronized (monitor) {
-            tracker = factory.createWindTracker(mockedTrackedRegatta, mockedRaceDefinition, /* correctByDeclination */ false);
+            tracker = factory.createWindTracker(mockedTrackedRegatta, mockedRaceDefinition, /* correctByDeclination */ false,
+                    null);
             monitor.wait(5000);
         }
         tracker.stop();

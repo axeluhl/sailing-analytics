@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRaceIdentifier>> implements RegattasDisplayer {
 
@@ -31,14 +32,18 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
     private final VerticalPanel panel;
     private Button btnRefresh;
 
-    public AssignRacesToMediaDialog(SailingServiceAsync sailingService, final MediaTrack mediaTrack,
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
-            Validator<Set<RegattaAndRaceIdentifier>> validator, DialogCallback<Set<RegattaAndRaceIdentifier>> callback) {
+    public AssignRacesToMediaDialog(final SailingServiceAsync sailingService, final UserService userService,
+            final MediaTrack mediaTrack,
+            final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
+            final StringMessages stringMessages,
+            final Validator<Set<RegattaAndRaceIdentifier>> validator,
+            final DialogCallback<Set<RegattaAndRaceIdentifier>> callback) {
         super(stringMessages.linkedRaces(), stringMessages.selectFromRacesWithOverlappingTimeRange(),
                 stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.mediaTrack = mediaTrack;
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, userService,
+                errorReporter,
                 regattaRefresher,
                 stringMessages, /* multiselection */true, /* actionButtonsEnabled */ false) {
             @Override

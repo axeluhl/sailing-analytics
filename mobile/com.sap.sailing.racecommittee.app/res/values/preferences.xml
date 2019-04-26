@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     
     <string name="preference_identifier_key" translatable="false">identifierPreference</string>
+    <string name="preference_config_uuid_key" translatable="false">configUuidPreference</string>
     <string name="preference_sync_key" translatable="false">syncConnectionPreference</string>
     <string name="preference_update_key" translatable="false">forceUpdatePreference</string>
 

@@ -29,6 +29,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     private SailingServiceAsync sailingService;
     private ErrorReporter errorReporter;
     
+    
     public CopyCourseAndCompetitorsDialog(SailingServiceAsync sailingService, ErrorReporter errorReporter, final StringMessages stringMessages,
             Collection<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
             String leaderboardName, Distance buoyZoneRadius, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
@@ -71,6 +72,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         HorizontalPanel checkBoxPanel = new HorizontalPanel();
         checkBoxPanel.add(courseCheckBox);
         checkBoxPanel.add(competitorCheckBox);
+
         mainPanel.add(checkBoxPanel);
         mainPanel.add(racesTable);
         final HorizontalPanel hp = new HorizontalPanel();
@@ -83,7 +85,8 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
 
     @Override
     protected CourseAndCompetitorCopyOperation getResult() {
-        Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo = racesTable.getSelectionModel().getSelectedSet();
+        Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo = racesTable
+                .getSelectionModel().getSelectedSet();
         return new CourseAndCompetitorCopyOperation(racesToCopyTo, courseCheckBox.getValue(), competitorCheckBox.getValue(),
                 priorityBox.getValue(), sailingService, errorReporter);
     }
