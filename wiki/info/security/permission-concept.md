@@ -15,6 +15,8 @@ A client can try to access the solution anonymously, without authentication, or 
 
 User groups can be created that users can be assigned to as members. A user can be member of any number of user groups. By default, when a new user account is created, a new user group is created, too, named after the user with the suffix ``-tenant`` appended. For example, for the user with nickname ``john`` a user group named ``john-tenant`` will be created. The user is made a member of that default user group automatically.
 
+Each server or server cluster (master and its replicas) has a unique name and a dedicated server user group. This group is named after the server: ``{servername}-server``. For example, the development server named ``DEV`` has a server group called ``DEV-server``.
+
 A special user named ``<all>`` represents any user accessing the system, including non-authenticated, non-signed-up users.
 All permissions granted to this user are implicitly also granted to all other users, and all permissions revoked for this
 user are revoked for all other users.
@@ -58,6 +60,8 @@ Each of the parts of a permission (type, action, ID) can optionally contain more
 
 Parts can use the asterisk character ``\*`` as a wildcard, meaning all possible values for that part. Example: ``\*:READ`` describes the permission to read regardless the object type.
 
+When *creating* objects, before checking the ``CREATE`` action for the type of object to be created, the ownership that will result from successful object creation is already assumed for the permission check. This way, users having the ``CREATE`` permission for a type of object owned by themselves or their default creation group, they may be eligible to create such objects. A second permission is always checked before granting the right for object creation: ``SERVER:CREATE_OBJECT:{servername}``. This means that the user requesting the object creation permission must not only be allowed to create the object of the requested type, but also the user must be allowed to create objects on this particular server through which the request is accepted. This way, servers and their data may be protected from unwanted object creations even if users generally have the permission to create objects they own. 
+
 ## Roles
 
 Roles have a *definition* and *assignments*. The role's definition is an entity that has a UUID, defines a (changeable) name and specifies the (changeable) set of permissions a user will obtain by being assigned a role instantiated from this definition. A role assignment references a role definition and "inherits" the definition's name. The assignment can furthermore optionally constrain the role by a user group and/or user qualifier. In this case the permissions the role definition specifies will be granted to a user in that role if and only if requested for an object whose group/user owner matches that of the group/user qualifier provided by the role assignment, respectively.
@@ -90,11 +94,13 @@ Another example: a group of sailors is sailing a training session together. They
 
 On fresh instances that do not use a shared UserStore, the "<all>" user as well as the user "admin" are automatically created if no users exist yet on this instance. This "admin" user has the unqualified "admin" role associated, which means this user has the permission to do everything. On event servers, this user is typically used to give permissions to specific event admin user. The "admin" user's initial password is "admin" and should be changed before making that server publicly reachable.
 
+Upon the first start of server or server cluster, the server-specific user group is created. The server or server cluster represents a logical object with type ``SERVER`` that has a number of actions associated with it for which permissions are checked before a client can execute them. The ``SERVER`` object is owned by the server-specific group.
+
 Additionally, on fresh instances not sharing a UserStore, a set of default roles with default permissions are created:
 
 ### Role "admin"
 
-This role implies the "*" permission. It should ideally be used with a user group ownership qualification.
+This role implies the "*" permission. It should ideally be used with a user group ownership qualification, such as the server-specific group, making a user with a role qualified in this way an administrator for the server object as well as for all other objects owned by that server group.
 
 ### Role "user"
 
@@ -115,3 +121,13 @@ the event hierarchy now and can then be restricted to the members of that group 
 ## Granting Permissions
 
 Generally, a user who has a permission can grant this permission to another user. This is helpful, e.g., if a user wants to establish delegate users who may take over some of his/her tasks. In the future, the system may impose some restrictions on this general rule, particularly for roles and permissions that users may need to pay for. Establishing such permissions may require another specific permission.
+
+## Server Properties
+
+### Public Server
+
+A server that is configured to be *public* adds the ``sailing_viewer`` role to its server-specific group (``{servername}-server``) and marks it to be granted to *all* users trying to access objects owned by the server group. When server administrators follow the advice to make this server group their default creation group (the group used for the group ownership of new objects created by the user) then all those objects will be publicly readable.
+
+### Self-Service Server
+
+If a server is configured as a self-service server, an ACL is created for the ``SERVER`` object that grants the ``CREATE_OBJECT`` permission to the anonymous *null* group. This way, all users, including those not logged in, are permitted to create not only a new user during a sign-up process but also objects of any other types, such as events, regattas, or leaderboards.
