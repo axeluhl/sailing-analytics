@@ -1,9 +1,9 @@
 package com.sap.sailing.selenium.api.core;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 
 import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 /**
@@ -67,9 +67,9 @@ public class JsonWrapper {
         Object object = json.get(key);
         if (object instanceof JSONArray) {
             JSONArray jsonArray = ((JSONArray) object);
-            JSONAware[] objectArray = (JSONAware[]) jsonArray.toArray();
+            Object[] objectArray = (Object[]) jsonArray.toArray();
             @SuppressWarnings("unchecked")
-            T[] result = (T[]) new Object[objectArray.length];
+            T[] result = (T[]) Array.newInstance(type, objectArray.length);
             for (int i = 0; i < objectArray.length; i++) {
                 if (objectArray[i] instanceof JSONObject) {
                     try {
