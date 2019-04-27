@@ -86,13 +86,13 @@ USE_ENVIRONMENT=live-replica-server
 REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
 REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 # Provide authentication credentials for a user on the master permitted to replicate, either by username/password...
-REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SERVER:REPLICATE:<server-name> permission)
+REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SERVER:REPLICATE:&lt;server-name&gt; permission)
 REPLICATE_MASTER_PASSWORD=(password of the user for replication login on master)
 # Or by bearer token, obtained, e.g., through
 #   curl -d "username=myuser&password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
 # REPLICATE_MASTER_BEARER_TOKEN=
 SERVER_NAME=MYSPECIFICEVENT
-MONGODB_NAME=myspecificevent-replica
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true"
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
 SERVER_STARTUP_NOTIFY=you@email.com
 ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
