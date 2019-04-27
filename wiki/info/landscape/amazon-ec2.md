@@ -76,7 +76,7 @@ SERVER_STARTUP_NOTIFY=you@email.com
 ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
 </pre>
 
-- After your master server is ready, note the internal IP and configure your replica instances. Set up a user account there that has the following permissions: ``SERVER:REPLICATE:{SERVERNAME}``, ``SERVER:READ_REPLICATOR:{SERVERNAME}``, and ``SERVER:START_REPLICATION:{SERVERNAME}``. You will need this user's credentials to authenticate your replicas for replication.
+- After your master server is ready, note the internal IP and configure your replica instances. Set up a user account there that has the following permission: ``SERVER:REPLICATE:{SERVERNAME}``. You will need this user's credentials to authenticate your replicas for replication.
 
 - Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data and adjust the `myspecificevent` master exchange name to the `REPLICATION_CHANNEL` setting you used for the master configuration. 
 
