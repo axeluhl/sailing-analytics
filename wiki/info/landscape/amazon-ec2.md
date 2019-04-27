@@ -90,6 +90,8 @@ REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SER
 REPLICATE_MASTER_PASSWORD=(password of the user for replication login on master)
 # Or by bearer token, obtained, e.g., through
 #   curl -d "username=myuser&password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
+# or by logging in to the master server using your web browser and then navigating to
+#     https://master-server.sapsailing.com/security/api/restsecurity/access_token
 # REPLICATE_MASTER_BEARER_TOKEN=
 SERVER_NAME=MYSPECIFICEVENT
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true"
