@@ -8242,17 +8242,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(
-                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForTypeRelativeIdentifier(
-                        DefaultActions.CREATE,
-                        new TypeRelativeObjectIdentifier(ServerInfo.getName(), deviceConfiguration.getName())));
-
-        // TODO consider replication
-        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
-        if (expeditionConnector != null) {
-            expeditionConnector.addOrReplaceDeviceConfiguration(deviceConfiguration);
-        }
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION,
+                new TypeRelativeObjectIdentifier(ServerInfo.getName(), deviceConfiguration.getName()),
+                /* display name */ ServerInfo.getName() + "/" + deviceConfiguration.getName(),
+                () -> {
+                    // TODO consider replication
+                    final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+                    if (expeditionConnector != null) {
+                        expeditionConnector.addOrReplaceDeviceConfiguration(deviceConfiguration);
+                    }
+                });
     }
 
     @Override
