@@ -3,7 +3,7 @@ package com.sap.sailing.server.security;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.concurrent.Callable;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -51,16 +51,14 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         defaultTenant = securityService.getDefaultTenantForCurrentUser();
     }
     
-    private <T> T decorate(RegattaAndRaceIdentifier regattaAndRaceIdentifier, Supplier<T> innerAction) {
+    private <T> T decorate(RegattaAndRaceIdentifier regattaAndRaceIdentifier, Callable<T> innerAction) {
         SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
         subjectThreadState.bind();
         try {
             return securityService.doWithTemporaryDefaultTenant(defaultTenant, () -> {
                 return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                         SecuredDomainType.TRACKED_RACE, regattaAndRaceIdentifier.getTypeRelativeObjectIdentifier(),
-                        regattaAndRaceIdentifier.toString(), () -> {
-                            return innerAction.get();
-                        });
+                        regattaAndRaceIdentifier.toString(), innerAction);
             });
         } finally {
             subjectThreadState.restore();
