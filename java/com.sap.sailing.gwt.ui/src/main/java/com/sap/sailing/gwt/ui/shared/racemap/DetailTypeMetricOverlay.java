@@ -19,8 +19,21 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
     
     private final String textColor = "Black";
     private final String textFont = "10pt 'Open Sans'";
-    private double lineWidth = 250;
+    /**
+     * Directly controls the width of the drawn box.
+     */
+    private int width = 260;
+    /**
+     * Directly controls the height of the drawn box.
+     */
+    private double lineAmount = 5;
+    /**
+     * Controls the height of each individual line.
+     */
     private double lineHeight = 13;
+    /**
+     * Margin space to leave along the boxes edges.
+     */
     private double lineMargin = 5;
     private final StringMessages stringMessages;
     private Canvas metricLegend;
@@ -35,6 +48,10 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
         this.stringMessages = stringMessages;
     }
     
+    /**
+     * Creates the needed HTML divs and canvas if supported.
+     * @param map {@link MapWidget} to draw on.
+     */
     protected void createMetricLegend(MapWidget map) {
         metricLegend = Canvas.createIfSupported();
         metricLegend.setStyleName("MapMetricLegend");
@@ -64,6 +81,9 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
         draw();
     }
 
+    /**
+     * Clears the canvas.
+     */
     public void clearCanvas() {
         if (metricLegend != null) {
             Context2d g = this.getCanvas().getContext2d();
@@ -73,7 +93,13 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
             g.clearRect(0, 0, w, h);            
         }
     }
-    
+
+    /**
+     * Updates the information displayed.
+     * @param valueRange {@link ValueRangeFlexibleBoundaries} to take min and max values from.
+     * @param colorMapper {@link ColorMapper} to generate a spectrum.
+     * @param detailType {@link DetailType} to show metric and unit.
+     */
     public void updateLegend(ValueRangeFlexibleBoundaries valueRange, ColorMapper colorMapper, DetailType detailType) {
         this.valueRange = valueRange;
         this.colorMapper = colorMapper;
@@ -81,43 +107,68 @@ public class DetailTypeMetricOverlay extends FullCanvasOverlay {
         draw();
     }
 
+    /**
+     * Draws the legend and creates a canvas if one does not exist already.
+     */
     public void drawLegend() {
         if (isVisible()) {
             if (metricLegend == null) {
                 createMetricLegend(map);
             }
             Context2d context2d = metricLegend.getContext2d();
-            
-            int canvasWidth = (int) Math.ceil(lineWidth + lineMargin * 2);
-            int canvasHeight = (int) Math.ceil(lineHeight * 5 + lineMargin * 2);
-            setCanvasSize(metricLegend, canvasWidth, canvasHeight);
-            context2d.setGlobalAlpha(0.75); //TODO Check color
-            drawRectangle(context2d, 0, 0, canvasWidth, canvasHeight, "white");
+            // Calculate sizes
+            int canvasHeight = (int) Math.ceil(lineHeight * lineAmount + lineMargin * 2);
+            double lineWidth = width - 2 * lineMargin;
+            setCanvasSize(metricLegend, width, canvasHeight);
+            // Draw background
+            context2d.setGlobalAlpha(0.75);
+            drawRectangle(context2d, 0, 0, width, canvasHeight, "white");
+            // Draw text
             context2d.setGlobalAlpha(1.0);
-            drawTextCentered(context2d, lineMargin, lineToYOffset(0), canvasWidth - 2 * lineMargin, "Tail Color", textColor);
-            drawText(context2d, lineMargin * 2, lineToYOffset(1), canvasWidth - 4 * lineMargin, detailTypeAndUnit, textColor);
-            
-            drawSpectrum(context2d, lineMargin * 2, lineToYOffset(2) - 6, canvasWidth - 4 * lineMargin);
+            drawTextCentered(context2d, lineMargin, lineToYOffset(0), lineWidth, stringMessages.tailColor(), textColor);
+            drawText(context2d, lineMargin * 2, lineToYOffset(1), lineWidth - 2 * lineMargin, detailTypeAndUnit, textColor);
+            // Draw spectrum
+            drawSpectrum(context2d, lineMargin * 2, lineToYOffset(2) - 6, lineWidth - 2 * lineMargin);
         }
     }
-    
+
+    /**
+     * Calculates the y offset needed to draw something from a line number.
+     * @param line {@code int} line number.
+     * @return {@code double} offset on y axis from the top of the canvas.
+     */
     private double lineToYOffset(int line) {
         return lineMargin + (lineHeight * ++line);
     }
-    
+
+    /**
+     * Sets the canvas size.
+     * @param canvas {@link Canvas} to set size of.
+     * @param canvasWidth {@code int} width to set.
+     * @param canvasHeight {@code int} height to set.
+     */
     protected void setCanvasSize(Canvas canvas, int canvasWidth, int canvasHeight) {
         canvas.setWidth(String.valueOf(canvasWidth));
         canvas.setHeight(String.valueOf(canvasHeight));
         canvas.setCoordinateSpaceWidth(canvasWidth);
         canvas.setCoordinateSpaceHeight(canvasHeight);
     }
-    
+
+    /**
+     * Draws a rectangle.
+     * @param context2d {@link Context2d} to draw on.
+     * @param fromX {@code double} upper-left corner x axis position.
+     * @param fromY {@code double} upper-left corner y axis position.
+     * @param toX {@code double} lower-right corner x axis position.
+     * @param toY {@code double} lower-right corner y axis position.
+     * @param color {@link String} color to use while drawing.
+     */
     protected void drawRectangle(Context2d context2d, double fromX, double fromY, double toX, double toY, String color) {
         context2d.setFillStyle(color);
         context2d.setLineWidth(3);
         context2d.fillRect(fromX, fromY, toX, toY);
     }
-    
+
     protected void drawText(Context2d context2d, double x, double y, double maxWidth, String text, String color) {
         context2d.setFillStyle(color);
         context2d.setFont(textFont);

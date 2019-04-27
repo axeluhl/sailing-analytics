@@ -1287,6 +1287,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorDeterminingPolarAvailability(String raceName, String message);
     String selectedDetailType();
     String errorLoadingAvailableDetailTypes();
+    String tailColor();
     String fileStorage();
     String active();
     String scoringSchemeHighPointEssOverallDescription();
