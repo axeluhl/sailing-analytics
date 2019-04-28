@@ -124,7 +124,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         RoleDefinition role = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString), name,
                 new Callable<RoleDefinition>() {
-
                     @Override
                     public RoleDefinition call() throws Exception {
                         return getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString),
@@ -341,10 +340,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throw new UserGroupManagementException(
                     String.format("A user group with the name '%s' already exists.", name));
         }
-
         UserGroup group = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER_GROUP, UserGroupImpl.getTypeRelativeObjectIdentifier(newTenantId), name, () -> {
-                    
                     UserGroup userGroup;
                     try {
                         userGroup = getSecurityService().createUserGroup(newTenantId, name);
@@ -353,7 +350,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     }
                     return userGroup;
                 });
-
         Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
         Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         return securityDTOFactory.createUserGroupDTOFromUserGroup(group, fromOriginalToStrippedDownUser,

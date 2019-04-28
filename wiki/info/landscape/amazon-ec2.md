@@ -23,21 +23,21 @@ You may need to select "All generations" instead of "Current generation" to see 
   <pre>
   INSTALL_FROM_RELEASE=`name-of-release`
   USE_ENVIRONMENT=live-server
-  MONGODB_NAME=myspecificevent
+  MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
   REPLICATION_CHANNEL=myspecificevent
   SERVER_NAME=MYSPECIFICEVENT
-  BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
-  SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+  BUILD_COMPLETE_NOTIFY=your@email.here
+  SERVER_STARTUP_NOTIFY=your@email.here
   ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
   </pre>
 
 The *MailInvitationType* property controls which version of the SAP Sail Insight app will be targeted by tracking invitations sent out by e-mail.
 Two different Branch.io URL schemes exist for the Sail Insight app: sailinsight-app.sapsailing.com and sailinsight20-app.sapsailing.com.
 They can be selected by providing *SailInsight1* or *SailInsight2*, respectively, as the values for the property. If the property is
-set to *LEGACY*, no Branch.io link is used in the invitation at all. This mode should no longer be used as soon as the Branch.io-enabled
-iOS app has hit the store. If not provided, it will default to *SailInsight1*.
+set to *LEGACY*, no Branch.io link is used in the invitation at all. This mode should no longer be used because the Branch.io-enabled
+iOS app has hit the store. If not provided, it will default to *SailInsight2*.
 
-Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_NAME` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
+Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_URI` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
 
 - To build from git, install and start, set the following in the instance's user data, adjusting the branch name (`BUILD_FROM`), the `myspecificevent` naming and memory settings according to your needs:
   <pre>
@@ -51,9 +51,7 @@ Note that when you select to install an environment using the `USE_ENVIRONMENT` 
   MEMORY=2048m
   REPLICATION_HOST=rabbit.internal.sapsailing.com
   REPLICATION_CHANNEL=myspecificevent
-  MONGODB_HOST=dbserver.internal.sapsailing.com
-  MONGODB_PORT=10202
-  MONGODB_NAME=myspecificevent
+  MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
   </pre>
 
 #### Setting up a new image (AMI) from scratch (more or less)
@@ -73,12 +71,14 @@ INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-master-server
 SERVER_NAME=MYSPECIFICEVENT
 REPLICATION_CHANNEL=myspecificevent
-MONGODB_NAME=myspecificevent
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
 SERVER_STARTUP_NOTIFY=you@email.com
 ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
 </pre>
 
-- After your master server is ready, note the internal IP and configure your replica instances. Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data and adjust the `myspecificevent` master exchange name to the `REPLICATION_CHANNEL` setting you used for the master configuration. 
+- After your master server is ready, note the internal IP and configure your replica instances. Set up a user account there that has the following permission: ``SERVER:REPLICATE:{SERVERNAME}``. You will need this user's credentials to authenticate your replicas for replication.
+
+- Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data and adjust the `myspecificevent` master exchange name to the `REPLICATION_CHANNEL` setting you used for the master configuration. 
 
 <pre>
 INSTALL_FROM_RELEASE=(name-of-release)
@@ -86,13 +86,15 @@ USE_ENVIRONMENT=live-replica-server
 REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
 REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 # Provide authentication credentials for a user on the master permitted to replicate, either by username/password...
-REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SERVER:REPLICATE:<server-name> permission)
+REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SERVER:REPLICATE:&lt;server-name&gt; permission)
 REPLICATE_MASTER_PASSWORD=(password of the user for replication login on master)
 # Or by bearer token, obtained, e.g., through
 #   curl -d "username=myuser&password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token
+# or by logging in to the master server using your web browser and then navigating to
+#     https://master-server.sapsailing.com/security/api/restsecurity/access_token
 # REPLICATE_MASTER_BEARER_TOKEN=
 SERVER_NAME=MYSPECIFICEVENT
-MONGODB_NAME=myspecificevent-replica
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true"
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
 SERVER_STARTUP_NOTIFY=you@email.com
 ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.domain.tracking.MailInvitationType=SailInsight2"
