@@ -2,6 +2,7 @@ package com.sap.sailing.server.security;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -51,14 +52,21 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         defaultTenant = securityService.getDefaultTenantForCurrentUser();
     }
     
-    private <T> T decorate(RegattaAndRaceIdentifier regattaAndRaceIdentifier, Callable<T> innerAction) {
+    /**
+     * Sets the ownership for a {@link SecuredDomainType#TRACKED_RACE} object identified by
+     * {@code regattaAndRaceIdentifier} if no ownership exists for it yet; then, the permission to
+     * create the object is checked. If granted, the {@code raceCreationAction} is executed and its
+     * result is returned. Otherwise, the action is not executed, and if the ownership was set here,
+     * it is removed again.
+     */
+    private <T> T setOwnershipForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier, Callable<T> raceCreationAction) {
         SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
         subjectThreadState.bind();
         try {
             return securityService.doWithTemporaryDefaultTenant(defaultTenant, () -> {
                 return securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                         SecuredDomainType.TRACKED_RACE, regattaAndRaceIdentifier.getTypeRelativeObjectIdentifier(),
-                        regattaAndRaceIdentifier.toString(), innerAction);
+                        regattaAndRaceIdentifier.toString(), raceCreationAction);
             });
         } finally {
             subjectThreadState.restore();
@@ -71,7 +79,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingCalculator,
             RaceLogResolver raceLogResolver, Optional<ThreadLocalTransporter> threadLocalTransporter) {
-        return decorate(new RegattaNameAndRaceName(trackedRegatta.getRegatta().getName(), raceDefinition.getName()),
+        return setOwnershipForRace(new RegattaNameAndRaceName(trackedRegatta.getRegatta().getName(), raceDefinition.getName()),
                 () -> super.createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, delayToLiveInMillis,
                         millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                         raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, threadLocalTransporter));
@@ -80,7 +88,22 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
     @Override
     public RaceDefinition createRaceDefinition(Regatta regatta, String name, Course course, BoatClass boatClass,
             Map<Competitor, Boat> competitorsAndTheirBoats, Serializable id) {
-        return decorate(new RegattaNameAndRaceName(regatta.getName(), name),
+        // TODO bug 5015: this is just a very basic hack that is not checking for competitor creation permission but for now only establishes an ownership when none exists
+        SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
+        subjectThreadState.bind();
+        try {
+            for (final Entry<Competitor, Boat> e : competitorsAndTheirBoats.entrySet()) {
+                if (securityService.getOwnership(e.getKey().getIdentifier()) == null) {
+                    securityService.setOwnership(e.getKey().getIdentifier(), securityService.getCurrentUser(), defaultTenant);
+                }
+                if (securityService.getOwnership(e.getValue().getIdentifier()) == null) {
+                    securityService.setOwnership(e.getValue().getIdentifier(), securityService.getCurrentUser(), defaultTenant);
+                }
+            }
+        } finally {
+            subjectThreadState.restore();
+        }
+        return setOwnershipForRace(new RegattaNameAndRaceName(regatta.getName(), name),
                 () -> super.createRaceDefinition(regatta, name, course, boatClass, competitorsAndTheirBoats, id));
     }
 }
