@@ -23,6 +23,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -223,6 +224,10 @@ public class Activator implements BundleActivator {
                 QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
                 securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier.toString());
+                if (securityService.isInitialOrMigration()) {
+                    securityService.addToAccessControlList(associationQualifiedIdentifier,
+                            securityService.getUserGroup(null), DefaultActions.READ.name());
+                }
             }
             for (WildcardPermission permission : user.getPermissions()) {
                 securityService.migratePermission(user, permission, this::getPermissionReplacement);
@@ -231,6 +236,10 @@ public class Activator implements BundleActivator {
                 QualifiedObjectIdentifier associationQualifiedIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
                 securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier.toString());
+                if (securityService.isInitialOrMigration()) {
+                    securityService.addToAccessControlList(associationQualifiedIdentifier,
+                            securityService.getUserGroup(null), DefaultActions.READ.name());
+                }
             }
         }
         
