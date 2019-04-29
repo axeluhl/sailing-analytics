@@ -245,6 +245,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
      * @param callback optional; may be {@code null}
      */
     public void refreshUserList(final Callback<Iterable<UserDTO>, Throwable> callback) {
+        getSelectionModel().clear();
         final AsyncCallback<Collection<UserDTO>> myCallback = new AsyncCallback<Collection<UserDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
