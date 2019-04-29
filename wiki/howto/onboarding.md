@@ -37,10 +37,10 @@ The script will install the following plugins for your convenience:
 
 * GWT Plugin ([https://github.com/gwt-plugins/gwt-eclipse-plugin](https://github.com/gwt-plugins/gwt-eclipse-plugin))
 * GWT SDM Debug Bridge ([http://sdbg.github.io/](http://sdbg.github.io/))
-* Android Tools ([https://marketplace.eclipse.org/content/android-development-tools-eclipse](https://marketplace.eclipse.org/content/android-development-tools-eclipse))
 * Easy Shell ([https://anb0s.github.io/EasyShell/](https://anb0s.github.io/EasyShell/))
 * Memory Analyzer ([https://www.eclipse.org/mat/](https://www.eclipse.org/mat/))
 * SAP JVM Profiler ([https://tools.hana.ondemand.com](https://tools.hana.ondemand.com))
+* UMLet ([https://www.umlet.com/](https://www.umlet.com/))
 * various updates to preinstalled plugins
 
 #### Further optional but recommended installations
