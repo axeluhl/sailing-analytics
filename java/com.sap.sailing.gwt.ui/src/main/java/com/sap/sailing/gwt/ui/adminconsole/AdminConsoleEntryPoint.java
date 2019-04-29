@@ -415,6 +415,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                     @Override
                     public void refreshAfterBecomingVisible() {
                         userManagementPanel.updateUsers();
+                        userManagementPanel.refreshSuggests();
                     }
                 }, getStringMessages().userManagement(), SecuredSecurityTypes.USER.getPermission(DefaultActions.MUTATION_ACTIONS));
 
