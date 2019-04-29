@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -13,11 +14,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.rules.TestWatchman;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.FrameworkMethod;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
@@ -60,7 +64,9 @@ public abstract class AbstractSeleniumTest {
     
     private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
     
-    private static final String LOGIN_URL = "security/api/restsecurity/login";
+    private static final String OBTAIN_ACCESS_TOKEN_URL = "security/api/restsecurity/access_token";
+    
+    private static final String CREATE_SESSION_URL = "sailingserver/test-support/createSession";
     
     private static final int CLEAR_STATE_SUCCESFUL_STATUS_CODE = 204;
 
@@ -121,9 +127,13 @@ public abstract class AbstractSeleniumTest {
     protected void setUpAuthenticatedSession(WebDriver webDriver) {
         // To be able to set a cookie we need to load a page having the target origin
         webDriver.get(getContextRoot());
-        
         logger.info("Authenticating session...");
-        Cookie sessionCookie = authenticate(getContextRoot());
+        Cookie sessionCookie;
+        try {
+            sessionCookie = authenticate(getContextRoot());
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
         webDriver.get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
         final Cookie cookieWithoutDomain = new Cookie(sessionCookie.getName(), sessionCookie.getValue(), null, sessionCookie.getPath(), sessionCookie.getExpiry(), sessionCookie.isSecure(), sessionCookie.isHttpOnly());
         webDriver.manage().addCookie(cookieWithoutDomain);
@@ -147,20 +157,23 @@ public abstract class AbstractSeleniumTest {
      * @return the cookie that represents the authenticated session or <code>null</code> if the session
      * couldn't successfully be authenticated
      */
-    protected Cookie authenticate(String contextRoot) {
+    protected Cookie authenticate(String contextRoot) throws JSONException {
         try {
             Cookie result = null;
-            URL url = new URL(contextRoot + LOGIN_URL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setInstanceFollowRedirects(false);
+            URL accessTokenUrl = new URL(contextRoot + OBTAIN_ACCESS_TOKEN_URL);
+            HttpURLConnection connection = (HttpURLConnection) accessTokenUrl.openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.connect();
             connection.getOutputStream().write("username=admin&password=admin".getBytes());
-            if (connection.getResponseCode() / 100 != 3) { // expecting something like "302 Found" which redirects to the success page
-                throw new RuntimeException("" + connection.getResponseCode() + " "+connection.getResponseMessage());
-            }
-            List<String> cookies = connection.getHeaderFields().get("Set-Cookie");
+            final JSONObject jsonResponse = new JSONObject(new JSONTokener(new InputStreamReader((InputStream) connection.getContent())));
+            final String accessToken = jsonResponse.getString("access_token");
+            URL createSessionUrl = new URL(contextRoot + CREATE_SESSION_URL);
+            HttpURLConnection adminConsoleConnection = (HttpURLConnection) createSessionUrl.openConnection();
+            adminConsoleConnection.setRequestProperty("Authorization", "Bearer "+accessToken);
+            adminConsoleConnection.setRequestMethod("GET");
+            adminConsoleConnection.connect();
+            List<String> cookies = adminConsoleConnection.getHeaderFields().get("Set-Cookie");
             if (cookies != null) {
                 for (String cookie : cookies) {
                     if (cookie.startsWith(SESSION_COOKIE_NAME + "=")) {
@@ -175,35 +188,18 @@ public abstract class AbstractSeleniumTest {
         }
     }
     
-    // TODO: Change to TestWatcher if we support a higher version (4.11) of JUnit.
-    //private class ScreenShotRule extends TestWatcher {
-    //    ScreenShotFilenameGenerator generator;
-    //    
-    //    public ScreenShotRule(ScreenShotFilenameGenerator generator) {
-    //        this.generator = generator;
-    //    }
-    //    
-    //    protected void failed(Throwable error, Description description) {
-    //        captureScreenshot(this.generator.getFilePath(description));
-    //    }
-    //}
-    
-    private class ScreenShotAndCloseWindowRule extends TestWatchman {
+    private class ScreenShotRule extends TestWatcher {
         @Override
-        public void failed(Throwable cause, FrameworkMethod method) {
-            try {
-                captureScreenshots();
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
+        protected void failed(Throwable error, Description description) {
+            captureScreenshots();
         }
-        
+
         @Override
-        public void finished(FrameworkMethod method) {
+        protected void finished(Description description) {
             try {
                 environment.getWindowManager().closeAllWindows();
             } finally {
-                super.finished(method);
+                super.finished(description);
             }
         }
     }
@@ -212,7 +208,7 @@ public abstract class AbstractSeleniumTest {
      * <p>Rule for capturing of a screenshot if a test fails.</p>
      */
     @Rule
-    public final ScreenShotAndCloseWindowRule takeScreenshotAndCloseWindows = new ScreenShotAndCloseWindowRule(/*generator*/);
+    public final ScreenShotRule takeScreenshotAndCloseWindows = new ScreenShotRule();
 
     /**
      * <p>The test environment used for the execution of the the tests.</p>

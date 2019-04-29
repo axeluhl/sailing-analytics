@@ -15,7 +15,9 @@ import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     private final String leaderboardName;
@@ -25,8 +27,8 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
 
     public RaceLogCourseManagementWidget(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
-            final String fleetName) {
-        super(sailingService, errorReporter, stringMessages);
+            final String fleetName, final UserService userService) {
+        super(sailingService, errorReporter, stringMessages, userService);
 
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
@@ -152,7 +154,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                 new AsyncCallback<RaceCourseDTO>() {
                     @Override
                     public void onSuccess(RaceCourseDTO result) {
-                        updateWaypointsAndControlPoints(result);
+                        updateWaypointsAndControlPoints(result, leaderboardName);
                     }
 
                     @Override

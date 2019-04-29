@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
-
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
@@ -22,6 +17,11 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
+
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 public class RaceHelper {
     public static String getRaceName(@Nullable ManagedRace race) {
@@ -76,7 +76,8 @@ public class RaceHelper {
         return raceName;
     }
 
-    public static String getShortReverseRaceName(@Nullable ManagedRace race, @Nullable String delimiter, @NonNull ManagedRace race2) {
+    public static String getShortReverseRaceName(@Nullable ManagedRace race, @Nullable String delimiter,
+            @NonNull ManagedRace race2) {
         delimiter = getDefaultDelimiter(delimiter);
         String raceName = "";
         if (race != null) {
@@ -138,7 +139,8 @@ public class RaceHelper {
         return getFleetSeries(fleet, series, null);
     }
 
-    public static String getFleetSeries(@Nullable Fleet fleet, @Nullable SeriesBase series, @Nullable String delimiter) {
+    public static String getFleetSeries(@Nullable Fleet fleet, @Nullable SeriesBase series,
+            @Nullable String delimiter) {
         delimiter = getDefaultDelimiter(delimiter);
 
         String fleetSeries = "";
@@ -181,7 +183,8 @@ public class RaceHelper {
         String timing;
         long launchTime = procedure.getGateLaunchStopTime() / GateStartTimingFragment.ONE_MINUTE_MILLISECONDS;
         long golfTime = procedure.getGolfDownTime() / GateStartTimingFragment.ONE_MINUTE_MILLISECONDS;
-        if (AppPreferences.on(context, PreferenceHelper.getRegattaPrefFileName(raceGroup.getName())).getGateStartHasAdditionalGolfDownTime()) {
+        if (AppPreferences.on(context, PreferenceHelper.getRegattaPrefFileName(raceGroup.getName()))
+                .getGateStartHasAdditionalGolfDownTime()) {
             timing = context.getString(R.string.gate_time_schedule_long, launchTime, golfTime, launchTime + golfTime);
         } else {
             timing = context.getString(R.string.gate_time_schedule_short, launchTime);
@@ -194,9 +197,12 @@ public class RaceHelper {
     }
 
     /**
-     * Obtains the set of races in the same race group / regatta and the same series and the same fleet as {@code currentRace}.
+     * Obtains the set of races in the same race group / regatta and the same series and the same fleet as
+     * {@code currentRace}.
      */
-    public static List<ManagedRace> getManagedRacesAsList(@NonNull LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, @Nullable ManagedRace currentRace) {
+    public static List<ManagedRace> getManagedRacesAsList(
+            @NonNull LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup,
+            @Nullable ManagedRace currentRace) {
         List<ManagedRace> races = new ArrayList<>();
         // Find the race group / series / fleet for the currentRace and add all races in that group/series/fleet
         String raceGroupName = "";
@@ -217,17 +223,17 @@ public class RaceHelper {
         return races;
     }
 
-    public static List<ManagedRace> getPreSelectedRaces(@NonNull LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, @Nullable ManagedRace currentRace) {
+    public static List<ManagedRace> getPreSelectedRaces(
+            @NonNull LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup,
+            @Nullable ManagedRace currentRace) {
         List<ManagedRace> managedRaces = getManagedRacesAsList(racesByGroup, currentRace);
         List<ManagedRace> preselectedRaces = new ArrayList<>();
-        for(ManagedRace race : managedRaces){
+        for (ManagedRace race : managedRaces) {
             if (race != null) {
                 RaceLogRaceStatus status = race.getState().getStatus();
-                boolean check = status != null && (status.equals(RaceLogRaceStatus.PRESCHEDULED) ||
-                        status.equals(RaceLogRaceStatus.SCHEDULED) ||
-                        status.equals(RaceLogRaceStatus.STARTPHASE) ||
-                        status.equals(RaceLogRaceStatus.RUNNING) ||
-                        status.equals(RaceLogRaceStatus.FINISHING));
+                boolean check = status != null && (status.equals(RaceLogRaceStatus.PRESCHEDULED)
+                        || status.equals(RaceLogRaceStatus.SCHEDULED) || status.equals(RaceLogRaceStatus.STARTPHASE)
+                        || status.equals(RaceLogRaceStatus.RUNNING) || status.equals(RaceLogRaceStatus.FINISHING));
                 if (check) {
                     preselectedRaces.add(race);
                 }
@@ -239,7 +245,8 @@ public class RaceHelper {
     public static SimpleRaceLogIdentifier getSimpleRaceLogIdentifier(@Nullable ManagedRace race) {
         SimpleRaceLogIdentifier identifier = null;
         if (race != null) {
-            identifier = new SimpleRaceLogIdentifierImpl(race.getRaceGroup().getName(), race.getRaceColumnName(), race.getFleet().getName());
+            identifier = new SimpleRaceLogIdentifierImpl(race.getRaceGroup().getName(), race.getRaceColumnName(),
+                    race.getFleet().getName());
         }
         return identifier;
     }

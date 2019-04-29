@@ -23,11 +23,13 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureFactoryImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -38,8 +40,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.test.LeaderboardScoringAndRankingTestBase;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -94,13 +96,16 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final Map<Competitor, MaxPointsReason> mprs = new HashMap<>();
         int oneBasedRank = 1;
         final CompetitorResults results = new CompetitorResultsImpl();
+        Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
+                new BoatClassImpl("X40", false), "123", Color.RED);
         for (final Competitor c : competitors) {
             final MaxPointsReason mpr = new MaxPointsReason[] { null, MaxPointsReason.NONE, MaxPointsReason.DNF, MaxPointsReason.OCS }[oneBasedRank%4];
             final Double score = oneBasedRank%5 == 0 ? null : 20*Math.random();
             scores.put(c, score);
             mprs.put(c, mpr);
-            results.add(new CompetitorResultImpl(c.getId(), c.getName(),
-                    oneBasedRank++, mpr, score, /* finishingTime */ null, /* comment */ null, MergeState.OK));
+            results.add(new CompetitorResultImpl(c.getId(), c.getName(), c.getShortName(), storedBoat.getName(),
+                    storedBoat.getSailID(), oneBasedRank++, mpr, score, /* finishingTime */ null, /* comment */ null,
+                    MergeState.OK));
         }
         final RaceLog f1RaceLog = f1Column.getRaceLog(f1Column.getFleets().iterator().next());
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Axel", 0);
@@ -229,6 +234,10 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
 
     private void setResultForCompetitor(final Competitor competitor, int oneBasedRank,
             final CompetitorResults results, MaxPointsReason maxPointsReason, Double explicitScore) {
-        results.add(new CompetitorResultImpl(competitor.getId(), competitor.getName(), oneBasedRank, maxPointsReason, explicitScore, /* finishingTime */ null, /* comment */ null, MergeState.OK));
+        Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
+                new BoatClassImpl("X40", false), "123", Color.RED);
+        results.add(new CompetitorResultImpl(competitor.getId(), competitor.getName(),
+                competitor.getShortName(), storedBoat.getName(), storedBoat.getSailID(), oneBasedRank,
+                maxPointsReason, explicitScore, /* finishingTime */ null, /* comment */ null, MergeState.OK));
     }
 }

@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -18,24 +20,51 @@ import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImp
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache.ResolveListener;
 
 public class MasterDataImporter {
+    private final static Logger logger = Logger.getLogger(MasterDataImporter.class.getName());
     private final DomainFactory baseDomainFactory;
-
     private final RacingEventService racingEventService;
+    private final User user;
+    private final UserGroup tenant;
 
-    public MasterDataImporter(DomainFactory baseDomainFactory, RacingEventService racingEventService) {
+    public MasterDataImporter(DomainFactory baseDomainFactory, RacingEventService racingEventService,
+            User user, UserGroup tenant) {
         this.baseDomainFactory = baseDomainFactory;
         this.racingEventService = racingEventService;
+        this.user = user;
+        this.tenant = tenant;
+
     }
 
-    public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override) throws IOException,
+    public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override)
+            throws IOException,
             ClassNotFoundException {
-        ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService.getBaseDomainFactory()
-                .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
+        ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService
+                .getBaseDomainFactory()
+                .createObjectInputStreamResolvingAgainstThisFactory(inputStream, new ResolveListener() {
+                    @Override
+                    public void onNewObject(Object result) {
+                        if (result instanceof Boat || result instanceof Competitor) {
+                            QualifiedObjectIdentifier id = ((WithQualifiedObjectIdentifier) result).getIdentifier();
+                            logger.info("Adopting " + id + " from Masterdataimport  to " + user.getName() + " and group "
+                                    + (tenant==null ? "null" : tenant.getName()));
+                            racingEventService.getSecurityService().setOwnershipIfNotSet(id, user, tenant);
+                        }
+                    }
+
+                    @Override
+                    public void onResolvedObject(Object result) {
+                    }
+                });
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03,
                 DataImportSubProgress.TRANSFER_STARTED, 0.5);
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
@@ -58,6 +87,12 @@ public class MasterDataImporter {
         for (Regatta regatta : topLevelMasterData.getAllRegattas()) {
             RegattaImpl regattaImpl = (RegattaImpl)regatta;
             regattaImpl.initializeSeriesAfterDeserialize();
+
+            // master data import from older system, generate a uuid for this.
+            if (regatta.getRegistrationLinkSecret() == null) {
+                logger.info("Generated missing registrationLinkSecret for " + this + " while importing MasterData");
+                regatta.setRegistrationLinkSecret(UUID.randomUUID().toString());
+            }
         }
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
                 DataImportSubProgress.TRANSFER_COMPLETED, 0.5);
@@ -77,7 +112,8 @@ public class MasterDataImporter {
     private MasterDataImportObjectCreationCount applyMasterDataImportOperation(TopLevelMasterData topLevelMasterData,
             UUID importOperationId, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override, creationCount);
+        ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
+                creationCount, user, tenant);
         creationCount = racingEventService.apply(op);
         return creationCount;
     }

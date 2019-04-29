@@ -21,6 +21,118 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+                    <h2 class="articleSubheadline">April 2019</h2>
+                    <ul class="bulletList">
+			<li>Filtering the leaderboard groups during a Master Data Import now also
+			    handles quoted strings correctly. With this, e.g., searching for a
+			    leaderboard group containing "Apr 2" in its name is doable.
+			</li>
+			<li>In AdminConsole.html all tables and lists are now filtered to only show domain objects readable by the current user.
+                This means additional objects may exist on the server and can cause errors due to name conflicts.<br>
+                To allow users to grant others permissions for their stuff, it is possible to manage permissions for users whose username is known without having a read permission for that user.
+                In addition, users may be added to groups by only knowing their username.
+			</li>
+			<li>The permission system was extended to allow groups to directly grant roles to their users.
+                In addition such a role can also be granted to all users (including anonymous ones).
+                Roles associated to groups only grant permissions to domain objects owned by that group.<br>
+                Example: By associating the <tt>sailing_viewer</tt> role to a group with "for all users" enabled, all objects owned by that group are publicly readable.
+			</li>
+			<li>When loading or tracking wind from Igtimi, only accounts readable by the current user will be used.
+                On dedicated event servers, such an account should be owned by the server group.
+                This ensures, that all server admins will consistently use this account while tracking races.
+			</li>
+			<li>Replication is now also secured by several actions of the SERVER security type.
+                Due to permission checks on the master side, it is now necessary to provide credentials of a user that exists
+                on the master server that is used when a replica contacts the master.
+                This user at least needs to have the permission <tt>SERVER:REPLICATE:&amp;server-name&amp;</tt> granted on the master.<br>
+                Server start scripts as well as the replication documentation have been updated to include details about configuring credentials for auto replication.
+                Newly created servers should automatically contain adjusted versions of the relevant scripts.
+                The configuration of existing servers needs to get updated accordingly. The environment variables considered by the
+                start script are: <tt>REPLICATE_MASTER_USERNAME</tt> and <tt>REPLICATE_MASTER_PASSWORD</tt>, or alternatively,
+                <tt>REPLICATE_MASTER_BEARER_TOKEN</tt> which can be obtained from the master server, e.g., by
+                <tt>curl -d "username=myuser&amp;password=mysecretpassword" "https://master-server.sapsailing.com/security/api/restsecurity/access_token" | jq .access_token</tt>.
+                These map to the system properties <tt>replicate.master.username</tt>, <tt>replicate.master.password</tt>, and
+                <tt>replicate.master.bearer_token</tt>, respectively.
+			</li>
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">March 2019</h2>
+                    <ul class="bulletList">
+			<li>By caching serialized results of leaderboard requests the server now requires
+			    significantly less CPU power during live situations. Instead of computing the
+			    serialized representation of a leaderboard again and again, the serialized version
+			    is maintained in the cache as long as the original object from which the serialized
+			    version was produced is referenced. This way, the cache cleans itself. It can be
+			    observed through JMX, e.g., using JConsole, by looking at the JMX bean
+			    <tt>com.sap.sse:type=GWTRPCSerializedResultCache_*</tt>.
+			</li>
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">February 2019</h2>
+                    <ul class="bulletList">
+			<li>The pairing list construction supports a new parameter that can be used
+			    to balance fairness of boat assignment with the reduction of boat changes
+			    between flights. It can be set between 0 (focus on fair boat assignments;
+			    use this, e.g., if there are noticeable differences between the boats used
+			    to ensure a fair distribution) and the number of flights, e.g., 14 or 15 for
+			    a typical league set-up (focus on reducing the number of boat changes while
+			    sacrificing a bit of boat assignment fairness).
+			</li>
+			<li>The built-in mark passing calculator that is primarily used for smartphone
+			    tracking has been improved. In particular, it now recognizes trackers left behind,
+			    e.g., on a committee boat, and avoids performance issues incurred by these scenarios
+			    by filtering possible mark passing candidates using a bounding box-based approach:
+			    if a tracker hardly moves over some time, only the most promising candidates from
+			    that time interval are considered. This avoids compute time and memory issues
+			    seen in the past.
+			</li>
+			<li>When during a server re-start with the <tt>-Drestore.tracked.races=true</tt> parameter
+			    restoring a race fails with an exception, that race is now removed from the restore list,
+			    a corresponding <tt>SEVERE</tt> log entry is written, and the server will no longer try
+			    to restore that race upon future restarts. This way, races that have been removed at
+			    their source will not keep causing permanent restore trouble, and manual database
+			    intervention is no longer necessary.
+			</li>
+			<li>A new status REST endpoint has been added: <tt>/gwt/status</tt>. It combines the status
+			    checks of <tt>/sailingserver/api/v1/status</tt> and <tt>/replication/replication?action=STATUS</tt>,
+			    and because it is offered by the same module hosting the web UI of the server, its availability
+			    indicates that the corresponding module has started and has registered with the web server
+			    successfully. It reports a 200 HTTP response if itself and the status reports it syndicates
+			    report availability, a non-2XX status otherwise.
+			</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">January 2019</h2>
+                    <ul class="bulletList">
+                        <li>Allow entering a priority for courses managed in the AdminConsole.
+                            The new default priority now is 1. It used to be 0 which caused problems
+                            because the Race Manager app's highest (logically) priority is 1 which
+                            never took priority over the AdminConsole-provided prio-0 events.</li>
+                        <li>User sessions are now stored durably in the database so that they can be
+                            restored in case of a server re-start. Users therefore will no longer need
+                            to sign in again only because a server was re-started.</li>
+                        <li>New availability checks have been implemented. Two new REST endpoints are provided:
+                            <ul>
+                              <li>/sailingserver/api/v1/status reports the availability of the "Sailing" application</li>
+                              <li>/replication/replication?action=STATUS reports the availability of the replication module,
+                                  providing details about each replication-capable component and queue lengths</li>
+                              <li>the "status" script in the server's working directory, next to the "start" and "stop"
+                                  script, now provides output based on the status checks above, plus a check for a 2XX
+                                  response code for /index.html. The exit code for the "status" script is now 1 in case
+                                  of an error / lack of availability, and 0 if all checks passed and server looks
+                                  available.</li>
+                            </ul>
+                        </li>
+			<li>Upgraded the MongoDB driver to version 3.6.4. This allows you to specify the new
+			    retryWrites parameter, e.g., as in "mongodb://mongo0.internal.sapsailing.com/mydb?replicaSet=live&retryWrites=true".
+			    This will improve your system's behavior if you run with a MongoDB replica set and have to
+			    assume that at some point the PRIMARY MongoDB system may fail, with the remaining systems
+			    in the replica set voting for a new PRIMARY. Without retryWrites your system will bluntly
+			    fail, but with retryWrites, write operations will be re-tried once, with a timeout usually
+			    enough for the remaining replicas to agree on a new PRIMARY.
+			</li>
+                    </ul>
+
                     <h2 class="articleSubheadline">October 2018</h2>
                     <ul class="bulletList">
                         <li>Added progress indicator to device mappings panel for smartphone tracking.</li>
@@ -144,6 +256,27 @@
                             a race then you now have to assign boats from the boats list to each competitor before
                             you can confirm the competitor-to-race assignments.
                         </li>
+                        <li>User, role and permission management has been extended. A new "tenant" concept
+                            is now available. Users can belong to zero or more tenants and can have a default
+                            tenant for a login session. Zero or more users can belong to a tenant. Objects have
+                            a tenant owner and a user owner, similar to group and user ownerships of files in a
+                            file system.<p>
+                            By default, each user receives a default tenant that is named like the user, with "-tenant"
+                            appended. This applies during user migration to this new version, as well as during
+                            creation of new users. While a "default tenant" only specifies the tenant that objects
+                            created by the user will have as their tenant owner, by default the user also "belongs"
+                            to its default tenant (is part of that tenant's user group).<p>
+                            Roles are now defined explicitly, in the "Roles" tab in the "Advanced" category.
+                            A new server that is not sharing the security service with any other server will
+                            start out with a few default role definitions, such as "admin" and "user". Roles imply permissions,
+                            and the permissions they imply can be modeled in the "Roles" tab.<p>
+                            Roles can be assigned to users in the UI-refurbished "User Management" tab in the
+                            "Advanced" category. There is now a table with users that currently exist in the
+                            system, with a pager and a filter box. Editing a user shows an edit dialog for that
+                            user where roles and permissions can be added. Adding permissions works as usual.
+                            However, when adding roles, qualifications for a tenant owner and a user owner
+                            can be added using the following format for the role's name: &lt;rolename&gt;[:[&lt;tenantname&gt;][:[&lt;username&gt;]]].
+                        </li>
                         <li>In addition to track competitors and marks using smartphone-tracking it is now possible to track boats.
                             This is e.g. useful for several national leagues where competitors are assigned dynamically to boats for each race.
                             In this case the competitors were used to bring a smartphone with them to the assigned boat.
@@ -165,8 +298,27 @@
                         <li>Added True Wind Angle as a data mining statistic on GPS fixes</li>
                         <li>Time points for wind data related to individual fixes now uses the fixes' specific time points, not the wind at the middle of the leg</li>
                         <li>Finally, the data mining UI sorts wind strengths given in Beaufort according to their strengths, not their names</li>
+                            For example, a simple role name such as "admin" will give an unqualified role to the user.
+                            To constrain the "admin" role to objects whose tenant owner is the tenant "abc", use
+                            "admin:abc" for the role. To assign the role "admin" so that it applies only to objects
+                            owner by user "u938" use "admin::u938".<p>
+                            Tenants can be managed in the "Tenant Management" tab in the "Advanced" category. Here,
+                            tenants can be created, removed and the set of users belonging to each tenant can be
+                            edited.<p>
+                            During migration of an existing server to this new version, a new default tenant will be
+                            created using the server's name. All existing objects will by default have this new default
+                            tenant as their tenant owner, and no user owner. All existing role assignments will be migrated
+                            such that all roles will have as tenant qualification the new default tenant. This way,
+                            users will maintain the rights they were assigned through roles only for those objects
+                            belonging to the server's new default tenant (by default all objects on that server).
+                            Only when new objects are created with a different tenant then the role's permissions
+                            won't apply because the roles were by default constrained to the server's default tenant.
+                            This will allow us to consolidate, merge and join the security services of various servers
+                            at a later point in time, ensuring that users will not obtain permissions for objects they
+                            are not eligible for.
+                        </li>
                     </ul>
-
+                    
                     <h2 class="articleSubheadline">January 2018</h2>
                     <ul class="bulletList">
                         <li>The auto detection for the media add dialog was improved. It will now attempt to only load the parts of a video that are required to parse the tags. Additionally if the server cannot reach a video, the client (browser) will make an attempt to load the video. This allows to analyze locally hosted videos without the need to upload them.</li>
@@ -185,13 +337,17 @@
     
                     <h2 class="articleSubheadline">December 2017</h2>
                     <ul class="bulletList">
-                        <li>In the raceboard it is now possible to upload 360&deg; videos in addition to the already supported video types. 
-                        360&deg; Videos must use MimeType mp4panorama, 2d mp4 videos must still use mimetype mp4, as in older releases. 
+                        <li>The date and time pickers have been replaced by more native browser elements,
+                            ensuring that they work in all locales such as Japan where problems were reported
+                            with the date/time pickers used in the Administration Console up to now.
+                        </li>
+                        <li>In the raceboard it is now possible to upload 360° videos in addition to the already supported video types. 
+                        360° Videos must use MimeType mp4panorama, 2d mp4 videos must still use mimetype mp4, as in older releases. 
                         The dialog will try an auto-detection for the mimetype upon entering the link.
                         Additionally, for mp4 videos it is now possible to use the start time, written in the file, as
                         a start time preset for the mediatrack, simplifying the video linking.</li>
                         <li>In Home it is now also possible to use 360&deg; videos, for example as a highlight video</li>
-                        <li>Various Fix importers can now properly report errors and other states</li>
+                        <li>Various fix importers can now properly report errors and other states.</li>
                         <li>Pairing list generation is now supported. Add competitors to a regatta, then use the new
                             action icons in the Leaderboards/Leaderboards panel in the administration console to generate
                             a pairing list. The result can be exported as a CSV file compatible with the TracTrac Excel

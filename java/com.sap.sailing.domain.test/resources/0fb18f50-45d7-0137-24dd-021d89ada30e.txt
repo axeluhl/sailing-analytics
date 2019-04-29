@@ -1,0 +1,475 @@
+stored-uri:datafiles/0fb18f50-45d7-0137-24dd-021d89ada30e.mtb
+StartReplay:1
+
+EnableLadderLines:
+LadderLineDistance:100
+DefaultPanel:
+ReCalcDirAndSpeed:
+xrr_version:1.x
+CompMarkerUUID:2dee0384-2c45-11e4-a9f6-14dae9614d7b
+CodanIsSponsor:0
+DefaultTailLength:60
+xrr_url_source:http://manage2sail.com/api/public/links/event/3da4c9de-e26e-4671-bb00-885c79a4cd47?accesstoken=bDAv8CwsTM94ujZ&mediaType=json&includeRaces=true
+smsParams:0,tracanonym,4525720572,3,12,15
+APzoomChangeTime:2500
+disableAutoProduce:
+autoProduce:
+APstartLineShowOfLeg:0.25
+APsideOfStartLine:0.30
+APstartSwitch:0.8
+APwholeLegBehindMarks:0.15
+APmarkSwitch:0.13
+APmarkZoomBehindMarks:0.10
+APmarkZoomInFrontOfMarks:0.20
+PopupMarkerUUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+ManualUrl:http://www.tractrac.com/files/userguide_sailing.pdf
+Marker1UUID:2dee0384-2c45-11e4-a9f6-14dae9614d7b
+Marker1Type:RGBMarkerFactory
+Marker1Directional:1
+Marker1Image:markers/boat_FF0000_big.png
+Marker1Length:5
+Marker1MinPixelSize:36
+Startlocation:8.96341691409884,44.36881376999546
+MaxDiffTime:1200
+MaxMetersPerSecond:20
+PrecisionMeters:20
+ShortAvgTime:180
+LongAvgTime:900
+TimeZone:2
+CompMarkerTimeout:0
+FramesPerSecond:15
+replayspeedup:5
+MatchRaceClock:
+MatchRaceClockNo:3
+MatchRaceClockSpacing:300
+Minimap:1
+MinimapUseLayers:
+Minimapgeorect:8.96341691409884,44.36881376999546,8.96341691409884,44.36881376999546
+MinimapMarkerUUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+Marker4UUID:84199024-2c45-11e4-a9f6-14dae9614d7b
+Marker4Type:RGBmarkerFactory
+Marker4Directional:1
+Marker4Image:markers/boat_FF0000_small.png
+MetersPerPixel:18
+MetersPerPixelMax:30
+MetersPerPixelMin:0.2
+isMatchRace:
+DefaultDistanceUnits:meters
+weatherEnabled:
+DefaultSpeedUnits:Knots
+showRaceClock:1
+BackGroundImage:graphics/background.jpg
+DisableRotation:
+ControlPointMarkerRadius:13
+disableselection:0
+disableleaderline:
+StartTimeType:Race
+ResultColumn5SpeedIn:Knots
+delayIntervals:3,12,15
+DisableChangeRace:
+DisableLatestRoundings:0
+DatabaseVersion:01.00.20
+PopUpRow1Name:
+PopUpRow1Type:Name
+PopUpRow2Name:Knots
+PopUpRow2Type:BoatSpeed
+PopUpRow3Name:Ranking
+PopUpRow3Type:RowNumber
+PopUpRow4Name:Sail
+PopUpRow4Type:Ini
+PopUpRow5Name:After
+PopUpRow5Type:BoatAfter
+smsProvider:0
+ws-uri:ws://event.tractrac.com:8888
+//live-uri:tcp://event.tractrac.com:4400
+//stored-uri:tcp://event.tractrac.com:4401
+PerformanceTableLayout:[{"key":"Pos","header":"Pos","tooltip":"Position"},{"key":"Name","header":"Name","tooltip":"Name"},{"key":"Short","header":"Short","tooltip":"Short name"},{"key":"Country","header":"Country","tooltip":"Country"},{"key":"After","header":"After","tooltip":"After"},{"key":"Leg pos","header":"Leg pos","tooltip":"Leg position"},{"key":"Leg time","header":"Leg time","tooltip":"Leg time"},{"key":"SOG","header":"SOG","tooltip":"SOG"},{"key":"VMG","header":"VMG","tooltip":"VMG"},{"key":"Top speed","header":"Top Speed","tooltip":"Top Speed"},{"key":"Distance","header":"Distance","tooltip":"Distance"}]
+ResultsLayout:[{"key":"Order","header":"#","description":"Position","printable":true,"align":"right","collapsible":false},{"key":"Name","header":"Name","description":"Competitor's name","printable":true,"align":"left","collapsible":false},{"key":"ShortName","header":"Short Name","description":"Competitor's short name","printable":true,"align":"left","collapsible":true},{"key":"LegTime","header":"Leg","description":"Leg time","printable":false,"align":"right","collapsible":true},{"key":"LegPosition","header":"#","description":"Leg position","printable":false,"align":"right","collapsible":true},{"key":"Time","header":"Total","description":"Total time","printable":true,"align":"right","collapsible":false},{"key":"After","header":"Total \u0026Delta;","description":"Total \u0026Delta;","printable":true,"align":"right","collapsible":false}]
+CompMarkerDeadTimeout:60
+ResultColumn1Visible:1
+ResultColumn1DefaultOrder:1
+ResultColumn2Visible:1
+ResultColumn2DefaultOrder:0
+ResultColumn3Visible:1
+ResultColumn3Default:0
+ResultColumn4Visible:1
+ResultColumn4DefaultOrder:0
+ResultColumn5Visible:1
+ResultColumn5DefaultOrder:0
+LaggingThreshold:5
+LowBatteryThreshold:5
+BatteryLevelWarn:20
+BatteryLevelDanger:13
+Marker4Length:5
+Marker4MinPixelSize:5
+Marker4Radius:5
+ExcludeRankInfo:
+CompetitorPopUp:1
+TailWidth:4
+DisableMarkTicker:
+LeaderboardMaxSize:
+ShowLeadersNumber:1
+TileZoomDiferentiater:-1
+cpFontSizeTv:0
+cpLabelDisplacement:11
+tailWidthTV:8
+resultHeaderColorTV:000000
+ProfileAxisFontColorTv:FFFFFF
+BackgroundColorTv:000000
+ProfilechartBackgroundTv:000000
+ProfileAndResultTvBackgroundImage:
+RaceStatusImage:
+RaceStatusIsVisible:1
+RaceStatusMainTextSize:8
+RaceStatusTailTextSize:6
+RaceStatusCompetitorTextSize:8
+RaceStatusBackGroundColor:000000
+RaceStatusUseAllSpace:0
+pageSize (TV):5
+UseNameOnMap:0
+downToning:0
+EnableMarquee:0
+MaxLegtimeDifference:45
+MaxLegtimePercentageDifference:100
+MinCompetitorsRequiredToEvalRecord:15
+MarqueeRefreshFrequency:3
+MarqueeMaxEventsShown:5
+RaceDurationMin:
+TrackHistoryLoadSec:-1
+TrackHistoryLoadSecDesktop:-1
+WeatherLon1:0
+WeatherLon2:0
+WeatherLat1:0
+WeatherLat2:0
+forceLocalTimeMode:
+dimmingLevel:1
+dimmingSeconds:60
+ResultColumn1Tooltip:
+ResultColumn2Tooltip:
+ResultColumn3Tooltip:
+ResultColumn4Tooltip:
+ResultColumn5Tooltip:
+enableDiplomas:
+boldorDiploma:
+enableLeaderboardExport:
+colorForeground:
+colorBackground:
+colorAccent1:
+colorAccent2:
+colorAccent3:
+showNonCourseMarks:
+WindEstimator:
+map_satellite:0
+MapUrl:http://tile.tractrac.com/osm
+ResultColumn1Name:#
+ResultColumn1Size:20
+ResultColumn1Type:RowNumber
+ResultColumn2Name:sail
+ResultColumn2Size:45
+ResultColumn2Type:Ini
+ResultColumn3Name:name
+ResultColumn3Size:110
+ResultColumn3Type:Name
+ResultColumn4Name:after
+ResultColumn4Size:45
+ResultColumn4Type:BoatAfter
+ResultColumn4OffsetIn:m
+ResultColumn5Name:kts
+ResultColumn5Size:40
+ResultColumn5Type:BoatSpeed
+DisableLeaderboard:
+DisableAnalysis:0
+TableFontSize:11
+compInitialsFontSize:11
+AutoRotate:0
+MassStart:
+SegmentFile:segments.php
+RaceHandicapSystem:NONE
+TeamCompetitionType:NONE
+LiveDelaySecs: 1
+LiveDelaySecsRace: 1
+LiveDelaySecsEvent: 3
+
+
+EventID:cc9f4f50-3f1b-0137-ee01-60a44ce903c3
+EventName:Sailing World Cup Genoa 2019
+EventAnalyticsName:Sailing World Cup Genoa 2019 - event_20190412_SailingWor
+EventDB:event_20190412_SailingWor
+EventStartTime:2019-04-12 22:00:00
+EventEndTime:2019-04-21 21:00:00
+EventType:a1b74ca0-fdd8-11dc-8811-005056c00008
+
+RaceID:0fb18f50-45d7-0137-24dd-021d89ada30e
+RaceName:M Medal (Laser Int.)
+RaceStartTime:2019-04-21 12:08:00
+RaceEndTime:
+RaceTrackingStartTime:2019-04-21 12:03:00
+RaceTrackingEndTime:2019-04-21 12:31:18
+Initialized:1
+RaceDefaultRouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+RaceHandicapSystem:NONE
+RaceDataSheet:IFClassID=LSR###BREAKLINE###Gender=Men
+RaceStatus:FSHD
+RaceCourseArea:Y - Medal
+
+Class1UUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Class1Name:Laser Int.
+
+Team1UUID:95572070-41e3-0137-28f7-021d89ada30e
+Team1Name:Wannes Van Laer
+Team1Comp1UUID:e0daed83-a5fd-4a80-9ebd-f99f1e395342
+
+Team2UUID:956a9ae0-41e3-0137-2900-021d89ada30e
+Team2Name:Pavlos Kontides
+Team2Comp1UUID:74360b33-5df4-46ab-a50d-e632966b4b17
+
+Team3UUID:9577beb0-41e3-0137-290a-021d89ada30e
+Team3Name:Joaqu�n Blanco
+Team3Comp1UUID:481d9bb3-6c30-4abc-8b18-87168acf9bba
+
+Team4UUID:95840dc0-41e3-0137-2914-021d89ada30e
+Team4Name:Finn Lynch
+Team4Comp1UUID:e8378614-374c-4c2f-b761-528e0f89ea33
+
+Team5UUID:961e83d0-41e3-0137-2978-021d89ada30e
+Team5Name:Benjamin Vadnai
+Team5Comp1UUID:6455ccbd-462c-4a3e-916d-d372ae673a90
+
+Team6UUID:961fb510-41e3-0137-2979-021d89ada30e
+Team6Name:Jonatan Vadnai
+Team6Comp1UUID:7288dbbf-5b53-478e-b5dc-f8cddf50bc72
+
+Team7UUID:96393e40-41e3-0137-298e-021d89ada30e
+Team7Name:Hermann Tomasgaard
+Team7Comp1UUID:03d852bb-b4ed-4598-82bd-0c97b76e5d2e
+
+Team8UUID:963a76b0-41e3-0137-298f-021d89ada30e
+Team8Name:Stefano Peschiera
+Team8Comp1UUID:790a1334-e749-4b97-9929-4cd1079beaa9
+
+Team9UUID:963baa70-41e3-0137-2990-021d89ada30e
+Team9Name:Tadeusz Kubiak
+Team9Comp1UUID:9515d615-e16c-49ca-a713-e874672842c5
+
+Team10UUID:96434d90-41e3-0137-2996-021d89ada30e
+Team10Name:Andrew Lewis
+Team10Comp1UUID:f0b5406d-3388-4525-8419-351f3e376402
+
+Comp1UUID:e0daed83-a5fd-4a80-9ebd-f99f1e395342
+Comp1Name:Wannes Van Laer
+Comp1NameShort:BEL 215347
+Comp1Nationality:BEL
+Comp1Description:Laser Int.
+Comp1Handicap:1.0000000000
+Comp1HandicapDistance:0.00000
+Comp1DataSheet:Gender: Men / BoatID: 'e0daed83-a5fd-4a80-9ebd-f99f1e395342' / SFamilyName: Van Laer / SGivenName: Wannes
+Comp1StartTime:2019-04-21 12:08:00
+Comp1ClassUUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Comp1Status:FIN
+Comp1StatusTime:2019-04-21 12:30:32
+Comp1RouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Comp1Color:FF4081
+
+Comp2UUID:74360b33-5df4-46ab-a50d-e632966b4b17
+Comp2Name:Pavlos Kontides
+Comp2NameShort:CYP 212431
+Comp2Nationality:CYP
+Comp2Description:Laser Int.
+Comp2Handicap:1.0000000000
+Comp2HandicapDistance:0.00000
+Comp2DataSheet:Gender: Men / BoatID: '74360b33-5df4-46ab-a50d-e632966b4b17' / SFamilyName: Kontides / SGivenName: Pavlos
+Comp2StartTime:2019-04-21 12:08:00
+Comp2ClassUUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Comp2Status:FIN
+Comp2StatusTime:2019-04-21 12:30:40
+Comp2RouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Comp2Color:00e60b
+
+Comp3UUID:481d9bb3-6c30-4abc-8b18-87168acf9bba
+Comp3Name:Joaquín Blanco
+Comp3NameShort:ESP 215311
+Comp3Nationality:ESP
+Comp3Description:Laser Int.
+Comp3Handicap:1.0000000000
+Comp3HandicapDistance:0.00000
+Comp3DataSheet:Gender: Men / BoatID: '481d9bb3-6c30-4abc-8b18-87168acf9bba' / SFamilyName: Blanco / SGivenName: Joaquín
+Comp3StartTime:2019-04-21 12:08:00
+Comp3ClassUUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Comp3Status:FIN
+Comp3StatusTime:2019-04-21 12:30:22
+Comp3RouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Comp3Color:64DD17
+
+Comp4UUID:e8378614-374c-4c2f-b761-528e0f89ea33
+Comp4Name:Finn Lynch
+Comp4NameShort:IRL 210254
+Comp4Nationality:IRL
+Comp4Description:Laser Int.
+Comp4Handicap:1.0000000000
+Comp4HandicapDistance:0.00000
+Comp4DataSheet:Gender: Men / BoatID: 'e8378614-374c-4c2f-b761-528e0f89ea33' / SFamilyName: Lynch / SGivenName: Finn
+Comp4StartTime:2019-04-21 12:08:00
+Comp4ClassUUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Comp4Status:FIN
+Comp4StatusTime:2019-04-21 12:30:22
+Comp4RouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Comp4Color:D50000
+
+Comp5UUID:6455ccbd-462c-4a3e-916d-d372ae673a90
+Comp5Name:Benjamin Vadnai
+Comp5NameShort:HUN 213095
+Comp5Nationality:HUN
+Comp5Description:Laser Int.
+Comp5Handicap:1.0000000000
+Comp5HandicapDistance:0.00000
+Comp5DataSheet:Gender: Men / BoatID: '6455ccbd-462c-4a3e-916d-d372ae673a90' / SFamilyName: Vadnai / SGivenName: Benjamin
+Comp5StartTime:2019-04-21 12:08:00
+Comp5ClassUUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Comp5Status:FIN
+Comp5StatusTime:2019-04-21 12:30:14
+Comp5RouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Comp5Color:8bff82
+
+Comp6UUID:7288dbbf-5b53-478e-b5dc-f8cddf50bc72
+Comp6Name:Jonatan Vadnai
+Comp6NameShort:HUN 213119
+Comp6Nationality:HUN
+Comp6Description:Laser Int.
+Comp6Handicap:1.0000000000
+Comp6HandicapDistance:0.00000
+Comp6DataSheet:Gender: Men / BoatID: '7288dbbf-5b53-478e-b5dc-f8cddf50bc72' / SFamilyName: Vadnai / SGivenName: Jonatan
+Comp6StartTime:2019-04-21 12:08:00
+Comp6ClassUUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Comp6Status:FIN
+Comp6StatusTime:2019-04-21 12:30:28
+Comp6RouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Comp6Color:FF4081
+
+Comp7UUID:03d852bb-b4ed-4598-82bd-0c97b76e5d2e
+Comp7Name:Hermann Tomasgaard
+Comp7NameShort:NOR 214941
+Comp7Nationality:NOR
+Comp7Description:Laser Int.
+Comp7Handicap:1.0000000000
+Comp7HandicapDistance:0.00000
+Comp7DataSheet:Gender: Men / BoatID: '03d852bb-b4ed-4598-82bd-0c97b76e5d2e' / SFamilyName: Tomasgaard / SGivenName: Hermann
+Comp7StartTime:2019-04-21 12:08:00
+Comp7ClassUUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Comp7Status:FIN
+Comp7StatusTime:2019-04-21 12:30:32
+Comp7RouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Comp7Color:098c00
+
+Comp8UUID:790a1334-e749-4b97-9929-4cd1079beaa9
+Comp8Name:Stefano Peschiera
+Comp8NameShort:PER 206115
+Comp8Nationality:PER
+Comp8Description:Laser Int.
+Comp8Handicap:1.0000000000
+Comp8HandicapDistance:0.00000
+Comp8DataSheet:Gender: Men / BoatID: '790a1334-e749-4b97-9929-4cd1079beaa9' / SFamilyName: Peschiera / SGivenName: Stefano
+Comp8StartTime:2019-04-21 12:08:00
+Comp8ClassUUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Comp8Status:FIN
+Comp8StatusTime:2019-04-21 12:30:47
+Comp8RouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Comp8Color:00B8D4
+
+Comp9UUID:9515d615-e16c-49ca-a713-e874672842c5
+Comp9Name:Tadeusz Kubiak
+Comp9NameShort:POL 215007
+Comp9Nationality:POL
+Comp9Description:Laser Int.
+Comp9Handicap:1.0000000000
+Comp9HandicapDistance:0.00000
+Comp9DataSheet:Gender: Men / BoatID: '9515d615-e16c-49ca-a713-e874672842c5' / SFamilyName: Kubiak / SGivenName: Tadeusz
+Comp9StartTime:2019-04-21 12:08:00
+Comp9ClassUUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Comp9Status:FIN
+Comp9StatusTime:2019-04-21 12:30:51
+Comp9RouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Comp9Color:C51162
+
+Comp10UUID:f0b5406d-3388-4525-8419-351f3e376402
+Comp10Name:Andrew Lewis
+Comp10NameShort:TTO 184116
+Comp10Nationality:TTO
+Comp10Description:Laser Int.
+Comp10Handicap:1.0000000000
+Comp10HandicapDistance:0.00000
+Comp10DataSheet:Gender: Men / BoatID: 'f0b5406d-3388-4525-8419-351f3e376402' / SFamilyName: Lewis / SGivenName: Andrew
+Comp10StartTime:2019-04-21 12:08:00
+Comp10ClassUUID:94d7e0d0-41e3-0137-28f2-021d89ada30e
+Comp10Status:FIN
+Comp10StatusTime:2019-04-21 12:30:14
+Comp10RouteUUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Comp10Color:D50000
+
+ControlPoint1UUID:42a7c9c0-40e8-0137-1519-021d89ada30e
+ControlPoint1Name:Y - Start
+ControlPoint1HasTwoPoints:1
+ControlPoint1ShortName:St
+ControlPoint1CourseArea:Y - Medal
+ControlPoint1DataSheet:P1.UUID=e54581c0-40e3-0137-13da-021d89ada30e###BREAKLINE###P2.UUID=e558ae60-40e3-0137-13dd-021d89ada30e###BREAKLINE###
+ControlPoint1Mark1Lon:8.927123
+ControlPoint1Mark1Lat:44.375005
+ControlPoint1Mark1Static:0
+ControlPoint1Mark2Lon:8.927080
+ControlPoint1Mark2Lat:44.373469
+ControlPoint1Mark2Static:0
+
+ControlPoint2UUID:e4f4a8c0-40e3-0137-13ce-021d89ada30e
+ControlPoint2Name:Y - 1
+ControlPoint2HasTwoPoints:0
+ControlPoint2ShortName:1
+ControlPoint2CourseArea:Y - Medal
+ControlPoint2Mark1Lon:8.919552
+ControlPoint2Mark1Lat:44.373997
+ControlPoint2Mark1Static:0
+
+ControlPoint3UUID:5c784420-40e8-0137-1523-021d89ada30e
+ControlPoint3Name:Y - 4 gate
+ControlPoint3HasTwoPoints:1
+ControlPoint3ShortName:4
+ControlPoint3CourseArea:Y - Medal
+ControlPoint3DataSheet:P1.UUID=e51b6d90-40e3-0137-13d4-021d89ada30e###BREAKLINE###P2.UUID=e5323cb0-40e3-0137-13d7-021d89ada30e###BREAKLINE###
+ControlPoint3Mark1Lon:8.925547
+ControlPoint3Mark1Lat:44.374655
+ControlPoint3Mark1Static:0
+ControlPoint3Mark2Lon:8.925783
+ControlPoint3Mark2Lat:44.374229
+ControlPoint3Mark2Static:0
+
+ControlPoint4UUID:e51b6d90-40e3-0137-13d4-021d89ada30e
+ControlPoint4Name:Y - 4p
+ControlPoint4HasTwoPoints:0
+ControlPoint4ShortName:4p
+ControlPoint4CourseArea:Y - Medal
+ControlPoint4Mark1Lon:8.925545
+ControlPoint4Mark1Lat:44.374655
+ControlPoint4Mark1Static:0
+
+ControlPoint5UUID:59486970-45b6-0137-2315-021d89ada30e
+ControlPoint5Name:Y - Finish Medal
+ControlPoint5HasTwoPoints:1
+ControlPoint5ShortName:Fi
+ControlPoint5CourseArea:Y - Medal
+ControlPoint5DataSheet:P1.UUID=e56b5d80-40e3-0137-13e0-021d89ada30e###BREAKLINE###P2.UUID=e57d8680-40e3-0137-13e3-021d89ada30e###BREAKLINE###
+ControlPoint5Mark1Lon:8.926214
+ControlPoint5Mark1Lat:44.376322
+ControlPoint5Mark1Static:0
+ControlPoint5Mark2Lon:8.927178
+ControlPoint5Mark2Lat:44.375937
+ControlPoint5Mark2Static:0
+
+SegmentFile:segments.php
+Route1UUID:0fb0cc50-45d7-0137-24dc-021d89ada30e
+Route1Description:M Medal (Laser Int.)
+Route1Length:0
+Route1ControlPoint1UUID:42a7c9c0-40e8-0137-1519-021d89ada30e
+Route1ControlPoint2UUID:e4f4a8c0-40e3-0137-13ce-021d89ada30e
+Route1ControlPoint3UUID:5c784420-40e8-0137-1523-021d89ada30e
+Route1ControlPoint4UUID:e4f4a8c0-40e3-0137-13ce-021d89ada30e
+Route1ControlPoint5UUID:e51b6d90-40e3-0137-13d4-021d89ada30e
+Route1ControlPoint6UUID:59486970-45b6-0137-2315-021d89ada30e
+

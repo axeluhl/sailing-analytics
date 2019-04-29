@@ -1,9 +1,25 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.util.SparseBooleanArray;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -27,27 +43,10 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.util.SparseBooleanArray;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.TimePicker;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class ProtestTimeDialogFragment extends AttachedDialogFragment implements View.OnClickListener {
 
@@ -93,8 +92,8 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
                 Calendar finishedCalendar = Calendar.getInstance();
                 finishedCalendar.setTime(finishedTime.asDate());
                 Calendar now = Calendar.getInstance();
-                return finishedCalendar.get(Calendar.YEAR) == now.get(Calendar.YEAR) && finishedCalendar.get(Calendar.DAY_OF_YEAR) == now
-                    .get(Calendar.DAY_OF_YEAR);
+                return finishedCalendar.get(Calendar.YEAR) == now.get(Calendar.YEAR)
+                        && finishedCalendar.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR);
             }
         }
         return false;
@@ -261,7 +260,8 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         TimePoint recentFinishedTime = null;
         for (ManagedRace race : races) {
             TimePoint currentFinishedTime = race.getState().getFinishedTime();
-            if (currentFinishedTime != null && (recentFinishedTime == null || recentFinishedTime.before(currentFinishedTime))) {
+            if (currentFinishedTime != null
+                    && (recentFinishedTime == null || recentFinishedTime.before(currentFinishedTime))) {
                 recentFinishedTime = currentFinishedTime;
             }
         }
@@ -285,8 +285,8 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
             }
         });
 
-        ThemeHelper.setPickerColor(getActivity(), timePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-            .getColor(getActivity(), R.attr.sap_yellow_1));
+        ThemeHelper.setPickerColor(getActivity(), timePicker, ThemeHelper.getColor(getActivity(), R.attr.white),
+                ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1));
     }
 
     private void getRacesFromArguments() {
@@ -319,7 +319,8 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         TimePoint startTime = TimeUtils.getTime(mTimePicker);
         TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
-            Duration duration = Duration.ONE_MINUTE.times(AppPreferences.on(getActivity()).getProtestTimeDurationInMinutes());
+            Duration duration = Duration.ONE_MINUTE
+                    .times(AppPreferences.on(getActivity()).getProtestTimeDurationInMinutes());
             TimeRange protestTime = new TimeRangeImpl(startTime, startTime.plus(duration));
             race.getState().setProtestTime(now, protestTime);
         }
@@ -346,13 +347,13 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.nav_prev:
-                viewPanel(MOVE_DOWN);
-                break;
+        case R.id.nav_prev:
+            viewPanel(MOVE_DOWN);
+            break;
 
-            case R.id.nav_next:
-                viewPanel(MOVE_UP);
-                break;
+        case R.id.nav_next:
+            viewPanel(MOVE_UP);
+            break;
         }
     }
 
@@ -456,11 +457,12 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
 
         @Override
         public void onClick(View v) {
-            FrameLayout layout = (FrameLayout) LayoutInflater.from(v.getContext()).inflate(R.layout.protest_duration, null);
+            FrameLayout layout = (FrameLayout) LayoutInflater.from(v.getContext()).inflate(R.layout.protest_duration,
+                    null);
             final EditText duration = (EditText) layout.findViewById(R.id.protest_duration);
             duration.setText(String.valueOf(mDuration));
             duration.setSelection(duration.length());
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextWrapper(v.getContext()), R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(v.getContext().getString(R.string.protest_duration_dialog_title));
             builder.setView(layout);
             builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

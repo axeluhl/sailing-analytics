@@ -15,8 +15,8 @@ public class ObjectInputStreamResolvingAgainstFileStorageServiceResolver extends
         ObjectInputStreamResolvingAgainstCache<FileStorageServiceResolver> {
 
     protected ObjectInputStreamResolvingAgainstFileStorageServiceResolver(InputStream in,
-            FileStorageServiceResolver cache) throws IOException {
-        super(in, cache);
+            FileStorageServiceResolver cache, ResolveListener resolveListener) throws IOException {
+        super(in, cache, resolveListener);
     }
 
 }

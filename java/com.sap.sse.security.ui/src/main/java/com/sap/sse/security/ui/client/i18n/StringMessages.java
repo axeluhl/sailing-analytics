@@ -1,7 +1,10 @@
 package com.sap.sse.security.ui.client.i18n;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
+import com.google.gwt.safehtml.shared.SafeHtml;
 
+@DefaultLocale("en")
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
 
@@ -41,7 +44,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String deleteUser();
     String deleteUserQuestion();
     String doYouReallyWantToDeleteUser(String username);
-    String errorDeletingUser();
+    String doYouReallyWantToDeleteNUsers(int count);
     String account(String accountType);
     String save();
     String remove();
@@ -103,4 +106,83 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String showMoreInfoLogin();
     String moreInfo();
     String dismiss();
+    String editACL();
+    String errorEditingACL();
+    String editAnACL();
+    String createUserGroup();
+    String removeUserGroup();
+    String youHaveToSelectAUserGroup();
+    String doYouReallyWantToRemoveUserGroup(String name);
+    String couldNotDeleteUserGroup();
+    String filterUserGroups();
+    String id();
+    String displayName();
+    String userGroups();
+    String errorTryingToLoadRoles(String message);
+    String filterRoles();
+    String actions();
+    String actionEdit();
+    String actionRemove();
+    String actionChangeOwnership();
+    String errorUpdatingOwnership(String name);
+    String doYouReallyWantToRemoveRole(String name);
+    String errorTryingToDeleteRole(String rolename, String message);
+    String pleaseEnterARoleName();
+    String editRoles();
+    String otherRoleWithNameAlreadyExists(String name);
+    String errorCreatingRole(String name, String message);
+    String errorEditingRoles(String rolename, String message);
+    String usersInUserGroup();
+    String allUsers();
+    String couldNotAddUserToUserGroup(String username, String userGroupName, String errorMessage);
+    String couldNotRemoveUserFromUserGroup(String username, String userGroupName, String errorMessage);
+    String enterUserGroupName();
+    String defaultTenant();
+    String editUser();
+    String validated();
+    String groups();
+    String group();
+    String errorDeletingUser(String username, String message);
+    String doYouReallyWantToRemoveUser(String name);
+    String errorTryingToUpdateUser(String username, String message);
+    String ownership();
+    String editObjectOwnership();
+    String errorObtainingUser(String message);
+    String errorObtainingUserGroup(String message);
+    String pleaseWaitUntilUsernameIsResolved();
+    String pleaseWaitUntilUserGroupNameIsResolved();
+    String userNotFound(String username);
+    String usergroupNotFound(String userGroupName);
+    String actionChangeACL();
+    String editACLForObject(String objectName);
+    String acl();
+    String errorUpdatingAcl(String name);
+    String allowedActionName();
+    String deniedActionName();
+    String errorMessageUserGroupNameNotFound(String name);
+    String successMessageAddedUserGroup(String name);
+    String successMessageRemovedUserGroup(String name);
+    SafeHtml allowedActions();
+    SafeHtml deniedActions();
+    String migrateGroupOwner();
+    String errorDeletingUserGroup(String usergroup, String message);
+    String enterAtLeastOneOwner();
+    String removeRole();
+    String addRole();
+    String couldNotAddRoleToGroup(String role, String group);
+    String roleName();
+    String enabledForAllUsers();
+    String couldNotDeleteRole(String role);
+    String couldNotLoadRoles();
+    String enterUsername();
+    String addUser();
+    String couldNotLoadUsers();
+    String couldNotRemoveRoleFromUser(String username, String role);
+    String couldNotRemovePermissionFromUser(String name, String string);
+    String filterPermission();
+    String permission();
+    String nullUserGroup();
+
+    String editRolesAndPermissionsForUser(String username);
+    String permissionType();
 }

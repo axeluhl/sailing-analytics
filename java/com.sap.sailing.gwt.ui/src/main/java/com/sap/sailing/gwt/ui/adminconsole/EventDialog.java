@@ -231,7 +231,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         formGrid.setWidget(rowIndex++, 1, startDateBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.endDate() + ":"));
         formGrid.setWidget(rowIndex++, 1, endDateBox);
-        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isPublic() + ":"));
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isListedOnHomepage() + ":"));
         formGrid.setWidget(rowIndex++, 1, isPublicCheckBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
         formGrid.setWidget(rowIndex++, 1, baseURLEntryField);

@@ -27,23 +27,22 @@ public class MessagePersistenceManager {
     private final static String delayedMessagesFileName = "delayedMessages.txt";
 
     protected Context context;
-    
+
     /**
-     * A synchronized {@link LinkedHashSet} that holds the messages to be (re-)sent, in the order in
-     * which they were received. Pick the first to retrieve the oldest message. Being a set, no two
-     * equal messages will be enqueued.
+     * A synchronized {@link LinkedHashSet} that holds the messages to be (re-)sent, in the order in which they were
+     * received. Pick the first to retrieve the oldest message. Being a set, no two equal messages will be enqueued.
      */
     private Set<String> persistedMessages;
-    
+
     /**
-     * When a message has been picked from the {@link #persistenceManager} for re-send, mark this message as
-     * being "on its way" until the callback arrives in {@link #onMessageSent(MessageSenderResult)} where
-     * it is removed again from this set and---if sending was successful---from the {@link #persistenceManager}.
-     * When the next delayed message shall be picked up by some thread, delayed messages that are still on their
-     * way are skipped in the {@link #persistenceManager}'s message list.
+     * When a message has been picked from the {@link #persistenceManager} for re-send, mark this message as being "on
+     * its way" until the callback arrives in {@link #onMessageSent(MessageSenderResult)} where it is removed again from
+     * this set and---if sending was successful---from the {@link #persistenceManager}. When the next delayed message
+     * shall be picked up by some thread, delayed messages that are still on their way are skipped in the
+     * {@link #persistenceManager}'s message list.
      */
     private final Set<String> messagesCurrentlyBeingResent = new HashSet<>();
-    
+
     private final MessageRestorer messageRestorer;
 
     public MessagePersistenceManager(Context context, MessageRestorer messageRestorer) {
@@ -82,14 +81,14 @@ public class MessagePersistenceManager {
     }
 
     /**
-     * @param payload will be URL-encoded to ensure that the resulting string does not contain newlines
+     * @param payload
+     *            will be URL-encoded to ensure that the resulting string does not contain newlines
      * @throws UnsupportedEncodingException
      */
-    private String getSerializedIntentForPersistence(String url, String callbackPayload,
-                                                     String payload, String callbackClass) throws UnsupportedEncodingException {
-        return String.format("%s;%s;%s;%s", callbackPayload, URLEncoder.encode(payload,
-                MessageSendingService.charsetName),
-                url, callbackClass);
+    private String getSerializedIntentForPersistence(String url, String callbackPayload, String payload,
+            String callbackClass) throws UnsupportedEncodingException {
+        return String.format("%s;%s;%s;%s", callbackPayload,
+                URLEncoder.encode(payload, MessageSendingService.charsetName), url, callbackClass);
     }
 
     public void removeIntent(Intent intent) throws UnsupportedEncodingException {
@@ -98,7 +97,8 @@ public class MessagePersistenceManager {
 
     private void removeMessage(Intent intent) throws UnsupportedEncodingException {
         if (!persistedMessages.isEmpty()) {
-            ExLog.i(context, TAG, String.format("Removing message \"%s\".", intent.getExtras().getString(MessageSendingService.PAYLOAD)));
+            ExLog.i(context, TAG, String.format("Removing message \"%s\".",
+                    intent.getExtras().getString(MessageSendingService.PAYLOAD)));
             String messageLine = getMessageLine(intent);
             removePersistedMessage(messageLine);
         }
@@ -137,7 +137,7 @@ public class MessagePersistenceManager {
 
     private Intent restorePersistedIntent(String persistedMessage) throws UnsupportedEncodingException {
         String[] lineParts = persistedMessage.split(";");
-        final Intent messageIntent; 
+        final Intent messageIntent;
         if (lineParts == null || lineParts.length < 4) {
             messageIntent = null;
         } else {
@@ -149,8 +149,8 @@ public class MessagePersistenceManager {
             if (!"null".equals(callbackClassString)) {
                 try {
                     @SuppressWarnings("unchecked")
-                    Class<? extends ServerReplyCallback> tmp =
-                            (Class<? extends ServerReplyCallback>) Class.forName(callbackClassString);
+                    Class<? extends ServerReplyCallback> tmp = (Class<? extends ServerReplyCallback>) Class
+                            .forName(callbackClassString);
                     callbackClass = tmp;
                 } catch (ClassNotFoundException e) {
                     ExLog.e(context, TAG, "Could not find class for callback name: " + callbackClassString);
@@ -158,8 +158,8 @@ public class MessagePersistenceManager {
             }
             // We are passing no message id, because we know it used to suppress message sending and
             // we want this message to be sent.
-            messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload,
-                    null, payload, /* isResend */ true, callbackClass);
+            messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload, null, payload,
+                    /* isResend */ true, callbackClass);
             if (messageRestorer != null) {
                 messageRestorer.restoreMessage(context, messageIntent);
             }
@@ -180,14 +180,15 @@ public class MessagePersistenceManager {
             fileContent = FileHandlerUtils.convertStreamToString(inputStream, context);
             inputStream.close();
         } catch (IOException e) {
-            ExLog.w(context, TAG, "In Method getFileContent(): " + e.getClass().getName() + " / " + e.getMessage() + " fileContent is empty");
+            ExLog.w(context, TAG, "In Method getFileContent(): " + e.getClass().getName() + " / " + e.getMessage()
+                    + " fileContent is empty");
         }
         return fileContent;
     }
 
     private void saveMessage(String messageLine) {
         persistedMessages.add(messageLine);
-        writeToFile(messageLine+"\n", Context.MODE_APPEND);
+        writeToFile(messageLine + "\n", Context.MODE_APPEND);
         ExLog.i(context, TAG, "Appended message to file: " + messageLine);
     }
 
@@ -228,27 +229,30 @@ public class MessagePersistenceManager {
             outputStream.write(content.getBytes());
             outputStream.close();
         } catch (IOException e) {
-            ExLog.e(context, TAG, "In Method writeToFile: " + e.getMessage() + " with content " + content + " and mode " + mode);
+            ExLog.e(context, TAG,
+                    "In Method writeToFile: " + e.getMessage() + " with content " + content + " and mode " + mode);
         }
     }
 
     /**
-     * This object holds a sequence of messages to be (re)sent. This method picks the first one that is not yet
-     * on its way to the message receiver and marks it as being on its way.<p>
+     * This object holds a sequence of messages to be (re)sent. This method picks the first one that is not yet on its
+     * way to the message receiver and marks it as being on its way.
+     * <p>
      * 
      * When the caller has received the response to sending the message---regardless of failure or success---the client
-     * must call {@link #sentSuccessfully(Intent)} for the intent returned by this method so that the 
+     * must call {@link #sentSuccessfully(Intent)} for the intent returned by this method so that the
      */
     public Intent restoreFirstDelayedIntentNotUnderwayAndMarkAsUnderway() throws UnsupportedEncodingException {
         Intent result = null;
         synchronized (persistedMessages) {
-            for (final Iterator<String> nextMessageIter=persistedMessages.iterator(); nextMessageIter.hasNext(); ) {
+            for (final Iterator<String> nextMessageIter = persistedMessages.iterator(); nextMessageIter.hasNext();) {
                 final String nextMessage = nextMessageIter.next();
                 if (!messagesCurrentlyBeingResent.contains(nextMessage)) {
                     result = restorePersistedIntent(nextMessage);
                     if (result == null) {
-                        ExLog.w(context, TAG, "In method restoreFirstDelayedIntentNotUnderwayAndMarkAsUnderway: message "+
-                                    nextMessage+" was not restored into a valid Intent; dropping.");
+                        ExLog.w(context, TAG,
+                                "In method restoreFirstDelayedIntentNotUnderwayAndMarkAsUnderway: message "
+                                        + nextMessage + " was not restored into a valid Intent; dropping.");
                         // couldn't be parsed into an intent; remove:
                         nextMessageIter.remove();
                         writePersistedMessagesToFile();
@@ -261,7 +265,7 @@ public class MessagePersistenceManager {
         }
         return result;
     }
-    
+
     /**
      * The intent returned by {@link #restoreFirstDelayedIntentNotUnderwayAndMarkAsUnderway()} has been delivered
      * successfully to the receiver. It can hence be removed from this persistence manager. In particular, it is no
@@ -282,6 +286,6 @@ public class MessagePersistenceManager {
         synchronized (persistedMessages) {
             persistIntent(intent);
             messagesCurrentlyBeingResent.remove(getMessageLine(intent));
-        }        
+        }
     }
 }

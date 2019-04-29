@@ -10,20 +10,22 @@ import com.sap.sse.common.TimePoint;
 
 public class CompetitorResultWithIdImpl extends CompetitorResultImpl {
     private static final long serialVersionUID = 4373611281142932067L;
-    
+
     private long mId;
     private Boat mBoat;
 
     public CompetitorResultWithIdImpl(long id, Boat boat, CompetitorResult result) {
-        this(id, boat, result.getCompetitorId(), result.getCompetitorDisplayName(), result.getOneBasedRank(),
-                result.getMaxPointsReason(), result.getScore(), result.getFinishingTime(), result.getComment(),
-                result.getMergeState());
+        this(id, boat, result.getCompetitorId(), result.getName(), result.getShortName(),
+                result.getOneBasedRank(), result.getMaxPointsReason(), result.getScore(), result.getFinishingTime(),
+                result.getComment(), result.getMergeState());
     }
 
-    public CompetitorResultWithIdImpl(long id, Boat boat, Serializable competitorId, String competitorDisplayName,
-                                      int oneBasedRank, MaxPointsReason maxPointsReason, Double score,
-            TimePoint finishingTime, String comment, MergeState mergeState) {
-        super(competitorId, competitorDisplayName, oneBasedRank, maxPointsReason, score, finishingTime, comment, mergeState);
+    public CompetitorResultWithIdImpl(long id, Boat boat, Serializable competitorId, String competitorName,
+            String shortName, int oneBasedRank, MaxPointsReason maxPointsReason, Double score, TimePoint finishingTime,
+            String comment, MergeState mergeState) {
+        super(competitorId, competitorName, shortName,
+                boat == null ? null : boat.getName(), boat == null ? null : boat.getSailID(),
+                oneBasedRank, maxPointsReason, score, finishingTime, comment, mergeState);
 
         mId = id;
         mBoat = boat;

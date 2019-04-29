@@ -60,7 +60,7 @@ public class XMLExportTest extends OnlineTracTracBasedTest {
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("ESS 2014 Nice", new ThresholdBasedResultDiscardingRuleImpl(new int[] {0}), new HighPointFirstGets10LastBreaksTie(), 
                 null);
         leaderboard.addRace(getTrackedRace(), "R1", false);
-        LeaderboardData leaderboardData = new LeaderboardData(leaderboard);
+        LeaderboardData leaderboardData = new LeaderboardData(leaderboard, new SecurityServiceMock());
         try {
             leaderboardData.perform();
         } catch (Exception e) {
@@ -70,7 +70,7 @@ public class XMLExportTest extends OnlineTracTracBasedTest {
         String resultData = leaderboardData.getResultXML();
         assertNotNull(resultData);
         int resultDataLength = resultData.length();
-        assertTrue("resultData length was " + resultDataLength + ", but expected to be > 254000", resultDataLength > 254000);
+        assertTrue("resultData length was " + resultDataLength + ", but expected to be > 220000", resultDataLength > 220000);
     }
 
 }

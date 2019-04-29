@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -46,9 +47,12 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 @Path("/v2/leaderboards")
 public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
+
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{name}")
@@ -57,7 +61,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             @QueryParam("columnNames") final List<String> raceColumnNames,
             @QueryParam("raceDetails") final List<String> raceDetails,
             @QueryParam("time") String time, @QueryParam("timeasmillis") Long timeasmillis,
-            @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
+            @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount,
+            @QueryParam("secret") String regattaSecret) {
         ShardingContext.setShardingConstraint(ShardingType.LEADERBOARDNAME, leaderboardName);
         
         try {
@@ -69,6 +74,10 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 try {
+                    boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, regattaSecret);
+                    if (!skip) {
+                        getSecurityService().checkCurrentUserReadPermission(leaderboard);
+                    }
                     TimePoint timePoint;
                     try {
                         timePoint = parseTimePoint(time, timeasmillis, calculateTimePointForResultState(leaderboard, resultState));
@@ -106,7 +115,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, raceColumnsToShow, /* addOverallDetails */
-                hasOverallDetail(raceDetailNames),
+                hasOverallDetail(raceDetailsToShow),
                 getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
         JSONObject jsonLeaderboard = new JSONObject();
@@ -115,9 +124,18 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         for (String raceColumnName : raceColumnsToShow) {
             List<CompetitorDTO> competitorsFromBestToWorst = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumnName);
             Map<String, Map<CompetitorDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
-            for (CompetitorDTO competitor: competitorsFromBestToWorst) {
+            List<CompetitorDTO> filteredCompetitorsFromBestToWorst = new ArrayList<>();
+            competitorsFromBestToWorst.forEach(competitor -> {
+                if (SecurityUtils.getSubject().isPermitted(competitor.getIdentifier()
+                        .getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
+                        || SecurityUtils.getSubject()
+                                .isPermitted(competitor.getIdentifier().getStringPermission(DefaultActions.READ))) {
+                    filteredCompetitorsFromBestToWorst.add(competitor);
+                }
+            });
+            for (CompetitorDTO competitor: filteredCompetitorsFromBestToWorst) {
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
-                LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);                
+                LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);
                 FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 if (fleetOfCompetitor != null && fleetOfCompetitor.getName() != null) {
                     Map<CompetitorDTO, Integer> competitorsOfFleet = competitorsOrderedByFleets.get(fleetOfCompetitor.getName());
@@ -135,7 +153,17 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         jsonLeaderboard.put("ShardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
         int competitorCounter = 1;
         // Remark: leaderboardDTO.competitors are ordered by total rank
-        for (CompetitorDTO competitor : leaderboardDTO.competitors) {
+        List<CompetitorDTO> filteredCompetitors = new ArrayList<>();
+        leaderboardDTO.competitors.forEach(competitor -> {
+            if (SecurityUtils.getSubject()
+                    .isPermitted(competitor.getIdentifier()
+                            .getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))
+                    || SecurityUtils.getSubject()
+                            .isPermitted(competitor.getIdentifier().getStringPermission(DefaultActions.READ))) {
+                filteredCompetitors.add(competitor);
+            }
+        });
+        for (CompetitorDTO competitor : filteredCompetitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
             if (maxCompetitorsCount != null && competitorCounter > maxCompetitorsCount) {
                 break;
@@ -218,11 +246,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         return jsonLeaderboard;
     }
 
-    private boolean hasOverallDetail(List<String> raceDetailNames) {
-        final HashSet<String> availableOverallDetailTypeNames = new HashSet<>(
-                Arrays.asList(getAvailableOverallDetailColumnTypes()).stream().map(dt->dt.name()).collect(Collectors.toSet()));
+    private boolean hasOverallDetail(List<DetailType> raceDetailsToShow) {
+        final HashSet<DetailType> availableOverallDetailTypeNames = new HashSet<>(
+                Arrays.asList(getAvailableOverallDetailColumnTypes()).stream().collect(Collectors.toSet()));
         // returns true if the set changed, meaning there was an overall detail type in the raceDetailNames
-        return availableOverallDetailTypeNames.removeAll(raceDetailNames);
+        return availableOverallDetailTypeNames.removeAll(raceDetailsToShow);
     }
 
     private List<DetailType> calculateRaceDetailTypesToShow(List<String> raceDetailTypesNames) {
@@ -232,14 +260,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         } else if (raceDetailTypesNames.size() == 1 && raceDetailTypesNames.get(0).equals("ALL")) {
             result = Arrays.asList(getAvailableRaceDetailColumnTypes());
         } else {
-            Map<String, DetailType> typeMap = new HashMap<>();
-            for (DetailType detailType : getAvailableRaceDetailColumnTypes()) {
-                typeMap.put(detailType.name(), detailType);
-            }
             for (String raceDetailTypeName : raceDetailTypesNames) {
-                if (typeMap.containsKey(raceDetailTypeName)) {
-                    result.add(typeMap.get(raceDetailTypeName));
+                DetailType value = DetailType.valueOf(raceDetailTypeName);
+                if (!Arrays.asList(getAvailableRaceDetailColumnTypes()).contains(value)) {
+                    throw new IllegalArgumentException(raceDetailTypeName + " is not a supported DetailType");
                 }
+                result.add(value);
             }
         }
         return result;

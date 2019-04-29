@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.impl.PlacemarkImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.geocoding.impl.ReverseGeocoderImpl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class ReverseGeocoderTest {
     private ReverseGeocoder geocoder;

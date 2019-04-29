@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
@@ -34,10 +35,9 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.test.TrackBasedTest;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.jaxrs.spi.MasterDataResource;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -47,8 +47,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.interfaces.UserImpl;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
       
@@ -186,8 +191,22 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testMasterDataImportForMediaTracks() throws MalformedURLException, IOException, InterruptedException,
             ClassNotFoundException {
+
+        UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
+        User currentUser = new UserImpl("test", "email@test", Collections.emptyMap(), null);
+
+        SecurityService securityService = Mockito.mock(SecurityService.class);
+        Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();
+        Mockito.doReturn(currentUser).when(securityService).getCurrentUser();
+        Mockito.doReturn(true).when(securityService).hasCurrentUserReadPermission(Mockito.any());
+        Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());
+        Mockito.doReturn(true).when(securityService)
+                .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
+
+
         // Setup source service
-        RacingEventService sourceService = new RacingEventServiceImpl();
+        RacingEventServiceImpl sourceService = Mockito.spy(new RacingEventServiceImpl());
+        Mockito.doReturn(securityService).when(sourceService).getSecurityService();
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         String regattaName1 = "49er";
         String regattaName2 = "49er FX";
@@ -232,31 +251,32 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         List<String> groupNamesToExport = Collections.singletonList(leaderboardGroup.getName());
 
         final DomainFactory domainFactory;
-        MasterDataResource resource = new MasterDataResource();
-        MasterDataResource spyResource = spyResource(resource, sourceService);
+        DummyMasterDataResource spyResource = spyResource(new DummyMasterDataResource(), sourceService);
+        Mockito.doReturn(securityService).when(spyResource).getSecurityService();
         Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
-        ByteArrayInputStream inputStream = null;
         try {
+            RacingEventServiceImpl fmaster = Mockito.spy(master);
+            Mockito.doReturn(securityService).when(fmaster).getSecurityService();
             streamingOutput.write(os);
             os.flush();
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            domainFactory = master.getBaseDomainFactory();
+            domainFactory = fmaster.getBaseDomainFactory();
             // ensure that this class's class loader and with it the dependency to com.sap.sailing.domain.test
             // is known during de-serialization because anonymous inner classes from that bundle may be used
             // in the object graph, e.g., for RankingMetricConstructor objects based on locally-instantiated lambda
             // expressions
-            master.addMasterDataClassLoader(this.getClass().getClassLoader());
-            inputStream = new ByteArrayInputStream(os.toByteArray());
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, master);
+            fmaster.addMasterDataClassLoader(this.getClass().getClassLoader());
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, fmaster,
+                    currentUser, null);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
-            inputStream.close();
         }
 
         // ---Asserts---
@@ -283,8 +303,8 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
 
     private void deleteAllDataFromDatabase() {
         MongoDBService service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
-        service.getDB().getWriteConcern().fsync();
-        service.getDB().dropDatabase();
+        service.getDB().getWriteConcern().getJournal();
+        service.getDB().drop();
     }
 
 }

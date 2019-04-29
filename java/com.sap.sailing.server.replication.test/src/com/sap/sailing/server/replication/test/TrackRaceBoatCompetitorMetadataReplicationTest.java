@@ -19,6 +19,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -31,8 +32,9 @@ import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sse.common.Color;
@@ -97,6 +99,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
     private void startTrackingOnMaster() throws Exception {
         final Regatta regatta = master.createRegatta("Test regatta", "J/70",
                 /* canBoatsOfCompetitorsChangePerRace==true because it's a league race we're using for this test */ true,
+                CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null,
                 /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
                 /* start with no series */ Collections.emptySet(),
                 /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),
@@ -107,7 +110,8 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
                 /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
                 /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
                 Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
-        racesHandle = master.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000);
+        racesHandle = master.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000,
+                new DefaultRaceTrackingHandler());
     }
 
     private void waitForTrackRaceReplicationTrigger() throws InterruptedException, IllegalAccessException {

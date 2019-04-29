@@ -1,42 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
-import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
-import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
-import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.RaceApplication;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.ui.activities.SessionActivity;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
-import com.sap.sailing.racecommittee.app.utils.StringHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sailing.racecommittee.app.utils.TickListener;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
-
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -44,6 +8,7 @@ import android.content.IntentFilter;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
@@ -67,7 +32,39 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class RaceListFragment extends LoggableFragment implements OnItemClickListener, OnItemSelectedListener, TickListener, OnScrollListener {
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.RaceApplication;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.activities.SessionActivity;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Util;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+
+public class RaceListFragment extends LoggableFragment
+        implements OnItemClickListener, OnItemSelectedListener, OnScrollListener {
 
     private final static String TAG = RaceListFragment.class.getName();
     private final static String LAYOUT = "layout";
@@ -177,23 +174,17 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             BitmapHelper.setBackground(mCurrentRacesButton, null);
             BitmapHelper.setBackground(mAllRacesButton, null);
 
-            int id;
-            if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(getActivity()).getTheme())) {
-                id = R.drawable.nav_drawer_tab_button_light;
-            } else {
-                id = R.drawable.nav_drawer_tab_button_dark;
-            }
-            Drawable drawable = ContextCompat.getDrawable(getActivity(), id);
+            Drawable drawable = ContextCompat.getDrawable(getActivity(), R.drawable.nav_drawer_tab_button);
             switch (getFilterMode()) {
-                case ALL:
-                    mAllRacesButton.setTextColor(colorOrange);
-                    BitmapHelper.setBackground(mAllRacesButton, drawable);
-                    break;
+            case ALL:
+                mAllRacesButton.setTextColor(colorOrange);
+                BitmapHelper.setBackground(mAllRacesButton, drawable);
+                break;
 
-                default:
-                    mCurrentRacesButton.setTextColor(colorOrange);
-                    BitmapHelper.setBackground(mCurrentRacesButton, drawable);
-                    break;
+            default:
+                mCurrentRacesButton.setTextColor(colorOrange);
+                BitmapHelper.setBackground(mCurrentRacesButton, drawable);
+                break;
             }
         }
     }
@@ -205,13 +196,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     public void setFilterMode(FilterMode filterMode) {
         mFilterMode = filterMode;
         filterChanged();
-    }
-
-    @Override
-    public void notifyTick(TimePoint now) {
-        if (mAdapter != null && mAdapter.getCount() >= 0 && mUpdateList) {
-            mAdapter.notifyDataSetChanged();
-        }
     }
 
     @Override
@@ -285,7 +269,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
                 @Override
                 public void onClick(View v) {
-                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_RELOAD_RACES));
+                    BroadcastManager.getInstance(getActivity())
+                            .addIntent(new Intent(AppConstants.INTENT_ACTION_RELOAD_RACES));
                 }
             });
         }
@@ -325,7 +310,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     public void onPause() {
         super.onPause();
 
-        TickSingleton.INSTANCE.unregisterListener(this);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
@@ -333,7 +317,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     public void onResume() {
         super.onResume();
 
-        TickSingleton.INSTANCE.registerListener(this);
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_PROTEST);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
@@ -348,13 +331,13 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         switch (scrollState) {
-            case SCROLL_STATE_FLING:
-            case SCROLL_STATE_TOUCH_SCROLL:
-                mUpdateList = false;
-                break;
+        case SCROLL_STATE_FLING:
+        case SCROLL_STATE_TOUCH_SCROLL:
+            mUpdateList = false;
+            break;
 
-            default:
-                mUpdateList = true;
+        default:
+            mUpdateList = true;
         }
     }
 
@@ -389,8 +372,9 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     public void setUp(DrawerLayout drawerLayout, String course, String author) {
         mDrawerLayout = drawerLayout;
         mDrawerLayout.setStatusBarBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.colorPrimaryDark));
-        mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, (Toolbar) getActivity()
-            .findViewById(R.id.toolbar), R.string.nav_drawer_open, R.string.nav_drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout,
+                (Toolbar) getActivity().findViewById(R.id.toolbar), R.string.nav_drawer_open,
+                R.string.nav_drawer_close) {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
@@ -423,7 +407,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     }
 
     public void setupOn(Iterable<ManagedRace> races) {
-        ExLog.i(getActivity(), TAG, String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), Util.size(races)));
+        ExLog.i(getActivity(), TAG,
+                String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), Util.size(races)));
         unregisterOnAllRaces();
         mManagedRacesById.clear();
         mRacesByGroup.clear();
@@ -480,6 +465,12 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         }
     }
 
+    public void resetSelectedRace() {
+        mSelectedRace = null;
+        mAdapter.setSelectedRace(null);
+        mAdapter.notifyDataSetChanged();
+    }
+
     private void unregisterOnAllRaces() {
         for (ManagedRace managedRace : mManagedRacesById.values()) {
             managedRace.getState().removeChangedListener(stateListener);
@@ -490,8 +481,9 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         // Find the race group for which the
         List<ManagedRace> races = new ArrayList<>();
         for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
-            Boolean matchingRaceGroup = raceGroupSeriesDisplayName.equals(
-                    new RaceGroupSeries(raceGroupSeriesFleet.getRaceGroup(), raceGroupSeriesFleet.getSeries()).getDisplayName());
+            Boolean matchingRaceGroup = raceGroupSeriesDisplayName
+                    .equals(new RaceGroupSeries(raceGroupSeriesFleet.getRaceGroup(), raceGroupSeriesFleet.getSeries())
+                            .getDisplayName());
             if (matchingRaceGroup) {
                 if (!isRaceListDirty(races)) {
                     // collect all races for a single fragment in case of portrait mode;
@@ -507,7 +499,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 }
             }
         }
-        if (AppUtils.with(getActivity()).isPortrait() && (getActivity().findViewById(R.id.protest_time_fragment)) != null) {
+        if (AppUtils.with(getActivity()).isPortrait()
+                && (getActivity().findViewById(R.id.protest_time_fragment)) != null) {
             ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.replace(R.id.protest_time_fragment, fragment);
@@ -573,7 +566,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                     showProtestTimeDialog(raceGroupSeriesDisplayName);
                     mDrawerLayout.closeDrawers();
                 } else {
-                    ExLog.e(getActivity(), TAG, "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");
+                    ExLog.e(getActivity(), TAG,
+                            "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");
                 }
             }
         }

@@ -13,7 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+import com.sap.sse.common.util.MappingIterable;
+import com.sap.sse.common.util.MappingIterator;
 import com.sap.sse.common.util.NaturalComparator;
 
 
@@ -144,20 +148,6 @@ public class Util {
         public String toString() {
             return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
-    }
-    
-    /**
-     * To be replaced with java.util.function.Supplier when we can consistently use Java 8.
-     */
-    public interface Provider<T> {
-        T get();
-    }
-    
-    /**
-     * To be replaced with java.util.function.Function when we can consistently use Java 8.
-     */
-    public interface Function<I, O> {
-        O get(I in);
     }
 
     /**
@@ -343,12 +333,13 @@ public class Util {
     }
     
     public static interface Mapper<S, T> { T map(S s); }
-    public static <S, T> Iterable<T> map(Iterable<S> iterable, Mapper<S, T> mapper) {
-        List<T> result = new ArrayList<>();
-        for (final S s : iterable) {
-            result.add(mapper.map(s));
-        }
-        return result;
+    public static <S, T> Iterable<T> map(final Iterable<S> iterable, final Mapper<S, T> mapper) {
+        return new MappingIterable<>(iterable, new MappingIterator.MapFunction<S, T>() {
+            @Override
+            public T map(S s) {
+                return mapper.map(s);
+            }
+        });
     }
 
     /**
@@ -456,31 +447,33 @@ public class Util {
      * then adds {@code value} to that set. No synchronization / concurrency control effort is
      * made. This is the caller's obligation.
      */
-    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        addToValueSet(map, key, value, new ValueSetConstructor<V>() {
+    public static <K, V> boolean addToValueSet(Map<K, Set<V>> map, K key, V value) {
+        return addToValueSet(map, key, value, new ValueCollectionConstructor<V, Set<V>>() {
             @Override
-            public Set<V> createSet() {
+            public Set<V> createValueCollection() {
                 return new HashSet<V>();
             }
         });
     }
 
-    public static interface ValueSetConstructor<T> {
-        Set<T> createSet();
+    public static interface ValueCollectionConstructor<T, C extends Collection<T>> {
+        C createValueCollection();
     }
     
     /**
-     * Ensures that a {@link Set Set&lt;V&gt;} is contained in {@code map} for {@code key} and
-     * then adds {@code value} to that set. No synchronization / concurrency control effort is
-     * made. This is the caller's obligation.
+     * Ensures that a {@link Collection Collection&lt;V&gt;} is contained in {@code map} for {@code key} and then adds {@code value}
+     * to that set. No synchronization / concurrency control effort is made. This is the caller's obligation.
+     * 
+     * @return {@code true} if the {@code value} was not yet contained in the {@code value} collection for {@code key} or if
+     *         the {@code map} did not even contain a value set for {@code key} yet.
      */
-    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value, ValueSetConstructor<V> setConstructor) {
-        Set<V> set = map.get(key);
-        if (set == null) {
-            set = setConstructor.createSet();
-            map.put(key, set);
+    public static <K, V, C extends Collection<V>> boolean addToValueSet(Map<K, C> map, K key, V value, ValueCollectionConstructor<V, C> setConstructor) {
+        C coll = map.get(key);
+        if (coll == null) {
+            coll = setConstructor.createValueCollection();
+            map.put(key, coll);
         }
-        set.add(value);
+        return coll.add(value);
     }
 
     /**
@@ -501,14 +494,21 @@ public class Util {
      * Removes {@code value} from the set that is the value for {@code key} in {@code map} if that key exists. If the
      * set existed and is emptied by this removal it is removed from the map. No synchronization / concurrency control
      * effort is made. This is the caller's obligation.
+     * 
+     * @return {@code true} if the {@code value} was contained in the set for {@code key} and was removed successfully
      */
-    public static <K, V> void removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
+    public static <K, V> boolean removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
         final Set<V> valuesPerKey = map.get(key);
+        final boolean removed;
         if (valuesPerKey != null) {
-            if (valuesPerKey.remove(value) && valuesPerKey.isEmpty()) {
+            removed = valuesPerKey.remove(value);
+            if (removed && valuesPerKey.isEmpty()) {
                 map.remove(key);
             }
+        } else {
+            removed = false;
         }
+        return removed;
     }
 
     public static String join(String separator, String... strings) {
@@ -771,10 +771,10 @@ public class Util {
      * @return a map containing all given values in inner collections grouped by a specific criteria
      */
     public static <K, V> Map<K, Iterable<V>> group(Iterable<V> values, Function<V, K> mappingFunction,
-            Provider<? extends Collection<V>> newCollectionProvider) {
+            Supplier<? extends Collection<V>> newCollectionProvider) {
         final Map<K, Iterable<V>> result = new HashMap<>();
         for (V value : values) {
-            final K key = mappingFunction.get(value);
+            final K key = mappingFunction.apply(value);
             Collection<V> groupValues = (Collection<V>) result.get(key);
             if (groupValues == null) {
                 groupValues = newCollectionProvider.get();
@@ -810,6 +810,12 @@ public class Util {
             return null;
         }
         return toStringOrNull.toString();
+    }
+    
+    public static boolean equalStringsWithEmptyIsNull(String o1, String o2) {
+        String effectiveO1 = o1 == null || o1.isEmpty() ? null : o1;
+        String effectiveO2 = o2 == null || o2.isEmpty() ? null : o2;
+        return equalsWithNull(effectiveO1, effectiveO2);
     }
     
     /**
@@ -857,5 +863,22 @@ public class Util {
         final List<T> returnValue = Util.asList(toFilter);
         returnValue.retainAll(Util.asList(toRetain));
         return returnValue;
+    }
+
+    /**
+     * This method will determine the latest entry in the given Iterable
+     * 
+     * @return The object with the latest time stamp in the input or {@code null} if the input was empty. If multiple
+     *         objects have equal time points and no other object has a later time point, the first object in the
+     *         iteration order with such an equal time stamp is returned.
+     */
+    public static <T extends Timed> T latest(Iterable<T> timedObjects) {
+        T latest = null;
+        for (T timedObject : timedObjects) {
+            if (latest == null || timedObject.getTimePoint().after(latest.getTimePoint())) {
+                latest = timedObject;
+            }
+        }
+        return latest;
     }
 }

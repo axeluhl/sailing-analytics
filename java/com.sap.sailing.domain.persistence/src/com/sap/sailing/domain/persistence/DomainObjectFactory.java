@@ -4,12 +4,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
-import com.mongodb.DBObject;
+import org.bson.Document;
+
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
@@ -23,7 +23,6 @@ import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -61,7 +60,7 @@ public interface DomainObjectFactory {
      */
     Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
 
-    RaceIdentifier loadRaceIdentifier(DBObject dbObject);
+    RaceIdentifier loadRaceIdentifier(Document dbObject);
     
     /**
      * Loads the leaderboard group that has <code>name</code> as its name.
@@ -153,7 +152,7 @@ public interface DomainObjectFactory {
 
     DomainFactory getBaseDomainFactory();
 
-    Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> loadAllDeviceConfigurations();
+    Iterable<DeviceConfiguration> loadAllDeviceConfigurations();
 
     Map<String, Set<URL>> loadResultUrls();
     
@@ -168,7 +167,7 @@ public interface DomainObjectFactory {
          * @return the number of parameter sets that were loaded from the persistent store; each of these parameter sets
          *         describes for one race how it is to be loaded / tracked.
          */
-        int getNumberOfParametersToLoad();
+        long getNumberOfParametersToLoad();
         
         /**
          * For each set of parameters obtained from the persistent store,
@@ -210,7 +209,7 @@ public interface DomainObjectFactory {
     ConnectivityParametersLoadingResult loadConnectivityParametersForRacesToRestore(
             Consumer<RaceTrackingConnectivityParameters> callback);
 
-    RegattaLeaderboardWithEliminations loadRegattaLeaderboardWithEliminations(DBObject dbLeaderboard,
+    RegattaLeaderboardWithEliminations loadRegattaLeaderboardWithEliminations(Document dbLeaderboard,
             String leaderboardName, String wrappedRegattaLeaderboardName, LeaderboardRegistry leaderboardRegistry);
 
     /**

@@ -9,13 +9,13 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.common.InvertibleComparator;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 
 public class CompetitorColumnBase<T> {
 

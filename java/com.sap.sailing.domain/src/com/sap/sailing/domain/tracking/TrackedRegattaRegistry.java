@@ -78,5 +78,14 @@ public interface TrackedRegattaRegistry {
      * {@link #getTrackedRace(Regatta, RaceDefinition)}.
      */
     void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
+    
+    /**
+     * Stops a defined {@link RaceTracker} that probably did not already get to know which race is about to be tracked.
+     * This can be used to stop a RaceTracker that is in an error state before resolution of the race(s) to track is
+     * successful. In this case it is not practicable to stop tracking by a {@link Regatta}/{@link RaceDefinition} pair
+     * due to the fact that this would remove all RaceTrackers that currently have no {@link RaceDefinition} resolved
+     * yet.
+     */
+    void stopTracker(Regatta regatta, RaceTracker tracker) throws MalformedURLException, IOException, InterruptedException;
 
 }

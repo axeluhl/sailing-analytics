@@ -136,7 +136,7 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends
             final MappableToDevice mappableToDevice = mappings.get(rowValue);
             tr.startTD().className(new StringBuilder(tdClasses).append(firstColumnStyle).toString())
                     .html(SafeHtmlUtils
-                            .fromString(MappableToDeviceFormatter.formatType(mappableToDevice, stringMessages)))
+                            .fromString(MappableToDeviceFormatter.formatType(mappableToDevice, getStringMessages())))
                     .end();
             TableCellBuilder td = tr.startTD();
             td.className(tdClasses.toString());

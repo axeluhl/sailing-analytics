@@ -11,19 +11,22 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class CourseAndCompetitorCopyOperation {
 
-    Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceLogsToCopyTo;
-    boolean copyCourse;
-    boolean copyCompetitors;
-    private ErrorReporter errorReporter;
-    private SailingServiceAsync sailingService;
+    final Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceLogsToCopyTo;
+    final boolean copyCourse;
+    final boolean copyCompetitors;
+    final Integer priority;
+    final private ErrorReporter errorReporter;
+    final private SailingServiceAsync sailingService;
 
-    public CourseAndCompetitorCopyOperation(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo,
-            boolean copyCourse, boolean copyCompetitors, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
+    public CourseAndCompetitorCopyOperation(
+            Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo,
+            boolean copyCourse, boolean copyCompetitors, Integer priority, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
         this.raceLogsToCopyTo = racesToCopyTo;
         this.copyCourse = copyCourse;
         this.copyCompetitors = copyCompetitors;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        this.priority = priority;
     }
 
     public Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> getRaceLogsToCopyTo() {
@@ -38,8 +41,8 @@ public class CourseAndCompetitorCopyOperation {
         return copyCompetitors;
     }
 
-    public void perform(Triple<String, String, String> fromTriple) {
-
+    public Integer getPriority() {
+        return priority;
     }
 
     private Set<Triple<String, String, String>> convertToRacelogs(String leaderboardName) {
@@ -55,13 +58,14 @@ public class CourseAndCompetitorCopyOperation {
         return new Util.Triple<String, String, String>(leaderboardName, race.getA().getName(), race.getB().getName());
     }
 
-    public void perform(String leaderboardName, RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO,
+    public void perform(String leaderboardName,
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO,
             final Runnable onSuccessCallback) {
         Triple<String, String, String> fromTriple = toTriple(leaderboardName, raceColumnDTOAndFleetDTO);
         Set<Triple<String, String, String>> toRacelogs = convertToRacelogs(leaderboardName);
 
         if (copyCourse) {
-            sailingService.copyCourseToOtherRaceLogs(fromTriple, toRacelogs, new AsyncCallback<Void>() {
+            sailingService.copyCourseToOtherRaceLogs(fromTriple, toRacelogs, getPriority(), new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Could not copy course and competitors: " + caught.getMessage());

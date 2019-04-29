@@ -30,8 +30,10 @@ import com.sap.sse.mail.MailServiceResolver;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class MailServiceImpl implements ReplicableMailService {
@@ -46,10 +48,19 @@ public class MailServiceImpl implements ReplicableMailService {
     private ReplicationMasterDescriptor replicatingFromMaster;
     private final ConcurrentMap<OperationExecutionListener<ReplicableMailService>, OperationExecutionListener<ReplicableMailService>> operationExecutionListeners;
     private final Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication = new HashSet<>();
-    private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
-            .withInitial(() -> false);
+    private ThreadLocal<Boolean> currentlyFillingFromInitialLoad = ThreadLocal.withInitial(() -> false);
+    
+    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
     private final MailServiceResolver mailServiceResolver;
+    
+    /**
+     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
+     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
+     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
+     * method.
+     */
+    private OperationsToMasterSendingQueue unsentOperationForMasterQueue;
 
     public MailServiceImpl(Properties mailProperties, MailServiceResolver mailServiceResolver) {
         this.mailProperties = mailProperties;
@@ -163,7 +174,8 @@ public class MailServiceImpl implements ReplicableMailService {
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstCache<MailServiceResolver>(is, mailServiceResolver) {};
+        return new ObjectInputStreamResolvingAgainstCache<MailServiceResolver>(is, mailServiceResolver, null) {
+        };
     }
 
     @Override
@@ -225,14 +237,35 @@ public class MailServiceImpl implements ReplicableMailService {
     }
 
     @Override
-    public boolean isCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster() {
-        return currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster.get();
+    public boolean isCurrentlyFillingFromInitialLoad() {
+        return currentlyFillingFromInitialLoad.get();
     }
 
     @Override
-    public void setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(
-            boolean currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster) {
-        this.currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster
-                .set(currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster);
+    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
+        this.currentlyFillingFromInitialLoad.set(currentlyFillingFromInitialLoad);
+    }
+
+    @Override
+    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
+        return currentlyApplyingOperationReceivedFromMaster.get();
+    }
+
+    @Override
+    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
+        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
+    }
+
+    @Override
+    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
+        this.unsentOperationForMasterQueue = service;
+    }
+
+    @Override
+    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
+            OperationWithResult<S, T> operationWithResult, OperationsToMasterSender<S, O> sender) {
+        if (unsentOperationForMasterQueue != null) {
+            unsentOperationForMasterQueue.scheduleForSending(operationWithResult, sender);
+        }
     }
 }

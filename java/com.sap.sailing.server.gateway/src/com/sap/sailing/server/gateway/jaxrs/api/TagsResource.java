@@ -30,8 +30,8 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sailing.server.tagging.TagDTODeSerializer;
-import com.sap.sailing.server.tagging.TaggingService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -53,7 +53,7 @@ public class TagsResource extends AbstractSailingServerResource {
 
     /**
      * Loads public tags from {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} and private tags from
-     * {@link com.sap.sse.security.UserStore UserStore} in case current user is logged in. Only loads tags when
+     * {@link com.sap.sse.security.interfaces.UserStore UserStore} in case current user is logged in. Only loads tags when
      * parameters <code>leaderboardName</code>, <code>raceColumnName</code> and <code>fleetName</code> can identify
      * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}.
      * 

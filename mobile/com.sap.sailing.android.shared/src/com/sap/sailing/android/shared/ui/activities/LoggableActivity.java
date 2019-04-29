@@ -3,11 +3,11 @@ package com.sap.sailing.android.shared.ui.activities;
 import java.io.Closeable;
 import java.io.IOException;
 
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
+
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 public abstract class LoggableActivity extends AppCompatActivity {
     private static final String TAG = LoggableActivity.class.getName();
@@ -53,7 +53,7 @@ public abstract class LoggableActivity extends AppCompatActivity {
         super.onDestroy();
         lifeLogger.onDestroy(this);
     }
-    
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();

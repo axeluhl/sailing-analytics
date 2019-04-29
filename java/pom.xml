@@ -45,7 +45,7 @@
       -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true
     </parameters.common>
     <parameters.vm-settings>
-      -ea -Xmx1024m -XX:+UseG1GC
+      -ea -Xmx8096m -XX:+UseG1GC
     </parameters.vm-settings>
     <parameters.tractrac>
       -Dtractrac.tunnel=true -Dtractrac.tunnel.host=localhost
@@ -80,6 +80,7 @@
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
         <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
+        <module>com.sap.sse.jettyextensions</module>
         <module>com.sap.sailing.routeconverterjava11extension</module>
         <module>com.sap.sse.mail</module>
         <module>com.sap.sse.mail.replication.test</module>
@@ -89,12 +90,16 @@
         <module>com.sap.sse.gwt.adminconsole</module>
         <module>com.sap.sse.datamining</module>
         <module>com.sap.sse.datamining.shared</module>
-		<module>com.sap.sse.datamining.ui</module>
+        <module>com.sap.sse.datamining.ui</module>
+        <module>com.sap.sse.security.interface</module>
         <module>com.sap.sse.security</module>
+        <module>com.sap.sse.security.persistence</module>
+        <module>com.sap.sse.security.persistence.test</module>
         <module>com.sap.sse.security.ui</module>
         <module>com.sap.sse.security.userstore.mongodb</module>
         <module>com.sap.sse.operationaltransformation</module>
         <module>com.sap.sse.replication</module>
+        <module>com.sap.sse.replication.interfaces</module>
         <module>com.sap.sse.threadmanager</module>
         <module>com.sap.sse.filestorage</module>
         <module>com.sap.sse.feature</module>
@@ -114,6 +119,7 @@
         <module>com.sap.sailing.domain.windfinderadapter</module>
         <module>com.sap.sailing.domain.windfinderadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter</module>
+        <module>com.sap.sailing.domain.igtimiadapter.gateway</module>
         <module>com.sap.sailing.domain.igtimiadapter.persistence</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter.testsupport</module>
@@ -127,6 +133,7 @@
         <module>com.sap.sailing.expeditionconnector</module>
         <module>com.sap.sailing.expeditionconnector.persistence</module>
         <module>com.sap.sailing.server</module>
+        <module>com.sap.sailing.server.interface</module>
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>
         <module>com.sap.sailing.www</module>
@@ -164,11 +171,10 @@
         <module>com.sap.sailing.domain.test</module>
         <module>com.sap.sse.replication.testsupport</module>
         <module>com.sap.sailing.server.testsupport</module>
-        <!-- The following test fragment doesn't yet do what it should in the Maven context... -->
         <module>com.sap.sse.gwt.test</module>
-        <!-- -->
         <module>com.sap.sse.datamining.test</module>
         <module>com.sap.sse.security.replication.test</module>
+        <module>com.sap.sse.security.testsupport</module>
         <module>com.sap.sse.security.test</module>
         <module>com.sap.sse.operationaltransformation.test</module>
         <module>com.sap.sse.common.test</module>
@@ -507,7 +513,7 @@
         <!-- GWT version detected from dependencyManagement -->
         <execution>
           <configuration>
-            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP}</extraJvmArgs>
+            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP} -Dgwt.watchFileChanges=false</extraJvmArgs>
              <fragmentCount>4</fragmentCount>
             <!--
             <userAgents>chrome</userAgents>

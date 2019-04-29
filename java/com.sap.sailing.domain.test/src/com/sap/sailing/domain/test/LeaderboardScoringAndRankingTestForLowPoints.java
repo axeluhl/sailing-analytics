@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -17,6 +19,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -28,8 +31,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import junit.framework.Assert;
 
 /**
  * This class contains several tests for the {@link LowPointFirstToWinTwoRaces} scoring rule defined by
@@ -65,11 +66,12 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     private Regatta setupRegatta(boolean useFirstTwoWins) {
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
-                false, /* startDate */ null, /* endDate */ null, series, /* persistent */false,
+                false, CompetitorRegistrationType.CLOSED, /* startDate */ null, /* endDate */ null, series, /* persistent */false,
                 DomainFactory.INSTANCE
                         .createScoringScheme(useFirstTwoWins ? ScoringSchemeType.LOW_POINT_FIRST_TO_WIN_TWO_RACES
                                 : ScoringSchemeType.LOW_POINT),
-                "123", /* course area */null, OneDesignRankingMetric::new);
+                "123", /* course area */null, OneDesignRankingMetric::new,
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
 

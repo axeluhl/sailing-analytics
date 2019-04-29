@@ -15,7 +15,7 @@ public class ServerInfo {
     private static final Logger logger = Logger.getLogger(ServerInfo.class.getName());
     
     public static String getBuildVersion() {
-        String version = "Unknown or Development (" + ServerStartupConstants.SERVER_NAME + ")";
+        String version = "Unknown or Development (" + getName() + ")";
         File versionfile = new File(ServerStartupConstants.JETTY_HOME + File.separator + "version.txt");
         if (versionfile.exists()) {
             try (BufferedReader bufferedReader = new BufferedReader(new FileReader(versionfile))) {

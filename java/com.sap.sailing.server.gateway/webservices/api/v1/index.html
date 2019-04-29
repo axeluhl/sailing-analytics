@@ -37,9 +37,13 @@ name to make sure you get to the event you're interested in.
 		<td>Creates a new event</td>
 	</tr>
 	<tr>
-		<td><a href="eventUpdate].html">/api/v1/events/{event-id}/update</a></td>
+		<td><a href="eventUpdate.html">/api/v1/events/{event-id}/update</a></td>
 		<td>Updates an existing event</td>
 	</tr>
+    <tr>
+        <td><a href="eventMigrate.html">/api/v1/events/{event-id}/migrate</a></td>
+        <td>Migrates an existing event</td>
+    </tr>
 	<tr>
 		<td><a href="eventGetDoc.html">/api/v1/events</a></td>
 		<td>Gets all events</td>
@@ -133,6 +137,10 @@ name to make sure you get to the event you're interested in.
 		<td><a href="regattaCompetitorsGet.html">/api/v1/regattas/{regattaname}/competitors</a></td>
 		<td>Obtains the competitors participating in a regatta</td>
 	</tr>
+	<tr>
+		<td><a href="regattaWindsummaryGet.html">/api/v1/regattas/{regattaname}/windsummary</a></td>
+		<td>Obtains a summary of the wind conditions for one or more races in the regatta</td>
+	</tr>
     <tr>
         <td><a href="regattaUpdateOrCreateSeries.html">/api/v1/regattas/updateOrCreateSeries</a></td>
         <td>Creates a Series in an regatta, and configures the Series it contains</td>
@@ -165,6 +173,10 @@ name to make sure you get to the event you're interested in.
 		<td><a href="leaderboardgroupGetDoc.html">/api/v1/leaderboardgroups/{name}</a></td>
 		<td>Gets the details of a group of leaderboards</td>
 	</tr>
+    <tr>
+        <td><a href="leaderboardGroupMigrate.html">/api/v1/leaderboardgroups/{name}/migrate</a></td>
+        <td>Migrates an existing leaderboardGroup</td>
+    </tr>
 	<tr>
 		<td><a href="leaderboardsGetDoc.html">/api/v1/leaderboards</a></td>
 		<td>Gets all leaderboards</td>
@@ -193,6 +205,10 @@ name to make sure you get to the event you're interested in.
 		<td><a href="leaderboardRaceMarksGetDoc.html">/api/v1/leaderboards/{name}/marks</a></td>
 		<td>Gets the marks of a race (from the RaceLog and if possible the TrackedRace)</td>
 	</tr>
+	<tr>
+		<td><a href="leaderboardRaceMarkGetDoc.html">/api/v1/leaderboards/{name}/marks/{markId}</a></td>
+		<td>Gets a defined mark</td>
+	</tr>
     <tr>
         <td><a href="leaderboardRaceStartorderGetDoc.html">/api/v1/leaderboards/{name}/startorder</a></td>
         <td>Gets the order in which competitors have started or are expected to start for a race</td>
@@ -220,6 +236,10 @@ name to make sure you get to the event you're interested in.
     <tr>
         <td><a href="leaderboardRaceEnableRaceLogForCompetitorRegistration.html">/api/v1/leaderboards/{name}/leaderboardRaceEnableRaceLogForCompetitorRegistration</a></td>
         <td>Enables racelog useage for competitor registration</td>
+    </tr>
+    <tr>
+        <td><a href="leaderboardMigrate.html">/api/v1/leaderboards/{name}/migrate</a></td>
+        <td>Migrates an existing leaderboard</td>
     </tr>
 	<tr>
 		<td><a href="leaderboardMarkGpsFixesPostDoc.html">/api/v1/leaderboards/{name}/marks/{id}/gps_fixes</a></td>
@@ -269,8 +289,12 @@ name to make sure you get to the event you're interested in.
         <td>Obtains information about all or a single boat class</td>
     </tr>
     <tr>
-        <td><a href="boats.html">/api/v1/boats</a></td>
+        <td><a href="boats.html">/api/v1/boats/{id}</a></td>
         <td>Obtains information about a single boat</td>
+    </tr>
+    <tr>
+        <td><a href="countrycodes.html">/api/v1/countrycodes</a></td>
+        <td>Obtains information about all country codes known by the system</td>
     </tr>
     <tr>
         <td><a href="putWind.html">/api/v1/wind/putWind</a></td>
@@ -296,19 +320,25 @@ name to make sure you get to the event you're interested in.
         <td><a href="tagsCRUDDoc.html">/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags</a></td>
         <td>Gets, creates, updates and deletes tags.</td>
     </tr>
-        <tr>
+    <tr>
         <td><a href="preferencesPut.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
         <td>Stores a document into the preferences of a user</td>
     </tr>
-    </tr>
-        <tr>
+    <tr>
         <td><a href="preferencesGet.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
         <td>Retrives a document that was stored into the preferences of a user</td>
     </tr>
-    </tr>
-        <tr>
+    <tr>
         <td><a href="preferencesDelete.html">/api/v1/preferences/{SETTINGS_KEY}</a></td>
         <td>Removes a document from the preferences of a user</td>
+    </tr>
+    <tr>
+        <td><a href="usergroupsGet.html">/api/v1/usergroups/</a></td>
+        <td>Lists all usergroups and their id's the current user is part of, required to obtain id's for migration for example</td>
+    </tr>
+    <tr>
+        <td><a href="status.html">/api/v1/status</a></td>
+        <td>Returns a status description for the "RacingEventService" core service</td>
     </tr>
 </tbody>
 </table>

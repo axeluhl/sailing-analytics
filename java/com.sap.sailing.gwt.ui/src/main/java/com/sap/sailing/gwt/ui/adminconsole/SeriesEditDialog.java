@@ -264,7 +264,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         private final Label addRacesHintLabel;
         
         public RaceNamesEditorUi(RegattaDTO regatta, StringMessages stringMessages, ImageResource removeImage, String seriesName) {
-            super(stringMessages, removeImage, /* suggest values */ Collections.<String>emptyList(), stringMessages.enterRaceName(), 40);
+            super(stringMessages, removeImage, /* suggest values */ Collections.emptySet(), stringMessages.enterRaceName(), 40);
 
             this.seriesName = seriesName;
             this.regatta = regatta;

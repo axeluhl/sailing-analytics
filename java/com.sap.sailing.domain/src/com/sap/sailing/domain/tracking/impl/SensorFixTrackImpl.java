@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.function.Consumer;
 
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.tracking.AddResult;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.SensorFixTrack;
 import com.sap.sailing.domain.tracking.SensorFixTrackListener;
@@ -41,8 +42,11 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
         lockForWrite();
         try {
             final boolean firstFixInTrack = getRawFixes().isEmpty();
-            result = addWithoutLocking(fix, replace);
-            this.notifyListeners((listener) -> listener.fixReceived(fix, getTrackedItem(), trackName, firstFixInTrack));
+            final AddResult addResult = addWithoutLocking(fix, replace);
+            result = addResult == AddResult.ADDED || addResult == AddResult.REPLACED;
+            if (result) {
+                this.notifyListeners((listener) -> listener.fixReceived(fix, getTrackedItem(), trackName, firstFixInTrack, addResult));
+            }
         } finally {
             unlockAfterWrite();
         }

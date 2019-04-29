@@ -1,13 +1,31 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.io.Serializable;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -44,40 +62,23 @@ import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
+import com.sap.sailing.racecommittee.app.ui.utils.CompetitorUtils;
 import com.sap.sailing.racecommittee.app.ui.views.SearchView;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.Loader;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.internal.view.ContextThemeWrapper;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
+import java.io.Serializable;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuItemClickListener, ItemListener, SearchView.SearchTextWatcher {
+public class PenaltyFragment extends BaseFragment
+        implements PopupMenu.OnMenuItemClickListener, ItemListener, SearchView.SearchTextWatcher {
     private static final String TAG = PenaltyFragment.class.getName();
 
     private static final int COMPETITOR_LOADER = 0;
@@ -165,7 +166,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         if (mPenaltyDropDown != null) {
             mPenaltyAdapter = new StringArraySpinnerAdapter(getAllMaxPointsReasons());
             mPenaltyDropDown.setAdapter(mPenaltyAdapter);
-            mPenaltyDropDown.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(mPenaltyAdapter));
+            mPenaltyDropDown
+                    .setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(mPenaltyAdapter));
         }
         View applyButton = ViewHelper.get(layout, R.id.button_apply);
         if (applyButton != null) {
@@ -181,7 +183,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             penaltyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AppTheme_AlertDialog));
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                     final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
                     builder.setTitle(R.string.select_penalty_reason);
                     builder.setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
@@ -223,7 +225,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mAdapter = new PenaltyAdapter(getActivity(), this, getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
+        mAdapter = new PenaltyAdapter(getActivity(), this,
+                getRace().getRaceGroup().canBoatsOfCompetitorsChangePerRace());
         RecyclerView recyclerView = ViewHelper.get(getView(), R.id.competitor_list);
         if (recyclerView != null) {
             recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -295,8 +298,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         mDraftData.clear();
         if (getRaceState().getFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getFinishPositioningList()) {
-                mDraftData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
+                mDraftData.add(new CompetitorResultImpl(item));
             }
         }
 
@@ -307,8 +309,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         mConfirmedData.clear();
         if (getRaceState().getConfirmedFinishPositioningList() != null) {
             for (CompetitorResult item : getRaceState().getConfirmedFinishPositioningList()) {
-                mConfirmedData.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
+                mConfirmedData.add(new CompetitorResultImpl(item));
             }
         }
     }
@@ -382,54 +383,57 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         for (Competitor competitor : getRace().getCompetitors()) {
             domainFactory.getCompetitorAndBoatStore().allowCompetitorResetToDefaults(competitor);
         }
-        final Loader<?> competitorLoader = getLoaderManager()
-            .initLoader(COMPETITOR_LOADER, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Map<Competitor, Boat>>() {
-                @Override
-                public void onLoadFailed(Exception reason) {
-                    Toast.makeText(getActivity(), getString(R.string.competitor_load_error, reason.toString()), Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onLoadSucceeded(Map<Competitor, Boat> data, boolean isCached) {
-                    if (isAdded() && !isCached) {
-                        onLoadCompetitorsSucceeded(data);
+        final Loader<?> competitorLoader = getLoaderManager().initLoader(COMPETITOR_LOADER, null,
+                dataManager.createCompetitorsLoader(getRace(), new LoadClient<Map<Competitor, Boat>>() {
+                    @Override
+                    public void onLoadFailed(Exception reason) {
+                        Toast.makeText(getActivity(), getString(R.string.competitor_load_error, reason.toString()),
+                                Toast.LENGTH_LONG).show();
                     }
-                }
-            }));
+
+                    @Override
+                    public void onLoadSucceeded(Map<Competitor, Boat> data, boolean isCached) {
+                        if (isAdded() && !isCached) {
+                            onLoadCompetitorsSucceeded(data);
+                        }
+                    }
+                }));
         // Force load to get non-cached remote competitors...
         competitorLoader.forceLoad();
     }
 
     private void loadLeaderboardResult() {
         ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
-        final Loader<?> leaderboardResultLoader = getLoaderManager()
-            .initLoader(LEADERBOARD_ORDER_LOADER, null, dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
-                @Override
-                public void onLoadFailed(Exception reason) {
-                    ExLog.ex(getActivity(), TAG, reason);
-                }
+        final Loader<?> leaderboardResultLoader = getLoaderManager().initLoader(LEADERBOARD_ORDER_LOADER, null,
+                dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
+                    @Override
+                    public void onLoadFailed(Exception reason) {
+                        ExLog.ex(getActivity(), TAG, reason);
+                    }
 
-                @Override
-                public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
-                    onLoadLeaderboardResultSucceeded(data);
-                }
-            }));
+                    @Override
+                    public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
+                        onLoadLeaderboardResultSucceeded(data);
+                    }
+                }));
         leaderboardResultLoader.forceLoad();
     }
 
     private void onLoadCompetitorsSucceeded(Map<Competitor, Boat> data) {
         mCompetitorResults.clear();
-        for (Competitor item : data.keySet()) { // add loaded competitors
-            String name = "";
-            if (item.getShortInfo() != null) {
-                name += item.getShortInfo() + " - ";
-            }
-            name += item.getName();
-            CompetitorResult result = new CompetitorResultImpl(item.getId(), name, 0, MaxPointsReason.NONE,
-                    /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK);
+
+        for (Map.Entry<Competitor, Boat> item : data.entrySet()) {
+            Competitor competitor = item.getKey();
+            Boat boat = item.getValue();
+
+            CompetitorResult result = new CompetitorResultImpl(competitor.getId(), competitor.getName(),
+                    competitor.getShortName(), boat.getName(), boat.getSailID(), 0, MaxPointsReason.NONE,
+                    /* score */ null, /* finishingTime */ null, /* comment */ null,
+                    MergeState.OK);
             mCompetitorResults.add(new CompetitorResultEditableImpl(result));
         }
-        if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) { // mix with finish position list
+        if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) { // mix with finish position
+            // list
             for (CompetitorResult result : getRaceState().getFinishPositioningList()) {
                 int pos = 0;
                 for (int i = 0; i < mCompetitorResults.size(); i++) {
@@ -469,6 +473,10 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
     public boolean onMenuItemClick(MenuItem item) {
         OrderBy orderBy = OrderBy.SAILING_NUMBER;
         switch (item.getItemId()) {
+            case R.id.by_short_name:
+                orderBy = OrderBy.COMPETITOR_SHORT_NAME;
+                break;
+
             case R.id.by_name:
                 orderBy = OrderBy.COMPETITOR_NAME;
                 break;
@@ -526,7 +534,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                             setMergeState(item, MergeState.ERROR);
                         }
                         item.setMaxPointsReason(result.getMaxPointsReason());
-                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                        changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
                     }
 
                     // check score
@@ -542,12 +550,12 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                                 setMergeState(item, MergeState.ERROR);
                             }
                             item.setScore(result.getScore());
-                            changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                            changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
                         }
                     } else if (result.getScore() != null) {
                         setMergeState(item, MergeState.ERROR);
                         item.setScore(result.getScore());
-                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                        changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
                     }
 
                     // check score
@@ -563,18 +571,18 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                                 setMergeState(item, MergeState.ERROR);
                             }
                             item.setComment(item.getComment() + " ## " + result.getComment());
-                            changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                            changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
                         }
                     } else if (result.getComment() != null) {
                         setMergeState(item, MergeState.ERROR);
                         item.setComment(result.getComment());
-                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                        changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
                     }
 
                     // check merge state
                     if (!item.getMergeState().equals(result.getMergeState())) {
                         setMergeState(item, result.getMergeState());
-                        changedCompetitor.put(item.getCompetitorId(), item.getCompetitorDisplayName());
+                        changedCompetitor.put(item.getCompetitorId(), CompetitorUtils.getDisplayName(item));
                     }
                 } else {
                     item.setValue(result);
@@ -586,7 +594,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         mAdapter.notifyDataSetChanged();
         setPublishButton();
         if (changedCompetitor.size() > 0) { // show message to user
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(R.string.refresh_title);
             StringBuilder string = new StringBuilder(1024);
             for (String competitor : changedCompetitor.values()) {
@@ -671,14 +679,16 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             }
         }
         competitor.setMergeState(MergeState.OK);
-        CompetitorResultWithIdImpl item = new CompetitorResultWithIdImpl(0, getBoat(competitor.getCompetitorId()), competitor.getCompetitorId(), competitor
-            .getCompetitorDisplayName(), competitor.getOneBasedRank(), competitor.getMaxPointsReason(), competitor.getScore(), competitor
-            .getFinishingTime(), competitor.getComment(), competitor.getMergeState());
+        CompetitorResultWithIdImpl item = new CompetitorResultWithIdImpl(0, getBoat(competitor.getCompetitorId()), competitor);
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
-        builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mCompetitorResults.getFirstRankZeroPosition() +
-                /* allow for setting rank as the new last in the list in case the competitor did not have a rank so far */
-            (item.getOneBasedRank() == 0 ? 1 : 0), competitor.getMergeState() == MergeState.ERROR);
+        builder.setTitle(CompetitorUtils.getDisplayName(item));
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item,
+                mCompetitorResults.getFirstRankZeroPosition() +
+                        /*
+                         * allow for setting rank as the new last in the list in case the competitor did not have a rank so far
+                         */
+                        (item.getOneBasedRank() == 0 ? 1 : 0),
+                competitor.getMergeState() == MergeState.ERROR);
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -719,7 +729,8 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
         if (AppUtils.with(getActivity()).isTablet()) {
             Window window = dialog.getWindow();
             if (window != null) {
-                window.setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
+                window.setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width),
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
             }
         }
     }
@@ -743,15 +754,13 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
             boolean found = false;
             for (CompetitorResult published : results) {
                 if (item.getCompetitorId().equals(published.getCompetitorId())) {
-                    result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                        .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
+                    result.add(new CompetitorResultImpl(item));
                     found = true;
                     break;
                 }
             }
             if (!found && item.isDirty()) {
-                result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
+                result.add(new CompetitorResultImpl(item));
             }
         }
 
@@ -763,8 +772,7 @@ public class PenaltyFragment extends BaseFragment implements PopupMenu.OnMenuIte
                 }
             }
             if (!found) {
-                result.add(new CompetitorResultImpl(item.getCompetitorId(), item.getCompetitorDisplayName(), item.getOneBasedRank(), item
-                    .getMaxPointsReason(), item.getScore(), item.getFinishingTime(), item.getComment(), item.getMergeState()));
+                result.add(new CompetitorResultImpl(item));
             }
         }
 

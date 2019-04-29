@@ -273,7 +273,7 @@
     <string name="flags_more">Zieleinlauf</string>
     <string name="flags_postpone">Verschieben</string>
     <string name="flags_dependent_races">von abhängigen Rennen</string>
-    <string name="wind_info">%2$s / %1$s kn</string>
+    <string name="wind_info">%2$s / %1$f kn</string>
     <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
     <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
     <string name="course">Kurs</string>
@@ -348,7 +348,6 @@
     <string name="settings_category_developer">Entwickler Optionen</string>
     <string name="preference_offline_header">Offline Modus</string>
     <string name="preference_offline_summary">Deaktiviert die Verbindung zum Server und benutzt statische Daten</string>
-    <string name="preference_theme_header">Darstellungsmodus</string>
     <string name="gate_start_nationality">Nation</string>
     <string name="gate_start_number">Nr.</string>
     <string name="gate_start_set_pathfinder">Pathfinder setzen</string>
@@ -519,6 +518,7 @@
     <string name="non_public_changed_title">Nicht öffentliche Events</string>
     <string name="competitor_list">Teilnehmerliste</string>
     <string name="sort_by_boat">nach Segelnummer</string>
+    <string name="sort_by_short_name">nach Kurzname</string>
     <string name="sort_by_name">nach Namen</string>
     <string name="sort_by_start">nach Abstand zur Startlinie</string>
     <string name="sort_by_goal">nach getracktem Zieldurchgang</string>

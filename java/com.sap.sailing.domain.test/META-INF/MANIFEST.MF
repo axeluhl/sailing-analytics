@@ -18,14 +18,19 @@ Require-Bundle: com.sap.sailing.domain,
  org.junit;bundle-version="4.8.2",
  org.json.simple;bundle-version="1.1.0",
  com.sap.sse.common,
- com.sap.sse.replication,
+ com.sap.sse.replication.interfaces,
  com.sap.sse,
  com.sap.sse.shared.android,
  com.sap.sailing.domain.racelogtrackingadapter,
  com.sap.sailing.server,
+ com.sap.sailing.server.interface,
  com.sap.sailing.server.testsupport,
  com.sap.sailing.domain.persistence,
- com.sap.sse.filestorage
+ com.sap.sse.filestorage,
+ com.sap.sse.security,
+ com.sap.sse.security.userstore.mongodb,
+ com.sap.sse.security.common,
+ org.mongodb.mongo-java-driver;bundle-version="3.6.4"
 Export-Package: com.sap.sailing.domain.test,
  com.sap.sailing.domain.test.mock
 Import-Package: org.osgi.util.tracker

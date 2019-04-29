@@ -47,10 +47,10 @@ import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
-import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SidelineImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -69,6 +69,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -456,10 +457,12 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (result == null) {
                     result = new RegattaImpl(raceLogStore, regattaLogStore, RegattaImpl.getDefaultName(
                             defaultRegattaNameAndBoatClass.getA(), boatClass.getName()), boatClass, 
-                            /* canBoatsOfCompetitorsChangePerRace */ false, /*startDate*/ null, /*endDate*/ null,
+                            /* canBoatsOfCompetitorsChangePerRace */ false, CompetitorRegistrationType.CLOSED,
+                            /*startDate*/ null, /*endDate*/ null,
                             trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
-                            getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null);
+                            getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null,
+                            /* registrationLinkSecret */ UUID.randomUUID().toString());
                     regattaCache.put(key, result);
                     weakDefaultRegattaCache.put(race, result);
                     logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+") because none found for key "+key);
@@ -485,7 +488,7 @@ public class DomainFactoryImpl implements DomainFactory {
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, 
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm,
-            long timeoutInMilliseconds, ReceiverType... types) {
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler, ReceiverType... types) {
         IEvent tractracEvent = tractracRace.getEvent();
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
@@ -495,7 +498,8 @@ public class DomainFactoryImpl implements DomainFactory {
                         raceDefinitionSetToUpdate, delayToLiveInMillis,
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, simulator, courseDesignUpdateURI,
                         tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
-                        useInternalMarkPassingAlgorithm, raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds));
+                        useInternalMarkPassingAlgorithm, raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds,
+                        raceTrackingHandler));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -529,11 +533,11 @@ public class DomainFactoryImpl implements DomainFactory {
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver, IRace tractracRace, URI courseDesignUpdateURI, 
             String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber,
-            boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds) {
+            boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) {
         return getUpdateReceivers(trackedRegatta, tractracRace, windStore, delayToLiveInMillis, simulator,
                 raceDefinitionSetToUpdate, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, courseDesignUpdateURI,
                 tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
-                useInternalMarkPassingAlgorithm, timeoutInMilliseconds, ReceiverType.RACECOURSE,
+                useInternalMarkPassingAlgorithm, timeoutInMilliseconds, raceTrackingHandler, ReceiverType.RACECOURSE,
                 ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS,
                 ReceiverType.SENSORDATA);
     }
@@ -589,49 +593,63 @@ public class DomainFactoryImpl implements DomainFactory {
 			long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
 			DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI tracTracUpdateURI, UUID tracTracEventUuid,
 			String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver,
-			Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace) {
+			Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace, RaceTrackingHandler raceTrackingHandler) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
                 logger.info("Creating RaceDefinitionImpl for race "+raceName);
-                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats, raceId);
+                try {
+                    raceDefinition = raceTrackingHandler.createRaceDefinition(trackedRegatta.getRegatta(), raceName, course, boatClass, competitorsAndBoats, raceId);
+                } catch (RuntimeException exception) {
+                    final String reasonForNotAddingRaceToRegatta = "Error while creating race " + raceDefinition + " for regatta " + trackedRegatta.getRegatta();
+                    errorWhileTryingToTrackRace(trackedRegatta, raceDefinitionSetToUpdate, raceDefinition, reasonForNotAddingRaceToRegatta);
+                }
             } else {
                 logger.info("Already found RaceDefinitionImpl for race "+raceName);
             }
-            DynamicTrackedRace trackedRace = trackedRegatta.getExistingTrackedRace(raceDefinition);
-            if (trackedRace == null) {
-                // add to existing regatta only if boat class matches
-                if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
-                    trackedRegatta.getRegatta().addRace(raceDefinition);
-                    trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
-                            delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
-                            raceLogResolver);
-                    logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
-                    if (runBeforeExposingRace != null) {
-                    	logger.fine("Running callback for tracked race creation for "+trackedRace.getRace());
-                    	runBeforeExposingRace.accept(trackedRace);
+            DynamicTrackedRace trackedRace = null;
+            if (raceDefinition != null) {
+                trackedRace = trackedRegatta.getExistingTrackedRace(raceDefinition);
+                if (trackedRace == null) {
+                    // add to existing regatta only if boat class matches
+                    if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
+                        trackedRegatta.getRegatta().addRace(raceDefinition);
+                        trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
+                                delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
+                                raceLogResolver, raceTrackingHandler);
+                        logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
+                        if (runBeforeExposingRace != null) {
+                            logger.fine("Running callback for tracked race creation for "+trackedRace.getRace());
+                            runBeforeExposingRace.accept(trackedRace);
+                        }
+                        addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
+                                raceDefinition, trackedRace, tractracRace);
+                        raceCache.put(raceId, raceDefinition);
+                        // the following unblocks waiters in DomainFactory.getAndWaitForRaceDefinition(...)
+                        raceCache.notifyAll();
+                    } else {
+                        final String reasonForNotAddingRaceToRegatta = "Not adding race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta()
+                        + " because boat class " + raceDefinition.getBoatClass()
+                        + " doesn't match regatta's boat class " + trackedRegatta.getRegatta().getBoatClass();
+                        errorWhileTryingToTrackRace(trackedRegatta, raceDefinitionSetToUpdate, raceDefinition,
+                                reasonForNotAddingRaceToRegatta);
                     }
-                    addTracTracUpdateHandlers(tracTracUpdateURI, tracTracEventUuid, tracTracUsername, tracTracPassword,
-                            raceDefinition, trackedRace, tractracRace);
-                    raceCache.put(raceId, raceDefinition);
-                    // the following unblocks waiters in DomainFactory.getAndWaitForRaceDefinition(...)
-                    raceCache.notifyAll();
                 } else {
-                    final String reasonForNotAddingRaceToRegatta = "Not adding race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta()
-                            + " because boat class " + raceDefinition.getBoatClass()
-                            + " doesn't match regatta's boat class " + trackedRegatta.getRegatta().getBoatClass();
-                    logger.warning(reasonForNotAddingRaceToRegatta);
-                    try {
-                        raceDefinitionSetToUpdate.raceNotLoaded(reasonForNotAddingRaceToRegatta);
-                    } catch (Exception e) {
-                        logger.log(Level.INFO, "Something else went wrong while trying to notify the RaceDefinition set that the race "+
-                                raceDefinition+" could not be added to the the regatta "+trackedRegatta.getRegatta(), e);
-                    }
+                    logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
                 }
-            } else {
-                logger.info("Found existing tracked race for race "+raceName+" with ID "+raceId);
             }
             return trackedRace;
+        }
+    }
+
+    private void errorWhileTryingToTrackRace(DynamicTrackedRegatta trackedRegatta, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+            RaceDefinition raceDefinition, final String reasonForNotAddingRaceToRegatta) {
+        logger.warning(reasonForNotAddingRaceToRegatta);
+        try {
+            raceDefinitionSetToUpdate.raceNotLoaded(reasonForNotAddingRaceToRegatta);
+        } catch (Exception e) {
+            logger.log(Level.INFO, "Something else went wrong while trying to notify the RaceDefinition set that the race "+
+                    raceDefinition+" could not be added to the the regatta "+trackedRegatta.getRegatta(), e);
         }
     }
 
@@ -695,8 +713,8 @@ public class DomainFactoryImpl implements DomainFactory {
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
-        return trackedRegatta.createTrackedRace(race, sidelines,
+            boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver, RaceTrackingHandler raceTrackingHandler) {
+        return raceTrackingHandler.createTrackedRace(trackedRegatta, race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, Optional.empty());
@@ -956,21 +974,22 @@ public class DomainFactoryImpl implements DomainFactory {
     public TracTracRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver,
-            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler)
             throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         return new TracTracRaceTrackerImpl(this, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
-                raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds);
+                raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds, raceTrackingHandler);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver,
-            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws URISyntaxException, CreateModelException, SubscriberInitializationException, IOException,
-            InterruptedException {
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) throws URISyntaxException, CreateModelException,
+            SubscriberInitializationException, IOException, InterruptedException {
         return new TracTracRaceTrackerImpl(regatta, this, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
-                raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds);
+                raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds, raceTrackingHandler);
     }
 
     @Override
@@ -979,8 +998,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) {
-        return new TracTracConfigurationImpl(name, jsonURL, liveDataURI, storedDataURI, courseDesignUpdateURI, tracTracUsername, tracTracPassword);
+    public TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
+            String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername,
+            String tracTracPassword) {
+        return new TracTracConfigurationImpl(creatorName, name, jsonURL, liveDataURI, storedDataURI,
+                courseDesignUpdateURI, tracTracUsername, tracTracPassword);
     }
 
     @Override

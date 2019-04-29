@@ -198,7 +198,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
         final AsyncCallback<Map<? extends CompetitorDTO, BoatDTO>> myCallback = new AsyncCallback<Map<? extends CompetitorDTO, BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.unableToObtainCompetitorsAndBoatsForRaceInFleetInLeaderboard(raceColumnName, fleetName, leaderboardName, caught.getMessage()));
+                errorReporter.reportError(getStringMessages().unableToObtainCompetitorsAndBoatsForRaceInFleetInLeaderboard(raceColumnName, fleetName, leaderboardName, caught.getMessage()));
             }
 
             @Override
@@ -214,7 +214,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
         sailingService.getBoatRegistrationsForLeaderboard(leaderboardName, new AsyncCallback<Collection<BoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.unableToObtainBoatsRegisteredWith(leaderboardName, caught.getMessage()));
+                errorReporter.reportError(getStringMessages().unableToObtainBoatsRegisteredWith(leaderboardName, caught.getMessage()));
             }
 
             @Override

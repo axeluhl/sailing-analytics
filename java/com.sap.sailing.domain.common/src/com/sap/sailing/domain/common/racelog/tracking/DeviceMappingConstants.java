@@ -23,11 +23,14 @@ public class DeviceMappingConstants {
     // all URL components should be treated as case insensitive, preferring _underscores_ to CamelCase.
     public static final String TRACKING_URL_BASE = "/tracking/checkin";
     public static final String BUOY_TENDER_URL_BASE = "/buoy-tender/checkin";
+    public static final String URL_CHECKIN_URL = "checkinUrl";
     public static final String URL_EVENT_ID = "event_id";
     public static final String URL_LEADERBOARD_NAME = "leaderboard_name";
+    public static final String URL_LEADERBOARD_NAME_FOR_SECRET = "leaderboardName";
     public static final String URL_COMPETITOR_ID_AS_STRING = "competitor_id";
     public static final String URL_BOAT_ID_AS_STRING = "boat_id";
     public static final String URL_MARK_ID_AS_STRING = "mark_id";
+    public static final String URL_SECRET = "secret";
     public static final String URL_FROM_MILLIS = "from_millis";
     public static final String URL_TO_MILLIS = "to_millis";
 
@@ -37,6 +40,7 @@ public class DeviceMappingConstants {
     public static final String JSON_DEVICE_UUID = "deviceUuid";
     public static final String JSON_DEVICE_TYPE = "deviceType";
     public static final String JSON_PUSH_DEVICE_ID = "pushDeviceId";
+    public static final String JSON_REGISTER_SECRET = "secret";
     public static final String JSON_FROM_MILLIS = "fromMillis";
     
     /**
@@ -48,15 +52,18 @@ public class DeviceMappingConstants {
     public static final String JSON_TEAM_IMAGE_URI = "teamImageUri";
 
     public static String getDeviceMappingForRegattaLogUrl(String serverUrlWithoutTrailingSlash, String eventId,
-            String leaderboardName, String mappedItemType, String mappedItemId, UrlHelper helper) {
+            String leaderboardName, String mappedItemType, String mappedItemId, String secret, UrlHelper helper) {
         return serverUrlWithoutTrailingSlash + TRACKING_URL_BASE + "?" + URL_EVENT_ID + "=" + helper.encodeQueryString(eventId) + "&"
                 + URL_LEADERBOARD_NAME + "=" + helper.encodeQueryString(leaderboardName) + "&" + helper.encodeQueryString(mappedItemType) + "="
-                + helper.encodeQueryString(mappedItemId);
+                + helper.encodeQueryString(mappedItemId) + "&" + JSON_REGISTER_SECRET + "="
+                + helper.encodeQueryString(secret);
     }
     
     public static String getBuoyTenderInvitationUrl(String serverUrlWithoutTrailingSlash,
-            String leaderboardName, String eventId, UrlHelper helper) {
+            String leaderboardName, String eventId, String secret, UrlHelper helper) {
         return serverUrlWithoutTrailingSlash + BUOY_TENDER_URL_BASE + "?" + URL_EVENT_ID + "="
-                + helper.encodeQueryString(eventId) + "&" + URL_LEADERBOARD_NAME + "=" + helper.encodeQueryString(leaderboardName);
+                + helper.encodeQueryString(eventId) + "&" + URL_LEADERBOARD_NAME + "="
+                + helper.encodeQueryString(leaderboardName) + "&" + JSON_REGISTER_SECRET + "="
+                + helper.encodeQueryString(secret);
     }
 }

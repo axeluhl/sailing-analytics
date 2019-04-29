@@ -19,9 +19,12 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -190,6 +193,77 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     public Integer getRankAtFinishForCompetitor(Competitor competitor) {
         int rank = getTrackedRace().getRank(competitor, getTrackedRace().getEndOfTracking());
         return rank == 0 ? null : rank;
+    }
+
+    @Override
+    public Distance getAdvantageOfStarboardSideOfStartline() {
+        final Distance result;
+        if (getTrackedRace().getStartOfRace() != null) {
+            final LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
+            if (startLine == null) {
+                result = null;
+            } else {
+                final Distance absoluteAdvantage = startLine.getAdvantage();
+                result = startLine.getAdvantageousSideWhileApproachingLine() == NauticalSide.STARBOARD ?
+                        absoluteAdvantage : absoluteAdvantage.scale(-1);
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Bearing getTrueWindAngleOfStartLineFromStarboardSide() {
+        final Bearing result;
+        if (getTrackedRace().getStartOfRace() != null) {
+            final LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
+            if (startLine == null) {
+                result = null;
+            } else {
+                final Bearing angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind = startLine.getAngleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind();
+                if (angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind == null) {
+                    result = null;
+                } else {
+                    result = new DegreeBearingImpl(-180).add(angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind);
+                }
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getStartLineLength() {
+        final Distance result;
+        if (getTrackedRace().getStartOfRace() != null) {
+            final LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
+            if (startLine == null) {
+                result = null;
+            } else {
+                result = startLine.getLength();
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getFinishLineLength() {
+        final Distance result;
+        if (getTrackedRace().getFinishedTime() != null) {
+            final LineDetails finishLine = getTrackedRace().getFinishLine(getTrackedRace().getFinishedTime());
+            if (finishLine == null) {
+                result = null;
+            } else {
+                result = finishLine.getLength();
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 
 }

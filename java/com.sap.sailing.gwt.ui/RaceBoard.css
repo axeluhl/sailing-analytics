@@ -97,10 +97,11 @@ table {
 	padding-left: 45px;
 }
 
-.MapSimulationLegendParentDiv {
-	padding-bottom: 10px;
-	padding-right: 10px;
+.MapMetricLegend {
 	pointer-events: none;
+}
+.MapMetricLegendParentDiv {
+	padding-top: 65px;
 }
 
 .MapSimulationLegend {
@@ -109,7 +110,7 @@ table {
 
 .MapSimulationLegendParentDiv {
 	padding-bottom: 10px;
-	padding-right: 10px;
+	padding-right: 50px;
 	pointer-events: none;
 }
 

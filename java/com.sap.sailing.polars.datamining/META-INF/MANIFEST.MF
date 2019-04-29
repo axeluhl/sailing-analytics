@@ -6,18 +6,19 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.polars.datamining.Activator
 Bundle-Vendor: SAP
 Require-Bundle: org.eclipse.osgi;bundle-version="3.10.1",
- com.sap.sse;bundle-version="1.0.0",
- com.sap.sse.datamining;bundle-version="1.0.0",
- com.sap.sse.datamining.annotations;bundle-version="1.0.0",
- com.sap.sse.datamining.shared;bundle-version="1.0.0",
- com.sap.sailing.server;bundle-version="1.0.0",
- com.sap.sse.common;bundle-version="1.0.0",
- com.sap.sailing.domain;bundle-version="1.0.0",
+ com.sap.sse,
+ com.sap.sse.datamining,
+ com.sap.sse.datamining.annotations,
+ com.sap.sse.datamining.shared,
+ com.sap.sse.common,
+ com.sap.sailing.domain,
  com.sap.sailing.domain.shared.android,
- com.sap.sailing.domain.common;bundle-version="1.0.0",
+ com.sap.sailing.domain.common,
  com.sap.sailing.polars.datamining.shared,
  org.apache.commons.math,
- com.sap.sailing.datamining.provider
+ com.sap.sailing.datamining.provider,
+ com.sap.sailing.server.interface,
+ com.sap.sse.security
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.polars.datamining.data,

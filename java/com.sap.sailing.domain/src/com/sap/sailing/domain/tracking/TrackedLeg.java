@@ -118,6 +118,13 @@ public interface TrackedLeg extends Serializable {
     Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
 
     /**
+     * Same as {@link #getWindwardDistance(Position, Position, TimePoint, WindPositionMode)}, only that a cache
+     * for leg types, wind data and leg bearings can be passed to save the effort of redundant calculations of these
+     * values.
+     */
+    Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache);
+
+    /**
      * Same as {@link #getAbsoluteWindwardDistance(Position, Position, TimePoint, WindPositionMode)}, but this method considers the leg's
      * direction and will return a negative distance if <code>pos1</code> is already "ahead" of <code>pos2</code> in the
      * leg's direction, or a positive distance otherwise.

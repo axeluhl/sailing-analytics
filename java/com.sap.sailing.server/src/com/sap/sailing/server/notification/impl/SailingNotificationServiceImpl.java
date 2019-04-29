@@ -23,11 +23,11 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.impl.preferences.BoatClassResultsNotificationSet;
 import com.sap.sailing.server.impl.preferences.BoatClassUpcomingRaceNotificationSet;
 import com.sap.sailing.server.impl.preferences.CompetitorResultsNotificationSet;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.notification.SailingNotificationService;
 import com.sap.sse.common.Stoppable;
 import com.sap.sse.common.TimePoint;
@@ -35,7 +35,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.queue.MailQueue;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.interfaces.UserStore;
 
 public class SailingNotificationServiceImpl implements SailingNotificationService {
     public static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
