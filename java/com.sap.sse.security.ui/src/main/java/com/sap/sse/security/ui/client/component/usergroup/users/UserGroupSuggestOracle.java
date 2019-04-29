@@ -37,6 +37,7 @@ public class UserGroupSuggestOracle extends AbstractListSuggestOracle<UserDTO> {
 
             @Override
             public void onSuccess(Collection<UserDTO> result) {
+                allUsers.clear();
                 allUsers.addAll(result);
                 setSelectableValues(result);
             }
