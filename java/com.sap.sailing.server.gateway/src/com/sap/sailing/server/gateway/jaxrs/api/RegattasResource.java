@@ -383,7 +383,6 @@ public class RegattasResource extends AbstractSailingServerResource {
             String competitorName, String competitorShortName, String competitorEmail, String flagImageURIString,
             String teamImageURIString, Function<String, DynamicBoat> boatObtainer, String deviceUuid,
             String registrationLinkSecret) {
-
         final Subject subject = SecurityUtils.getSubject();
         final User user = getSecurityService().getCurrentUser();
         Response response;
@@ -1058,13 +1057,16 @@ public class RegattasResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/times")
-    public Response getTimes(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+    public Response getTimes(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+            @QueryParam("secret") String regattaSecret) {
         Response response = null;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
-            getSecurityService().checkCurrentUserReadPermission(regatta);
+            if (!getService().skipChecksDueToCorrectSecret(regattaName, regattaSecret)) {
+                getSecurityService().checkCurrentUserReadPermission(regatta);
+            }
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);

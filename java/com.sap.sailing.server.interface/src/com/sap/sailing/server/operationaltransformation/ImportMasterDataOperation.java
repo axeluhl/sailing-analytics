@@ -544,12 +544,10 @@ public class ImportMasterDataOperation extends
                         }
                     }
                 }
-                regatta.getRegattaLog().lockForRead();
                 ensureOwnership(regatta.getIdentifier(), securityService);
                 creationCount.addOneRegatta(regatta.getId().toString());
             }
         }
-
     }
 
 

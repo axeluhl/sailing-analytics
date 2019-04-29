@@ -46,6 +46,7 @@ import org.json.simple.parser.ParseException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.Set;
@@ -99,7 +100,7 @@ public class CheckinManager {
             String defaultCharset = "UTF-8";
             // Secret
             String secretFromQR = uri.getQueryParameter(DeviceMappingConstants.URL_SECRET);
-            String leaderboardNameFromQR = URLEncoder
+            String urlEncodedLeaderboardNameFromQR = URLEncoder
                     .encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), defaultCharset)
                     .replace("+", "%20");
             Set<String> parameterNames = uri.getQueryParameterNames();
@@ -111,6 +112,7 @@ public class CheckinManager {
                         .encodedPath(prefs.getServerCompetitorPath(competitorUrlData.competitorId));
                 if (secretFromQR != null) {
                     builder.appendQueryParameter(DeviceMappingConstants.URL_SECRET, secretFromQR);
+                    builder.appendQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME_FOR_SECRET, URLDecoder.decode(urlEncodedLeaderboardNameFromQR, "UTF-8"));
                 }
                 competitorUrlData.competitorUrl = builder.build().toString();
                 urlData = competitorUrlData;
@@ -119,7 +121,7 @@ public class CheckinManager {
                 markUrlData.setMarkId(URLEncoder
                         .encode(uri.getQueryParameter(DeviceMappingConstants.URL_MARK_ID_AS_STRING), defaultCharset));
                 Uri.Builder builder = Uri.parse(markUrlData.hostWithPort).buildUpon()
-                        .encodedPath(prefs.getServerMarkPath(leaderboardNameFromQR, markUrlData.getMarkId()));
+                        .encodedPath(prefs.getServerMarkPath(urlEncodedLeaderboardNameFromQR, markUrlData.getMarkId()));
                 if (secretFromQR != null) {
                     builder.appendQueryParameter(DeviceMappingConstants.URL_SECRET, secretFromQR);
                 }
@@ -133,6 +135,7 @@ public class CheckinManager {
                         .encodedPath(prefs.getServerBoatPath(boatUrlData.getBoatId()));
                 if (secretFromQR != null) {
                     builder.appendQueryParameter(DeviceMappingConstants.URL_SECRET, secretFromQR);
+                    builder.appendQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME_FOR_SECRET, URLDecoder.decode(urlEncodedLeaderboardNameFromQR, "UTF-8"));
                 }
                 boatUrlData.setBoatUrl(builder.build().toString());
                 urlData = boatUrlData;
@@ -143,12 +146,12 @@ public class CheckinManager {
             if (urlData != null) {
                 urlData.uriStr = uri.toString();
                 urlData.checkinURLStr = Uri.parse(urlData.hostWithPort).buildUpon()
-                        .encodedPath(prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR))
+                        .encodedPath(prefs.getServerCheckinPath().replace("{leaderboard-name}", urlEncodedLeaderboardNameFromQR))
                         .build().toString();
                 urlData.secret = secretFromQR;
                 urlData.eventId = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID),
                         defaultCharset);
-                urlData.leaderboardName = leaderboardNameFromQR;
+                urlData.leaderboardName = urlEncodedLeaderboardNameFromQR;
                 urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(
                         UUID.fromString(UniqueDeviceUuid.getUniqueId(activity)));
                 Uri.Builder eventBuilder = Uri.parse(urlData.hostWithPort).buildUpon()

@@ -1635,10 +1635,27 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 securityDisplayName, actionWithResult, true);
     }
 
+    /**
+     * For the current session's {@link Subject} an ownership for an object of type {@code type} and with
+     * type-relative object identifier {@code typeRelativeIdentifier} is created with the subject's
+     * default creation group if no ownership for that object is found yet. Otherwise, the existing ownership
+     * is left untouched.<p>
+     * 
+     * If {@code doServerCreateObjectCheck} is {@code true}, the {@link ServerActions#CREATE_OBJECT} permission
+     * is checked for the executing server.<p>
+     * 
+     * Then, the {@link DefaultActions#CREATE} permission is checked for the {@code type}/{@code typeRelativeIdentifier}
+     * object.<p>
+     * 
+     * If any of these permission checks fails and the ownership has not been found but created, the ownership
+     * is removed again, and the authorization exception is thrown by this method. Otherwise, the subject is
+     * considered to have the permission to create the object, the {@code actionWithResult} is invoked, and
+     * the object returned by the action is the result of this method.
+     */
     private <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
-            TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult,
+            TypeRelativeObjectIdentifier typeRelativeIdentifier, String securityDisplayName, Callable<T> actionWithResult,
             boolean doServerCreateObjectCheck) {
-        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
+        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeRelativeIdentifier);
         T result = null;
         boolean didSetOwnership = false;
         try {

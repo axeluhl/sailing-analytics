@@ -14,6 +14,7 @@ import javax.servlet.ServletContext;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.mail.MailException;
@@ -43,6 +44,7 @@ import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -62,11 +64,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     SecurityManager getSecurityManager();
 
     /**
-     * Return the ownership information for the object identified by {@code idOfOwnedObject}. If there is no
-     * ownership information for that object and there is a default tenant available, create a default {@link Ownership}
-     * information that lists the default tenant as the tenant owner for the object in question; no user owner is
-     * specified. If no default tenant is available and no ownership information for the object with the ID specified
-     * is found, {@code null} is returned.
+     * Return the ownership information for the object identified by {@code idOfOwnedObject}. If there is no ownership
+     * information for that object {@code null} is returned.
      */
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
@@ -354,10 +353,31 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     UserGroup getDefaultTenant();
 
+    /**
+     * For the current session's {@link Subject} an ownership for an object of type {@code type} and with type-relative
+     * object identifier {@code typeRelativeObjectIdentifier} is created with the subject's default creation group if no
+     * ownership for that object is found yet. Otherwise, the existing ownership is left untouched.
+     * <p>
+     * 
+     * The {@link ServerActions#CREATE_OBJECT} permission is checked for the executing server. Then, the
+     * {@link DefaultActions#CREATE} permission is checked for the {@code type}/{@code typeRelativeObjectIdentifier}
+     * object.
+     * <p>
+     * 
+     * If any of these permission checks fails and the ownership has not been found but created, the ownership is
+     * removed again, and the authorization exception is thrown by this method. Otherwise, the subject is considered to
+     * have the permission to create the object, the {@code actionWithResult} is invoked, and the object returned by the
+     * action is the result of this method.
+     */
     <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier,
             String securityDisplayName, Callable<T> createActionReturningCreatedObject);
 
+    /**
+     * Like
+     * {@link #setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions, TypeRelativeObjectIdentifier, String, Callable)},
+     * only that the action does not return an object, so this method does not either.
+     */
     void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName, Action actionToCreateObject);
 
@@ -569,9 +589,19 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck);
 
+    /**
+     * Like {@link #setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions, TypeRelativeObjectIdentifier, String, Callable)},
+     * only that no check is performed for {@link ServerActions#CREATE_OBJECT} in addition to the {@code type}-specific
+     * {@link DefaultActions#CREATE} check.
+     */
     <T> T setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName, Callable<T> actionWithResult);
 
+    /**
+     * Like {@link #setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions, TypeRelativeObjectIdentifier, String, Action)},
+     * only that no check is performed for {@link ServerActions#CREATE_OBJECT} in addition to the {@code type}-specific
+     * {@link DefaultActions#CREATE} check.
+     */
     void setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, String securityDisplayName,
             Action actionToCreateObject);

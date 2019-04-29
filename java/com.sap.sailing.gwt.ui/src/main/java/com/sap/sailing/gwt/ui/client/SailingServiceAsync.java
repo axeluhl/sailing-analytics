@@ -425,27 +425,16 @@ public interface SailingServiceAsync extends FileStorageManagementGwtServiceAsyn
     void getRaceboardData(String regattaName, String raceName, String leaderboardName, 
             String leaderboardGroupName, UUID eventId, AsyncCallback<RaceboardDataDTO> callback);
 
-    /**
-     * @param date
-     *            use <code>null</code> to indicate "live" in which case the server live time stamp for the race
-     *            identified by <code>raceIdentifier</code> will be used, considering that race's delay.
-     * @param md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID
-     *            used to decide whether the client requires an update to the race's competitor set. If the server
-     *            has the same MD5 hash for the race's competitors, no competitor set is transmitted to the client.
-     *            Otherwise, the full race competitor ID's as strings are sent to the client again for update.
-     * @param estimatedDurationRequired {@code true} if the estimated duration should be calculated
-     * @param timeToGetTheEstimatedDurationFor the time to use for the calculation of the estimated duration.
-     *            May be {@code null} if estimatedDurationRequired is {@code false}
-     */
     void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
-            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, Date timeToGetTheEstimatedDurationFor,
-            boolean estimatedDurationRequired, AsyncCallback<CompactRaceMapDataDTO> callback);
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
+            Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired, DetailType detailType,
+            String leaderboardName, String leaderboardGroupName, AsyncCallback<CompactRaceMapDataDTO> callback);
 
     void getBoatPositions(RegattaAndRaceIdentifier raceIdentifier, Map<String, Date> fromPerCompetitorIdAsString,
-            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate,
-            AsyncCallback<CompactBoatPositionsDTO> callback);
+            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate, DetailType detailType,
+            String leaderboardName, String leaderboardGroupName, AsyncCallback<CompactBoatPositionsDTO> callback);
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
