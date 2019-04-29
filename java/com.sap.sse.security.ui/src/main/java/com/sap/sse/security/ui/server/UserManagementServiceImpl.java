@@ -881,6 +881,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
                         @Override
                         public void run() throws Exception {
+                            final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
+                                    .getQualifiedObjectIdentifier(associationTypeIdentifier);
+                            getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
+                                    getSecurityService().getUserGroup(null), DefaultActions.READ.name());
+
                             getSecurityService().addRoleForUser(user, role);
                             logger.info(message);
                         }
