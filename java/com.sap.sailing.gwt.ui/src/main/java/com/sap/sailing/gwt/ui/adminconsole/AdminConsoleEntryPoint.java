@@ -435,6 +435,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
                     @Override
                     public void refreshAfterBecomingVisible() {
                         userGroupManagementPanel.updateUserGroups();
+                        userGroupManagementPanel.refreshSuggests();
                     }
                 }, getStringMessages().userGroupManagement(), SecuredSecurityTypes.USER_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
 
