@@ -127,4 +127,9 @@ public class UserGroupManagementPanel extends Composite {
         userGroupDetailPanel.updateUserList();
         userGroupRoleDefinitionPanel.updateUserGroups();
     }
+
+    public void refreshSuggests() {
+        userGroupDetailPanel.refreshSuggest();
+        userGroupRoleDefinitionPanel.refreshSuggest();
+    }
 }
