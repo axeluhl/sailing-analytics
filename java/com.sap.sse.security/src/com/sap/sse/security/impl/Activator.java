@@ -225,8 +225,8 @@ public class Activator implements BundleActivator {
                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
                 securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier.toString());
                 if (securityService.isInitialOrMigration()) {
-                    securityService.addToAccessControlList(associationQualifiedIdentifier,
-                            securityService.getUserGroup(null), DefaultActions.READ.name());
+                    securityService.addToAccessControlList(associationQualifiedIdentifier, null,
+                            DefaultActions.READ.name());
                 }
             }
             for (WildcardPermission permission : user.getPermissions()) {
@@ -237,8 +237,8 @@ public class Activator implements BundleActivator {
                         .getQualifiedObjectIdentifier(associationTypeIdentifier);
                 securityService.migrateOwnership(associationQualifiedIdentifier, associationTypeIdentifier.toString());
                 if (securityService.isInitialOrMigration()) {
-                    securityService.addToAccessControlList(associationQualifiedIdentifier,
-                            securityService.getUserGroup(null), DefaultActions.READ.name());
+                    securityService.addToAccessControlList(associationQualifiedIdentifier, null,
+                            DefaultActions.READ.name());
                 }
             }
         }

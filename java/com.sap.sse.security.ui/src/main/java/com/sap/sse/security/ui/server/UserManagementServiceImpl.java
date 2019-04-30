@@ -884,7 +884,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                             final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
                             getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
-                                    getSecurityService().getUserGroup(null), DefaultActions.READ.name());
+                                    null, DefaultActions.READ.name());
 
                             getSecurityService().addRoleForUser(user, role);
                             logger.info(message);
@@ -1034,7 +1034,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                             final QualifiedObjectIdentifier qualifiedObjectAssociationIdentifier = SecuredSecurityTypes.PERMISSION_ASSOCIATION
                                     .getQualifiedObjectIdentifier(associationTypeIdentifier);
                             getSecurityService().addToAccessControlList(qualifiedObjectAssociationIdentifier,
-                                    getSecurityService().getUserGroup(null), DefaultActions.READ.name());
+                                    null, DefaultActions.READ.name());
                             getSecurityService().addPermissionForUser(username, permission);
                             logger.info(message);
                         }
