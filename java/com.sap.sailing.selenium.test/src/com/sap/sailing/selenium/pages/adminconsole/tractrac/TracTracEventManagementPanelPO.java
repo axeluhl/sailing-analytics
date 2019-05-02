@@ -74,16 +74,6 @@ public class TracTracEventManagementPanelPO extends PageArea {
         }
     }
     
-    // TODO [D049941]: Prefix the Ids with the component (e.g. "Button")
-    @FindBy(how = BySeleniumId.class, using = "LiveURITextBox")
-    private WebElement liveURITextBox;
-    
-    @FindBy(how = BySeleniumId.class, using = "StoredURITextBox")
-    private WebElement storedURITextBox;
-    
-    @FindBy(how = BySeleniumId.class, using = "JsonURLTextBox")
-    private WebElement jsonURLTextBox;
-    
     @FindBy(how = BySeleniumId.class, using = "ListRacesButton")
     private WebElement listRacesButton;
     
@@ -111,6 +101,12 @@ public class TracTracEventManagementPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "TrackedRacesListComposite")
     private WebElement trackedRacesListComposite;
     
+    @FindBy(how = BySeleniumId.class, using = "AddConnectionButton")
+    private WebElement addConnectionButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "TracTracConfigurationWithSecurityDTOTable")
+    private WebElement configurationTable;
+    
     /**
      * <p></p>
      * 
@@ -123,38 +119,32 @@ public class TracTracEventManagementPanelPO extends PageArea {
         super(driver, element);
     }
     
-    
-    /**
-     * <p>Lists all available trackable races for the given URL. The list of the races can be obtained via
-     *   {@link #getTrackableRaces()}.</p>
-     * 
-     * @param url
-     *   The URL for which the races are to list.
-     */
-    public void listTrackableRaces(String url) {
-        listTrackableRaces("", "", url);  //$NON-NLS-1$//$NON-NLS-2$
+    public void addConnectionAndListTrackableRaces(String url) {
+        AddTracTracConnectionDialogPO dialog = addConnection();
+        dialog.setJsonUrl(url);
+        dialog.pressOk();
+        listRacesForExistingConnection(url);
     }
-    
-    /**
-     * <p>Lists all available trackable races for the given URL. The list of the races can be obtained via
-     *   {@link #getTrackableRaces()}.</p>
-     * 
-     * @param url
-     *   The URL for which the races are to list.
-     */
-    public void listTrackableRaces(String liveURI, String storedURI, String jsonURL) {
-        this.liveURITextBox.clear();
-        this.liveURITextBox.sendKeys(liveURI);
-        
-        this.storedURITextBox.clear();
-        this.storedURITextBox.sendKeys(storedURI);
-        
-        this.jsonURLTextBox.clear();
-        this.jsonURLTextBox.sendKeys(jsonURL);
+
+    public void listRacesForExistingConnection(String url) {
+        CellTablePO<DataEntryPO> tablePO = getConfigurationTable();
+        tablePO.waitForTableToShowData();
+        tablePO.selectEntries(entry -> {
+            return url.equals(entry.getColumnContent("JSON URL"));
+        }, () -> false);
         
         this.listRacesButton.click();
-        
         waitForAjaxRequests();
+    }
+    
+    public AddTracTracConnectionDialogPO addConnection() {
+        addConnectionButton.click();
+        final WebElement dialog = findElementBySeleniumId(this.driver, "EditTracTracConnectionDialog");
+        return new AddTracTracConnectionDialogPO(this.driver, dialog);
+    }
+
+    private CellTablePO<DataEntryPO> getConfigurationTable() {
+        return new GenericCellTablePO<>(this.driver, this.configurationTable, DataEntryPO.class);
     }
     
     /**

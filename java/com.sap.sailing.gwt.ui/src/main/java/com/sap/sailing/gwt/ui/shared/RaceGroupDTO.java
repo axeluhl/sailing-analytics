@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class RaceGroupDTO extends NamedDTO implements IsSerializable {
         

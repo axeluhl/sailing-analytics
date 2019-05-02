@@ -8,13 +8,16 @@ import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Base view class of the user account details page. This class implements the shared logic of the desktop and mobile
@@ -43,6 +46,11 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
     });
     
     @UiField public TextBox emailUi;
+    
+    /**
+     * The item texts are the tenant names, the values are the tenant IDs as strings
+     */
+    @UiField public ListBox defaultTenantUi;
     @UiField public PasswordTextBox oldPasswordUi;
     @UiField public PasswordTextBox newPasswordUi;
     @UiField public PasswordTextBox newPasswordConfirmationUi;
@@ -72,12 +80,24 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         companyUi.setValue(currentUser.getCompany());
         usernameUi.setValue(currentUser.getName());
         emailUi.setValue(currentUser.getEmail());
-        
+        updateDefaultTenantSelection(currentUser);
         String currentLocale = currentUser.getLocale();
         localeUi.setValue(currentLocale);
         localeUi.setAcceptableValues(GWTLocaleUtil.getAvailableLocalesAndDefault());
-        
         clearPasswordFields();
+    }
+
+    private void updateDefaultTenantSelection(UserDTO currentUser) {
+        StrippedUserGroupDTO defaultTennant = currentUser.getDefaultTenant();
+        defaultTenantUi.clear();
+        int i = 0;
+        for (StrippedUserGroupDTO group : currentUser.getUserGroups()) {
+            defaultTenantUi.addItem(group.getName(), group.getId().toString());
+            if (Util.equalsWithNull(group, defaultTennant)) {
+                defaultTenantUi.setSelectedIndex(i);
+            }
+            i++;
+        }
     }
 
     public void clearPasswordFields() {
@@ -92,7 +112,7 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
     
     @UiHandler("saveChangesUi")
     public void onSaveChangesClicked(ClickEvent event) {
-        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue(), localeUi.getValue());
+        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue(), localeUi.getValue(), defaultTenantUi.getSelectedValue());
     }
     
     @UiHandler("changeEmailUi")

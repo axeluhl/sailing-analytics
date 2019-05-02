@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 
 /**
  * Special Comparator with following precedences:

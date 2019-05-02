@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -22,7 +23,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
@@ -338,7 +338,7 @@ public class OnlineDataManager extends DataManager {
 
     @Override
     public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
-            final DeviceConfigurationIdentifier identifier, LoadClient<DeviceConfiguration> callback) {
+            final String deviceConfigurationName, UUID deviceConfigurationUuid, LoadClient<DeviceConfiguration> callback) {
         return new DataLoaderCallbacks<>(callback, new LoaderCreator<DeviceConfiguration>() {
             @Override
             public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
@@ -346,11 +346,14 @@ public class OnlineDataManager extends DataManager {
                 DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(
                         DeviceConfigurationJsonDeserializer.create());
-                String encodedIdentifier = identifier.getClientIdentifier();
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
-                params.add(new Util.Pair<String, Object>("client", encodedIdentifier));
-                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration",
-                        params);
+                if (deviceConfigurationName != null) {
+                    params.add(new Util.Pair<String, Object>("client", deviceConfigurationName));
+                }
+                if (deviceConfigurationUuid != null) {
+                    params.add(new Util.Pair<String, Object>("uuid", deviceConfigurationUuid.toString()));
+                }
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration", params);
                 return new OnlineDataLoader<>(context, url, parser, handler);
             }
         }, getContext());

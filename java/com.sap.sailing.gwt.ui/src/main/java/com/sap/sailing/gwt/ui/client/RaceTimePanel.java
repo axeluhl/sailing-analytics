@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
+import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -21,9 +21,9 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * A specific {@link TimePanel} that shows and manages a time slider for a race. Receives {@link RaceTimesInfoDTO}
@@ -56,12 +56,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * timer to be set to a reasonable value.
      */
     private final Set<RaceTimesInfoProviderListener> listeners;
-    
+
+    private final RaceWithCompetitorsAndBoatsDTO raceDTO;
+
     private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
         @Override
         public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-            RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = user != null && user.hasPermission(
-                    Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(), SailingPermissionsForRoleProvider.INSTANCE);
+            RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = userService.hasPermission(raceDTO,
+                    TrackedRaceActions.CAN_REPLAY_DURING_LIVE_RACES);
         }
     };
 
@@ -78,9 +80,11 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             UserService userService,
             Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
-            RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
+            RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode,
+            final RaceWithCompetitorsAndBoatsDTO raceDTO) {
         super(parent, context, timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible,
-                forcePaddingRightToAlignToCharts, userService);
+                forcePaddingRightToAlignToCharts, userService, raceDTO);
+        this.raceDTO = raceDTO;
         this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;

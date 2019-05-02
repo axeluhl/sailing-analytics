@@ -1,6 +1,11 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList; 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -21,18 +25,16 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
-import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -40,34 +42,42 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
  * A composite showing the list of all regattas 
  * @author Frank
- *
  */
 public class RegattaListComposite extends Composite implements RegattasDisplayer {
-    protected final CellTable<RegattaDTO> regattaTable;
+
     protected final ListDataProvider<RegattaDTO> regattaListDataProvider;
-    private List<RegattaDTO> allRegattas;
-    private final SimplePanel mainPanel;
-    private final VerticalPanel panel;
-
-    private final Label noRegattasLabel;
-
-    private final SailingServiceAsync sailingService;
-    protected final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
-    private final ErrorReporter errorReporter;
-    private final RegattaRefresher regattaRefresher;
     protected final StringMessages stringMessages;
 
+    private final CellTable<RegattaDTO> regattaTable;
+    private final Label noRegattasLabel;
+    private final SailingServiceAsync sailingService;
+    private final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
+    private final ErrorReporter errorReporter;
+    private final RegattaRefresher regattaRefresher;
     private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
+
+    private List<RegattaDTO> allRegattas;
 
     protected static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
@@ -79,17 +89,15 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
 
     @SuppressWarnings("unchecked")
-    public RegattaListComposite(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
-            final ErrorReporter errorReporter, final StringMessages stringMessages) {
+    public RegattaListComposite(final SailingServiceAsync sailingService, final UserService userService,
+            RegattaRefresher regattaRefresher, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         allRegattas = new ArrayList<RegattaDTO>();
         
-        mainPanel = new SimplePanel();
-        panel = new VerticalPanel();
-        mainPanel.setWidget(panel);
+        final VerticalPanel panel = new VerticalPanel();
         Label filterRegattasLabel = new Label(stringMessages.filterRegattasByName() + ":");
         filterRegattasLabel.setWordWrap(false);
         noRegattasLabel = new Label(stringMessages.noRegattasYet());
@@ -117,21 +125,21 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         };
         filterablePanelRegattas.getTextBox().ensureDebugId("RegattasFilterTextBox");
-        regattaTable = createRegattaTable();
+        regattaTable = createRegattaTable(userService);
         regattaTable.ensureDebugId("RegattasCellTable");
         refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
         regattaTable.setVisible(false);
         panel.add(filterablePanelRegattas);
 
         panel.add(regattaTable);
-        initWidget(mainPanel);
+        initWidget(panel);
     }
     
     public HandlerRegistration addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
         return refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(handler);
     }
 
-    protected CellTable<RegattaDTO> createRegattaTable() {
+    protected CellTable<RegattaDTO> createRegattaTable(final UserService userService) {
         FlushableCellTable<RegattaDTO> table = new FlushableCellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
@@ -177,6 +185,15 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         regattaCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
         columnSortHandler.setComparator(regattaCanBoatsOfCompetitorsChangePerRaceColumn,
                 (r1, r2)->Boolean.valueOf(r1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(r2.canBoatsOfCompetitorsChangePerRace)));
+        
+        TextColumn<RegattaDTO> competitorRegistrationTypeColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                return regatta.competitorRegistrationType.getLabel(stringMessages);
+            }
+        };
+        competitorRegistrationTypeColumn.setSortable(true);
+        columnSortHandler.setComparator(competitorRegistrationTypeColumn, (r1, r2)->r1.competitorRegistrationType.ordinal() - r2.competitorRegistrationType.ordinal());
 
         TextColumn<RegattaDTO> startEndDateColumn = new TextColumn<RegattaDTO>() {
             @Override
@@ -230,29 +247,35 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
 
-        ImagesBarColumn<RegattaDTO, RegattaConfigImagesBarCell> regattaActionColumn = new ImagesBarColumn<RegattaDTO, RegattaConfigImagesBarCell>(
-                new RegattaConfigImagesBarCell(stringMessages));
-        regattaActionColumn.setFieldUpdater(new FieldUpdater<RegattaDTO, String>() {
-            @Override
-            public void update(int index, RegattaDTO regatta, String value) {
-                if (RegattaConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    editRegatta(regatta);
-                } else if (RegattaConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
-                        removeRegatta(regatta);
-                    }
-                }
+        final HasPermissions type = SecuredDomainType.REGATTA;
+        final AccessControlledActionsColumn<RegattaDTO, RegattaConfigImagesBarCell> actionsColumn = create(
+                new RegattaConfigImagesBarCell(stringMessages), userService);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::editRegatta);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DELETE, regatta -> {
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
+                removeRegatta(regatta);
             }
         });
+        final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
+                regatta -> regattaRefresher.fillRegattas(), stringMessages);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
+                config::openDialog);
+
+        final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
+                stringMessages);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                configACL::openDialog);
 
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
+        table.addColumn(competitorRegistrationTypeColumn, stringMessages.competitorRegistrationTypeShort());
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());
-        table.addColumn(regattaActionColumn, stringMessages.actions());
+        SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
+        table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(regattaSelectionCheckboxColumn.getSelectionModel(), regattaSelectionCheckboxColumn.getSelectionManager());
         return table;
     }
@@ -291,7 +314,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private void openEditRegattaDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents) {
         RegattaWithSeriesAndFleetsDialog dialog = new RegattaWithSeriesAndFleetsEditDialog(regatta, existingRegattas,
-                existingEvents, /*correspondingEvent*/ null, stringMessages, new DialogCallback<RegattaDTO>() {
+                existingEvents, /*correspondingEvent*/ null, sailingService, stringMessages, new DialogCallback<RegattaDTO>() {
                     @Override
                     public void cancel() {
                     }
@@ -306,9 +329,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
-
         sailingService.updateRegatta(regattaName, editedRegatta.startDate, editedRegatta.endDate, editedRegatta.defaultCourseAreaUuid,
                 editedRegatta.configuration, editedRegatta.buoyZoneRadiusInHullLengths, editedRegatta.useStartTimeInference, editedRegatta.controlTrackingFromStartAndFinishTimes,
+                editedRegatta.registrationLinkSecret, editedRegatta.competitorRegistrationType,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {

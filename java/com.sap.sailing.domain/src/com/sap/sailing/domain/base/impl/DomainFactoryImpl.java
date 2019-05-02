@@ -82,6 +82,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache.ResolveListener;
 
 public class DomainFactoryImpl extends SharedDomainFactoryImpl implements DomainFactory {
     private static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
@@ -103,8 +104,9 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     }
 
     @Override
-    public ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException {
-        return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this);
+    public ObjectInputStreamResolvingAgainstCache<DomainFactory> createObjectInputStreamResolvingAgainstThisFactory(
+            InputStream inputStream, ResolveListener resolveListener) throws IOException {
+        return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this, resolveListener);
     }
 
     @Override

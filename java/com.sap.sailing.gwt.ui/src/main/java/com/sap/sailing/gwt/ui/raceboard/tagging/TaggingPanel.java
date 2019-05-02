@@ -25,15 +25,13 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -47,17 +45,18 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * A view showing tags which are connected to a specific race and allowing users to add own tags to a race. This view is
  * shown at the {@link com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel RaceBoard}. Tags consist of a title and optional
  * a comment and/or image. Tag-Buttons allow users to preset tags which are used more frequently. Public tags will be
  * stored as an {@link com.sap.sailing.domain.abstractlog.race.RaceLogEvent RaceLogEvent}, private tags will be stored
- * in the {@link com.sap.sse.security.UserStore UserStore}.
+ * in the {@link com.sap.sse.security.interfaces.UserStore UserStore}.
  * 
  * @author Julian Rendl, Henri Kohlberg
  */
@@ -68,9 +67,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      * Describes the {@link TaggingPanel#currentState current state} of the {@link TaggingPanel}.
      */
     protected enum State {
-        VIEW, // default
-        CREATE_TAG,
-        EDIT_TAG
+            VIEW, // default
+            CREATE_TAG, EDIT_TAG
     }
 
     // styling
@@ -119,16 +117,19 @@ public class TaggingPanel extends ComponentWithoutSettings
      * 3) another user adds/deletes/changes any tag between the latest received tag and the current timer position<br/>
      * consecutively, the timer would jump to this new tag as the selection would change automatically as the latest tag
      * changed. This selection change would also trigger the timer to jump to the latest tag, which is not intended in
-     * this case. Therefor any received changes on any tags will set this boolean to true which will ignore the time jump
-     * at the selection change event and prevent this wrong behavior.
+     * this case. Therefor any received changes on any tags will set this boolean to true which will ignore the time
+     * jump at the selection change event and prevent this wrong behavior.
      * 
      * @see #raceTimesInfosReceived(Map, long, Date, long)
      */
     private boolean preventTimeJumpAtSelectionChangeForOnce = false;
 
+    private StrippedLeaderboardDTOWithSecurity leaderboardDTO;
+
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
-            RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight) {
+            RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight,
+            StrippedLeaderboardDTOWithSecurity leaderboardDTO) {
         super(parent, context);
 
         this.stringMessages = stringMessages;
@@ -138,6 +139,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.timePointToHighlight = timePointToHighlight;
         this.tagToHighlight = tagToHighlight;
+        this.leaderboardDTO = leaderboardDTO;
 
         style = TaggingPanelResources.INSTANCE.style();
         style.ensureInjected();
@@ -201,7 +203,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                         if (preventTimeJumpAtSelectionChangeForOnce) {
                             preventTimeJumpAtSelectionChangeForOnce = false;
                         } else {
-                            // remove time change listener when manually selecting tag cells as this could end in an infinite loop
+                            // remove time change listener when manually selecting tag cells as this could end in an
+                            // infinite loop
                             // of timer change -> automatic selection change -> timer change -> ...
                             timer.removeTimeListener(TaggingPanel.this);
                             timer.setTime(selectedTag.getRaceTimepoint().asMillis());
@@ -333,7 +336,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     /**
      * Sends request to {@link SailingServiceAsync SailingService} to add the given tag to the
      * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} if the parameter <code>isVisibleForPublic</code>
-     * is set to <code>true</code>. Otherwise tag will be stored in the {@link com.sap.sse.security.UserStore
+     * is set to <code>true</code>. Otherwise tag will be stored in the {@link com.sap.sse.security.interfaces.UserStore
      * UserStore}. <br/>
      * Checks parameters for valid values and replaces optional parameters with value <code>null</code> by default
      * values: <code>comment</code> and <code>imageURL</code> will be replaced by an empty string,
@@ -497,22 +500,25 @@ public class TaggingPanel extends ComponentWithoutSettings
      * SailingService}, adds them to the {@link TagListProvider} and updates the UI via {@link #updateContent()}.
      */
     private void reloadPrivateTags() {
-        sailingService.getPrivateTags(leaderboardName, raceColumn.getName(), fleet.getName(),
-                new AsyncCallback<List<TagDTO>>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        GWT.log(caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(List<TagDTO> result) {
-                        tagListProvider.removePrivateTags();
-                        if (result != null && !result.isEmpty()) {
-                            tagListProvider.addAll(result);
+        tagListProvider.removePrivateTags();
+        if (userService.getCurrentUser() != null) {
+            sailingService.getPrivateTags(leaderboardName, raceColumn.getName(), fleet.getName(),
+                    new AsyncCallback<List<TagDTO>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log(caught.getMessage());
                         }
-                        updateContent();
-                    }
-                });
+
+                        @Override
+                        public void onSuccess(List<TagDTO> result) {
+                            tagListProvider.removePrivateTags();
+                            if (result != null && !result.isEmpty()) {
+                                tagListProvider.addAll(result);
+                            }
+                            updateContent();
+                        }
+                    });
+        }
     }
 
     /**
@@ -629,9 +635,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected boolean hasPermissionToModifyPublicTags() {
         boolean hasPermission = false;
-        if (leaderboardName != null && userService.getCurrentUser().hasPermission(
-                Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName),
-                SailingPermissionsForRoleProvider.INSTANCE)) {
+        if (leaderboardName != null && userService.hasPermission(leaderboardDTO, DefaultActions.UPDATE)) {
             hasPermission = true;
         }
         return hasPermission;

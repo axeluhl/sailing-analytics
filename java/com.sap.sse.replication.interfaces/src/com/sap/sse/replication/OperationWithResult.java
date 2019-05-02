@@ -34,7 +34,7 @@ public interface OperationWithResult<S, R> extends Operation<S>, Serializable {
      * Tells whether this operation requires explicit transitive replication to other replicas when received by a
      * replica. This is the case for all operations whose {@link #internalApplyTo(Object)} method will not trigger
      * replication. An example for an operation that does <em>not</em> require explicit transitive replication is the
-     * insertion of a GPS fix into a competitor's track because the insertion of the track, as implemented by
+     * insertion of a GPS fix into a competitor's track because the insertion of the fix, as implemented by
      * {@link #internalApplyTo} will trigger the replication.
      * <p>
      * 

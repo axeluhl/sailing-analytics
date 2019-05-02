@@ -46,7 +46,6 @@ public class SensorDataImporter {
      *            contents; the importer names are matched against {@link DoubleVectorFixImporter#getType()} for all
      *            importers found registered in the OSGi registry. The first matching importer is used for the file. The
      *            importer is selected on a per-file basis.
-     * @return 
      * 
      * @throws IOException
      */

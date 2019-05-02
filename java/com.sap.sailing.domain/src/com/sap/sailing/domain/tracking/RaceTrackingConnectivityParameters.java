@@ -40,7 +40,8 @@ public interface RaceTrackingConnectivityParameters {
      *            tracker.
      */
     RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception;
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) throws Exception;
     
     /**
      * Starts a {@link RaceTracker}, associating the resulting races with the {@link Regatta} passed as argument instead
@@ -54,7 +55,8 @@ public interface RaceTrackingConnectivityParameters {
      * {@link TrackedRegattaRegistry#removeRace(Regatta, com.sap.sailing.domain.base.RaceDefinition)}.
      */
     RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception;
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) throws Exception;
     
     /**
      * Deliver an ID object equal to that of the {@link RaceTracker#getID()} delivered by the {@link RaceTracker}

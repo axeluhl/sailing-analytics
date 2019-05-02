@@ -152,6 +152,7 @@ public class PolarResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -187,6 +188,7 @@ public class PolarResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);

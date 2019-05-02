@@ -249,7 +249,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                     if (!first) {
                         sb.append(", ");
                     }
-                    sb.append(leaderboard.name);
+                    sb.append(leaderboard.getName());
                     first = false;
                 }
                 return sb.toString();
@@ -360,11 +360,11 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
+                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.getName()
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + "&leaderboardGroupName=" + selectedGroup.getName() + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), leaderboard.name);
+                return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), leaderboard.getName());
             }
         };
         
@@ -454,7 +454,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                         RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
                         String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
-                                + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
+                                + selectedLeaderboard.getName() + "&raceName=" + raceId.getRaceName() + "&regattaName="
                                 + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.getName()
                                 + "&root=overview"
                                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));

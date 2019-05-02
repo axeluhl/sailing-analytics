@@ -14,17 +14,6 @@
   <inherits name="com.sap.sse.security.ui.SecurityLocalesAllPermutations" />
   <inherits name="com.sap.sse.security.ui.LoginPanel"/>
   
-  <!-- Specify the app entry point class.                         -->
-  <entry-point class='com.sap.sse.security.ui.usermanagement.UserManagementEntryPoint'/>
-
-  <set-property name="gwt.logging.enabled" value="TRUE"/> 
-  <set-property name="gwt.logging.logLevel" value="FINE"/>
-  
-  <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
-  <set-property name="gwt.logging.consoleHandler" value="ENABLED" />
-  <set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
-  <set-property name="gwt.logging.systemHandler" value="ENABLED" />
-
   <!-- Specify the paths for translatable code                    -->
   <source path='usermanagement'/>
 </module>

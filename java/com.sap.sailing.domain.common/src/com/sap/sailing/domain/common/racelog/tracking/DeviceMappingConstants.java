@@ -52,15 +52,18 @@ public class DeviceMappingConstants {
     public static final String JSON_TEAM_IMAGE_URI = "teamImageUri";
 
     public static String getDeviceMappingForRegattaLogUrl(String serverUrlWithoutTrailingSlash, String eventId,
-            String leaderboardName, String mappedItemType, String mappedItemId, UrlHelper helper) {
+            String leaderboardName, String mappedItemType, String mappedItemId, String secret, UrlHelper helper) {
         return serverUrlWithoutTrailingSlash + TRACKING_URL_BASE + "?" + URL_EVENT_ID + "=" + helper.encodeQueryString(eventId) + "&"
                 + URL_LEADERBOARD_NAME + "=" + helper.encodeQueryString(leaderboardName) + "&" + helper.encodeQueryString(mappedItemType) + "="
-                + helper.encodeQueryString(mappedItemId);
+                + helper.encodeQueryString(mappedItemId) + "&" + JSON_REGISTER_SECRET + "="
+                + helper.encodeQueryString(secret);
     }
     
     public static String getBuoyTenderInvitationUrl(String serverUrlWithoutTrailingSlash,
-            String leaderboardName, String eventId, UrlHelper helper) {
+            String leaderboardName, String eventId, String secret, UrlHelper helper) {
         return serverUrlWithoutTrailingSlash + BUOY_TENDER_URL_BASE + "?" + URL_EVENT_ID + "="
-                + helper.encodeQueryString(eventId) + "&" + URL_LEADERBOARD_NAME + "=" + helper.encodeQueryString(leaderboardName);
+                + helper.encodeQueryString(eventId) + "&" + URL_LEADERBOARD_NAME + "="
+                + helper.encodeQueryString(leaderboardName) + "&" + JSON_REGISTER_SECRET + "="
+                + helper.encodeQueryString(secret);
     }
 }

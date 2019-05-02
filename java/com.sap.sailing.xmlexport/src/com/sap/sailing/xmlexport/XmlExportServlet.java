@@ -6,6 +6,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 
 public class XmlExportServlet extends SailingServerHttpServlet {
@@ -17,11 +19,16 @@ public class XmlExportServlet extends SailingServerHttpServlet {
         try {
             if ((action != null) && !"".equals(action)) {
                 if ("leaderboard".equalsIgnoreCase(action)) {
-                    final LeaderboardData leaderboardData = new LeaderboardData(req, res, getService());
+                    final LeaderboardData leaderboardData = new LeaderboardData(req, res, getService(),
+                            getSecurityService());
+                    try {
                     leaderboardData.perform();
+                    } catch (UnauthorizedException e) {
+                        res.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+                    }
                     return;
                 } else if ("foiling".equalsIgnoreCase(action)) {
-                	final FoilingData foilingData = new FoilingData(req, res, getService());
+                    final FoilingData foilingData = new FoilingData(req, res, getService(), getSecurityService());
                 	foilingData.perform();
                 	return;
                 }

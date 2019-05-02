@@ -50,9 +50,9 @@ public class ColorMapper implements ValueRangeFlexibleBoundariesChangedListener 
             }
         } else {
             if (value < minValue) {
-                result = "hsl(0, 100%, 50%)";
-            } else if (value > maxValue) {
                 result = "hsl(240, 100%, 50%)";
+            } else if (value > maxValue) {
+                result = "hsl(0, 100%, 50%)";
             } else {
                 double h = (1 - (value - minValue) / (maxValue - minValue)) * 240;
                 result = "hsl(" + Math.round(h) + ", 100%, 50%)";

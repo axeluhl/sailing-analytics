@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity/access_token</h2>
+
+<b>Description:</b>
+<p>Removes / invalidates any existing access token that so far was valid as a bearer token in a request's
+<tt>Authorization:</tt> HTTP header field.</p>
+<br/>
+<table>
+	<tr>
+		<td>Request Method:</td>
+		<td>GET/POST</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Examples:</td>
+		<td>
+		  <div>Using the session ID in a session cookie:<br>
+		    <code>curl -D /tmp/header -b JSESSIONID=5e94c93e-b515-4bcd-8df8-0c786805a9e0 http://127.0.0.1:8888/security/api/restsecurity/remove_access_token</code>
+		  </div>
+		  <div>Using POST username and password form parameters:<br>
+		    <code>curl -d "username=admin&password=admin" -D /tmp/header http://127.0.0.1:8888/security/api/restsecurity/remove_access_token</code>
+		  </div>
+		  <div>Using a bearer access token:<br>
+		    <code>curl -D /tmp/header -H "Authorization: Bearer MVPg/uCV1QGqMDmDtUuOQBrSrB1NlIldm0LW+dnxZ2A=" http://127.0.0.1:8888/security/api/restsecurity/remove_access_token</code>
+		  </div>
+		  <div>Using basic authentication:<br>
+		    <code>curl -D /tmp/header http://admin:admin@127.0.0.1:8888/security/api/restsecurity/remove_access_token</code>
+		  </div>
+		</td>
+	</tr>
+</table>
+</body>
+</html>

@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -159,10 +158,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
@@ -175,6 +171,7 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
@@ -247,6 +244,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJs
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.LegacyCompetitorWithContainedBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -1294,27 +1292,37 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 canBoatsOfCompetitorsChangePerRace = false;
                 createMigratableRegatta = true;
             }
+            
+            CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType
+                    .valueOfOrDefault((String) dbRegatta.get(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name()));
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
+            String registrationLinkSecret = (String) dbRegatta.get(FieldNames.REGATTA_REGISTRATION_LINK_SECRET.name());
             if (createMigratableRegatta) {
                 result = new MigratableRegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
-                        canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
+                        canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
                         loadScoringScheme(dbRegatta), id, courseArea,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                        rankingMetricConstructor, new MongoObjectFactoryImpl(database));
+                        rankingMetricConstructor, new MongoObjectFactoryImpl(database), registrationLinkSecret);
             } else {
                 result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
-                        canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
+                        canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
                         loadScoringScheme(dbRegatta), id, courseArea,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,
                         useStartTimeInference == null ? true : useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
-                        rankingMetricConstructor);
+                        rankingMetricConstructor, registrationLinkSecret);
             }
             result.setRegattaConfiguration(configuration);
+        }
+        // all regattas are required to have a secret, to allow tracking in classic scenarios or in open regatta ones
+        if (result.getRegistrationLinkSecret() == null) {
+            logger.info("Added missing RegistrationLinkSecret to " + result + " and stored to database");
+            result.setRegistrationLinkSecret(UUID.randomUUID().toString());
+            new MongoObjectFactoryImpl(database).storeRegatta(result);
         }
         return result;
     }
@@ -2572,55 +2580,55 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<Entry<DeviceConfigurationMatcher, DeviceConfiguration>> loadAllDeviceConfigurations() {
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> result = new HashMap<>();
+    public Iterable<DeviceConfiguration> loadAllDeviceConfigurations() {
+        List<DeviceConfiguration> result = new ArrayList<>();
         MongoCollection<Document> configurationCollection = database.getCollection(CollectionNames.CONFIGURATIONS.name());
-
         try {
             for (Document dbObject : configurationCollection.find()) {
-                Util.Pair<DeviceConfigurationMatcher, DeviceConfiguration> entry = loadConfigurationEntry(dbObject);
-                result.put(entry.getA(), entry.getB());
+                DeviceConfiguration entry = loadConfigurationEntry(dbObject);
+                result.add(entry);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load configurations.");
             logger.log(Level.SEVERE, "loadAllDeviceConfigurations", e);
         }
 
-        return result.entrySet();
+        return result;
     }
 
-    private Util.Pair<DeviceConfigurationMatcher, DeviceConfiguration> loadConfigurationEntry(Document dbObject) {
-        Document matcherObject = (Document) dbObject.get(FieldNames.CONFIGURATION_MATCHER.name());
-        Document configObject = (Document) dbObject.get(FieldNames.CONFIGURATION_CONFIG.name());
-        return new Util.Pair<DeviceConfigurationMatcher, DeviceConfiguration>(loadConfigurationMatcher(matcherObject),
-                loadConfiguration(configObject));
-    }
-
-    private DeviceConfigurationMatcher loadConfigurationMatcher(Document matcherObject) {
-        List<String> clientIdentifiers = new ArrayList<String>();
-        Iterable<?> clientIdentifiersObject = (Iterable<?>) matcherObject
-                .get(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name());
-        if (clientIdentifiersObject != null) {
-            for (Object clientIdentifier : clientIdentifiersObject) {
-                clientIdentifiers.add(clientIdentifier.toString());
+    private DeviceConfiguration loadConfigurationEntry(Document dbObject) throws JsonDeserializationException, ParseException {
+        final String idAsString = dbObject.getString(FieldNames.CONFIGURATION_ID_AS_STRING.name());
+        final DeviceConfiguration configuration;
+        if (idAsString == null) {
+            @SuppressWarnings("deprecation") // migration
+            final String oldCombinedName = dbObject.getString(FieldNames.CONFIGURATION_MATCHER_ID.name());
+            final String name = oldCombinedName.substring("DeviceConfigurationMatcherSingle".length());
+            final UUID id = UUID.randomUUID();
+            logger.info("Migrating configuration with old matcher ID "+oldCombinedName+" to config with ID "+id+" with name "+name);
+            Document configObject = (Document) dbObject.get(FieldNames.CONFIGURATION_CONFIG.name());
+            // inject name and ID into old config document format to satisfy new de-serializer's format:
+            configObject.put(DeviceConfigurationJsonSerializer.FIELD_ID_AS_STRING, id.toString());
+            configObject.put(DeviceConfigurationJsonSerializer.FIELD_NAME, name);
+            configuration = loadConfiguration(configObject);
+            @SuppressWarnings("deprecation") // migration
+            final DeleteResult deleteResult = database.getCollection(CollectionNames.CONFIGURATIONS.name()).deleteOne(
+                    new Document(FieldNames.CONFIGURATION_MATCHER_ID.name(), oldCombinedName));
+            if (deleteResult.getDeletedCount() != 1) {
+                logger.warning("Expected to delete device configuration "+oldCombinedName+", but couldn't delete any");
             }
+            new MongoObjectFactoryImpl(database).storeDeviceConfiguration(configuration);
+        } else {
+            configuration = loadConfiguration(dbObject);
         }
-        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(clientIdentifiers);
+        return configuration;
     }
 
-    private DeviceConfiguration loadConfiguration(Document configObject) {
+    private DeviceConfiguration loadConfiguration(Document configObject) throws JsonDeserializationException, ParseException {
         DeviceConfiguration configuration = null;
-        try {
-            final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
-            JsonDeserializer<DeviceConfiguration> deserializer = DeviceConfigurationJsonDeserializer.create();
-            JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(configObject.toJson(writerSettings)));
-            configuration = deserializer.deserialize(json);
-        } catch (JsonDeserializationException | ParseException e) {
-            logger.log(Level.SEVERE,
-                    "Error parsing configuration object from MongoDB, falling back to empty configuration.");
-            logger.log(Level.SEVERE, "loadConfiguration", e);
-            configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
-        }
+        final JsonWriterSettings writerSettings = JsonWriterSettings.builder().outputMode(JsonMode.RELAXED).build();
+        JsonDeserializer<DeviceConfiguration> deserializer = DeviceConfigurationJsonDeserializer.create();
+        JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(configObject.toJson(writerSettings)));
+        configuration = deserializer.deserialize(json);
         return configuration;
     }
 

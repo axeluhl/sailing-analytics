@@ -19,9 +19,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
@@ -39,11 +36,13 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
-import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.celltable.SortedCellTable;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -132,8 +131,8 @@ public class SailorProfileStatisticTable extends Composite {
             dataMiningUrl = navigationTarget.apply(data.get(0));
             anchor.setHref(dataMiningUrl);
         }
-        if (!userService.getCurrentUser().hasPermission(Permission.DATA_MINING.getStringPermission(),
-                SailingPermissionsForRoleProvider.INSTANCE)) {
+
+        if (!userService.hasServerPermission(ServerActions.DATA_MINING)) {
             anchor.setVisible(false);
         }
         sailorProfilesTable.setList(data);
@@ -177,8 +176,8 @@ public class SailorProfileStatisticTable extends Composite {
             // navigation target is set from outside
         }
 
-        if (userService.getCurrentUser().hasPermission(Permission.DATA_MINING.getStringPermission(),
-                SailingPermissionsForRoleProvider.INSTANCE) || !isAverage) {
+
+        if (userService.hasServerPermission(ServerActions.DATA_MINING) || !isAverage) {
             addButtonStyle(actualValueColumn);
             addButtonStyle(clubNameColumn);
             addButtonStyle(competitorColumn);

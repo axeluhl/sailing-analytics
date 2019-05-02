@@ -31,9 +31,9 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.PersonImpl;
-import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -55,6 +55,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.CourseDesignUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
@@ -118,9 +119,11 @@ public class DomainFactoryImpl implements DomainFactory {
             Calendar calendar = Calendar.getInstance();
             result = new RegattaImpl(raceLogStore, regattaLogStore, RegattaImpl.getDefaultName(
                     "ST Regatta " + calendar.get(Calendar.YEAR) + " for race " + raceID, regattaBoatClass.getName()),
-                    regattaBoatClass, /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
+                    regattaBoatClass, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                    /*startDate*/ null, /*endDate*/ null,
                     trackedRegattaRegistry, getBaseDomainFactory().createScoringScheme(
-                            ScoringSchemeType.LOW_POINT), raceID, null);
+                            ScoringSchemeType.LOW_POINT),
+                    raceID, null, /* registrationLinkSecret */ UUID.randomUUID().toString());
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToRegattaCache.put(raceID, result);
         }
@@ -209,7 +212,8 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public RaceDefinition createRaceDefinition(Regatta regatta, String swissTimingRaceID, Map<Competitor, Boat> competitorsAndBoats,
-            List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition) {
+            List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition,
+            RaceTrackingHandler raceTrackingHandler) {
         List<Waypoint> waypoints = new ArrayList<>();
         for (ControlPoint controlPoint : courseDefinition) {
             Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
@@ -218,18 +222,20 @@ public class DomainFactoryImpl implements DomainFactory {
         com.sap.sailing.domain.base.Course domainCourse = new CourseImpl("Course", waypoints);
         BoatClass boatClass = getRaceTypeFromRaceID(swissTimingRaceID).getBoatClass();
         logger.info("Creating RaceDefinitionImpl for race "+swissTimingRaceID);
-        RaceDefinition result = new RaceDefinitionImpl(raceName, domainCourse, boatClass, competitorsAndBoats, raceIdForRaceDefinition);
+        RaceDefinition result = raceTrackingHandler.createRaceDefinition(regatta, raceName, domainCourse, boatClass,
+                competitorsAndBoats, raceIdForRaceDefinition);
         regatta.addRace(result);
         return result;
     }
 
     @Override
-    public RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, Course course) {
+    public RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, Course course,
+            RaceTrackingHandler raceTrackingHandler) {
         com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
         Map<Competitor, Boat> competitorsAndBoats = createCompetitorsAndBoats(startList, race.getRaceID(), race.getBoatClass());
         logger.info("Creating RaceDefinitionImpl for race "+race.getRaceID());
         BoatClass boatClass = race.getBoatClass() != null ? race.getBoatClass() : getRaceTypeFromRaceID(race.getRaceID()).getBoatClass();
-        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitorsAndBoats, race.getRaceID());
+        RaceDefinition result = raceTrackingHandler.createRaceDefinition(regatta, race.getRaceName(), domainCourse, boatClass, competitorsAndBoats, race.getRaceID());
         regatta.addRace(result);
         return result;
     }

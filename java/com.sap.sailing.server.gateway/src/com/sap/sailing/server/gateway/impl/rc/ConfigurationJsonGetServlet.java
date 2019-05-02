@@ -1,50 +1,56 @@
 package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationIdentifierImpl;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class ConfigurationJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;
 
     public static final String PARAMS_CLIENT_ID = "client";
+    public static final String PARAMS_CLIENT_UUID = "uuid";
     
     private final static Logger logger = Logger.getLogger(ConfigurationJsonGetServlet.class.getName());
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String clientId = request.getParameter(PARAMS_CLIENT_ID);
-        if (clientId == null) {
+        final String configurationName = request.getParameter(PARAMS_CLIENT_ID);
+        final String configurationUuidAsString = request.getParameter(PARAMS_CLIENT_UUID);
+        if (configurationName == null && configurationUuidAsString == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    String.format("Missing parameter '%s'.", PARAMS_CLIENT_ID));
-            return;
-        }
-        
-        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(clientId);
-        
-        logger.fine(String.format("Configuration requested by client %s.", identifier));
-        
-        DeviceConfiguration configuration = getService().getDeviceConfiguration(identifier);
-        if (configuration != null) {
-            JsonSerializer<DeviceConfiguration> serializer = DeviceConfigurationJsonSerializer.create();
-            JSONObject json = serializer.serialize(configuration);
-            response.setCharacterEncoding("UTF-8");
-            json.writeJSONString(response.getWriter());
+                    String.format("Missing parameter: one of '%s' and '%s' must be provided.", PARAMS_CLIENT_ID, PARAMS_CLIENT_UUID));
         } else {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No configuration for given identifier.");
+            final DeviceConfiguration configuration;
+            if (configurationName != null) {
+                logger.fine(String.format("Configuration requested by client %s.", configurationName));
+                configuration = getService().getDeviceConfigurationByName(configurationName);
+            } else {
+                logger.fine(String.format("Configuration requested by id %s.", configurationUuidAsString));
+                configuration = getService().getDeviceConfigurationById(UUID.fromString(configurationUuidAsString));
+            }
+            if (configuration != null) {
+                SecurityUtils.getSubject()
+                        .checkPermission(configuration.getIdentifier().getStringPermission(DefaultActions.READ));
+                JsonSerializer<DeviceConfiguration> serializer = DeviceConfigurationJsonSerializer.create();
+                JSONObject json = serializer.serialize(configuration);
+                response.setCharacterEncoding("UTF-8");
+                json.writeJSONString(response.getWriter());
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No configuration for given identifier.");
+            }
         }
     }
-
 }

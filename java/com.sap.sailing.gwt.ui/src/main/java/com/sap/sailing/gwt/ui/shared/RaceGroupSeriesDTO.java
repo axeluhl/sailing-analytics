@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class RaceGroupSeriesDTO extends NamedDTO implements IsSerializable {
 

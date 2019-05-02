@@ -44,4 +44,9 @@ public class ExceptionManager implements ExceptionMapper<Exception> {
         return "The value \"" + StringEscapeUtils.escapeHtml(value) + "\" is not recognized. Correct values are: "
                 + correctValues;
     }
+
+    public static String objectAlreadyExists(String objectTypeName, String objectName) {
+        return "The \"" + StringEscapeUtils.escapeHtml(objectTypeName) + "\" with name \""
+                + StringEscapeUtils.escapeHtml(objectName) + "\" already exists.";
+    }
 }

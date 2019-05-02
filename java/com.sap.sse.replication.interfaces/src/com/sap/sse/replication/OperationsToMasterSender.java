@@ -46,6 +46,11 @@ public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>
         addOperationSentToMasterForReplication(operationWithResultWithIdWrapper);
         URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(this.getId().toString());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Content-Type", "application/octet-stream");
+        String optionalBearerToken = masterDescriptor.getBearerToken();
+        if (optionalBearerToken != null && !optionalBearerToken.isEmpty()) {
+            connection.setRequestProperty("Authorization", "Bearer " + optionalBearerToken);
+        }
         connection.setDoOutput(true); // we want to post the serialized operation
         logger.info("Sending operation "+operation+" to master "+masterDescriptor+"'s replicable with ID "+this+" for initial execution and replication");
         connection.connect();

@@ -3,7 +3,7 @@ package com.sap.sailing.server.impl;
 import java.util.function.Supplier;
 
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
-import com.sap.sse.security.PreferenceConverter;
+import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.shared.settings.SettingsToJsonSerializer;
 
 public class GenericJSONPreferenceConverter<PREF extends GenericSerializableSettings> implements PreferenceConverter<PREF> {
