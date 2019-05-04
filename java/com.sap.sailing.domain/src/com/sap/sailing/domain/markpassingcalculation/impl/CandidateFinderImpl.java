@@ -844,14 +844,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                             if (xte == 0) {
                                 newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, true));
                             } else {
-                                if (fixAfter != null && xtesAfter != null && !xtesAfter.get(w).isEmpty()) {
+                                if (fixAfter != null && xtesAfter != null && xtesAfter.get(w) != null && !xtesAfter.get(w).isEmpty()) {
                                     Double xteAfter = xtesAfter.get(w).get(0).getMeters();
                                     if (xteAfter != null && xte < 0 != xteAfter <= 0) {
                                         newCandidates.put(Arrays.asList(fix, fixAfter),
                                                 createCandidate(c, xte, xteAfter, t, tAfter, w, true));
                                     }
                                 }
-                                if (fixBefore != null && !xtesBefore.get(w).isEmpty()) {
+                                if (fixBefore != null && xtesBefore.get(w) != null && !xtesBefore.get(w).isEmpty()) {
                                     Double xteBefore = xtesBefore.get(w).get(0).getMeters();
                                     if (xte < 0 != xteBefore <= 0) {
                                         newCandidates.put(Arrays.asList(fixBefore, fix),
