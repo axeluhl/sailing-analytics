@@ -235,6 +235,10 @@ public class UserGroupDetailPanel extends Composite
         oracle.resetAndRemoveExistingUsers(getSelectedUserGroupUsernames());
     }
 
+    public void refreshSuggest() {
+        oracle.refresh();
+    }
+
     private List<String> getSelectedUserGroupUsernames() {
         final UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
         return tenant == null ? Collections.emptyList()
