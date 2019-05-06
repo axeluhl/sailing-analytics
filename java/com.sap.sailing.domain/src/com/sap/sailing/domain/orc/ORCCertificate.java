@@ -9,6 +9,13 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
+/**
+ * For a {@link Competitor} 
+ * 
+ * 
+ * @author Daniel Lisunkin (I505543)
+ *
+ */
 public class ORCCertificate {
 
     private Map<String, String> general;

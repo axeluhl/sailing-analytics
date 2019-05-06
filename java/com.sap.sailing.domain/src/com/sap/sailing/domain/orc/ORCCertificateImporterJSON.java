@@ -36,7 +36,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
     private final int[] twsDistances = new int[] { 6, 8, 10, 12, 14, 16, 20 };
 
     /**
-     * Receives an InputStream from different possible sources (web, local file, ...) and does parse the {@code .json} file.
+     * Receives an {@link InputStream} from different possible sources (web, local file, ...) and does parse the {@code .json} file.
      * 
      * @param in
      * @throws IOException
@@ -63,7 +63,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
     }
 
     /**
-     * Returns an ORCCertificate object for a given {@link String} key. If there is no map value for the given key, the method returns {@link null}.
+     * Returns an {@link ORCCertificate} object for a given {@link String} key. If there is no map value for the given key, the method returns {@link null}.
      */
     @Override
     public ORCCertificate getCertificate(String sailnumber) {
@@ -154,13 +154,13 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                     if (((String) aKey).equals("BeatAngle")) {
                         for (int i = 0; i < array.size(); i++) {
                             beatAngles.put(new KnotSpeedImpl(twsDistances[i]),
-                                    new DegreeBearingImpl((double) array.get(i)));
+                                    new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
                         }
                         break;
                     } else if (((String) aKey).equals("GybeAngle")) {
                         for (int i = 0; i < array.size(); i++) {
                             gybeAngles.put(new KnotSpeedImpl(twsDistances[i]),
-                                    new DegreeBearingImpl((double) array.get(i)));
+                                    new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
                         }
                         break;
                     }
@@ -168,7 +168,7 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
                     Map<Speed, Duration> twsMap = new HashMap<>();
                     for (int i = 0; i < array.size(); i++) {
                         twsMap.put(new KnotSpeedImpl(twsDistances[i]),
-                                Duration.ONE_SECOND.times((double) array.get(i)));
+                                Duration.ONE_SECOND.times(((Number) array.get(i)).doubleValue()));
                     }
 
                     switch ((String) aKey) {
@@ -198,6 +198,9 @@ public class ORCCertificateImporterJSON implements ORCCertificateImporter {
         return new ORCCertificate(general, hull, sails, scoring, twaCourses, predefinedCourses, beatAngles, gybeAngles);
     }
 
+    /**
+     * Returns a {@link Map} of {@link ORCCertificate} keyed by the {@link String} sailnumbers, which were given as an input inside an array.
+     */
     @Override
     public Map<String, ORCCertificate> getCertificates(String[] sailnumbers) {
         Map<String, ORCCertificate> result = new HashMap<>();

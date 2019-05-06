@@ -31,7 +31,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  * href="http://bugzilla.sapsailing.com/bugzilla/attachment.cgi?id=146">http://bugzilla.sapsailing.com/bugzilla/attachment.cgi?id=146</a>
  * for details. The true wind angles are symmetrical, assuming that the boat performs equally well on both tacks.
  * 
- * @author Axel Uhl (D043530)
+ * @author Daniel Lisunkin (i505543)
  * 
  */
 public class ORCCertificatePerformanceCurve implements Serializable {
@@ -180,4 +180,6 @@ public class ORCCertificatePerformanceCurve implements Serializable {
         }
         return result;
     }
+    
+    
 }
