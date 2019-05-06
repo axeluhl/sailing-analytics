@@ -227,8 +227,8 @@ public class StationarySequence {
                 candidate.getTimePoint().until(getLast().getTimePoint()).abs().compareTo(CANDIDATE_FILTER_TIME_WINDOW) < 0;
     }
     
-    Iterable<Candidate> getAllCandidates() {
-        return candidates;
+    int size() {
+        return candidates.size();
     }
     
     /**
@@ -404,7 +404,7 @@ public class StationarySequence {
             candidatesEffectivelyRemoved.addAll(candidatesRemoved);
             candidatesEffectivelyAdded.removeAll(candidatesRemoved);
         }
-        return tailSequence != null && Util.size(tailSequence.getAllCandidates()) >= 2 ? tailSequence : null;
+        return tailSequence != null && tailSequence.size() >= 2 ? tailSequence : null;
     }
 
     /**

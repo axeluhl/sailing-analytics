@@ -354,7 +354,7 @@ public class StationarySequenceBasedFilter {
                     latestStationarySequenceStartingAtOrBeforeRemovedCandidate.remove(removedCandidate,
                             candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
                             /* StationarySequence set to update */ stationarySequences);
-                    if (Util.size(latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getAllCandidates()) == 1) {
+                    if (latestStationarySequenceStartingAtOrBeforeRemovedCandidate.size() == 1) {
                         stationarySequences.remove(latestStationarySequenceStartingAtOrBeforeRemovedCandidate);
                     }
                     addToEffectivelyRemoved = false; // already taken care of by the remove call above
@@ -421,7 +421,7 @@ public class StationarySequenceBasedFilter {
                 if (lastSequenceStartingAtOrBeforeFix != null && !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(newFix.getTimePoint())) {
                     // fix falls into the existing StationarySequence; update its bounding box:
                     final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved, /* StationarySequence set to update */ stationarySequences);
-                    if (Util.size(lastSequenceStartingAtOrBeforeFix.getAllCandidates()) <= 1) {
+                    if (lastSequenceStartingAtOrBeforeFix.size() == 1) {
                         stationarySequences.remove(lastSequenceStartingAtOrBeforeFix);
                     }
                     if (splitResult != null) {
