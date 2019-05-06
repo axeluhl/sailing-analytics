@@ -354,7 +354,7 @@ public class StationarySequenceBasedFilter {
                     latestStationarySequenceStartingAtOrBeforeRemovedCandidate.remove(removedCandidate,
                             candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
                             /* StationarySequence set to update */ stationarySequences);
-                    if (Util.size(latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getAllCandidates()) <= 1) {
+                    if (Util.size(latestStationarySequenceStartingAtOrBeforeRemovedCandidate.getAllCandidates()) == 1) {
                         stationarySequences.remove(latestStationarySequenceStartingAtOrBeforeRemovedCandidate);
                     }
                     addToEffectivelyRemoved = false; // already taken care of by the remove call above
