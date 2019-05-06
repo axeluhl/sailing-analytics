@@ -10,8 +10,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.SAXException;
 
-import com.sap.sailing.domain.igtimiadapter.oauth.AuthorizationCallback;
-
 /**
  * A connection factory is bound to a {@link Client} and allows that client to obtain a connection to the Igtimi
  * services on behalf of an {@link Account} for which an authorization token must have been
@@ -28,12 +26,13 @@ public interface IgtimiConnectionFactory {
      * Removes the account and the credentials associated with it permanently. The account is identified by the e-mail
      * address of the owner of the data to which the account granted access. See also {@link #getExistingAccountByEmail(String)}.
      */
-    void removeAccount(String eMail);
+    void removeAccount(Account account);
     
     /**
      * Obtains a URL that a user agent (e.g., a web browser) can be sent to in order to allow that user to authenticate
-     * and then authorize this factory's {@link Client} for accessing the user's Igtimi data. The URL is chosen such that
-     * it redirects to the {@link AuthorizationCallback} with the <code>code</code> response type.
+     * and then authorize this factory's {@link Client} for accessing the user's Igtimi data. The URL is chosen such
+     * that it redirects to the {@link com.sap.sailing.domain.igtimiadapter.oauth.AuthorizationCallback} with the
+     * <code>code</code> response type.
      */
     String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPort) throws MalformedURLException, UnsupportedEncodingException;
     
@@ -44,7 +43,7 @@ public interface IgtimiConnectionFactory {
      * which this factory belongs.
      * @return 
      */
-    Account registerAccountForWhichClientIsAuthorized(String accessToken) throws ClientProtocolException,
+    Account registerAccountForWhichClientIsAuthorized(String creatorName, String accessToken) throws ClientProtocolException,
             IllegalStateException, IOException, ParseException;
 
     /**
@@ -60,7 +59,7 @@ public interface IgtimiConnectionFactory {
      * @return the account with which a caller can then {@link #connect obtain a connection} for the data that the user
      *         identified by <code>userEmail</code> and <code>userPassword</code> shares with our client.
      */
-    Account createAccountToAccessUserData(String userEmail, String userPassword) throws ClientProtocolException,
+    Account createAccountToAccessUserData(String creatorName, String userEmail, String userPassword) throws ClientProtocolException,
             IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
             InstantiationException, IllegalAccessException, ClassCastException, ParseException;
 

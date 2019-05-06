@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.MigratableRegatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -27,13 +28,16 @@ public class MigratableRegattaImpl extends RegattaImpl implements MigratableRega
     private transient final MongoObjectFactory mongoObjectFactory;
 
     public <S extends Series> MigratableRegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
-            BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate,
+            BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
+            TimePoint startDate, TimePoint endDate,
             Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea,
             Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor, MongoObjectFactory mongoObjectFactory) {
-        super(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, startDate, endDate, series,
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor,
+            MongoObjectFactory mongoObjectFactory, String registrationLinkSecret) {
+        super(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series,
                 persistent, scoringScheme, id, courseArea, buoyZoneRadiusInHullLengths, useStartTimeInference,
-                controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
+                controlTrackingFromStartAndFinishTimes, rankingMetricConstructor,
+                registrationLinkSecret);
         this.mongoObjectFactory = mongoObjectFactory;
         mongoObjectFactory.storeRegatta(this); // make sure the canBoatsOfCompetitorsChangePerRace flag makes it into the DB
     }

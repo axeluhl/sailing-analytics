@@ -89,13 +89,13 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
     private void setupIdentifierBox() {
         final AppPreferences appPreferences = AppPreferences.on(getActivity());
         EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
-        identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
+        identifierPreference.setSummary(appPreferences.getDeviceConfigurationName());
         addOnPreferenceChangeListener(identifierPreference, new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 String value = (String) newValue;
                 if (value.isEmpty()) {
-                    preference.setSummary(appPreferences.getDeviceIdentifier());
+                    preference.setSummary(appPreferences.getDeviceConfigurationName());
                 } else {
                     preference.setSummary(value);
                 }
@@ -179,8 +179,8 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 appPreferences.setNeedConfigRefresh(true);
                 // update device identifier in ui
                 EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
-                identifierPreference.setText(appPreferences.getDeviceIdentifier());
-                identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
+                identifierPreference.setText(appPreferences.getDeviceConfigurationName());
+                identifierPreference.setSummary(appPreferences.getDeviceConfigurationName());
                 // update server url in ui
                 EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
                 serverUrlPreference.setText(appPreferences.getServerBaseURL());

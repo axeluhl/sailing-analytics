@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +22,6 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
-import com.sap.sailing.server.gateway.jaxrs.api.CompetitorsResource;
 import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
@@ -41,8 +39,7 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
     @Before
     public void setUpSubClass() throws Exception {
         super.setUp();
-        racingEventService = spy(racingEventService);
-        storageService = AmazonS3TestSupport.createService();
+        storageService = AmazonS3TestSupport.createService(securityService);
         FileStorageManagementService fsmsMock = mock(FileStorageManagementService.class);
         doReturn(fsmsMock).when(racingEventService).getFileStorageManagementService();
         doReturn(storageService).when(fsmsMock).getActiveFileStorageService();
@@ -55,27 +52,21 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
     @Test
     public void storeAndRemoveTeamImage() throws URISyntaxException, ParseException, MalformedURLException,
             IOException, OperationFailedException, InvalidPropertiesException {
-        //set team image
-        CompetitorsResource r = spyResource(new CompetitorsResource());
+        // set team image
         String fileExtension = teamImageFile.substring(teamImageFile.lastIndexOf("."));;
         InputStream stream = getClass().getResourceAsStream("/" + teamImageFile);
-        
         // this is not ideal, as this #available() is not supposed to be used for getting the file size
         // however, working with a File() descriptor does not work, as when running via maven/tycho the
         // URL has the bundleresource:// scheme instead of file:, which File() can't handle
         long length = stream.available();
-        
-        String jsonString = r.setTeamImage(id, stream, fileExtension, length);
-        
-        //now download and compare
+        String jsonString = competitorsResource.setTeamImage(id, stream, fileExtension, length, null, null);
+        // now download and compare
         JSONObject json = (JSONObject) JSONValue.parseWithException(jsonString);
         String imageUriString = (String) json.get(DeviceMappingConstants.JSON_TEAM_IMAGE_URI);
         URI imageUri = new URI(imageUriString);
-        
         InputStream downloadStream = imageUri.toURL().openStream();
         stream = getClass().getResourceAsStream("/" + teamImageFile);
         IOUtils.contentEquals(downloadStream, stream);
-        
         storageService.removeFile(imageUri);
     }
 }

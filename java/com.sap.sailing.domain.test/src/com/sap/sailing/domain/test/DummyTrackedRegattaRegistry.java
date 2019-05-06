@@ -9,6 +9,7 @@ import java.util.Map;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 
@@ -62,4 +63,8 @@ public class DummyTrackedRegattaRegistry implements TrackedRegattaRegistry {
             InterruptedException {
     }
 
+    @Override
+    public void stopTracker(Regatta regatta, RaceTracker tracker)
+            throws MalformedURLException, IOException, InterruptedException {
+    }
 }

@@ -10,9 +10,13 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatChangeListener;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.RenamableImpl;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class BoatImpl extends RenamableImpl implements DynamicBoat {
     private static final long serialVersionUID = 3489730487528955788L;
@@ -121,5 +125,23 @@ public class BoatImpl extends RenamableImpl implements DynamicBoat {
     @Override
     public String toString() {
         return getName()==null?getSailID():getName();
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.BOAT;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getId());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Serializable id) {
+        return new TypeRelativeObjectIdentifier(id.toString());
     }
 }

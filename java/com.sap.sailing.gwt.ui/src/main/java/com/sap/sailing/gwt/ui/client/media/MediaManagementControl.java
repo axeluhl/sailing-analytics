@@ -59,7 +59,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     private void addNewMediaButtonsTo(Panel grid) {
         HorizontalPanel controlButtons = new HorizontalPanel();
         controlButtons.setWidth("100%");
-        if (mediaPlayerManager.allowsEditing()) {
+        if (mediaPlayerManager.allowsCreating()) {
             Button addButton = new Button(stringMessages.add(), new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -136,7 +136,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             }
         });
 
-        if (mediaPlayerManager.allowsEditing()) {
+        if (mediaPlayerManager.allowsEditing(videoTrack.dbId)) {
             HorizontalPanel panel = new HorizontalPanel();
             panel.setWidth("100%");
             panel.add(videoCheckBox);
@@ -227,8 +227,8 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     }
 
     private Widget createAudioButton(final MediaTrack audioTrack) {
-        String label = audioTrack != null ? audioTrack.title : "Sound off";
-        String title = audioTrack != null ? audioTrack.toString() : "Turn off all sound channels.";
+        String label = audioTrack != null ? audioTrack.title : stringMessages.soundOff();
+        String title = audioTrack != null ? audioTrack.toString() : stringMessages.turnOffAllSoundChannels();
         RadioButton audioButton = new RadioButton("group-name", label);
         audioButton.setTitle(title);
         audioButton.setValue(audioTrack == mediaPlayerManager.getPlayingAudioTrack());
@@ -246,11 +246,10 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             }
         });
 
-        if (mediaPlayerManager.allowsEditing() && audioTrack != null) {
+        if (mediaPlayerManager.allowsEditing(audioTrack.dbId) && audioTrack != null) {
             HorizontalPanel panel = new HorizontalPanel();
             panel.setWidth("100%");
             panel.add(audioButton);
-
             Button deleteButton = createDeleteButton(audioTrack);
             panel.add(deleteButton);
             panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);

@@ -10,6 +10,7 @@ dependencies {
     /* local dependencies */
     api project(":com.sap.sailing.domain.common")
     api project(":com.sap.sse.common")
+    api project(":com.sap.sse.security.common")
     api project(":com.sap.sse.datamining.annotations")
     api project(":com.sap.sse.shared.android")
 }

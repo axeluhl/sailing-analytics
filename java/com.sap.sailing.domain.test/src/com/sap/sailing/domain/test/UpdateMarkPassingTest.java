@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -22,6 +23,7 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -45,8 +47,9 @@ public class UpdateMarkPassingTest {
         when(race.getBoatClass()).thenReturn(new BoatClassImpl("49er", /* typicallyStartsUpwind */ true));
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(
-        /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, true, null, null, new HashSet<Series>(), false, null,
-                                "test", null, OneDesignRankingMetric::new)),
+        /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, new HashSet<Series>(), false, null,
+                        "test", null, OneDesignRankingMetric::new,
+                        /* registrationLinkSecret */ UUID.randomUUID().toString())),
                 race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 
         /* delayToLiveInMillis */1000, /* millisecondsOverWhichToAverageWind */30000,
         /* millisecondsOverWhichToAverageSpeed */30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));

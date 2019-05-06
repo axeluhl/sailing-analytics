@@ -11,12 +11,12 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
 import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
+import com.sap.sse.gwt.client.celltable.SortedCellTable;
 
 public class LeaderboardPanelMock extends MultiRaceLeaderboardPanel {
 

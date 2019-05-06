@@ -29,6 +29,9 @@ public class RegattaEditDialogPO extends DataEntryDialogPO {
     
     @FindBy(how = BySeleniumId.class, using = "AddSeriesButton")
     private WebElement addSeriesButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "registrationLinkWithQRCodeOpenButton")
+    private WebElement registrationLinkWithQRCodeOpenButton;
 
     public RegattaEditDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -50,6 +53,12 @@ public class RegattaEditDialogPO extends DataEntryDialogPO {
         WebElement dialog = findElementBySeleniumId(this.driver, "SeriesCreateDialog");
         
         return new SeriesCreateDialogPO(this.driver, dialog);
+    }
+    
+    public RegistrationLinkWithQRCodeDialogPO configureRegistrationURL() {
+        registrationLinkWithQRCodeOpenButton.click();
+        WebElement dialog = findElementBySeleniumId(this.driver, "RegistrationLinkWithQRCodeDialog");
+        return new RegistrationLinkWithQRCodeDialogPO(this.driver, dialog);
     }
     
     public void addSeries(String seriesName) {

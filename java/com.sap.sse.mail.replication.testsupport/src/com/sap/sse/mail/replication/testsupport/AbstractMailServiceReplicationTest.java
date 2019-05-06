@@ -8,6 +8,7 @@ import org.junit.Before;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.mail.MailServiceResolver;
+import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.mail.impl.MailServiceImpl;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp;
 import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
@@ -36,10 +37,21 @@ public class AbstractMailServiceReplicationTest extends AbstractServerWithSingle
             @Override
             protected void internalSendMail(String toAddress, String subject, ContentSetter contentSetter)
                     throws MailException {
+                countOneIfCanSendMail(canSendMail);
+            }
+
+            private void countOneIfCanSendMail(final boolean canSendMail) {
                 if (canSendMail) {
                     Integer old = numberOfMailsSent.get(this);
                     numberOfMailsSent.put(this, old == null ? 1 : old + 1);
                 }
+            }
+            
+            @Override
+            public Void internalSendMail(String toAddress, String subject,
+                    SerializableMultipartSupplier multipartSupplier) throws MailException {
+                countOneIfCanSendMail(canSendMail);
+                return null;
             }
         };
         return mailService[0];

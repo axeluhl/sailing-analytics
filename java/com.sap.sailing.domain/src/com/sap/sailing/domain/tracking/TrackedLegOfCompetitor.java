@@ -62,7 +62,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * direction. If the competitor already finished this leg, a zero, non-<code>null</code> distance will result.
      * If the competitor hasn't started the leg yet, the full leg distance is returned. For reaching legs or when
      * no wind information is available, the projection onto the leg's direction will be used instead of wind
-     * projection.
+     * projection. When for the {@code timePoint} given the competitor hasn't finished the leg yet but has
+     * already passed the approximate windward / along course position of the leg's end, a negative distance
+     * will result. 
      */
     Distance getWindwardDistanceToGo(TimePoint timePoint, WindPositionMode windPositionMode);
 

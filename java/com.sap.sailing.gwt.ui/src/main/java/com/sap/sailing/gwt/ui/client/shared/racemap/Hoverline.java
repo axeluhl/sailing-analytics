@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
@@ -12,6 +12,7 @@ import com.google.gwt.maps.client.events.mouseover.MouseOverMapEvent;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
 import com.google.gwt.maps.client.events.mouseup.MouseUpMapEvent;
 import com.google.gwt.maps.client.events.mouseup.MouseUpMapHandler;
+import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
 
@@ -19,24 +20,26 @@ public class Hoverline {
     private static final double TRANSPARENT = 0;
     private static final double VISIBLE = 0.2d;
     
-    private final Polyline hoverline;
-    private final PolylineOptions options;
+    private final Colorline hoverline;
+    private final ColorlineOptions options;
     protected boolean doNotProcessMouseMoveOut;
     
-    public Hoverline(final Polyline polyline, PolylineOptions polylineOptions, final RaceMap map) {     
-        this.options = PolylineOptions.newInstance();
-        this.options.setClickable(polylineOptions.getClickable());
-        this.options.setGeodesic(polylineOptions.getGeodesic());
-        this.options.setMap(polyline.getMap());
-        this.options.setPath(polyline.getPath());
-        this.options.setStrokeColor(polylineOptions.getStrokeColor());
+    public Hoverline(final Polyline polyline, PolylineOptions polylineOptions, final RaceMap map) {   
+        options = new ColorlineOptions();
+        options.setClickable(polylineOptions.getClickable());
+        options.setEditable(polyline.getEditable());
+        options.setGeodesic(polylineOptions.getGeodesic());
         try {
-            this.options.setZindex(polylineOptions.getZindex());  // if the zindex is not set, this line throws an exception in dev mode
+            options.setZIndex(polylineOptions.getZindex());  // if the zindex is not set, this line throws an exception in dev mode
         } catch (Exception e) {
             // the Z-index of polylineOptions most likely was undefined and therefore cannot be copied (GWT DevMode problem, mostly)
         }
-        this.hoverline = Polyline.newInstance(this.options);
-        this.hoverline.setVisible(false);
+        options.setVisible(false);
+        options.setColorMode(ColorlineMode.MONOCHROMATIC);
+        options.setColorProvider((i) -> polylineOptions.getStrokeColor());
+        hoverline = new Colorline(options);
+        hoverline.setMap(polyline.getMap());
+        hoverline.setPath(polyline.getPath());
         polyline.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
@@ -66,27 +69,79 @@ public class Hoverline {
             @Override
             public void onEvent(MouseOutMapEvent event) {
                 if (!doNotProcessMouseMoveOut) {
-                    hoverline.setVisible(false);
+                    options.setVisible(false);
+                    hoverline.setOptions(options);
                 }
             }
         });
         map.getMap().addMouseMoveHandler(new MouseMoveMapHandler() {
             @Override
             public void onEvent(MouseMoveMapEvent event) {
-                hoverline.setVisible(false);
+                options.setVisible(false);
+                hoverline.setOptions(options);
             }
         });
     }
     
-    public HandlerRegistration addClickHandler(ClickMapHandler handler) {
-        return this.hoverline.addClickHandler(handler);
+    public Hoverline(final Colorline colorline,
+            final ColorlineOptions colorlineOptions, final RaceMap map) {
+        options = colorlineOptions;
+        hoverline = new Colorline(options);
+        hoverline.setMap(colorline.getMap());
+        hoverline.setPath(MVCArray.newInstance(colorline.getPath().toArray(new LatLng[0])));
+        colorline.addPathChangeListener(hoverline);
+        
+        options.setVisible(false);
+        colorline.addMouseOverHandler(new MouseOverMapHandler() {
+            @Override
+            public void onEvent(MouseOverMapEvent event) {
+                options.setStrokeOpacity(map.getSettings().getTransparentHoverlines() ? TRANSPARENT : VISIBLE);
+                options.setStrokeWeight(map.getSettings().getHoverlineStrokeWeight());
+                options.setVisible(true);
+                hoverline.setOptions(options);
+            }
+        });
+        //Workaround for bug4480 (chrome does fire mouseOutMove on mouseclick)
+        hoverline.addMouseDownHandler(new MouseDownMapHandler() {
+            @Override
+            public void onEvent(MouseDownMapEvent event) {
+                doNotProcessMouseMoveOut = true;
+            }
+        });
+        hoverline.addMouseUpHandler(new MouseUpMapHandler() {
+            @Override
+            public void onEvent(MouseUpMapEvent event) {
+                doNotProcessMouseMoveOut = false;
+            }
+        });
+        hoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
+            @Override
+            public void onEvent(MouseOutMapEvent event) {
+                if (!doNotProcessMouseMoveOut) {
+                    options.setVisible(false);
+                    hoverline.setOptions(options);
+                }
+            }
+        });
+        map.getMap().addMouseMoveHandler(new MouseMoveMapHandler() {
+            @Override
+            public void onEvent(MouseMoveMapEvent event) {
+                options.setVisible(false);
+                hoverline.setOptions(options);
+            }
+        });
+    }
+
+
+    public void addClickHandler(ClickMapHandler handler) {
+        hoverline.addClickHandler(handler);
     }
     
-    public HandlerRegistration addMouseOutMoveHandler(MouseOutMapHandler handler) {
-        return this.hoverline.addMouseOutMoveHandler(handler);
+    public void addMouseOutMoveHandler(MouseOutMapHandler handler) {
+        hoverline.addMouseOutMoveHandler(handler);
     }
     
-    public HandlerRegistration addMouseOverHandler(MouseOverMapHandler handler) {
-        return this.hoverline.addMouseOverHandler(handler);
+    public void addMouseOverHandler(MouseOverMapHandler handler) {
+        hoverline.addMouseOverHandler(handler);
     }
 }

@@ -41,6 +41,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -61,6 +62,10 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -77,7 +82,8 @@ import com.sap.sse.common.Util.Pair;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomainFactory> {
+public interface TrackedRace
+        extends Serializable, IsManagedByCache<SharedDomainFactory>, WithQualifiedObjectIdentifier {
     final Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
     final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_SECOND.times(30);
 
@@ -1138,4 +1144,31 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * as a single average wind direction.
      */
     WindSummary getWindSummary();
+    
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return getIdentifier(getRaceIdentifier());
+    }
+    
+    public static QualifiedObjectIdentifier getIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
+        return getSecuredDomainType().getQualifiedObjectIdentifier(regattaAndRaceId.getTypeRelativeObjectIdentifier());
+    }
+
+    default TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getRaceIdentifier().getTypeRelativeObjectIdentifier();
+    }
+
+    @Override
+    default String getName() {
+        return getRaceIdentifier().getRaceName() + "@" + getRaceIdentifier().getRegattaName();
+    }
+
+    @Override
+    default HasPermissions getType() {
+        return getSecuredDomainType();
+    }
+    
+    public static HasPermissions getSecuredDomainType() {
+        return SecuredDomainType.TRACKED_RACE;
+    }
 }

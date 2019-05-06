@@ -2,8 +2,13 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 
 /**
  * Equality and hash code are based on the {@link #getIdAsString() ID}, the {@link #getSailID() sail number}, the
@@ -14,7 +19,7 @@ import com.sap.sse.common.Duration;
  * @author Axel Uhl (d043530)
  * 
  */
-public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serializable {
+public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements CompetitorDTO, Serializable {
     private static final long serialVersionUID = 3019126418065082622L;
     private String countryName;
     private String twoLetterIsoCountryCode;
@@ -193,6 +198,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     }
 
     @Override
+    public Serializable getId() {
+        return idAsString;
+    }
+
+    @Override
     public Color getColor() {
         return color;
     }
@@ -235,4 +245,19 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     public boolean hasBoat() {
         return false;
     }
+    
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.COMPETITOR;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(idAsString);
+    }
+
 }

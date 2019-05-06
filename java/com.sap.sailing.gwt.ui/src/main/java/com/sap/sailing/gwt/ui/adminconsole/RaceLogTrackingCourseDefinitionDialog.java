@@ -17,6 +17,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RaceLogTrackingCourseDefinitionDialog extends
         DataEntryDialog<RaceLogTrackingCourseDefinitionDialog.Result> {
@@ -45,7 +46,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends
     public RaceLogTrackingCourseDefinitionDialog(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName,
             final String raceColumnName, final String fleetName,
-            DialogCallback<Result> callback) {
+            DialogCallback<Result> callback, final UserService userService) {
         super(stringMessages.defineCourse(), null, stringMessages.save(), stringMessages.cancel(),
                 new Validator<Result>() {
                     @Override
@@ -62,7 +63,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends
                 callback);
         this.stringMessages = stringMessages;
         courseManagementWidget = new RaceLogCourseManagementWidget(sailingService, errorReporter, stringMessages,
-                leaderboardName, raceColumnName, fleetName);
+                leaderboardName, raceColumnName, fleetName, userService);
         priorityBox = createIntegerBox(/* default priority: race officer */ 1, /* visibleLength */ 1);
         refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() { 

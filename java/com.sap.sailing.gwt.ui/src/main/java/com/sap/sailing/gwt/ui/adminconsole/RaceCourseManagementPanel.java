@@ -15,6 +15,8 @@ import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * A panel that has a race selection (inherited from {@link AbstractRaceManagementPanel}) and which adds a table
@@ -28,10 +30,12 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     private final CourseManagementWidget courseManagementWidget;
 
     public RaceCourseManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
-        super(sailingService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false, stringMessages);
+            RegattaRefresher regattaRefresher, final StringMessages stringMessages, final UserService userService) {
+        super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false,
+                stringMessages);
         
-        courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages) {
+        courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages,
+                userService) {
             @Override
             protected void save() {
                 sailingService.updateRaceCourse(singleSelectedRace, createWaypointPairs(), new AsyncCallback<Void>() {
@@ -56,7 +60,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
                         @Override
                         public void onSuccess(RaceCourseDTO raceCourseDTO) {
-                            updateWaypointsAndControlPoints(raceCourseDTO);
+                            updateWaypointsAndControlPoints(raceCourseDTO, selectedRaceDTO);
                             marks.refresh(raceCourseDTO.getMarks());
                         }
             
@@ -96,6 +100,10 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 }
             });
         
+        trackedRacesListComposite.getSelectionModel().addSelectionChangeHandler(h -> {
+            saveBtn.setVisible(userService.hasPermission(selectedRaceDTO, DefaultActions.UPDATE));
+        });
+
         buttonsPanel.add(saveBtn);
         this.selectedRaceContentPanel.add(courseManagementWidget);
         this.selectedRaceContentPanel.add(buttonsPanel);

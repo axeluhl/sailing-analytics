@@ -100,7 +100,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                 }
             }
             if (fileItem == null) {
-                throw new AllinOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorImportFileMissing"));
+                throw new AllInOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorImportFileMissing"));
             }
             final ImportMode importMode;
             if (importModeName == null) {
@@ -109,22 +109,22 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                 try {
                     importMode = ImportMode.valueOf(importModeName);
                 } catch (Exception e) {
-                    throw new AllinOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorUnknownImportMode"));
+                    throw new AllInOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorUnknownImportMode"));
                 }
             }
             if (importMode == ImportMode.NEW_EVENT) {
                 if (boatClassName == null || boatClassName.isEmpty()) {
-                    throw new AllinOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorMissingBoatClass"));
+                    throw new AllInOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorMissingBoatClass"));
                 }
             } else {
                 if (regattaName == null || regattaName.isEmpty()) {
-                    throw new AllinOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorMissingRegattaClass"));
+                    throw new AllInOneImportException(serverStringMessages.get(uiLocale, "allInOneErrorMissingRegattaClass"));
                 }
             }
             importerResult = new ExpeditionAllInOneImporter(serverStringMessages, uiLocale, getService(),
-                    getRaceLogTrackingAdapter(), getServiceFinderFactory(), getContext()).importFiles(fileName,
-                            fileItem, boatClassName, importMode, regattaName, importStartData);
-        } catch (AllinOneImportException e) {
+                    getSecurityService(), getRaceLogTrackingAdapter(), getServiceFinderFactory(), getContext())
+                            .importFiles(fileName, fileItem, boatClassName, importMode, regattaName, importStartData);
+        } catch (AllInOneImportException e) {
             importerResult = new ImporterResult(e, e.additionalErrors);
             logger.log(Level.SEVERE, e.getMessage());
         } catch (Throwable t) {
@@ -150,8 +150,8 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
         json.put(ExpeditionAllInOneConstants.RESPONSE_GPS_DEVICE_IDS, ImportResultSerializer.serializeTrackList(importerResult.importGpsFixData));
         json.put(ExpeditionAllInOneConstants.RESPONSE_SENSOR_DEVICE_IDS, ImportResultSerializer.serializeTrackList(importerResult.importSensorFixData));
         json.put(ExpeditionAllInOneConstants.RESPONSE_SENSOR_FIX_IMPORTER_TYPE, importerResult.sensorFixImporterType);
-        json.put(ExpeditionAllInOneConstants.RESPONSE_START_TIMES, ImportResultSerializer.serializeIterable(importerResult.startData.getStartTimes(),
-                startTime->startTime.asMillis()));
+        json.put(ExpeditionAllInOneConstants.RESPONSE_START_TIMES, importerResult.startData==null ? null :
+            ImportResultSerializer.serializeIterable(importerResult.startData.getStartTimes(), startTime->startTime.asMillis()));
         return json;
     }
 }

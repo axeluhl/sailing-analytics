@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
@@ -22,15 +23,20 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.User;
 
 @Path("/v1/masterdata/leaderboardgroups")
 public class MasterDataResource extends AbstractSailingServerResource {
@@ -39,11 +45,16 @@ public class MasterDataResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/x-java-serialized-object")
-    public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> leaderboardGroupNames,
+    public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> requestedLeaderboardGroups,
             @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind, @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs)
             throws UnsupportedEncodingException {
+        final SecurityService securityService = getSecurityService();
+        User user = securityService.getCurrentUser();
+        if (user == null) {
+            return Response.status(Status.FORBIDDEN).build();
+        }
         final long startTime = System.currentTimeMillis();
-        logger.info("Masterdataexport has started");
+        logger.info("Masterdataexport has started; requesting user: "+user);
         if (compress == null) {
             compress = false;
         }
@@ -58,37 +69,63 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
         Set<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
 
-        if (leaderboardGroupNames.size() > 0) {
-            for (String name : leaderboardGroupNames) {
-                LeaderboardGroup group = allLeaderboardGroups.get(name);
-                if (group != null) {
+        if (requestedLeaderboardGroups.isEmpty()) {
+            // add all visible
+            for (LeaderboardGroup group : allLeaderboardGroups.values()) {
+                if (securityService.hasCurrentUserReadPermission(group)) {
                     groupsToExport.add(group);
                 }
             }
         } else {
-            groupsToExport = new HashSet<LeaderboardGroup>();
-            groupsToExport.addAll(allLeaderboardGroups.values());
-        }
-
-        final List<Serializable> competitorIds = new ArrayList<Serializable>();
-
-        for (LeaderboardGroup lg : groupsToExport) {
-            for (Leaderboard leaderboard : lg.getLeaderboards()) {
-                for (Competitor competitor : leaderboard.getAllCompetitors()) {
-                    competitorIds.add(competitor.getId());
+            // add all requested, that are visible
+            for (String name : requestedLeaderboardGroups) {
+                LeaderboardGroup group = allLeaderboardGroups.get(name);
+                if (group != null) {
+                    if (securityService.hasCurrentUserReadPermission(group)) {
+                        groupsToExport.add(group);
+                    }
                 }
             }
         }
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations;
+        final List<Serializable> competitorIds = new ArrayList<Serializable>();
+        for (LeaderboardGroup lg : groupsToExport) {
+            for (Leaderboard leaderboard : lg.getLeaderboards()) {
+                if (securityService.hasCurrentUserReadPermission(leaderboard)) {
+                    for (Competitor competitor : leaderboard.getAllCompetitors()) {
+                        competitorIds.add(competitor.getId());
+                    }
+                }
+            }
+        }
+        Set<DeviceConfiguration> raceManagerDeviceConfigurations = new HashSet<>();
         if (exportDeviceConfigs) {
-            deviceConfigurations = getAllDeviceConfigs();
-        } else {
-            deviceConfigurations = new HashMap<>();
+            for (DeviceConfiguration deviceConfig : getAllDeviceConfigs()) {
+                // FIXME here permission check?
+                raceManagerDeviceConfigurations.add(deviceConfig);
+            }
+        }
+        ArrayList<Event> events = new ArrayList<>();
+        for (Event event : getService().getAllEvents()) {
+            if (securityService.hasCurrentUserReadPermission(event)) {
+                events.add(event);
+            }
+        }
+
+        ArrayList<MediaTrack> mediaTracks = new ArrayList<>();
+        for (MediaTrack mediaTrack : getService().getAllMediaTracks()) {
+            if (securityService.hasCurrentUserReadPermission(mediaTrack)) {
+                mediaTracks.add(mediaTrack);
+            }
+        }
+        Map<String, Regatta> regattaRaceIds = new HashMap<>();
+        for (Entry<String, Regatta> regattaRaceMap : getService().getPersistentRegattasForRaceIDs().entrySet()) {
+            if (securityService.hasCurrentUserReadPermission(regattaRaceMap.getValue())) {
+                regattaRaceIds.put(regattaRaceMap.getKey(), regattaRaceMap.getValue());
+            }
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
-                getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService()
-                        .getAllMediaTracks(),
-                getService().getSensorFixStore(), exportWind, deviceConfigurations);
+                events, regattaRaceIds, mediaTracks,
+                getService().getSensorFixStore(), exportWind, raceManagerDeviceConfigurations);
         final StreamingOutput streamingOutput;
         if (compress) {
             streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime);
@@ -105,9 +142,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
         return builtResponse;
     }
     
-    private Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigs() {
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> configs = getService().getAllDeviceConfigurations();
-        return configs;
+    private Iterable<DeviceConfiguration> getAllDeviceConfigs() {
+        return getService().getAllDeviceConfigurations();
     }
 
     private abstract class AbstractStreamingOutput implements StreamingOutput {

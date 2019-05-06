@@ -336,7 +336,7 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
         ObjectInputStream ois;
         if (domainFactory != null) {
-            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(is);
+            ois = domainFactory.createObjectInputStreamResolvingAgainstThisFactory(is, null);
         } else {
             // TODO ensure that domainfactory is set here. Otherwise there can be issues with duplicate domain objects
             logger.warning("PolarDataService didn't have a domain factory attached. Replication to this service could fail.");

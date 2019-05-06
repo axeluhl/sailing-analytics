@@ -30,6 +30,9 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.subject.Subject;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
 import org.mockito.Matchers;
@@ -90,12 +93,23 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
      */
     public void setUp() throws Exception {
         try {
+            setUpSecurity();
             Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = setUpWithoutStartingToReplicateYet();
             result.getA().startToReplicateFrom(result.getB());
         } catch (Exception e) {
             tearDown();
             throw e;
         }
+    }
+    
+    private void setUpSecurity() {
+        SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
+        Subject fakeSubject = Mockito.mock(Subject.class);
+
+        SecurityUtils.setSecurityManager(securityManager);
+        Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
+        Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
+        Mockito.doNothing().when(fakeSubject).checkPermission(Mockito.anyString());
     }
 
     /**
@@ -264,7 +278,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                 replicablesToReplicate.add(getReplicablesProvider().getReplicable(replicableIdAsString, /* wait */ false));
             }
             this.masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, exchangeName, /* messagingPort */ 0,
-                    UUID.randomUUID().toString(), "localhost", ss.getLocalPort(), replicablesToReplicate);
+                    UUID.randomUUID().toString(), "localhost", ss.getLocalPort(), /* bearerToken */ null, replicablesToReplicate);
         }
         
         ReplicationMasterDescriptor getMasterDescriptor() {

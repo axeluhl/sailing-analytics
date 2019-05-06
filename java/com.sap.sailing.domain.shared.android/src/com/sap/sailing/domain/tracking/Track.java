@@ -3,13 +3,13 @@ package com.sap.sailing.domain.tracking;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.TimeRangeCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
-import com.sap.sse.common.Util.Function;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**

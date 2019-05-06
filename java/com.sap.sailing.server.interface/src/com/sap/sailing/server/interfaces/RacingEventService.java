@@ -14,7 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-import javax.security.auth.Subject;
+import org.apache.shiro.subject.Subject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -43,11 +43,10 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
-import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
@@ -102,6 +101,7 @@ import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -331,7 +331,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param controlTrackingFromStartAndFinishTimes
      *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
      */
-    Regatta createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
+    Regatta createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
+            CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
     
@@ -342,7 +343,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes);
+            boolean controlTrackingFromStartAndFinishTimes, String registrationLinkSecret,
+            CompetitorRegistrationType registrationType);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -489,7 +491,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         the call
      */
     Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
-            boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id, 
+            boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
+            String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
@@ -515,26 +518,31 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param identifier of the client (may include event)
      * @return the {@link DeviceConfiguration}
      */
-    DeviceConfiguration getDeviceConfiguration(DeviceConfigurationIdentifier identifier);
+    DeviceConfiguration getDeviceConfigurationById(UUID id);
+    
+    /**
+     * Returns a mobile device's configuration by its name. This was unique in the past, but this constraint will
+     * be removed in future releases, so using this method is considered deprecated.
+     */
+    DeviceConfiguration getDeviceConfigurationByName(String deviceConfigurationName);
     
     /**
      * Adds a device configuration.
      * @param matcher defining for which the configuration applies.
      * @param configuration of the device.
      */
-    void createOrUpdateDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration);
+    void createOrUpdateDeviceConfiguration(DeviceConfiguration configuration);
     
     /**
-     * Removes a configuration by its matching object.
-     * @param matcher
+     * Removes a configuration by its ID.
      */
-    void removeDeviceConfiguration(DeviceConfigurationMatcher matcher);
+    void removeDeviceConfiguration(UUID id);
 
     /**
      * Returns all configurations and their matching objects. 
      * @return the {@link DeviceConfiguration}s.
      */
-    Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigurations();
+    Iterable<DeviceConfiguration> getAllDeviceConfigurations();
 
     /**
      * Forces a new start time on the RaceLog identified by the passed parameters.
@@ -818,7 +826,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary();
     
     /**
-     * Returns the {@link AnniversaryRaceDeterminatorImpl} used by this service. This is needed for replication for
+     * Returns the {@link AnniversaryRaceDeterminator} used by this service. This is needed for replication for
      * anniversary races only.
      */
     AnniversaryRaceDeterminator getAnniversaryRaceDeterminator();
@@ -861,4 +869,32 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * to be in the {@link CompetitorStore}.
      */
     DynamicCompetitorWithBoat convertCompetitorDescriptorToCompetitorWithBoat(CompetitorDescriptor competitorDescriptor, String searchTag);
+
+    /**
+     * Required for replicated operations, so they can obtain a valid instance of the SecurityService
+     */
+    SecurityService getSecurityService();
+
+    /**
+     * If the leaderboard can be resolved to a regatta, and the given secret is correct, return true
+     */
+    default boolean skipChecksDueToCorrectSecret(String leaderboardName, String secret) {
+        final boolean result;
+        if (leaderboardName == null && secret == null) {
+            result = false;
+        } else {
+            Regatta regatta = getRegattaByName(leaderboardName);
+            if (regatta == null) {
+                if (secret != null) {
+                    logger.warning(
+                            "Attempt to skip security checks using regatta secret \"" + secret + "\" for leaderboard \""
+                                    + leaderboardName + "\", but a regatta with the same name could not be resolved");
+                } // else regatta not found, but no secret specified either; checks won't be skipped, but no skipping was really requested
+                result = false;
+            } else {
+                result = Util.equalStringsWithEmptyIsNull(regatta.getRegistrationLinkSecret(), secret);
+            }
+        }
+        return result;
+    }
 }
