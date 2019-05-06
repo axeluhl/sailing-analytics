@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.orc;
+package com.sap.sailing.domain.orc.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;

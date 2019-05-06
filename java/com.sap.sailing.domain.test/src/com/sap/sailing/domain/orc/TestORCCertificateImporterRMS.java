@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.ranking;
+package com.sap.sailing.domain.orc;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,8 +7,8 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.orc.ORCCertificateImporterRMS;
-import com.sap.sailing.domain.orc.ORCCertificateImporterRMS.ORCCertificateValues;
+import com.sap.sailing.domain.orc.impl.ORCCertificateImporterRMS;
+import com.sap.sailing.domain.orc.impl.ORCCertificateImporterRMS.ORCCertificateValues;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

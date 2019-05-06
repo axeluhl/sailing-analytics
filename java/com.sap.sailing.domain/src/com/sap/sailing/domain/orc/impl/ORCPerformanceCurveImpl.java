@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.orc;
+package com.sap.sailing.domain.orc.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,6 +14,8 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeFo
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.orc.ORCPerformanceCurve;
+import com.sap.sailing.domain.ranking.ORCPerformanceCurveRankingMetric;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -34,7 +36,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  * @author Daniel Lisunkin (i505543)
  * 
  */
-public class ORCCertificatePerformanceCurve implements Serializable {
+public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurve {
     private static final long serialVersionUID = 4113356173492168453L;
 
     private final Map<Speed, Map<Bearing, Duration>> durationPerNauticalMileAtTrueWindAngleAndSpeed;
@@ -61,7 +63,7 @@ public class ORCCertificatePerformanceCurve implements Serializable {
      * column is a map from the true wind angle (here expressed as an object of type {@link Bearing}) and
      * the {@link Duration} the boat is assumed to need at that true wind speed/angle for one nautical mile.
      */
-    public ORCCertificatePerformanceCurve(Map<Speed, Map<Bearing, Duration>> twaAllowances, Map<Speed, Bearing> beatAngles, Map<Speed, Bearing> gybeAngles) {
+    public ORCPerformanceCurveImpl(Map<Speed, Map<Bearing, Duration>> twaAllowances, Map<Speed, Bearing> beatAngles, Map<Speed, Bearing> gybeAngles) {
         Map<Speed, Map<Bearing, Duration>> map = twaAllowances;
         durationPerNauticalMileAtTrueWindAngleAndSpeed = Collections.unmodifiableMap(map);
         this.beatAngles = Collections.unmodifiableMap(beatAngles);
@@ -179,6 +181,22 @@ public class ORCCertificatePerformanceCurve implements Serializable {
                     .times(legDistance_ProjectedForBeatAndRun_GreatCircleForAllOthers.getNauticalMiles()));
         }
         return result;
+    }
+    
+    PolynomialFunctionLagrangeForm getLagrangeInterpolationPerTrueWindSpeed(Bearing trueWindDirection) {
+        return lagrangePolynomialsPerTrueWindSpeed.getOrDefault(trueWindDirection, null);
+    }
+
+    @Override
+    public Speed getImpliedWind() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Duration getCalculatedTime() {
+        // TODO Auto-generated method stub
+        return null;
     }
     
     

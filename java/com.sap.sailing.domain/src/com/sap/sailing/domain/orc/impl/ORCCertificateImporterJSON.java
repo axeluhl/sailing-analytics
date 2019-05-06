@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.orc;
+package com.sap.sailing.domain.orc.impl;
 
 import java.io.*;
 import java.util.HashMap;
@@ -12,6 +12,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.orc.ORCCertificate;
+import com.sap.sailing.domain.orc.ORCCertificateImporter;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -26,7 +27,7 @@ public class ORCCertificate {
     private Map<String, Map<Speed, Duration>> predefinedCourses;
     private Map<Speed, Bearing> beatAngles;
     private Map<Speed, Bearing> gybeAngles;
-    private ORCCertificatePerformanceCurve performanceCurve;
+    private ORCPerformanceCurveImpl performanceCurve;
 
     public ORCCertificate(Map<String, String> general, Map<String, Number> hull, Map<String, Number> sails,
             Map<String, Number> scoring, Map<String, Map<Speed, Duration>> twaCourses,
@@ -71,7 +72,7 @@ public class ORCCertificate {
             map.get(tws).put(gybeAngles.get(tws), predefinedCourses.get("Gybe").get(tws));
         }
 
-        performanceCurve = new ORCCertificatePerformanceCurve(map, beatAngles, gybeAngles);
+        performanceCurve = new ORCPerformanceCurveImpl(map, beatAngles, gybeAngles);
         performanceCurve.hashCode(); // Only to resolve "Warning"
     }
 

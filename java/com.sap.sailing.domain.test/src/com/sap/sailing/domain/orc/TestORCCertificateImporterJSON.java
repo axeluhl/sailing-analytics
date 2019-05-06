@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.ranking;
+package com.sap.sailing.domain.orc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,7 +13,7 @@ import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.orc.ORCCertificate;
-import com.sap.sailing.domain.orc.ORCCertificateImporterJSON;
+import com.sap.sailing.domain.orc.impl.ORCCertificateImporterJSON;
 
 
 public class TestORCCertificateImporterJSON {
