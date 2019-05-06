@@ -231,6 +231,10 @@ public class StationarySequence {
         return candidates.size();
     }
     
+    boolean isEmpty() {
+        return candidates.isEmpty();
+    }
+    
     /**
      * Adds a candidate whose time point is within (including the first/last candidate's time points) the
      * time range of this sequence. This will not change this sequence's set of fixes spanned. Therefore,

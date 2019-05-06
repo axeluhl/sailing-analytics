@@ -275,6 +275,7 @@ public class StationarySequenceBasedFilter {
                 }
             }
         }
+        assert containsNoEmptyStationarySequence();
     }
     
     /**
@@ -301,6 +302,7 @@ public class StationarySequenceBasedFilter {
                 }
             }
         }
+        assert containsNoEmptyStationarySequence();
     }
     
     private StationarySequence tryToConstructStationarySequence(Candidate start, Candidate end) {
@@ -371,8 +373,18 @@ public class StationarySequenceBasedFilter {
                 candidatesEffectivelyAdded.remove(removedCandidate);
             }
         }
+        assert containsNoEmptyStationarySequence();
     }
 
+    private boolean containsNoEmptyStationarySequence() {
+        for (final StationarySequence ss : stationarySequences) {
+            if (ss.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     /**
      * Informs this filter that for its competitor a new position fix was added or replaced. All necessary updates to
      * the stationary sequences managed by this filter are carried out, and the changes that this has to the result of
@@ -470,6 +482,7 @@ public class StationarySequenceBasedFilter {
             }
         }
         updateFilteredCandidates(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
+        assert containsNoEmptyStationarySequence();
         return new Pair<>(candidatesEffectivelyAdded, candidatesEffectivelyRemoved);
     }
 
