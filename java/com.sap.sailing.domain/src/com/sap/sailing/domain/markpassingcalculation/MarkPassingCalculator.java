@@ -311,8 +311,13 @@ public class MarkPassingCalculator {
                                 for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas.entrySet()) {
                                     tasks.add(()->{
                                         Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
-                                        chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
-                                        return null;
+                                        try {
+                                            chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                                            return null;
+                                        } catch (Exception e) {
+                                            logger.log(Level.SEVERE, "Exception trying to calculate mark passing deltas for competitor "+entry.getKey(), e);
+                                            throw e;
+                                        }
                                     });
                                 }
                                 executor.invokeAll(tasks);
