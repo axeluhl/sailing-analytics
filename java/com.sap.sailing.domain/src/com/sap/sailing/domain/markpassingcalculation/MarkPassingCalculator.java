@@ -290,9 +290,14 @@ public class MarkPassingCalculator {
                         // haven't processed them yet with the CandidateFinder or CandidateChooser.
                         if (!finished && !suspended) {
                             if (smallestChangedWaypointIndex.value != -1) {
+                                logger.finer("Handling course change; smallesChangedWaypointIndex=="+smallestChangedWaypointIndex.value+
+                                        "; waypoints added: "+addedWaypoints+"; waypoints removed: "+removedWaypoints);
                                 // there was a course change; finder and chooser need to be updated in this regard;
                                 // do this before the other changes such as new / replaced position fixes are considered:
                                 final Course course = race.getRace().getCourse();
+                                logger.finer(()->"Handling course change; smallestChangedWaypointIndex=="+smallestChangedWaypointIndex.value+
+                                        "; waypoints added: "+addedWaypoints+"; waypoints removed: "+removedWaypoints+
+                                        "; current course: "+course);
                                 final Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas;
                                 // obtain the course's read lock so that the finder creates the candidate deltas under the
                                 // premise of the same course as the chooser updates its end proxy node's index; they have
@@ -320,7 +325,9 @@ public class MarkPassingCalculator {
                                         }
                                     });
                                 }
+                                logger.finer(()->"Calculating mark passing deltas after course change in executor");
                                 executor.invokeAll(tasks);
+                                logger.finer(()->"Done calculating mark passing deltas after course change");
                             }
                             updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings, unsuppressedMarkPassings);
                             computeMarkPasses(competitorFixes, competitorFixesThatReplacedExistingOnes, markFixes);
