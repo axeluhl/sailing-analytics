@@ -2,7 +2,6 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -370,7 +369,7 @@ public class StationarySequence {
             tailSequence = null;
         } else {
             // split:
-            final Set<Candidate> oldValidCandidates = new HashSet<>();
+            final Set<Candidate> oldValidCandidates = new TreeSet<>(candidateComparator);
             Util.addAll(getValidCandidates(), oldValidCandidates);
             final Candidate dummyCandidateForFix = createDummyCandidate(newFix.getTimePoint());
             SortedSet<Candidate> tailSet = candidates.tailSet(dummyCandidateForFix);
@@ -383,7 +382,8 @@ public class StationarySequence {
             }
             tailSequence = tailSet.isEmpty() ? null : createStationarySequence(tailSet);
             if (tailSequence != null && tryToAddCandidateAtFixLater) {
-                tailSequence.tryToExtendBeforeFirst(candidates.floor(dummyCandidateForFix), new HashSet<>(), new HashSet<>(), stationarySequenceSetToUpdate);
+                tailSequence.tryToExtendBeforeFirst(candidates.floor(dummyCandidateForFix),
+                        new TreeSet<>(candidateComparator), new TreeSet<>(candidateComparator), stationarySequenceSetToUpdate);
             }
             // now remove the tail set candidates from this stationary sequence:
             final ArrayList<Candidate> fullTailSet = new ArrayList<>(candidates.tailSet(dummyCandidateForFix));
@@ -394,14 +394,16 @@ public class StationarySequence {
             candidates.removeAll(fullTailSet);
             // ...and it doesn't need adding because if it was removed, it's empty now.
             refreshBoundingBox();
-            final Set<Candidate> newValidCandidates = new HashSet<>();
+            final Set<Candidate> newValidCandidates = new TreeSet<>(candidateComparator);
             Util.addAll(getValidCandidates(), newValidCandidates);
             if (tailSequence != null) { // this includes the possibility of a single candidate being added to the tail set
                 Util.addAll(tailSequence.getValidCandidates(), newValidCandidates);
             }
-            final Set<Candidate> candidatesAdded = new HashSet<>(newValidCandidates);
+            final Set<Candidate> candidatesAdded = new TreeSet<>(candidateComparator);
+            candidatesAdded.addAll(newValidCandidates);
             candidatesAdded.removeAll(newValidCandidates);
-            final Set<Candidate> candidatesRemoved = new HashSet<>(oldValidCandidates);
+            final Set<Candidate> candidatesRemoved = new TreeSet<>(candidateComparator);
+            candidatesRemoved.addAll(oldValidCandidates);
             candidatesRemoved.removeAll(newValidCandidates);
             candidatesEffectivelyAdded.addAll(candidatesAdded);
             candidatesEffectivelyRemoved.removeAll(candidatesAdded);
@@ -420,8 +422,8 @@ public class StationarySequence {
      * @return a sequence with the candidate(s)
      */
     private StationarySequence createStationarySequence(SortedSet<Candidate> candidates) {
-        final Set<Candidate> candidatesEffectivelyAdded = new HashSet<>();
-        final Set<Candidate> candidatesEffectivelyRemoved = new HashSet<>();
+        final Set<Candidate> candidatesEffectivelyAdded = new TreeSet<>(candidateComparator);
+        final Set<Candidate> candidatesEffectivelyRemoved = new TreeSet<>(candidateComparator);
         final Iterator<Candidate> candidateIterator = candidates.iterator();
         assert candidateIterator.hasNext();
         final StationarySequence result = new StationarySequence(candidateIterator.next(), candidateComparator, track);

@@ -162,7 +162,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
             ArrayList<Candidate> sortedByProbabilityFromLowToHigh = new ArrayList<>(contiguousCandidateSequence);
             Collections.sort(sortedByProbabilityFromLowToHigh, (c1, c2)->Double.compare(c1.getProbability(), c2.getProbability()));
             double maxProbability = sortedByProbabilityFromLowToHigh.get(sortedByProbabilityFromLowToHigh.size()-1).getProbability();
-            Set<Candidate> candidatesAcceptedFromSequence = new HashSet<>();
+            Set<Candidate> candidatesAcceptedFromSequence = new TreeSet<>(candidateComparator);
             Candidate currentCandidate;
             for (int i=sortedByProbabilityFromLowToHigh.size()-1; i>=0 &&
                     (currentCandidate=sortedByProbabilityFromLowToHigh.get(i)).getProbability()+MAX_PROBABILITY_DELTA >= maxProbability; i--) {
