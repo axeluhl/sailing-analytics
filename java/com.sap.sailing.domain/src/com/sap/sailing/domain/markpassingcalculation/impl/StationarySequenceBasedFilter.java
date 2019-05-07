@@ -346,6 +346,7 @@ public class StationarySequenceBasedFilter {
             candidatesEffectivelyAdded.remove(removedCandidate);
         } else {
             assert candidates.contains(removedCandidate);
+            candidates.remove(removedCandidate);
             final StationarySequence latestStationarySequenceStartingAtOrBeforeRemovedCandidate =
                     stationarySequences.floor(createStationarySequence(removedCandidate));
             final boolean addToEffectivelyRemoved;
@@ -356,9 +357,8 @@ public class StationarySequenceBasedFilter {
                     latestStationarySequenceStartingAtOrBeforeRemovedCandidate.remove(removedCandidate,
                             candidatesEffectivelyAdded, candidatesEffectivelyRemoved,
                             /* StationarySequence set to update */ stationarySequences);
-                    if (latestStationarySequenceStartingAtOrBeforeRemovedCandidate.size() == 1) {
-                        stationarySequences.remove(latestStationarySequenceStartingAtOrBeforeRemovedCandidate);
-                    }
+                    assert !stationarySequences.contains(latestStationarySequenceStartingAtOrBeforeRemovedCandidate) ||
+                        latestStationarySequenceStartingAtOrBeforeRemovedCandidate.size() > 1;
                     addToEffectivelyRemoved = false; // already taken care of by the remove call above
                 } else {
                     // candidate not in any sequence
@@ -433,10 +433,9 @@ public class StationarySequenceBasedFilter {
                 if (lastSequenceStartingAtOrBeforeFix != null && !lastSequenceStartingAtOrBeforeFix.getLast().getTimePoint().before(newFix.getTimePoint())) {
                     // fix falls into the existing StationarySequence; update its bounding box:
                     final StationarySequence splitResult = lastSequenceStartingAtOrBeforeFix.tryToAddFix(newFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved, /* StationarySequence set to update */ stationarySequences);
-                    if (lastSequenceStartingAtOrBeforeFix.size() == 1) {
-                        stationarySequences.remove(lastSequenceStartingAtOrBeforeFix);
-                    }
+                    assert !stationarySequences.contains(lastSequenceStartingAtOrBeforeFix) || lastSequenceStartingAtOrBeforeFix.size() > 1;
                     if (splitResult != null) {
+                        assert splitResult.size() > 1;
                         stationarySequences.add(splitResult);
                     }
                 }
