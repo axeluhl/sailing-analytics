@@ -43,7 +43,7 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
                     result = stringMessages.pleaseEnterASailNumberOrABoatName();
                 } else if (boatToValidate.getColor() != null && boatToValidate.getColor() instanceof InvalidColor) {
                     result = boatToValidate.getColor().getAsHtml();
-                } else if (!boatClassWasChanged(boatToValidate, originalBoat) && isBoatClassValid(boatToValidate)) {
+                } else if (boatClassWasChanged(boatToValidate, originalBoat) && isBoatClassInvalid(boatToValidate)) {
                     // only validate if boat class has changed and the originalBoat actually exists and is not to be
                     // created here
                     result = stringMessages.pleaseEnterABoatClass();
@@ -52,13 +52,27 @@ public abstract class AbstractCompetitorWithBoatDialog extends CompetitorEditDia
             return result;
         }
 
-        private boolean isBoatClassValid(BoatDTO boatToValidate) {
+        private boolean isBoatClassInvalid(BoatDTO boatToValidate) {
             return boatToValidate.getBoatClass().getName() == null || boatToValidate.getBoatClass().getName().isEmpty();
         }
 
         private boolean boatClassWasChanged(BoatDTO boatToValidate, BoatDTO originalBoat) {
-            return !(boatToValidate.getBoatClass() != null && originalBoat.getBoatClass() != null
-                    && !originalBoat.getBoatClass().getName().equals(boatToValidate.getBoatClass().getName()));
+            boolean changed = false;
+            if (boatToValidate.getBoatClass() == null && originalBoat.getBoatClass() != null) {
+                // boat class has been added
+                changed = true;
+            } else if (boatToValidate.getBoatClass() != null && originalBoat.getBoatClass() == null) {
+                //
+                changed = true;
+            } else if (boatToValidate.getBoatClass() == null && originalBoat.getBoatClass() == null) {
+                // this is a create dialog, the boat class was just created
+                changed = true;
+            } else if (originalBoat.getBoatClass().getName()
+                    .equals(boatToValidate.getBoatClass().getName())) {
+                // boat class exists and stayed the same
+                changed = false;
+            }
+            return changed;
         }
     }
     

@@ -60,9 +60,22 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
                     }
 
                     private boolean boatClassWasChanged(BoatDTO boatToValidate, BoatDTO originalBoat) {
-                        return !(boatToValidate.getBoatClass() != null && originalBoat.getBoatClass() != null
-                                && !originalBoat.getBoatClass().getName()
-                                        .equals(boatToValidate.getBoatClass().getName()));
+                        boolean changed = false;
+                        if (boatToValidate.getBoatClass() == null && originalBoat.getBoatClass() != null) {
+                            // boat class has been added
+                            changed = true;
+                        } else if (boatToValidate.getBoatClass() != null && originalBoat.getBoatClass() == null) {
+                            //
+                            changed = true;
+                        } else if (boatToValidate.getBoatClass() == null && originalBoat.getBoatClass() == null) {
+                            // this is a create dialog, the boat class was just created
+                            changed = true;
+                        } else if (originalBoat.getBoatClass().getName()
+                                .equals(boatToValidate.getBoatClass().getName())) {
+                            // boat class exists and stayed the same
+                            changed = false;
+                        }
+                        return changed;
                     }
                 }, /* animationEnabled */true, callback);
         this.ensureDebugId("BoatEditDialog");
