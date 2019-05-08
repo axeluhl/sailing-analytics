@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NavigableSet;
@@ -421,7 +422,9 @@ public class StationarySequence {
             candidatesEffectivelyRemoved.addAll(candidatesRemoved);
             candidatesEffectivelyAdded.removeAll(candidatesRemoved);
         }
-        return tailSequence != null && tailSequence.size() >= 2 ? tailSequence : null;
+        final StationarySequence result = tailSequence != null && tailSequence.size() >= 2 ? tailSequence : null;
+        assert result == null || !this.getLast().getTimePoint().equals(result.getFirst().getTimePoint());
+        return result;
     }
 
     /**
@@ -467,6 +470,11 @@ public class StationarySequence {
         return result;
     }
     
+    @Override
+    public String toString() {
+        return "Stationary Sequence "+candidates+", bounds diameter "+boundingBoxOfTrackSpanningCandidates.getDiameter();
+    }
+    
     /**
      * Creates a dummy time point that can be used for searching in {@link #candidates} by time point. It
      * uses {@code 1} for the one-based waypoint index, {@code null} for the waypoint and {@code 0.0} for its
@@ -474,6 +482,18 @@ public class StationarySequence {
      */
     static Candidate createDummyCandidate(TimePoint timePoint) {
         return new CandidateImpl(/* one-based index of waypoint */ 1, timePoint, /* probability */ 0, /* waypoint */ null);
+    }
+
+    Iterable<Candidate> getAllCandidates() {
+        return Collections.unmodifiableCollection(candidates);
+    }
+
+    /**
+     * Tells whether the {@link #candidates} set contains {@code candidate}. Containment is decided based on
+     * the {@link #candidateComparator}'s notion of equality. 
+     */
+    public boolean contains(Candidate candidate) {
+        return candidates.contains(candidate);
     }
 }
 
