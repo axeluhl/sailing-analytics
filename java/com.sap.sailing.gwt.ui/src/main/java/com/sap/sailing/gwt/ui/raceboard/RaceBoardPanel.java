@@ -43,6 +43,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
@@ -511,7 +512,7 @@ public class RaceBoardPanel
     protected void updateRaceTimePanelOverlay() {
         ArrayList<BarOverlay> overlays = new ArrayList<BarOverlay>();
         Set<MediaTrack> videoPlaying = mediaPlayerManagerComponent.getPlayingVideoTracks();
-        Set<MediaTrack> audioPlaying = mediaPlayerManagerComponent.getPlayingAudioTrack();
+        Set<MediaTrackWithSecurityDTO> audioPlaying = mediaPlayerManagerComponent.getPlayingAudioTrack();
         for (MediaTrack track : mediaPlayerManagerComponent.getAssignedMediaTracks()) {
             double start = track.startTime.asMillis();
             // do not show bars for very short videos but show for live streaming ones

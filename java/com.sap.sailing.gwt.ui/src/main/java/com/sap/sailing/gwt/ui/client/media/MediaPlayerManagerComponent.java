@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -71,8 +72,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     private MediaPlayer dockedVideoPlayer;
     private final Map<MediaTrack, MediaPlayerContainer> activePlayerContainers = new HashMap<MediaTrack, MediaPlayerContainer>();
-    private Collection<MediaTrack> assignedMediaTracks = new ArrayList<>();
-    private Collection<MediaTrack> overlappingMediaTracks = new ArrayList<>();
+    private Collection<MediaTrackWithSecurityDTO> assignedMediaTracks = new ArrayList<>();
+    private Collection<MediaTrackWithSecurityDTO> overlappingMediaTracks = new ArrayList<>();
     private Map<MediaTrack, Status> mediaTrackStatus = new HashMap<>();
 
     private final RegattaAndRaceIdentifier raceIdentifier;
@@ -174,20 +175,20 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void playDefault() {
-        final MediaTrack defaultVideo = getDefaultMedia(MediaType.video);
+        final MediaTrackWithSecurityDTO defaultVideo = getDefaultMedia(MediaType.video);
         if (defaultVideo != null) {
             playFloatingVideo(defaultVideo);
         } else {
-            final MediaTrack defaultAudio = getDefaultMedia(MediaType.audio);
+            final MediaTrackWithSecurityDTO defaultAudio = getDefaultMedia(MediaType.audio);
             if (defaultAudio != null) {
                 playAudio(defaultAudio);
             }
         }
     }
 
-    private MediaTrack getDefaultMedia(MediaType mediaType) {
+    private MediaTrackWithSecurityDTO getDefaultMedia(MediaType mediaType) {
         // TODO: implement a better heuristic than just taking the first to come
-        for (MediaTrack mediaTrack : assignedMediaTracks) {
+        for (MediaTrackWithSecurityDTO mediaTrack : assignedMediaTracks) {
             if (mediaTrack.mimeType != null && mediaType.equals(mediaTrack.mimeType.mediaType)
                     && getMediaTrackStatus(mediaTrack).isPotentiallyPlayable()) {
                 return mediaTrack;
@@ -260,8 +261,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
      * 
      * @return
      */
-    private AsyncCallback<Iterable<MediaTrack>> getAssignedMediaCallback() {
-        return new AsyncCallback<Iterable<MediaTrack>>() {
+    private AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> getAssignedMediaCallback() {
+        return new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 notifyStateChange();
@@ -271,7 +272,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             }
 
             @Override
-            public void onSuccess(Iterable<MediaTrack> mediaTracks) {
+            public void onSuccess(Iterable<MediaTrackWithSecurityDTO> mediaTracks) {
                 MediaPlayerManagerComponent.this.assignedMediaTracks.clear();
                 Util.addAll(mediaTracks, MediaPlayerManagerComponent.this.assignedMediaTracks);
                 for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.assignedMediaTracks) {
@@ -291,8 +292,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
      * 
      * @return
      */
-    private AsyncCallback<Iterable<MediaTrack>> getOverlappingMediaCallback() {
-        return new AsyncCallback<Iterable<MediaTrack>>() {
+    private AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> getOverlappingMediaCallback() {
+        return new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 notifyStateChange();
@@ -301,7 +302,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             }
 
             @Override
-            public void onSuccess(Iterable<MediaTrack> mediaTracks) {
+            public void onSuccess(Iterable<MediaTrackWithSecurityDTO> mediaTracks) {
                 MediaPlayerManagerComponent.this.overlappingMediaTracks.clear();
                 Util.addAll(mediaTracks, MediaPlayerManagerComponent.this.overlappingMediaTracks);
                 for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.overlappingMediaTracks) {
@@ -319,7 +320,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public void playDockedVideo(MediaTrack videoTrack) {
+    public void playDockedVideo(MediaTrackWithSecurityDTO videoTrack) {
         if ((dockedVideoPlayer == null) || (dockedVideoPlayer.getMediaTrack() != videoTrack)) {
             closeDockedVideo();
             closeFloatingPlayer(videoTrack);
@@ -349,7 +350,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public void playAudio(MediaTrack audioTrack) {
+    public void playAudio(MediaTrackWithSecurityDTO audioTrack) {
         muteAudio();
         playFloatingVideo(audioTrack);
         activePlayerContainers.get(audioTrack).getMediaPlayer().setMuted(false);
@@ -369,7 +370,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public void playFloatingVideo(final MediaTrack videoTrack) {
+    public void playFloatingVideo(final MediaTrackWithSecurityDTO videoTrack) {
         if (dockedVideoPlayer != null && dockedVideoPlayer.getMediaTrack() == videoTrack) {
             closeDockedVideo();
         }
@@ -392,7 +393,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         }
     }
 
-    private <T> T createAndWrapVideoPlayer(final MediaTrack videoTrack, VideoContainerFactory<T> videoContainerFactory) {
+    private <T> T createAndWrapVideoPlayer(final MediaTrackWithSecurityDTO videoTrack,
+            VideoContainerFactory<T> videoContainerFactory) {
         final PopoutWindowPlayer.PlayerCloseListener playerCloseListener = new PopoutWindowPlayer.PlayerCloseListener() {
             private MediaPlayerContainer videoContainer;
 
@@ -413,7 +415,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         };
         PopoutListener popoutListener = new PopoutListener() {
             @Override
-            public void popoutVideo(MediaTrack videoTrack) {
+            public void popoutVideo(MediaTrackWithSecurityDTO videoTrack) {
                 MediaPlayerContainer videoContainer;
                 if (videoTrack.isYoutube()) {
                     videoContainer = new YoutubeWindowPlayer(videoTrack, playerCloseListener);
@@ -461,7 +463,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public void closeFloatingPlayer(MediaTrack videoTrack) {
+    public void closeFloatingPlayer(MediaTrackWithSecurityDTO videoTrack) {
         MediaPlayerContainer removedVideoContainer = activePlayerContainers.remove(videoTrack);
         if (removedVideoContainer != null) {
             removedVideoContainer.shutDown();
@@ -533,7 +535,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     @Override
                     public void ok(final MediaTrack mediaTrack) {
                         MediaPlayerManagerComponent.this.getMediaService().addMediaTrack(mediaTrack,
-                            new AsyncCallback<String>() {
+                                new AsyncCallback<MediaTrackWithSecurityDTO>() {
 
                                 @Override
                                 public void onFailure(Throwable t) {
@@ -541,8 +543,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                                 }
 
                                 @Override
-                                public void onSuccess(String dbId) {
-                                    mediaTrack.dbId = dbId;
+                                    public void onSuccess(MediaTrackWithSecurityDTO mediaTrack) {
                                     assignedMediaTracks.add(mediaTrack);
                                     playFloatingVideo(mediaTrack);
                                     notifyStateChange();
@@ -555,7 +556,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public boolean deleteMediaTrack(final MediaTrack mediaTrack) {
+    public boolean deleteMediaTrack(final MediaTrackWithSecurityDTO mediaTrack) {
         if (Window.confirm(stringMessages.reallyRemoveMediaTrack(mediaTrack.title))) {
             getMediaService().deleteMediaTrack(mediaTrack, new AsyncCallback<Void>() {
 
@@ -577,10 +578,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public boolean allowsEditing(String mediaTrackDbId) {
-        return userService.hasPermission(
-                SecuredDomainType.MEDIA_TRACK.getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
-                        MediaTrack.getTypeRelativeObjectIdentifier(mediaTrackDbId)));
+    public boolean allowsEditing(MediaTrackWithSecurityDTO mediaTrack) {
+        return userService.hasPermission(mediaTrack, DefaultActions.READ);
     }
 
     @Override
@@ -610,12 +609,12 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public Collection<MediaTrack> getAssignedMediaTracks() {
+    public Collection<MediaTrackWithSecurityDTO> getAssignedMediaTracks() {
         return Collections.unmodifiableCollection(assignedMediaTracks);
     }
     
     @Override
-    public Collection<MediaTrack> getOverlappingMediaTracks() {
+    public Collection<MediaTrackWithSecurityDTO> getOverlappingMediaTracks() {
         removeMediaTracksWhichAreInAssignedMediaTracks();
         return Collections.unmodifiableCollection(overlappingMediaTracks);
     }
@@ -716,7 +715,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public Set<MediaTrack> getPlayingAudioTrack() {
+    public Set<MediaTrackWithSecurityDTO> getPlayingAudioTrack() {
         return getActiveAudioContainers().stream().map(f -> f.getMediaPlayer().getMediaTrack())
                 .collect(Collectors.toSet());
     }

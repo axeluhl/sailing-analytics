@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client.media;
 
-import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 
 public interface MediaSynchAdapter {
     
@@ -20,7 +20,7 @@ public interface MediaSynchAdapter {
 
     void updateOffset();
 
-    MediaTrack getMediaTrack();
+    MediaTrackWithSecurityDTO getMediaTrack();
 
     void forceAlign();
 
