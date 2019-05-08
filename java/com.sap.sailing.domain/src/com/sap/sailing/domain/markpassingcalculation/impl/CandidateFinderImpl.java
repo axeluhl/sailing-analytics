@@ -422,10 +422,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                     }
                 });
             }
-            executor.invokeAll(tasks);
-        } catch (InterruptedException e) {
-            logger.log(Level.SEVERE, "Problem trying to update competitor candidate sets after waypoints starting at zero-based index "+
-                    zeroBasedIndexOfWaypointChanged+" have changed", e);
+            ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
+                    "Problem trying to update competitor candidate sets after waypoints starting at zero-based index "+
+                            zeroBasedIndexOfWaypointChanged+" have changed: %s", tasks);
         } finally {
             course.unlockAfterRead();
         }

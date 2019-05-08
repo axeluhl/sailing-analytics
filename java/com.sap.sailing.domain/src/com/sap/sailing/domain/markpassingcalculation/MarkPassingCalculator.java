@@ -120,11 +120,8 @@ public class MarkPassingCalculator {
                     return null;
                 });
             }
-            try {
-                executor.invokeAll(tasks);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error trying to compute initial set of mark passings for race "+race.getRace().getName(), e);
-            }
+            ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
+                    "Error trying to compute initial set of mark passings for race "+race.getRace().getName()+": %s", tasks);
             if (listener != null) {
                 synchronized (MarkPassingCalculator.this) {
                     if (listenerThread == null) {
@@ -326,7 +323,8 @@ public class MarkPassingCalculator {
                                     });
                                 }
                                 logger.finer(()->"Calculating mark passing deltas after course change in executor");
-                                executor.invokeAll(tasks);
+                                ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
+                                        "Error calculating mark passing deltas after course change in executor: %s", tasks);
                                 logger.finer(()->"Done calculating mark passing deltas after course change");
                             }
                             updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings, unsuppressedMarkPassings);
@@ -424,11 +422,8 @@ public class MarkPassingCalculator {
                     }
                 });
             }
-            try {
-                executor.invokeAll(tasks);
-            } catch (InterruptedException e) {
-                logger.log(Level.INFO, "mark passing calculation interrupted", e);
-            }
+            ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.INFO,
+                    "Error during mark passing calculation: %s", tasks);
         }
 
         private class ComputeMarkPassings implements Runnable {
