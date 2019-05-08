@@ -209,6 +209,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.SPEED_OVER_GROUND_AT_RACE_START, // start analysis mode
                 DetailCheckboxInfo.SPEED_OVER_GROUND_WHEN_STARTING, // start analysis mode
                 DetailCheckboxInfo.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_STARTING, // start analysis mode
+                DetailCheckboxInfo.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START,
                 DetailCheckboxInfo.START_TACK, // start analysis mode
 
                 DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
