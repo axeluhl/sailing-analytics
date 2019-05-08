@@ -36,6 +36,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.ThreadLocalTransporter;
@@ -80,6 +81,23 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         }
     }
 
+    /**
+     * Check if there is already an ownership asssociated to the object identified by the
+     * {@link QualifiedObjectIdentifier}. If no ownership exists, one will be created in the context of the current
+     * user.
+     */
+    private void createOwnershipIfMissing(final QualifiedObjectIdentifier identifier) {
+        if (securityService.getOwnership(identifier) == null) {
+            SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
+            subjectThreadState.bind();
+            try {
+                securityService.setOwnership(identifier, securityService.getCurrentUser(), defaultTenant);
+            } finally {
+                subjectThreadState.restore();
+            }
+        }
+    }
+
     @Override
     public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition raceDefinition,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
@@ -107,16 +125,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         final DynamicCompetitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, shortName,
                 displayColor, email, flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile,
                 searchTag);
-        if (securityService.getOwnership(competitor.getIdentifier()) == null) {
-            SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
-            subjectThreadState.bind();
-            try {
-                securityService.setOwnership(competitor.getIdentifier(), securityService.getCurrentUser(),
-                        defaultTenant);
-            } finally {
-                subjectThreadState.restore();
-            }
-        }
+        createOwnershipIfMissing(competitor.getIdentifier());
         return competitor;
     }
 
@@ -128,32 +137,15 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         final DynamicCompetitorWithBoat competitorWithBoat = competitorStore.getOrCreateCompetitorWithBoat(competitorId,
                 name, shortName, displayColor, email, flagImageURI,
                 team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
-        if (securityService.getOwnership(competitorWithBoat.getIdentifier()) == null) {
-            SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
-            subjectThreadState.bind();
-            try {
-                securityService.setOwnership(competitorWithBoat.getIdentifier(), securityService.getCurrentUser(),
-                        defaultTenant);
-            } finally {
-                subjectThreadState.restore();
-            }
-        }
+        createOwnershipIfMissing(competitorWithBoat.getIdentifier());
         return competitorWithBoat;
     }
 
     @Override
     public DynamicBoat getOrCreateBoat(CompetitorAndBoatStore competitorAndBoatStore, Serializable id, String name,
             BoatClass boatClass, String sailId, Color color) {
-        DynamicBoat boat = competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color);
-        if (securityService.getOwnership(boat.getIdentifier()) == null) {
-            SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
-            subjectThreadState.bind();
-            try {
-                securityService.setOwnership(boat.getIdentifier(), securityService.getCurrentUser(), defaultTenant);
-            } finally {
-                subjectThreadState.restore();
-            }
-        }
+        final DynamicBoat boat = competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color);
+        createOwnershipIfMissing(boat.getIdentifier());
         return boat;
     }
 }
