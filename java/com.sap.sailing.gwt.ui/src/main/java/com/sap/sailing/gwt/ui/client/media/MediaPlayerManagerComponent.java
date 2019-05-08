@@ -24,6 +24,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -52,6 +53,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -83,6 +85,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private final PopupPositionProvider popupPositionProvider;
     private MediaPlayerSettings settings;
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
+    private final RaceDTO raceDto;
 
     private List<PlayerChangeListener> playerChangeListener = new ArrayList<>();
 
@@ -91,13 +94,15 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
-            UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings) {
+            UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings,
+            RaceDTO raceDto) {
         super(parent, context);
         this.mediaPlayerLifecycle = mediaPlayerLifecycle;
         this.userService = userService;
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.raceTimer = raceTimer;
+        this.raceDto = raceDto;
         this.raceTimer.addPlayStateListener(this);
         this.raceTimer.addTimeListener(this);
         this.playSpeedFactorChanged(raceTimer.getPlaySpeedFactor());
@@ -719,5 +724,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     @Override
     public Status getMediaTrackStatus(MediaTrack track) {
         return mediaTrackStatus.getOrDefault(track, Status.UNDEFINED);
+    }
+
+    public SecuredDTO getCurrentRaceDTO() {
+        return raceDto;
     }
 }

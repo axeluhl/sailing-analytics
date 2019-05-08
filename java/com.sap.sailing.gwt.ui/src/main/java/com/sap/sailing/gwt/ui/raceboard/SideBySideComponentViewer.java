@@ -411,11 +411,11 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     private boolean isMediaManagementVisible(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
         boolean canCreateNew = userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.MEDIA_TRACK);
-        boolean canUpdateRace = userService.hasPermission(SecuredDomainType.TRACKED_RACE
-                .getPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, mediaPlayerManagerComponent
-                        .getCurrentRace().getIdentifier().getTypeRelativeObjectIdentifier()));
+        boolean canUpdateRace = userService.hasPermission(mediaPlayerManagerComponent.getCurrentRaceDTO(),
+                DefaultActions.UPDATE);
         boolean canDirectlyUpdateAnyExistingTrack = mediaPlayerManagerComponent.getAssignedMediaTracks().stream()
                 .anyMatch(track -> mediaPlayerManagerComponent.allowsEditing(track.dbId));
         return canCreateNew && canUpdateRace || canDirectlyUpdateAnyExistingTrack;
+
     }
 }
