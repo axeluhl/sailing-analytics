@@ -266,13 +266,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public void updateCompetitor(ICompetitor competitor) {
+    public void updateCompetitor(ICompetitor competitor, RaceTrackingHandler raceTrackingHandler) {
         Competitor domainCompetitor = this.resolveCompetitor(competitor);
         if (domainCompetitor != null) {
             if (domainCompetitor.hasBoat()) {
                 getOrCreateCompetitorWithBoat(competitor);
             } else {
-                getOrCreateCompetitor(competitor);
+                getOrCreateCompetitor(competitor, raceTrackingHandler);
             }
             logger.info("Competitor " + competitor
                     + " was updated on TracTrac side. Maybe consider updating in competitor store as well. "
@@ -283,9 +283,10 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
     
-    private Competitor getOrCreateCompetitor(ICompetitor competitor) {
+    private Competitor getOrCreateCompetitor(ICompetitor competitor, RaceTrackingHandler raceTrackingHandler) {
         Competitor result = getOrCreateCompetitor(competitor.getId(), competitor.getNationality(), competitor.getName(),
-                competitor.getShortName(), competitor.getHandicapToT(), competitor.getHandicapToD(), null);
+                competitor.getShortName(), competitor.getHandicapToT(), competitor.getHandicapToD(), null,
+                raceTrackingHandler);
         return result;
     }
 
@@ -325,7 +326,8 @@ public class DomainFactoryImpl implements DomainFactory {
 
     private Competitor getOrCreateCompetitor(final UUID competitorId, final String nationalityAsString, 
             final String name, final String shortName, float timeOnTimeFactor,
-            float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag) {
+            float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag,
+            RaceTrackingHandler raceTrackingHandler) {
         CompetitorAndBoatStore competitorStore = baseDomainFactory.getCompetitorAndBoatStore();
         Competitor domainCompetitor = competitorStore.getExistingCompetitorById(competitorId);
         if (domainCompetitor == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(domainCompetitor)) {
@@ -338,7 +340,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
             DynamicTeam team = createTeam(name, nationality, competitorId);
-            domainCompetitor = competitorStore.getOrCreateCompetitor(competitorId, name, shortName, null /* displayColor */,
+            domainCompetitor = raceTrackingHandler.getOrCreateCompetitor(competitorStore, competitorId, name, shortName,
+                    null /* displayColor */,
                     null /* email */, null /* flagImag */, team, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
         }
@@ -729,7 +732,7 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     @Override
     public Map<Competitor, Boat> getOrCreateCompetitorsAndTheirBoats(DynamicTrackedRegatta trackedRegatta, LeaderboardGroupResolver leaderboardGroupResolver,
-            IRace race, BoatClass defaultBoatClass) {
+            IRace race, BoatClass defaultBoatClass, RaceTrackingHandler raceTrackingHandler) {
         final CompetitorAndBoatStore competitorAndBoatStore = baseDomainFactory.getCompetitorAndBoatStore();
         final Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         Regatta regatta = trackedRegatta.getRegatta();
@@ -818,7 +821,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         competitorToUse = existingCompetitor;
                     }
                 } else {
-                    competitorToUse = getOrCreateCompetitor(rc.getCompetitor());
+                    competitorToUse = getOrCreateCompetitor(rc.getCompetitor(), raceTrackingHandler);
                 }
                 Boat boatToUse;
                 if (existingBoat != null) {
