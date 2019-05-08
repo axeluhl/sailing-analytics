@@ -352,11 +352,14 @@ public class DomainFactoryImpl implements DomainFactory {
         return domainCompetitor;
     }
 
-    public Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass, String sailId, Color boatColor) {
+    @Override
+    public Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass, String sailId,
+            Color boatColor, RaceTrackingHandler raceTrackingHandler) {
         CompetitorAndBoatStore competitorStore = baseDomainFactory.getCompetitorAndBoatStore();
         Boat domainBoat = competitorStore.getExistingBoatById(boatId);
         if (domainBoat == null) {
-            domainBoat = baseDomainFactory.getCompetitorAndBoatStore().getOrCreateBoat(boatId, boatName, boatClass, sailId, boatColor);
+            domainBoat = raceTrackingHandler.getOrCreateBoat(baseDomainFactory.getCompetitorAndBoatStore(), boatId,
+                    boatName, boatClass, sailId, boatColor);
         }
         return domainBoat;
     }
@@ -832,9 +835,11 @@ public class DomainFactoryImpl implements DomainFactory {
                     boatToUse = existingBoat;
                 } else {
                     if (competitorBoatInfo != null) {
-                        boatToUse = getOrCreateBoat(boatId, competitorBoatInfo.getName(), defaultBoatClass, sailId, AbstractColor.getCssColor(competitorBoatInfo.getColor()));
+                        boatToUse = getOrCreateBoat(boatId, competitorBoatInfo.getName(), defaultBoatClass, sailId,
+                                AbstractColor.getCssColor(competitorBoatInfo.getColor()), raceTrackingHandler);
                     } else {
-                        boatToUse = getOrCreateBoat(boatId, /* boat name*/ null, defaultBoatClass, sailId, null);
+                        boatToUse = getOrCreateBoat(boatId, /* boat name */ null, defaultBoatClass, sailId, null,
+                                raceTrackingHandler);
                     }
                 }
                 competitorsAndBoats.put(competitorToUse, boatToUse);

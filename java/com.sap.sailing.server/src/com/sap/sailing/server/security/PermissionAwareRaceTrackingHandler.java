@@ -140,4 +140,20 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
         }
         return competitorWithBoat;
     }
+
+    @Override
+    public DynamicBoat getOrCreateBoat(CompetitorAndBoatStore competitorAndBoatStore, Serializable id, String name,
+            BoatClass boatClass, String sailId, Color color) {
+        DynamicBoat boat = competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color);
+        if (securityService.getOwnership(boat.getIdentifier()) == null) {
+            SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
+            subjectThreadState.bind();
+            try {
+                securityService.setOwnership(boat.getIdentifier(), securityService.getCurrentUser(), defaultTenant);
+            } finally {
+                subjectThreadState.restore();
+            }
+        }
+        return boat;
+    }
 }

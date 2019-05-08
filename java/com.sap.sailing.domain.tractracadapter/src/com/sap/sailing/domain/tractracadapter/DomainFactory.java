@@ -83,7 +83,8 @@ public interface DomainFactory {
 
     Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
 
-    com.sap.sailing.domain.base.Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass, String sailId, Color boatColor);
+    com.sap.sailing.domain.base.Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass,
+            String sailId, Color boatColor, RaceTrackingHandler raceTrackingHandler);
 
     com.sap.sailing.domain.base.Competitor resolveCompetitor(ICompetitor competitor);
 

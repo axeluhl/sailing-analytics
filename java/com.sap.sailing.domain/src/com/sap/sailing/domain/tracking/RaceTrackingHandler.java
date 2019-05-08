@@ -49,6 +49,9 @@ public interface RaceTrackingHandler {
             URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
             Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat);
 
+    DynamicBoat getOrCreateBoat(CompetitorAndBoatStore competitorAndBoatStore, Serializable id, String name,
+            BoatClass boatClass, String sailId, Color color);
+
     public class DefaultRaceTrackingHandler implements RaceTrackingHandler {
         @Override
         public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition raceDefinition,
@@ -84,6 +87,12 @@ public interface RaceTrackingHandler {
                 Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
             return competitorStore.getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email,
                     flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+        }
+
+        @Override
+        public DynamicBoat getOrCreateBoat(CompetitorAndBoatStore competitorAndBoatStore, Serializable id, String name,
+                BoatClass boatClass, String sailId, Color color) {
+            return competitorAndBoatStore.getOrCreateBoat(id, name, boatClass, sailId, color);
         }
     }
 }
