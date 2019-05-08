@@ -50,10 +50,19 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
                             result = stringMessages.pleaseEnterASailNumberOrABoatName();
                         } else if (valueToValidate.getColor() != null && valueToValidate.getColor() instanceof InvalidColor) {
                             result = valueToValidate.getColor().getAsHtml();
-                        } else if (valueToValidate.getBoatClass().getName() == null || valueToValidate.getBoatClass().getName().isEmpty()) {
+                        } else if (boatClassWasChanged(valueToValidate, boatToEdit)
+                                && (valueToValidate.getBoatClass().getName() == null
+                                        || valueToValidate.getBoatClass().getName().isEmpty())) {
+                            // only validate if boat class changed
                             result = stringMessages.pleaseEnterABoatClass();
                         }
                         return result;
+                    }
+
+                    private boolean boatClassWasChanged(BoatDTO boatToValidate, BoatDTO originalBoat) {
+                        return !(boatToValidate.getBoatClass() != null && originalBoat.getBoatClass() != null
+                                && !originalBoat.getBoatClass().getName()
+                                        .equals(boatToValidate.getBoatClass().getName()));
                     }
                 }, /* animationEnabled */true, callback);
         this.ensureDebugId("BoatEditDialog");
