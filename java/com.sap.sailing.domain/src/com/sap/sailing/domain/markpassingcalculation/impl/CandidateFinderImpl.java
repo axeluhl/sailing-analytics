@@ -844,14 +844,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                             if (xte == 0) {
                                 newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, true));
                             } else {
-                                if (fixAfter != null && xtesAfter != null && !xtesAfter.get(w).isEmpty()) {
+                                if (fixAfter != null && xtesAfter != null && xtesAfter.get(w) != null && !xtesAfter.get(w).isEmpty()) {
                                     Double xteAfter = xtesAfter.get(w).get(0).getMeters();
                                     if (xteAfter != null && xte < 0 != xteAfter <= 0) {
                                         newCandidates.put(Arrays.asList(fix, fixAfter),
                                                 createCandidate(c, xte, xteAfter, t, tAfter, w, true));
                                     }
                                 }
-                                if (fixBefore != null && !xtesBefore.get(w).isEmpty()) {
+                                if (fixBefore != null && xtesBefore.get(w) != null && !xtesBefore.get(w).isEmpty()) {
                                     Double xteBefore = xtesBefore.get(w).get(0).getMeters();
                                     if (xte < 0 != xteBefore <= 0) {
                                         newCandidates.put(Arrays.asList(fixBefore, fix),
@@ -918,6 +918,11 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
+     * Returns a non-{@code null} mapping from the waypoints currently in the course, telling the {@code fix}'s
+     * cross-track error for each waypoint. There may be "excess" entries from older waypoints that have already
+     * been removed from the course which may be reflected only by a later call to {@link #invalidateAfterCourseChange(int)}.
+     * See also bug 5021.
+     * 
      * @return if for a waypoint the mark positions are known, the resulting map will contain a non-empty list that for
      *         each way of passing the waypoint (e.g., for a gate the competitor can round the left or the right mark) the
      *         cross track error of the {@code fix} to the virtual line that must be crossed is contained; if the mark
@@ -925,15 +930,18 @@ public class CandidateFinderImpl implements CandidateFinder {
      */
     private Map<Waypoint, List<Distance>> getXTE(Competitor c, GPSFix fix) {
         Map<Waypoint, List<Distance>> result = xteCache.get(c).get(fix);
-        if (result == null) {
-            result = new HashMap<>();
-            Position p = fix.getPosition();
-            TimePoint t = fix.getTimePoint();
+        Course course = race.getRace().getCourse();
+        course.lockForRead();
+        try {
+            if (result == null) {
+                result = new HashMap<>();
+                xteCache.get(c).put(fix, result);
+            }
+            final Position p = fix.getPosition();
+            final TimePoint t = fix.getTimePoint();
             final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(race, t);
-            Course course = race.getRace().getCourse();
-            course.lockForRead();
-            try {
-                for (Waypoint w : course.getWaypoints()) {
+            for (Waypoint w : course.getWaypoints()) {
+                if (!result.containsKey(w)) { // bug5021: calculate in case waypoint was added since last call
                     List<Distance> distances = new ArrayList<>();
                     result.put(w, distances);
                     for (Util.Pair<Position, Bearing> crossingInfo : getCrossingInformation(w, t, markPositionCache)) {
@@ -942,10 +950,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                         }
                     }
                 }
-            } finally {
-                course.unlockAfterRead();
             }
-            xteCache.get(c).put(fix, result);
+        } finally {
+            course.unlockAfterRead();
         }
         return result;
     }
