@@ -184,7 +184,7 @@
            {  
 	     "startingFolderPath": "mobile/com.sap.sailing.android.buoy.positioning.app/res/**",
 	     "sourceFilters":["strings.xml"],
-	     "targetFolderPath":"../values-[langCode]",
+	     "targetFolderPath":"../values-[langCode]"
            }
 	 ]
       },
@@ -194,7 +194,7 @@
            {  
 	     "startingFolderPath": "mobile/com.sap.sailing.racecommittee.app/res/**",
 	     "sourceFilters":["strings.xml"],
-	     "targetFolderPath":"../values-[langCode]",
+	     "targetFolderPath":"../values-[langCode]"
            }
 	 ]
       },
@@ -204,7 +204,7 @@
            {  
 	     "startingFolderPath": "mobile/com.sap.sailing.android.tracking.app/res/**",
 	     "sourceFilters":["strings.xml"],
-	     "targetFolderPath":"../values-[langCode]",
+	     "targetFolderPath":"../values-[langCode]"
            }
 	 ]
       },
@@ -214,7 +214,7 @@
 	   {  
 	     "startingFolderPath": "mobile/com.sap.sailing.android.shared/res/**",
 	     "sourceFilters":["strings.xml"],
-	     "targetFolderPath":"../values-[langCode]",
+	     "targetFolderPath":"../values-[langCode]"
 	   }
 	 ]
       },
@@ -224,7 +224,7 @@
 	   {  
 	     "startingFolderPath": "ios/SAPTracker/src/xcode/SAPTracker/**",
 	     "sourceFilters":["*.strings"],
-	     "targetFolderPath":"../[langCode].lproj",
+	     "targetFolderPath":"../[langCode].lproj"
 	   }
 	 ]
       }
