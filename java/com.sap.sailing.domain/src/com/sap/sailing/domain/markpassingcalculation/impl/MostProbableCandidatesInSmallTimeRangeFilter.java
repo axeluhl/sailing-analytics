@@ -41,7 +41,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
      * path's ends such that each path step spans a duration less than or equal to the duration specified by this field.
      * In other words, each cluster is the transitive hull of fixes not further than this duration apart.
      */
-    static final Duration CANDIDATE_FILTER_TIME_WINDOW = Duration.ONE_SECOND.times(5);
+    public static final Duration CANDIDATE_FILTER_TIME_WINDOW = Duration.ONE_SECOND.times(5);
     
     /**
      * When looking for the most probable candidates within time windows of length {@link #CANDIDATE_FILTER_TIME_WINDOW},
@@ -55,7 +55,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
     private final Candidate startProxyCandidate;
     private final Candidate endProxyCandidate;
 
-    MostProbableCandidatesInSmallTimeRangeFilter(Comparator<Candidate> candidateComparator, Candidate startProxyCandidate,
+    public MostProbableCandidatesInSmallTimeRangeFilter(Comparator<Candidate> candidateComparator, Candidate startProxyCandidate,
             Candidate endProxyCandidate) {
         this.candidateComparator = candidateComparator;
         filteredCandidates = new TreeSet<>(candidateComparator);
@@ -227,7 +227,7 @@ public class MostProbableCandidatesInSmallTimeRangeFilter {
      * @param includeStartFrom
      *            whether or not to include {@code startFrom} in the resulting set
      */
-    NavigableSet<Candidate> getTimeWiseContiguousDistanceCandidates(NavigableSet<Candidate> competitorCandidates, Candidate startFrom, boolean includeStartFrom) {
+    public NavigableSet<Candidate> getTimeWiseContiguousDistanceCandidates(NavigableSet<Candidate> competitorCandidates, Candidate startFrom, boolean includeStartFrom) {
         final NavigableSet<Candidate> result = new TreeSet<>(candidateComparator);
         if (includeStartFrom) {
             result.add(startFrom);
