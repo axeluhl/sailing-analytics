@@ -14,7 +14,9 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
+import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sse.common.Color;
@@ -42,6 +44,11 @@ public interface RaceTrackingHandler {
     RaceDefinition createRaceDefinition(Regatta regatta, String name, Course course, BoatClass boatClass,
             Map<Competitor, Boat> competitorsAndTheirBoats, Serializable id);
 
+    DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(CompetitorAndBoatStore competitorStore,
+            Serializable competitorId, String name, String shortName, Color displayColor, String email,
+            URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat);
+
     public class DefaultRaceTrackingHandler implements RaceTrackingHandler {
         @Override
         public DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition raceDefinition,
@@ -68,6 +75,15 @@ public interface RaceTrackingHandler {
             return competitorStore.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
                     flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile,
                     searchTag);
+        }
+
+        @Override
+        public DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(CompetitorAndBoatStore competitorStore,
+                Serializable competitorId, String name, String shortName, Color displayColor, String email,
+                URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
+                Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+            return competitorStore.getOrCreateCompetitorWithBoat(competitorId, name, shortName, displayColor, email,
+                    flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
         }
     }
 }

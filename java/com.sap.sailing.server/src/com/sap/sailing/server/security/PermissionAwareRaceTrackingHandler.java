@@ -19,7 +19,9 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
+import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
@@ -102,7 +104,7 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
     public DynamicCompetitor getOrCreateCompetitor(CompetitorAndBoatStore competitorStore, Serializable competitorId,
             String name, String shortName, Color displayColor, String email, URI flagImageURI, DynamicTeam team,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
-        DynamicCompetitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, shortName,
+        final DynamicCompetitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, shortName,
                 displayColor, email, flagImageURI, team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile,
                 searchTag);
         if (securityService.getOwnership(competitor.getIdentifier()) == null) {
@@ -116,5 +118,26 @@ public class PermissionAwareRaceTrackingHandler extends DefaultRaceTrackingHandl
             }
         }
         return competitor;
+    }
+
+    @Override
+    public DynamicCompetitorWithBoat getOrCreateCompetitorWithBoat(CompetitorAndBoatStore competitorStore,
+            Serializable competitorId, String name, String shortName, Color displayColor, String email,
+            URI flagImageURI, DynamicTeam team, Double timeOnTimeFactor,
+            Duration timeOnDistanceAllowancePerNauticalMile, String searchTag, DynamicBoat boat) {
+        final DynamicCompetitorWithBoat competitorWithBoat = competitorStore.getOrCreateCompetitorWithBoat(competitorId,
+                name, shortName, displayColor, email, flagImageURI,
+                team, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile, searchTag, boat);
+        if (securityService.getOwnership(competitorWithBoat.getIdentifier()) == null) {
+            SubjectThreadState subjectThreadState = new SubjectThreadState(subject);
+            subjectThreadState.bind();
+            try {
+                securityService.setOwnership(competitorWithBoat.getIdentifier(), securityService.getCurrentUser(),
+                        defaultTenant);
+            } finally {
+                subjectThreadState.restore();
+            }
+        }
+        return competitorWithBoat;
     }
 }
