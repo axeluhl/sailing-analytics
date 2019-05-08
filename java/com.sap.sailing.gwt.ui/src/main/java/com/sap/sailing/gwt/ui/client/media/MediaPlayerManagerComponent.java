@@ -579,12 +579,14 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public boolean allowsEditing(MediaTrackWithSecurityDTO mediaTrack) {
-        return userService.hasPermission(mediaTrack, DefaultActions.READ);
+        return userService.hasPermission(mediaTrack, DefaultActions.READ)
+                && userService.hasPermission(getCurrentRaceDTO(), DefaultActions.UPDATE);
     }
 
     @Override
     public boolean allowsCreating() {
-        return userService.hasCreatePermission(SecuredDomainType.MEDIA_TRACK);
+        return userService.hasCreatePermission(SecuredDomainType.MEDIA_TRACK)
+                && userService.hasPermission(getCurrentRaceDTO(), DefaultActions.UPDATE);
     }
 
     @Override

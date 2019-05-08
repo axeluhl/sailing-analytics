@@ -416,6 +416,5 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         boolean canDirectlyUpdateAnyExistingTrack = mediaPlayerManagerComponent.getAssignedMediaTracks().stream()
                 .anyMatch(track -> mediaPlayerManagerComponent.allowsEditing(track));
         return canCreateNew && canUpdateRace || canDirectlyUpdateAnyExistingTrack;
-
     }
 }
