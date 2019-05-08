@@ -14,7 +14,10 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunctionLagrangeFo
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.orc.ORCPerformanceCurve;
+import com.sap.sailing.domain.orc.ORCPerformanceCurveCourse;
+import com.sap.sailing.domain.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.ranking.ORCPerformanceCurveRankingMetric;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -38,6 +41,14 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
  */
 public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurve {
     private static final long serialVersionUID = 4113356173492168453L;
+    
+    public static final Speed[] ALLOWANCES_SPEED_DELTAS = { new KnotSpeedImpl( 6),
+                                                            new KnotSpeedImpl( 8),
+                                                            new KnotSpeedImpl(10),
+                                                            new KnotSpeedImpl(12),
+                                                            new KnotSpeedImpl(14),
+                                                            new KnotSpeedImpl(16),
+                                                            new KnotSpeedImpl(20)};
 
     private final Map<Speed, Map<Bearing, Duration>> durationPerNauticalMileAtTrueWindAngleAndSpeed;
     
@@ -94,99 +105,37 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
         return Collections.unmodifiableMap(writeableLagrange);
     }
     
-    /**
-     * Computes the time allowance (expected duration) that the boat described by this certificate will get for the
-     * <code>leg</code>. The true wind direction expected for the leg can optionally be provided using the
-     * <code>trueWindToDirection</code> parameter. If that parameter is left <code>null</code>, a wind average will be
-     * taken for the leg, based on the times when competitors entered and finished the leg.
-     * 
-     * @param trueWindToDirection
-     *            if <code>null</code>, the true wind direction is taken from the leg's
-     *            {@link TrackedLeg#getTrackedRace() tracked race} (see {@link TrackedLeg#getAverageTrueWindDirection()}).
-     * 
-     * @return a map telling for each of the standard true wind speeds which as also key in
-     *         {@link #durationPerNauticalMileAtTrueWindAngleAndSpeed} which duration is expected for the competitor
-     *         described by this certificate to sail the complete <code>leg</code>.
-     */
-    protected Map<Speed, Duration> getAllowancesForLegPerTrueWindSpeed(TrackedLeg leg, Bearing trueWindToDirection) throws FunctionEvaluationException {
-        Bearing legBearing = leg.getLegBearing(leg.getReferenceTimePoint());
-        Distance greatCircleLegDistance = leg.getGreatCircleDistance(leg.getReferenceTimePoint());
-        if (trueWindToDirection == null) {
-            trueWindToDirection = leg.getAverageTrueWindDirection().getObject().getBearing();
-        }
-        return getAllowancesForLegPerTrueWindSpeed(trueWindToDirection, legBearing, greatCircleLegDistance);
-    }
-    
-    /**
-     * Calculates the times that the competitor is expected to have taken to reach her position at
-     * <code>timePoint</code> for the different true wind speeds. This can be used to calculate the implied wind, given
-     * the actual duration the competitor took, by constructing a spline from the knots defined by the resulting map,
-     * mapping durations to implied wind speeds.
-     * <p>
-     * 
-     * If the <code>competitor</code> hasn't started the race yet, <code>null</code> is returned.
-     */
-    protected Map<Speed, Duration> getAllowances(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint) {
-        final Map<Speed, Duration> result;
-        if (trackedRace.getMarkPassings(competitor).isEmpty()) {
-            result = null;
-        } else {
-            result = new HashMap<>();
-            Course course = trackedRace.getRace().getCourse();
-            course.lockForRead();
-            try {
-                for (Leg leg : course.getLegs()) {
-                    TrackedLegOfCompetitor tloc = trackedRace.getTrackedLeg(competitor, leg);
-                    if (!tloc.hasStartedLeg(timePoint)) {
-                        break; // consider only legs that the competitor has at least started to sail
-                    } else {
-                        if (tloc.hasFinishedLeg(timePoint)) {
-                            // entire leg sailed
-                            // TODO continue here...
-                        }
-                    }
-                }
-            } finally {
-                course.unlockAfterRead();
-            }
-        }
-        return result;
-    }
-    
-    // TODO keep in mind when projecting a boat onto the leg direction that TrackedLeg et al. won't know about the beat/gybe angles here.
-    // Therefore, it may be a bit tricky to determine the "leg" distance for a competitor sailing anywhere on the course. Projecting
-    // onto the wind based on a guess what the beat angle may be can lead to incorrect results for angles that the guessed beat angle
-    // may already call an upwind beat where this polar still considers it a reach...
-
-    /**
-     * Same as {@link #getAllowancesForLegPerTrueWindSpeed(TrackedLeg, Bearing)}, but here any leg direction and great circle
-     * leg distance can be provided. This can be useful to obtain allowances for parts of a leg only.
-     */
-    private Map<Speed, Duration> getAllowancesForLegPerTrueWindSpeed(Bearing trueWindToDirection, Bearing legBearing,
-            Distance greatCircleLegDistance) throws FunctionEvaluationException {
-        Bearing trueWindAngle = legBearing.getDifferenceTo(trueWindToDirection.reverse());
-        final double twaInDegrees = trueWindAngle.getDegrees();
-        Map<Speed, Duration> result = new HashMap<>();
-        for (Entry<Speed, PolynomialFunctionLagrangeForm> polyForSpeed : lagrangePolynomialsPerTrueWindSpeed.entrySet()) {
-            final MillisecondsDurationImpl durationPerNauticalMileAtTwa = new MillisecondsDurationImpl(
-                                                    (long) (1000. * polyForSpeed.getValue().value(twaInDegrees)));
-            final Distance legDistance_ProjectedForBeatAndRun_GreatCircleForAllOthers;
-            if (twaInDegrees < beatAngles.get(polyForSpeed.getKey()).getDegrees() || twaInDegrees > gybeAngles.get(polyForSpeed.getKey()).getDegrees()) {
-                // project leg's distance to the wind
-                legDistance_ProjectedForBeatAndRun_GreatCircleForAllOthers = greatCircleLegDistance.scale(Math.cos(trueWindAngle.getRadians()));
-            } else {
-                legDistance_ProjectedForBeatAndRun_GreatCircleForAllOthers = greatCircleLegDistance;
-            }
-            result.put(polyForSpeed.getKey(), durationPerNauticalMileAtTwa
-                    .times(legDistance_ProjectedForBeatAndRun_GreatCircleForAllOthers.getNauticalMiles()));
-        }
-        return result;
-    }
-    
     PolynomialFunctionLagrangeForm getLagrangeInterpolationPerTrueWindSpeed(Bearing trueWindDirection) {
         return lagrangePolynomialsPerTrueWindSpeed.getOrDefault(trueWindDirection, null);
     }
 
+    Map<Speed, Duration> createAllowancesPerCourse(ORCPerformanceCurveCourse course) throws FunctionEvaluationException {
+        Map<Speed, Duration> result = new HashMap<>();
+        Map<ORCPerformanceCurveLeg, Map<Speed, Duration>> allowancesPerLeg = new HashMap<>();
+        
+        for (ORCPerformanceCurveLeg leg : course.getLegs()) {
+            allowancesPerLeg.put(leg, createAllowancePerLeg(leg));
+        }
+        
+        
+        return result;
+    }
+    
+    Map<Speed, Duration> createAllowancePerLeg(ORCPerformanceCurveLeg leg) throws FunctionEvaluationException {
+        Map<Speed, Duration> result = new HashMap<>();
+        Bearing twa = leg.getTwa(); 
+        
+        for (Entry<Speed, PolynomialFunctionLagrangeForm> entry : lagrangePolynomialsPerTrueWindSpeed.entrySet()) {
+            result.put(entry.getKey(), Duration.ONE_SECOND.times(entry.getValue().value(twa.getDegrees())) );
+        }
+        
+        for (Speed tws : ALLOWANCES_SPEED_DELTAS) {
+            //TODO Go on here.
+        }
+        
+        return result;
+    }
+    
     @Override
     public Speed getImpliedWind() {
         // TODO Auto-generated method stub
