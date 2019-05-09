@@ -226,7 +226,7 @@ public class CompetitorEditLayout extends ScrollView
         CompetitorResult result = new CompetitorResultImpl(mCompetitor.getCompetitorId(), mCompetitor.getName(),
                 mCompetitor.getShortName(), mCompetitor.getBoatName(), mCompetitor.getBoatSailId(), oneBaseRank,
                 maxPointsReason, score, finishingTime, comment, MergeState.OK);
-        return new CompetitorResultWithIdImpl(mCompetitor.getId(), mCompetitor.getBoat(), result);
+        return new CompetitorResultWithIdImpl(mCompetitor.getId(), result);
     }
 
     @Override
