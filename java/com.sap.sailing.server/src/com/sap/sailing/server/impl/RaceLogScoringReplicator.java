@@ -65,8 +65,8 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
     
     /**
      * Called when a {@link RaceLogFinishPositioningConfirmedEvent} was received by the {@link RaceLog}. Retrieves the
-     * last {@link RaceLogFinishPositioningConfirmedEvent} from the racelog and applies the ranks and disqualifications
-     * entered by the race committee to the score correstions as follows:
+     * last {@link RaceLogFinishPositioningConfirmedEvent} from the {@link RaceLog} and applies the ranks and
+     * disqualifications entered by the race committee to the score corrections as follows:
      * <ul>
      * <li>When no {@link CompetitorResult} object is received for a competitor, no change is applied to that
      * competitor's score corrections.</li>
@@ -75,11 +75,13 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
      * {@link MaxPointsReason}, any existing score correction (points) is removed for that competitor, otherwise, the
      * score correction (points) from the CompetitorResult object is applied if provided (in this case a rank provided
      * in the {@link CompetitorResult} object is ignored); if no {@link MaxPointsReason} is provided and only a rank but
-     * no score is provided in the {@link CompetitorResult}, the scoring scheme will compute the score from the rank,
-     * considering any {@link MaxPointsReason} provided in the result, and that score will be applied as a score
-     * correction. If a {@link MaxPointsReason} but no explicit score is provided, the rank is ignored because
-     * the scoring scheme is expected to compute the score from the {@link MaxPointsReason}; therefore, the score
-     * correction (points) is cleared in this case so that the scoring scheme will be used for score calculation.</li>
+     * no score is provided in the {@link CompetitorResult}, the scoring scheme will
+     * {@link ScoringScheme#getScoreForRank(Leaderboard, RaceColumn, Competitor, int, java.util.concurrent.Callable, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint)
+     * compute} the score from the rank, considering any {@link MaxPointsReason} provided in the result, and that score
+     * will be applied as a score correction. If a {@link MaxPointsReason} but no explicit score is provided, the rank
+     * is ignored because the scoring scheme is expected to compute the score from the {@link MaxPointsReason};
+     * therefore, the score correction (points) is cleared in this case so that the scoring scheme will be used for
+     * score calculation.</li>
      * <li>When a {@link CompetitorResult} object is received for a competitor, if it contains {@code null} for the
      * {@link MaxPointsReason}, any existing {@link MaxPointsReason} is removed for that competitor; otherwise, the
      * {@link MaxPointsReason} from the {@link CompetitorResult} object is applied, and if no explicit score is provided
